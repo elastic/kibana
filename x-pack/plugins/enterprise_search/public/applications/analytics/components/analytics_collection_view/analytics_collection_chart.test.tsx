@@ -9,7 +9,7 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import moment from 'moment';
 
@@ -38,7 +38,7 @@ describe('AnalyticsCollectionChart', () => {
   const mockedDataViewQuery = 'mockedDataViewQuery';
 
   const defaultProps = {
-    data: mockedData,
+    data: {},
     dataViewQuery: mockedDataViewQuery,
     id: 'mockedId',
     isLoading: false,
@@ -59,8 +59,16 @@ describe('AnalyticsCollectionChart', () => {
     expect(component.find(AreaSeries)).toHaveLength(4);
   });
 
-  it('should render a loading indicator if loading', () => {
-    const component = shallow(<AnalyticsCollectionChart {...defaultProps} isLoading />);
+  it('should render a loading indicator if loading and have not data', () => {
+    const component = shallow(<AnalyticsCollectionChart {...defaultProps} data={{}} isLoading />);
     expect(component.find(EuiLoadingChart).exists()).toBeTruthy();
+  });
+
+  it('should not render a loading indicator if loading but have data', () => {
+    const component = mount(<AnalyticsCollectionChart {...defaultProps} isLoading />);
+    component.update();
+    component.setProps({ data: mockedData });
+    component.update();
+    expect(component.find(EuiLoadingChart).exists()).toBeFalsy();
   });
 });

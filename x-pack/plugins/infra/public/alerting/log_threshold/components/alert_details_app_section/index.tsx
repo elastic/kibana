@@ -6,11 +6,16 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
+import compact from 'lodash/compact';
 import moment from 'moment';
 import React from 'react';
+import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
+import { AlertAnnotation } from './components/alert_annotation';
 import { AlertDetailsAppSectionProps } from './types';
+
+const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const ruleWindowSizeMS = moment
@@ -18,6 +23,25 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     .asMilliseconds();
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
+
+  /**
+   * The `CriterionPreview` chart shows all the series/data stacked when there is a GroupBy in the rule parameters.
+   * e.g., `host.name`, the chart will show stacks of data by hostname.
+   * We only need the chart to show the series that is related to the selected alert.
+   * The chart series are built based on the GroupBy in the rule params
+   * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
+   * We filter down the series using this group name
+   */
+  const alertFieldsFromGroupBy = compact(
+    rule.params.groupBy?.map((fieldNameGroupBy) => {
+      const field = Object.keys(alert.fields).find(
+        (alertFiledName) => alertFiledName === fieldNameGroupBy
+      );
+      if (field) return alert.fields[field];
+    })
+  );
+  const selectedSeries = getChartGroupNames(alertFieldsFromGroupBy);
+
   /**
    * This is part or the requirements (RFC).
    * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
@@ -34,22 +58,32 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    <EuiFlexGroup>
-      {rule.params.criteria.map((criteria) => {
+    <EuiFlexGroup direction="column">
+      {rule.params.criteria.map((criteria, idx) => {
         const chartCriterion = criteria as PartialCriterion;
         return (
-          <EuiFlexItem>
+          <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
             <CriterionPreview
-              key={chartCriterion.field}
               ruleParams={rule.params}
-              sourceId={rule.params.logView.logViewId}
+              logViewReference={{
+                type: 'log-view-reference',
+                logViewId: rule.params.logView.logViewId,
+              }}
               chartCriterion={chartCriterion}
               showThreshold={true}
               executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+              annotations={[<AlertAnnotation alertStarted={alert.start} />]}
+              filterSeriesByGroupName={[selectedSeries]}
             />
           </EuiFlexItem>
         );
       })}
+      {/* For now we show the history chart only if we have one criteria */}
+      {rule.params.criteria.length === 1 && (
+        <EuiFlexItem>
+          <LogsHistoryChart alert={alert} rule={rule} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

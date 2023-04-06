@@ -10,7 +10,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
 import { File } from '../common';
-import { FileClient, FileServiceFactory, FileServiceStart } from '.';
+import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),
@@ -76,5 +76,11 @@ export const createFileClientMock = (): DeeplyMockedKeys<FileClient> => {
     share: jest.fn(),
     unshare: jest.fn(),
     listShares: jest.fn().mockResolvedValue({ shares: [] }),
+  };
+};
+
+export const createFilesSetupMock = (): DeeplyMockedKeys<FilesSetup> => {
+  return {
+    registerFileKind: jest.fn(),
   };
 };

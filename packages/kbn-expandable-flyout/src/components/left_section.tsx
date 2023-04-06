@@ -26,10 +26,8 @@ interface LeftSectionProps {
  */
 export const LeftSection: React.FC<LeftSectionProps> = ({ component, width }: LeftSectionProps) => {
   return (
-    <EuiFlexItem grow data-test-subj={LEFT_SECTION}>
-      <EuiFlexGroup direction="column" style={{ maxWidth: width, width: 'auto' }}>
-        {component}
-      </EuiFlexGroup>
+    <EuiFlexItem grow data-test-subj={LEFT_SECTION} style={{ width: `${width * 100}%` }}>
+      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
     </EuiFlexItem>
   );
 };
