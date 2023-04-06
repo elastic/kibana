@@ -25,6 +25,7 @@ export async function reinstallPackageForInstallation({
   if (installation.install_source === 'upload') {
     throw new Error('Cannot reinstall an uploaded package');
   }
+  console.log('--@@reinstallPackageForInstallation');
   return installPackage({
     // If the package is bundled reinstall from the registry will still use the bundled package.
     installSource: 'registry',

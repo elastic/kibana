@@ -23,6 +23,8 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
+import type { APIKey } from '../elasticsearch/transform/install';
+
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -118,6 +120,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }): Promise<Installation> {
   const {
     savedObjectsClient,
@@ -126,6 +129,7 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
+    apiKeyWithCurrentUserPermission,
   } = options;
 
   // If pkgVersion isn't specified, find the latest package version
@@ -150,6 +154,7 @@ export async function ensureInstalledPackage(options: {
     esClient,
     neverIgnoreVerificationError: !force,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    apiKeyWithCurrentUserPermission,
   });
 
   if (installResult.error) {
@@ -253,6 +258,7 @@ interface InstallRegistryPackageParams {
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -261,6 +267,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -288,6 +295,7 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   spaceId,
+  apiKeyWithCurrentUserPermission,
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
@@ -364,6 +372,7 @@ async function installPackageFromRegistry({
       packageInfo,
       paths,
       verificationResult,
+      apiKeyWithCurrentUserPermission,
     });
   } catch (e) {
     sendEvent({
@@ -392,6 +401,7 @@ async function installPackageCommon(options: {
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }): Promise<InstallResult> {
   const {
     pkgName,
@@ -406,6 +416,7 @@ async function installPackageCommon(options: {
     packageInfo,
     paths,
     verificationResult,
+    apiKeyWithCurrentUserPermission,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -488,6 +499,7 @@ async function installPackageCommon(options: {
       spaceId,
       verificationResult,
       installSource,
+      apiKeyWithCurrentUserPermission,
     })
       .then(async (assets) => {
         await removeOldAssets({
@@ -540,6 +552,7 @@ async function installPackageByUpload({
   contentType,
   spaceId,
   version,
+  apiKeyWithCurrentUserPermission,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -587,6 +600,7 @@ async function installPackageByUpload({
       force: true, // upload has implicit force
       packageInfo,
       paths,
+      apiKeyWithCurrentUserPermission,
     });
   } catch (e) {
     return {
@@ -600,6 +614,7 @@ async function installPackageByUpload({
 export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
+  apiKeyWithCurrentUserPermission?: object;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -613,6 +628,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
 
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
+  const apiKeyWithCurrentUserPermission = args.apiKeyWithCurrentUserPermission;
 
   const bundledPackages = await getBundledPackages();
 
@@ -636,6 +652,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,
+        apiKeyWithCurrentUserPermission,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -651,6 +668,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,
+      apiKeyWithCurrentUserPermission,
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -661,6 +679,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
+      apiKeyWithCurrentUserPermission,
     });
     return response;
   }

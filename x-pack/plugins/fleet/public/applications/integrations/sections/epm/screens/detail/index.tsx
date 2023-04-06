@@ -27,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
+
 import {
   getPackageReleaseLabel,
   isPackagePrerelease,
@@ -65,6 +67,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
@@ -273,6 +276,11 @@ export function Detail() {
       : fromIntegrations === 'installed'
       ? getHref('integrations_installed')
       : getHref('integrations_all');
+
+  const numOfDeferredInstallations = useMemo(
+    () => getDeferredInstallationsCnt(packageInfo),
+    [packageInfo]
+  );
 
   const headerLeftContent = useMemo(
     () => (
@@ -570,10 +578,16 @@ export function Detail() {
       tabs.push({
         id: 'assets',
         name: (
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
-            defaultMessage="Assets"
-          />
+          <div style={{ display: 'flex', textAlign: 'center' }}>
+            <FormattedMessage
+              id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
+              defaultMessage="Assets"
+            />
+            &nbsp;
+            {numOfDeferredInstallations > 0 ? (
+              <DeferredAssetsWarning numOfDeferredInstallations={numOfDeferredInstallations} />
+            ) : null}
+          </div>
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
@@ -645,6 +659,7 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
+    numOfDeferredInstallations,
     isInstalled,
     CustomAssets,
     canReadPackageSettings,

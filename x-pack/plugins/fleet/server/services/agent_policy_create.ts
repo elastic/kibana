@@ -17,6 +17,8 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
+import type { APIKey } from './epm/elasticsearch/transform/install';
+
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
@@ -48,7 +50,11 @@ async function createPackagePolicy(
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
-  options: { spaceId: string; user: AuthenticatedUser | undefined }
+  options: {
+    spaceId: string;
+    user: AuthenticatedUser | undefined;
+    apiKeyWithCurrentUserPermission?: APIKey;
+  }
 ) {
   const newPackagePolicy = await packagePolicyService
     .buildPackagePolicyFromPackage(soClient, packageToInstall)
@@ -71,6 +77,7 @@ async function createPackagePolicy(
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
+    // @TODO remove apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
   });
 }
 
@@ -94,7 +101,8 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled,
   spaceId,
   user,
-}: CreateAgentPolicyParams) {
+}: // @TODO remove apiKeyWithCurrentUserPermission,
+CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
   if (hasFleetServer) {
@@ -118,6 +126,7 @@ export async function createAgentPolicyWithPackages({
       esClient,
       packagesToInstall,
       spaceId,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -133,6 +142,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
       spaceId,
       user,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -141,6 +151,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
       spaceId,
       user,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 

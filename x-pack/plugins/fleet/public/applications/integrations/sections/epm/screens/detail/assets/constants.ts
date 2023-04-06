@@ -13,4 +13,5 @@ export const allowedAssetTypes: AllowedAssetTypes = [
   KibanaAssetType.dashboard,
   KibanaAssetType.search,
   KibanaAssetType.visualization,
+  // ElasticsearchAssetType.transform,
 ];

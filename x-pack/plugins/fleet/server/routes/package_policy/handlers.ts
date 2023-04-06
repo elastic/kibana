@@ -13,6 +13,8 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
+import type { APIKey } from '../../services/epm/elasticsearch/transform/install';
+
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
 import {
@@ -248,6 +250,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     }
 
     // Create package policy
+    const apiKeyWithCurrentUserPermission = await appContextService
+      .getSecurity()
+      .authc.apiKeys.grantAsInternalUser(request, {
+        name: `auto-generated-transform-api-key`,
+        role_descriptors: {},
+      });
+
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
@@ -256,6 +265,9 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         user,
         force,
         spaceId,
+        apiKeyWithCurrentUserPermission: apiKeyWithCurrentUserPermission
+          ? (apiKeyWithCurrentUserPermission as APIKey)
+          : undefined,
       },
       context,
       request

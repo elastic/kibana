@@ -451,6 +451,7 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   showLabels?: boolean;
@@ -537,6 +538,7 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+  deferred?: boolean;
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {

@@ -39,6 +39,7 @@ import {
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
+  ReauthorizeTransformRequestSchema,
 } from '../../types';
 
 import {
@@ -54,6 +55,7 @@ import {
   getStatsHandler,
   updatePackageHandler,
   getVerificationKeyIdHandler,
+  reauthorizeTransformsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -293,5 +295,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       }
       return resp;
     }
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
+      validate: ReauthorizeTransformRequestSchema,
+      fleetAuthz: {
+        integrations: { installPackages: true },
+        packagePrivileges: {
+          transform: {
+            actions: {
+              canStartStopTransform: {
+                executePackageAction: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    reauthorizeTransformsHandler
   );
 };

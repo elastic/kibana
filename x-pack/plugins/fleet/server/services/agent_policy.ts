@@ -474,6 +474,7 @@ class AgentPolicyService {
       packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
     }
     if (packagesToInstall.length > 0) {
+      console.log('--@@update');
       await bulkInstallPackages({
         savedObjectsClient: soClient,
         esClient,

@@ -36,7 +36,11 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
+import {
+  getAsset,
+  type SecondaryAuthorizationHeader,
+  TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX,
+} from './common';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -371,7 +375,8 @@ const installTransformsAssets = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[] = [],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
@@ -393,6 +398,15 @@ const installTransformsAssets = async (
       previousInstalledTransformEsAssets
     );
 
+    const secondaryAuth =
+      apiKeyWithCurrentUserPermission?.api_key !== undefined
+        ? {
+            headers: {
+              'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
+            },
+          }
+        : {};
+
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices
     await Promise.all(
@@ -407,13 +421,15 @@ const installTransformsAssets = async (
         esClient,
         transformsToRemoveWithDestIndex.map((asset) => asset.id),
         // Delete destination indices if specified or if from old json schema
-        true
+        true,
+        secondaryAuth
       ),
       deleteTransforms(
         esClient,
         transformsToRemove.map((asset) => asset.id),
         // Else, keep destination indices by default
-        false
+        false,
+        secondaryAuth
       ),
     ]);
 
@@ -555,6 +571,7 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth,
         });
         installedTransforms.push(installTransform);
       }
@@ -566,22 +583,50 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth,
         });
       });
 
       installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
     }
+
+    // If user does not have sufficient permissions to start the transforms,
+    // we need to mark them as deferred installations without blocking full package installation
+    // so that they can be updated/re-authorized later
+
+    if (installedTransforms.length > 0) {
+      // get and save refs associated with the transforms before installing
+      esReferences = await updateEsAssetReferences(
+        savedObjectsClient,
+        installablePackage.name,
+        esReferences,
+        {
+          assetsToRemove: transformRefs,
+          assetsToAdd: [...transformRefs].map((t) => ({ ...t, deferred: true })),
+        }
+      );
+    }
   }
 
   return { installedTransforms, esReferences };
 };
+
+// @todo: move to better spot
+export interface APIKey {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
+}
+
 export const installTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
-  esReferences?: EsAssetReference[]
+  esReferences?: EsAssetReference[],
+  apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
 
@@ -628,7 +673,8 @@ export const installTransforms = async (
     savedObjectsClient,
     logger,
     esReferences,
-    previousInstalledTransformEsAssets
+    previousInstalledTransformEsAssets,
+    apiKeyWithCurrentUserPermission
   );
 };
 
@@ -664,38 +710,57 @@ async function deleteAliasFromIndices({
       logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
     }
   } catch (err) {
-    logger.error(`Error deleting alias: ${alias}`);
+    logger.error(`Error deleting alias: ${alias} because ${err}`);
   }
 }
+
 async function handleTransformInstall({
   esClient,
   logger,
   transform,
   startTransform,
+  secondaryAuth,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   transform: TransformInstallation;
   startTransform?: boolean;
+  secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<EsAssetReference> {
+  // For PUT and UPDATE transforms
+  // we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+  // If API Key has insufficient permissions, it should still create the transforms but not start it
+  // Instead of failing, we need to allow package to continue installing other assets
+  // and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
+  let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(
       () =>
         // defer validation on put if the source index is not available
-        esClient.transform.putTransform({
-          transform_id: transform.installationName,
-          defer_validation: true,
-          body: transform.content,
-        }),
+        // but will check if API Key has sufficient permission
+        esClient.transform.putTransform(
+          {
+            transform_id: transform.installationName,
+            defer_validation: true,
+            body: transform.content,
+          },
+          { ...(secondaryAuth ? secondaryAuth : {}) }
+        ),
       { logger }
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
-    // swallow the error if the transform already exists.
+    const isResponseError = err instanceof errors.ResponseError;
+    isUnauthorizedAPIKey =
+      isResponseError &&
+      err?.body?.error?.type === 'security_exception' &&
+      err?.body?.error?.reason?.includes('unauthorized for API key');
+
     const isAlreadyExistError =
-      err instanceof errors.ResponseError &&
-      err?.body?.error?.type === 'resource_already_exists_exception';
-    if (!isAlreadyExistError) {
+      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+
+    // swallow the error if the transform already exists or if API key has insufficient permissions
+    if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
       throw err;
     }
   }
@@ -703,18 +768,35 @@ async function handleTransformInstall({
   // start transform by default if not set in yml file
   // else, respect the setting
   if (startTransform === undefined || startTransform === true) {
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.startTransform(
-          { transform_id: transform.installationName },
-          { ignore: [409] }
-        ),
-      { logger, additionalResponseStatuses: [400] }
-    );
-    logger.debug(`Started transform: ${transform.installationName}`);
+    try {
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.startTransform(
+            { transform_id: transform.installationName },
+            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+      logger.debug(`Started transform: ${transform.installationName}`);
+    } catch (err) {
+      const isResponseError = err instanceof errors.ResponseError;
+      isUnauthorizedAPIKey =
+        isResponseError &&
+        err?.body?.error?.type === 'security_exception' &&
+        err?.body?.error?.reason?.includes('unauthorized for API key');
+
+      // swallow the error if the transform can't be started if API key has insufficient permissions
+      if (!isUnauthorizedAPIKey) {
+        throw err;
+      }
+    }
   }
 
-  return { id: transform.installationName, type: ElasticsearchAssetType.transform };
+  return {
+    id: transform.installationName,
+    type: ElasticsearchAssetType.transform,
+    deferred: isUnauthorizedAPIKey,
+  };
 }
 
 const getLegacyTransformNameForInstallation = (

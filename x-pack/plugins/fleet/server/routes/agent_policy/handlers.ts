@@ -176,6 +176,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
   try {
+    // const apiKeyWithCurrentUserPermission = await appContextService
+    //   .getSecurity()
+    //   .authc.apiKeys.grantAsInternalUser(request, {
+    //     name: `auto-generated-transform-api-key`,
+    //     role_descriptors: {},
+    //   });
+
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
         soClient,
@@ -186,6 +193,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         monitoringEnabled,
         spaceId,
         user,
+        // @TODO remove apiKeyWithCurrentUserPermission,
       }),
     };
 

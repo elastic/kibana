@@ -8,15 +8,15 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { groupBy } from 'lodash';
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 
-import { Loading, Error, ExtensionWrapper } from '../../../../../components';
+import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
+import { ElasticsearchAssetType, InstallStatus } from '../../../../../types';
 
 import {
   useGetPackageInstallStatus,
@@ -24,6 +24,8 @@ import {
   useStartServices,
   useUIExtension,
 } from '../../../../../hooks';
+
+import { DeferredAssetsSection } from './deferred_assets_accordion';
 
 import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
@@ -50,6 +52,8 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
+  const [deferredInstallations, setDeferredInstallations] = useState<any[]>();
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
@@ -73,13 +77,26 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         } = packageInfo;
 
         if (
-          !packageAttributes.installed_kibana ||
-          packageAttributes.installed_kibana.length === 0
+          Array.isArray(packageAttributes.installed_es) &&
+          packageAttributes.installed_es?.length > 0
+        ) {
+          const deferredAssets = packageAttributes.installed_es.filter(
+            (asset) => asset.deferred === true
+          );
+          setDeferredInstallations(deferredAssets);
+        }
+
+        const authorizedTransforms = packageAttributes.installed_es.filter(
+          (asset) => asset.type === ElasticsearchAssetType.transform && !asset.deferred
+        );
+
+        if (
+          authorizedTransforms.length === 0 &&
+          (!packageAttributes.installed_kibana || packageAttributes.installed_kibana.length === 0)
         ) {
           setIsLoading(false);
           return;
         }
-
         try {
           const objectsToGet = packageAttributes.installed_kibana.map(({ id, type }) => ({
             id,
@@ -118,7 +135,10 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                 )
             )
           );
-          setAssetsSavedObjects(objectsByType.flat());
+          setAssetsSavedObjects([
+            ...authorizedTransforms.map((d) => ({ ...d, attributes: { title: d.id } })),
+            ...objectsByType.flat(),
+          ]);
         } catch (e) {
           setFetchError(e);
         } finally {
@@ -136,6 +156,9 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   if (packageInstallStatus.status !== InstallStatus.installed) {
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
+
+  const showDeferredInstallations =
+    Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
 
   let content: JSX.Element | Array<JSX.Element | null>;
   if (isLoading) {
@@ -190,7 +213,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         </ExtensionWrapper>
       );
     } else {
-      content = (
+      content = !showDeferredInstallations ? (
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -199,11 +222,11 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
             />
           </h2>
         </EuiTitle>
-      );
+      ) : null;
     }
   } else {
     content = [
-      ...allowedAssetTypes.map((assetType) => {
+      ...[...allowedAssetTypes, ElasticsearchAssetType.transform].map((assetType) => {
         const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
 
         if (!sectionAssetSavedObjects.length) {
@@ -225,11 +248,24 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       ) : null,
     ];
   }
+  const deferredInstallationsContent =
+    Array.isArray(deferredInstallations) && deferredInstallations.length > 0 ? (
+      <>
+        <DeferredAssetsSection
+          deferredInstallations={deferredInstallations}
+          packageInfo={packageInfo}
+        />
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
 
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>{content}</EuiFlexItem>
+      <EuiFlexItem grow={6}>
+        {deferredInstallationsContent}
+        {content}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

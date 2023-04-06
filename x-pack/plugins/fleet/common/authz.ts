@@ -7,8 +7,11 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
 import { ENDPOINT_PRIVILEGES } from './constants';
 
+export type TransformPrivilege = 'createTransform' | 'startOrStopTransform' | 'viewTransform';
 export interface FleetAuthz {
   fleet: {
     all: boolean;
@@ -106,9 +109,21 @@ export function calculatePackagePrivilegesFromCapabilities(
     {}
   );
 
+  const transformActions = Object.keys(capabilities.transform).reduce((acc, privilegeName) => {
+    return {
+      ...acc,
+      [privilegeName]: {
+        executePackageAction: capabilities.transform[privilegeName] || false,
+      },
+    };
+  }, {});
+
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }
@@ -158,9 +173,40 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     {}
   );
 
+  const transformActions: {
+    [key in TransformPrivilege]: {
+      executePackageAction: boolean;
+    };
+  } = {
+    createTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        `admin`
+      ),
+    },
+    canStartStopTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        'admin'
+      ),
+    },
+    canViewTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        `read`
+      ),
+    },
+  };
+
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }

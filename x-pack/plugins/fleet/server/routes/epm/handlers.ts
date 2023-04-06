@@ -12,6 +12,10 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
+import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
+
+import type { APIKey } from '../../services/epm/elasticsearch/transform/install';
+
 import type {
   GetInfoResponse,
   InstallPackageResponse,
@@ -54,12 +58,13 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import type { ReauthorizeTransformRequestSchema } from '../../types';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -284,6 +289,13 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
+
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
     installSource: 'registry',
@@ -294,6 +306,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
+    apiKeyWithCurrentUserPermission: apiKeyWithCurrentUserPermission
+      ? (apiKeyWithCurrentUserPermission as APIKey)
+      : undefined,
   });
 
   if (!res.error) {
@@ -334,6 +349,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
+
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
@@ -361,6 +377,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       body: { message: 'Requires Enterprise license' },
     });
   }
+
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -375,6 +392,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
+    // @TODO remove apiKeyWithCurrentUserPermission,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -431,4 +449,47 @@ export const getVerificationKeyIdHandler: FleetRequestHandler = async (
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
+};
+
+export const reauthorizeTransformsHandler: FleetRequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
+  TypeOf<typeof ReauthorizeTransformRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { pkgName, pkgVersion } = request.params;
+  const { transforms } = request.body;
+
+  const logger = appContextService.getLogger();
+
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
+
+  const secondaryAuth =
+    apiKeyWithCurrentUserPermission?.api_key !== undefined
+      ? {
+          headers: {
+            'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
+          },
+        }
+      : undefined;
+
+  const resp = await handleTransformReauthorizeAndStart({
+    esClient,
+    savedObjectsClient,
+    logger,
+    pkgName,
+    pkgVersion,
+    transforms,
+    secondaryAuth,
+  });
+
+  return response.ok({ body: resp });
 };
