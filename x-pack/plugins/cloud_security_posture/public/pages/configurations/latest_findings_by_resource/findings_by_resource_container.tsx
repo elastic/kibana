@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -71,6 +71,17 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
+
+  const onResetFilters = useCallback(() => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [setUrlQuery]);
 
   /**
    * Page URL query to ES query
@@ -153,6 +164,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <FindingsByResourceTable
             loading={findingsGroupByResource.isFetching}
             items={slicedPage}
+            onResetFilters={onResetFilters}
             pagination={getPaginationTableParams({
               pageSize,
               pageIndex: urlQuery.pageIndex,

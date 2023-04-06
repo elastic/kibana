@@ -13,6 +13,7 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import { TestProvider } from '../../../test/test_provider';
 import { getFindingsFixture } from '../../../test/fixtures/findings_fixture';
+import { EMPTY_STATE_TEST_SUBJ } from '../../../components/test_subjects';
 
 const chance = new Chance();
 
@@ -35,6 +36,7 @@ describe('<FindingsTable />', () => {
         onOpenFlyout={onOpenFlyout}
         onCloseFlyout={onCloseFlyout}
         onPaginateFlyout={jest.fn()}
+        onResetFilters={jest.fn()}
         flyoutFindingIndex={-1}
         {...overrideProps}
       />
@@ -67,9 +69,7 @@ describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     renderWrapper({ items: [] });
 
-    expect(
-      screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(EMPTY_STATE_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {

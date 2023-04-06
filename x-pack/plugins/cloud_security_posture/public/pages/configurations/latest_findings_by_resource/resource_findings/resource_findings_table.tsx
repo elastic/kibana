@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiBasicTable,
   type CriteriaWithPagination,
   type Pagination,
@@ -15,7 +14,6 @@ import {
   type EuiBasicTableProps,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import {
   baseFindingsColumns,
@@ -26,6 +24,7 @@ import {
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 import { getSelectedRowStyle } from '../../utils/utils';
 import * as TEST_SUBJECTS from '../../test_subjects';
+import { EmptyState } from '../../../../components/empty_state';
 
 export interface ResourceFindingsTableProps {
   items: CspFinding[];
@@ -38,6 +37,7 @@ export interface ResourceFindingsTableProps {
   onCloseFlyout: () => void;
   onOpenFlyout: (finding: CspFinding) => void;
   flyoutFindingIndex: number;
+  onResetFilters: () => void;
 }
 
 const ResourceFindingsTableComponent = ({
@@ -51,6 +51,7 @@ const ResourceFindingsTableComponent = ({
   flyoutFindingIndex,
   onPaginateFlyout,
   onCloseFlyout,
+  onResetFilters,
 }: ResourceFindingsTableProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -76,21 +77,9 @@ const ResourceFindingsTableComponent = ({
     [onAddFilter, onOpenFlyout]
   );
 
-  if (!loading && !items.length)
-    return (
-      <EuiEmptyPrompt
-        iconType="logoKibana"
-        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE_EMPTY_STATE}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.findings.resourceFindings.noFindingsTitle"
-              defaultMessage="There are no Findings"
-            />
-          </h2>
-        }
-      />
-    );
+  if (!loading && !items.length) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
 
   return (
     <>

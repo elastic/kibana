@@ -50,6 +50,17 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
+  const onResetFilters = useCallback(() => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [setUrlQuery]);
+
   /**
    * Page URL query to ES query
    */
@@ -171,6 +182,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           )}
           <EuiSpacer />
           <FindingsTable
+            onResetFilters={onResetFilters}
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}

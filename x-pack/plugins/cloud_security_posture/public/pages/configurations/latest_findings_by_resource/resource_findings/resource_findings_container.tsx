@@ -105,6 +105,17 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
 
+  const onResetFilters = useCallback(() => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [setUrlQuery]);
+
   /**
    * Page URL query to ES query
    */
@@ -259,6 +270,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}
+            onResetFilters={onResetFilters}
             flyoutFindingIndex={flyoutFindingIndex}
             loading={resourceFindings.isFetching}
             items={slicedPage}

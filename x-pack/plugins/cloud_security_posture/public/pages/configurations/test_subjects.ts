@@ -8,16 +8,12 @@
 export const FINDINGS_FLYOUT = 'findings_flyout';
 export const FINDINGS_TABLE_EXPAND_COLUMN = 'findings_table_expand_column';
 export const FINDINGS_TABLE = 'findings_table';
-export const FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE =
-  'findings-by-resource-table-no-findings-empty-state';
 export const FINDINGS_CONTAINER = 'findings_container';
 export const FINDINGS_BY_RESOURCE_CONTAINER = 'findings_by_resource_container';
 export const FINDINGS_BY_RESOURCE_TABLE_RESOURCE_ID_COLUMN =
   'findings_by_resource_table_resource_id_column';
 export const FINDINGS_BY_RESOURCE_TABLE = 'findings_by_resource_table';
 
-export const LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE =
-  'latest-findings-table-no-findings-empty-state';
 export const getFindingsByResourceTableRowTestId = (id: string) =>
   `findings_resource_table_row_${id}`;
 export const LATEST_FINDINGS_CONTAINER = 'latest_findings_container';
@@ -33,7 +29,6 @@ export const FINDINGS_TABLE_CELL_ADD_FILTER = 'findings_table_cell_add_filter';
 export const FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER = 'findings_table_cell_add_negated_filter';
 
 export const RESOURCES_FINDINGS_CONTAINER = 'resources_findings_container';
-export const RESOURCES_FINDINGS_TABLE_EMPTY_STATE = 'resource_findings_table_empty_state';
 export const RESOURCES_FINDINGS_TABLE = 'resource_findings_table';
 export const getResourceFindingsTableRowTestId = (id: string) =>
   `resource_findings_table_row_${id}`;

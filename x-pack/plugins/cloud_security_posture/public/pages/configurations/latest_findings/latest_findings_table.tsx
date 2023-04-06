@@ -39,6 +39,7 @@ interface Props {
   onCloseFlyout: () => void;
   onOpenFlyout: (finding: CspFinding) => void;
   flyoutFindingIndex: number;
+  onResetFilters: () => void;
 }
 
 const FindingsTableComponent = ({
@@ -52,6 +53,7 @@ const FindingsTableComponent = ({
   flyoutFindingIndex,
   onPaginateFlyout,
   onCloseFlyout,
+  onResetFilters,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
@@ -84,8 +86,9 @@ const FindingsTableComponent = ({
     [onOpenFlyout, onAddFilter]
   );
 
-  // Show "zero state"
-  if (!loading && !items.length) return <EmptyState />;
+  if (!loading && !items.length) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
 
   return (
     <>

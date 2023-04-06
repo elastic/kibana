@@ -6,27 +6,41 @@
  */
 
 import React from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiTitle,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiImage, EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { EMPTY_STATE_TEST_SUBJ } from './test_subjects';
+import { FINDINGS_DOCS_URL } from '../common/constants';
 import illustration from '../assets/illustrations/illustration_product_no_results_magnifying_glass.svg';
 
-export const EmptyState: React.FC = () => {
+export const EmptyState = ({
+  onResetFilters,
+  docsUrl = FINDINGS_DOCS_URL,
+}: {
+  onResetFilters: () => void;
+  docsUrl?: string;
+}) => {
   return (
     <EuiEmptyPrompt
+      css={css`
+        max-width: 734px;
+        && > .euiEmptyPrompt__main {
+          gap: 32px;
+        }
+      `}
       data-test-subj={EMPTY_STATE_TEST_SUBJ}
-      icon={<EuiImage size="290" url={illustration} alt="" />}
+      icon={
+        <EuiImage
+          url={illustration}
+          alt={i18n.translate('xpack.cloudSecurityPosture.emptyState.illustrationAlt', {
+            defaultMessage: 'No results',
+          })}
+          css={css`
+            width: 290px;
+          `}
+        />
+      }
       title={
         <h2>
           <FormattedMessage
@@ -48,13 +62,13 @@ export const EmptyState: React.FC = () => {
         </>
       }
       actions={[
-        <EuiButton color="primary" fill>
+        <EuiButton color="primary" fill onClick={onResetFilters}>
           <FormattedMessage
             id="xpack.cloudSecurityPosture.emptyState.resetFiltersButton"
             defaultMessage="Reset filters"
           />
         </EuiButton>,
-        <EuiLink href="#" target="_blank">
+        <EuiLink href={docsUrl} target="_blank">
           <FormattedMessage
             id="xpack.cloudSecurityPosture.emptyState.readDocsLink"
             defaultMessage="Read the docs"
@@ -62,46 +76,5 @@ export const EmptyState: React.FC = () => {
         </EuiLink>,
       ]}
     />
-    // <EuiFlexGroup
-    //   data-test-subj={EMPTY_STATE_TEST_SUBJ}
-    //   css={css`
-    //     height: 254px;
-    //   `}
-    //   alignItems="center"
-    //   justifyContent="center"
-    // >
-    //   <EuiFlexItem grow={false}>
-    //     <EuiPanel
-    //       hasBorder={true}
-    //       css={css`
-    //         max-width: 734px;
-    //       `}
-    //     >
-    //       <EuiFlexGroup>
-    //         <EuiFlexItem>
-    //           <EuiText size="s">
-    //             <EuiTitle>
-    //               <h3>
-    //                 <FormattedMessage
-    //                   id="xpack.kubernetesSecurity.treeView.empty.title"
-    //                   defaultMessage="No results match your search criteria"
-    //                 />
-    //               </h3>
-    //             </EuiTitle>
-    //             <p>
-    //               <FormattedMessage
-    //                 id="xpack.kubernetesSecurity.treeView.empty.description"
-    //                 defaultMessage="Try modifying your search or filter set"
-    //               />
-    //             </p>
-    //           </EuiText>
-    //         </EuiFlexItem>
-    //         <EuiFlexItem grow={false}>
-    //           <EuiImage size="200" alt="" url={icon} />
-    //         </EuiFlexItem>
-    //       </EuiFlexGroup>
-    //     </EuiPanel>
-    //   </EuiFlexItem>
-    // </EuiFlexGroup>
   );
 };
