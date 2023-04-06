@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { Privileges } from '../../../../../common/types/privileges';
+import { cloneDeep } from 'lodash';
+import { APP_INDEX_PRIVILEGES } from '../constants';
+import { Privileges } from '../types/privileges';
 
-export interface Capabilities {
+export interface TransformCapabilities {
   canGetTransform: boolean;
   canDeleteTransform: boolean;
   canPreviewTransform: boolean;
@@ -21,6 +23,19 @@ export interface Capabilities {
   canUseTransformAlerts: boolean;
   canResetTransform: boolean;
 }
+export type Capabilities = { [k in keyof TransformCapabilities]: boolean };
+
+export const INITIAL_CAPABILITIES = Object.freeze<Capabilities>({
+  canGetTransform: false,
+  canDeleteTransform: false,
+  canPreviewTransform: false,
+  canCreateTransform: false,
+  canScheduleNowTransform: false,
+  canStartStopTransform: false,
+  canCreateTransformAlerts: false,
+  canUseTransformAlerts: false,
+  canResetTransform: false,
+});
 
 export type Privilege = [string, string];
 
@@ -58,10 +73,69 @@ export const hasPrivilegeFactory =
     );
   };
 
+export const extractMissingPrivileges = (
+  privilegesObject: { [key: string]: boolean } = {}
+): string[] =>
+  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
+    if (!privilegesObject[privilegeName]) {
+      privileges.push(privilegeName);
+    }
+    return privileges;
+  }, []);
+
+export const getPrivilegesAndCapabilities = (
+  clusterPrivileges: Record<string, boolean>,
+  hasOneIndexWithAllPrivileges: boolean,
+  hasAllPrivileges: boolean
+) => {
+  const privilegesResult: Privileges = {
+    hasAllPrivileges: true,
+    missingPrivileges: {
+      cluster: [],
+      index: [],
+    },
+  };
+
+  // Find missing cluster privileges and set overall app privileges
+  privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(clusterPrivileges);
+  privilegesResult.hasAllPrivileges = hasAllPrivileges;
+
+  if (!hasOneIndexWithAllPrivileges) {
+    privilegesResult.missingPrivileges.index = [...APP_INDEX_PRIVILEGES];
+  }
+
+  const hasPrivilege = hasPrivilegeFactory(privilegesResult);
+
+  const capabilities = cloneDeep<Capabilities>(INITIAL_CAPABILITIES);
+  capabilities.canGetTransform =
+    hasPrivilege(['cluster', 'cluster:monitor/transform/get']) &&
+    hasPrivilege(['cluster', 'cluster:monitor/transform/stats/get']);
+
+  capabilities.canCreateTransform = hasPrivilege(['cluster', 'cluster:admin/transform/put']);
+
+  capabilities.canDeleteTransform = hasPrivilege(['cluster', 'cluster:admin/transform/delete']);
+
+  capabilities.canResetTransform = hasPrivilege(['cluster', 'cluster:admin/transform/reset']);
+
+  capabilities.canPreviewTransform = hasPrivilege(['cluster', 'cluster:admin/transform/preview']);
+
+  capabilities.canStartStopTransform =
+    hasPrivilege(['cluster', 'cluster:admin/transform/start']) &&
+    hasPrivilege(['cluster', 'cluster:admin/transform/start_task']) &&
+    hasPrivilege(['cluster', 'cluster:admin/transform/stop']);
+
+  capabilities.canCreateTransformAlerts = capabilities.canCreateTransform;
+
+  capabilities.canUseTransformAlerts = capabilities.canGetTransform;
+
+  capabilities.canScheduleNowTransform = capabilities.canStartStopTransform;
+
+  return { privileges: privilegesResult, capabilities };
+};
 // create the text for button's tooltips if the user
 // doesn't have the permission to press that button
 export function createCapabilityFailureMessage(
-  capability: keyof Capabilities | 'noTransformNodes'
+  capability: keyof TransformCapabilities | 'noTransformNodes'
 ) {
   let message = '';
 
