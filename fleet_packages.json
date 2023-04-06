@@ -42,7 +42,7 @@
   },
   {
     "name": "synthetics",
-    "version": "0.11.8"
+    "version": "0.12.0"
   },
   {
     "name": "security_detection_engine",
