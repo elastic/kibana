@@ -128,7 +128,7 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   selectedPatterns: [],
   missingPatterns: [],
 };
-export const initDataView = {
+export const initDataView: SourcererDataView & { id: string; error?: unknown } = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
   indexFields: EMPTY_INDEX_FIELDS,
