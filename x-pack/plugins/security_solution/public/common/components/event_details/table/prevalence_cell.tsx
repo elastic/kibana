@@ -56,6 +56,7 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
       <InvestigateInTimelineButton
         asEmptyButton={true}
         dataProviders={cellDataProviders.dataProviders}
+        filters={cellDataProviders.filters}
       >
         <span data-test-subj="alert-prevalence">{count}</span>
       </InvestigateInTimelineButton>
