@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect } from 'react';
-import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
+import React, { useEffect, useRef } from 'react';
+import type { DocViewRenderFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
 
 interface Props {
   render: DocViewRenderFn;

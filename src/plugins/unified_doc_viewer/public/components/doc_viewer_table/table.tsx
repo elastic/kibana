@@ -7,6 +7,8 @@
  */
 
 import './table.scss';
+import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/public/types';
+import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFieldSearch,
@@ -27,18 +29,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
-import { usePager, useUnifiedDocViewerServices } from '../../hooks';
-import { FieldName } from '../field_name';
-import { DocViewRenderProps, FieldRecordLegacy } from '../../types';
 import {
   formatFieldValue,
   getIgnoredReason,
   getShouldShowFieldHandler,
   isNestedFieldParent,
-} from '../../utils';
+} from '@kbn/unified-doc-viewer/public';
+import { usePager, useUnifiedDocViewerServices } from '../../hooks';
+import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import type { DocView, DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
 import { getDocViewsRegistry } from '../../services';
 import { DocViewerTab } from './doc_viewer_tab';
 

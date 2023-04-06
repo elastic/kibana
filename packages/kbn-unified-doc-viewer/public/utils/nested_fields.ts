@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { escapeRegExp } from 'lodash/fp';
-import { getFieldSubtypeNested } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { escapeRegExp } from 'lodash/fp';
+import { getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 /**
  * This function checks if the given field in a given data view is a nested field's parent.
@@ -52,7 +52,7 @@ export function isNestedFieldParent(fieldName: string, dataView: DataView): bool
     !!dataView.fields.getAll().find((patternField) => {
       // We only want to match a full path segment
       const nestedRootRegex = new RegExp(escapeRegExp(fieldName) + '(\\.|$)');
-      const subTypeNested = getFieldSubtypeNested(patternField);
+      const subTypeNested = getDataViewFieldSubtypeNested(patternField);
       return nestedRootRegex.test(subTypeNested?.nested.path ?? '');
     })
   );

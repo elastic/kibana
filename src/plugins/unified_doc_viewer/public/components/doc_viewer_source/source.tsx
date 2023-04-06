@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer/public';
 import { useEsDocSearch } from '../../hooks';
-import { ElasticRequestState } from '../../types';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 import { getHeight } from './get_height';
 

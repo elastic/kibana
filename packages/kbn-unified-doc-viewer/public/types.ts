@@ -7,12 +7,12 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { IgnoredReason } from './utils';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { IgnoredReason } from './utils';
 
 export { IgnoredReason };
 

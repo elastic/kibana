@@ -13,8 +13,8 @@ import type {
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -53,6 +53,6 @@ export function formatFieldValue(
       .convert(value, usedContentType, converterOptions);
   }
 
-  // If we have a data view and field we use that fields field formatter
+  // If we have a data view and field we use that field's field formatter
   return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
 }

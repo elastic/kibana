@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer/public/types';
-
-export const useUnifiedDocViewerServices = () => useKibana<UnifiedDocViewerServices>().services;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-unified-doc-viewer'],
+};

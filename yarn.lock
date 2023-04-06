@@ -5405,6 +5405,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
   version "0.0.0"
   uid ""

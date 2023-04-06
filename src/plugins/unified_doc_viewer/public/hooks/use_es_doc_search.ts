@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ESSearchRequest, SearchHit } from '@kbn/es-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
-import type { SearchHit, ESSearchRequest } from '@kbn/es-types';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DocProps, ElasticRequestState } from '@kbn/unified-doc-viewer/public/types';
 import { useUnifiedDocViewerServices } from './use_doc_view_services';
-import { DocProps, ElasticRequestState } from '../types';
 
 type RequestBody = Pick<ESSearchRequest, 'body'>;
 

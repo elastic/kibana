@@ -6,26 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedDocViewerPlugin } from './plugin';
-
+export { ElasticRequestState } from './types';
 export {
-  DocViewer,
-  DocViewerSource,
-  DocViewerTable,
-  DocViewerTableLegacy,
-  JSONCodeEditorCommonMemoized,
-  JsonCodeEditor,
-  JsonCodeEditorCommon,
-} from './components';
-
-export { useEsDocSearch, usePager } from './hooks';
-
-export {
-  formatFieldValue,
+  IgnoredReason,
+  getIgnoredReason,
   getShouldShowFieldHandler,
+  formatFieldValue,
   isNestedFieldParent,
-} from '@kbn/unified-doc-viewer/public';
-
-export function plugin() {
-  return new UnifiedDocViewerPlugin();
-}
+} from './utils';

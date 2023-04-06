@@ -11,14 +11,18 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
-import { useUnifiedDocViewerServices } from '../../hooks';
-import { DataTableRecord, DocViewFilterFn, FieldRecordLegacy } from '../../types';
 import {
   formatFieldValue,
   getIgnoredReason,
   getShouldShowFieldHandler,
   isNestedFieldParent,
-} from '../../utils';
+} from '@kbn/unified-doc-viewer/public';
+import type {
+  DataTableRecord,
+  DocViewFilterFn,
+  FieldRecordLegacy,
+} from '@kbn/unified-doc-viewer/public/types';
+import { useUnifiedDocViewerServices } from '../../hooks';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
 export interface DocViewRenderProps {
