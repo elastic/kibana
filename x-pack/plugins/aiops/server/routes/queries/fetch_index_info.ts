@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getSampleProbability } from '@kbn/ml-agg-utils';
+import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 

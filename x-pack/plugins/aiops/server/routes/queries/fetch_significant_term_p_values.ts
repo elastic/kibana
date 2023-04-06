@@ -9,8 +9,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import { randomSampler } from '@kbn/ml-random-sampler-utils';
+
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
@@ -53,7 +54,7 @@ export const getSignificantTermRequest = (
     ];
   }
 
-  const pValueAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+  const pValueAgg: Record<'change_point_p_value', estypes.AggregationsAggregationContainer> = {
     change_point_p_value: {
       significant_terms: {
         field: fieldName,
@@ -80,21 +81,12 @@ export const getSignificantTermRequest = (
     },
   };
 
-  const randomSamplerAgg: Record<string, estypes.AggregationsAggregationContainer> = {
-    sample: {
-      // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
-      random_sampler: {
-        probability: sampleProbability,
-        seed: RANDOM_SAMPLER_SEED,
-      },
-      aggs: pValueAgg,
-    },
-  };
+  const rs = randomSampler({ probability: sampleProbability });
 
   const body = {
     query,
     size: 0,
-    aggs: sampleProbability < 1 ? randomSamplerAgg : pValueAgg,
+    aggs: rs.wrap(pValueAgg),
   };
 
   return {
@@ -107,18 +99,6 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
   doc_count: number;
   bg_count: number;
   buckets: estypes.AggregationsSignificantLongTermsBucket[];
-}
-
-interface PValuesAggregation extends estypes.AggregationsSamplerAggregation {
-  change_point_p_value: Aggs;
-}
-
-interface RandomSamplerAggregation {
-  sample: PValuesAggregation;
-}
-
-function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
-  return isPopulatedObject(arg, ['sample']);
 }
 
 export const fetchSignificantTermPValues = async (
@@ -135,10 +115,10 @@ export const fetchSignificantTermPValues = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
-      esClient.search<unknown, { sample: PValuesAggregation } | { change_point_p_value: Aggs }>(
-        getSignificantTermRequest(params, fieldName, sampleProbability),
-        { signal: abortSignal, maxRetries: 0 }
-      )
+      esClient.search(getSignificantTermRequest(params, fieldName, sampleProbability), {
+        signal: abortSignal,
+        maxRetries: 0,
+      })
     )
   );
 
@@ -172,9 +152,9 @@ export const fetchSignificantTermPValues = async (
       continue;
     }
 
-    const overallResult = isRandomSamplerAggregation(resp.aggregations)
-      ? resp.aggregations.sample.change_point_p_value
-      : resp.aggregations.change_point_p_value;
+    const rs = randomSampler({ probability: sampleProbability });
+
+    const overallResult = rs.unwrap(resp.aggregations).change_point_p_value as Aggs;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);

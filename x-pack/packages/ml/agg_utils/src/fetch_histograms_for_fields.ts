@@ -13,11 +13,10 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
+import { randomSampler } from '@kbn/ml-random-sampler-utils';
 
-import { buildRandomSamplerAggregation } from './build_random_sampler_aggregation';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
-import { getRandomSamplerAggregationsResponsePath } from './get_random_sampler_aggregations_response_path';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
 import type {
   AggCardinality,
@@ -213,6 +212,8 @@ export const fetchHistogramsForFields = async (
     return [];
   }
 
+  const rs = randomSampler({ probability: randomSamplerProbability ?? 1 });
+
   const body = await client.search(
     {
       index: indexPattern,
@@ -222,7 +223,7 @@ export const fetchHistogramsForFields = async (
         aggs:
           randomSamplerProbability === undefined
             ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
-            : buildRandomSamplerAggregation(chartDataAggs, randomSamplerProbability),
+            : rs.wrap(chartDataAggs),
         size: 0,
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
@@ -233,8 +234,13 @@ export const fetchHistogramsForFields = async (
   const aggsPath =
     randomSamplerProbability === undefined
       ? getSamplerAggregationsResponsePath(samplerShardSize)
-      : getRandomSamplerAggregationsResponsePath(randomSamplerProbability);
-  const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
+      : [];
+  const aggregations =
+    aggsPath.length > 0
+      ? get(body.aggregations, aggsPath)
+      : randomSamplerProbability !== undefined
+      ? rs.unwrap(body.aggregations)
+      : body.aggregations;
 
   return fields.map((field) => {
     const id = stringHash(field.fieldName);
