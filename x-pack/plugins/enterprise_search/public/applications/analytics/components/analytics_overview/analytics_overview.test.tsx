@@ -18,6 +18,9 @@ import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 import { AnalyticsOverview } from './analytics_overview';
+import { LicensingCallout } from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
+import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
+import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 const mockValues = {
   analyticsCollections: [
@@ -27,6 +30,8 @@ const mockValues = {
     },
   ] as AnalyticsCollection[],
   hasNoAnalyticsCollections: false,
+  hasPlatinumLicense: true,
+  isCloud: false,
 };
 
 const mockActions = {
@@ -49,8 +54,9 @@ describe('AnalyticsOverview', () => {
       const wrapper = shallow(<AnalyticsOverview />);
 
       expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
-
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
+      expect(wrapper.find(AnalyticsOverviewEmptyPage)).toHaveLength(1);
+
     });
 
     it('renders with Data', async () => {
@@ -60,7 +66,34 @@ describe('AnalyticsOverview', () => {
       const wrapper = shallow(<AnalyticsOverview />);
 
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(1);
+      expect(wrapper.find(LicensingCallout)).toHaveLength(0);
       expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
+    });
+
+    it('renders Platinum license callout when not Cloud or Platinum', async () => {
+      setMockValues({
+        ...mockValues,
+        hasPlatinumLicense: false,
+        isCloud: false,
+      });
+      setMockActions(mockActions);
+      const wrapper = shallow(<AnalyticsOverview />);
+  
+      expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
+      expect(wrapper.find(AnalyticsOverviewEmptyPage)).toHaveLength(0);
+      expect(wrapper.find(LicensingCallout)).toHaveLength(1);
+    });
+  
+    it('Does not render Platinum license callout when Cloud', async () => {
+      setMockValues({
+        ...mockValues,
+        hasPlatinumLicense: false,
+        isCloud: true,
+      });
+      setMockActions(mockActions);
+      const wrapper = shallow(<AnalyticsOverview />);
+  
+      expect(wrapper.find(LicensingCallout)).toHaveLength(0);
     });
   });
 });
