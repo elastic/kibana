@@ -12,7 +12,6 @@ import { EuiFlyout } from '@elastic/eui';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -35,9 +34,6 @@ interface DetailsPanelProps {
   scopeId: string;
   isReadOnly?: boolean;
 }
-
-// Both event detail and timeline on detection are rendered in a portal, we need to set the z-index to be below the timeline
-const flyoutZIndexStyle = { zIndex: euiThemeVars.euiZLevel1 - 1 };
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -159,7 +155,6 @@ export const DetailsPanel = React.memo(
         onClose={closePanel}
         ownFocus={false}
         key={flyoutUniqueKey}
-        style={flyoutZIndexStyle}
       >
         {visiblePanel}
       </EuiFlyout>

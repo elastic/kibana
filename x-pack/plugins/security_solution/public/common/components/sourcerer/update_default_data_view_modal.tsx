@@ -37,7 +37,6 @@ const MyEuiModal = styled(EuiModal)`
     height: auto !important;
     max-width: 718px;
   }
-  z-index: 99999999;
 `;
 
 export const UpdateDefaultDataViewModal = React.memo<Props>(
