@@ -112,7 +112,7 @@ describe('migration v2', () => {
     expect(assertMigratedDocuments(migratedDocs, originalDocs));
   });
 
-  it.only('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
+  it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
     root = createRoot({ maxBatchSizeBytes: 1015275 });
     esServer = await startES();
     await root.preboot();
