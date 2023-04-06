@@ -10,6 +10,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -20,7 +21,7 @@ import {
   RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,
 } from '../../../common/range_slider/types';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
@@ -68,10 +69,8 @@ export class RangeSliderEmbeddableFactory
     return newInput;
   };
 
-  public isFieldCompatible = (dataControlField: DataControlField) => {
-    if (dataControlField.field.aggregatable && dataControlField.field.type === 'number') {
-      dataControlField.compatibleControlTypes.push(this.type);
-    }
+  public isFieldCompatible = (field: DataViewField) => {
+    return field.aggregatable && field.type === 'number';
   };
 
   public inject = createRangeSliderInject();
