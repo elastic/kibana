@@ -8,7 +8,6 @@
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiLoadingSpinner,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -130,10 +129,6 @@ const useRuleSnoozeColumn = ({
       field: 'snooze',
       name: i18n.COLUMN_SNOOZE,
       render: (_, rule: ExtendedRule) => {
-        if (!rule.snoozeSettings) {
-          return <EuiLoadingSpinner size="s" />;
-        }
-
         if (rule.snoozeSettings instanceof Error) {
           return (
             <EuiToolTip content={rule.snoozeSettings.message}>

@@ -10,7 +10,7 @@ import type { RuleSnoozeSettings } from '../../../detection_engine/rule_manageme
 import { useKibana } from '../../lib/kibana';
 
 interface RuleSnoozeBadgeProps {
-  snoozeSettings: RuleSnoozeSettings;
+  snoozeSettings?: RuleSnoozeSettings;
   hasCRUDPermissions: boolean;
   onChange: () => void;
 }
@@ -23,17 +23,17 @@ export function RuleSnoozeBadge({
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
   const rule = useMemo(
     () => ({
-      id: snoozeSettings.id,
-      muteAll: snoozeSettings.mute_all,
-      activeSnoozes: snoozeSettings.active_snoozes,
-      isSnoozedUntil: snoozeSettings.is_snoozed_until
+      id: snoozeSettings?.id ?? '',
+      muteAll: snoozeSettings?.mute_all ?? false,
+      activeSnoozes: snoozeSettings?.active_snoozes ?? [],
+      isSnoozedUntil: snoozeSettings?.is_snoozed_until
         ? new Date(snoozeSettings.is_snoozed_until)
         : undefined,
-      snoozeSchedule: snoozeSettings.snooze_schedule,
+      snoozeSchedule: snoozeSettings?.snooze_schedule,
       isEditable: hasCRUDPermissions,
     }),
     [snoozeSettings, hasCRUDPermissions]
   );
 
-  return <RulesListNotifyBadge rule={rule} isLoading={false} onRuleChanged={onChange} />;
+  return <RulesListNotifyBadge rule={rule} isLoading={!snoozeSettings} onRuleChanged={onChange} />;
 }
