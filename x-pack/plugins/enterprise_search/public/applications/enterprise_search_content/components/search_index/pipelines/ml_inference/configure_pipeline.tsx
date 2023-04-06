@@ -32,6 +32,7 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
+import { ELSERCallOut } from './elser_callout';
 import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
@@ -315,6 +316,8 @@ export const ConfigurePipeline: React.FC = () => {
               </EuiFormRow>
               <InferenceConfiguration />
             </EuiForm>
+            <EuiSpacer />
+            <ELSERCallOut />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
