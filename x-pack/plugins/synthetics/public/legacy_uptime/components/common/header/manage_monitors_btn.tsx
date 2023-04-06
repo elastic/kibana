@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import { EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
-
 export const ManageMonitorsBtn = () => {
-  const { basePath } = useUptimeSettingsContext();
-
   return (
-    <EuiHeaderLink
-      aria-label={NAVIGATE_LABEL}
-      color="text"
-      data-test-subj="syntheticsManagementPageLink"
-      href={`${basePath}/app/synthetics/monitors`}
-    >
-      <FormattedMessage
-        id="xpack.synthetics.page_header.manageMonitors"
-        defaultMessage="Monitor Management"
-      />
-    </EuiHeaderLink>
+    <EuiToolTip content={NAVIGATE_LABEL}>
+      <EuiHeaderLink
+        aria-label={NAVIGATE_LABEL}
+        color="text"
+        data-test-subj="syntheticsManagementPageLink"
+      >
+        <FormattedMessage
+          id="xpack.synthetics.page_header.manageMonitors"
+          defaultMessage="Monitor Management"
+        />
+      </EuiHeaderLink>
+    </EuiToolTip>
   );
 };
 
-const NAVIGATE_LABEL = i18n.translate('xpack.synthetics.page_header.manageLink.label', {
-  defaultMessage: 'Navigate to the Uptime Monitor Management page',
+const NAVIGATE_LABEL = i18n.translate('xpack.synthetics.page_header.manageLink.not', {
+  defaultMessage:
+    'Monitor Management is no longer available in Uptime, use the Synthetics app instead.',
 });
