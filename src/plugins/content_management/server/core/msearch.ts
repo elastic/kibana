@@ -23,7 +23,10 @@ export class MSearchService {
     contentTypes: Array<{ contentTypeId: string; ctx: StorageContext }>,
     query: SearchQuery
   ): Promise<MSearchResult> {
+    // Map: contentTypeId -> StorageContext
     const contentTypeToCtx = new Map(contentTypes.map((ct) => [ct.contentTypeId, ct.ctx]));
+
+    // Map: contentTypeId -> MSearchConfig
     const contentTypeToMSearchConfig = new Map(
       contentTypes.map((ct) => {
         const mSearchConfig = this.deps.contentRegistry.getDefinition(ct.contentTypeId).storage
@@ -34,6 +37,8 @@ export class MSearchService {
         return [ct.contentTypeId, mSearchConfig];
       })
     );
+
+    // Map: Saved object type -> [contentTypeId, MSearchConfig]
     const soTypeToMSearchConfig = new Map(
       Array.from(contentTypeToMSearchConfig.entries()).map(([ct, mSearchConfig]) => {
         return [mSearchConfig.savedObjectType, [ct, mSearchConfig] as const];
@@ -42,6 +47,7 @@ export class MSearchService {
 
     const mSearchConfigs = Array.from(contentTypeToMSearchConfig.values());
     const soSearchTypes = mSearchConfigs.map((mSearchConfig) => mSearchConfig.savedObjectType);
+
     const additionalSearchFields = new Set<string>();
     mSearchConfigs.forEach((mSearchConfig) => {
       if (mSearchConfig.additionalSearchFields) {
