@@ -19,8 +19,8 @@ export const queryKeyBuilder = {
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
   },
-  search: (type: string, query: unknown) => {
-    return [...queryKeyBuilder.all(type), 'search', query] as const;
+  search: (type: string, query: unknown, options?: object) => {
+    return [...queryKeyBuilder.all(type), 'search', query, options] as const;
   },
 };
 
@@ -73,7 +73,7 @@ const createQueryOptionBuilder = ({
       const input = addVersion(_input, contentTypeRegistry);
 
       return {
-        queryKey: queryKeyBuilder.search(input.contentTypeId, input.query),
+        queryKey: queryKeyBuilder.search(input.contentTypeId, input.query, input.options),
         queryFn: () => crudClientProvider(input.contentTypeId).search(input) as Promise<O>,
       };
     },

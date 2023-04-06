@@ -32,7 +32,6 @@ const serviceObjectPaths = [
   'update.out.result',
   'delete.in.options',
   'delete.out.result',
-  'search.in.query',
   'search.in.options',
   'search.out.result',
 ];
@@ -171,7 +170,6 @@ const getDefaultServiceTransforms = (): ServiceTransforms => ({
   search: {
     in: {
       options: getDefaultTransforms(),
-      query: getDefaultTransforms(),
     },
     out: {
       result: getDefaultTransforms(),
