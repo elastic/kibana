@@ -175,7 +175,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       params.fieldConfigs = [
         {
           fn: DEFAULT_AGG_FUNCTION,
-          metricField: metricFieldOptions[0].name,
+          metricField: metricFieldOptions[0]?.name,
         },
       ];
     }
