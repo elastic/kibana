@@ -31,13 +31,17 @@ const getAvailableVersions = async (log: ToolingLog) => {
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
       .map((item: any) => item?.version_number);
 
-    log.info(`Retrieved available versions`);
+    log.info(`Retrieved available Elastic Agent versions`);
     return versions;
   } catch (error) {
-    log.warning(`Failed to fetch versions list`);
+    log.warning(`Failed to fetch Elastic Agent versions list`);
     log.info(`Status: ${results.status}`);
     log.info(rawBody);
-    throw new Error(error);
+    if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+      log.warning(error);
+    } else {
+      throw new Error(error);
+    }
   }
   return [];
 };
@@ -51,7 +55,7 @@ export const FetchAgentVersionsList: Task = {
     const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
 
     if (versionsList.length !== 0) {
-      log.info(`Writing versions list to ${AGENT_VERSION_BUILD_FILE}`);
+      log.info(`Writing Elastic Agent versions list to ${AGENT_VERSION_BUILD_FILE}`);
       await write(
         build.resolvePath(AGENT_VERSION_BUILD_FILE),
         JSON.stringify(versionsList, null, '  ')
