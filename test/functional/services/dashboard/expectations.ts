@@ -309,7 +309,14 @@ export class DashboardExpectService extends FtrService {
   async seriesElementCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
     const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    this.log.debug(heatmapData.axes?.y[0]);
     expect(heatmapData.axes?.y[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatmapXAxisBuckets(expectedCount: number) {
+    this.log.debug(`DashboardExpect.heatmapXAxisBuckets(${expectedCount})`);
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    expect(heatmapData.axes?.x[0].labels.length).to.be(expectedCount);
   }
 
   async heatMapNoResults() {

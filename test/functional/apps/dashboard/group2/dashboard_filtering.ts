@@ -212,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(2);
+        await dashboardExpect.heatmapXAxisBuckets(11);
       });
 
       it('data tables', async () => {
