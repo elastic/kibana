@@ -114,6 +114,13 @@ export const EXCEPTION_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeade
 export const EXCEPTION_CARD_ITEM_CONDITIONS =
   '[data-test-subj="exceptionItemCardConditions-condition"]';
 
+// Affected Rules
+export const EXCEPTION_CARD_ITEM_AFFECTED_RULES =
+  '[data-test-subj="exceptionItemCardMetaInfo-affectedRulesButton"]';
+
+export const EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM =
+  'div.euiContextMenuPanel button.euiContextMenuItem';
+
 // Exception flyout components
 export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';
 

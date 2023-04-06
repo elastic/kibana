@@ -38,13 +38,18 @@ import {
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
-import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
+import {
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES,
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_EXIST_PROMPT,
+} from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Rule Exceptions workflows from Alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
-
+  const newRule = getNewRule();
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
@@ -59,7 +64,7 @@ describe('Rule Exceptions workflows from Alert', () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule({
-      ...getNewRule(),
+      ...newRule,
       query: 'agent.name:*',
       data_view_id: 'exceptions-*',
       interval: '10s',
@@ -98,6 +103,16 @@ describe('Rule Exceptions workflows from Alert', () => {
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again
     goToExceptionsTab();
+
+    // Validate that the exception is affecting the correct rule
+    // displays existing exception items
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).should('have.text', 'Affects 1 rule');
+
+    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).click();
+
+    cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM).first().should('have.text', newRule.name);
 
     // when removing exception and again, no more exist, empty screen shows again
     removeException();
