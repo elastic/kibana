@@ -10,6 +10,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FrameType, getLanguageType } from '../../../common/profiling';
+import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   frameType: FrameType;
@@ -17,6 +19,7 @@ interface Props {
 
 export function MissingSymbolsCallout({ frameType }: Props) {
   const languageType = getLanguageType({ frameType });
+  const { docLinks } = useProfilingDependencies().start.core;
 
   if (languageType === 'NATIVE') {
     return (
@@ -34,7 +37,10 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             defaultMessage="To see function names and line numbers in traces of applications written in programming languages that compile to native code (C, C++, Rust, Go, etc.), you need to push symbols to the cluster. {readMore} how to do that or download the binary."
             values={{
               readMore: (
-                <EuiLink href="#">
+                <EuiLink
+                  href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.profiling.frameInformationWindow.missingSymbols.native.readMore',
                     { defaultMessage: 'Read more' }
@@ -44,7 +50,11 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             }}
           />
         </p>
-        <EuiButton href="#" color="warning">
+        <EuiButton
+          href="https://container-library.elastic.co/r/observability/profiling-agent"
+          target="_blank"
+          color="warning"
+        >
           {i18n.translate(
             'xpack.profiling.frameInformationWindow.missingSymbols.native.downloadBinary',
             { defaultMessage: 'Download elastic-profiling binary' }
@@ -69,7 +79,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
           defaultMessage="There is an error in our unwinder for that language or there is some special case in that interpreter which we simply can't handle for whatever reason, and means the symbols are not available. {reportProblem}."
           values={{
             reportProblem: (
-              <EuiLink href="#">
+              <EuiLink href={PROFILING_FEEDBACK_LINK} target="_blank">
                 {i18n.translate(
                   'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
                   { defaultMessage: 'Report a problem' }

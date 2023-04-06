@@ -6,14 +6,27 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Meta } from '@storybook/react';
 import React from 'react';
 import { FrameType } from '../../../common/profiling';
+import { MockProfilingDependenciesStorybook } from '../contexts/profiling_dependencies/mock_profiling_dependencies_storybook';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
 
-export default {
+const stories: Meta<{}> = {
   title: 'shared/Frame information window/Missing symbols',
   component: MissingSymbolsCallout,
+  decorators: [
+    (StoryComponent, { globals }) => {
+      return (
+        <MockProfilingDependenciesStorybook>
+          <StoryComponent />
+        </MockProfilingDependenciesStorybook>
+      );
+    },
+  ],
 };
+
+export default stories;
 
 export function Examples() {
   return (
