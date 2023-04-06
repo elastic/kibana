@@ -22,9 +22,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
-import { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/unified-doc-viewer/public/types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
 import { formatHit } from '../../utils/format_hit';
@@ -202,6 +203,7 @@ function renderPopoverContent({
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
+            CodeEditor={CodeEditor}
             json={getJSON(columnId, row, useTopLevelObjectColumns)}
             width={defaultMonacoEditorWidth}
             height={200}

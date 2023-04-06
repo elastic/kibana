@@ -12,9 +12,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import * as hooks from '@kbn/discover-plugin/public/hooks/use_es_doc_search';
+import * as hooks from '../../hooks/use_es_doc_search';
 import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
-import { JsonCodeEditorCommon } from '../json_code_editor';
+import { JsonCodeEditorCommon } from '@kbn/unified-doc-viewer/public';
 import { DocViewerSource } from './source';
 
 const mockDataView = {

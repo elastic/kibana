@@ -11,7 +11,6 @@ import DocViewerSource from './doc_viewer_source';
 import DocViewerTable from './doc_viewer_table';
 import DocViewerTableLegacy from './doc_viewer_table_legacy';
 
-export * from './json_code_editor';
 export * from './deferred_spinner';
 
 export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy };

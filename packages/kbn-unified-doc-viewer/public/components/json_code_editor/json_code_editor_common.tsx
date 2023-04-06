@@ -12,7 +12,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { Props as CodeEditorProps } from '@kbn/kibana-react-plugin/public/code_editor/code_editor';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -22,6 +22,8 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 });
 
 interface JsonCodeEditorCommonProps {
+  // TODO: Is this acceptable? What are the alternatives?
+  CodeEditor: React.FunctionComponent<CodeEditorProps>;
   jsonValue: string;
   onEditorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   width?: string | number;
@@ -31,6 +33,7 @@ interface JsonCodeEditorCommonProps {
 }
 
 export const JsonCodeEditorCommon = ({
+  CodeEditor,
   jsonValue,
   width,
   height,

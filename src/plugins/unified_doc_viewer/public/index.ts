@@ -8,15 +8,7 @@
 
 import { UnifiedDocViewerPlugin } from './plugin';
 
-export {
-  DocViewer,
-  DocViewerSource,
-  DocViewerTable,
-  DocViewerTableLegacy,
-  JSONCodeEditorCommonMemoized,
-  JsonCodeEditor,
-  JsonCodeEditorCommon,
-} from './components';
+export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy } from './components';
 
 export { useEsDocSearch, usePager } from './hooks';
 

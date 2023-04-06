@@ -12,20 +12,20 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { ElasticRequestState } from '@kbn/unified-doc-viewer/public';
-import { useEsDocSearch } from '../../hooks';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { Props as CodeEditorProps } from '@kbn/kibana-react-plugin/public/code_editor/code_editor';
+import { ElasticRequestState } from '../..';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 import { getHeight } from './get_height';
 
 interface SourceViewerProps {
-  id: string;
-  index: string;
-  dataView: DataView;
+  CodeEditor: React.FunctionComponent<CodeEditorProps>;
   hasLineNumbers: boolean;
   width?: number;
-  useNewFieldsApi: boolean;
   useDocExplorer: boolean;
+  requestState?: ElasticRequestState;
+  hit: SearchHit | null;
+  onRefresh: () => void;
 }
 
 // Ihe number of lines displayed without scrolling used for classic table, which renders the component
@@ -35,29 +35,23 @@ export const MAX_LINES_CLASSIC_TABLE = 500;
 export const MARGIN_BOTTOM = 25;
 
 export const DocViewerSource = ({
-  id,
-  index,
-  dataView,
+  CodeEditor,
   width,
   hasLineNumbers,
-  useNewFieldsApi,
   useDocExplorer,
+  requestState,
+  hit,
+  onRefresh,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const [reqState, hit, requestData] = useEsDocSearch({
-    id,
-    index,
-    dataView,
-    requestSource: useNewFieldsApi,
-  });
 
   useEffect(() => {
-    if (reqState === ElasticRequestState.Found && hit) {
+    if (requestState === ElasticRequestState.Found && hit) {
       setJsonValue(JSON.stringify(hit, undefined, 2));
     }
-  }, [reqState, hit]);
+  }, [requestState, hit]);
 
   // setting editor height
   // - classic view: based on lines height and count to stretch and fit its content
@@ -106,7 +100,7 @@ export const DocViewerSource = ({
         defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
       })}
       <EuiSpacer size="s" />
-      <EuiButton iconType="refresh" onClick={requestData}>
+      <EuiButton iconType="refresh" onClick={onRefresh}>
         {i18n.translate('discover.sourceViewer.refresh', {
           defaultMessage: 'Refresh',
         })}
@@ -117,17 +111,18 @@ export const DocViewerSource = ({
     <EuiEmptyPrompt iconType="warning" title={errorMessageTitle} body={errorMessage} />
   );
 
-  if (reqState === ElasticRequestState.Error || reqState === ElasticRequestState.NotFound) {
+  if (requestState === ElasticRequestState.Error || requestState === ElasticRequestState.NotFound) {
     return errorState;
   }
 
-  if (reqState === ElasticRequestState.Loading || jsonValue === '') {
+  if (requestState === ElasticRequestState.Loading || jsonValue === '') {
     return loadingState;
   }
 
   return (
     <>
       <JSONCodeEditorCommonMemoized
+        CodeEditor={CodeEditor}
         jsonValue={jsonValue}
         width={width}
         height={editorHeight}

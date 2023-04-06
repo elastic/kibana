@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { DocViewerSource } from './source';
-
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default DocViewerSource;
+export * from './doc_viewer_source';
+export * from './json_code_editor';

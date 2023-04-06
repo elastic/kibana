@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ESSearchRequest, SearchHit } from '@kbn/es-types';
+import type { ESSearchRequest } from '@kbn/es-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { DocProps, ElasticRequestState } from '@kbn/unified-doc-viewer/public/types';
@@ -23,9 +24,9 @@ export function useEsDocSearch({
   index,
   dataView,
   requestSource,
-}: DocProps): [ElasticRequestState, Record<string, unknown> | null, () => void] {
+}: DocProps): [ElasticRequestState, SearchHit | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<SearchHit<any> | null>(null);
+  const [hit, setHit] = useState<SearchHit | null>(null);
   const { data, uiSettings } = useUnifiedDocViewerServices();
 
   // TODO: Use a const instead of hard-coding this value

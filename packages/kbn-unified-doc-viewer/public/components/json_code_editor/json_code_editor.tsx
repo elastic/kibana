@@ -9,20 +9,29 @@
 import './json_code_editor.scss';
 
 import React from 'react';
+import type { Props as CodeEditorProps } from '@kbn/kibana-react-plugin/public/code_editor/code_editor';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 
 interface JsonCodeEditorProps {
+  CodeEditor: React.FunctionComponent<CodeEditorProps>;
   json: Record<string, unknown>;
   width?: string | number;
   height?: string | number;
   hasLineNumbers?: boolean;
 }
 
-export const JsonCodeEditor = ({ json, width, height, hasLineNumbers }: JsonCodeEditorProps) => {
+export const JsonCodeEditor = ({
+  CodeEditor,
+  json,
+  width,
+  height,
+  hasLineNumbers,
+}: JsonCodeEditorProps) => {
   const jsonValue = JSON.stringify(json, null, 2);
 
   return (
     <JsonCodeEditorCommon
+      CodeEditor={CodeEditor}
       jsonValue={jsonValue}
       width={width}
       height={height}

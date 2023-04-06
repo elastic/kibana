@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { getShouldShowFieldHandler } from './get_should_show_field_handler';
 
 describe('get fields to show', () => {
