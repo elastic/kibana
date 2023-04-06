@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FieldMapping } from '@kbn/enterprise-search-plugin/common/ml_inference_pipeline';
+import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+
 import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
 
 export interface InferencePipelineConfiguration {

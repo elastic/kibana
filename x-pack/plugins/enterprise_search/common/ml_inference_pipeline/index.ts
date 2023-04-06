@@ -65,7 +65,13 @@ export const generateMlInferencePipelineBody = ({
   // Add remove and inference processors
   fieldMappings.forEach(({ sourceField, targetField }) => {
     const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
-    const inference = getInferenceProcessor(sourceField, targetField, inferenceConfig, model, pipelineName);
+    const inference = getInferenceProcessor(
+      sourceField,
+      targetField,
+      inferenceConfig,
+      model,
+      pipelineName
+    );
 
     pipelineDefinition.processors?.push({
       remove: {
@@ -107,7 +113,7 @@ export const getInferenceProcessor = (
   targetField: string,
   inferenceConfig: InferencePipelineInferenceConfig | undefined,
   model: MlTrainedModelConfig,
-  pipelineName: string,
+  pipelineName: string
 ): IngestInferenceProcessor => {
   // If model returned no input field, insert a placeholder
   const modelInputField =

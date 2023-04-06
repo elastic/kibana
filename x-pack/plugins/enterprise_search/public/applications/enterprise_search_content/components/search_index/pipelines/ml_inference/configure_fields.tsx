@@ -29,6 +29,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
@@ -36,7 +38,6 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { TargetFieldHelpText } from './target_field_help_text';
-import { FieldMapping } from '@kbn/enterprise-search-plugin/common/ml_inference_pipeline';
 
 const NoSourceFieldsError: React.FC = () => (
   <FormattedMessage
@@ -208,7 +209,8 @@ export const MultiFieldMapping: React.FC = () => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { addSelectedFieldsToMapping, selectFields } = useActions(MLInferenceLogic);
 
-  const mappedSourceFields = configuration.fieldMappings?.map(( { sourceField }) => sourceField) ?? [];
+  const mappedSourceFields =
+    configuration.fieldMappings?.map(({ sourceField }) => sourceField) ?? [];
 
   // Remove fields that have already been selected or mapped from selectable field options
   const fieldOptions = (sourceFields || [])
@@ -218,7 +220,7 @@ export const MultiFieldMapping: React.FC = () => {
   const selectedFields = selectedSourceFields.map((fieldName) => ({
     label: fieldName,
   }));
-  
+
   const { destinationField } = configuration;
   const isEmptySourceFields = (sourceFields?.length ?? 0) === 0;
 
@@ -252,7 +254,7 @@ export const MultiFieldMapping: React.FC = () => {
           >
             <EuiComboBox
               fullWidth
-              //data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-zeroShot-labels`}
+              // data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-zeroShot-labels`}
               placeholder={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.selectedFields',
                 { defaultMessage: 'Selected fields' }
@@ -284,7 +286,7 @@ export const MultiFieldMapping: React.FC = () => {
           >
             <EuiFieldText
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
-              disabled={true}
+              disabled
               value="This is automatically created"
               fullWidth
             />
