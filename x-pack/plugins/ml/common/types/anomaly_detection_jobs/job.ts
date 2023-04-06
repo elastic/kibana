@@ -37,9 +37,6 @@ export type CustomSettings = estypes.MlCustomSettings;
 
 export function isAnomalyDetectionJob(arg: unknown): arg is Job {
   return (
-    isPopulatedObject(arg) &&
-    typeof arg.id === 'string' &&
-    arg.selected !== undefined &&
-    arg.bucketSpanSeconds !== undefined
+    isPopulatedObject(arg) && typeof arg.job_id === 'string' && arg.analysis_config !== undefined
   );
 }
