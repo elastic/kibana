@@ -150,6 +150,7 @@ const baseColumns = [
         defaultMessage: 'Rule Number',
       }
     ),
+    sortable: true,
     width: '100px',
   },
   {
