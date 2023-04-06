@@ -68,7 +68,7 @@ const typeConfig: FieldConfig<string> = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   const {
-    services: { documentation },
+    services: { documentation, license },
   } = useKibana();
   const esDocUrl = documentation.getEsDocsBasePath();
   return (
