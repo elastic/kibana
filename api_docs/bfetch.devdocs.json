@@ -846,10 +846,28 @@
             "tags": [],
             "label": "flush",
             "description": [
-              "\nCall `.onflush` method and clear buffer."
+              "\nCall `.onFlush` method and clear buffer."
             ],
             "signature": [
               "() => void"
+            ],
+            "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.ItemBuffer.flushAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "flushAsync",
+            "description": [
+              "\nSame as `.flush()` but asynchronous, and returns a promise, which\nrejects if `.onFlush` throws."
+            ],
+            "signature": [
+              "() => Promise<void>"
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
@@ -985,6 +1003,22 @@
             "description": [],
             "signature": [
               "() => void"
+            ],
+            "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.TimedItemBuffer.flushAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "flushAsync",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
             ],
             "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
             "deprecated": false,
@@ -1525,7 +1559,7 @@
               "\nCallback that is called every time buffer is flushed. It receives a single\nargument which is a list of all buffered items. If `.flush()` is called\nwhen buffer is empty, `.onflush` is called with empty array."
             ],
             "signature": [
-              "(items: Item[]) => void"
+              "(items: Item[]) => void | Promise<void>"
             ],
             "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
             "deprecated": false,
