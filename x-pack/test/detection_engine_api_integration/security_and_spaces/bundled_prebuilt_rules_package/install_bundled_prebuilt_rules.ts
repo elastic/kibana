@@ -6,13 +6,7 @@
  */
 import expect from 'expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  deleteAllRules,
-  deleteAllTimelines,
-  getPrebuiltRulesAndTimelinesStatus,
-} from '../../utils';
-import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/delete_prebuilt_rules_fleet_package';
+import { getPrebuiltRulesAndTimelinesStatus } from '../../utils';
 import { BUNDLED_PACKAGE_DEST_DIR, BUNDLED_PACKAGE_SRC_DIR } from './config';
 import {
   bundlePackage,
@@ -21,18 +15,9 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const es = getService('es');
   const supertest = getService('supertest');
-  const log = getService('log');
 
   describe('install_bundled_prebuilt_rules', () => {
-    beforeEach(async () => {
-      await deletePrebuiltRulesFleetPackage(supertest);
-      await deleteAllRules(supertest, log);
-      await deleteAllTimelines(es);
-      await deleteAllPrebuiltRuleAssets(es);
-    });
-
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
       // Verify that status is empty before package installation
       const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
