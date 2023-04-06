@@ -8,6 +8,5 @@ import { FieldBrowser } from './field_browser';
 export type { FieldBrowserProps } from './types';
 
 export { FieldBrowser };
-export { getCategory } from './helpers';
 // eslint-disable-next-line import/no-default-export
 export { FieldBrowser as default };

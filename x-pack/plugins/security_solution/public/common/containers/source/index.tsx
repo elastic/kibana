@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
 import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/helpers';
 
 import { useKibana } from '../../lib/kibana';
 import { getDataViewStateFromIndexFields } from './use_data_view';
