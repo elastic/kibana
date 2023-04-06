@@ -41,6 +41,7 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/shared-ux-prompt-not-found",
+    "@kbn/i18n-react",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
