@@ -23,6 +23,7 @@ import {
   ReportingError,
   QueueTimeoutError,
   KibanaShuttingDownError,
+  TaskRunResult,
 } from '@kbn/reporting-common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
@@ -34,13 +35,7 @@ import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import {
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  TaskRunResult,
-} from '.';
+import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;

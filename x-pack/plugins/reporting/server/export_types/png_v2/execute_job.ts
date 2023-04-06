@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, generatePngObservable } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
