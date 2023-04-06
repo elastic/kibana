@@ -21,6 +21,9 @@ interface RandomSamplerOptionProbability extends RandomSamplerOptionsBase {
   probability: number;
 }
 
+/**
+ * Type guard for RandomSamplerOptionProbability
+ */
 function isRandomSamplerOptionProbability(arg: unknown): arg is RandomSamplerOptionProbability {
   return isPopulatedObject(arg, ['probability']);
 }
@@ -31,11 +34,25 @@ interface RandomSamplerOptionTotalNumDocs extends RandomSamplerOptionsBase {
 
 type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOptionTotalNumDocs;
 
-export function isValidProbability(d: unknown): d is number {
-  return typeof d === 'number' && d > 0 && d < 0.5;
+/**
+ * Check if a given probability is suitable for the `random_sampler` aggregation.
+ * @param {unknown} p The probability to be tested.
+ * @returns {boolean}
+ */
+export function isValidProbability(p: unknown): p is number {
+  return typeof p === 'number' && p > 0 && p < 0.5;
 }
 
+/**
+ * The return type of the `createRandomSamplerWrapper` factory.
+ */
 export type RandomSamplerWrapper = ReturnType<typeof createRandomSamplerWrapper>;
+
+/**
+ * Factory to create the random sampler wrapper utility.
+ * @param {RandomSamplerOptions} options RandomSamplerOptions
+ * @returns {RandomSamplerWrapper} random sampler wrapper utility
+ */
 export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
   let probability: number = 1;
 
