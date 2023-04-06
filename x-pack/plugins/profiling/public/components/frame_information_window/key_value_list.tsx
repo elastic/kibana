@@ -19,7 +19,9 @@ export function KeyValueList({ rows }: Props) {
         <>
           <EuiFlexItem>
             <EuiFlexGroup direction="row">
-              <EuiFlexItem grow>{row.label}:</EuiFlexItem>
+              <EuiFlexItem grow style={{ display: 'flex', flexDirection: 'row' }}>
+                {row.label}:
+              </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}>
                 {row.value}
               </EuiFlexItem>
