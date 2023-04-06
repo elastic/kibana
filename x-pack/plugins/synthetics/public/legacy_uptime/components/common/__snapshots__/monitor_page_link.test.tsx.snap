@@ -12,12 +12,8 @@ exports[`MonitorPageLink component renders a help link when link parameters pres
 `;
 
 exports[`MonitorPageLink component renders the link properly 1`] = `
-<EuiLink
-  data-test-subj="syntheticsMonitorPageLinkLink"
->
-  <Link
-    data-test-subj="monitor-page-link-bad-ssl"
-    to="/monitor/YmFkLXNzbA=="
-  />
-</EuiLink>
+<ReactRouterEuiLink
+  data-test-subj="monitor-page-link-bad-ssl"
+  to="/monitor/YmFkLXNzbA=="
+/>
 `;
