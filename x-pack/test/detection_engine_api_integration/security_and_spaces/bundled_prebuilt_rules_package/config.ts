@@ -7,7 +7,14 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
-export const BUNDLED_PACKAGE_DIR = path.join(path.dirname(__filename), './fleet_bundled_packages');
+export const BUNDLED_PACKAGE_SRC_DIR = path.join(
+  path.dirname(__filename),
+  './fleet_bundled_packages'
+);
+export const BUNDLED_PACKAGE_DEST_DIR = path.join(
+  path.dirname(__filename),
+  './tmp_fleet_bundled_packages'
+);
 
 const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
@@ -23,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
-        `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
+        `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DEST_DIR}`,
       ],
     },
   };
