@@ -410,13 +410,14 @@ function getExpressionForLayer(
             return [formatCall];
           }
         }
-        if (col.operationType === 'counter_rate') {
+        if (ifColumnOfType<CounterRateIndexPatternColumn>('counter_rate', col)) {
           const metric =
-            layer.columns[(layer.columns[id] as ReferenceBasedIndexPatternColumn).references[0]];
+            layer.columns[col.references[0]];
           if (
             metric &&
             'sourceField' in metric &&
             indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
+            // should it check for supported metric type here as well?
           ) {
             return [formatCall];
           }
