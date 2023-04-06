@@ -16,7 +16,7 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
   stackByField?: string,
-  alertsOptions?: ExtraOptions
+  extraOptions?: ExtraOptions
 ) => LensAttributes;
 
 export interface UseLensAttributesProps {
@@ -116,6 +116,7 @@ export interface ExtraOptions {
   ruleId?: string;
   spaceId?: string;
   status?: Status;
+  dnsIsPtrIncluded: boolean;
 }
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
@@ -123,4 +124,14 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
   inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
+}
+
+export interface UseLensAttributesProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraOptions?: ExtraOptions;
+  getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
+  stackByField?: string;
+  title?: string;
 }

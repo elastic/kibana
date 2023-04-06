@@ -235,6 +235,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   ]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+  const extraVisualizationOptions = useMemo(
+    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
+    [isPtrIncluded]
+  );
   if (hideHistogram) {
     return null;
   }
@@ -310,6 +314,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 lensAttributes={lensAttributes}
                 stackByField={selectedStackByOption.value}
                 timerange={timerange}
+                extraOptions={extraVisualizationOptions}
               />
             ) : (
               <MatrixHistogramChartContent
