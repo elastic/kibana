@@ -84,7 +84,7 @@ const HostsFilterRT = rt.intersection([
   }),
   rt.partial({
     query: rt.record(rt.string, rt.any),
-    $search: rt.type({
+    $state: rt.type({
       store: enumeration('FilterStateStore', FilterStateStore),
     }),
   }),
