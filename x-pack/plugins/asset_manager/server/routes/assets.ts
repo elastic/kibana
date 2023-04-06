@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { differenceBy, intersectionBy } from 'lodash';
 import { debug } from '../../common/debug_log';
 import { AssetType, assetTypeRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
@@ -32,7 +33,14 @@ const getRelatedAssetsQueryOptions = schema.object({
   maxDistance: schema.maybe(schema.number()),
   size: schema.maybe(schema.number()),
 });
-type GetRelatedAssetsQueryOptions = typeof getRelatedAssetsQueryOptions.type;
+
+const getAssetsDiffQueryOptions = schema.object({
+  aFrom: schema.string(),
+  aTo: schema.string(),
+  bFrom: schema.string(),
+  bTo: schema.string(),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
+});
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
   // GET /assets
@@ -64,8 +72,8 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     }
   );
 
-  // GET assets/ancestors
-  router.get<unknown, GetRelatedAssetsQueryOptions, unknown>(
+  // GET assets/related
+  router.get<unknown, typeof getRelatedAssetsQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/related`,
       validate: {
@@ -101,6 +109,69 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       } catch (error: any) {
         debug('error looking up asset records', error);
         return res.customError({ statusCode: 500, body: error.message });
+      }
+    }
+  );
+
+  // GET /assets/diff
+  router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
+    {
+      path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
+      validate: {
+        query: getAssetsDiffQueryOptions,
+      },
+    },
+    async (context, req, res) => {
+      const { aFrom, aTo, bFrom, bTo } = req.query;
+      const type = validateTypeParameter(req.query.type);
+
+      if (new Date(aFrom) > new Date(aTo)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "aTo" (${aTo}) is before "aFrom" (${aFrom}).`,
+        });
+      }
+
+      if (new Date(bFrom) > new Date(bTo)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "bTo" (${bTo}) is before "bFrom" (${bFrom}).`,
+        });
+      }
+
+      const esClient = await getEsClientFromContext(context);
+
+      try {
+        const resultsForA = await getAssets({
+          esClient,
+          filters: {
+            from: aFrom,
+            to: aTo,
+            type,
+          },
+        });
+
+        const resultsForB = await getAssets({
+          esClient,
+          filters: {
+            from: bFrom,
+            to: bTo,
+            type,
+          },
+        });
+
+        const onlyInA = differenceBy(resultsForA, resultsForB, 'asset.ean');
+        const onlyInB = differenceBy(resultsForB, resultsForA, 'asset.ean');
+        const inBoth = intersectionBy(resultsForA, resultsForB, 'asset.ean');
+
+        return res.ok({
+          body: {
+            onlyInA,
+            onlyInB,
+            inBoth,
+          },
+        });
+      } catch (error: unknown) {
+        debug('error looking up asset records', error);
+        return res.customError({ statusCode: 500 });
       }
     }
   );

@@ -62,7 +62,9 @@
         "label": "GuideFilters",
         "description": [],
         "signature": [
-          "({ activeFilter, setActiveFilter }: GuideFiltersProps) => JSX.Element"
+          "({ activeFilter, setActiveFilter, application }: ",
+          "GuideFiltersProps",
+          ") => JSX.Element"
         ],
         "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_filters.tsx",
         "deprecated": false,
@@ -73,7 +75,7 @@
             "id": "def-common.GuideFilters.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ activeFilter, setActiveFilter }",
+            "label": "{ activeFilter, setActiveFilter, application }",
             "description": [],
             "signature": [
               "GuideFiltersProps"
