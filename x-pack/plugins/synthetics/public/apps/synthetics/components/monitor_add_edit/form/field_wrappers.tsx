@@ -25,6 +25,8 @@ import {
   EuiButtonGroupProps,
   EuiComboBox,
   EuiComboBoxProps,
+  EuiTextArea,
+  EuiTextAreaProps,
 } from '@elastic/eui';
 import { SourceField, SourceFieldProps } from '../fields/source_field';
 import {
@@ -80,6 +82,10 @@ export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
     />
   )
 );
+
+export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (
+  <EuiTextArea data-test-subj="syntheticsTextAreaTextArea" {...props} inputRef={ref} />
+));
 
 export const FieldNumber = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
   <EuiFieldNumber data-test-subj="syntheticsFieldNumberFieldNumber" {...props} inputRef={ref} />

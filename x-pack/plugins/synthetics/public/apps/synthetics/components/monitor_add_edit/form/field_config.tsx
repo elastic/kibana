@@ -18,7 +18,6 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiLink,
-  EuiTextArea,
   EuiSelectProps,
   EuiFieldTextProps,
   EuiSwitchProps,
@@ -55,6 +54,7 @@ import {
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
   KeyValuePairsField,
+  TextArea,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -1018,7 +1018,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.label', {
       defaultMessage: 'Certificate authorities',
     }),
@@ -1036,7 +1036,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_CERTIFICATE]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.label', {
       defaultMessage: 'Client certificate',
     }),
@@ -1054,7 +1054,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.TLS_KEY]: {
     fieldKey: ConfigKey.TLS_KEY,
-    component: EuiTextArea,
+    component: TextArea,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientKey.label', {
       defaultMessage: 'Client key',
     }),
