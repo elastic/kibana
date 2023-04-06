@@ -39,7 +39,7 @@ export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps
         <EuiIcon
           type="popout"
           css={css`
-            margin-right: ${euiTheme.size.xs}; ;
+            margin-right: ${euiTheme.size.xs};
           `}
         />
         <FormattedMessage
