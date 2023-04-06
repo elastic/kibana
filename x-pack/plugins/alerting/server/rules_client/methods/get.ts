@@ -11,7 +11,7 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
-import { formatLegacyActionsForSiemRules } from '../lib';
+import { formatLegacyActions } from '../lib';
 
 export interface GetParams {
   id: string;
@@ -66,7 +66,7 @@ export async function get<Params extends RuleTypeParams = never>(
 
   // format legacy actions for SIEM rules
   if (result.attributes.consumer === AlertConsumers.SIEM) {
-    const [migratedRule] = await formatLegacyActionsForSiemRules([rule], {
+    const [migratedRule] = await formatLegacyActions([rule], {
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       logger: context.logger,
     });

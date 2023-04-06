@@ -28,7 +28,7 @@ import {
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import type { IndexType, RulesClientContext } from '../types';
-import { formatLegacyActionsForSiemRules } from '../lib';
+import { formatLegacyActions } from '../lib';
 
 export interface FindParams {
   options?: FindOptions;
@@ -184,7 +184,7 @@ export async function find<Params extends RuleTypeParams = never>(
 
   // format legacy actions for SIEM rules, if there any
   if (siemRules.length) {
-    const formattedRules = await formatLegacyActionsForSiemRules(siemRules, {
+    const formattedRules = await formatLegacyActions(siemRules, {
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       logger: context.logger,
     });

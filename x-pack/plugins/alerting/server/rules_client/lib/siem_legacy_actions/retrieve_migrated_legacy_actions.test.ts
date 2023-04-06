@@ -15,7 +15,7 @@ import {
   legacyGetWeeklyNotificationResult,
 } from './migrate_legacy_actions.mock';
 
-import { retrieveMigratedLegacyActions } from './migrate_legacy_actions';
+import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
 import { find } from '../../methods/find';
 import { deleteRule } from '../../methods/delete';

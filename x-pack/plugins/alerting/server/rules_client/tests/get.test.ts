@@ -18,11 +18,11 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { formatLegacyActionsForSiemRules } from '../lib';
+import { formatLegacyActions } from '../lib';
 
 jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
-    formatLegacyActionsForSiemRules: jest.fn(),
+    formatLegacyActions: jest.fn(),
   };
 });
 
@@ -548,7 +548,7 @@ describe('get()', () => {
       ],
     };
 
-    test('should call formatLegacyActionsForSiemRules if consumer is SIEM', async () => {
+    test('should call formatLegacyActions if consumer is SIEM', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...rule,
@@ -557,7 +557,7 @@ describe('get()', () => {
           consumer: AlertConsumers.SIEM,
         },
       });
-      (formatLegacyActionsForSiemRules as jest.Mock).mockResolvedValue([
+      (formatLegacyActions as jest.Mock).mockResolvedValue([
         {
           id: 'migrated_rule_mock',
         },
@@ -565,7 +565,7 @@ describe('get()', () => {
 
       const result = await rulesClient.get({ id: '1' });
 
-      expect(formatLegacyActionsForSiemRules).toHaveBeenCalledWith(
+      expect(formatLegacyActions).toHaveBeenCalledWith(
         [expect.objectContaining({ id: '1' })],
         expect.any(Object)
       );
@@ -575,12 +575,12 @@ describe('get()', () => {
       });
     });
 
-    test('should not call formatLegacyActionsForSiemRules if consumer is not SIEM', async () => {
+    test('should not call formatLegacyActions if consumer is not SIEM', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(rule);
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.get({ id: '1' });
 
-      expect(formatLegacyActionsForSiemRules).not.toHaveBeenCalled();
+      expect(formatLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

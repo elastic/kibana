@@ -20,11 +20,11 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
-import { formatLegacyActionsForSiemRules } from '../lib';
+import { formatLegacyActions } from '../lib';
 
 jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
-    formatLegacyActionsForSiemRules: jest.fn(),
+    formatLegacyActions: jest.fn(),
   };
 });
 
@@ -817,7 +817,7 @@ describe('find()', () => {
     test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
-      (formatLegacyActionsForSiemRules as jest.Mock).mockResolvedValueOnce([
+      (formatLegacyActions as jest.Mock).mockResolvedValueOnce([
         { ...siemRule1, migrated: true },
         { ...siemRule2, migrated: true },
       ]);
@@ -835,8 +835,8 @@ describe('find()', () => {
 
       const result = await rulesClient.find({ options: {} });
 
-      expect(formatLegacyActionsForSiemRules).toHaveBeenCalledTimes(1);
-      expect(formatLegacyActionsForSiemRules).toHaveBeenCalledWith(
+      expect(formatLegacyActions).toHaveBeenCalledTimes(1);
+      expect(formatLegacyActions).toHaveBeenCalledWith(
         [
           expect.objectContaining({ id: siemRule1.id }),
           expect.objectContaining({ id: siemRule2.id }),

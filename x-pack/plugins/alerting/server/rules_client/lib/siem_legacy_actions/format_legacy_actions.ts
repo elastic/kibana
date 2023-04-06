@@ -107,7 +107,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
  * @param params - logger, savedObjectsClient
  * @returns
  */
-export const formatLegacyActionsForSiemRules = async <T extends Rule>(
+export const formatLegacyActions = async <T extends Rule>(
   rules: T[],
   { logger, savedObjectsClient }: Omit<LegacyGetBulkRuleActionsSavedObject, 'alertIds'>
 ): Promise<T[]> => {
