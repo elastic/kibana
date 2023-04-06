@@ -101,7 +101,10 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
           legacyRuleActionsSO.saved_objects[0].attributes,
           legacyRuleActionsSO.saved_objects[0].references
         ),
-        legacyActionsReferences: legacyRuleActionsSO.saved_objects[0].references ?? [],
+        legacyActionsReferences:
+          // only action references need to be saved
+          legacyRuleActionsSO.saved_objects[0].references.filter(({ type }) => type === 'action') ??
+          [],
       };
     }
   } catch (e) {

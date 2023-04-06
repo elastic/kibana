@@ -63,7 +63,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
   }
 
   return {
-    actions: [...actions, ...legacyActionsWithoutFrequencies],
+    actions: [...actions, ...legacyActions],
     hasLegacyActions: legacyActions.length > 0,
     references: [...references, ...legacyActionsReferences],
   };

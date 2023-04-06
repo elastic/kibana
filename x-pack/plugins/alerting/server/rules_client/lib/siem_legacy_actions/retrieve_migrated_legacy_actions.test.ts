@@ -170,10 +170,7 @@ describe('Legacy rule action migration logic', () => {
             uuid: expect.any(String),
           },
         ],
-        legacyActionsReferences: [
-          { id: '123', name: 'alert_0', type: 'alert' },
-          { id: '456', name: 'action_0', type: 'action' },
-        ],
+        legacyActionsReferences: [{ id: '456', name: 'action_0', type: 'action' }],
       });
     });
 
@@ -218,10 +215,7 @@ describe('Legacy rule action migration logic', () => {
             uuid: expect.any(String),
           },
         ],
-        legacyActionsReferences: [
-          { id: '123', name: 'alert_0', type: 'alert' },
-          { id: '456', name: 'action_0', type: 'action' },
-        ],
+        legacyActionsReferences: [{ id: '456', name: 'action_0', type: 'action' }],
       });
     });
 
@@ -266,10 +260,7 @@ describe('Legacy rule action migration logic', () => {
             uuid: expect.any(String),
           },
         ],
-        legacyActionsReferences: [
-          { id: '123', name: 'alert_0', type: 'alert' },
-          { id: '456', name: 'action_0', type: 'action' },
-        ],
+        legacyActionsReferences: [{ id: '456', name: 'action_0', type: 'action' }],
       });
     });
   });
