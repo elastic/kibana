@@ -35,7 +35,7 @@ export const LinkToUptime = ({ nodeType, node }: LinkTUptimeProps) => {
       <EuiIcon
         type="popout"
         css={css`
-          margin-right: ${euiTheme.size.xs}; ;
+          margin-right: ${euiTheme.size.xs};
         `}
       />
       <FormattedMessage
