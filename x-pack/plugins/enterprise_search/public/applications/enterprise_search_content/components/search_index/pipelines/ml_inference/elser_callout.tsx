@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -18,6 +20,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+
+import { TEXT_EXPANSION_TYPE } from '../../../../../../../common/ml_inference_pipeline';
+
+import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface ELSERCallOutState {
   dismiss: () => void;
@@ -34,6 +40,12 @@ export const ELSER_CALL_OUT_DISMISSED_KEY = 'enterprise-search-elser-callout-dis
 export const useELSERCallOutData = ({
   dismissable = false,
 }: ELSERCallOutProps): ELSERCallOutState => {
+  const { supportedMLModels } = useValues(MLInferenceLogic);
+
+  const doesNotHaveELSERModel = useMemo(() => {
+    return supportedMLModels.every((m) => m.model_type !== TEXT_EXPANSION_TYPE);
+  }, [supportedMLModels]);
+
   const [show, setShow] = useState<boolean>(() => {
     if (!dismissable) return true;
 
@@ -56,7 +68,7 @@ export const useELSERCallOutData = ({
     setShow(false);
   });
 
-  return { dismiss, dismissable, show };
+  return { dismiss, dismissable, show: doesNotHaveELSERModel && show };
 };
 
 export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
