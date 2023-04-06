@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiButtonGroup,
-  EuiSpacer,
-  EuiDatePickerRange,
-  EuiDatePicker,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import deepEqual from 'fast-deep-equal';
 import { AlertsSearchBar } from '../alerts_search_bar';
-import { I18N_WEEKDAY_OPTIONS_DDD, ISO_WEEKDAYS } from '../../../common/constants';
 
 interface ActionAlertsFilterQueryProps {
   state: AlertsFilter['query'] | null;
@@ -64,7 +52,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
           {
-            defaultMessage: 'If alert matches a query',
+            defaultMessage: 'Send alert notification only if fields match a query',
           }
         )}
         checked={queryEnabled}
@@ -79,6 +67,16 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
             featureIds={['siem']}
             query={query.kql}
             onQueryChange={onQueryChange}
+            showFilterBar
+            submitOnBlur
+            showDatePicker={false}
+            showSubmitButton={false}
+            placeholder={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryPlaceholder',
+              {
+                defaultMessage: 'Filter alerts using KQL syntax',
+              }
+            )}
           />
         </>
       )}

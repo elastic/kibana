@@ -15,6 +15,11 @@ export interface AlertsSearchBarProps {
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
+  showFilterBar?: boolean;
+  showDatePicker?: boolean;
+  showSubmitButton?: boolean;
+  placeholder?: string;
+  submitOnBlur?: boolean;
   onQueryChange: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
