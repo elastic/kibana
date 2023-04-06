@@ -30,12 +30,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
 
-import { esFieldTypes, SchemaField } from '../../../../../common/types/engines';
+import { SchemaField } from '../../../../../common/types/engines';
 
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -162,7 +163,11 @@ export const EngineSchema: React.FC = () => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-
+  // get all the elasticsearch Field Types
+  const esFieldTypes = Object.values(ES_FIELD_TYPES).map((fieldDataTypeName) => ({
+    checked: undefined,
+    label: fieldDataTypeName.toString(),
+  }));
   const [selectedEsFieldTypes, setSelectedEsFieldTypes] = useState(esFieldTypes);
 
   const toggleOnlyShowConflicts = useCallback(() => {

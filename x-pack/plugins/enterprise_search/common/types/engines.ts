@@ -6,7 +6,6 @@
  */
 
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 export interface EnterpriseSearchEnginesResponse {
   count: number;
@@ -54,8 +53,3 @@ export interface SchemaField {
   searchable: boolean;
   type: string;
 }
-// get all the elasticsearch Field Types
-export const esFieldTypes = Object.values(ES_FIELD_TYPES).map((fieldDataTypeName) => ({
-  checked: undefined,
-  label: fieldDataTypeName.toString(),
-}));
