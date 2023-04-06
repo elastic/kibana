@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTENT_TYPE_CSV } from '@kbn/generate-csv';
 import * as reportTypes from './report_types';
 import * as jobTypes from './job_types';
 
@@ -22,7 +23,7 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
-  'text/csv',
+  CONTENT_TYPE_CSV,
   'image/png',
   'text/plain',
 ];
