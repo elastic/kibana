@@ -14,7 +14,7 @@ import { getConnectorsAction } from '../../../../state/settings/actions';
 
 export const useAlertingDefaults = () => {
   const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
-  const { connectors } = useSelector(selectDynamicSettings);
+  const { connectors, loading } = useSelector(selectDynamicSettings);
 
   const dispatch = useDispatch();
 
@@ -34,5 +34,6 @@ export const useAlertingDefaults = () => {
     options,
     actionTypes,
     connectors,
+    loading,
   };
 };
