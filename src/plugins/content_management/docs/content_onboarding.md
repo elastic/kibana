@@ -201,7 +201,7 @@ export const serviceDefinition: ServicesDefinition = {
 };
 ```
 
-#### 2.c. Decare a map of CM services definition
+#### 2.c. Delcare a map of CM services definition
 
 We expose a map of all the versioned supported. Initially we'll have a single version but as our content evolves we will be adding more versions in this map.
 
@@ -540,6 +540,8 @@ export * from './v2';
 
 #### 3. Create a new cm services definition
 
+Note: Use `down()` transforms for objects that are returned ("out") to the client
+
 ```ts
 // common/content_management/v2/cm_services.ts
 
@@ -645,7 +647,7 @@ export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = 
 
 #### 5. Update the "v1" services definition and add `up()` transforms
 
-Note: Use `up()` transforms are for the object coming "in" (input parameters of the storage instance methods)
+Note: Use `up()` transforms for objects coming "in" (input parameters of the storage instance methods)
 
 ```ts
 // common/content_management/v1/cm_services.ts
