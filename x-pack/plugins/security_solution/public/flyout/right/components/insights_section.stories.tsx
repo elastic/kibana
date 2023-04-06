@@ -8,26 +8,33 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { InvestigationSection } from './investigation_section';
-import { mockDataFormattedForFieldBrowser, mockSearchHit } from '../mocks/mock_context';
+import { InsightsSection } from './insights_section';
 import { RightPanelContext } from '../context';
 
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
+const flyoutContextValue = {
+  openLeftPanel: () => window.alert('openLeftPanel'),
+} as unknown as ExpandableFlyoutContext;
 const panelContextValue = {
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  searchHit: mockSearchHit,
+  getFieldsData: () => ({
+    host: {
+      name: 'hostName',
+    },
+    user: {
+      name: 'userName',
+    },
+  }),
 } as unknown as RightPanelContext;
 
 export default {
-  component: InvestigationSection,
-  title: 'Flyout/InvestigationSection',
+  component: InsightsSection,
+  title: 'Flyout/InsightsSection',
 };
 
 export const Expand: Story<void> = () => {
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <RightPanelContext.Provider value={panelContextValue}>
-        <InvestigationSection expanded={true} />
+        <InsightsSection expanded={true} />
       </RightPanelContext.Provider>
     </ExpandableFlyoutContext.Provider>
   );
@@ -37,7 +44,7 @@ export const Collapse: Story<void> = () => {
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <RightPanelContext.Provider value={panelContextValue}>
-        <InvestigationSection />
+        <InsightsSection />
       </RightPanelContext.Provider>
     </ExpandableFlyoutContext.Provider>
   );
