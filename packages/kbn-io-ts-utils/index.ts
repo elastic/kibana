@@ -11,7 +11,6 @@ export type { NonEmptyStringBrand } from './src/non_empty_string_rt';
 
 export { deepExactRt } from './src/deep_exact_rt';
 export { indexPatternRt } from './src/index_pattern_rt';
-export { inRangeRT } from './src/in_range_rt';
 export { jsonRt } from './src/json_rt';
 export { mergeRt } from './src/merge_rt';
 export { strictKeysRt } from './src/strict_keys_rt';
