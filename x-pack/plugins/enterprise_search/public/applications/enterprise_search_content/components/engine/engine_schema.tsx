@@ -24,17 +24,18 @@ import {
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSelectable,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
 
-import { SchemaField } from '../../../../../common/types/engines';
+import { esFieldTypes, SchemaField } from '../../../../../common/types/engines';
 
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -162,14 +163,6 @@ export const EngineSchema: React.FC = () => {
     {}
   );
 
-  const [totalFieldsWithConflicts, setTotalFieldsWithConflicts] = useState<number>(0);
-
-  // get all the elasticsearch Field Types
-  const esFieldTypes = Object.values(ES_FIELD_TYPES).map((dataTypeName) => ({
-    checked: undefined,
-    label: dataTypeName.toString(),
-  }));
-
   const [selectedEsFieldTypes, setSelectedEsFieldTypes] = useState(esFieldTypes);
 
   const toggleOnlyShowConflicts = useCallback(() => {
@@ -185,26 +178,26 @@ export const EngineSchema: React.FC = () => {
     return selectedDataTypes;
   }, [selectedEsFieldTypes]);
 
-  const filteredSchemaFields = useMemo(() => {
-    setTotalFieldsWithConflicts(0);
+  const [filteredSchemaFields, totalFieldsWithConflicts] = useMemo(() => {
+    let totalFieldsWithConflict = 0;
     if (onlyShowConflicts) {
       const fieldsWithConflicts = schemaFields.filter((field) => field.type === 'conflict');
       // apply filters on fields with conflicts
       if (filteredDataTypes.length > 0) {
         const filteredFieldsWithConflicts = fieldsWithConflicts.filter((field) =>
-          field.indices.some((i) => filteredDataTypes.indexOf(i.type) > -1)
+          field.indices.some((i) => filteredDataTypes.includes(i.type))
         );
-        setTotalFieldsWithConflicts(
-          fieldsWithConflicts.length - filteredFieldsWithConflicts.length
-        );
-        return filteredFieldsWithConflicts;
-      } else {
-        return fieldsWithConflicts;
+        totalFieldsWithConflict = fieldsWithConflicts.length - filteredFieldsWithConflicts.length;
+        return [filteredFieldsWithConflicts, totalFieldsWithConflict];
       }
+      return [fieldsWithConflicts, totalFieldsWithConflict];
     }
     return filteredDataTypes.length > 0
-      ? schemaFields.filter((field) => filteredDataTypes.includes(field.type))
-      : schemaFields;
+      ? [
+          schemaFields.filter((field) => filteredDataTypes.includes(field.type)),
+          totalFieldsWithConflict,
+        ]
+      : [schemaFields, totalFieldsWithConflict];
   }, [onlyShowConflicts, schemaFields, filteredDataTypes]);
 
   useEffect(() => {
@@ -385,20 +378,25 @@ export const EngineSchema: React.FC = () => {
                   button={filterButton}
                   isOpen={isFilterByPopoverOpen}
                   closePopover={() => setIsFilterByPopoverOpen(false)}
-                  panelPaddingSize="m"
+                  panelPaddingSize="none"
                   anchorPosition="downCenter"
                 >
                   <EuiSelectable
                     searchable
                     searchProps={{
-                      placeholder: 'Filter list',
+                      placeholder: i18n.translate(
+                        'xpack.enterpriseSearch.content.engine.schema.filters.searchPlaceholder',
+                        {
+                          defaultMessage: 'Filter list ',
+                        }
+                      ),
                     }}
                     options={selectedEsFieldTypes}
                     onChange={(options) => setSelectedEsFieldTypes(options)}
                   >
                     {(list, search) => (
                       <div style={{ width: 300 }}>
-                        {search}
+                        <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
                         {list}
                       </div>
                     )}
@@ -407,7 +405,7 @@ export const EngineSchema: React.FC = () => {
                     <EuiFlexGroup justifyContent="spaceAround">
                       <EuiButtonEmpty
                         color="danger"
-                        iconType="error"
+                        iconType="eraser"
                         size="s"
                         onClick={() => setSelectedEsFieldTypes(esFieldTypes)}
                       >
@@ -433,7 +431,7 @@ export const EngineSchema: React.FC = () => {
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isExpandable
           />
-          {totalFieldsWithConflicts > 0 ? (
+          {totalFieldsWithConflicts > 0 && (
             <EuiCallOut
               title={
                 <FormattedMessage
@@ -463,8 +461,6 @@ export const EngineSchema: React.FC = () => {
                 )}
               </EuiButton>
             </EuiCallOut>
-          ) : (
-            <></>
           )}
         </EuiFlexGroup>
       </>
