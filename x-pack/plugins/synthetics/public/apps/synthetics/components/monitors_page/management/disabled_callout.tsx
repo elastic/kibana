@@ -6,80 +6,47 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { InvalidApiKeyCalloutCallout } from './invalid_api_key_callout';
+import * as labels from './labels';
 import { useEnablement } from '../../../hooks';
 
 export const DisabledCallout = ({ total }: { total: number }) => {
-  const { enablement, enableSynthetics } = useEnablement();
+  const { enablement, enableSynthetics, invalidApiKeyError, loading } = useEnablement();
 
   const showDisableCallout = !enablement.isEnabled && total > 0;
+
+  if (invalidApiKeyError) {
+    return <InvalidApiKeyCalloutCallout />;
+  }
 
   if (!showDisableCallout) {
     return null;
   }
 
   return (
-    <>
-      <EuiCallOut title={CALLOUT_MANAGEMENT_DISABLED} color="warning" iconType="help">
-        <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-        {enablement.canEnable ? (
-          <EuiButton
-            data-test-subj="syntheticsDisabledCalloutButton"
-            fill
-            color="primary"
-            onClick={() => {
-              enableSynthetics();
-            }}
-          >
-            {SYNTHETICS_ENABLE_LABEL}
-          </EuiButton>
-        ) : (
-          <p>
-            {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink data-test-subj="syntheticsDisabledCalloutLink" href="#" target="_blank">
-              {LEARN_MORE_LABEL}
-            </EuiLink>
-          </p>
-        )}
-      </EuiCallOut>
-      <EuiSpacer size="s" />
-    </>
+    <EuiCallOut title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning" iconType="help">
+      <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
+      {enablement.canEnable || loading ? (
+        <EuiButton
+          data-test-subj="syntheticsMonitorManagementPageButton"
+          fill
+          color="primary"
+          onClick={() => {
+            enableSynthetics();
+          }}
+          isLoading={loading}
+        >
+          {labels.SYNTHETICS_ENABLE_LABEL}
+        </EuiButton>
+      ) : (
+        <p>
+          {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
+          <EuiLink data-test-subj="syntheticsMonitorManagementPageLink" href="#" target="_blank">
+            {labels.LEARN_MORE_LABEL}
+          </EuiLink>
+        </p>
+      )}
+    </EuiCallOut>
   );
 };
-
-const LEARN_MORE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.manageMonitorLoadingLabel.disabledCallout.learnMore',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
-
-const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
-  'xpack.synthetics.monitorManagement.callout.disabled',
-  {
-    defaultMessage: 'Monitor Management is disabled',
-  }
-);
-
-const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
-  'xpack.synthetics.monitorManagement.disabledCallout.adminContact',
-  {
-    defaultMessage: 'Contact your administrator to enable Monitor Management.',
-  }
-);
-
-const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.monitorManagement.disabledCallout.description.disabled',
-  {
-    defaultMessage:
-      'Monitor Management is currently disabled and your existing monitors are paused. You can enable Monitor Management to run your monitors.',
-  }
-);
-
-const SYNTHETICS_ENABLE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.syntheticsEnableLabel.management',
-  {
-    defaultMessage: 'Enable Monitor Management',
-  }
-);

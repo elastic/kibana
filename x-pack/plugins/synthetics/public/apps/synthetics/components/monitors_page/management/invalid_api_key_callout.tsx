@@ -11,17 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { useEnablement } from '../../../hooks';
 
 export const InvalidApiKeyCalloutCallout = () => {
-  const { enablement, enableSynthetics, invalidApiKeyError } = useEnablement();
-
-  if (!invalidApiKeyError || !enablement.isEnabled) {
-    return null;
-  }
+  const { enablement, enableSynthetics, loading } = useEnablement();
 
   return (
     <>
       <EuiCallOut title={API_KEY_MISSING} color="warning" iconType="help">
         <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-        {enablement.canEnable ? (
+        {enablement.canEnable || loading ? (
           <EuiButton
             data-test-subj="syntheticsInvalidApiKeyCalloutCalloutButton"
             fill
@@ -29,6 +25,7 @@ export const InvalidApiKeyCalloutCallout = () => {
             onClick={() => {
               enableSynthetics();
             }}
+            isLoading={loading}
           >
             {SYNTHETICS_ENABLE_LABEL}
           </EuiButton>
