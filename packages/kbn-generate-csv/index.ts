@@ -7,3 +7,4 @@
  */
 
 export { CsvGenerator } from './src/generate_csv';
+export * from './types';

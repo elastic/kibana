@@ -37,6 +37,7 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
+    "@kbn/generate-csv-types",
     "@kbn/reporting-common",
   ],
   "exclude": [

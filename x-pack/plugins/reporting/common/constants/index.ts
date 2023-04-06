@@ -28,6 +28,7 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
+export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
