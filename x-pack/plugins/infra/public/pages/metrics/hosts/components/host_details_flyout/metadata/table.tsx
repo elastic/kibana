@@ -81,7 +81,7 @@ export const Table = (props: Props) => {
       'data-test-subj': 'infraMetadataSearchBarInput',
       incremental: true,
       schema: true,
-      placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+      placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForMetadata', {
         defaultMessage: 'Search for metadata…',
       }),
     },
