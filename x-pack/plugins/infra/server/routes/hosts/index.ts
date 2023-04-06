@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
 import {
@@ -32,18 +33,25 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
       const [{ savedObjects }, { data }] = await libs.getStartServices();
       const params: GetHostsRequestBodyPayload = request.body;
 
-      const searchClient = data.search.asScoped(request);
-      const soClient = savedObjects.getScopedClient(request);
-      const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
-
       try {
+        const searchClient = data.search.asScoped(request);
+        const soClient = savedObjects.getScopedClient(request);
+        const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
+
         const hosts = await getHosts({ searchClient, source, params });
         return response.ok({
           body: GetHostsResponsePayloadRT.encode(hosts),
         });
       } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
         return response.customError({
-          statusCode: err.statusCode ?? err,
+          statusCode: err.statusCode ?? 500,
           body: {
             message: err.message ?? 'An unexpected error occurred',
           },

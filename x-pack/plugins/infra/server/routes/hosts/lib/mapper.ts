@@ -43,6 +43,14 @@ export const mapToApiResponse = (
   };
 };
 
+const normalizeValue = (value: string | number | null) => {
+  if (typeof value === 'string') {
+    return value?.trim().length === 0 ? null : value;
+  }
+
+  return value;
+};
+
 const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
   const metadataAggregation = bucket[METADATA_AGGREGATION_NAME];
   return TopMetricsTypeRT.is(metadataAggregation)
@@ -52,7 +60,7 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[]
           ([key, value]) =>
             ({
               name: key,
-              value,
+              value: normalizeValue(value),
             } as HostMetadata)
         )
     : [];

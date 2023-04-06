@@ -93,7 +93,7 @@ describe('mapper', () => {
         {
           metadata: [
             { name: 'host.os.name', value: null },
-            { name: 'cloud.provider', value: '' },
+            { name: 'cloud.provider', value: null },
           ],
           metrics: [
             { name: 'cpu', value: 0.13271302652800487 },

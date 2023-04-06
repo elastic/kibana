@@ -13,7 +13,7 @@ import { InfraSource } from '../../../../common/source_configuration/source_conf
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import { FilteredHostsSearchAggregationResponseRT, GetHostsArgs } from './types';
 import { BUCKET_KEY } from './constants';
-import { parseFilters } from './utils';
+import { assertQueryStructure } from './utils';
 import { createFilters, runQuery } from './helpers/query';
 
 export const getFilteredHosts = async ({ searchClient, source, params }: GetHostsArgs) => {
@@ -25,7 +25,7 @@ export const getFilteredHosts = async ({ searchClient, source, params }: GetHost
 };
 
 const createQuery = (params: GetHostsRequestBodyPayload, source: InfraSource): ESSearchRequest => {
-  const parsedFilters = parseFilters(params.query);
+  assertQueryStructure(params.query);
 
   return {
     allow_no_indices: true,
@@ -35,8 +35,8 @@ const createQuery = (params: GetHostsRequestBodyPayload, source: InfraSource): E
       size: 0,
       query: {
         bool: {
-          ...parsedFilters.bool,
-          filter: createFilters({ params, extraFilter: parsedFilters }),
+          ...params.query.bool,
+          filter: createFilters({ params, extraFilter: params.query }),
         },
       },
       aggs: {

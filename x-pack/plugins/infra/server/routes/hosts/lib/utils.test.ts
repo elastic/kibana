@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseFilters, hasFilters } from './utils';
+import { assertQueryStructure, hasFilters } from './utils';
 
 const query = { bool: { must_not: [], filter: [], should: [], must: [] } };
 
@@ -18,23 +18,22 @@ describe('utils', () => {
           filter: [],
         },
       };
-      const parsed = parseFilters(partialQuery);
-      expect(parsed).toEqual(partialQuery);
+
+      expect(() => assertQueryStructure(partialQuery)).not.toThrow();
     });
 
     test('should successfully parse query object', () => {
-      const parsed = parseFilters(query);
-      expect(parsed).toEqual(query);
+      expect(() => assertQueryStructure(query)).not.toThrow();
     });
 
     test('should fail to parse query object', () => {
       const anyObject = { test: [{ a: 1 }] };
-      expect(() => parseFilters(anyObject)).toThrowError();
+      expect(() => assertQueryStructure(anyObject)).toThrow();
     });
 
     test('should fail to parse query object without any filter clause', () => {
       const anyObject = { bool: {} };
-      expect(() => parseFilters(anyObject)).toThrowError();
+      expect(() => assertQueryStructure(anyObject)).toThrow();
     });
   });
   describe('hasFilters', () => {

@@ -12,34 +12,37 @@ import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 type FilterClauses = keyof estypes.QueryDslBoolQuery;
 const validClauses: FilterClauses[] = ['must', 'filter', 'must_not', 'should'];
 
-const isValidFilter = (query: any): query is estypes.QueryDslQueryContainer => {
+interface BoolQuery {
+  bool: estypes.QueryDslBoolQuery;
+}
+
+const isValidFilter = (query: any): query is BoolQuery => {
   const boolClause = (query as estypes.QueryDslQueryContainer).bool;
 
-  if (!boolClause) {
+  if (!boolClause || Object.keys(boolClause).length === 0) {
     return false;
   }
-  return (
-    boolClause.filter !== undefined ||
-    boolClause.must !== undefined ||
-    boolClause.must_not !== undefined ||
-    boolClause.should !== undefined
-  );
+
+  return [boolClause.filter, boolClause.must, boolClause.must_not, boolClause.should]
+    .filter(Boolean)
+    .every((clause) => Array.isArray(clause) || clause === undefined);
 };
 
-export const parseFilters = (query: any): estypes.QueryDslQueryContainer => {
-  const parsed = isValidFilter(query) ? query : undefined;
-  if (!parsed) {
+export const assertQueryStructure: (query: any) => asserts query is BoolQuery = (query) => {
+  if (!isValidFilter(query)) {
     throw Boom.badRequest('Invalid query');
   }
-
-  return parsed;
 };
 
-export const hasFilters = (query: any) => {
-  const parsedFilters = parseFilters(query);
+export const hasFilters = (query?: any) => {
+  if (!query) {
+    return false;
+  }
+
+  assertQueryStructure(query);
 
   // ignores minimum_should_match
-  return Object.entries(parsedFilters.bool ?? {})
+  return Object.entries(query.bool)
     .filter(([key, _]) => validClauses.includes(key as FilterClauses))
     .some(([_, filter]) => {
       return Array.isArray(filter) ? filter.length > 0 : !!filter;

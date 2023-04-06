@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
+import { createLiteralValueFromUndefinedRT, inRangeRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const HostMetricTypeRT = rt.keyof({
@@ -35,33 +35,20 @@ export const HostMetricsRT = rt.type({
 export const HostMetadataRT = rt.type({
   // keep the actual field name from the index mappings
   name: HostMetadataTypeRT,
-  value: rt.union([rt.string, rt.null]),
+  value: rt.union([rt.string, rt.number, rt.null]),
 });
 
 export const HostSortFieldRT = rt.keyof({ name: null, ...HostMetricTypeRT.keys });
-
-interface LimitRangeBrand {
-  readonly LimitRange: unique symbol;
-}
-
-export type LimitRange = rt.Branded<number, LimitRangeBrand>;
-
-const LimitRangeRT = rt.brand(
-  rt.number, // codec
-  (n): n is LimitRange => n > 0 && n <= 100,
-  // refinement of the number type
-  'LimitRange' // name of this codec
-);
 
 export const GetHostsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     sortField: HostSortFieldRT,
     sortDirection: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    query: rt.UnknownRecord,
   }),
   rt.type({
-    limit: rt.union([LimitRangeRT, createLiteralValueFromUndefinedRT(10)]),
+    limit: rt.union([inRangeRT(1, 100), createLiteralValueFromUndefinedRT(10)]),
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
-    query: rt.UnknownRecord,
     sourceId: rt.string,
     timeRange: TimerangeRT,
   }),

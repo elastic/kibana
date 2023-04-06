@@ -17,7 +17,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const ENDPOINT = '/api/metrics/hosts';
 
 const normalizeNewLine = (text: string) => {
-  return text.replaceAll('\n ', '');
+  return text.replaceAll(/(\s{2,}|\\n\\s)/g, ' ');
 };
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -102,6 +102,46 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
+      it('should return all hosts if query params is not sent', async () => {
+        const body: GetHostsRequestBodyPayload = {
+          ...basePayload,
+          metrics: [
+            {
+              type: 'memory',
+            },
+          ],
+          query: undefined,
+        };
+
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
+        expect(response.body.hosts).eql([
+          {
+            metadata: [
+              { name: 'host.os.name', value: 'CentOS Linux' },
+              { name: 'cloud.provider', value: 'gcp' },
+            ],
+            metrics: [{ name: 'memory', value: 0.4563333333333333 }],
+            name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+          },
+          {
+            metadata: [
+              { name: 'host.os.name', value: 'CentOS Linux' },
+              { name: 'cloud.provider', value: 'gcp' },
+            ],
+            metrics: [{ name: 'memory', value: 0.32066666666666666 }],
+            name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+          },
+          {
+            metadata: [
+              { name: 'host.os.name', value: 'CentOS Linux' },
+              { name: 'cloud.provider', value: 'gcp' },
+            ],
+            metrics: [{ name: 'memory', value: 0.2346666666666667 }],
+            name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+          },
+        ]);
+      });
+
       it('should sort all hosts sorted by cpu desc', async () => {
         const body: GetHostsRequestBodyPayload = {
           ...basePayload,
@@ -113,11 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           sortField: 'cpu',
           sortDirection: 'desc',
         };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         expect(response.body.hosts).eql([
           {
@@ -267,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in limit: 0 does not match expected type LimitRange in limit: 0 does not match expected type pipe(undefined, BooleanFromString)'
+          '[request body]: Failed to validate: in limit: 0 does not match expected type InRange in limit: 0 does not match expected type pipe(undefined, BooleanFromString)'
         );
       });
 
@@ -276,7 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in limit: -2 does not match expected type LimitRange in limit: -2 does not match expected type pipe(undefined, BooleanFromString)'
+          '[request body]: Failed to validate: in limit: -2 does not match expected type InRange in limit: -2 does not match expected type pipe(undefined, BooleanFromString)'
         );
       });
 
@@ -285,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in limit: 150 does not match expected type LimitRange in limit: 150 does not match expected type pipe(undefined, BooleanFromString)'
+          '[request body]: Failed to validate: in limit: 150 does not match expected type InRange in limit: 150 does not match expected type pipe(undefined, BooleanFromString)'
         );
       });
 
@@ -294,7 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
+          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
         );
       });
 
@@ -303,7 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in sortDirection: "any" does not match expected type "desc" in sortDirection: "any" does not match expected type "asc"'
+          '[request body]: Failed to validate: in sortDirection: "any" does not match expected type "desc" in sortDirection: "any" does not match expected type "asc"'
         );
       });
 
@@ -312,7 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in sortField: "any" does not match expected type "name" | "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
+          '[request body]: Failed to validate: in sortField: "any" does not match expected type "name" | "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
         );
       });
 
@@ -321,7 +357,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate:  in timeRange: undefined does not match expected type { from: number, to: number }'
+          '[request body]: Failed to validate: in timeRange: undefined does not match expected type { from: number, to: number }'
         );
       });
     });

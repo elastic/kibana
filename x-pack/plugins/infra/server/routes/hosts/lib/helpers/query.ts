@@ -7,7 +7,6 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { ISearchClient } from '@kbn/data-plugin/common';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
 import { GetHostsRequestBodyPayload } from '../../../../../common/http_api/hosts';
@@ -19,7 +18,7 @@ export const createFilters = ({
 }: {
   params: GetHostsRequestBodyPayload;
   hostNamesShortList?: string[];
-  extraFilter?: QueryDslQueryContainer;
+  extraFilter?: estypes.QueryDslQueryContainer;
 }) => {
   const extrafilterClause = extraFilter?.bool?.filter;
   const extraFilterList = !!extrafilterClause
