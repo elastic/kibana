@@ -160,6 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(() => {

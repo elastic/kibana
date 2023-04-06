@@ -37,7 +37,7 @@ const monitor850UI = {
     origin: 'ui',
     journey_id: '',
     id: '',
-    __ui: { is_tls_enabled: false, is_zip_url_tls_enabled: false },
+    __ui: { is_tls_enabled: false },
     urls: 'https://elastic.co',
     max_redirects: '0',
     'url.port': null,
