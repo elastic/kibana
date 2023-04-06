@@ -80,6 +80,10 @@ export const COLLAPSE_DESCRIPTION = i18n.translate('xpack.cases.caseView.collaps
   defaultMessage: 'Collapse description',
 });
 
+export const EXPAND_DESCRIPTION = i18n.translate('xpack.cases.caseView.expand.description', {
+  defaultMessage: 'Expand description',
+});
+
 export const QUOTE = i18n.translate('xpack.cases.caseView.edit.quote', {
   defaultMessage: 'Quote',
 });
