@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse } from '../types';
 import * as i18n from '../translations';
-import { Status, STATUS_SORT } from '../constants';
+import { Status, StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
@@ -63,27 +63,15 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         field: 'status',
         name: i18n.TABLE_STATUS,
         render: (status: string) => {
-          const display: Record<
-            string,
-            {
-              color: 'warning' | 'success' | 'text';
-              label: string;
-            }
-          > = {
-            [Status.RUNNING]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
-            [Status.UPCOMING]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
-            [Status.FINISHED]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
-            [Status.ARCHIVED]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
-          };
           return (
             <EuiButton
               css={styles.status}
               fill={status === Status.RUNNING}
-              color={display[status].color}
+              color={STATUS_DISPLAY[status].color as StatusColor}
               size="s"
               onClick={() => {}}
             >
-              {display[status].label}
+              {STATUS_DISPLAY[status].label}
             </EuiButton>
           );
         },
@@ -127,6 +115,17 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
           className: item.status,
           'data-test-subj': 'list-item',
         })}
+        search={{
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'status',
+              name: 'Status',
+              multiSelect: 'or',
+              options: STATUS_OPTIONS,
+            },
+          ],
+        }}
       />
     );
   }

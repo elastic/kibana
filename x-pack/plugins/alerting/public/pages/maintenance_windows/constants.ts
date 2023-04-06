@@ -112,9 +112,25 @@ export enum Status {
   ARCHIVED = 'archived',
 }
 
-export const STATUS_SORT: Record<Status, number> = {
+export const STATUS_DISPLAY: Record<string, { color: string; label: string }> = {
+  [Status.RUNNING]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
+  [Status.UPCOMING]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
+  [Status.FINISHED]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
+  [Status.ARCHIVED]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
+};
+
+export type StatusColor = 'warning' | 'success' | 'text';
+
+export const STATUS_SORT = {
   [Status.RUNNING]: 0,
   [Status.UPCOMING]: 1,
   [Status.FINISHED]: 2,
   [Status.ARCHIVED]: 3,
 };
+
+export const STATUS_OPTIONS = [
+  { value: Status.RUNNING, name: i18n.TABLE_STATUS_RUNNING },
+  { value: Status.UPCOMING, name: i18n.TABLE_STATUS_UPCOMING },
+  { value: Status.FINISHED, name: i18n.TABLE_STATUS_FINISHED },
+  { value: Status.ARCHIVED, name: i18n.TABLE_STATUS_ARCHIVED },
+];

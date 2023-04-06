@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiPageHeader } from '@elastic/eui';
+import { EuiButton, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
@@ -51,11 +51,13 @@ export const MaintenanceWindowsPage = React.memo(() => {
             : []
         }
       />
-
       {showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (
-        <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
+        <>
+          <EuiSpacer size="xl" />
+          <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
+        </>
       )}
     </>
   );
