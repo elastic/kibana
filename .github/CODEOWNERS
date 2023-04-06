@@ -381,7 +381,6 @@ packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-csv @elastic/appex-sharedux
-packages/kbn-generate-csv-types @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
