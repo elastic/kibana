@@ -391,7 +391,8 @@ export const MLInferenceLogic = kea<
           fieldMappings: [
             {
               sourceField: configuration.sourceField,
-              targetField: configuration.destinationField || formatPipelineName(configuration.pipelineName),
+              targetField:
+                configuration.destinationField || formatPipelineName(configuration.pipelineName),
             },
           ],
           inferenceConfig: configuration.inferenceConfig,
