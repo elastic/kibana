@@ -6,7 +6,6 @@
  */
 
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 export interface EnterpriseSearchEnginesResponse {
   count: number;
