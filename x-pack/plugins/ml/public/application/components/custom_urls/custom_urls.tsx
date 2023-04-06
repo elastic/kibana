@@ -55,7 +55,7 @@ function getDropDownOptions(job: Job | DataFrameAnalyticsConfig, dataView?: Data
   if (isAnomalyDetectionJob(job)) {
     return getQueryEntityFieldNames(job);
   } else if (isDataFrameAnalyticsConfigs(job) && dataView !== undefined) {
-    return getSupportedFieldNames(dataView);
+    return getSupportedFieldNames(job, dataView);
   }
   return [];
 }

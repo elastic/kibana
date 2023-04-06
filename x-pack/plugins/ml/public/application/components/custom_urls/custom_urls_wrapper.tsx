@@ -45,16 +45,17 @@ export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
       if (isDataFrameAnalyticsConfigs(props.job)) {
         const destIndex = props.job.dest.index;
         const sourceIndex = props.job.source.index[0];
-        let dataViewId: string | null;
+        let dataViewIdSource: string | null;
+        let dataViewIdDest: string | null;
         let dv: DataView | undefined;
 
         try {
-          dataViewId = await getDataViewIdFromName(destIndex);
-          dv = await dataViews.get(dataViewId ?? '');
+          dataViewIdSource = await getDataViewIdFromName(sourceIndex);
+          dataViewIdDest = await getDataViewIdFromName(destIndex);
+          dv = await dataViews.get(dataViewIdDest ?? dataViewIdSource ?? '');
 
           if (dv === undefined) {
-            dataViewId = await getDataViewIdFromName(sourceIndex);
-            dv = await dataViews.get(dataViewId ?? '');
+            dv = await dataViews.get(dataViewIdSource ?? '');
           }
           if (!active) return;
           setDataView(dv);

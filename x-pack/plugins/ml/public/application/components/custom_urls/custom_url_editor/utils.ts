@@ -15,6 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
@@ -130,14 +131,19 @@ export function getNewCustomUrlDefaults(
   };
 }
 
-export function getSupportedFieldNames(dataView: DataView): string[] {
-  // Returns the list of supported field names that can be used
-  // to add to the query used when linking to a Kibana dashboard or Discover.
+// Returns the list of supported field names that can be used
+// to add to the query used when linking to a Kibana dashboard or Discover.
+export function getSupportedFieldNames(
+  job: DataFrameAnalyticsConfig,
+  dataView: DataView
+): string[] {
+  const resultsField = job.dest.results_field;
   const sortedFields = dataView.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
-  const categoryFields = sortedFields.filter((f) =>
-    categoryFieldTypes.some((type) => {
-      return f.esTypes?.includes(type);
-    })
+  const categoryFields = sortedFields.filter(
+    (f) =>
+      categoryFieldTypes.some((type) => {
+        return f.esTypes?.includes(type);
+      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD)
   );
   return categoryFields.map((field) => field.name);
 }
