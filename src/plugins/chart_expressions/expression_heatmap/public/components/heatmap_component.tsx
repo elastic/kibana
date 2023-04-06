@@ -22,6 +22,7 @@ import {
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
+  SettingsProps,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -36,6 +37,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -148,6 +150,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncTooltips,
     syncCursor,
     renderComplete,
+    overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
@@ -498,6 +501,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
+    const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+      overrides,
+      'settings'
+    ) as Partial<SettingsProps>;
+
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
@@ -515,10 +523,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               args.gridConfig.strokeColor ??
               chartTheme.axes?.gridLine?.horizontal?.stroke ??
               '#D3DAE6',
-          },
-          cellHeight: {
-            max: 'fill',
-            min: 1,
           },
         },
         cell: {
@@ -591,7 +595,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
-              theme={[themeOverrides, chartTheme]}
+              theme={[
+                themeOverrides,
+                chartTheme,
+                ...(Array.isArray(settingsThemeOverrides)
+                  ? settingsThemeOverrides
+                  : [settingsThemeOverrides]),
+              ]}
               baseTheme={chartBaseTheme}
               xDomain={{
                 min:
@@ -606,6 +616,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              {...settingsOverrides}
             />
             <Heatmap
               id="heatmap"

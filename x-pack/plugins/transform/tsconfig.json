@@ -56,7 +56,9 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/ml-route-utils"
+    "@kbn/ml-route-utils",
+    "@kbn/core-lifecycle-server",
+    "@kbn/security-plugin"
   ],
   "exclude": [
     "target/**/*",
