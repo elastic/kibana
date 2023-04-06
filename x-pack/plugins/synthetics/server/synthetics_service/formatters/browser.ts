@@ -36,13 +36,7 @@ const throttlingFormatter: Formatter = (fields) => {
 export const browserFormatters: BrowserFormatMap = {
   ...basicBrowserFormatters,
   [ConfigKey.METADATA]: objectFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: arrayFormatter,
   [ConfigKey.SOURCE_INLINE]: null,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: null,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: null,
-  [ConfigKey.ZIP_URL_TLS_KEY]: null,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: null,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,

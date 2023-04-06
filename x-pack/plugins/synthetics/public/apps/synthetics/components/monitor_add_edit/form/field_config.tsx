@@ -68,7 +68,11 @@ import {
   FieldMap,
   FormLocation,
 } from '../types';
-import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
+import {
+  AlertConfigKey,
+  DEFAULT_BROWSER_ADVANCED_FIELDS,
+  ALLOWED_SCHEDULES_IN_MINUTES,
+} from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -90,16 +94,10 @@ const getScheduleContent = (value: number) => {
   }
 };
 
-const getScheduleConfig = (schedules: number[]) => {
-  return schedules.map((value) => ({
-    value: `${value}`,
-    text: getScheduleContent(value),
-  }));
-};
-
-const BROWSER_SCHEDULES = getScheduleConfig([3, 5, 10, 15, 30, 60, 120, 240]);
-
-const LIGHTWEIGHT_SCHEDULES = getScheduleConfig([1, 3, 5, 10, 15, 30, 60]);
+const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
+  value,
+  text: getScheduleContent(parseInt(value, 10)),
+}));
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -378,12 +376,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    dependencies: [ConfigKey.MONITOR_TYPE],
-    props: ({ dependencies }): EuiSelectProps => {
-      const [monitorType] = dependencies;
+    props: (): EuiSelectProps => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
+        options: SCHEDULES,
         disabled: readOnly,
       };
     },

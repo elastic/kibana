@@ -80,8 +80,8 @@ export async function getAssets({
 
     if (filters.ean) {
       musts.push({
-        term: {
-          ['asset.ean']: filters.ean,
+        terms: {
+          ['asset.ean']: Array.isArray(filters.ean) ? filters.ean : [filters.ean],
         },
       });
     }
