@@ -40,6 +40,7 @@ import {
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
+  getIDsAndIndicesAsArrays,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
@@ -213,6 +214,7 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
+      const attachmentWithoutDuplicateAlerts = this.filterDuplicatedAlerts([commentReq]);
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(commentReq)];
 
@@ -243,6 +245,31 @@ export class CaseCommentModel {
         logger: this.params.logger,
       });
     }
+  }
+
+  private async filterDuplicatedAlerts(attachments: CommentRequest[]) {
+    const hasAlertsInRequest = attachments.some((attachment) =>
+      isCommentRequestTypeAlert(attachment)
+    );
+
+    if (!hasAlertsInRequest) {
+      return;
+    }
+
+    const filteredAttachments = [];
+    const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
+      {
+        caseId: this.caseInfo.id,
+      }
+    );
+
+    attachments.forEach((attachment) => {
+      if (attachment.type !== CommentType.alert) {
+        filteredAttachments.push(attachment);
+      } else {
+        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+      }
+    });
   }
 
   private async validateCreateCommentRequest(req: CommentRequest[]) {
