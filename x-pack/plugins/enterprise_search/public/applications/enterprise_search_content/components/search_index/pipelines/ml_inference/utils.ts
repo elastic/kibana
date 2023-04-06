@@ -53,7 +53,7 @@ export const validateInferencePipelineFields = (
   config: InferencePipelineConfiguration
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
-  
+
   // TODO: update
   if (Object.keys(config.fieldMappings || {}).length > 0) {
     return errors;
@@ -84,7 +84,8 @@ export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
 export const EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledElserNotSupportedDescription',
   {
-    defaultMessage: 'This pipeline cannot be selected because attaching an ELSER pipeline is not supported yet.',
+    defaultMessage:
+      'This pipeline cannot be selected because attaching an ELSER pipeline is not supported yet.',
   }
 );
 

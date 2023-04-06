@@ -9,6 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
 import {
   FieldMapping,
   formatPipelineName,
@@ -77,7 +79,6 @@ import {
   EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS,
   EXISTING_PIPELINE_DISABLED_ELSER,
 } from './utils';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   destinationField: '',
@@ -143,7 +144,7 @@ interface MLInferenceProcessorsActions {
   selectExistingPipeline: (pipelineName: string) => {
     pipelineName: string;
   };
-  selectFields: (fieldNames: string[]) => { fieldNames: string[] },
+  selectFields: (fieldNames: string[]) => { fieldNames: string[] };
   setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => {
     step: AddInferencePipelineSteps;
   };
@@ -321,14 +322,17 @@ export const MLInferenceLogic = kea<
       },
       {
         addSelectedFieldsToMapping: (modal) => {
-          const { configuration: { fieldMappings }, selectedSourceFields } = modal;
+          const {
+            configuration: { fieldMappings },
+            selectedSourceFields,
+          } = modal;
 
           const mergedFieldMappings: FieldMapping[] = [
             ...(fieldMappings || []),
             ...(selectedSourceFields || []).map((fieldName) => ({
               sourceField: fieldName,
               targetField: `ml.inference.${fieldName}_expanded`,
-             })),
+            })),
           ];
 
           return {
@@ -338,10 +342,12 @@ export const MLInferenceLogic = kea<
               fieldMappings: mergedFieldMappings,
             },
             selectedSourceFields: [],
-          }
+          };
         },
         removeFieldFromMapping: (modal, { fieldName }) => {
-          const { configuration: { fieldMappings } } = modal;
+          const {
+            configuration: { fieldMappings },
+          } = modal;
 
           if (!fieldMappings) {
             return modal;
@@ -351,9 +357,9 @@ export const MLInferenceLogic = kea<
             ...modal,
             configuration: {
               ...modal.configuration,
-              fieldMappings: fieldMappings?.filter(({ sourceField }) => sourceField !== fieldName)
+              fieldMappings: fieldMappings?.filter(({ sourceField }) => sourceField !== fieldName),
             },
-          }
+          };
         },
         selectFields: (modal, { fieldNames }) => ({
           ...modal,
