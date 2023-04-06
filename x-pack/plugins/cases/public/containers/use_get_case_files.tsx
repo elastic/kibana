@@ -48,7 +48,7 @@ export const useGetCaseFiles = ({
         page: page + 1,
         ...(searchTerm && { name: `*${searchTerm}*` }),
         perPage,
-        meta: { caseId },
+        meta: { caseIds: [caseId] },
       });
     },
     {

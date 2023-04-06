@@ -138,7 +138,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
               kind={constructFileKindIdByOwner(owner[0] as Owner)}
               onDone={onUploadDone}
               onError={onError}
-              meta={{ caseId, owner: owner[0] }}
+              meta={{ caseIds: [caseId], owner: owner[0] }}
             />
           </EuiModalBody>
         </EuiModal>

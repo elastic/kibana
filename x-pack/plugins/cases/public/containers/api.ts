@@ -51,6 +51,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -399,6 +400,25 @@ export const createAttachments = async (
     }
   );
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteFileAttachments = async ({
+  caseId,
+  fileIds,
+  signal,
+}: {
+  caseId: string;
+  fileIds: string[];
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(
+    INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ ids: fileIds }),
+      signal,
+    }
+  );
 };
 
 export const getFeatureIds = async (

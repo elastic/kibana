@@ -162,3 +162,13 @@ export const getCaseConnectors = async (
 
 export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> =>
   Promise.resolve(getCaseUsersMockResponse());
+
+export const deleteFileAttachments = async ({
+  caseId,
+  fileIds,
+  signal,
+}: {
+  caseId: string;
+  fileIds: string[];
+  signal: AbortSignal;
+}): Promise<void> => Promise.resolve(undefined);

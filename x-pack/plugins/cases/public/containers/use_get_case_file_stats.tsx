@@ -43,7 +43,7 @@ export const useGetCaseFileStats = ({
         kind: constructFileKindIdByOwner(owner[0] as Owner),
         page: 1,
         perPage: 1,
-        meta: { caseId },
+        meta: { caseIds: [caseId] },
       });
     },
     {

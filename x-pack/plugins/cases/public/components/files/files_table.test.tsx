@@ -45,7 +45,7 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-action-delete')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -129,6 +129,36 @@ describe('FilesTable', () => {
     });
 
     expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
+  });
+
+  it('delete button renders correctly', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} />);
+
+    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
+    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+      fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+      id: basicFileMock.id,
+    });
+
+    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+  });
+
+  it('clicking delete button opens deletion modal', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} />);
+
+    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
+    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+      fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+      id: basicFileMock.id,
+    });
+
+    const deleteButton = await screen.findByTestId('cases-files-delete-button');
+
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(deleteButton);
+
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
 
   it('go to next page calls onTableChange with correct values', async () => {

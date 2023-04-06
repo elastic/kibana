@@ -46,7 +46,7 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
     showPreview();
   };
 
-  const columns = useFilesTableColumns({ showPreview: displayPreview });
+  const columns = useFilesTableColumns({ caseId, showPreview: displayPreview });
 
   return isLoading ? (
     <>
