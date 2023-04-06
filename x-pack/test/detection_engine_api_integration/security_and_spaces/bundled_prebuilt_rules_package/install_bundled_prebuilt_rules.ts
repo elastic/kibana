@@ -17,7 +17,7 @@ import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/dele
 import { BUNDLED_PACKAGE_DIR } from './config';
 import {
   bundlePackage,
-  removeBundledPackages,
+  // removeBundledPackages,
 } from '../../utils/prebuilt_rules/bundle_fleet_package';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await removeBundledPackages(BUNDLED_FLEET_PACKAGE_DIR);
+      // await removeBundledPackages(BUNDLED_FLEET_PACKAGE_DIR);
     });
 
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
