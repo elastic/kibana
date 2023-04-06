@@ -7,10 +7,10 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 import { getPrebuiltRulesStatus } from '../../api';
-import { DEFAULT_QUERY_OPTIONS } from './../constants';
+import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
-import { GetPrebuiltRulesStatusResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 
 export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', GET_PREBUILT_RULES_STATUS_URL];
 

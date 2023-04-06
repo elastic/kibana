@@ -9,7 +9,7 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewRuleInstall } from '../../api';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
-import { ReviewRuleInstallationResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 export const REVIEW_RULE_INSTALLATION_QUERY_KEY = ['POST', REVIEW_RULE_INSTALLATION_URL];
 

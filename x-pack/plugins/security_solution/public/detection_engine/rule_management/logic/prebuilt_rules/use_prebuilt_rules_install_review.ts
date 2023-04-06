@@ -9,7 +9,7 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
-import { ReviewRuleInstallationResponseBody } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { ReviewRuleInstallationResponseBody } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
