@@ -8,6 +8,7 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
+import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
@@ -18,7 +19,6 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { pick } from 'lodash';
 import { AiopsAppContext } from './hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './components/log_categorization/log_categorization_for_flyout';
 import { AiopsPluginStartDeps } from './types';
@@ -78,9 +78,9 @@ export async function showCategorizeFlyout(
           )
         ),
         {
-          'data-test-subj': 'mlFlyoutLensLayerSelector',
+          'data-test-subj': 'aiopsCategorizeFlyout',
           ownFocus: true,
-          closeButtonAriaLabel: 'jobSelectorFlyout',
+          closeButtonAriaLabel: 'aiopsCategorizeFlyout',
           onClose: onFlyoutClose,
           size: 'l',
         }
