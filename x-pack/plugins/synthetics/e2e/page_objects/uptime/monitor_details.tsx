@@ -7,7 +7,8 @@
 
 import { Page } from '@elastic/synthetics';
 import { utilsPageProvider } from '../utils';
-import { byTestId, delay } from '../../helpers/utils';
+import { byTestId, delay, getQuerystring } from '../../helpers/utils';
+import { loginPageProvider } from '../login';
 
 interface AlertType {
   id: string;
@@ -15,7 +16,20 @@ interface AlertType {
 }
 
 export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
+  const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
+  const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
+  const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
+  const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
+
+  const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
+  const overview = `${basePath}/app/uptime`;
   return {
+    ...loginPageProvider({
+      page,
+      isRemote,
+      username: isRemote ? remoteUsername : 'elastic',
+      password: isRemote ? remotePassword : 'changeme',
+    }),
     ...utilsPageProvider({ page }),
     async navigateToMonitorDetails(monitorId: string) {
       await page.click(byTestId(`monitor-page-link-${monitorId}`));
@@ -123,6 +137,11 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
       await page.click(byTestId('confirmModalConfirmButton'));
       await page.waitForSelector('text=Rule successfully disabled!');
       await this.closeAnomalyDetectionMenu();
+    },
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
+        waitUntil: 'networkidle',
+      });
     },
   };
 }

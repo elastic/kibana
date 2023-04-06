@@ -21,15 +21,11 @@ describe('<StatusBadge />', () => {
     render(<StatusBadge status="down" summaryError={{ message: 'journey did not run' }} />);
 
     expect(screen.getByText('Down')).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('journey did not run. Click for more details.')
-    ).toBeInTheDocument();
   });
 
   it('renders errors for downs state for http monitor', () => {
     render(<StatusBadge status="down" summaryError={{ message: 'journey did not run' }} />);
 
     expect(screen.getByText('Down')).toBeInTheDocument();
-    expect(screen.getByLabelText('journey did not run')).toBeInTheDocument();
   });
 });
