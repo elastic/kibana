@@ -145,6 +145,9 @@ export function createSearchBar({
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
+    useEffect(() => {
+      onQuerySubmitRef.current = props.onQuerySubmit;
+    }, [props.onQuerySubmit]);
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({

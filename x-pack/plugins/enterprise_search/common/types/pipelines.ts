@@ -73,6 +73,11 @@ export interface CreateMlInferencePipelineParameters {
   source_field: string;
 }
 
+export interface CreateMLInferencePipelineDefinition {
+  pipeline_definition: MlInferencePipeline;
+  pipeline_name: string;
+}
+
 export type InferencePipelineInferenceConfig = IngestInferenceConfig & {
   zero_shot_classification?: {
     labels: string[];
