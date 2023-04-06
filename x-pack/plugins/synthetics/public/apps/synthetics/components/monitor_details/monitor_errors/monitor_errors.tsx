@@ -19,13 +19,14 @@ import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorErrors = () => {
   const { errorStates, loading, data } = useMonitorErrors();
 
-  const initialLoading = loading && !data;
+  const initialLoading = !data;
 
-  const emptyState = !loading && errorStates.length === 0;
+  const emptyState = !loading && errorStates && errorStates?.length === 0;
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {
@@ -33,15 +34,15 @@ export const MonitorErrors = () => {
   }
 
   return (
-    <>
+    <MonitorPendingWrapper>
       <SyntheticsDatePicker fullWidth={true} />
       <EuiSpacer size="m" />
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates} loading={loading} />
+        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
       </div>
-    </>
+    </MonitorPendingWrapper>
   );
 };
 

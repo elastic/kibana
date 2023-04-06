@@ -187,7 +187,10 @@ export function ErrorSampleDetails({
         </EuiFlexItem>
         {isTraceExplorerEnabled && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={traceExplorerLink}>
+            <EuiLink
+              data-test-subj="apmErrorSampleDetailsLink"
+              href={traceExplorerLink}
+            >
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiIcon type="apmTrace" />

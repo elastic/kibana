@@ -11,8 +11,9 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
+import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { sortPredicateByType } from './sort_predicate';
+import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 
@@ -52,7 +53,10 @@ export const getLayers = (
     );
   }
 
-  const sortPredicate = sortPredicateByType(chartType, visParams, visData, columns);
+  const sortPredicateForType = sortPredicateByType(chartType, visParams, visData, columns);
+
+  const distinctSeries = getDistinctSeries(rows, columns);
+
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
@@ -62,17 +66,20 @@ export const getLayers = (
         layerIndex === 0 && chartType === ChartTypes.MOSAIC
           ? { ...fillLabel, minFontSize: 14, maxFontSize: 14, clipText: true }
           : fillLabel,
-      sortPredicate,
+      sortPredicate: col.meta?.sourceParams?.consolidatedMetricsColumn
+        ? sortPredicateSaveSourceOrder()
+        : sortPredicateForType,
       shape: {
-        fillColor: (d) =>
+        fillColor: (key, sortIndex, node) =>
           getColor(
             chartType,
-            d,
+            key,
+            node,
             layerIndex,
             isSplitChart,
             overwriteColors,
-            columns,
-            rows,
+            distinctSeries,
+            { columnsLength: columns.length, rowsLength: rows.length },
             visParams,
             palettes,
             byDataPalette,

@@ -21,11 +21,12 @@ import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
-import { MonitorDetailsPanelContainer } from './monitor_details_panel';
+import { MonitorDetailsPanelContainer } from './monitor_details_panel_container';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
@@ -40,7 +41,7 @@ export const MonitorSummary = () => {
   }
 
   return (
-    <>
+    <MonitorPendingWrapper>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <MonitorDetailsPanelContainer />
@@ -138,7 +139,7 @@ export const MonitorSummary = () => {
       <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
         <TestRunsTable paginable={false} from={from} to={to} />
       </LoadWhenInView>
-    </>
+    </MonitorPendingWrapper>
   );
 };
 

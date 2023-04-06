@@ -23,7 +23,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -57,6 +57,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       http,
       uiSettings,
       data: { dataViews },
+      savedObjectsManagement,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -146,7 +147,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
               <EuiSpacer size="s" />
 
-              <SavedObjectFinderUi
+              <SavedObjectFinder
                 key="searchSavedObjectFinder"
                 onChoose={onDataViewSelected}
                 showFilter
@@ -170,8 +171,11 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                   },
                 ]}
                 fixedPageSize={fixedPageSize}
-                uiSettings={uiSettings}
-                http={http}
+                services={{
+                  uiSettings,
+                  http,
+                  savedObjectsManagement,
+                }}
               />
             </>
           )}

@@ -11,7 +11,7 @@ describe('APM deep links', () => {
   });
   it('navigates to apm links on search elastic', () => {
     cy.visitKibana('/');
-    cy.getByTestSubj('nav-search-input').type('APM');
+    cy.getByTestSubj('nav-search-input').type('APM').focus();
     cy.contains('APM');
     cy.contains('APM / Services');
     cy.contains('APM / Service groups');

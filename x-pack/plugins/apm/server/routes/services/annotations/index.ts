@@ -7,9 +7,14 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { Annotation } from '../../../../common/annotations';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { getStoredAnnotations } from './get_stored_annotations';
+
+export interface ServiceAnnotationResponse {
+  annotations: Annotation[];
+}
 
 export async function getServiceAnnotations({
   apmEventClient,

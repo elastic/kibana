@@ -53,6 +53,7 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -184,7 +185,7 @@ export function DashboardApp({
   }, [dashboardContainer, kbnUrlStateStorage]);
 
   return (
-    <div className={'dshAppWrapper'}>
+    <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -197,6 +198,7 @@ export function DashboardApp({
           )}
 
           {getLegacyConflictWarning?.()}
+
           <DashboardContainerRenderer
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}

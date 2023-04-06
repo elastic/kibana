@@ -101,6 +101,7 @@ export function OpenTelemetryInstructions({
           values={{
             otelExporterOtlpEndpoint: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpEndpointLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
@@ -109,6 +110,7 @@ export function OpenTelemetryInstructions({
             ),
             otelExporterOtlpHeaders: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpHeadersLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
@@ -117,6 +119,7 @@ export function OpenTelemetryInstructions({
             ),
             otelResourceAttributes: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelResourceAttributesLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
               >
@@ -137,6 +140,7 @@ export function OpenTelemetryInstructions({
           values={{
             otelInstrumentationGuide: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOpenTelemetryInstrumentationGuideLink"
                 target="_blank"
                 href="https://opentelemetry.io/docs/instrumentation"
               >

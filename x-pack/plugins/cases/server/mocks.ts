@@ -10,6 +10,8 @@ import type { CaseSavedObject } from './common/types';
 import type { CasePostRequest, CommentAttributes } from '../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
+import type { CasesStart } from './types';
+import { createCasesClientMock } from './client/mocks';
 
 export const mockCases: CaseSavedObject[] = [
   {
@@ -368,8 +370,8 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-6',
     attributes: {
       type: CommentType.alert,
-      index: 'test-index',
-      alertId: 'test-id',
+      index: 'test-index-3',
+      alertId: 'test-id-3',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -416,4 +418,16 @@ export const newCase: CasePostRequest = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+};
+
+const casesClientMock = createCasesClientMock();
+
+export const mockCasesContract = (): CasesStart => ({
+  getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
+  getExternalReferenceAttachmentTypeRegistry: jest.fn(),
+  getPersistableStateAttachmentTypeRegistry: jest.fn(),
+});
+
+export const casesPluginMock = {
+  createStartContract: mockCasesContract,
 };

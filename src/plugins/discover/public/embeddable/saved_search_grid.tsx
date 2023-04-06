@@ -37,7 +37,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       data-test-subj="embeddedSavedSearchDocTable"
     >
       {props.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {props.totalHitCount !== 0 && (
+      {Boolean(props.totalHitCount) && props.totalHitCount !== 0 && (
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <TotalDocuments totalHitCount={props.totalHitCount} />
         </EuiFlexItem>

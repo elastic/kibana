@@ -65,6 +65,7 @@ export const SubscriptionSplashPrompt: React.FC = () => {
 
     cta = (
       <EuiButton
+        data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
         fullWidth={false}
         fill
         href={services.http.basePath.prepend('/app/management/stack/license_management')}
@@ -88,7 +89,12 @@ export const SubscriptionSplashPrompt: React.FC = () => {
     );
 
     cta = (
-      <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
+      <EuiButton
+        data-test-subj="infraSubscriptionSplashPromptUpgradeSubscriptionButton"
+        fullWidth={false}
+        fill
+        href="https://www.elastic.co/subscriptions"
+      >
         <FormattedMessage
           id="xpack.infra.ml.splash.updateSubscriptionCta"
           defaultMessage="Upgrade subscription"

@@ -18,6 +18,7 @@ import type {
   SnapshotNodeMetric,
   SnapshotMetricInput,
 } from '../../../../../common/http_api';
+import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 
 /**
  * Columns and items types
@@ -30,12 +31,12 @@ type HostMetrics = Record<HostMetric, SnapshotNodeMetric>;
 
 export interface HostNodeRow extends HostMetrics {
   os?: string | null;
+  ip?: string | null;
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
+  id: string;
 }
-
-// type MappedMetrics = Record<keyof HostNodeRow, SnapshotNodeMetric>;
 
 interface HostTableParams {
   time: TimeRange;
@@ -49,9 +50,11 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }) => ({
+  return nodes.map(({ metrics, path, name }, index) => ({
+    id: `${name}-${index}`,
     name,
     os: path.at(-1)?.os ?? '-',
+    ip: path.at(-1)?.ip ?? '',
     title: {
       name,
       cloudProvider: path.at(-1)?.cloudProvider ?? null,
@@ -107,6 +110,13 @@ const averageMemoryUsageLabel = i18n.translate(
   }
 );
 
+const toggleDialogActionLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.toggleDialogWithDetails',
+  {
+    defaultMessage: 'Toggle dialog with details',
+  }
+);
+
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
@@ -114,6 +124,10 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+
+  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -126,14 +140,46 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   );
 
   const items = useMemo(() => buildItemsList(nodes), [nodes]);
+  const clickedItem = useMemo(
+    () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
+    [hostFlyoutOpen.clickedItemId, items]
+  );
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
+      {
+        name: '',
+        width: '40px',
+        field: 'id',
+        actions: [
+          {
+            name: toggleDialogActionLabel,
+            description: toggleDialogActionLabel,
+            icon: ({ id }) =>
+              hostFlyoutOpen.clickedItemId && id === hostFlyoutOpen.clickedItemId
+                ? 'minimize'
+                : 'expand',
+            type: 'icon',
+            'data-test-subj': 'hostsView-flyout-button',
+            onClick: ({ id }) => {
+              setHostFlyoutOpen({
+                clickedItemId: id,
+              });
+              if (id === hostFlyoutOpen.clickedItemId) {
+                setHostFlyoutOpen({ clickedItemId: '' });
+              } else {
+                setHostFlyoutOpen({ clickedItemId: id });
+              }
+            },
+          },
+        ],
+      },
       {
         name: titleLabel,
         field: 'title',
         sortable: true,
         truncateText: true,
+        'data-test-subj': 'hostsView-tableRow-title',
         render: (title: HostNodeRow['title']) => (
           <HostsTableEntryTitle
             title={title}
@@ -146,12 +192,14 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         name: osLabel,
         field: 'os',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-os',
         render: (os: string) => <EuiText size="s">{os}</EuiText>,
       },
       {
         name: averageCpuUsageLabel,
         field: 'cpu.avg',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-cpuUsage',
         render: (avg: number) => formatMetric('cpu', avg),
         align: 'right',
       },
@@ -159,27 +207,31 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         name: diskLatencyLabel,
         field: 'diskLatency.avg',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-diskLatency',
         render: (avg: number) => formatMetric('diskLatency', avg),
-        align: 'right',
-      },
-      {
-        name: averageTXLabel,
-        field: 'tx.avg',
-        sortable: true,
-        render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
       },
       {
         name: averageRXLabel,
         field: 'rx.avg',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
+        align: 'right',
+      },
+      {
+        name: averageTXLabel,
+        field: 'tx.avg',
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-tx',
+        render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
       },
       {
         name: averageTotalMemoryLabel,
         field: 'memoryTotal.avg',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-memoryTotal',
         render: (avg: number) => formatMetric('memoryTotal', avg),
         align: 'right',
       },
@@ -187,12 +239,19 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         name: averageMemoryUsageLabel,
         field: 'memory.avg',
         sortable: true,
+        'data-test-subj': 'hostsView-tableRow-memory',
         render: (avg: number) => formatMetric('memory', avg),
         align: 'right',
       },
     ],
-    [reportHostEntryClick, time]
+    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
   );
 
-  return { columns, items };
+  return {
+    columns,
+    items,
+    clickedItem,
+    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
+    closeFlyout,
+  };
 };

@@ -58,6 +58,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   const button = (
     <ButtonWrapper>
       <EuiButton
+        data-test-subj="infraLogEntryContextMenuButton"
         size="s"
         fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}

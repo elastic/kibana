@@ -126,12 +126,22 @@ export const AddParamFlyout = ({
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                <EuiButtonEmpty
+                  data-test-subj="syntheticsAddParamFlyoutButton"
+                  iconType="cross"
+                  onClick={closeFlyout}
+                  flush="left"
+                >
                   {CLOSE_TABLE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={handleSubmit(onSubmit)} fill isLoading={loading}>
+                <EuiButton
+                  data-test-subj="syntheticsAddParamFlyoutButton"
+                  onClick={handleSubmit(onSubmit)}
+                  fill
+                  isLoading={loading}
+                >
                   {SAVE_TABLE}
                 </EuiButton>
               </EuiFlexItem>
@@ -145,6 +155,7 @@ export const AddParamFlyout = ({
   return (
     <div>
       <EuiButton
+        data-test-subj="syntheticsAddParamFlyoutButton"
         fill
         iconType="plusInCircleFilled"
         iconSide="left"

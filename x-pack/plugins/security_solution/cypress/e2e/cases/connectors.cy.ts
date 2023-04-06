@@ -14,7 +14,7 @@ import { cleanKibana, deleteCases } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
-  selectLastConnectorCreated,
+  verifyNewConnectorSelected,
 } from '../../tasks/configure_cases';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -58,7 +58,7 @@ describe('Cases connectors', () => {
     });
 
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
-    cy.intercept('POST', '/api/cases/configure', (req) => {
+    cy.intercept('PATCH', '/api/cases/configure/*', (req) => {
       const connector = req.body.connector;
       req.reply((res) => {
         res.send(200, { ...configureResult, connector });
@@ -94,14 +94,15 @@ describe('Cases connectors', () => {
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
+
+      verifyNewConnectorSelected(snConnector);
+
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
+      cy.get(TOASTER).should('have.text', 'Saved external connection settings');
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response?.body.id);
-
-      cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
+      cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
-      cy.get(TOASTER).should('have.text', 'Saved external connection settings');
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
@@ -40,7 +41,7 @@ export function useCloneSlo() {
 
         const optimisticUpdate = {
           ...data,
-          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name }],
+          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name, id: uuidv1() }],
           total: data?.total && data.total + 1,
         };
 

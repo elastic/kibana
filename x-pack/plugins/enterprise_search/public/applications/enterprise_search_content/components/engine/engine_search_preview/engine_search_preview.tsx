@@ -47,6 +47,7 @@ import {
   ResultView,
   ResultsPerPageView,
   ResultsView,
+  Sorting,
 } from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
@@ -71,7 +72,13 @@ class InternalEngineTransporter implements Transporter {
         ...response.hits,
         hits: response.hits.hits.map((hit) => ({
           ...hit,
-          _id: btoa(JSON.stringify([hit._index, hit._id])),
+          // The `__id` field is the actual document ID.
+          __id: hit._id,
+          // Search UI expects a unique `_id` for use as a React key but
+          // because Search Applications can have multiple indices, keys
+          // can be duplicated. Here we prefix the `_id` with the index
+          // name to ensure uniqueness.
+          _id: `${hit._index}__${hit._id}`,
         })),
       },
     };
@@ -85,7 +92,7 @@ export const EngineSearchPreview: React.FC = () => {
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -101,7 +108,7 @@ export const EngineSearchPreview: React.FC = () => {
         search_fields: searchableFields,
       },
     };
-  }, [http, engineName, setLastAPICall]);
+  }, [http, engineName, setLastAPICall, resultFields, searchableFields]);
 
   if (!engineData) return null;
 
@@ -140,6 +147,8 @@ export const EngineSearchPreview: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
                 <FormattedMessage

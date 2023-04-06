@@ -191,6 +191,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   });
   const button = (
     <EuiButtonEmpty
+      data-test-subj="infraMetricsExplorerChartContextMenuButton"
       contentProps={{ 'aria-label': actionAriaLabel }}
       onClick={handleOpen}
       size="s"

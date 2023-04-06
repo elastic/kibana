@@ -43,11 +43,13 @@ export function populateAlertActions({
   defaultEmail,
   groupId,
   translations,
+  isLegacy = false,
 }: {
   groupId: string;
   defaultActions: ActionConnector[];
   defaultEmail?: DefaultEmail;
   translations: Translations;
+  isLegacy?: boolean;
 }) {
   const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
@@ -78,8 +80,8 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case INDEX_ACTION_ID:
-        action.params = getIndexActionParams(translations);
-        recoveredAction.params = getIndexActionParams(translations, true);
+        action.params = getIndexActionParams(translations, false, isLegacy);
+        recoveredAction.params = getIndexActionParams(translations, true, isLegacy);
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
@@ -119,8 +121,12 @@ export function populateAlertActions({
   return actions;
 }
 
-function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
-  if (recovery) {
+function getIndexActionParams(
+  translations: Translations,
+  recovery = false,
+  isLegacy = false
+): IndexActionParams {
+  if (isLegacy && recovery) {
     return {
       documents: [
         {
@@ -134,14 +140,45 @@ function getIndexActionParams(translations: Translations, recovery = false): Ind
       indexOverride: null,
     };
   }
+
+  if (isLegacy) {
+    return {
+      documents: [
+        {
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
+          statusMessage: '{{{context.statusMessage}}}',
+          latestErrorMessage: '{{{context.latestErrorMessage}}}',
+          observerLocation: '{{context.observerLocation}}',
+        },
+      ],
+      indexOverride: null,
+    };
+  }
+
+  if (recovery) {
+    return {
+      documents: [
+        {
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
+          statusMessage: '{{{context.status}}}',
+          latestErrorMessage: '{{{context.latestErrorMessage}}}',
+          observerLocation: '{{context.locationName}}',
+          recoveryReason: '{{context.recoveryReason}}',
+        },
+      ],
+      indexOverride: null,
+    };
+  }
   return {
     documents: [
       {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
-        statusMessage: '{{{context.statusMessage}}}',
-        latestErrorMessage: '{{{context.latestErrorMessage}}}',
-        observerLocation: '{{context.observerLocation}}',
+        statusMessage: '{{{context.status}}}',
+        latestErrorMessage: '{{{context.lastErrorMessage}}}',
+        observerLocation: '{{context.locationName}}',
       },
     ],
     indexOverride: null,

@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -64,6 +65,7 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export interface EmbeddableSetup {
@@ -143,7 +145,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(
     core: CoreStart,
-    { uiActions, inspector }: EmbeddableStartDependencies
+    { uiActions, inspector, savedObjectsManagement }: EmbeddableStartDependencies
   ): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
@@ -207,7 +209,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             notifications={core.notifications}
             application={core.application}
             inspector={inspector}
-            SavedObjectFinder={getSavedObjectFinder(core.uiSettings, core.http)}
+            SavedObjectFinder={getSavedObjectFinder(
+              core.uiSettings,
+              core.http,
+              savedObjectsManagement
+            )}
             containerContext={containerContext}
             theme={theme}
           />

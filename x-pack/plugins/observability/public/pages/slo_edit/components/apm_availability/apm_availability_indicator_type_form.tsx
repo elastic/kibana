@@ -18,10 +18,11 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
-import { FieldSelector } from '../common/field_selector';
+import { FieldSelector } from '../apm_common/field_selector';
+import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue } = useFormContext<CreateSLOInput>();
+  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -32,11 +33,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           allowAllOption={false}
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmAvailability.serviceName', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceName.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceName.placeholder',
             {
               defaultMessage: 'Select the APM service',
             }
@@ -47,13 +48,13 @@ export function ApmAvailabilityIndicatorTypeForm() {
         />
         <FieldSelector
           label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceEnvironment',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment',
             {
               defaultMessage: 'Service environment',
             }
           )}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceEnvironment.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment.placeholder',
             {
               defaultMessage: 'Select the environment',
             }
@@ -66,14 +67,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionType',
-            {
-              defaultMessage: 'Transaction type',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionType', {
+            defaultMessage: 'Transaction type',
+          })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionType.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.transactionType.placeholder',
             {
               defaultMessage: 'Select the transaction type',
             }
@@ -83,14 +81,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
         />
         <FieldSelector
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionName',
-            {
-              defaultMessage: 'Transaction name',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionName', {
+            defaultMessage: 'Transaction name',
+          })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionName.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.transactionName.placeholder',
             {
               defaultMessage: 'Select the transaction name',
             }
@@ -104,7 +99,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes', {
+            {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
               defaultMessage: 'Good status codes',
             })}
           </EuiFormLabel>
@@ -118,13 +113,13 @@ export function ApmAvailabilityIndicatorTypeForm() {
               <EuiComboBox
                 {...field}
                 aria-label={i18n.translate(
-                  'xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
                   {
                     defaultMessage: 'Select the good status codes',
                   }
                 )}
                 placeholder={i18n.translate(
-                  'xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
                   {
                     defaultMessage: 'Select the good status codes',
                   }
@@ -145,7 +140,23 @@ export function ApmAvailabilityIndicatorTypeForm() {
             )}
           />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem>
+          <QueryBuilder
+            control={control}
+            dataTestSubj="apmLatencyFilterInput"
+            indexPatternString={watch('indicator.params.index')}
+            label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
+              defaultMessage: 'Query filter',
+            })}
+            name="indicator.params.filter"
+            placeholder={i18n.translate(
+              'xpack.observability.slo.sloEdit.apmLatency.filter.placeholder',
+              {
+                defaultMessage: 'Custom filter to apply on the index',
+              }
+            )}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

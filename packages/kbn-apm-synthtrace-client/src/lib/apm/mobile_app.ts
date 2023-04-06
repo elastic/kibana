@@ -14,12 +14,12 @@ import { generateLongId } from '../utils/generate_id';
 type MobileAgentName = 'android/java' | 'iOS/swift';
 
 export class MobileApp extends Entity<ApmFields> {
-  mobileDevice(deviceId?: string) {
+  mobileDevice({ deviceId, serviceVersion }: { deviceId?: string; serviceVersion?: string }) {
     return new MobileDevice({
       ...this.fields,
       'device.id': deviceId ? deviceId : generateLongId(),
       'service.language.name': this.fields['agent.name'] === 'iOS' ? 'swift' : 'java',
-      'service.version': this.fields['service.version'] ?? '1.0',
+      'service.version': serviceVersion ?? this.fields['service.version'] ?? '1.0',
     }).startNewSession();
   }
 }

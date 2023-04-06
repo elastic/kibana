@@ -64,6 +64,7 @@ export function EditDiscoveryRule({
             }}
           >
             <EuiSelect
+              data-test-subj="apmEditDiscoveryRuleSelect"
               options={operationTypes.map((item) => ({
                 text: item.operation.label,
                 value: item.operation.value,
@@ -145,6 +146,7 @@ export function EditDiscoveryRule({
                 )}
               >
                 <EuiFieldText
+                  data-test-subj="apmEditDiscoveryRuleFieldText"
                   fullWidth
                   value={probe}
                   onChange={(e) => onChangeProbe(e.target.value)}
@@ -156,10 +158,16 @@ export function EditDiscoveryRule({
       )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj="apmEditDiscoveryRuleCancelButton"
+            onClick={onCancel}
+          >
+            Cancel
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="apmEditDiscoveryRuleButton"
             onClick={onSubmit}
             fill
             disabled={type === DISCOVERY_RULE_TYPE_ALL ? false : probe === ''}

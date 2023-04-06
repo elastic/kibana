@@ -12,10 +12,15 @@ import {
 } from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsType,
+  SavedObjectModelTransformationFn,
+} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectTypeRegistry,
   LEGACY_URL_ALIAS_TYPE,
+  modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
@@ -48,6 +53,17 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   });
   return registry;
 };
+
+const createDoc = (
+  parts: Partial<SavedObjectUnsanitizedDoc<any>> = {}
+): SavedObjectUnsanitizedDoc<any> => ({
+  id: 'test-doc',
+  type: 'test-type',
+  attributes: {},
+  references: [],
+  coreMigrationVersion: kibanaVersion,
+  ...parts,
+});
 
 beforeEach(() => {
   mockGetConvertedObjectId.mockClear();
@@ -124,7 +140,7 @@ describe('DocumentMigrator', () => {
           id: 'me',
           type: 'user',
           attributes: { name: 'Christopher' },
-          migrationVersion: {},
+          typeMigrationVersion: '',
         })
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
 
@@ -133,7 +149,7 @@ describe('DocumentMigrator', () => {
           id: 'me',
           type: 'user',
           attributes: { name: 'Christopher' },
-          migrationVersion: {},
+          typeMigrationVersion: '',
         })
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
@@ -155,13 +171,15 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Christopher' },
-        migrationVersion: {},
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '',
       });
       expect(actual).toEqual({
         id: 'me',
         type: 'user',
         attributes: { name: 'Chris' },
-        migrationVersion: { user: '1.2.3' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.2.3',
       });
     });
 
@@ -183,38 +201,12 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: {},
-        migrationVersion: {},
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '',
       };
       const migratedDoc = migrator.migrate(originalDoc);
       expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
       expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
-    });
-
-    it('migrates root properties', () => {
-      const migrator = new DocumentMigrator({
-        ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'acl',
-          migrations: {
-            '2.3.5': setAttr('acl', 'admins-only, sucka!'),
-          },
-        }),
-      });
-      migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'me',
-        type: 'user',
-        attributes: { name: 'Tyler' },
-        acl: 'anyone',
-        migrationVersion: {},
-      } as SavedObjectUnsanitizedDoc);
-      expect(actual).toEqual({
-        id: 'me',
-        type: 'user',
-        attributes: { name: 'Tyler' },
-        migrationVersion: { acl: '2.3.5' },
-        acl: 'admins-only, sucka!',
-      });
     });
 
     it('does not apply migrations to unrelated docs', () => {
@@ -246,7 +238,7 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        migrationVersion: {},
+        typeMigrationVersion: '',
       });
       expect(actual).toEqual({
         id: 'me',
@@ -255,7 +247,7 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('assumes documents w/ undefined migrationVersion and correct coreMigrationVersion are up to date', () => {
+    it('assumes documents w/ undefined typeMigrationVersion and correct coreMigrationVersion are up to date', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -292,11 +284,8 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Tyler' },
         bbb: 'Shazm',
-        migrationVersion: {
-          user: '1.0.0',
-          bbb: '2.3.4',
-        },
         coreMigrationVersion: kibanaVersion,
+        typeMigrationVersion: '1.0.0',
       });
     });
 
@@ -317,17 +306,19 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        migrationVersion: { dog: '1.2.3' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.2.3',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
-        migrationVersion: { dog: '2.0.1' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '2.0.1',
       });
     });
 
-    it('rejects docs with a migrationVersion[type] for a type that does not have any migrations defined', () => {
+    it('rejects docs with a typeMigrationVersion for a type that does not have any migrations defined', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
       });
@@ -337,14 +328,15 @@ describe('DocumentMigrator', () => {
           id: 'smelly',
           type: 'dog',
           attributes: { name: 'Callie' },
-          migrationVersion: { dog: '10.2.0' },
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '10.2.0',
         })
       ).toThrow(
-        /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
+        /Document "smelly" belongs to a more recent version of Kibana \[10\.2\.0\] when the last known version is \[undefined\]/i
       );
     });
 
-    it('rejects docs with a migrationVersion[type] for a type that does not have a migration >= that version defined', () => {
+    it('rejects docs with a typeMigrationVersion for a type that does not have a migration >= that version defined', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -360,10 +352,10 @@ describe('DocumentMigrator', () => {
           id: 'fleabag',
           type: 'dawg',
           attributes: { name: 'Callie' },
-          migrationVersion: { dawg: '1.2.4' },
+          typeMigrationVersion: '1.2.4',
         })
       ).toThrow(
-        /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+        /Document "fleabag" belongs to a more recent version of Kibana \[1\.2\.4\]\ when the last known version is \[1\.2\.3\]/i
       );
     });
 
@@ -421,47 +413,43 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        migrationVersion: { dog: '1.2.0' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.2.0',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
-        migrationVersion: { dog: '10.0.1' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '10.0.1',
       });
     });
 
     it('allows props to be added', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
-        typeRegistry: createRegistry(
-          {
-            name: 'animal',
-            migrations: {
-              '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
-            },
+        typeRegistry: createRegistry({
+          name: 'dog',
+          migrations: {
+            '2.2.4': setAttr('animal', 'Doggie'),
           },
-          {
-            name: 'dog',
-            migrations: {
-              '2.2.4': setAttr('animal', 'Doggie'),
-            },
-          }
-        ),
+        }),
       });
       migrator.prepareMigrations();
       const actual = migrator.migrate({
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        migrationVersion: { dog: '1.2.0' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.2.0',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        animal: 'Animal: Doggie',
-        migrationVersion: { animal: '1.0.0', dog: '2.2.4' },
+        animal: 'Doggie',
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '2.2.4',
       });
     });
 
@@ -482,17 +470,19 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: { name: 'Callie' },
-        migrationVersion: {},
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '',
       });
       expect(actual).toEqual({
         id: 'smelly',
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
-        migrationVersion: { dog: '1.0.2' },
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '1.0.2',
       });
     });
 
-    it('allows changing type', () => {
+    it('does not allow changing type', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -511,27 +501,26 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'dog',
-        attributes: { name: 'Callie' },
-        migrationVersion: {},
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Kitty Callie' },
-        migrationVersion: { dog: '2.2.4', cat: '1.0.0' },
-      });
+      expect(() =>
+        migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          typeMigrationVersion: '',
+          coreMigrationVersion: '8.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Changing a document's type during a migration is not supported."`
+      );
     });
 
-    it('disallows updating a migrationVersion prop to a lower version', () => {
+    it('disallows updating a typeMigrationVersion prop to a lower version', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
           name: 'cat',
           migrations: {
-            '1.0.0': setAttr('migrationVersion.foo', '3.2.1'),
+            '4.5.7': setAttr('typeMigrationVersion', '3.2.1'),
           },
         }),
       });
@@ -541,20 +530,21 @@ describe('DocumentMigrator', () => {
           id: 'smelly',
           type: 'cat',
           attributes: { name: 'Boo' },
-          migrationVersion: { foo: '4.5.6' },
+          typeMigrationVersion: '4.5.6',
+          coreMigrationVersion: '8.8.0',
         })
       ).toThrow(
-        /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion.foo" from 4.5.6 to 3.2.1./
+        /Migration "cat v4.5.7" attempted to downgrade "typeMigrationVersion" from 4.5.6 to 3.2.1./
       );
     });
 
-    it('disallows removing a migrationVersion prop', () => {
+    it('disallows removing a typeMigrationVersion prop', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
           name: 'cat',
           migrations: {
-            '1.0.0': setAttr('migrationVersion', {}),
+            '4.5.7': setAttr('typeMigrationVersion', undefined),
           },
         }),
       });
@@ -564,36 +554,12 @@ describe('DocumentMigrator', () => {
           id: 'smelly',
           type: 'cat',
           attributes: { name: 'Boo' },
-          migrationVersion: { foo: '4.5.6' },
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '4.5.6',
         })
       ).toThrow(
-        /Migration "cat v 1.0.0" attempted to downgrade "migrationVersion.foo" from 4.5.6 to undefined./
+        /Migration "cat v4.5.7" attempted to downgrade "typeMigrationVersion" from 4.5.6 to undefined./
       );
-    });
-
-    it('allows adding props to migrationVersion', () => {
-      const migrator = new DocumentMigrator({
-        ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'cat',
-          migrations: {
-            '1.0.0': setAttr('migrationVersion.foo', '5.6.7'),
-          },
-        }),
-      });
-      migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Boo' },
-        migrationVersion: {},
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Boo' },
-        migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
-      });
     });
 
     it('logs the original error and throws a transform error if a document transform fails', () => {
@@ -602,7 +568,7 @@ describe('DocumentMigrator', () => {
         id: 'smelly',
         type: 'dog',
         attributes: {},
-        migrationVersion: {},
+        typeMigrationVersion: '',
       };
       const migrator = new DocumentMigrator({
         ...testOpts(),
@@ -648,7 +614,7 @@ describe('DocumentMigrator', () => {
         id: 'joker',
         type: 'dog',
         attributes: {},
-        migrationVersion: {},
+        typeMigrationVersion: '',
       };
       migrator.migrate(doc);
       expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
@@ -680,7 +646,7 @@ describe('DocumentMigrator', () => {
             migrations: {
               '9.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
             },
-            convertToMultiNamespaceTypeVersion: '11.0.0', // this results in reference transforms getting added to other types, but does not increase the migrationVersion of those types
+            convertToMultiNamespaceTypeVersion: '11.0.0', // this results in reference transforms getting added to other types, but does not increase the typeMigrationVersion of those types
           }
         ),
       });
@@ -694,12 +660,12 @@ describe('DocumentMigrator', () => {
     });
 
     describe('conversion to multi-namespace type', () => {
-      it('assumes documents w/ undefined migrationVersion and correct coreMigrationVersion are up to date', () => {
+      it('assumes documents w/ undefined typeMigrationVersion and correct coreMigrationVersion are up to date', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
             { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
-            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+            // no migration transforms are defined, the typeMigrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
           ),
         });
         migrator.prepareMigrations();
@@ -715,8 +681,8 @@ describe('DocumentMigrator', () => {
             id: 'mischievous',
             type: 'dog',
             attributes: { name: 'Ann' },
-            migrationVersion: { dog: '1.0.0' },
             coreMigrationVersion: kibanaVersion,
+            typeMigrationVersion: '1.0.0',
             // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
           },
         ]);
@@ -727,7 +693,7 @@ describe('DocumentMigrator', () => {
           ...testOpts(),
           typeRegistry: createRegistry(
             { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
-            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+            // no migration transforms are defined, the typeMigrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
           ),
         });
         migrator.prepareMigrations();
@@ -735,8 +701,8 @@ describe('DocumentMigrator', () => {
           id: 'mischievous',
           type: 'dog',
           attributes: { name: 'Ann' },
-          migrationVersion: { dog: '0.1.0' },
-          coreMigrationVersion: '2.0.0',
+          coreMigrationVersion: '20.0.0',
+          typeMigrationVersion: '0.1.0',
         } as SavedObjectUnsanitizedDoc;
         const actual = migrator.migrateAndConvert(obj);
         expect(actual).toEqual([
@@ -744,8 +710,8 @@ describe('DocumentMigrator', () => {
             id: 'mischievous',
             type: 'dog',
             attributes: { name: 'Ann' },
-            migrationVersion: { dog: '1.0.0' },
-            coreMigrationVersion: '2.0.0',
+            coreMigrationVersion: '20.0.0',
+            typeMigrationVersion: '1.0.0',
             namespaces: ['default'],
           },
         ]);
@@ -755,8 +721,8 @@ describe('DocumentMigrator', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
-            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' },
-            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '8.8.0' },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '8.8.0' }
           ),
         });
         migrator.prepareMigrations();
@@ -764,9 +730,10 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
-          migrationVersion: {},
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
           namespace: 'foo-namespace',
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '',
         };
         const actual = migrator.migrate(obj);
         expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
@@ -775,13 +742,14 @@ describe('DocumentMigrator', () => {
           type: 'dog',
           attributes: { name: 'Leslie' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: '1.0.0',
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '8.8.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
       });
 
-      it('should keep the same `migrationVersion` when the conversion transforms are skipped', () => {
+      it('should keep the same `typeMigrationVersion` when the conversion transforms are skipped', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry({
@@ -798,7 +766,8 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
-          migrationVersion: { dog: '2.0.0' },
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '2.0.0',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
           namespace: 'foo-namespace',
         };
@@ -808,11 +777,64 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
-          migrationVersion: { dog: '2.0.0' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: '3.0.0',
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '2.0.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      describe('correctly applies core transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            {
+              name: 'dog',
+              namespaceType: 'single',
+              migrations: { '1.0.0': (doc) => doc },
+            },
+            { name: 'toy', namespaceType: 'multiple' }
+          ),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'bad',
+          type: 'dog',
+          attributes: { name: 'Sweet Peach' },
+          migrationVersion: { dog: '1.0.0' },
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
+          expect(actual).toEqual([
+            {
+              id: 'bad',
+              type: 'dog',
+              attributes: { name: 'Sweet Peach' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
+            },
+          ]);
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
+          expect(actual).toEqual([
+            {
+              id: 'bad',
+              type: 'dog',
+              attributes: { name: 'Sweet Peach' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
+              namespace: 'foo-namespace',
+            },
+          ]);
         });
       });
 
@@ -829,7 +851,7 @@ describe('DocumentMigrator', () => {
           id: 'bad',
           type: 'dog',
           attributes: { name: 'Sweet Peach' },
-          migrationVersion: {},
+          typeMigrationVersion: '',
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
         };
 
@@ -842,7 +864,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
             },
           ]);
         });
@@ -857,7 +879,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -878,7 +900,8 @@ describe('DocumentMigrator', () => {
           id: 'loud',
           type: 'dog',
           attributes: { name: 'Wally' },
-          migrationVersion: {},
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '',
         };
 
         it('in the default space', () => {
@@ -889,8 +912,8 @@ describe('DocumentMigrator', () => {
               id: 'loud',
               type: 'dog',
               attributes: { name: 'Wally' },
-              migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -905,8 +928,8 @@ describe('DocumentMigrator', () => {
               id: 'uuidv5',
               type: 'dog',
               attributes: { name: 'Wally' },
-              migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'loud',
             },
@@ -920,14 +943,14 @@ describe('DocumentMigrator', () => {
                 targetId: 'uuidv5',
                 purpose: 'savedObjectConversion',
               },
-              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '0.1.2',
             },
           ]);
         });
       });
 
-      describe('correctly applies reference and conversion transforms', () => {
+      describe('correctly applies core, reference, and conversion transforms', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
@@ -952,9 +975,9 @@ describe('DocumentMigrator', () => {
               id: 'cute',
               type: 'dog',
               attributes: { name: 'Too' },
-              migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -980,9 +1003,9 @@ describe('DocumentMigrator', () => {
               id: 'uuidv5',
               type: 'dog',
               attributes: { name: 'Too' },
-              migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
             },
@@ -996,14 +1019,14 @@ describe('DocumentMigrator', () => {
                 targetId: 'uuidv5',
                 purpose: 'savedObjectConversion',
               },
-              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '0.1.2',
             },
           ]);
         });
       });
 
-      describe('correctly applies reference and migration transforms', () => {
+      describe('correctly applies core, reference, and migration transforms', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
@@ -1037,9 +1060,9 @@ describe('DocumentMigrator', () => {
               id: 'sleepy',
               type: 'dog',
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
-              migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
             },
           ]);
         });
@@ -1053,9 +1076,9 @@ describe('DocumentMigrator', () => {
               id: 'sleepy',
               type: 'dog',
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
-              migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -1069,7 +1092,7 @@ describe('DocumentMigrator', () => {
             name: 'dog',
             namespaceType: 'multiple',
             migrations: {
-              '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+              '1.0.0': setAttr('typeMigrationVersion', '2.0.0'),
               '2.0.0': (doc) => doc, // noop
             },
             convertToMultiNamespaceTypeVersion: '1.0.0', // the conversion transform occurs before the migration transform above
@@ -1080,7 +1103,8 @@ describe('DocumentMigrator', () => {
           id: 'hungry',
           type: 'dog',
           attributes: { name: 'Remy' },
-          migrationVersion: {},
+          coreMigrationVersion: '8.8.0',
+          typeMigrationVersion: '',
         };
 
         it('in the default space', () => {
@@ -1091,8 +1115,8 @@ describe('DocumentMigrator', () => {
               id: 'hungry',
               type: 'dog',
               attributes: { name: 'Remy' },
-              migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1107,8 +1131,8 @@ describe('DocumentMigrator', () => {
               id: 'uuidv5',
               type: 'dog',
               attributes: { name: 'Remy' },
-              migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
               namespaces: ['foo-namespace'],
               originId: 'hungry',
             },
@@ -1122,14 +1146,14 @@ describe('DocumentMigrator', () => {
                 targetId: 'uuidv5',
                 purpose: 'savedObjectConversion',
               },
-              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '0.1.2',
             },
           ]);
         });
       });
 
-      describe('correctly applies reference, conversion, and migration transforms', () => {
+      describe('correctly applies core, reference, conversion, and migration transforms', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
@@ -1137,7 +1161,7 @@ describe('DocumentMigrator', () => {
               name: 'dog',
               namespaceType: 'multiple',
               migrations: {
-                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '1.0.0': setAttr('typeMigrationVersion', '2.0.0'),
                 '2.0.0': (doc) => doc, // noop
               },
               convertToMultiNamespaceTypeVersion: '1.0.0',
@@ -1162,9 +1186,9 @@ describe('DocumentMigrator', () => {
               id: 'pretty',
               type: 'dog',
               attributes: { name: 'Sasha' },
-              migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1190,9 +1214,9 @@ describe('DocumentMigrator', () => {
               id: 'uuidv5',
               type: 'dog',
               attributes: { name: 'Sasha' },
-              migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '2.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
             },
@@ -1206,12 +1230,285 @@ describe('DocumentMigrator', () => {
                 targetId: 'uuidv5',
                 purpose: 'savedObjectConversion',
               },
-              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: '1.0.0',
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: '0.1.2',
             },
           ]);
         });
       });
+    });
+
+    describe('`typeMigrationVersion` core migration', () => {
+      let migrator: DocumentMigrator;
+      let noop: jest.MockedFunction<(doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc>;
+
+      beforeEach(() => {
+        noop = jest.fn((doc) => doc);
+        migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            migrations: {
+              '1.0.0': noop,
+            },
+          }),
+        });
+        migrator.prepareMigrations();
+      });
+
+      it('migrates to `typeMigrationVersion`', () => {
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          migrationVersion: { dog: '1.0.0' },
+        });
+        expect(actual).toHaveProperty('typeMigrationVersion', '1.0.0');
+      });
+
+      it('ignores unrelated versions', () => {
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          migrationVersion: {
+            dog: '1.0.0',
+            cat: '2.0.0',
+          },
+        });
+        expect(actual).toHaveProperty('typeMigrationVersion', '1.0.0');
+      });
+
+      it('removes `migrationVersion` property', () => {
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          migrationVersion: {
+            dog: '1.0.0',
+            cat: '2.0.0',
+          },
+        });
+        expect(actual).not.toHaveProperty('migrationVersion');
+      });
+
+      it('migrates to the latest on missing version', () => {
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          migrationVersion: {},
+          coreMigrationVersion: '8.7.0',
+        });
+        expect(noop).toHaveBeenCalledWith(
+          expect.objectContaining({ typeMigrationVersion: '' }),
+          expect.anything()
+        );
+        expect(actual).toHaveProperty('typeMigrationVersion', '1.0.0');
+      });
+
+      it('does not migrate if there is no `migrationVersion`', () => {
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          coreMigrationVersion: '8.7.0',
+        });
+        expect(noop).not.toHaveBeenCalled();
+        expect(actual).toHaveProperty('coreMigrationVersion', '8.8.0');
+        expect(actual).toHaveProperty('typeMigrationVersion', '1.0.0');
+        expect(actual).not.toHaveProperty('migrationVersion');
+      });
+
+      it('does not add `typeMigrationVersion` if there are no migrations', () => {
+        migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+          }),
+        });
+        migrator.prepareMigrations();
+
+        const actual = migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: {},
+          coreMigrationVersion: '8.7.0',
+        });
+        expect(noop).not.toHaveBeenCalled();
+        expect(actual).toHaveProperty('coreMigrationVersion', '8.8.0');
+        expect(actual).not.toHaveProperty('typeMigrationVersion');
+        expect(actual).not.toHaveProperty('migrationVersion');
+      });
+    });
+  });
+
+  describe('down transformation', () => {
+    let migrator: DocumentMigrator;
+    let transforms: Record<number, jest.MockedFunction<SavedObjectModelTransformationFn<any>>>;
+
+    const createTransformFn = (
+      impl?: SavedObjectModelTransformationFn<any>
+    ): jest.MockedFunction<SavedObjectModelTransformationFn<any>> => {
+      const defaultImpl: SavedObjectModelTransformationFn = (doc) => ({
+        document: doc,
+      });
+      return jest.fn().mockImplementation(impl ?? defaultImpl);
+    };
+
+    const transformCall = (num: number) => transforms[num].mock.invocationCallOrder[0];
+
+    beforeEach(() => {
+      const migrate1 = createTransformFn((doc) => {
+        doc.attributes.wentThoughDown1 = true;
+        return { document: doc };
+      });
+      const migrate2 = createTransformFn((doc) => {
+        doc.attributes.wentThoughDown2 = true;
+        return { document: doc };
+      });
+      const migrate3 = createTransformFn((doc) => {
+        doc.attributes.wentThoughDown3 = true;
+        return { document: doc };
+      });
+
+      transforms = {
+        1: migrate1,
+        2: migrate2,
+        3: migrate3,
+      };
+
+      migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'down-test',
+          migrations: {
+            '7.8.0': jest.fn(),
+            '7.9.0': jest.fn(),
+          },
+          switchToModelVersionAt: '8.0.0',
+          modelVersions: {
+            1: {
+              modelChange: {
+                type: 'expansion',
+                transformation: { up: jest.fn(), down: migrate1 },
+              },
+            },
+            2: {
+              modelChange: {
+                type: 'expansion',
+                transformation: { up: jest.fn(), down: migrate2 },
+              },
+            },
+            3: {
+              modelChange: {
+                type: 'expansion',
+                transformation: { up: jest.fn(), down: migrate3 },
+              },
+            },
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+    });
+
+    it('applies the expected conversion', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(2),
+      });
+
+      const result = migrator.transformDown(document, {
+        targetTypeVersion: modelVersionToVirtualVersion(1),
+      });
+
+      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(1));
+      expect(result.attributes).toEqual({
+        wentThoughDown2: true,
+      });
+    });
+
+    it('applies all the expected conversions', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(3),
+      });
+
+      const result = migrator.transformDown(document, {
+        targetTypeVersion: modelVersionToVirtualVersion(0),
+      });
+
+      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(0));
+      expect(result.attributes).toEqual({
+        wentThoughDown1: true,
+        wentThoughDown2: true,
+        wentThoughDown3: true,
+      });
+    });
+
+    it('applies the conversions in order', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(3),
+      });
+
+      const result = migrator.transformDown(document, {
+        targetTypeVersion: modelVersionToVirtualVersion(0),
+      });
+
+      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(0));
+
+      expect(transforms[1]).toHaveBeenCalledTimes(1);
+      expect(transforms[2]).toHaveBeenCalledTimes(1);
+      expect(transforms[3]).toHaveBeenCalledTimes(1);
+
+      expect(transformCall(3)).toBeLessThan(transformCall(2));
+      expect(transformCall(2)).toBeLessThan(transformCall(1));
+    });
+
+    it('throw when trying to transform to a higher version', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(2),
+      });
+
+      expect(() =>
+        migrator.transformDown(document, {
+          targetTypeVersion: modelVersionToVirtualVersion(3),
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Trying to transform down to a higher version: 10.2.0 to 10.3.0"`
+      );
+    });
+
+    it('throw when trying to transform a document from a higher version than the max one', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(4),
+      });
+
+      expect(() =>
+        migrator.transformDown(document, {
+          targetTypeVersion: modelVersionToVirtualVersion(2),
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Document \\"test-doc\\" belongs to a more recent version of Kibana [10.4.0] when the last known version is [10.3.0]."`
+      );
+    });
+
+    it('throw when trying to transform to a version without down conversion', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(2),
+      });
+
+      expect(() =>
+        migrator.transformDown(document, {
+          targetTypeVersion: '7.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Could not apply transformation migrate:7.9.0: no down conversion registered"`
+      );
     });
   });
 });

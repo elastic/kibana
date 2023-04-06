@@ -23,6 +23,7 @@ import {
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
+  RawAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -37,7 +38,6 @@ export type {
 export type { CreateOptions } from './methods/create';
 export type { FindOptions, FindResult } from './methods/find';
 export type { UpdateOptions } from './methods/update';
-export type { AggregateOptions, AggregateResult } from './methods/aggregate';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
 export type {
   GetExecutionLogByIdParams,
@@ -73,8 +73,12 @@ export interface RulesClientContext {
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithUuid = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
+export type NormalizedAlertActionWithGeneratedValues = Omit<
+  NormalizedAlertAction,
+  'uuid' | 'alertsFilter'
+> & {
   uuid: string;
+  alertsFilter?: RawAlertsFilter;
 };
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {

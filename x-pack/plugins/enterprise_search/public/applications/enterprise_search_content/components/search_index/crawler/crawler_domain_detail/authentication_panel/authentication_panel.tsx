@@ -9,9 +9,11 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { PageIntroduction } from '../../../../../../shared/page_introduction/page_introduction';
 
 import { AuthenticationPanelDeleteConfirmationModal } from './auth_panel_delete_confirm_modal';
 import { AuthenticationPanelActions } from './authentication_panel_actions';
@@ -27,8 +29,17 @@ export const AuthenticationPanel: React.FC = () => {
   return (
     <>
       <div className="authenticationPanel">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+        <PageIntroduction
+          actions={[<AuthenticationPanelActions />]}
+          description={
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.crawler.authenticationPanel.description"
+                defaultMessage="Setup authentication to enable crawling protected content for this domain."
+              />
+            </p>
+          }
+          title={
             <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.title', {
@@ -36,19 +47,9 @@ export const AuthenticationPanel: React.FC = () => {
                 })}
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AuthenticationPanelActions />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.crawler.authenticationPanel.description"
-              defaultMessage="Setup authentication to enable crawling protected content for this domain."
-            />
-          </p>
-        </EuiText>
+          }
+        />
+        <EuiSpacer size="l" />
         {isEditing ? <AuthenticationPanelEditContent /> : <AuthenticationPanelViewContent />}
       </div>
       {isModalVisible && <AuthenticationPanelDeleteConfirmationModal />}

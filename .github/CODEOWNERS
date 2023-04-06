@@ -18,6 +18,7 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
+x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
@@ -42,6 +43,7 @@ packages/kbn-apm-synthtrace-client @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
+x-pack/plugins/asset_manager @elastic/infra-monitoring-ui
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -83,6 +85,7 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
+examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
@@ -282,7 +285,6 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
-packages/core/versioning/core-version-http-server @elastic/kibana-core
 x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
@@ -310,6 +312,7 @@ x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
+packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
@@ -333,6 +336,7 @@ packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
+packages/kbn-eslint-plugin-telemetry @elastic/actionable-observability
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 src/plugins/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -340,6 +344,7 @@ x-pack/plugins/event_log @elastic/response-ops
 packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations
 x-pack/examples/exploratory_view_example @elastic/uptime
+x-pack/plugins/exploratory_view @elastic/uptime
 src/plugins/expression_error @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -454,7 +459,9 @@ x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
+x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
@@ -463,6 +470,8 @@ src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
+packages/kbn-object-versioning @elastic/appex-sharedux
+x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -527,11 +536,14 @@ x-pack/test/security_api_integration/packages/helpers @elastic/kibana-core
 x-pack/plugins/security @elastic/kibana-security
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/plugins/security_solution @elastic/security-solution
+packages/security-solution/side_nav @elastic/security-threat-hunting-explore
+packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
+packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform
@@ -769,6 +781,10 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # Actionable Observability
 /x-pack/test/observability_functional @elastic/actionable-observability
 
+# Observability robots
+/.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
+/.github/workflows/oblt-github-commands @elastic/observablt-robots
+
 # Infra Monitoring
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui
@@ -801,8 +817,14 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/test/api_integration/apis/synthetics @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-
+/x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/load_when_in_view @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/filter_value_label @elastic/uptime
+/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
+/x-pack/plugins/observability/e2e @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -874,14 +896,16 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 
-# Quality Assurance
+# Appex QA
 /src/dev/code_coverage @elastic/appex-qa
-/vars/*Coverage.groovy @elastic/appex-qa
 /test/functional/services/common @elastic/appex-qa
 /test/functional/services/lib @elastic/appex-qa
 /test/functional/services/remote @elastic/appex-qa
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
+/x-pack/performance @elastic/appex-qa
+/packages/kbn-test/src/functional_test_runner @elastic/appex-qa
+/packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 
 # Core
 /config/kibana.yml @elastic/kibana-core
@@ -1006,7 +1030,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/grouping @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
@@ -1157,11 +1180,14 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
 
+# Cloud Defend
+/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
+/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
+
 # Cloud Security Posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
@@ -1195,8 +1221,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
-
-x-pack/performance @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

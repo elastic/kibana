@@ -33,24 +33,10 @@ export const CHARTS = i18n.translate('xpack.securitySolution.components.chartSel
   defaultMessage: 'Charts',
 });
 
-export const TABLE_TITLE = i18n.translate(
+export const COUNTS = i18n.translate(
   'xpack.securitySolution.components.chartSelect.tableOptionTitle',
   {
-    defaultMessage: 'Aggregations',
-  }
-);
-
-export const TREND_TITLE = i18n.translate(
-  'xpack.securitySolution.components.chartSelect.trendOptionTitle',
-  {
-    defaultMessage: 'Trend Analysis',
-  }
-);
-
-export const TREEMAP_TITLE = i18n.translate(
-  'xpack.securitySolution.components.chartSelect.treemapOptionTitle',
-  {
-    defaultMessage: 'Multi-dimensional',
+    defaultMessage: 'Counts',
   }
 );
 

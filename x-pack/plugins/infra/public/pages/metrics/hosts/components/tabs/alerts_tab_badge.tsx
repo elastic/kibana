@@ -31,7 +31,7 @@ export const AlertsTabBadge = () => {
             'The active alert count was not retrieved correctly, try reloading the page.',
         })}
       >
-        <EuiIcon color="warning" type="alert" />
+        <EuiIcon color="warning" type="warning" />
       </EuiToolTip>
     );
   }
@@ -40,7 +40,11 @@ export const AlertsTabBadge = () => {
     typeof alertsCount?.activeAlertCount === 'number' && alertsCount.activeAlertCount > 0;
 
   return shouldRenderBadge ? (
-    <EuiNotificationBadge className="eui-alignCenter" size="m">
+    <EuiNotificationBadge
+      className="eui-alignCenter"
+      size="m"
+      data-test-subj="hostsView-tabs-alerts-count"
+    >
       {alertsCount?.activeAlertCount}
     </EuiNotificationBadge>
   ) : null;

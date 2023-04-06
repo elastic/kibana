@@ -30,7 +30,7 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
-import { DOCUMENT_FIELD_NAME } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';

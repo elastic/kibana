@@ -10,8 +10,9 @@ import { RuleAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  isSummaryActionOnInterval,
+  isActionOnInterval,
   isSummaryAction,
+  isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
 
@@ -38,8 +39,7 @@ const mockAction: RuleAction = {
 
 const mockSummaryAction: RuleAction = {
   id: '1',
-  // @ts-ignore
-  group: null,
+  group: 'default',
   actionTypeId: 'slack',
   params: {},
   frequency: {
@@ -47,6 +47,7 @@ const mockSummaryAction: RuleAction = {
     notifyWhen: 'onThrottleInterval',
     throttle: '1d',
   },
+  uuid: '111-111',
 };
 
 describe('rule_action_helper', () => {
@@ -64,16 +65,26 @@ describe('rule_action_helper', () => {
       const result = isSummaryAction(mockSummaryAction);
       expect(result).toBe(true);
     });
+
+    test('should return false if the action is undefined', () => {
+      const result = isSummaryAction(undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the action is not a proper RuleAction', () => {
+      const result = isSummaryAction({} as RuleAction);
+      expect(result).toBe(false);
+    });
   });
 
-  describe('isSummaryActionOnInterval', () => {
+  describe('isActionOnInterval', () => {
     test('should return false if the action does not have frequency field', () => {
-      const result = isSummaryActionOnInterval(mockOldAction);
+      const result = isActionOnInterval(mockOldAction);
       expect(result).toBe(false);
     });
 
     test('should return false if notifyWhen is not onThrottleInterval', () => {
-      const result = isSummaryActionOnInterval({
+      const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, notifyWhen: 'onActiveAlert' },
       } as RuleAction);
@@ -81,7 +92,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if throttle is not a valid interval string', () => {
-      const result = isSummaryActionOnInterval({
+      const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, throttle: null },
       } as RuleAction);
@@ -89,8 +100,18 @@ describe('rule_action_helper', () => {
     });
 
     test('should return true if the action is a throttling action', () => {
-      const result = isSummaryActionOnInterval(mockSummaryAction);
+      const result = isActionOnInterval(mockSummaryAction);
       expect(result).toBe(true);
+    });
+
+    test('should return false if the action  undefined', () => {
+      const result = isActionOnInterval(undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the action is not a proper RuleAction', () => {
+      const result = isActionOnInterval({} as RuleAction);
+      expect(result).toBe(false);
     });
   });
 
@@ -109,6 +130,11 @@ describe('rule_action_helper', () => {
       const result = generateActionHash(mockSummaryAction);
       expect(result).toBe('slack:summary:1d');
     });
+
+    test('should return a hash for a broken summary action', () => {
+      const result = generateActionHash(undefined);
+      expect(result).toBe('no-action-type-id:no-action-group:no-throttling');
+    });
   });
 
   describe('getSummaryActionsFromTaskState', () => {
@@ -116,11 +142,21 @@ describe('rule_action_helper', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction],
         summaryActions: {
-          'slack:summary:1d': { date: new Date('01.01.2020') },
-          'slack:summary:2d': { date: new Date('01.01.2020') },
+          '111-111': { date: new Date('01.01.2020') },
+          '222-222': { date: new Date('01.01.2020') },
         },
       });
-      expect(result).toEqual({ 'slack:summary:1d': { date: new Date('01.01.2020') } });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
+    });
+
+    test('should replace hash with uuid', () => {
+      const result = getSummaryActionsFromTaskState({
+        actions: [mockSummaryAction],
+        summaryActions: {
+          'slack:summary:1d': { date: new Date('01.01.2020') },
+        },
+      });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
     });
   });
 
@@ -132,17 +168,20 @@ describe('rule_action_helper', () => {
     beforeEach(() => {
       jest.setSystemTime(new Date('2020-01-01T23:00:00.000Z').getTime());
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
     afterAll(() => {
       jest.useRealTimers();
     });
-    const logger = { debug: jest.fn } as unknown as Logger;
-    const summaryActions = { 'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const logger = { debug: jest.fn() } as unknown as Logger;
+    const throttledSummaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
         action: mockAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -151,7 +190,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryActionThrottled({
         action: mockOldAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -163,7 +202,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, notifyWhen: 'onActiveAlert' },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -175,7 +214,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, throttle: null },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -184,7 +223,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is not in the task instance', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { 'slack:summary:2d': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -194,7 +233,7 @@ describe('rule_action_helper', () => {
       jest.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { 'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -203,10 +242,71 @@ describe('rule_action_helper', () => {
     test('should return true for a throttling action', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(true);
+    });
+
+    test('should return false if the action is broken', () => {
+      const result = isSummaryActionThrottled({
+        action: undefined,
+        throttledSummaryActions,
+        logger,
+      });
+      expect(result).toBe(false);
+    });
+
+    test('should return false if there is no summary action in the state', () => {
+      const result = isSummaryActionThrottled({
+        action: mockSummaryAction,
+        throttledSummaryActions: undefined,
+        logger,
+      });
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the actions throttle interval is not valid', () => {
+      const result = isSummaryActionThrottled({
+        action: {
+          ...mockSummaryAction,
+          frequency: {
+            summary: true,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1',
+          },
+        },
+        throttledSummaryActions,
+        logger,
+      });
+      expect(result).toBe(false);
+      expect(logger.debug).toHaveBeenCalledWith(
+        "Action'slack:1', has an invalid throttle interval"
+      );
+    });
+  });
+
+  describe('isSummaryActionOnInterval', () => {
+    test('returns true for a summary action on interval', () => {
+      expect(isSummaryActionOnInterval(mockSummaryAction)).toBe(true);
+    });
+
+    test('returns false for a non-summary ', () => {
+      expect(
+        isSummaryActionOnInterval({
+          ...mockAction,
+          frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        })
+      ).toBe(false);
+    });
+
+    test('returns false for a summary per rule run ', () => {
+      expect(
+        isSummaryActionOnInterval({
+          ...mockAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        })
+      ).toBe(false);
     });
   });
 });

@@ -132,7 +132,7 @@ function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
 
 function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
   if (!isObject(arg)) {
-    return typeof arg;
+    return getTypeI18n(typeof arg);
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {
@@ -512,7 +512,7 @@ function checkMissingVariableOrFunctions(
         },
         locations: missingVariables.map(({ location }) => location),
       }),
-      extraInfo: { missingFields: missingVariables.map(({ value }) => value) },
+      extraInfo: { missingFields: [...new Set(missingVariables.map(({ value }) => value))] },
     });
   }
   const invalidVariableErrors = checkVariableEdgeCases(

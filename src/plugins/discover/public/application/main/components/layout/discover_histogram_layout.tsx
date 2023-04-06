@@ -14,6 +14,7 @@ import { useDiscoverHistogram } from './use_discover_histogram';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
@@ -35,18 +36,13 @@ export const DiscoverHistogramLayout = ({
   inspectorAdapters,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const commonProps = {
-    dataView,
-    stateContainer,
-    savedSearchData$: stateContainer.dataState.data$,
-  };
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
-
-  const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
+  const hideChart = useAppStateSelector((state) => state.hideChart);
+  const unifiedHistogramProps = useDiscoverHistogram({
+    stateContainer,
     inspectorAdapters,
-    savedSearchFetch$: stateContainer.dataState.fetch$,
-    searchSessionId,
-    ...commonProps,
+    hideChart,
+    isPlainRecord,
   });
 
   // Initialized when the first search has been requested or
@@ -57,7 +53,10 @@ export const DiscoverHistogramLayout = ({
 
   return (
     <UnifiedHistogramContainer
-      ref={setUnifiedHistogramApi}
+      {...unifiedHistogramProps}
+      dataView={dataView}
+      searchSessionId={searchSessionId}
+      requestAdapter={inspectorAdapters.requests}
       resizeRef={resizeRef}
       appendHitsCounter={
         savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
@@ -65,8 +64,9 @@ export const DiscoverHistogramLayout = ({
       css={histogramLayoutCss}
     >
       <DiscoverMainContent
-        {...commonProps}
         {...mainContentProps}
+        stateContainer={stateContainer}
+        dataView={dataView}
         savedSearch={savedSearch}
         isPlainRecord={isPlainRecord}
         // The documents grid doesn't rerender when the chart visibility changes

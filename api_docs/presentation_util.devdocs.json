@@ -632,7 +632,7 @@
         "label": "FloatingActions",
         "description": [],
         "signature": [
-          "({ className, actions, isEnabled, usingTwoLineLayout, children, }: React.PropsWithChildren<",
+          "({ children, viewMode, isEnabled, embeddable, className, disabledActions, }: React.PropsWithChildren<",
           "FloatingActionsProps",
           ">) => JSX.Element"
         ],
@@ -645,7 +645,7 @@
             "id": "def-public.FloatingActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  className = '',\n  actions,\n  isEnabled,\n  usingTwoLineLayout,\n  children,\n}",
+            "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  embeddable,\n  className = '',\n  disabledActions,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -732,9 +732,9 @@
           },
           "[]; selectedDataViewId?: string | undefined; trigger: ",
           "DataViewTriggerProps",
-          "; onChangeDataViewId: (newId: string) => void; selectableProps?: ",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
+          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -744,9 +744,9 @@
           },
           "[]; selectedDataViewId?: string | undefined; trigger: ",
           "DataViewTriggerProps",
-          "; onChangeDataViewId: (newId: string) => void; selectableProps?: ",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}> | undefined; }) => JSX.Element; }"
+          "<{}>> | undefined; }) => JSX.Element; }"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -830,7 +830,7 @@
         "signature": [
           "React.ExoticComponent<",
           "FieldPickerProps",
-          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, }: ",
+          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, }: ",
           "FieldPickerProps",
           ") => JSX.Element; }"
         ],
@@ -3026,6 +3026,39 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-common.isValidHttpUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidHttpUrl",
+        "description": [],
+        "signature": [
+          "(str: string) => boolean"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.isValidHttpUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/httpurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-common.isValidUrl",
         "type": "Function",
         "tags": [],
@@ -3100,6 +3133,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.resolveFromArgs",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveFromArgs",
+        "description": [],
+        "signature": [
+          "(args: any, defaultDataurl?: string | null) => string"
+        ],
+        "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveFromArgs.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-common.resolveFromArgs.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultDataurl",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/plugins/presentation_util/common/lib/utils/resolve_dataurl.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

@@ -27,6 +27,7 @@ import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import {
   type Session,
+  SessionConcurrencyLimitError,
   SessionExpiredError,
   SessionUnexpectedError,
   type SessionValue,
@@ -386,7 +387,8 @@ export class Authenticator {
               )}`
             : ''
         }${
-          existingSession.error instanceof SessionExpiredError
+          existingSession.error instanceof SessionExpiredError ||
+          existingSession.error instanceof SessionConcurrencyLimitError
             ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
                 existingSession.error.code
               )}`
@@ -420,7 +422,8 @@ export class Authenticator {
 
         if (requestIsRedirectable) {
           if (
-            existingSession.error instanceof SessionExpiredError &&
+            (existingSession.error instanceof SessionExpiredError ||
+              existingSession.error instanceof SessionConcurrencyLimitError) &&
             authenticationResult.redirectURL?.startsWith(
               `${this.options.basePath.get(request)}/login?`
             )
@@ -479,9 +482,9 @@ export class Authenticator {
         }
       }
     }
-
     if (
       existingSession.error instanceof SessionExpiredError ||
+      existingSession.error instanceof SessionConcurrencyLimitError ||
       existingSession.error instanceof SessionUnexpectedError
     ) {
       const options = requestIsRedirectable

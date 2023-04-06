@@ -33,7 +33,7 @@ import {
 } from '../so_references';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type { IndexRefresh } from '../types';
-import type { AttachedToCaseArgs, GetAttachmentArgs, ServiceContext } from './types';
+import type { AttachedToCaseArgs, ServiceContext } from './types';
 import { AttachmentGetter } from './operations/get';
 
 type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
@@ -47,7 +47,9 @@ interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
   aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
 
-interface DeleteAttachmentArgs extends GetAttachmentArgs, IndexRefresh {}
+interface DeleteAttachmentArgs extends IndexRefresh {
+  attachmentIds: string[];
+}
 
 interface CreateAttachmentArgs extends IndexRefresh {
   attributes: AttachmentAttributes;
@@ -94,7 +96,7 @@ export class AttachmentService {
       const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
         ...params,
         attachmentType: CommentType.alert,
-        aggregations: this.buildAlertsAggs('cardinality'),
+        aggregations: this.buildAlertsAggs(),
       });
 
       return res?.alerts?.value;
@@ -104,32 +106,14 @@ export class AttachmentService {
     }
   }
 
-  private buildAlertsAggs(agg: string): Record<string, estypes.AggregationsAggregationContainer> {
+  private buildAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       alerts: {
-        [agg]: {
+        cardinality: {
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
         },
       },
     };
-  }
-
-  public async valueCountAlertsAttachedToCase(params: AlertsAttachedToCaseArgs): Promise<number> {
-    try {
-      this.context.log.debug(`Attempting to value count alerts for case id ${params.caseId}`);
-      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
-        ...params,
-        attachmentType: CommentType.alert,
-        aggregations: this.buildAlertsAggs('value_count'),
-      });
-
-      return res?.alerts?.value ?? 0;
-    } catch (error) {
-      this.context.log.error(
-        `Error while value counting alerts for case id ${params.caseId}: ${error}`
-      );
-      throw error;
-    }
   }
 
   /**
@@ -187,18 +171,21 @@ export class AttachmentService {
     }
   }
 
-  public async delete({ attachmentId, refresh }: DeleteAttachmentArgs) {
+  public async bulkDelete({ attachmentIds, refresh }: DeleteAttachmentArgs) {
     try {
-      this.context.log.debug(`Attempting to DELETE attachment ${attachmentId}`);
-      return await this.context.unsecuredSavedObjectsClient.delete(
-        CASE_COMMENT_SAVED_OBJECT,
-        attachmentId,
+      if (attachmentIds.length <= 0) {
+        return;
+      }
+
+      this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
+      return await this.context.unsecuredSavedObjectsClient.bulkDelete(
+        attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
         {
           refresh,
         }
       );
     } catch (error) {
-      this.context.log.error(`Error on DELETE attachment ${attachmentId}: ${error}`);
+      this.context.log.error(`Error on DELETE attachments ${attachmentIds}: ${error}`);
       throw error;
     }
   }

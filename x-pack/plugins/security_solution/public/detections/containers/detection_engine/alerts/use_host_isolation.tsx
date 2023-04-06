@@ -33,7 +33,11 @@ export const useHostIsolation = ({
   const isolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostIsolation({ endpointId, comment, caseIds });
+      const isolationStatus = await createHostIsolation({
+        endpointId,
+        comment,
+        caseIds: caseIds && caseIds.length > 0 ? caseIds : undefined,
+      });
       setLoading(false);
       return isolationStatus.action ? true : false;
     } catch (error) {

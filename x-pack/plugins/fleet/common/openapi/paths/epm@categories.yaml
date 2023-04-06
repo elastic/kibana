@@ -1,6 +1,7 @@
 get:
-  summary: Package categories
-  tags: []
+  summary: List package categories
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -12,20 +13,20 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-package-categories
 parameters:
-  - in: query 
+  - in: query
     name: prerelease
     schema:
       type: boolean
       default: false
     description: >-
-      Whether to include prerelease packages in categories count (e.g. beta, rc, preview) 
-  - in: query 
+      Whether to include prerelease packages in categories count (e.g. beta, rc, preview)
+  - in: query
     name: experimental
     deprecated: true
     schema:
       type: boolean
       default: false
-  - in: query 
+  - in: query
     name: include_policy_templates
     schema:
       type: boolean
