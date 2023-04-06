@@ -60,11 +60,13 @@ export const getTestProjectSyntheticsPolicy = (
             timeout: { type: 'text' },
             max_redirects: { type: 'integer' },
             proxy_url: { type: 'text' },
+            proxy_headers: { type: 'yaml' },
             tags: { type: 'yaml' },
             username: { type: 'text' },
             password: { type: 'password' },
             'response.include_headers': { type: 'bool' },
             'response.include_body': { type: 'text' },
+            'response.include_body_max_bytes': { type: 'text' },
             'check.request.method': { type: 'text' },
             'check.request.headers': { type: 'yaml' },
             'check.request.body': { type: 'yaml' },
@@ -85,6 +87,9 @@ export const getTestProjectSyntheticsPolicy = (
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            ipv4: { type: 'bool' },
+            ipv6: { type: 'bool' },
+            mode: { type: 'text' },
           },
           id: `synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
@@ -284,10 +289,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           id: `synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
         {
@@ -303,10 +305,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           id: `synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
       ],
