@@ -196,6 +196,23 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
     waitForRulesTableToBeLoaded();
   });
 
+  it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
+    selectNumberOfRules(customRulesNumber);
+
+    openBulkEditAddIndexPatternsForm();
+    typeIndexPatterns(expectedIndexPatterns);
+    checkOverwriteDataViewCheckbox();
+    submitBulkEditForm();
+
+    waitForBulkEditActionToFinish({
+      updatedCount: 2,
+    });
+
+    // check if rule still has data view and index patterns field does not exist
+    goToRuleDetails();
+    assertDetailsNotExist(DATA_VIEW_DETAILS);
+  });
+
   it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
     selectNumberOfRules(customRulesNumber);
 
@@ -213,22 +230,5 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
     goToRuleDetails();
     getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
-  });
-
-  it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
-    selectNumberOfRules(customRulesNumber);
-
-    openBulkEditAddIndexPatternsForm();
-    typeIndexPatterns(expectedIndexPatterns);
-    checkOverwriteDataViewCheckbox();
-    submitBulkEditForm();
-
-    waitForBulkEditActionToFinish({
-      updatedCount: 2,
-    });
-
-    // check if rule still has data view and index patterns field does not exist
-    goToRuleDetails();
-    assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 });
