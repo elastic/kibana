@@ -280,6 +280,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"
+                    extraOptions={extraVisualizationOptions}
                     getLensAttributes={getLensAttributes}
                     isInspectButtonDisabled={filterQuery === undefined}
                     lensAttributes={lensAttributes}
@@ -307,6 +308,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
+                extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
                 height={CHART_HEIGHT}
                 id={`${id}-embeddable`}
@@ -314,7 +316,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 lensAttributes={lensAttributes}
                 stackByField={selectedStackByOption.value}
                 timerange={timerange}
-                extraOptions={extraVisualizationOptions}
               />
             ) : (
               <MatrixHistogramChartContent

@@ -14,11 +14,12 @@ import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
-import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
+import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { VisualizationActions } from '../visualization_actions/actions';
 
 jest.mock('../../containers/query_toggle');
 
@@ -61,19 +62,23 @@ describe('Matrix Histogram Component', () => {
 
   const mockMatrixOverTimeHistogramProps = {
     defaultIndex: ['defaultIndex'],
-    defaultStackByOption: { text: 'text', value: 'value' },
+    defaultStackByOption: {
+      text: 'dns.question.registered_domain',
+      value: 'dns.question.registered_domain',
+    },
     endDate: '2019-07-18T20:00:00.000Z',
     errorMessage: 'error',
     histogramType: MatrixHistogramType.alerts,
     id: 'mockId',
     indexNames: [],
     isInspected: false,
-    isPtrIncluded: false,
+    isPtrIncluded: true,
     setQuery: jest.fn(),
     skip: false,
     sourceId: 'default',
-    stackByField: 'mockStackByField',
-    stackByOptions: [{ text: 'text', value: 'value' }],
+    stackByOptions: [
+      { text: 'dns.question.registered_domain', value: 'dns.question.registered_domain' },
+    ],
     startDate: '2019-07-18T19:00: 00.000Z',
     subtitle: 'mockSubtitle',
     totalCount: -1,
@@ -192,7 +197,7 @@ describe('Matrix Histogram Component', () => {
     test("it doesn't render Inspect button by default", () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
+        getLensAttributes: getDnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
@@ -202,17 +207,40 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('VisualizationActions', () => {
-    test('it renders VisualizationActions if lensAttributes is provided', () => {
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
+    const testProps = {
+      ...mockMatrixOverTimeHistogramProps,
+      getLensAttributes: jest.fn().mockReturnValue(getDnsTopDomainsLensAttributes()),
+    };
+    beforeEach(() => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
+    });
+    test('it renders VisualizationActions if getLensAttributes is provided', () => {
       expect(wrapper.find('[data-test-subj="visualizationActions"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="visualizationActions"]').prop('className')).toEqual(
         'histogram-viz-actions'
+      );
+    });
+
+    test('it VisualizationActions with correct properties', () => {
+      expect((VisualizationActions as unknown as jest.Mock).mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          className: 'histogram-viz-actions',
+          extraOptions: {
+            dnsIsPtrIncluded: testProps.isPtrIncluded,
+          },
+          getLensAttributes: testProps.getLensAttributes,
+          lensAttributes: undefined,
+          isInspectButtonDisabled: true,
+          queryId: testProps.id,
+          stackByField: testProps.defaultStackByOption.value,
+          timerange: {
+            from: testProps.startDate,
+            to: testProps.endDate,
+          },
+          title: testProps.title,
+        })
       );
     });
   });
@@ -220,7 +248,7 @@ describe('Matrix Histogram Component', () => {
   describe('toggle query', () => {
     const testProps = {
       ...mockMatrixOverTimeHistogramProps,
-      lensAttributes: dnsTopDomainsLensAttributes,
+      getLensAttributes: getDnsTopDomainsLensAttributes,
     };
 
     test('toggleQuery updates toggleStatus', () => {

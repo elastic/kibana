@@ -30,8 +30,10 @@ export interface UseLensAttributesProps {
 }
 
 export interface VisualizationActionsProps {
+  applyGlobalQueriesAndFilters?: boolean;
   className?: string;
   extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
@@ -40,6 +42,7 @@ export interface VisualizationActionsProps {
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;

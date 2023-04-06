@@ -9,7 +9,10 @@ import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
-export const getDnsTopDomainsLensAttributes: GetLensAttributes = (stackByField, extraOptions) =>
+export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
+  stackByField = 'dns.question.registered_domain',
+  extraOptions
+) =>
   ({
     title: 'Top domains by dns.question.registered_domain',
     visualizationType: 'lnsXY',
@@ -98,11 +101,11 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (stackByField, 
             'b1c3efc6-c886-4fba-978f-3b6bb5e7948a': {
               columns: {
                 'e8842815-2a45-4c74-86de-c19a391e2424': {
-                  label: TOP_VALUE('dns.question.registered_domain'),
+                  label: TOP_VALUE(stackByField),
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: 'dns.question.registered_domain',
+                  sourceField: stackByField,
                   isBucketed: true,
                   params: {
                     size: 10,

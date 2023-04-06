@@ -43,7 +43,7 @@ Object {
               "e8842815-2a45-4c74-86de-c19a391e2424": Object {
                 "dataType": "string",
                 "isBucketed": true,
-                "label": "Top values of dns.question.registered_domain",
+                "label": "Top values of event.dataset",
                 "operationType": "terms",
                 "params": Object {
                   "accuracyMode": true,
@@ -61,7 +61,7 @@ Object {
                   "size": 10,
                 },
                 "scale": "ordinal",
-                "sourceField": "dns.question.registered_domain",
+                "sourceField": "event.dataset",
               },
             },
             "incompleteColumns": Object {},
