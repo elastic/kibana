@@ -12,9 +12,9 @@
  */
 
 import React, { Suspense } from 'react';
-import { memoize } from 'lodash';
+import { memoize, partition } from 'lodash';
 
-import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import type { AttachmentType } from '../../../client/attachment_framework/types';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { CommentResponse } from '../../../../common/api';
@@ -116,6 +116,11 @@ export const createRegisteredAttachmentUserActionBuilder = <
       caseData: { id: caseData.id, title: caseData.title },
     };
 
+    const actions = attachmentViewObject.getActions?.(props) ?? [];
+    const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
+    const visiblePrimaryActions = primaryActions.slice(0, 2);
+    const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
+
     return [
       {
         username: (
@@ -128,10 +133,24 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
           <UserActionContentToolbar id={comment.id}>
-            {attachmentViewObject.actions}
+            {visiblePrimaryActions.map((action) => (
+              <EuiFlexItem
+                grow={false}
+                data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
+              >
+                <EuiButtonIcon
+                  aria-label={action.label}
+                  iconType={action.iconType}
+                  color={action.color ?? 'text'}
+                  onClick={action.onClick}
+                  data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                />
+              </EuiFlexItem>
+            ))}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
               onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
+              registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
             />
           </UserActionContentToolbar>
         ),
