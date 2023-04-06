@@ -239,6 +239,7 @@ export function FieldValueSelection({
                 )}
 
                 <EuiButton
+                  data-test-subj="o11yFieldValueSelectionApplyButton"
                   aria-label={i18n.translate(
                     'xpack.observability.fieldValueSelection.apply.label',
                     {

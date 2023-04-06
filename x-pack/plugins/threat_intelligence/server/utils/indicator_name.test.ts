@@ -11,7 +11,7 @@ describe('display name generation', () => {
   describe('threatIndicatorNamesScript()', () => {
     it('should generate a valid painless script', () => {
       expect(threatIndicatorNamesScript()).toMatchInlineSnapshot(`
-        "if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit(doc['threat.indicator.ip'].value) } }
+        "try { if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit(doc['threat.indicator.ip'].value) } }
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv6-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit(doc['threat.indicator.ip'].value) } }
 
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='file') { if (doc.containsKey('threat.indicator.file.hash.sha256') && !doc['threat.indicator.file.hash.sha256'].empty && doc['threat.indicator.file.hash.sha256'].size()!=0 && doc['threat.indicator.file.hash.sha256'].value!=null) { return emit(doc['threat.indicator.file.hash.sha256'].value) }
@@ -53,7 +53,7 @@ describe('display name generation', () => {
 
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='mac-addr') { if (doc.containsKey('threat.indicator.mac') && !doc['threat.indicator.mac'].empty && doc['threat.indicator.mac'].size()!=0 && doc['threat.indicator.mac'].value!=null) { return emit(doc['threat.indicator.mac'].value) } }
 
-        return emit('')"
+        return emit('') } catch (Exception e) { return emit('') }"
       `);
     });
   });
@@ -61,7 +61,7 @@ describe('display name generation', () => {
   describe('threatIndicatorNamesOriginScript()', () => {
     it('should generate a valid painless script', () => {
       expect(threatIndicatorNamesOriginScript()).toMatchInlineSnapshot(`
-        "if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit('threat.indicator.ip') } }
+        "try { if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv4-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit('threat.indicator.ip') } }
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='ipv6-addr') { if (doc.containsKey('threat.indicator.ip') && !doc['threat.indicator.ip'].empty && doc['threat.indicator.ip'].size()!=0 && doc['threat.indicator.ip'].value!=null) { return emit('threat.indicator.ip') } }
 
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='file') { if (doc.containsKey('threat.indicator.file.hash.sha256') && !doc['threat.indicator.file.hash.sha256'].empty && doc['threat.indicator.file.hash.sha256'].size()!=0 && doc['threat.indicator.file.hash.sha256'].value!=null) { return emit('threat.indicator.file.hash.sha256') }
@@ -103,7 +103,7 @@ describe('display name generation', () => {
 
         if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='mac-addr') { if (doc.containsKey('threat.indicator.mac') && !doc['threat.indicator.mac'].empty && doc['threat.indicator.mac'].size()!=0 && doc['threat.indicator.mac'].value!=null) { return emit('threat.indicator.mac') } }
 
-        return emit('')"
+        return emit('') } catch (Exception e) { return emit('') }"
       `);
     });
   });

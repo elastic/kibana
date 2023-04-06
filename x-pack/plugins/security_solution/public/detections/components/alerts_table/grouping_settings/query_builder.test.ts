@@ -43,19 +43,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
           value_count: {
             field: 'kibana.alert.rule.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'kibana.alert.rule.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },
@@ -180,19 +180,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
           value_count: {
             field: 'process.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'process.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },

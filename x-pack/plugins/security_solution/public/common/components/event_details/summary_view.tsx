@@ -83,7 +83,7 @@ const SummaryViewComponent: React.FC<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink onClick={goToTable}>
+          <EuiLink onClick={goToTable} data-test-subj="summary-view-go-to-table-link">
             <EuiText size="xs">{VIEW_ALL_FIELDS}</EuiText>
           </EuiLink>
         </EuiFlexItem>

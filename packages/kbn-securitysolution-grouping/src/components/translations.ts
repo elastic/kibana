@@ -47,8 +47,8 @@ export const CUSTOM_FIELD = i18n.translate('grouping.customGroupByOptionName', {
   defaultMessage: 'Custom field',
 });
 
-export const ALERTS_UNIT = (totalCount: number) =>
+export const DEFAULT_UNIT = (totalCount: number) =>
   i18n.translate('grouping.eventsTab.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });

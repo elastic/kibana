@@ -77,7 +77,7 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         jest.advanceTimersByTime(1000);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/events');
+        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/overview');
         jest.useRealTimers();
       });
     });
@@ -166,9 +166,7 @@ describe('addAnalyticsCollectionLogic', () => {
 
       it('updates when apiSuccess listener triggered', () => {
         AddAnalyticsCollectionLogic.actions.apiSuccess({
-          event_retention_day_length: 180,
           events_datastream: 'logs-elastic_analytics.events-test',
-          id: 'bla',
           name: 'test',
         });
 

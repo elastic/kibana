@@ -153,7 +153,7 @@ export const useListDetailsView = (exceptionListId: string) => {
               list_id: exceptionListId,
               type: list.type,
               name: listDetails.name,
-              description: listDetails.description || list.description,
+              description: listDetails.description ?? '',
               namespace_type: list.namespace_type,
             },
           });

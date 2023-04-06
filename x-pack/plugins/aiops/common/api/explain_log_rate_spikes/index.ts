@@ -6,10 +6,10 @@
  */
 
 export {
-  addChangePointsAction,
-  addChangePointsGroupAction,
-  addChangePointsGroupHistogramAction,
-  addChangePointsHistogramAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
+  addSignificantTermsGroupHistogramAction,
+  addSignificantTermsHistogramAction,
   addErrorAction,
   pingAction,
   resetAllAction,

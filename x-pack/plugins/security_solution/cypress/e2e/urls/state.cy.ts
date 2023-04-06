@@ -287,9 +287,8 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
-    addNameToTimeline(getTimeline().title);
-
     cy.wait('@timeline').then(({ response }) => {
+      addNameToTimeline(getTimeline().title);
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;

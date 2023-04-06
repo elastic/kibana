@@ -122,6 +122,7 @@ export const getKibanaMigratorTestKit = async ({
   types = [],
   logFilePath = defaultLogFilePath,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
+  let hasRun = false;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -148,9 +149,15 @@ export const getKibanaMigratorTestKit = async ({
     kibanaBranch
   );
 
-  const runMigrations = async (rerun?: boolean) => {
+  const runMigrations = async () => {
+    if (hasRun) {
+      throw new Error('The test kit migrator can only be run once. Please instantiate it again.');
+    }
+    hasRun = true;
     migrator.prepareMigrations();
-    return await migrator.runMigrations({ rerun });
+    const migrationResults = await migrator.runMigrations();
+    await loggingSystem.stop();
+    return migrationResults;
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
@@ -283,13 +290,12 @@ const registerTypes = (
 };
 
 export const createBaseline = async () => {
-  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     kibanaIndex: defaultKibanaIndex,
     types: baselineTypes,
   });
 
-  migrator.prepareMigrations();
-  await migrator.runMigrations();
+  await runMigrations();
 
   await savedObjectsRepository.bulkCreate(baselineDocuments, {
     refresh: 'wait_for',
@@ -385,7 +391,7 @@ export const getIncompatibleMappingsMigrator = async ({
 };
 
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
-  await delay(0.1); // give the logger enough time to write to the file
+  await delay(0.1);
   return await fs.readFile(logFilePath, 'utf-8');
 };
 

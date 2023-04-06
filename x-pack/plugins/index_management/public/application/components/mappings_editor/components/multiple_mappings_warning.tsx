@@ -17,7 +17,7 @@ export const MultipleMappingsWarning = () => (
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutTitle', {
       defaultMessage: 'Mapping types detected',
     })}
-    iconType="alert"
+    iconType="warning"
     color="warning"
     data-test-subj="mappingTypesDetectedCallout"
   >

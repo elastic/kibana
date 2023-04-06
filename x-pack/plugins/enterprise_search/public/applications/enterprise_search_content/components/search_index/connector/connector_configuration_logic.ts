@@ -155,7 +155,10 @@ export const ConnectorConfigurationLogic = kea<
             )
             .filter(isNotNullish)
             .reduce(
-              (prev: Record<string, string>, { key, value }) => ({ ...prev, [key]: value }),
+              (prev: Record<string, string | number | boolean | null>, { key, value }) => ({
+                ...prev,
+                [key]: value,
+              }),
               {}
             ),
           connectorId: values.index.connector.id,

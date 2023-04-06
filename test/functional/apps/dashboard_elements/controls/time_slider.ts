@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display document count for global time range when no timeslice is set', async () => {
-          expect(await discover.getSavedSearchDocumentCount()).to.be('14005 documents');
+          expect(await discover.getSavedSearchDocumentCount()).to.be('14,005 documents');
         });
 
         it('should display document count for timeslice when timeslice is selected', async () => {

@@ -28,7 +28,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
     <>
       <EuiCallOut
         size="m"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="snDeprecatedCallout"
         color="warning"
         title={i18n.translate(

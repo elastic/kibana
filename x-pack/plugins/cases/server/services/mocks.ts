@@ -139,6 +139,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     executeAggregations: jest.fn(),
     bulkUpdateCases: jest.fn(),
     ensureAlertsAuthorized: jest.fn(),
+    removeCaseIdFromAlerts: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -152,6 +153,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAllAlertsAttachToCase: jest.fn(),
     getCaseCommentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
+    getFileAttachments: jest.fn(),
   };
 
   return service as unknown as AttachmentGetterServiceMock;
@@ -162,7 +164,7 @@ type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServ
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: FakeAttachmentService = {
     getter: createAttachmentGetterServiceMock(),
-    delete: jest.fn(),
+    bulkDelete: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),

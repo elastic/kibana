@@ -156,10 +156,6 @@ jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
 
-jest.mock('./timeline_actions/use_bulk_add_to_case_actions', () => ({
-  useBulkAddToCaseActions: jest.fn(() => []),
-}));
-
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -188,6 +184,8 @@ const testProps: AlertsTableComponentProps = {
   to: '2020-07-08T08:20:18.966Z',
 };
 
+const resetPagination = jest.fn();
+
 describe('GroupedAlertsTable', () => {
   const getGrouping = jest.fn().mockReturnValue(<span data-test-subj={'grouping-table'} />);
   beforeEach(() => {
@@ -201,7 +199,7 @@ describe('GroupedAlertsTable', () => {
       groupSelector: <></>,
       getGrouping,
       selectedGroup: 'host.name',
-      pagination: { pageSize: 1, pageIndex: 0 },
+      pagination: { pageSize: 1, pageIndex: 0, reset: resetPagination },
     });
   });
 
@@ -220,26 +218,15 @@ describe('GroupedAlertsTable', () => {
     );
   });
 
-  it('renders alerts table when no group selected', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
-    expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
-  });
-
-  it('renders grouped alerts when group selected', async () => {
+  it('renders grouping table', async () => {
     (isNoneGroup as jest.Mock).mockReturnValue(false);
 
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders store={groupingStore}>
         <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
     expect(getByTestId('grouping-table')).toBeInTheDocument();
-    expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
     expect(getGrouping.mock.calls[0][0].isLoading).toEqual(false);
   });
 
@@ -251,5 +238,24 @@ describe('GroupedAlertsTable', () => {
       </TestProviders>
     );
     expect(getGrouping.mock.calls[0][0].isLoading).toEqual(true);
+  });
+
+  it('resets grouping pagination when global query updates', () => {
+    (isNoneGroup as jest.Mock).mockReturnValue(false);
+    const { rerender } = render(
+      <TestProviders store={groupingStore}>
+        <GroupedAlertsTableComponent {...testProps} />
+      </TestProviders>
+    );
+    // called on initial query definition
+    expect(resetPagination).toHaveBeenCalledTimes(1);
+    rerender(
+      <TestProviders store={groupingStore}>
+        <GroupedAlertsTableComponent
+          {...{ ...testProps, globalQuery: { query: 'updated', language: 'language' } }}
+        />
+      </TestProviders>
+    );
+    expect(resetPagination).toHaveBeenCalledTimes(2);
   });
 });

@@ -22,6 +22,12 @@ export const ADD_FALSE_POSITIVE_BTN =
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
+export const ALERT_SUPPRESSION_FIELDS =
+  '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
+
+export const ALERT_SUPPRESSION_DURATION_OPTIONS =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
