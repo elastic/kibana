@@ -7,6 +7,11 @@
 
 const SAMPLE_PROBABILITY_MIN_DOC_COUNT = 50000;
 
+// Trims the sample probability to the first non-zero digit.
+function trimSampleProbability(x: number): number {
+  return +x.toFixed(Math.max(-Math.log10(x) + 1, 1));
+}
+
 export function getSampleProbability(totalDocCount: number) {
   let sampleProbability = 1;
 
@@ -14,5 +19,5 @@ export function getSampleProbability(totalDocCount: number) {
     sampleProbability = Math.min(0.5, SAMPLE_PROBABILITY_MIN_DOC_COUNT / totalDocCount);
   }
 
-  return sampleProbability;
+  return trimSampleProbability(sampleProbability);
 }

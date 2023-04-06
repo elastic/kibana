@@ -26,6 +26,7 @@ import {
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export interface DocumentStats {
+  sampleProbability: number;
   totalCount: number;
   documentCountStats?: DocumentCountStats;
   documentCountStatsCompare?: DocumentCountStats;
@@ -70,6 +71,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const abortCtrl = useRef(new AbortController());
 
   const [documentStats, setDocumentStats] = useState<DocumentStats>({
+    sampleProbability: 1,
     totalCount: 0,
   });
 
@@ -132,6 +134,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       );
 
       const newStats: DocumentStats = {
+        sampleProbability: randomSamplerWrapper.probability,
         documentCountStats,
         totalCount,
       };

@@ -26,6 +26,6 @@ describe('createRandomSamplerWrapper', () => {
   });
 
   test('returns un-sampled aggregation as-is for probability of null', () => {
-    expect(createRandomSamplerWrapper({ probability: null }).wrap(testAggs)).toEqual(testAggs);
+    expect(createRandomSamplerWrapper({ probability: 1 }).wrap(testAggs)).toEqual(testAggs);
   });
 });

@@ -10,9 +10,12 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
 import { type SignificantTerm } from '@kbn/ml-agg-utils';
-import { randomSampler } from '@kbn/ml-random-sampler-utils';
+import {
+  createRandomSamplerWrapper,
+  type RandomSamplerWrapper,
+} from '@kbn/ml-random-sampler-utils';
 
-import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
+import { SPIKE_ANALYSIS_THRESHOLD, RANDOM_SAMPLER_SEED } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
 import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
@@ -26,8 +29,7 @@ import { getRequestBase } from './get_request_base';
 export const getSignificantTermRequest = (
   params: AiopsExplainLogRateSpikesSchema,
   fieldName: string,
-  // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1
+  { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
     params,
@@ -81,12 +83,10 @@ export const getSignificantTermRequest = (
     },
   };
 
-  const rs = randomSampler({ probability: sampleProbability });
-
   const body = {
     query,
     size: 0,
-    aggs: rs.wrap(pValueAgg),
+    aggs: wrap(pValueAgg),
   };
 
   return {
@@ -111,11 +111,16 @@ export const fetchSignificantTermPValues = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ): Promise<SignificantTerm[]> => {
+  const randomSamplerWrapper = createRandomSamplerWrapper({
+    probability: sampleProbability,
+    seed: RANDOM_SAMPLER_SEED,
+  });
+
   const result: SignificantTerm[] = [];
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
-      esClient.search(getSignificantTermRequest(params, fieldName, sampleProbability), {
+      esClient.search(getSignificantTermRequest(params, fieldName, randomSamplerWrapper), {
         signal: abortSignal,
         maxRetries: 0,
       })
@@ -152,9 +157,9 @@ export const fetchSignificantTermPValues = async (
       continue;
     }
 
-    const rs = randomSampler({ probability: sampleProbability });
-
-    const overallResult = rs.unwrap(resp.aggregations).change_point_p_value as Aggs;
+    const overallResult = (
+      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'change_point_p_value', Aggs>
+    ).change_point_p_value;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);

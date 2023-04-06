@@ -18,7 +18,7 @@ interface RandomSamplerOptionsBase {
 }
 
 interface RandomSamplerOptionProbability extends RandomSamplerOptionsBase {
-  probability: number | null;
+  probability: number;
 }
 
 function isRandomSamplerOptionProbability(arg: unknown): arg is RandomSamplerOptionProbability {
@@ -32,12 +32,12 @@ interface RandomSamplerOptionTotalNumDocs extends RandomSamplerOptionsBase {
 type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOptionTotalNumDocs;
 
 export function isValidProbability(d: unknown): d is number {
-  return typeof d === 'number' && d > 0 && d <= 1;
+  return typeof d === 'number' && d > 0 && d < 0.5;
 }
 
 export type RandomSamplerWrapper = ReturnType<typeof createRandomSamplerWrapper>;
 export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
-  let probability: number | null = 1;
+  let probability: number = 1;
 
   if (isRandomSamplerOptionProbability(options)) {
     probability = options.probability;
@@ -70,5 +70,5 @@ export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
     responseAggs: T
   ) => (!isValidProbability(probability) ? responseAggs : get(responseAggs, [aggName]));
 
-  return { wrap, unwrap };
+  return { wrap, unwrap, probability };
 };
