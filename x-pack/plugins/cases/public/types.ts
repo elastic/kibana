@@ -25,6 +25,9 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -103,6 +106,10 @@ export interface CasesUiStart {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
+      bulkGet: <Field extends keyof CaseResponse = keyof CaseResponse>(
+        params: CasesBulkGetRequestCertainFields<Field>,
+        signal?: AbortSignal
+      ) => Promise<CasesBulkGetResponseCertainFields<Field>>;
     };
   };
   ui: {
