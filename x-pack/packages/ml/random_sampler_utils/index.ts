@@ -6,4 +6,4 @@
  */
 
 export { getSampleProbability } from './src/get_sample_probability';
-export { randomSampler } from './src/random_sampler';
+export { randomSampler, type RandomSampler } from './src/random_sampler';

@@ -11,6 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
+import { randomSampler } from '@kbn/ml-random-sampler-utils';
 
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
@@ -87,17 +88,36 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     try {
       abortCtrl.current = new AbortController();
 
+      const totalHitsParams = {
+        ...searchParams,
+        timeFieldName: undefined,
+        selectedSignificantTerm: undefined,
+        trackTotalHits: true,
+      };
+
+      const totalHitsResp = await lastValueFrom(
+        data.search.search(
+          {
+            params: getDocumentCountStatsRequest(totalHitsParams),
+          },
+          { abortSignal: abortCtrl.current.signal }
+        )
+      );
+      const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
+      const totalCount = totalHitsStats?.totalCount ?? 0;
+
+      const rs = randomSampler({ totalNumDocs: totalCount });
+
       const resp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(searchParams),
+            params: getDocumentCountStatsRequest({ ...searchParams, trackTotalHits: false }, rs),
           },
           { abortSignal: abortCtrl.current.signal }
         )
       );
 
-      const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams);
-      const totalCount = documentCountStats?.totalCount ?? 0;
+      const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams, rs);
 
       const newStats: DocumentStats = {
         documentCountStats,
@@ -108,7 +128,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         const respCompare = await lastValueFrom(
           data.search.search(
             {
-              params: getDocumentCountStatsRequest(searchParamsCompare),
+              params: getDocumentCountStatsRequest(
+                { ...searchParamsCompare, trackTotalHits: false },
+                rs
+              ),
             },
             { abortSignal: abortCtrl.current.signal }
           )
@@ -116,12 +139,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
         const documentCountStatsCompare = processDocumentCountStats(
           respCompare?.rawResponse,
-          searchParamsCompare
+          searchParamsCompare,
+          rs
         );
-        const totalCountCompare = documentCountStatsCompare?.totalCount ?? 0;
 
         newStats.documentCountStatsCompare = documentCountStatsCompare;
-        newStats.totalCount = totalCount + totalCountCompare;
+        newStats.totalCount = totalCount;
       }
 
       setDocumentStats(newStats);

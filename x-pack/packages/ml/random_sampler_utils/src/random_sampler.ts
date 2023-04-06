@@ -38,6 +38,11 @@ interface RandomSamplerOptionTotalNumDocs extends RandomSamplerOptionsBase {
 
 type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOptionTotalNumDocs;
 
+function isValidProbability(d: unknown): d is number {
+  return typeof d === 'number' && d > 0 && d <= 1;
+}
+
+export type RandomSampler = ReturnType<typeof randomSampler>;
 export const randomSampler = (options: RandomSamplerOptions) => {
   let probability: number | null = 1;
 
@@ -52,7 +57,7 @@ export const randomSampler = (options: RandomSamplerOptions) => {
   const wrap = <T extends Record<string, estypes.AggregationsAggregationContainer>>(
     aggs: T
   ): T | Record<string, estypes.AggregationsAggregationContainer> => {
-    if (probability === null || probability <= 0 || probability > 1) {
+    if (!isValidProbability(probability)) {
       return aggs;
     }
 
@@ -70,7 +75,7 @@ export const randomSampler = (options: RandomSamplerOptions) => {
 
   const unwrap = <T extends estypes.SearchResponse['aggregations']>(responseAggs: T) => {
     if (responseAggs !== undefined) {
-      return probability === 1 ? responseAggs : get(responseAggs, [aggName]);
+      return !isValidProbability(probability) ? responseAggs : get(responseAggs, [aggName]);
     }
   };
 
