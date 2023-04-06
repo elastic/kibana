@@ -11,5 +11,5 @@ import { PartialRuleParams } from '../../../../../common/alerting/logs/log_thres
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<PartialRuleParams>;
-  alert: TopAlert;
+  alert: TopAlert<Record<string, any>>;
 }
