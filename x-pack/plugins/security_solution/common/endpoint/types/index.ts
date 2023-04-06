@@ -1228,6 +1228,19 @@ export interface HostPolicyResponse {
             events: HostPolicyResponseConfigurationStatus;
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            attack_surface_reduction: HostPolicyResponseConfigurationStatus;
+            antivirus_registration: HostPolicyResponseConfigurationStatus;
+            host_isolation: HostPolicyResponseConfigurationStatus;
+            response_actions: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
+          };
+          diagnostic: {
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            malware: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
           };
         };
         artifacts: {

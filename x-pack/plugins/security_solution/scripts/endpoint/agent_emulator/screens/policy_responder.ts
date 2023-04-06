@@ -20,6 +20,15 @@ import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/type
 
 const policyResponseGenerator = new EndpointPolicyResponseGenerator();
 
+const policyResponseStatusesTypes: Readonly<
+  Record<string, HostPolicyResponseActionStatus | undefined>
+> = Object.freeze({
+  Success: HostPolicyResponseActionStatus.success,
+  Failure: HostPolicyResponseActionStatus.failure,
+  Warning: HostPolicyResponseActionStatus.warning,
+  Random: undefined,
+});
+
 interface PolicyResponseOptions {
   agentId: string;
   hostMetadata: HostInfo;
@@ -113,7 +122,7 @@ ${this.choices.output}
           type: 'list',
           name: 'responseType',
           message: 'Policy response type: ',
-          choices: ['Success', 'Failure', 'Random'],
+          choices: Object.keys(policyResponseStatusesTypes),
           default: 'Success',
         },
       ],
@@ -142,11 +151,7 @@ ${this.choices.output}
     const { responseType, hostMetadata } = this.options;
     const lastAppliedPolicy = hostMetadata.metadata.Endpoint.policy.applied;
     const overallStatus: HostPolicyResponseActionStatus | undefined =
-      responseType === 'Success'
-        ? HostPolicyResponseActionStatus.success
-        : responseType === 'Failure'
-        ? HostPolicyResponseActionStatus.failure
-        : undefined;
+      policyResponseStatusesTypes[responseType];
 
     const policyApplied: Partial<HostInfo['metadata']['Endpoint']['policy']['applied']> = {
       ...(overallStatus ? { status: overallStatus } : {}),
