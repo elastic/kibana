@@ -34,5 +34,7 @@ describe('transformAddManaged', () => {
     [docWithManagedFalse, docWithManagedTrue].forEach((doc) => {
       expect(doc.transformedDoc.managed).toBeDefined();
     });
+    expect(docWithManagedFalse.transformedDoc.managed).not.toBeTruthy();
+    expect(docWithManagedTrue.transformedDoc.managed).toBeTruthy();
   });
 });
