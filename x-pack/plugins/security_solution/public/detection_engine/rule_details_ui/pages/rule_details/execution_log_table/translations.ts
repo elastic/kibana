@@ -229,3 +229,10 @@ export const GREATER_THAN_YEAR = i18n.translate(
     defaultMessage: '> 1 Year',
   }
 );
+
+export const COPY_FULL_MESSAGE_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.copyFullMessageText',
+  {
+    defaultMessage: 'Copy full message text',
+  }
+);

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -18,6 +19,7 @@ import type {
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
+import { CopyTextIconButton } from '../../../../../common/components/copy_text_icon_button';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
@@ -77,7 +79,37 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
         tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
       />
     ),
-    render: (value: string) => <>{value}</>,
+    render: (value: string, record) => {
+      if (record.security_status === 'succeeded') {
+        return value;
+      }
+
+      return (
+        <div
+          css={css`
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+          `}
+        >
+          <div
+            css={css`
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            `}
+          >
+            {value}
+          </div>
+          <CopyTextIconButton
+            textToCopy={value}
+            tooltipTextBeforeCopying={i18n.COPY_FULL_MESSAGE_TEXT}
+          />
+        </div>
+      );
+    },
     sortable: false,
     truncateText: false,
     width: '35%',

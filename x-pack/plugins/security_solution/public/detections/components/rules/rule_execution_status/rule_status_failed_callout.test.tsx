@@ -52,6 +52,7 @@ describe('RuleStatusFailedCallOut', () => {
     result.getByText('Warning at');
     result.getByText('Jan 27, 2022 @ 15:03:31.176');
     result.getByText(MESSAGE);
+    result.getByTestId('copyTextIconButton');
   });
 
   it('is visible if status is "failed"', () => {
@@ -60,5 +61,6 @@ describe('RuleStatusFailedCallOut', () => {
     result.getByText('Rule failure at');
     result.getByText('Jan 27, 2022 @ 15:03:31.176');
     result.getByText(MESSAGE);
+    result.getByTestId('copyTextIconButton');
   });
 });

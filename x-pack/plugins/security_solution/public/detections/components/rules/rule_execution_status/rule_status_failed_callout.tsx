@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
+import { CopyTextIconButton } from '../../../../common/components/copy_text_icon_button';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 
@@ -34,15 +35,29 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
       title={
         <>
           {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
+          <span
+            css={`
+              float: right;
+            `}
+          >
+            <CopyTextIconButton textToCopy={message} />
+          </span>
         </>
       }
       color={color}
       iconType="warning"
       data-test-subj="ruleStatusFailedCallOut"
     >
-      {message.split('\n').map((line) => (
-        <p>{line}</p>
-      ))}
+      <div
+        css={`
+          max-height: 200px;
+          overflow-y: auto;
+        `}
+      >
+        {message.split('\n').map((line) => (
+          <p>{line}</p>
+        ))}
+      </div>
     </EuiCallOut>
   );
 };
