@@ -6,7 +6,7 @@
  */
 
 import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
-import { UNINSTALL_COMMAND_TARGETS } from './uninstall_command_flyout';
+import { UNINSTALL_COMMAND_TARGETS } from './types';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 
 export default {
