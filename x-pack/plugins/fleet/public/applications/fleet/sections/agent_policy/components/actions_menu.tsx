@@ -140,6 +140,7 @@ export const AgentPolicyActionMenu = memo<{
                   setIsUninstallCommandFlyoutOpen(true);
                 }}
                 key="getUninstallCommand"
+                data-test-subj="uninstall-agents-command-menu-item"
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyActionMenu.getUninstallCommand"
