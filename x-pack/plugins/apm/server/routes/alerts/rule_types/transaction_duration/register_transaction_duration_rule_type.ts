@@ -171,7 +171,6 @@ export function registerTransactionDurationRuleType({
                     missing: ENVIRONMENT_NOT_DEFINED.value,
                   },
                   { field: TRANSACTION_TYPE },
-                  { field: TRANSACTION_NAME },
                 ],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
@@ -203,8 +202,7 @@ export function registerTransactionDurationRuleType({
       const triggeredBuckets = [];
 
       for (const bucket of response.aggregations.series.buckets) {
-        const [serviceName, environment, transactionType, transactionName] =
-          bucket.key;
+        const [serviceName, environment, transactionType] = bucket.key;
 
         const transactionDuration =
           'avgLatency' in bucket // only true if ruleParams.aggregationType === 'avg'
@@ -220,7 +218,6 @@ export function registerTransactionDurationRuleType({
             serviceName,
             sourceFields: getServiceGroupFields(bucket),
             transactionType,
-            transactionName,
             transactionDuration,
           });
         }
@@ -230,7 +227,6 @@ export function registerTransactionDurationRuleType({
         serviceName,
         environment,
         transactionType,
-        transactionName,
         transactionDuration,
         sourceFields,
       } of triggeredBuckets) {
@@ -277,7 +273,6 @@ export function registerTransactionDurationRuleType({
               [SERVICE_NAME]: serviceName,
               ...getEnvironmentEsField(environment),
               [TRANSACTION_TYPE]: transactionType,
-              [TRANSACTION_NAME]: transactionName,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
