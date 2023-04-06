@@ -15,12 +15,12 @@ import { shallow } from 'enzyme';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
+import { LicensingCallout } from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
+
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 import { AnalyticsOverview } from './analytics_overview';
-import { LicensingCallout } from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
 import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
-import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 const mockValues = {
   analyticsCollections: [
@@ -56,7 +56,6 @@ describe('AnalyticsOverview', () => {
       expect(mockActions.fetchAnalyticsCollections).toHaveBeenCalled();
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
       expect(wrapper.find(AnalyticsOverviewEmptyPage)).toHaveLength(1);
-
     });
 
     it('renders with Data', async () => {
@@ -78,12 +77,12 @@ describe('AnalyticsOverview', () => {
       });
       setMockActions(mockActions);
       const wrapper = shallow(<AnalyticsOverview />);
-  
+
       expect(wrapper.find(AnalyticsCollectionTable)).toHaveLength(0);
       expect(wrapper.find(AnalyticsOverviewEmptyPage)).toHaveLength(0);
       expect(wrapper.find(LicensingCallout)).toHaveLength(1);
     });
-  
+
     it('Does not render Platinum license callout when Cloud', async () => {
       setMockValues({
         ...mockValues,
@@ -92,7 +91,7 @@ describe('AnalyticsOverview', () => {
       });
       setMockActions(mockActions);
       const wrapper = shallow(<AnalyticsOverview />);
-  
+
       expect(wrapper.find(LicensingCallout)).toHaveLength(0);
     });
   });
