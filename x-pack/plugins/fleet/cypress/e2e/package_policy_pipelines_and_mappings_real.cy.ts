@@ -166,11 +166,10 @@ describe('Integration package with custom dataset create and edit package policy
   });
 });
 
-describe('Integration package with fixed dataset create and edit package policy', () => {
+describe.only('Integration package with fixed dataset create and edit package policy', () => {
   const agentPolicyId = 'test-integration-package-policy';
   const agentPolicyName = 'Test integration package policy';
   const packagePolicyName = 'integration-package-policy';
-  const datasetName = INTEGRATION_TEST_PACKAGE_NO_DATASET + '.log';
 
   before(() => {
     cy.task('installTestPackage', INTEGRATION_TEST_PACKAGE_NO_DATASET);
@@ -234,6 +233,6 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
 
     cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).click();
-    cy.get('body').should('contain', `logs-${datasetName}@custom`);
+    cy.get('body').should('contain', `logs-logs_int_no_dataset.log@custom`);
   });
 });
