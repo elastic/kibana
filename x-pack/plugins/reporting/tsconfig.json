@@ -39,6 +39,7 @@
     "@kbn/generate-csv",
     "@kbn/generate-csv-types",
     "@kbn/reporting-common",
+    "@kbn/generate-csv-types",
   ],
   "exclude": [
     "target/**/*",
