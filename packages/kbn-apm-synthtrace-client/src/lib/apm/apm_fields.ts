@@ -89,6 +89,7 @@ export type ApmFields = Fields<{
     'error.grouping_key': string;
     'error.grouping_name': string;
     'error.id': string;
+    'error.type': string;
     'event.ingested': number;
     'event.name': string;
     'event.outcome': string;

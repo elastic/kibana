@@ -130,7 +130,7 @@ export async function getMobileMainStatisticsByField({
           end,
           value: bucket.doc_count,
         }),
-        crashRate: (bucket.crashes.doc_count / bucket.sessions.value) * 100,
+        crashRate: bucket.crashes.doc_count / bucket.sessions.value,
         appLaunchTime: bucket.app_launch_time.value,
       };
     }) ?? [];

@@ -12,6 +12,7 @@ import { Transaction } from './transaction';
 import { ApmFields, SpanParams, GeoLocation, ApmApplicationMetricFields } from './apm_fields';
 import { generateLongId } from '../utils/generate_id';
 import { Metricset } from './metricset';
+import { ApmError } from './apm_error';
 
 export interface DeviceInfo {
   manufacturer: string;
@@ -245,6 +246,15 @@ export class MobileDevice extends Entity<ApmFields> {
       ...this.fields,
       'metricset.name': 'app',
       ...metrics,
+    });
+  }
+
+  crash({ message, groupingName }: { message: string; groupingName?: string }) {
+    return new ApmError({
+      ...this.fields,
+      'error.type': 'crash',
+      'error.exception': [{ message, ...{ type: 'crash' } }],
+      'error.grouping_name': groupingName || message,
     });
   }
 }
