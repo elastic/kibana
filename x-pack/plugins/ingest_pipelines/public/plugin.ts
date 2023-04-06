@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
 import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
-import { SetupDependencies, StartDependencies } from './types';
+import { SetupDependencies, StartDependencies, ILicense } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 
 export class IngestPipelinesPlugin

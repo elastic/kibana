@@ -15,7 +15,7 @@ import {
   FieldValidateResponse,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { LicenseType } from '@kbn/licensing-plugin/public';
+import { LicenseType } from '../../../../../../../types';
 import {
   FIELD_TYPES,
   FieldConfig,
@@ -26,12 +26,12 @@ import {
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
 
-const extractProcessorTypesAndLabels = flow(
+const extractProcessorDetails = flow(
   Object.entries,
   map(([type, { label, forLicenseAtLeast }]) => ({
     label,
-    ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
     value: type,
+    ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
   })),
   (arr) => arr.sort((a, b) => a.label.localeCompare(b.label))
 );
@@ -42,7 +42,7 @@ interface ProcessorTypeAndLabel {
   forLicenseAtLeast?: LicenseType;
 }
 
-const processorTypesAndLabels: ProcessorTypeAndLabel[] = extractProcessorTypesAndLabels(
+const processorTypesAndLabels: ProcessorTypeAndLabel[] = extractProcessorDetails(
   mapProcessorTypeToDescriptor
 );
 

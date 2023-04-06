@@ -6,10 +6,9 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { StartDependencies } from '../types';
+import { StartDependencies, ILicense } from '../types';
 import {
   documentationService,
   uiMetricService,

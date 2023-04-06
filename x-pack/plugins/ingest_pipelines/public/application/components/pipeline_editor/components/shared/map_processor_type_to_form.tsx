@@ -10,7 +10,7 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
-import { LicenseType } from '@kbn/licensing-plugin/public';
+import { LicenseType } from '../../../../../types';
 
 import {
   Append,
@@ -72,7 +72,7 @@ interface FieldDescriptor {
    */
   getDefaultDescription: (processorOptions: Record<string, any>) => string | undefined;
   /**
-   * Should only be shown for specific license types
+   * Some processors are only available for certain license types
    */
   forLicenseAtLeast?: LicenseType;
 }
