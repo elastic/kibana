@@ -119,7 +119,7 @@ export interface ExtraOptions {
   ruleId?: string;
   spaceId?: string;
   status?: Status;
-  dnsIsPtrIncluded: boolean;
+  dnsIsPtrIncluded?: boolean;
 }
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
