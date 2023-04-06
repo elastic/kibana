@@ -42,7 +42,8 @@ export interface DocumentStatsSearchStrategyParams {
 
 export const getDocumentCountStatsRequest = (
   params: DocumentStatsSearchStrategyParams,
-  randomSamplerWrapper?: RandomSamplerWrapper
+  randomSamplerWrapper?: RandomSamplerWrapper,
+  skipAggs = false
 ) => {
   const {
     index,
@@ -96,7 +97,11 @@ export const getDocumentCountStatsRequest = (
         filter: filterCriteria,
       },
     },
-    ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+    ...(!fieldsToFetch &&
+    !skipAggs &&
+    timeFieldName !== undefined &&
+    intervalMs !== undefined &&
+    intervalMs > 0
       ? { aggs }
       : {}),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),

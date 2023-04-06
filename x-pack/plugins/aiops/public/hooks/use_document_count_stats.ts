@@ -94,7 +94,6 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
       const totalHitsParams = {
         ...searchParams,
-        timeFieldName: undefined,
         selectedSignificantTerm: undefined,
         trackTotalHits: true,
       };
@@ -102,7 +101,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsResp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(totalHitsParams),
+            params: getDocumentCountStatsRequest(totalHitsParams, undefined, true),
           },
           { abortSignal: abortCtrl.current.signal }
         )
