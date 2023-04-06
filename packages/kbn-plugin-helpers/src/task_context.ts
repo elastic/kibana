@@ -11,8 +11,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Plugin } from './load_kibana_platform_plugin';
 import { Config } from './config';
 
-export interface BuildContext {
+export interface TaskContext {
   log: ToolingLog;
+  dev: boolean;
+  dist?: boolean;
+  watch?: boolean;
   plugin: Plugin;
   config: Config;
   sourceDir: string;
