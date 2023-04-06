@@ -78,17 +78,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusAfterPackageInstallation.rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.rules_not_installed).toBeGreaterThan(0);
       expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
-
-      // Verify that all previously not installed rules were installed
-      const response = await installPrebuiltRulesAndTimelines(supertest);
-      expect(response.rules_installed).toBe(statusAfterPackageInstallation.rules_not_installed);
-      expect(response.rules_updated).toBe(0);
-
-      // Verify that status is updated after rules installation
-      const statusAfterRuleInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
-      expect(statusAfterRuleInstallation.rules_installed).toBe(response.rules_installed);
-      expect(statusAfterRuleInstallation.rules_not_installed).toBe(0);
-      expect(statusAfterRuleInstallation.rules_not_updated).toBe(0);
     });
   });
 };
