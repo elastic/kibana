@@ -26,5 +26,5 @@ export const runEndpointLoaderScript = () => {
   // FIXME: remove use of cli script and use instead data loaders
   const script = `node scripts/endpoint/resolver_generator.js --node="${ES_URL.toString()}" --kibana="${KBN_URL.toString()}" --delete --numHosts=1 --numDocs=1 --fleet --withNewUser=santaEndpoint:changeme --anc=1 --gen=1 --ch=1 --related=1 --relAlerts=1`;
 
-  cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 } });
+  cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 }, timeout: 180000 });
 };
