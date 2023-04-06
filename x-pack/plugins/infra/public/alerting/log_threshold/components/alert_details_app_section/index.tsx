@@ -6,9 +6,8 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
-import compact from 'lodash/compact';
 import moment from 'moment';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
@@ -17,7 +16,16 @@ import { AlertDetailsAppSectionProps } from './types';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 
-const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
+const AlertDetailsAppSection = ({
+  rule,
+  alert,
+  setAlertSummaryFields,
+}: AlertDetailsAppSectionProps) => {
+  const [selectedSeries, setSelectedSeries] = useState<string>('');
+
+  /* For now we show the history chart only if we have one criteria */
+  const [showHistoryChart, setShowHistoryChart] = useState<boolean>(false);
+
   const ruleWindowSizeMS = moment
     .duration(rule.params.timeSize, rule.params.timeUnit)
     .asMilliseconds();
@@ -32,15 +40,28 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
    * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
    * We filter down the series using this group name
    */
-  const alertFieldsFromGroupBy = compact(
-    rule.params.groupBy?.map((fieldNameGroupBy) => {
-      const field = Object.keys(alert.fields).find(
-        (alertFiledName) => alertFiledName === fieldNameGroupBy
-      );
-      if (field) return alert.fields[field];
-    })
-  );
-  const selectedSeries = getChartGroupNames(alertFieldsFromGroupBy);
+  useEffect(() => {
+    setShowHistoryChart(rule && rule.params.criteria.length === 1);
+  }, [rule, rule.params.criteria]);
+
+  useEffect(() => {
+    const alertFieldsFromGroupBy =
+      rule.params.groupBy?.reduce(
+        (selectedFields: Record<string, any>, field) => ({
+          ...selectedFields,
+          ...{ [field]: alert.fields[field] },
+        }),
+        {}
+      ) || {};
+
+    setSelectedSeries(getChartGroupNames(Object.values(alertFieldsFromGroupBy)));
+    const test = Object.keys(alertFieldsFromGroupBy).map((key) => ({
+      label: key,
+      value: alertFieldsFromGroupBy[key],
+    }));
+
+    setAlertSummaryFields(test);
+  }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
 
   /**
    * This is part or the requirements (RFC).
@@ -58,33 +79,39 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    <EuiFlexGroup direction="column">
-      {rule.params.criteria.map((criteria, idx) => {
-        const chartCriterion = criteria as PartialCriterion;
-        return (
-          <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
-            <CriterionPreview
-              ruleParams={rule.params}
-              logViewReference={{
-                type: 'log-view-reference',
-                logViewId: rule.params.logView.logViewId,
-              }}
-              chartCriterion={chartCriterion}
-              showThreshold={true}
-              executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
-              annotations={[<AlertAnnotation alertStarted={alert.start} />]}
-              filterSeriesByGroupName={[selectedSeries]}
-            />
+    !!rule.params.criteria ? (
+      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+        {rule.params.criteria.map((criteria, idx) => {
+          const chartCriterion = criteria as PartialCriterion;
+          return (
+            <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
+              <CriterionPreview
+                ruleParams={rule.params}
+                logViewReference={{
+                  type: 'log-view-reference',
+                  logViewId: rule.params.logView.logViewId,
+                }}
+                chartCriterion={chartCriterion}
+                showThreshold={true}
+                executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+                annotations={[
+                  <AlertAnnotation
+                    key={`${alert.start}${chartCriterion.field}${idx}`}
+                    alertStarted={alert.start}
+                  />,
+                ]}
+                filterSeriesByGroupName={[selectedSeries]}
+              />
+            </EuiFlexItem>
+          );
+        })}
+        {showHistoryChart && (
+          <EuiFlexItem>
+            <LogsHistoryChart rule={rule} />
           </EuiFlexItem>
-        );
-      })}
-      {/* For now we show the history chart only if we have one criteria */}
-      {rule.params.criteria.length === 1 && (
-        <EuiFlexItem>
-          <LogsHistoryChart rule={rule} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        )}
+      </EuiFlexGroup>
+    ) : null
   );
 };
 // eslint-disable-next-line import/no-default-export

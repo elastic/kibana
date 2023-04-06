@@ -34,14 +34,16 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
     lte: DateMath.parse(dateRange.to, { roundUp: true })!.valueOf(),
   };
 
-  const { alertsHistory } = useAlertsHistory({
-    featureIds: [AlertConsumers.LOGS],
-    ruleId: rule.id,
-    dateRange,
-  });
+  const { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts, loading } =
+    useAlertsHistory({
+      featureIds: [AlertConsumers.LOGS],
+      ruleId: rule.id,
+      dateRange,
+    });
+
   const alertHistoryAnnotations =
-    alertsHistory?.histogramTriggeredAlerts
-      .filter((annotation) => annotation.doc_count > 0)
+    histogramTriggeredAlerts
+      ?.filter((annotation) => annotation.doc_count > 0)
       .map((annotation) => {
         return {
           dataValue: annotation.key,
@@ -78,7 +80,7 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{alertsHistory?.totalTriggeredAlerts || '-'}</h3>
+                  <h3>{totalTriggeredAlerts || '-'}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
@@ -96,10 +98,10 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {alertsHistory?.avgTimeToRecoverUS
+                  {avgTimeToRecoverUS
                     ? convertTo({
                         unit: 'minutes',
-                        microseconds: alertsHistory?.avgTimeToRecoverUS,
+                        microseconds: avgTimeToRecoverUS,
                         extended: true,
                       }).formatted
                     : '-'}
