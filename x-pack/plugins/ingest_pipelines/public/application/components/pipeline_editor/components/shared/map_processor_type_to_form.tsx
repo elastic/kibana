@@ -12,7 +12,6 @@ import { EuiCode, EuiLink } from '@elastic/eui';
 
 import { LicenseType } from '@kbn/licensing-plugin/public';
 
-
 import {
   Append,
   Bytes,
@@ -75,7 +74,7 @@ interface FieldDescriptor {
   /**
    * Should only be shown for specific license types
    */
-  forLicenseAtLeast?: LicenseType
+  forLicenseAtLeast?: LicenseType;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;

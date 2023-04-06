@@ -23,14 +23,12 @@ export interface AppParams extends ManagementAppMountParams {
   license: ILicense | null;
 }
 
-
 export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
-  params: AppParams,
+  params: AppParams
 ) {
   const { element, setBreadcrumbs, history, theme$, license } = params;
   const [coreStart, depsStart] = await getStartServices();
-  console.log(coreStart);
   const {
     docLinks,
     application,

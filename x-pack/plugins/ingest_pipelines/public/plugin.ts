@@ -15,11 +15,10 @@ import { uiMetricService, apiService } from './application/services';
 import { SetupDependencies, StartDependencies } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 
-
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
-  private license: (ILicense | null) = null;
+  private license: ILicense | null = null;
   private licensingSubscription?: Subscription;
 
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
