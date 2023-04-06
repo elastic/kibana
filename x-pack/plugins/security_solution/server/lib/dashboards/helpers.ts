@@ -15,7 +15,7 @@ import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import type { OutputError } from '@kbn/securitysolution-es-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { SECURITY_TAG_NAME, SECURITY_TAG_DESCRIPTION } from '../../../common/constants';
-import { createTag, findTagsByName } from '../../utils/saved_objects/tags';
+import { createTag, findTagsByName } from './saved_objects/tags';
 
 /**
  * Returns the hex representation of a random color (e.g `#F1B7E2`)
