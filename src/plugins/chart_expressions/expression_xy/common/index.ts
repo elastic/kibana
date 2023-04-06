@@ -12,6 +12,7 @@ export const PLUGIN_NAME = 'expressionXy';
 export { LayerTypes } from './constants';
 
 export type {
+  AllowedXYOverrides,
   XYArgs,
   EndValue,
   XYRender,
