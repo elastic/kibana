@@ -43,7 +43,7 @@ export const TestWrapper = ({
   <SyntheticsStartupPluginsContext.Provider
     value={{
       // @ts-expect-error incomplete implementation for test purposes
-      observability: {
+      exploratoryView: {
         ExploratoryViewEmbeddable: jest.fn((props: any) => <EmbeddableMock {...props} />),
       },
     }}
