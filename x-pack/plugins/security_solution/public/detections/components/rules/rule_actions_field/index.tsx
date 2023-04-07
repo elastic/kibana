@@ -143,6 +143,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionFrequencyProperty: () => {},
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
         hideNotifyWhen: true,
       }),
