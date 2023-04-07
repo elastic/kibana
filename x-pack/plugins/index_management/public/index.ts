@@ -19,3 +19,6 @@ export type { IndexManagementPluginSetup } from './types';
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 
 export type { Index } from '../common';
+
+export type { Filters } from './application/sections/home/components';
+export { FilterListButton } from './application/sections/home/components';

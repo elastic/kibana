@@ -29,6 +29,7 @@ export interface Props {
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
+  filterListButton: React.ReactElement;
 }
 
 export const PipelineTable: FunctionComponent<Props> = ({
@@ -37,6 +38,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onEditPipelineClick,
   onClonePipelineClick,
   onDeletePipelineClick,
+  filterListButton,
 }) => {
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
@@ -99,6 +101,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
+        filterListButton,
         <EuiButton
           key="reloadButton"
           iconType="refresh"
@@ -145,15 +148,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
-      filters: [
-        {
-          type: 'is',
-          field: 'isManaged',
-          name: i18n.translate('xpack.ingestPipelines.list.table.isManagedFilterLabel', {
-            defaultMessage: 'Managed',
-          }),
-        },
-      ],
     },
     pagination: {
       initialPageSize: 10,

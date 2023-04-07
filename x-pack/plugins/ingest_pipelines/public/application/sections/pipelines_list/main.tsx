@@ -20,6 +20,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { FilterListButton, Filters } from '@kbn/index-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
@@ -36,6 +38,8 @@ const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
   return pipeline;
 };
+
+type FilterName = 'managed' | 'notManaged';
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -78,6 +82,37 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     setShowFlyout(false);
     redirectToPathOrRedirectPath(getListPath());
   };
+
+  const isManagedPipelines = (allPipelines: Pipeline[], isManaged: boolean) => {
+    return allPipelines.filter((pipeline) => {
+      return isManaged ? pipeline.isManaged : !pipeline.isManaged;
+    });
+  };
+
+  function filteredPipelines(allPipelines: Pipeline[]) {
+    let filteredItems: Pipeline[] = [];
+
+    if (filters.managed.checked === 'on')
+      filteredItems = filteredItems.concat(isManagedPipelines(allPipelines, true));
+    if (filters.notManaged.checked === 'on')
+      filteredItems = filteredItems.concat(isManagedPipelines(allPipelines, false));
+    return filteredItems;
+  }
+
+  const [filters, setFilters] = useState<Filters<FilterName>>({
+    managed: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel', {
+        defaultMessage: 'Managed pipelines',
+      }),
+      checked: 'on',
+    },
+    notManaged: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewNotManagedTemplateLabel', {
+        defaultMessage: 'Not managed pipelines',
+      }),
+      checked: 'on',
+    },
+  });
 
   if (error) {
     return (
@@ -187,7 +222,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onEditPipelineClick={goToEditPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
-        pipelines={data as Pipeline[]}
+        pipelines={filteredPipelines(data as Pipeline[])}
+        filterListButton={<FilterListButton<FilterName> filters={filters} onChange={setFilters} />}
       />
 
       {renderFlyout()}

@@ -22,7 +22,8 @@
     ],
     "requiredBundles": [
       "esUiShared",
-      "kibanaReact"
+      "kibanaReact",
+      "indexManagement"
     ]
   }
 }
