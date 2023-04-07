@@ -33,7 +33,7 @@ export const EmptyState = ({
       icon={
         <EuiImage
           url={illustration}
-          alt={i18n.translate('xpack.cloudSecurityPosture.emptyState.illustrationAlt', {
+          alt={i18n.translate('xpack.csp.emptyState.illustrationAlt', {
             defaultMessage: 'No results',
           })}
           css={css`
@@ -44,7 +44,7 @@ export const EmptyState = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.cloudSecurityPosture.emptyState.title"
+            id="xpack.csp.emptyState.title"
             defaultMessage="No results match your search criteria"
           />
         </h2>
@@ -55,7 +55,7 @@ export const EmptyState = ({
         <>
           <p>
             <FormattedMessage
-              id="xpack.cloudSecurityPosture.emptyState.description"
+              id="xpack.csp.emptyState.description"
               defaultMessage="Try modifying your search or filter set"
             />
           </p>
@@ -64,15 +64,12 @@ export const EmptyState = ({
       actions={[
         <EuiButton color="primary" fill onClick={onResetFilters}>
           <FormattedMessage
-            id="xpack.cloudSecurityPosture.emptyState.resetFiltersButton"
+            id="xpack.csp.emptyState.resetFiltersButton"
             defaultMessage="Reset filters"
           />
         </EuiButton>,
         <EuiLink href={docsUrl} target="_blank">
-          <FormattedMessage
-            id="xpack.cloudSecurityPosture.emptyState.readDocsLink"
-            defaultMessage="Read the docs"
-          />
+          <FormattedMessage id="xpack.csp.emptyState.readDocsLink" defaultMessage="Read the docs" />
         </EuiLink>,
       ]}
     />
