@@ -87,13 +87,16 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
   getRoutes: () => RouterRoute[];
 }
 
+/** @internal */
+export type RouterRouteHandler = (
+  req: Request,
+  responseToolkit: ResponseToolkit
+) => Promise<ResponseObject | Boom.Boom<any>>;
+
 /** @public */
 export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  handler: (
-    req: Request,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject | Boom.Boom<any>>;
+  handler: RouterRouteHandler;
 }

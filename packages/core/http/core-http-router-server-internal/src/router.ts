@@ -26,6 +26,7 @@ import type {
 import { validBodyOutput } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import apm from 'elastic-apm-node';
+import { RouterRouteHandler } from '@kbn/core-http-server/src/router/router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
@@ -122,6 +123,47 @@ function validOptions(
 }
 
 /**
+ * Adds ELU timings for the executed function to the current's context transaction
+ *
+ * @param callback The callback to instrument
+ * @param path The request path
+ */
+async function addEluTimings<T>(callback: () => Promise<T>, path: string, log: Logger): Promise<T> {
+  const startUtilization = performance.eventLoopUtilization();
+  const start = performance.now();
+
+  const response = await callback();
+
+  const { active, utilization } = performance.eventLoopUtilization(startUtilization);
+
+  apm.currentTransaction?.addLabels({
+    event_loop_utilization: utilization,
+    event_loop_active: active,
+  });
+
+  const duration = performance.now() - start;
+
+  if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
+    log.warn(
+      `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
+        THRESHOLD_ELU * 100
+      }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
+        utilization * 100
+      )}%)`,
+      {
+        labels: {
+          request_path: path,
+          event_loop_active: active,
+          event_loop_utilization: utilization,
+        },
+      }
+    );
+  }
+
+  return response;
+}
+
+/**
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
@@ -147,47 +189,17 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       ) => {
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
+        const internalHandler: RouterRouteHandler = async (req, responseToolkit) =>
+          await this.handle({
+            routeSchemas,
+            request: req,
+            responseToolkit,
+            handler: this.enhanceWithContext(handler),
+          });
+
         this.routes.push({
           handler: async (req, responseToolkit) => {
-            const startUtilization = performance.eventLoopUtilization();
-            const start = performance.now();
-
-            const response = await this.handle({
-              routeSchemas,
-              request: req,
-              responseToolkit,
-              handler: this.enhanceWithContext(handler),
-            });
-
-            const { active, utilization } = performance.eventLoopUtilization(startUtilization);
-
-            apm.currentTransaction?.addLabels({
-              event_loop_utilization: utilization,
-              event_loop_active: active,
-            });
-
-            const duration = performance.now() - start;
-
-            const path = req.path;
-
-            if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
-              log.warn(
-                `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
-                  THRESHOLD_ELU * 100
-                }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
-                  utilization * 100
-                )}%)`,
-                {
-                  labels: {
-                    request_path: path,
-                    event_loop_active: active,
-                    event_loop_utilization: utilization,
-                  },
-                }
-              );
-            }
-
-            return response;
+            return addEluTimings(() => internalHandler(req, responseToolkit), req.path, log);
           },
           method,
           path: getRouteFullPath(this.routerPath, route.path),
