@@ -17,6 +17,7 @@ import {
   ADD_FILTER_FORM_OPERATOR_FIELD,
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
   GLOBAL_KQL_INPUT,
+  GLOBAL_KQL_WRAPPER,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
@@ -38,6 +39,8 @@ export const fillKqlQueryBar = (query: string) => {
 export const clearKqlQueryBar = () => {
   cy.get(GLOBAL_KQL_INPUT).should('be.visible');
   cy.get(GLOBAL_KQL_INPUT).clear();
+  // clicks outside of the input to close the autocomplete
+  cy.get('body').click(0, 0);
 };
 
 export const removeKqlFilter = () => {
