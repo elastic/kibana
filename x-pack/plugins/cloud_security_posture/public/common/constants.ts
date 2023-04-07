@@ -178,5 +178,4 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     ],
   },
 };
-export const FINDINGS_DOCS_URL =
-  'https://www.elastic.co/guide/en/security/current/cspm-findings-page.html';
+export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
