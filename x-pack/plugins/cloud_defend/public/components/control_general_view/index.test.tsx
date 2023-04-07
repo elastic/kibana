@@ -10,7 +10,11 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
+import {
+  getCloudDefendNewPolicyMock,
+  MOCK_YAML_INVALID_CONFIGURATION,
+  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
+} from '../../test/mocks';
 import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../common/utils';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -155,5 +159,16 @@ describe('<ControlGeneralView />', () => {
 
     expect(queryAllByTestId('cloud-defend-selector')).toHaveLength(0);
     expect(queryAllByTestId('cloud-defend-response')).toHaveLength(0);
+  });
+
+  it('prevents the user from adding more than MAX_SELECTORS_AND_RESPONSES_PER_TYPE', async () => {
+    const { getByTestId } = render(
+      <WrappedComponent
+        policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
+      />
+    );
+
+    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
   });
 });

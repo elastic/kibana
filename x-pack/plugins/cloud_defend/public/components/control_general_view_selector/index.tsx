@@ -25,7 +25,6 @@ import {
   EuiText,
   EuiCheckbox,
 } from '@elastic/eui';
-import { i18n as i18nLib } from '@kbn/i18n';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
@@ -40,15 +39,10 @@ import {
   getSelectorTypeIcon,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
+  validateStringValuesForCondition,
 } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
-import {
-  VALID_SELECTOR_NAME_REGEX,
-  MAX_SELECTOR_NAME_LENGTH,
-  MAX_CONDITION_VALUE_LENGTH_BYTES,
-} from '../../common/constants';
-
-const { translate } = i18nLib;
+import { VALID_SELECTOR_NAME_REGEX, MAX_SELECTOR_NAME_LENGTH } from '../../common/constants';
 
 interface ConditionProps {
   label: string;
@@ -289,37 +283,11 @@ export const ControlGeneralViewSelector = ({
         errors.push(i18n.errorValueRequired);
       }
 
-      const conditionOptions = SelectorConditionsMap[prop];
-      const { pattern, patternError } = conditionOptions;
-      let { maxValueBytes } = conditionOptions;
+      const stringValueErrors = validateStringValuesForCondition(prop, values);
 
-      values.forEach((value) => {
-        const bytes = new Blob([value]).size;
-
-        if (pattern && !new RegExp(pattern).test(value)) {
-          if (patternError) {
-            errors.push(patternError);
-          } else {
-            errors.push(
-              translate('xpack.cloudDefend.errorGenericRegexFailure', {
-                defaultMessage: '"{prop}" values must match the pattern: /{pattern}/',
-                values: { prop, pattern },
-              })
-            );
-          }
-        }
-
-        maxValueBytes = maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
-
-        if (bytes > maxValueBytes) {
-          errors.push(
-            translate('xpack.cloudDefend.errorMaxValueBytesExceeded', {
-              defaultMessage: '"{prop}" values cannot exceed {maxValueBytes} bytes',
-              values: { prop, maxValueBytes },
-            })
-          );
-        }
-      });
+      if (stringValueErrors.length > 0) {
+        errors.push(...stringValueErrors);
+      }
 
       if (errors.length) {
         errorMap[prop] = errors;

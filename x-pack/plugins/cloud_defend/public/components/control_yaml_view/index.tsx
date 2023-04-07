@@ -8,27 +8,31 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
-import { getInputFromPolicy } from '../../common/utils';
+import {
+  getInputFromPolicy,
+  validateStringValuesForCondition,
+  getSelectorsAndResponsesFromYaml,
+  validateMaxSelectorsAndResponses,
+} from '../../common/utils';
 import * as i18n from './translations';
-import { ViewDeps } from '../../types';
+import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
 
 const { editor } = monaco;
 
 const TEXT_EDITOR_PADDING = 10;
 
-interface ConfigError {
+interface EditorError {
   line: number;
   message: string;
 }
 
 export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
-  const [errors, setErrors] = useState<ConfigError[]>([]);
-  const [actionsValid, setActionsValid] = useState(true);
+  const [editorErrors, setEditorErrors] = useState<EditorError[]>([]);
+  const [additionalErrors, setAdditionalErrors] = useState<string[]>([]);
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
@@ -37,7 +41,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     const listener = editor.onDidChangeMarkers(([resource]) => {
       const markers = editor.getModelMarkers({ resource });
       const errs = markers.map((marker) => {
-        const error: ConfigError = {
+        const error: EditorError = {
           line: marker.startLineNumber,
           message: marker.message,
         };
@@ -46,34 +50,49 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
       });
 
       // prevents infinite loop
-      if (JSON.stringify(errs) !== JSON.stringify(errors)) {
-        onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
-        setErrors(errs);
+      if (JSON.stringify(errs) !== JSON.stringify(editorErrors)) {
+        onChange({
+          isValid: additionalErrors.length === 0 && errs.length === 0,
+          updatedPolicy: policy,
+        });
+        setEditorErrors(errs);
       }
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, errors, onChange, policy]);
+  }, [editorErrors, onChange, policy, additionalErrors.length]);
 
-  // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
-  const validateActions = useCallback((value) => {
-    try {
-      const json = yaml.load(value);
+  // not all validations can be done via json-schema
+  const validateAdditional = useCallback((value) => {
+    const errors: string[] = [];
 
-      for (let i = 0; i < json.responses.length; i++) {
-        const response = json.responses[i];
+    const { selectors, responses } = getSelectorsAndResponsesFromYaml(value);
 
-        if (!response.actions.includes('alert')) {
-          return false;
+    errors.push(...validateMaxSelectorsAndResponses(selectors, responses));
+
+    // validate selectors
+    selectors.forEach((selector) => {
+      Object.keys(selector).map((prop) => {
+        const condition = prop as SelectorCondition;
+
+        if (SelectorConditionsMap[condition]?.type === 'stringArray') {
+          const values = selector[condition] as string[];
+          errors.push(...validateStringValuesForCondition(condition, values));
         }
-      }
-    } catch {
-      // noop
-    }
+      });
+    });
 
-    return true;
+    // validate responses
+    responses.forEach((response) => {
+      // for now we force 'alert' action if 'block' action added.
+      if (response.actions.includes('block') && !response.actions.includes('alert')) {
+        errors.push(i18n.errorAlertActionRequired);
+      }
+    });
+
+    return errors;
   }, []);
 
   const onYamlChange = useCallback(
@@ -81,14 +100,16 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
       if (input?.vars) {
         input.vars.configuration.value = value;
 
-        const areActionsValid = validateActions(value);
+        const errs = validateAdditional(value);
+        setAdditionalErrors(errs);
 
-        setActionsValid(areActionsValid);
-
-        onChange({ isValid: areActionsValid && errors.length === 0, updatedPolicy: policy });
+        onChange({
+          isValid: errs.length === 0 && editorErrors.length === 0,
+          updatedPolicy: policy,
+        });
       }
     },
-    [errors.length, input?.vars, onChange, policy, validateActions]
+    [editorErrors.length, input?.vars, onChange, policy, validateAdditional]
   );
 
   return (
@@ -98,7 +119,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
           {i18n.controlYamlHelp}
         </EuiText>
         <EuiSpacer size="s" />
-        {!actionsValid && <EuiForm isInvalid={true} error={i18n.errorAlertActionRequired} />}
+        {!additionalErrors && <EuiForm isInvalid={true} error={additionalErrors} />}
         <div css={styles.yamlEditor}>
           <CodeEditor
             width="100%"

@@ -151,6 +151,7 @@ export type ResponseAction = 'log' | 'alert' | 'block';
 export interface Selector {
   name: string;
   operation?: string[];
+  containerImageFullName?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
   kubernetesClusterId?: string[];

@@ -7,6 +7,7 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../common/constants';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../common/constants';
 
 export const MOCK_YAML_CONFIGURATION = `file:
   selectors:
@@ -36,6 +37,23 @@ export const MOCK_YAML_CONFIGURATION = `file:
 
 export const MOCK_YAML_INVALID_CONFIGURATION = `
 s
+`;
+
+export const MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+  responses:
+${new Array(MAX_SELECTORS_AND_RESPONSES_PER_TYPE + 1)
+  .fill(0)
+  .map(() => {
+    return `    - match: [default]
+      actions: [alert]
+`;
+  })
+  .join('')}
 `;
 
 export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): NewPackagePolicy => ({
