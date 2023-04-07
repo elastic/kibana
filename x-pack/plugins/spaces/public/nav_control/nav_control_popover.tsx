@@ -110,6 +110,7 @@ export class NavControlPopover extends Component<Props, State> {
         panelPaddingSize="none"
         repositionOnScroll
         ownFocus
+        zIndex={6000}
       >
         {element}
       </EuiPopover>
