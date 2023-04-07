@@ -1,4 +1,4 @@
-title: Agent Policy
+title: Create agent policy request
 type: object
 properties:
   id:
@@ -32,20 +32,6 @@ properties:
     type: number
   inactivity_timeout:
     type: number
-  package_policies:
-    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter
-    type: array
-    items:
-      $ref: ./package_policy.yaml
-  updated_on:
-    type: string
-    format: date-time
-  updated_by:
-    type: string
-  revision:
-    type: number
-  agents:
-    type: number
   agent_features:
     type: array
     items:
@@ -59,7 +45,5 @@ properties:
         - name
         - enabled
 required:
-  - id
-  - status
   - name
   - namespace

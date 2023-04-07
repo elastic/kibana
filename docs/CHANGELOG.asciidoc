@@ -186,8 +186,7 @@ Machine Learning::
 
 Management::
 * Adds field statistics popovers for Data Frame Analytics & Transform creation wizards {kibana-pull}149879[#149879]
-* Transforms: Adds date picker to transform wizard for data view with time fields {kibana-pull}149049[#149049]
-* Transforms: Shows health status of transform in UI {kibana-pull}144157[#144157]
+* Transforms: Shows health status of transform in UI {kibana-pull}150359[#150359]
 
 Monitoring::
 * Adds duration configuration to Stack Monitoring Cluster Health rule {kibana-pull}147565[#147565]
@@ -319,7 +318,6 @@ Machine Learning::
 * Remove beta badge for Field statistics table in Discover {kibana-pull}140991[#140991]
 
 Management::
-* Transforms: Health status information in transform list {kibana-pull}150359[#150359]
 * Transforms: Adds "Use full data" button to transform creation wizard {kibana-pull}150030[#150030]
 * Adds override field to Dot expander processor form {kibana-pull}149599[#149599]
 * Adds fields to Append Ingest Pipeline processor form {kibana-pull}149520[#149520]
