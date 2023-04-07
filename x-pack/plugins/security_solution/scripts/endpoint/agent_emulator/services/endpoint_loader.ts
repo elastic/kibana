@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type seedrandom from 'seedrandom';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -27,17 +24,11 @@ import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/const
 
 let WAS_FLEET_SETUP_DONE = false;
 
-const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
-
-    super(seedValue, MetadataGenerator);
-  }
-};
+const CurrentKibanaVersionDocGenerator = EndpointDocGenerator.custom({
+  CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+    version: kibanaPackageJson.version,
+  }),
+});
 
 export const loadEndpointsIfNoneExist = async (
   esClient: Client,
