@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -59,17 +59,12 @@ const FormWrapper: React.FC = ({ children }) => <>{children}</>;
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {
-    const [isValidForm, setIsValidForm] = useState<boolean | undefined>(undefined);
-    const validation = form.validate();
-
-    useEffect(() => {
-      validation.then((isValid) => setIsValidForm(isValid));
-    }, [validation]);
-
     const submitForm = async () => {
-      const { data } = await form.submit();
+      const { isValid, data } = await form.submit();
 
-      updateField({ ...field, source: data });
+      if (isValid) {
+        updateField({ ...field, source: data });
+      }
     };
 
     const { isMultiField } = field;
@@ -181,7 +176,7 @@ export const EditField = React.memo(
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          {!isValidForm && (
+          {form.isSubmitted && form.isValid === false && (
             <>
               <EuiCallOut
                 title={i18n.translate(
@@ -243,7 +238,7 @@ export const EditField = React.memo(
                 fill
                 onClick={submitForm}
                 type="submit"
-                disabled={!isValidForm || !isFormModified}
+                disabled={(form.isSubmitted && !form.isValid) || !isFormModified}
                 data-test-subj="editFieldUpdateButton"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {
