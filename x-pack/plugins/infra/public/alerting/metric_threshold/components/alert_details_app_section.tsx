@@ -54,17 +54,18 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const annotations = [
     <AlertAnnotation
-      key={ALERT_START_ANNOTATION_ID}
       alertStart={alert.start}
       color={euiTheme.colors.danger}
       dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
+      key={ALERT_START_ANNOTATION_ID}
     />,
     <AlertActiveTimeRangeAnnotation
       alertStart={alert.start}
       alertEnd={alertEnd}
       color={euiTheme.colors.danger}
       id={ALERT_TIME_RANGE_ANNOTATION_ID}
+      key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
 
