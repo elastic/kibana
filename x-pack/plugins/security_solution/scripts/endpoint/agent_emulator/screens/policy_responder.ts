@@ -138,6 +138,22 @@ ${this.choices.output}
         ...userChoices,
         hostMetadata,
       };
+
+      const runNow = await this.prompt<{ confirm: boolean }>({
+        questions: [
+          {
+            type: 'confirm',
+            name: 'confirm',
+            message: 'Send it? ',
+            default: 'y',
+          },
+        ],
+      });
+
+      if (runNow.confirm) {
+        this.onEnterChoice('2');
+        return;
+      }
     }
 
     this.reRender();
