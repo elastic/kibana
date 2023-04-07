@@ -42,16 +42,19 @@ interface PolicyResponseOptions {
 }
 
 export class PolicyResponderScreen extends ScreenBaseClass {
-  private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter([
-    {
-      title: 'Setup',
-      key: '1',
-    },
-    {
-      title: 'Send',
-      key: '2',
-    },
-  ]);
+  private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter(
+    [
+      {
+        title: 'Setup',
+        key: '1',
+      },
+      {
+        title: 'Send',
+        key: '2',
+      },
+    ],
+    { layout: 'horizontal' }
+  );
 
   private options: PolicyResponseOptions | undefined = undefined;
 
