@@ -765,7 +765,7 @@ describe('XYChart component', () => {
       <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
     );
     expect(component.find(Settings).at(0).prop('theme')).toEqual(
-      expect.objectContaining(markSizeRatioArg)
+      expect.arrayContaining([expect.objectContaining(markSizeRatioArg)])
     );
   });
 
@@ -1103,6 +1103,41 @@ describe('XYChart component', () => {
       />
     );
     expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
+  });
+
+  test('should not render tooltip header if no x axis', () => {
+    const { args, data } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: undefined,
+              accessors: ['a', 'b'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              xScaleType: 'ordinal',
+              isHistogram: false,
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+          detailedTooltip: false,
+        }}
+      />
+    );
+    const tooltip = component.find(Tooltip);
+    const headerFormatter = tooltip.prop('headerFormatter');
+    expect(headerFormatter).toBeUndefined();
   });
 
   test('should not have tooltip actions for the detailed tooltip', () => {
@@ -3431,6 +3466,86 @@ describe('XYChart component', () => {
       expect(customTooltip).toBeUndefined();
       const headerFormatter = tooltip.prop('headerFormatter');
       expect(headerFormatter).not.toBeUndefined();
+    });
+  });
+
+  describe('overrides', () => {
+    it('should work for settings component', () => {
+      const { args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'line' }],
+          }}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+
+    it('should work for all axes components', () => {
+      const args = createArgsWithLayers();
+      const layer = args.layers[0] as DataLayerConfig;
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...layer,
+                accessors: ['a', 'b'],
+                decorations: [
+                  {
+                    type: 'dataDecorationConfig',
+                    forAccessor: 'a',
+                    axisId: '1',
+                  },
+                  {
+                    type: 'dataDecorationConfig',
+                    forAccessor: 'b',
+                    axisId: '2',
+                  },
+                ],
+                table: dataWithoutFormats,
+              },
+            ],
+            yAxisConfigs: [
+              {
+                type: 'yAxisConfig',
+                id: '1',
+                position: 'left',
+              },
+              {
+                type: 'yAxisConfig',
+                id: '2',
+                position: 'right',
+              },
+            ],
+          }}
+          overrides={{
+            settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true },
+            axisX: { showOverlappingTicks: true },
+            axisLeft: { showOverlappingTicks: true },
+            axisRight: { showOverlappingTicks: true },
+          }}
+        />
+      );
+
+      const axes = component.find(Axis);
+      expect(axes).toHaveLength(3);
+      if (Array.isArray(axes)) {
+        for (const axis of axes) {
+          expect(axis.prop('showOverlappingTicks').toEqual(true));
+        }
+      }
     });
   });
 });

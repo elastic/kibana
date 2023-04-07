@@ -22,6 +22,7 @@ export type {
   FakeRequest,
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
+  ElasticsearchApiToRedactInLogs,
 } from './src/client';
 
 export type {

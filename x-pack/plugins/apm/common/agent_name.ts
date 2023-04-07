@@ -27,6 +27,7 @@ export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'opentelemetry/php',
   'opentelemetry/python',
   'opentelemetry/ruby',
+  'opentelemetry/rust',
   'opentelemetry/swift',
   'opentelemetry/webjs',
 ];
@@ -71,6 +72,10 @@ export function isRumAgentName(
 
 export function isMobileAgentName(agentName?: string) {
   return isIosAgentName(agentName) || isAndroidAgentName(agentName);
+}
+
+export function isRumOrMobileAgent(agentName?: string) {
+  return isRumAgentName(agentName) || isMobileAgentName(agentName);
 }
 
 export function isIosAgentName(agentName?: string) {

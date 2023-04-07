@@ -13,6 +13,9 @@ import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { search } from './search';
+import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
+import { schema } from '@kbn/config-schema';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 
 const { fn, schemas } = search;
 
@@ -31,8 +34,8 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
-    const query = { title: 'hello' };
-    const validInput = { contentTypeId: 'foo', version: 'v1', query };
+    const query = { text: 'hello' };
+    const validInput = { contentTypeId: 'foo', version: 1, query };
 
     test('should validate that a contentTypeId and "query" object is passed', () => {
       [
@@ -43,19 +46,22 @@ describe('RPC -> search()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
+        },
+        {
+          input: { ...validInput, version: 'foo' }, // invalid version format
+          expectedError: '[version]: expected value of type [number] but got [string]',
         },
         {
           input: omit(validInput, 'query'),
-          expectedError: '[query]: expected value of type [object] but got [undefined]',
+          expectedError: '[query]: expected at least one defined value but got [undefined]',
         },
         {
           input: { ...validInput, query: 123 }, // query is not an object
-          expectedError: '[query]: expected value of type [object] but got [number]',
+          expectedError: '[query]: expected a plain object value, but found [number] instead.',
         },
         {
           input: { ...validInput, unknown: 'foo' },
@@ -63,7 +69,6 @@ describe('RPC -> search()', () => {
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
-
         if (!expectedError) {
           try {
             expect(error).toBe(null);
@@ -80,8 +85,8 @@ describe('RPC -> search()', () => {
       let error = validate(
         {
           contentTypeId: 'foo',
-          query: { title: 'hello' },
-          version: 'v1',
+          query: { text: 'hello' },
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -92,8 +97,8 @@ describe('RPC -> search()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
-          version: 'v1',
-          query: { title: 'hello' },
+          version: 1,
+          query: { text: 'hello' },
           options: 123, // Not an object
         },
         inputSchema
@@ -104,22 +109,21 @@ describe('RPC -> search()', () => {
       );
     });
 
-    test('should validate that the response is an object or an array of object', () => {
+    test('should validate the response format with "hits" and "pagination"', () => {
       let error = validate(
         {
-          any: 'object',
-        },
-        outputSchema
-      );
-
-      expect(error).toBe(null);
-
-      error = validate(
-        [
-          {
-            any: 'object',
+          contentTypeId: 'foo',
+          result: {
+            hits: [],
+            pagination: {
+              total: 0,
+              cursor: '',
+            },
           },
-        ],
+          meta: {
+            foo: 'bar',
+          },
+        },
         outputSchema
       );
 
@@ -130,7 +134,6 @@ describe('RPC -> search()', () => {
       expect(error?.message).toContain(
         'expected a plain object value, but found [number] instead.'
       );
-      expect(error?.message).toContain('expected value of type [array] but got [number]');
     });
   });
 
@@ -142,12 +145,16 @@ describe('RPC -> search()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
-      const ctx: any = { contentRegistry, requestHandlerContext };
+      const ctx: any = {
+        contentRegistry,
+        requestHandlerContext,
+        getTransformsFactory: getServiceObjectTransformFactory,
+      };
 
       return { ctx, storage };
     };
@@ -155,13 +162,19 @@ describe('RPC -> search()', () => {
     test('should return the storage search() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'SearchResult';
+      const expected = {
+        hits: ['SearchResult'],
+        pagination: {
+          total: 1,
+          cursor: '',
+        },
+      };
       storage.search.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
-        version: 'v1', // version in request
-        query: { title: 'Hello' },
+        version: 1, // version in request
+        query: { text: 'Hello' },
       });
 
       expect(result).toEqual({
@@ -173,11 +186,14 @@ describe('RPC -> search()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
+          },
+          utils: {
+            getTransforms: expect.any(Function),
           },
         },
-        { title: 'Hello' },
+        { text: 'Hello' },
         undefined
       );
     });
@@ -186,7 +202,7 @@ describe('RPC -> search()', () => {
       test('should validate that content type definition exist', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypeId: 'unknown', query: { title: 'Hello' } })
+          fn(ctx, { contentTypeId: 'unknown', query: { text: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
@@ -195,10 +211,58 @@ describe('RPC -> search()', () => {
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
-            query: { title: 'Hello' },
-            version: 'v7',
+            query: { text: 'Hello' },
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
+      });
+    });
+
+    describe('object versioning', () => {
+      test('should expose a  utility to transform and validate services objects', () => {
+        const { ctx, storage } = setup();
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { text: 'Hello' }, version: 1 });
+        const [[storageContext]] = storage.search.mock.calls;
+
+        // getTransforms() utils should be available from context
+        const { getTransforms } = storageContext.utils ?? {};
+        expect(getTransforms).not.toBeUndefined();
+
+        const definitions: ContentManagementServiceDefinitionVersioned = {
+          1: {
+            search: {
+              in: {
+                options: {
+                  schema: schema.object({
+                    version1: schema.string(),
+                  }),
+                  up: (pre: object) => ({ ...pre, version2: 'added' }),
+                },
+              },
+            },
+          },
+          2: {},
+        };
+
+        const transforms = getTransforms(definitions, 1);
+
+        // Some smoke tests for the getTransforms() utils. Complete test suite is inside
+        // the package @kbn/object-versioning
+        expect(transforms.search.in.options.up({ version1: 'foo' }).value).toEqual({
+          version1: 'foo',
+          version2: 'added',
+        });
+
+        const optionsUpTransform = transforms.search.in.options.up({ version1: 123 });
+
+        expect(optionsUpTransform.value).toBe(null);
+        expect(optionsUpTransform.error?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
+
+        expect(transforms.search.in.options.validate({ version1: 123 })?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
       });
     });
   });

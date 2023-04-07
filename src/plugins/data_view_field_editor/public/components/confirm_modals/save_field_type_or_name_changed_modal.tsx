@@ -70,7 +70,7 @@ export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
       <EuiCallOut
         color="warning"
         title={i18nTexts.warningChangingFields}
-        iconType="alert"
+        iconType="warning"
         size="s"
       />
       <EuiSpacer />

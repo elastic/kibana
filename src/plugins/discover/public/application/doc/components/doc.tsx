@@ -83,7 +83,7 @@ export function Doc(props: DocProps) {
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-notFoundDataView`}
-            iconType="alert"
+            iconType="warning"
             title={
               <FormattedMessage
                 id="discover.doc.failedToLocateDataView"
@@ -97,7 +97,7 @@ export function Doc(props: DocProps) {
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-notFound`}
-            iconType="alert"
+            iconType="warning"
             title={
               <FormattedMessage
                 id="discover.doc.failedToLocateDocumentDescription"
@@ -116,7 +116,7 @@ export function Doc(props: DocProps) {
           <EuiCallOut
             color="danger"
             data-test-subj={`doc-msg-error`}
-            iconType="alert"
+            iconType="warning"
             title={
               <FormattedMessage
                 id="discover.doc.failedToExecuteQueryDescription"

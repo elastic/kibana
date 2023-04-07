@@ -14,10 +14,14 @@ export const significantTermGroups: SignificantTermGroup[] = [
       {
         fieldName: 'custom_field.keyword',
         fieldValue: 'deviation',
+        docCount: 101,
+        pValue: 0.01,
       },
       {
         fieldName: 'airline',
         fieldValue: 'UAL',
+        docCount: 101,
+        pValue: 0.01,
       },
     ],
     docCount: 101,
@@ -29,10 +33,14 @@ export const significantTermGroups: SignificantTermGroup[] = [
       {
         fieldName: 'custom_field.keyword',
         fieldValue: 'deviation',
+        docCount: 49,
+        pValue: 0.001,
       },
       {
         fieldName: 'airline',
         fieldValue: 'AAL',
+        docCount: 49,
+        pValue: 0.001,
       },
     ],
     docCount: 49,

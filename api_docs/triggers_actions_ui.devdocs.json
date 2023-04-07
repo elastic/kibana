@@ -2680,7 +2680,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "string[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\")[]"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false,
@@ -2754,6 +2754,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertStatus.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertStatus.status",
@@ -3666,6 +3680,27 @@
             "description": [],
             "signature": [
               "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.alertsFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.AlertsFilter",
+                "text": "AlertsFilter"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -5588,7 +5623,7 @@
         "signature": [
           "{ alertsTableConfiguration: ",
           "AlertsTableConfigurationRegistry",
-          "; casesData: { cases: Map<string, ",
+          "; cases: { data: Map<string, ",
           "Case",
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
@@ -5927,6 +5962,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ValidNormalizedTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidNormalizedTypes",
+        "description": [],
+        "signature": [
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\""
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -6051,7 +6101,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "\"number\"[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6117,7 +6167,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "\"number\"[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6183,7 +6233,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6249,7 +6299,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -7032,10 +7082,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout",
           "type": "Function",
           "tags": [],
-          "label": "getAddAlertFlyout",
+          "label": "getAddRuleFlyout",
           "description": [],
           "signature": [
             "(props: Omit<",
@@ -7050,7 +7100,7 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -7070,10 +7120,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout",
           "type": "Function",
           "tags": [],
-          "label": "getEditAlertFlyout",
+          "label": "getEditRuleFlyout",
           "description": [],
           "signature": [
             "(props: Omit<",
@@ -7088,7 +7138,7 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",

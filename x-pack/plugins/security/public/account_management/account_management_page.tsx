@@ -35,7 +35,7 @@ export const AccountManagementPage: FunctionComponent = () => {
 
   const error = currentUser.error || profileLoadError;
   if (error) {
-    return <EuiEmptyPrompt iconType="alert" title={<h2>{error.message}</h2>} />;
+    return <EuiEmptyPrompt iconType="warning" title={<h2>{error.message}</h2>} />;
   }
 
   if (!currentUser.value || (canUserHaveProfile(currentUser.value) && !userProfile.value)) {
