@@ -9,6 +9,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
+import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -16,8 +18,6 @@ import {
 } from '../../common';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
-
-import type { APIKey } from './epm/elasticsearch/transform/install';
 
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
@@ -53,7 +53,7 @@ async function createPackagePolicy(
   options: {
     spaceId: string;
     user: AuthenticatedUser | undefined;
-    apiKeyWithCurrentUserPermission?: APIKey;
+    authorizationHeader?: HTTPAuthorizationHeader | null;
   }
 ) {
   const newPackagePolicy = await packagePolicyService
@@ -77,7 +77,7 @@ async function createPackagePolicy(
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
-    // @TODO remove apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
+    authorizationHeader: options.authorizationHeader,
   });
 }
 
@@ -90,6 +90,7 @@ interface CreateAgentPolicyParams {
   monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -101,8 +102,8 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled,
   spaceId,
   user,
-}: // @TODO remove apiKeyWithCurrentUserPermission,
-CreateAgentPolicyParams) {
+  authorizationHeader,
+}: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
   if (hasFleetServer) {
@@ -126,7 +127,7 @@ CreateAgentPolicyParams) {
       esClient,
       packagesToInstall,
       spaceId,
-      // @TODO remove apiKeyWithCurrentUserPermission,
+      authorizationHeader,
     });
   }
 
@@ -135,6 +136,7 @@ CreateAgentPolicyParams) {
   const agentPolicy = await agentPolicyService.create(soClient, esClient, policy, {
     user,
     id: agentPolicyId,
+    authorizationHeader,
   });
 
   // Create the fleet server package policy and add it to agent policy.
@@ -142,7 +144,7 @@ CreateAgentPolicyParams) {
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
       spaceId,
       user,
-      // @TODO remove apiKeyWithCurrentUserPermission,
+      authorizationHeader,
     });
   }
 
@@ -151,7 +153,7 @@ CreateAgentPolicyParams) {
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
       spaceId,
       user,
-      // @TODO remove apiKeyWithCurrentUserPermission,
+      authorizationHeader,
     });
   }
 

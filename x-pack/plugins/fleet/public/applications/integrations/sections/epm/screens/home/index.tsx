@@ -85,6 +85,7 @@ export const mapToCard = ({
       urlVersion = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
+
       isReauthorizationRequired = hasDeferredInstallations(item);
     }
 

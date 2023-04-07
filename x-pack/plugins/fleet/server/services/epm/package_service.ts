@@ -14,7 +14,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { appContextService } from '..';
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
 import type { PackageList } from '../../../common';
 
@@ -30,7 +30,6 @@ import type {
 import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
-import type { APIKey } from './elasticsearch/transform/install';
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
@@ -82,8 +81,6 @@ export class PackageServiceImpl implements PackageService {
   ) {}
 
   public asScoped(request: KibanaRequest) {
-    // await this.initAPIKeyWithCurrentUserPermission(request);
-    // console.log('this.apiKey', this.apiKey);
     const preflightCheck = () => {
       if (!checkSuperuser(request)) {
         throw new FleetUnauthorizedError(
@@ -107,7 +104,7 @@ export class PackageServiceImpl implements PackageService {
 }
 
 class PackageClientImpl implements PackageClient {
-  private apiKeyWithCurrentUserPermission?: APIKey = undefined;
+  private authorizationHeader?: HTTPAuthorizationHeader | null = undefined;
 
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
@@ -117,19 +114,10 @@ class PackageClientImpl implements PackageClient {
     private readonly request?: KibanaRequest
   ) {}
 
-  private async initAPIKeyWithCurrentUserPermission() {
-    if (!this.apiKeyWithCurrentUserPermission && this.request) {
-      const apiKeyWithCurrentUserPermission = await appContextService
-        .getSecurity()
-        .authc.apiKeys.grantAsInternalUser(this.request, {
-          name: `auto-generated-transform-api-key`,
-          role_descriptors: {},
-        });
-
-      if (apiKeyWithCurrentUserPermission) {
-        this.apiKeyWithCurrentUserPermission = apiKeyWithCurrentUserPermission as APIKey;
-        return this.apiKeyWithCurrentUserPermission;
-      }
+  private getAuthorizationHeader() {
+    if (this.request) {
+      this.authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
+      return this.authorizationHeader;
     }
   }
 
@@ -209,7 +197,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const apiKeyWithCurrentUserPermission = await this.initAPIKeyWithCurrentUserPermission();
+    const authorizationHeader = await this.getAuthorizationHeader();
 
     const { installedTransforms } = await installTransforms(
       packageInfo,
@@ -218,7 +206,7 @@ class PackageClientImpl implements PackageClient {
       this.internalSoClient,
       this.logger,
       undefined,
-      apiKeyWithCurrentUserPermission
+      authorizationHeader
     );
     return installedTransforms;
   }

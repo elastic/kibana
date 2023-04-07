@@ -11,6 +11,12 @@ import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 
+import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
+
+import { generateTransformSecondaryAuthHeaders } from '../../../api_keys/transform_api_keys';
+
 import {
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
@@ -36,11 +42,7 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import {
-  getAsset,
-  type SecondaryAuthorizationHeader,
-  TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX,
-} from './common';
+import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -376,7 +378,8 @@ const installTransformsAssets = async (
   logger: Logger,
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
-  apiKeyWithCurrentUserPermission?: APIKey
+  authorizationHeader?: HTTPAuthorizationHeader | null
+  // apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
@@ -398,14 +401,10 @@ const installTransformsAssets = async (
       previousInstalledTransformEsAssets
     );
 
-    const secondaryAuth =
-      apiKeyWithCurrentUserPermission?.api_key !== undefined
-        ? {
-            headers: {
-              'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
-            },
-          }
-        : {};
+    const secondaryAuth = await generateTransformSecondaryAuthHeaders({
+      authorizationHeader,
+      logger,
+    });
 
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices
@@ -601,8 +600,8 @@ const installTransformsAssets = async (
         installablePackage.name,
         esReferences,
         {
-          assetsToRemove: transformRefs,
-          assetsToAdd: [...transformRefs].map((t) => ({ ...t, deferred: true })),
+          assetsToRemove: installedTransforms,
+          assetsToAdd: installedTransforms,
         }
       );
     }
@@ -626,7 +625,7 @@ export const installTransforms = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences?: EsAssetReference[],
-  apiKeyWithCurrentUserPermission?: APIKey
+  authorizationHeader?: HTTPAuthorizationHeader | null
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
 
@@ -674,7 +673,7 @@ export const installTransforms = async (
     logger,
     esReferences,
     previousInstalledTransformEsAssets,
-    apiKeyWithCurrentUserPermission
+    authorizationHeader
   );
 };
 
@@ -714,6 +713,13 @@ async function deleteAliasFromIndices({
   }
 }
 
+/**
+ * Create transform and optionally start transform
+ * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+ * If API Key has insufficient permissions, it should still create the transforms but not start it
+ * Instead of failing, we need to allow package to continue installing other assets
+ * and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
+ */
 async function handleTransformInstall({
   esClient,
   logger,
@@ -727,16 +733,11 @@ async function handleTransformInstall({
   startTransform?: boolean;
   secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<EsAssetReference> {
-  // For PUT and UPDATE transforms
-  // we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
-  // If API Key has insufficient permissions, it should still create the transforms but not start it
-  // Instead of failing, we need to allow package to continue installing other assets
-  // and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
   let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(
       () =>
-        // defer validation on put if the source index is not available
+        // defer_validation: true on put if the source index is not available
         // but will check if API Key has sufficient permission
         esClient.transform.putTransform(
           {
@@ -744,6 +745,7 @@ async function handleTransformInstall({
             defer_validation: true,
             body: transform.content,
           },
+          // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
           { ...(secondaryAuth ? secondaryAuth : {}) }
         ),
       { logger }
@@ -773,7 +775,7 @@ async function handleTransformInstall({
         () =>
           esClient.transform.startTransform(
             { transform_id: transform.installationName },
-            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [409] }
+            { ignore: [409] }
           ),
         { logger, additionalResponseStatuses: [400] }
       );
@@ -783,7 +785,7 @@ async function handleTransformInstall({
       isUnauthorizedAPIKey =
         isResponseError &&
         err?.body?.error?.type === 'security_exception' &&
-        err?.body?.error?.reason?.includes('unauthorized for API key');
+        err?.body?.error?.reason?.includes('lacks the required permissions');
 
       // swallow the error if the transform can't be started if API key has insufficient permissions
       if (!isUnauthorizedAPIKey) {
@@ -795,6 +797,9 @@ async function handleTransformInstall({
   return {
     id: transform.installationName,
     type: ElasticsearchAssetType.transform,
+    // If isUnauthorizedAPIKey: true (due to insufficient user permission at transform creation)
+    // that means the transform is created but not started.
+    // Note in saved object this is a deferred installation so user can later reauthorize
     deferred: isUnauthorizedAPIKey,
   };
 }

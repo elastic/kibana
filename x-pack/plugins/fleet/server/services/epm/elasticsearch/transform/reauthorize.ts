@@ -7,17 +7,14 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/install';
-
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
 import { retryTransientEsErrors } from '../retry';
-
-import type { SecondaryAuthorizationHeader } from './common';
 
 async function reauthorizeAndStartTransform({
   esClient,
@@ -32,7 +29,7 @@ async function reauthorizeAndStartTransform({
   shouldInstallSequentially?: boolean;
 }): Promise<{ transformId: string; success: boolean; error: null | any }> {
   try {
-    const updatedTransform = await retryTransientEsErrors(
+    await retryTransientEsErrors(
       () =>
         esClient.transform.updateTransform(
           {
@@ -43,8 +40,8 @@ async function reauthorizeAndStartTransform({
         ),
       { logger, additionalResponseStatuses: [400] }
     );
+
     logger.debug(`Updated transform: ${transformId}`);
-    return { transformId, success: true, error: null };
   } catch (err) {
     logger.error(`Failed to update transform: ${transformId} because ${err}`);
     return { transformId, success: false, error: err };
@@ -52,16 +49,11 @@ async function reauthorizeAndStartTransform({
 
   try {
     const startedTransform = await retryTransientEsErrors(
-      () =>
-        esClient.transform.startTransform(
-          { transform_id: transformId },
-          // Ignore error if transform has already been started
-          { ...(secondaryAuth ? secondaryAuth : {}), ignore: [409] }
-        ),
+      () => esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
       { logger, additionalResponseStatuses: [400] }
     );
     logger.debug(`Started transform: ${transformId}`);
-    return { transformId, success: true, error: null };
+    return { transformId, success: startedTransform.acknowledged, error: null };
   } catch (err) {
     logger.error(`Failed to start transform: ${transformId} because ${err}`);
     return { transformId, success: false, error: err };
@@ -80,9 +72,9 @@ export async function handleTransformReauthorizeAndStart({
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  pkgName: string;
-  pkgVersion: string;
   transforms: Array<{ transformId: string }>;
+  pkgName: string;
+  pkgVersion?: string;
   secondaryAuth?: SecondaryAuthorizationHeader;
   shouldInstallSequentially?: boolean;
 }) {

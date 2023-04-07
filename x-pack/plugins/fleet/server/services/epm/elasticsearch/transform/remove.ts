@@ -7,12 +7,11 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
-
-import type { SecondaryAuthorizationHeader } from './common';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {

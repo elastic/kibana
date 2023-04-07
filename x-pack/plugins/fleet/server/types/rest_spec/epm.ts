@@ -110,11 +110,9 @@ export const ReauthorizeTransformRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
   }),
-  body: schema.nullable(
-    schema.object({
-      transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
-    })
-  ),
+  body: schema.object({
+    transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
+  }),
 };
 
 export const InstallPackageFromRegistryRequestSchemaDeprecated = {

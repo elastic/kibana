@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FunctionComponent, MouseEvent } from 'react';
 
 import {
@@ -15,10 +15,10 @@ import {
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   EuiHorizontalRule,
   EuiNotificationBadge,
   EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -86,79 +86,87 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
     useAuthz().packagePrivileges?.transform?.actions?.canStartStopTransform?.executePackageAction ??
     false;
 
-  const handleAuthorizeTransforms = async (transformIds: Array<{ transformId: string }>) => {
-    setIsLoading(true);
+  const [transformsToAuthorize, setTransformsToAuthorize] = useState<Array<{
+    transformId: string;
+  }> | null>(null);
 
-    try {
-      notifications.toasts.addInfo(
-        i18n.translate('xpack.fleet.epm.packageDetails.assets.authorizeTransformsAcknowledged', {
-          defaultMessage:
-            'Request to authorize {count, plural, one {# transform} other {# transforms}} acknowledged.',
-          values: { count: transformIds.length },
-        }),
-        { toastLifeTimeMs: 500 }
-      );
+  useEffect(() => {
+    async function authorizeTransforms(transformIds: Array<{ transformId: string }>) {
+      setIsLoading(true);
 
-      const resp = await sendRequestReauthorizeTransforms(
-        packageInfo.name,
-        packageInfo.version,
-        transformIds
-      );
-      if (Array.isArray(resp.data)) {
-        const error = resp.data.find((d) => d.error)?.error;
+      try {
+        notifications.toasts.addInfo(
+          i18n.translate('xpack.fleet.epm.packageDetails.assets.authorizeTransformsAcknowledged', {
+            defaultMessage:
+              'Request to authorize {count, plural, one {# transform} other {# transforms}} acknowledged.',
+            values: { count: transformIds.length },
+          }),
+          { toastLifeTimeMs: 500 }
+        );
 
-        const cntAuthorized = resp.data.filter((d) => d.success).length;
-        if (error) {
-          const errorBody = error.meta?.body as ElasticsearchErrorDetails;
-          const errorMsg = errorBody
-            ? `${errorBody.error?.type}: ${errorBody.error?.reason}`
-            : `${error.message}`;
+        const resp = await sendRequestReauthorizeTransforms(
+          packageInfo.name,
+          packageInfo.version,
+          transformIds
+        );
+        if (Array.isArray(resp.data)) {
+          const error = resp.data.find((d) => d.error)?.error;
 
-          notifications.toasts.addError(
-            { name: errorMsg, message: errorMsg },
-            {
-              title: i18n.translate(
+          const cntAuthorized = resp.data.filter((d) => d.success).length;
+          if (error) {
+            const errorBody = error.meta?.body as ElasticsearchErrorDetails;
+            const errorMsg = errorBody
+              ? `${errorBody.error?.type}: ${errorBody.error?.reason}`
+              : `${error.message}`;
+
+            notifications.toasts.addError(
+              { name: errorMsg, message: errorMsg },
+              {
+                title: i18n.translate(
+                  'xpack.fleet.epm.packageDetails.assets.authorizeTransformsSuccessful',
+                  {
+                    defaultMessage:
+                      'Unable to authorize {cntUnauthorized, plural, one {# transform} other {# transforms}}.',
+                    values: { cntAuthorized, cntUnauthorized: transformIds.length - cntAuthorized },
+                  }
+                ),
+                toastLifeTimeMs: 1000,
+              }
+            );
+          } else {
+            notifications.toasts.addSuccess(
+              i18n.translate(
                 'xpack.fleet.epm.packageDetails.assets.authorizeTransformsSuccessful',
                 {
                   defaultMessage:
-                    'Unable to authorize {cntUnauthorized, plural, one {# transform} other {# transforms}}.',
-                  values: { cntAuthorized, cntUnauthorized: transformIds.length - cntAuthorized },
+                    'Successfully authorized {count, plural, one {# transform} other {# transforms}}.',
+                  values: { count: cntAuthorized },
                 }
               ),
-              toastLifeTimeMs: 1000,
-            }
-          );
-        } else {
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.fleet.epm.packageDetails.assets.authorizeTransformsSuccessful', {
-              defaultMessage:
-                'Successfully authorized {count, plural, one {# transform} other {# transforms}}.',
-              values: { count: cntAuthorized },
-            }),
-            { toastLifeTimeMs: 1000 }
-          );
+              { toastLifeTimeMs: 1000 }
+            );
+          }
+        }
+      } catch (e) {
+        if (e) {
+          notifications.toasts.addError(e, {
+            title: i18n.translate(
+              'xpack.fleet.epm.packageDetails.assets.unableToAuthorizeAllTransformsError',
+              {
+                defaultMessage: 'An error occurred authorizing and starting transforms.',
+              }
+            ),
+          });
         }
       }
-    } catch (e) {
-      if (e) {
-        notifications.toasts.addError(e, {
-          title: i18n.translate(
-            'xpack.fleet.epm.packageDetails.assets.unableToAuthorizeAllTransformsError',
-            {
-              defaultMessage: 'An error occurred authorizing and starting transforms.',
-            }
-          ),
-        });
-      }
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
 
-  const handleAuthorizeAll = async () => {
-    await handleAuthorizeTransforms(
-      deferredTransforms.map((t) => ({ transformId: t.attributes.title }))
-    );
-  };
+    if (transformsToAuthorize && transformsToAuthorize.length > 0) {
+      authorizeTransforms(transformsToAuthorize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transformsToAuthorize]);
 
   if (deferredTransforms.length === 0) return null;
   return (
@@ -182,16 +190,23 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
     >
       <>
         <EuiSpacer size="m" />
-        <EuiToolTip content={getDeferredAssetDescription(type, deferredInstallations.length)}>
+        <EuiToolTip
+          content={getDeferredAssetDescription(type, deferredInstallations.length)}
+          data-test-subject={`fleetAssetsReauthorizeAllTooltip-${isLoading}`}
+        >
           <EuiButton
             isLoading={isLoading}
             disabled={!canReauthorizeTransforms}
             size={'m'}
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
-              handleAuthorizeAll();
+              e.preventDefault();
+              setTransformsToAuthorize(
+                deferredTransforms.map((t) => ({ transformId: t.attributes.title }))
+              );
             }}
+            aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
           >
-            {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeButton', {
+            {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
               defaultMessage: 'Reauthorize all',
             })}
           </EuiButton>
@@ -204,7 +219,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
             ({ id: transformId, attributes: { title, description } }, idx) => {
               return (
                 <>
-                  <EuiSplitPanel.Inner grow={false} key={idx}>
+                  <EuiSplitPanel.Inner grow={false} key={`${transformId}-${idx}`}>
                     <EuiFlexGroup>
                       <EuiFlexItem grow={8}>
                         <EuiText size="m">
@@ -220,14 +235,17 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiToolTip content={getDeferredAssetDescription(type, 1)}>
+                        <EuiToolTip
+                          content={getDeferredAssetDescription(type, 1)}
+                          data-test-subject={`fleetAssetsReauthorizeTooltip-${transformId}-${isLoading}`}
+                        >
                           <EuiButton
                             isLoading={isLoading}
                             disabled={!canReauthorizeTransforms}
                             size={'s'}
                             onClick={(e: MouseEvent<HTMLButtonElement>) => {
                               e.preventDefault();
-                              handleAuthorizeTransforms([{ transformId }]);
+                              setTransformsToAuthorize([{ transformId }]);
                             }}
                           >
                             {i18n.translate(

@@ -7,10 +7,11 @@
 
 import type { PackageInfo, PackageListItem } from '../../common';
 
-export const getDeferredInstallationsCnt = (pkg?: PackageInfo | PackageListItem | null): number =>
-  pkg && 'savedObject' in pkg && pkg.savedObject
+export const getDeferredInstallationsCnt = (pkg?: PackageInfo | PackageListItem | null): number => {
+  return pkg && 'savedObject' in pkg && pkg.savedObject
     ? pkg.savedObject.attributes?.installed_es?.filter((d) => d.deferred).length
     : 0;
+};
 
 export const hasDeferredInstallations = (pkg?: PackageInfo | PackageListItem | null): boolean =>
   getDeferredInstallationsCnt(pkg) > 0;

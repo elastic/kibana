@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
@@ -41,7 +43,6 @@ import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/in
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import type { APIKey } from '../elasticsearch/transform/install';
 import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
@@ -75,7 +76,7 @@ export async function _installPackage({
   installSource,
   spaceId,
   verificationResult,
-  apiKeyWithCurrentUserPermission,
+  authorizationHeader,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -90,7 +91,7 @@ export async function _installPackage({
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
-  apiKeyWithCurrentUserPermission?: APIKey;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
@@ -251,7 +252,8 @@ export async function _installPackage({
         savedObjectsClient,
         logger,
         esReferences,
-        apiKeyWithCurrentUserPermission
+        authorizationHeader
+        // apiKeyWithCurrentUserPermission
       )
     ));
 

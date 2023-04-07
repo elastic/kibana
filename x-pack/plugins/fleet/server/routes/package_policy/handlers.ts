@@ -13,7 +13,7 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import type { APIKey } from '../../services/epm/elasticsearch/transform/install';
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
@@ -221,6 +221,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, package: pkg, ...newPolicy } = request.body;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+
   if ('output_id' in newPolicy) {
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     delete newPolicy.output_id;
@@ -250,12 +252,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     }
 
     // Create package policy
-    const apiKeyWithCurrentUserPermission = await appContextService
-      .getSecurity()
-      .authc.apiKeys.grantAsInternalUser(request, {
-        name: `auto-generated-transform-api-key`,
-        role_descriptors: {},
-      });
 
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
@@ -265,9 +261,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         user,
         force,
         spaceId,
-        apiKeyWithCurrentUserPermission: apiKeyWithCurrentUserPermission
-          ? (apiKeyWithCurrentUserPermission as APIKey)
-          : undefined,
+        authorizationHeader,
       },
       context,
       request

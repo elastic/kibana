@@ -12,9 +12,10 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
-import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
-import type { APIKey } from '../../services/epm/elasticsearch/transform/install';
+import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
+import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
 import type {
   GetInfoResponse,
@@ -289,12 +290,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(request, {
-      name: `auto-generated-transform-api-key`,
-      role_descriptors: {},
-    });
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
 
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
@@ -306,9 +302,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    apiKeyWithCurrentUserPermission: apiKeyWithCurrentUserPermission
-      ? (apiKeyWithCurrentUserPermission as APIKey)
-      : undefined,
+    authorizationHeader,
   });
 
   if (!res.error) {
@@ -385,6 +379,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,
@@ -392,7 +388,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
-    // @TODO remove apiKeyWithCurrentUserPermission,
+    authorizationHeader,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -464,22 +460,11 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   const { transforms } = request.body;
 
   const logger = appContextService.getLogger();
-
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(request, {
-      name: `auto-generated-transform-api-key`,
-      role_descriptors: {},
-    });
-
-  const secondaryAuth =
-    apiKeyWithCurrentUserPermission?.api_key !== undefined
-      ? {
-          headers: {
-            'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
-          },
-        }
-      : undefined;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const secondaryAuth = await generateTransformSecondaryAuthHeaders({
+    authorizationHeader,
+    logger,
+  });
 
   const resp = await handleTransformReauthorizeAndStart({
     esClient,

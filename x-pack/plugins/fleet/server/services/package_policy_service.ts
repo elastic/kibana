@@ -9,6 +9,8 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
+import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
 import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -23,8 +25,6 @@ import type {
 } from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
-
-import type { APIKey } from './epm/elasticsearch/transform/install';
 
 import type { NewPackagePolicyWithId } from './package_policy';
 
@@ -42,7 +42,7 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      apiKeyWithCurrentUserPermission?: APIKey;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
@@ -62,6 +62,7 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
     }
   ): Promise<PackagePolicy[]>;
 

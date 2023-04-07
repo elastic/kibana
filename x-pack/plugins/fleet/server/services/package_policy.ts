@@ -27,6 +27,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -86,8 +88,6 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import type { APIKey } from './epm/elasticsearch/transform/install';
-
 import type { FleetAuthzRouteConfig } from './security';
 
 import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
@@ -130,6 +130,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -139,7 +140,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-      apiKeyWithCurrentUserPermission?: APIKey;
     } = {},
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -147,6 +147,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
       options.id = SavedObjectsUtils.generateId();
+    }
+
+    let authorizationHeader = options.authorizationHeader;
+
+    if (!authorizationHeader && request) {
+      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -195,7 +201,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (enrichedPackagePolicy.package?.name) {
-      console.log('--@@DO NOT REMOVE policy.create', options?.apiKeyWithCurrentUserPermission);
       if (!options?.skipEnsureInstalled) {
         await ensureInstalledPackage({
           esClient,
@@ -204,7 +209,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgName: enrichedPackagePolicy.package.name,
           pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
-          apiKeyWithCurrentUserPermission: options?.apiKeyWithCurrentUserPermission,
+          authorizationHeader,
         });
       }
 
@@ -1611,6 +1616,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;

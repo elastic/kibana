@@ -15,6 +15,8 @@ import type {
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
@@ -175,14 +177,9 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
-  try {
-    // const apiKeyWithCurrentUserPermission = await appContextService
-    //   .getSecurity()
-    //   .authc.apiKeys.grantAsInternalUser(request, {
-    //     name: `auto-generated-transform-api-key`,
-    //     role_descriptors: {},
-    //   });
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
 
+  try {
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
         soClient,
@@ -193,7 +190,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         monitoringEnabled,
         spaceId,
         user,
-        // @TODO remove apiKeyWithCurrentUserPermission,
+        authorizationHeader,
       }),
     };
 
