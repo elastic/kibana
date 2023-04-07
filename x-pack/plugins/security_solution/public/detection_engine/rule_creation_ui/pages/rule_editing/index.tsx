@@ -78,6 +78,7 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -132,6 +133,7 @@ const EditRulePageComponent: FC = () => {
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
+  const invalidateFetchRulesSnoozeSettingsQuery = useInvalidateFetchRulesSnoozeSettingsQuery();
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -369,6 +371,7 @@ const EditRulePageComponent: FC = () => {
         ...(ruleId ? { id: ruleId } : {}),
         ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
+      invalidateFetchRulesSnoozeSettingsQuery();
 
       displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
       navigateToApp(APP_UI_ID, {
