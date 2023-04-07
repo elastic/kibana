@@ -8,30 +8,33 @@
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import { isConfigSchema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
+import type {
+  ErrorHttpResponseOptions,
+  IRouter,
+  IRouterWithVersion,
+  KibanaRequest,
+  RequestHandler,
+  RequestHandlerContextBase,
+  RouteConfig,
+  RouteMethod,
+  RouterRoute,
+  VersionedRouter,
+} from '@kbn/core-http-server';
+import { validBodyOutput } from '@kbn/core-http-server';
+import { RouterRouteHandler } from '@kbn/core-http-server/src/router/router';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
-import type {
-  KibanaRequest,
-  ErrorHttpResponseOptions,
-  RouteConfig,
-  RouteMethod,
-  RequestHandlerContextBase,
-  RouterRoute,
-  IRouter,
-  RequestHandler,
-} from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
-import { performance } from 'perf_hooks';
+import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
-import { RouterRouteHandler } from '@kbn/core-http-server/src/router/router';
+import { performance } from 'perf_hooks';
+import { wrapErrors } from './error_wrapper';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
-import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 
 const THRESHOLD_ELU = 0.15;
 const THRESHOLD_ELA = 250;
@@ -167,7 +170,7 @@ async function addEluTimings<T>(callback: () => Promise<T>, path: string, log: L
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
-  implements IRouter<Context>
+  implements IRouterWithVersion<Context>
 {
   public routes: Array<Readonly<RouterRoute>> = [];
   public get: IRouter<Context>['get'];
@@ -252,6 +255,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       }
       return hapiResponseAdapter.toInternalError();
     }
+  }
+
+  private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+  public get versioned(): VersionedRouter<Context> {
+    if (this.versionedRouter === undefined) {
+      this.versionedRouter = CoreVersionedRouter.from({ router: this });
+    }
+    return this.versionedRouter;
   }
 }
 

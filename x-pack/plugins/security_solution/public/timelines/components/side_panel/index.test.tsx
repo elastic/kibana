@@ -29,6 +29,15 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
+const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => mockUseLocation(),
+  };
+});
+
 describe('Details Panel Component', () => {
   const state: State = {
     ...mockGlobalState,

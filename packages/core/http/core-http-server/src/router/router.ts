@@ -8,6 +8,7 @@
 
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
+import type { VersionedRouter } from '../versioning';
 import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -87,11 +88,34 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
   getRoutes: () => RouterRoute[];
 }
 
-/** @internal */
 export type RouterRouteHandler = (
   req: Request,
   responseToolkit: ResponseToolkit
 ) => Promise<ResponseObject | Boom.Boom<any>>;
+
+export interface IRouterWithVersion<
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase
+> extends IRouter<Context> {
+  /**
+   * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
+   * following the Elastic versioning specification.
+   *
+   * @example
+   * const router = core.http.createRouter();
+   * router.versioned.get({ path: '/api/my-path', access: 'public' }).addVersion(
+   *   {
+   *     version: '1',
+   *     validate: false,
+   *   },
+   *   async (ctx, req, res) => {
+   *     return res.ok();
+   *   }
+   * );
+   *
+   * @experimental
+   */
+  versioned: VersionedRouter<Context>;
+}
 
 /** @public */
 export interface RouterRoute {
