@@ -212,6 +212,8 @@ export interface OSFields {
   platform: string;
   family: string;
   Ext: OSFieldsExt;
+  kernel?: string;
+  type?: string;
 }
 
 /**
