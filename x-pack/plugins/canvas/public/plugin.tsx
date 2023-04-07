@@ -113,7 +113,7 @@ export class CanvasPlugin
       euiIconType: 'logoKibana',
       order: 3000,
       updater$: this.appUpdater,
-      defaultPath: `${APP_ROUTE}/`,
+      defaultPath: APP_ROUTE,
       mount: async (params: AppMountParameters) => {
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
