@@ -391,6 +391,7 @@ const EditRulePageComponent: FC = () => {
     scheduleStep,
     setStepData,
     updateRule,
+    invalidateFetchRulesSnoozeSettingsQuery,
     startTransaction,
   ]);
 
