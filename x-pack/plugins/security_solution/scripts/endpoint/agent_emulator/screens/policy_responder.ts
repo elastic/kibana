@@ -6,6 +6,8 @@
  */
 
 import type { DeepPartial } from '@kbn/utility-types';
+import { grey } from 'chalk';
+import { layout } from '../../common/screen/layout';
 import { indexEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import type { HostInfo, HostPolicyResponse } from '../../../../common/endpoint/types';
@@ -62,17 +64,20 @@ export class PolicyResponderScreen extends ScreenBaseClass {
   }
 
   protected body(): string | DataFormatter {
-    return `Send a policy response for a given Endpoint host.
-
-  Selected Host: ${
-    this.options?.hostMetadata
+    const selectedHost = this.options?.hostMetadata
       ? this.options.hostMetadata.metadata.host.hostname
-      : 'None configured'
-  }
-  Response Type: ${this.options?.responseType ? this.options.responseType : 'None configured'}
+      : grey('None configured');
+    const responseType = this.options?.responseType
+      ? this.options.responseType
+      : grey('None configured');
+
+    return layout`Send a policy response for a given Endpoint host.
+
+  Selected Host: ${selectedHost}
+  Response Type: ${responseType}
 
 Options:
-${this.choices.output}
+${this.choices}
 `;
   }
 
