@@ -13,12 +13,19 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
+
+const DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.ACTIVE,
+  throttle: null,
+  summary: true,
+};
 
 interface Props {
   field: FieldHook;
@@ -131,6 +138,25 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field, isInitializingAction]
   );
 
+  const setActionFrequency = useCallback(
+    // TODO: replace any with a concrete type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (key: string, value: any, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          frequency: {
+            ...(updatedActions[index].frequency ?? DEFAULT_FREQUENCY),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
   const actionForm = useMemo(
     () =>
       getActionForm({
@@ -140,16 +166,20 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        setActionFrequencyProperty: () => {},
+        setActionFrequencyProperty: setActionFrequency,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        // TODO: [Frequency Integration]
+        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
-        hideNotifyWhen: true,
+        hideNotifyWhen: false,
+        hasSummary: true,
       }),
     [
       actions,
       getActionForm,
       messageVariables,
+      setActionFrequency,
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,

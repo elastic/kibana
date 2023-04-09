@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,13 +28,8 @@ import { ResponseActionsForm } from '../../../../detection_engine/rule_response_
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
-import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
+import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import {
-  ThrottleSelectField,
-  THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING,
-  DEFAULT_THROTTLE_OPTION,
-} from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './get_schema';
@@ -55,22 +49,9 @@ export const stepActionsDefaultValue: ActionsStepRule = {
   actions: [],
   responseActions: [],
   kibanaSiemAppUrl: '',
-  throttle: DEFAULT_THROTTLE_OPTION.value,
 };
 
 const GhostFormField = () => <></>;
-
-const getThrottleOptions = (throttle?: string | null) => {
-  // Add support for throttle options set by the API
-  if (
-    throttle &&
-    findIndex(['value', throttle], THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING) < 0
-  ) {
-    return [...THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING, { value: throttle, text: throttle }];
-  }
-
-  return THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING;
-};
 
 const DisplayActionsHeader = () => {
   return (
@@ -127,11 +108,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
-    form,
-    watch: ['throttle'],
-  });
-  const throttle = formThrottle || initialState.throttle;
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -163,10 +139,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     };
   }, [getData, setForm]);
 
-  const throttleOptions = useMemo(() => {
-    return getThrottleOptions(throttle);
-  }, [throttle]);
-
   const throttleFieldComponentProps = useMemo(
     () => ({
       idAria: 'detectionEngineStepRuleActionsThrottle',
@@ -178,29 +150,26 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         ? THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY
         : THROTTLE_FIELD_HELP_TEXT,
       euiFieldProps: {
-        options: throttleOptions,
+        options: [],
       },
     }),
-    [isLoading, isLoadingCaseAction, ruleType, throttleOptions]
+    [isLoading, isLoadingCaseAction, ruleType]
   );
 
   const displayActionsOptions = useMemo(
-    () =>
-      throttle !== stepActionsDefaultValue.throttle ? (
-        <>
-          <EuiSpacer />
-          <UseField
-            path="actions"
-            component={RuleActionsField}
-            componentProps={{
-              messageVariables: actionMessageParams,
-            }}
-          />
-        </>
-      ) : (
-        <UseField path="actions" component={GhostFormField} />
-      ),
-    [throttle, actionMessageParams]
+    () => (
+      <>
+        <EuiSpacer />
+        <UseField
+          path="actions"
+          component={RuleActionsField}
+          componentProps={{
+            messageVariables: actionMessageParams,
+          }}
+        />
+      </>
+    ),
+    [actionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {
@@ -217,11 +186,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     return application.capabilities.actions.show ? (
       <>
         <DisplayActionsHeader />
-        <UseField
-          path="throttle"
-          component={ThrottleSelectField}
-          componentProps={throttleFieldComponentProps}
-        />
         {displayActionsOptions}
         {responseActionsEnabled && displayResponseActionsOptions}
 

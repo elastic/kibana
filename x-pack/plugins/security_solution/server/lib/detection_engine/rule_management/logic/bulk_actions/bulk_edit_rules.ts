@@ -7,10 +7,7 @@
 
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import pMap from 'p-map';
-import {
-  MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../../common/constants';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 
 import type {
   BulkActionEditPayload,
@@ -21,7 +18,6 @@ import { BulkActionEditType } from '../../../../../../common/detection_engine/ru
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import { enrichFilterWithRuleTypeMapping } from '../search/enrich_filter_with_rule_type_mappings';
-import { readRules } from '../crud/read_rules';
 import type { RuleAlertType } from '../../../rule_schema';
 
 import { ruleParamsModifier } from './rule_params_modifier';
@@ -67,6 +63,9 @@ export const bulkEditRules = async ({
     },
   });
 
+  //
+  // TODO: [Frequency Integration] We should use new snoozing UI instead
+  //
   // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
   // this is a workaround to mitigate this,
   // until https://github.com/elastic/kibana/issues/139084 is resolved
@@ -86,10 +85,13 @@ export const bulkEditRules = async ({
       result.rules,
       async (rule) => {
         try {
-          if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
-            await rulesClient.unmuteAll({ id: rule.id });
-            return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
-          }
+          //
+          // TODO: [Frequency Integration] We should use new snoozing UI instead
+          //
+          // if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          //   await rulesClient.unmuteAll({ id: rule.id });
+          //   return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
+          // }
 
           return rule;
         } catch (err) {
