@@ -26,7 +26,7 @@ export async function getAllRelatedAssets(
   options: GetAllRelatedAssetsOptions
 ) {
   // How to put size into this?
-  const { ean, from, to, relation, maxDistance } = options;
+  const { ean, from, to, relation, maxDistance, type = [] } = options;
 
   const primary = await findPrimary(esClient, { ean, from, to });
 
@@ -52,7 +52,9 @@ export async function getAllRelatedAssets(
 
   return {
     primary: primary[0],
-    [relation]: relatedAssets,
+    [relation]: type.length
+      ? relatedAssets.filter((asset) => type.includes(asset['asset.type']))
+      : relatedAssets,
   };
 }
 
