@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
+import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
 
 const ASSETS_ENDPOINT = '/api/asset-manager/assets';
 const DIFF_ENDPOINT = `${ASSETS_ENDPOINT}/diff`;
+const RELATED_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/related`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -310,6 +311,165 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.onlyInA).to.eql(onlyInA);
         expect(getResponse.body.onlyInB).to.eql(onlyInB);
         expect(getResponse.body.inBoth).to.eql(inBoth);
+      });
+    });
+
+    describe('GET /assets/related', () => {
+      describe('response shape validation', () => {
+        it('should return the primary asset', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-002'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 5,
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          delete results.primary['@timestamp'];
+          expect(results.primary).to.eql(sampleCluster);
+        });
+
+        it('should return empty assets when none matching', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-002'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 5,
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(results).to.have.property('descendants');
+          expect(results.descendants).to.have.length(0);
+        });
+      });
+
+      describe('no asset.type filters', () => {
+        it('should return all descendants of a provided ean at maxDistance 1', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-001'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 1,
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(results.descendants).to.have.length(3);
+          expect(results.descendants.every((asset: { distance: number }) => asset.distance === 1));
+        });
+
+        it('should return all descendants of a provided ean at maxDistance 2', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-001'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 2,
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(results.descendants).to.have.length(12);
+        });
+      });
+
+      describe('with asset.type filters', () => {
+        it('should filter by the provided asset type', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-001'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 1,
+              type: ['k8s.pod'],
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(results.descendants).to.have.length(0);
+        });
+
+        it('should return all descendants of a provided ean at maxDistance 2', async () => {
+          await createSampleAssets(supertest);
+
+          const sampleCluster = sampleAssetDocs.find(
+            (asset) => asset['asset.id'] === 'cluster-001'
+          );
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleCluster!['asset.ean'],
+              maxDistance: 2,
+              type: ['k8s.pod'],
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(results.descendants).to.have.length(9);
+          expect(results.descendants.every((asset: { distance: number }) => asset.distance === 2));
+          expect(results.descendants.every((asset: Asset) => asset['asset.type'] === 'k8s.pod'));
+        });
       });
     });
   });
