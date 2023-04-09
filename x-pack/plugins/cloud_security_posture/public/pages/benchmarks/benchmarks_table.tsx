@@ -14,18 +14,25 @@ import {
   EuiLink,
   EuiToolTip,
   EuiAvatar,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
 import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
+import { isCommonError } from '../../components/cloud_posture_page';
+import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
+
+export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
+export const ERROR_MESSAGE_TITLE = "We couldn't fetch your cloud security posture benchmark data";
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -33,6 +40,10 @@ interface BenchmarksTableProps
   benchmarks: Benchmark[];
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
   'data-test-subj'?: string;
+}
+
+interface ErrorProps {
+  error: unknown;
 }
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
@@ -66,6 +77,39 @@ const IntegrationButtonLink = ({
     </EuiLink>
   );
 };
+
+const ErrorMessageComponent = (error: ErrorProps) => (
+  <FullSizeCenteredPage>
+    <EuiEmptyPrompt
+      color="danger"
+      iconType="warning"
+      data-test-subj={ERROR_STATE_TEST_SUBJECT}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
+            defaultMessage={ERROR_MESSAGE_TITLE}
+          />
+        </h2>
+      }
+      body={
+        isCommonError(error) ? (
+          <p>
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
+              defaultMessage="{error} {statusCode}: {body}"
+              values={{
+                error: error.body.error,
+                statusCode: error.body.statusCode,
+                body: error.body.message,
+              }}
+            />
+          </p>
+        ) : undefined
+      }
+    />
+  </FullSizeCenteredPage>
+);
 
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
@@ -192,6 +236,10 @@ export const BenchmarksTable = ({
   const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
     setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
+
+  if (error) {
+    return <ErrorMessageComponent error={error} />;
+  }
 
   return (
     <EuiBasicTable
