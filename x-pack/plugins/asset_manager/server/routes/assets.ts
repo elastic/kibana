@@ -118,6 +118,13 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET /assets/diff
+  const getAssetsDiffQueryOptions = schema.object({
+    aFrom: schema.string(),
+    aTo: schema.string(),
+    bFrom: schema.string(),
+    bTo: schema.string(),
+    type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+  });
   router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
