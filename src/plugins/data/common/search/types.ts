@@ -7,7 +7,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { KibanaExecutionContext, SavedObject } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from '..';
@@ -166,3 +166,16 @@ export type ISearchOptionsSerializable = Pick<
   | 'isRestore'
   | 'executionContext'
 >;
+
+/**
+ * Common interface for the saved objects client
+ * @public
+ */
+export interface SavedObjectsClientCommon {
+  /**
+   * Get a single saved object by id
+   * @param type - type of saved object
+   * @param id - id of saved object
+   */
+  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+}

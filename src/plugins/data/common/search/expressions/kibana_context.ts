@@ -14,7 +14,7 @@ import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
+import { SavedObjectsClientCommon } from '../types';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
@@ -129,7 +129,7 @@ export const getKibanaContextFn = (
       let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
-        const obj = await savedObjectsClient.getSavedSearch(args.savedSearchId);
+        const obj = await savedObjectsClient.get('search', args.savedSearchId); // todo
         const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
         const { query, filter } = getParsedValue(search, {});
 

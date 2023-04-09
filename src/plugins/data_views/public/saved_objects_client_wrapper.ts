@@ -66,7 +66,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
       }
     }
 
-    if (response.outcome === 'conflict') {
+    if (response.meta.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
     return response.item;

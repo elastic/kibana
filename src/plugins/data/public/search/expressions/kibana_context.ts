@@ -7,9 +7,9 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/public';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { SavedObjectsClientCommon } from '../../../common/search/types';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -33,6 +33,7 @@ export function getKibanaContext({
   return getKibanaContextFn(async () => {
     const [core] = await getStartServices();
     return {
+      // savedObjectsClient: core.savedObjects.client as unknown as SavedObjectsClientCommon,
       savedObjectsClient: core.savedObjects.client as unknown as SavedObjectsClientCommon,
     };
   });

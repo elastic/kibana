@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsResolveResponse,
-  // SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 
 import type {

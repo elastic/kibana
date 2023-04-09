@@ -20,5 +20,4 @@ export type {
   DataViewDeleteOut,
   DataViewSearchIn,
   DataViewSearchOut,
-  DataViewSearchQuery,
 } from './types';

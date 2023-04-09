@@ -198,7 +198,8 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get populated data view saved object cache.
    */
-  getCache: () => Promise<Array<SavedObject<DataViewSavedObjectAttrs>> | null | undefined>;
+  // todo I'm not sure if this is used
+  getCache: () => Promise<DataViewSpec[]>;
   /**
    * If user can save data view, return true.
    */
@@ -368,7 +369,8 @@ export class DataViewsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map((obj) => obj?.id);
+    // todo should have types that communicate whether there's an id
+    return this.savedObjectsCache.map((obj) => obj.id!);
   };
 
   /**
@@ -452,7 +454,7 @@ export class DataViewsService {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
     }
-    return this.savedObjectsCache;
+    return this.savedObjectsCache || []; // todo not sure of the use of returning null or undefined
   };
 
   /**
