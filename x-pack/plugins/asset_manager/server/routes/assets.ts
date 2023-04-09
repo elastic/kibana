@@ -17,12 +17,26 @@ import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
 
+const assetType = schema.oneOf([
+  schema.literal('k8s.pod'),
+  schema.literal('k8s.cluster'),
+  schema.literal('k8s.node'),
+]);
+
 const getAssetsQueryOptions = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
   type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
   ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   size: schema.maybe(schema.number()),
+});
+
+const getAssetsDiffQueryOptions = schema.object({
+  aFrom: schema.string(),
+  aTo: schema.string(),
+  bFrom: schema.string(),
+  bTo: schema.string(),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
 });
 
 const getRelatedAssetsQueryOptions = schema.object({
@@ -33,14 +47,6 @@ const getRelatedAssetsQueryOptions = schema.object({
   type: schema.maybe(schema.oneOf([assetTypeRT, schema.arrayOf(assetTypeRT)])),
   maxDistance: schema.maybe(schema.number()),
   size: schema.maybe(schema.number()),
-});
-
-const getAssetsDiffQueryOptions = schema.object({
-  aFrom: schema.string(),
-  aTo: schema.string(),
-  bFrom: schema.string(),
-  bTo: schema.string(),
-  type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
 });
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
@@ -118,13 +124,6 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET /assets/diff
-  const getAssetsDiffQueryOptions = schema.object({
-    aFrom: schema.string(),
-    aTo: schema.string(),
-    bFrom: schema.string(),
-    bTo: schema.string(),
-    type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
-  });
   router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
