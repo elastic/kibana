@@ -26,7 +26,7 @@ export async function getAllRelatedAssets(
   options: GetAllRelatedAssetsOptions
 ) {
   // How to put size into this?
-  const { ean, from, to, type, relation, maxDistance, size } = options;
+  const { ean, from, to, relation, maxDistance } = options;
 
   const primary = await findPrimary(esClient, { ean, from, to });
 
