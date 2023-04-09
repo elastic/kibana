@@ -25,6 +25,8 @@ import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
 
+import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
+
 export class DataViewsPublicPlugin
   implements
     Plugin<
@@ -38,18 +40,26 @@ export class DataViewsPublicPlugin
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
-    { expressions }: DataViewsPublicSetupDependencies
+    { expressions, contentManagement }: DataViewsPublicSetupDependencies
   ): DataViewsPublicPluginSetup {
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+
+    contentManagement.registry.register({
+      id: DATA_VIEW_SAVED_OBJECT_TYPE,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: 'data view',
+    });
 
     return {};
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats }: DataViewsPublicStartDependencies
+    { fieldFormats, contentManagement }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, application } = core;
+    const { uiSettings, http, notifications, application } = core;
 
     const onNotifDebounced = debounceByKey(
       notifications.toasts.add.bind(notifications.toasts),
@@ -63,7 +73,7 @@ export class DataViewsPublicPlugin
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {

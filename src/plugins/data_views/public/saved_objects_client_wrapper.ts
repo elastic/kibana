@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
-  SimpleSavedObject,
-} from '@kbn/core/public';
-import { omit } from 'lodash';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -21,53 +16,98 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
-type SOClient = Pick<
-  SavedObjectsClientContract,
-  'find' | 'resolve' | 'update' | 'create' | 'delete'
->;
-
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
-  ({
-    version: simpleSavedObject._version,
-    ...omit(simpleSavedObject, '_version'),
-  } as SavedObject<T>);
+import type {
+  DataViewGetIn,
+  DataViewGetOut,
+  DataViewCreateIn,
+  DataViewCreateOut,
+  DataViewUpdateIn,
+  DataViewUpdateOut,
+  DataViewDeleteIn,
+  DataViewDeleteOut,
+  DataViewSearchIn,
+  DataViewSearchOut,
+  DataViewUpdateOptions,
+  CreateOptions,
+  // DataViewSearchQuery,
+} from '../common/content_management';
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
-  private savedObjectClient: SOClient;
+  private contentManagemntClient: ContentClient;
 
-  constructor(savedObjectClient: SOClient) {
-    this.savedObjectClient = savedObjectClient;
+  constructor(contentManagemntClient: ContentClient) {
+    this.contentManagemntClient = contentManagemntClient;
   }
 
-  async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
+  async find(options: SavedObjectsClientCommonFindArgs) {
+    const results = await this.contentManagemntClient.search<DataViewSearchIn, DataViewSearchOut>({
+      contentTypeId: 'index-pattern',
+      query: options,
+    });
+    return results.savedObjects;
   }
 
-  async get<T = unknown>(type: string, id: string) {
-    const response = await this.savedObjectClient.resolve<T>(type, id);
+  async get(id: string) {
+    let response: DataViewGetOut;
+    try {
+      response = await this.contentManagemntClient.get<DataViewGetIn, DataViewGetOut>({
+        contentTypeId: 'index-pattern',
+        id,
+      });
+    } catch (e) {
+      if (e.body?.statusCode === 404) {
+        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+      } else {
+        throw e;
+      }
+    }
+
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    return simpleSavedObjectToSavedObject<T>(response.saved_object);
+    return response.savedObject;
   }
 
-  async update(
-    type: string,
-    id: string,
-    attributes: DataViewAttributes,
-    options: SavedObjectsUpdateOptions<unknown>
-  ) {
-    const response = await this.savedObjectClient.update(type, id, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+  async getSavedSearch(id: string) {
+    const response = await this.contentManagemntClient.get({
+      contentTypeId: 'search',
+      id,
+    });
+
+    // todo
+    // @ts-ignore
+    if (response.outcome === 'conflict') {
+      throw new DataViewSavedObjectConflictError(id);
+    }
+    // @ts-ignore
+    return response.savedObject;
   }
 
-  async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
-    const response = await this.savedObjectClient.create(type, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+  // SO update method took a `version` value via the options object.
+  // This was used to make sure the update was based on the most recent version of the object.
+  async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
+    const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
+      contentTypeId: 'index-pattern',
+      id,
+      data: attributes,
+      options,
+    });
+    return response as SavedObject<DataViewAttributes>;
   }
 
-  delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id, { force: true });
+  async create(attributes: DataViewAttributes, options: CreateOptions) {
+    return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
+      contentTypeId: 'index-pattern',
+      data: attributes,
+      // this is required, shouldn't be.
+      options,
+    })) as SavedObject<DataViewAttributes>;
+  }
+
+  async delete(id: string) {
+    await this.contentManagemntClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
+      contentTypeId: 'index-pattern',
+      id,
+    });
   }
 }

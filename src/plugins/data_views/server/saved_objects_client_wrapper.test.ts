@@ -22,7 +22,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
       .fn()
       .mockResolvedValue({ outcome: 'exactMatch', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientServerToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -34,7 +34,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
       .fn()
       .mockResolvedValue({ outcome: 'aliasMatch', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientServerToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -48,8 +48,6 @@ describe('SavedObjectsClientPublicToCommon', () => {
       .mockResolvedValue({ outcome: 'conflict', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientServerToCommon(soClient);
 
-    await expect(service.get('index-pattern', '1')).rejects.toThrow(
-      DataViewSavedObjectConflictError
-    );
+    await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
   });
 });
