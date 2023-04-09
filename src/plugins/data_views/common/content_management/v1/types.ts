@@ -9,7 +9,7 @@
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsResolveResponse,
+
   // SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
