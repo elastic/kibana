@@ -22,7 +22,6 @@ export type {
   DataViewDeleteOut,
   DataViewSearchIn,
   DataViewSearchOut,
-  DataViewSearchQuery,
 } from './v1/types';
 
 export { DataViewContentType } from './constants';

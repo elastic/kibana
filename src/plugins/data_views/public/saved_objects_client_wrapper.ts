@@ -14,6 +14,7 @@ import {
   SavedObject,
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
+  DataViewSpec,
 } from '../common/types';
 
 import type {
@@ -42,9 +43,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   async find(options: SavedObjectsClientCommonFindArgs) {
     const results = await this.contentManagemntClient.search<DataViewSearchIn, DataViewSearchOut>({
       contentTypeId: 'index-pattern',
-      query: options,
+      query: {
+        text: options.search,
+        limit: options.perPage,
+      },
     });
-    return results.savedObjects;
+    return results.hits;
   }
 
   async get(id: string) {
@@ -65,7 +69,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    return response.savedObject;
+    return response.item;
   }
 
   async getSavedSearch(id: string) {
@@ -85,20 +89,20 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
 
   // SO update method took a `version` value via the options object.
   // This was used to make sure the update was based on the most recent version of the object.
-  async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
+  async update(id: string, spec: DataViewSpec, options: DataViewUpdateOptions) {
     const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
       contentTypeId: 'index-pattern',
       id,
-      data: attributes,
+      data: spec,
       options,
     });
     return response as SavedObject<DataViewAttributes>;
   }
 
-  async create(attributes: DataViewAttributes, options: CreateOptions) {
+  async create(spec: DataViewSpec, options: CreateOptions) {
     return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
       contentTypeId: 'index-pattern',
-      data: attributes,
+      data: spec,
       // this is required, shouldn't be.
       options,
     })) as SavedObject<DataViewAttributes>;

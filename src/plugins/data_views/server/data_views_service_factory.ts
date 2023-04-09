@@ -44,7 +44,9 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+      // todo remove this
       savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+      // savedObjectsClient,
       apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
       fieldFormats: formats,
       onError: (error) => {

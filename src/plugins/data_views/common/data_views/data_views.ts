@@ -294,7 +294,7 @@ export interface DataViewsServicePublicMethods {
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
+  private savedObjectsCache?: DataViewSpec[] | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   /**
@@ -382,7 +382,7 @@ export class DataViewsService {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
+    return this.savedObjectsCache.map((obj) => obj.title!);
   };
 
   /**
@@ -400,7 +400,7 @@ export class DataViewsService {
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
-      return await this.get(savedObject.id);
+      return await this.get(savedObject.id!);
     });
     return await Promise.all(getIndexPatternPromises);
   };
@@ -417,12 +417,12 @@ export class DataViewsService {
       return [];
     }
     return this.savedObjectsCache.map((obj) => ({
-      id: obj?.id,
-      namespaces: obj?.namespaces,
-      title: obj?.attributes?.title,
-      type: obj?.attributes?.type,
-      typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
-      name: obj?.attributes?.name,
+      id: obj?.id!,
+      namespaces: obj.namespaces,
+      title: obj.title!,
+      type: obj.type,
+      typeMeta: obj.typeMeta,
+      name: obj.name,
     }));
   };
 
@@ -659,6 +659,7 @@ export class DataViewsService {
    * @param fieldAttrs: FieldAttrs
    * @returns Record<string, FieldSpec>
    */
+  // todo remove
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<DataViewFieldMap>((collector, field) => {
       collector[field.name] = {
@@ -675,6 +676,7 @@ export class DataViewsService {
    * @returns DataViewSpec
    */
 
+  // todo remove
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
     const {
       id,
@@ -726,9 +728,9 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    const savedObject = await this.savedObjectsClient.get(id);
-
-    return this.initFromSavedObject(savedObject, displayErrors);
+    const spec = await this.savedObjectsClient.get(id);
+    return this.createFromSpec(spec);
+    // return this.initFromSavedObject(savedObject, displayErrors);
   };
 
   private initFromSavedObjectLoadFields = async ({
@@ -992,16 +994,19 @@ export class DataViewsService {
 
     if (dupe) {
       if (override) {
-        await this.delete(dupe.id);
+        await this.delete(dupe.id!);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
 
-    const body = dataView.getAsSavedObjectBody();
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
-      id: dataView.id,
-    })) as SavedObject<DataViewAttributes>;
+    // const body = dataView.getAsSavedObjectBody();
+    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
+      dataView.toSpec(),
+      {
+        id: dataView.id,
+      }
+    )) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
@@ -1030,10 +1035,11 @@ export class DataViewsService {
     }
 
     // get the list of attributes
-    const body = indexPattern.getAsSavedObjectBody();
+    // const body = indexPattern.getAsSavedObjectBody();
     const originalBody = indexPattern.getOriginalSavedObjectBody();
 
     // get changed keys
+    /*
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
       const realKey = key as keyof typeof originalBody;
@@ -1041,9 +1047,10 @@ export class DataViewsService {
         originalChangedKeys.push(key);
       }
     });
+    */
 
     return this.savedObjectsClient
-      .update(indexPattern.id, body, {
+      .update(indexPattern.id, indexPattern.toSpec(), {
         version: indexPattern.version,
       })
       .then((response) => {

@@ -10,7 +10,7 @@ import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsResolveResponse,
-  SavedObjectsUpdateResponse,
+  // SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 
@@ -20,15 +20,12 @@ import type {
   SearchIn,
   UpdateIn,
   DeleteIn,
+  SearchResult,
+  GetResult,
 } from '@kbn/content-management-plugin/common';
 
-import { DataViewAttributes } from '../../types';
+import { DataViewAttributes, DataViewSpec } from '../../types';
 import { DataViewContentType } from '../constants';
-
-interface Reference {
-  type: string;
-  id: string;
-}
 
 export type DataViewSavedObject = SavedObject<DataViewAttributes>;
 
@@ -36,12 +33,15 @@ export type DataViewSavedObject = SavedObject<DataViewAttributes>;
 
 export type DataViewGetIn = GetIn<typeof DataViewContentType>;
 
-export interface DataViewGetOut {
-  savedObject: SavedObjectsResolveResponse<DataViewAttributes>['saved_object'];
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
-}
+// todo this could use a good abstraction
+export type DataViewGetOut = GetResult<
+  DataViewSpec,
+  {
+    outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+    aliasTargetId?: string;
+    aliasPurpose?: 'savedObjectConversion' | 'savedObjectImport';
+  }
+>;
 
 // ----------- CREATE --------------
 
@@ -56,13 +56,9 @@ export interface CreateOptions {
   references?: SavedObjectReference[];
 }
 
-export type DataViewCreateIn = CreateIn<
-  typeof DataViewContentType,
-  DataViewAttributes,
-  CreateOptions
->;
+export type DataViewCreateIn = CreateIn<typeof DataViewContentType, DataViewSpec, CreateOptions>;
 
-export type DataViewCreateOut = DataViewSavedObject;
+export type DataViewCreateOut = DataViewSpec;
 
 // ----------- UPDATE --------------
 
@@ -74,11 +70,11 @@ export interface DataViewUpdateOptions {
 
 export type DataViewUpdateIn = UpdateIn<
   typeof DataViewContentType,
-  DataViewAttributes,
+  DataViewSpec,
   DataViewUpdateOptions
 >;
 
-export type DataViewUpdateOut = SavedObjectsUpdateResponse<DataViewAttributes>;
+export type DataViewUpdateOut = DataViewSpec;
 
 // ----------- DELETE --------------
 
@@ -90,28 +86,6 @@ export interface DataViewDeleteOut {
 
 // ----------- SEARCH --------------
 
-export interface DataViewSearchQuery {
-  search?: string;
-  fields?: string[];
-  searchFields?: string[];
-  perPage?: number;
-  page?: number;
-  defaultSearchOperator?: 'AND' | 'OR';
-  hasReference?: Reference | Reference[];
-  hasNoReference?: Reference | Reference[];
-}
+export type DataViewSearchIn = SearchIn<typeof DataViewContentType>;
 
-export type DataViewSearchIn = SearchIn<typeof DataViewContentType, DataViewSearchQuery>;
-
-export interface DataViewSearchOut {
-  /** current page in results*/
-  page: number;
-  /** number of results per page */
-  perPage: number;
-  /** total number of results */
-  total: number;
-  /** Array of simple saved objects */
-  savedObjects: DataViewSavedObject[];
-  /** aggregations from the search query */
-  aggregations?: unknown; // TODO: Check if used in Maps
-}
+export type DataViewSearchOut = SearchResult<DataViewSpec>;

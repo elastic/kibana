@@ -61,9 +61,10 @@ const dataViewSavedObjectSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+/*
 const getResultSchema = schema.object(
   {
-    savedObject: dataViewSavedObjectSchema,
+    item: schema.any(), // todo dataViewSavedObjectSchema,
     outcome: schema.oneOf([
       schema.literal('exactMatch'),
       schema.literal('aliasMatch'),
@@ -75,6 +76,30 @@ const getResultSchema = schema.object(
     ),
   },
   { unknowns: 'allow' }
+);*/
+
+const getResultSchema = schema.object(
+  {
+    item: schema.any(),
+    meta: schema.object(
+      {
+        outcome: schema.oneOf([
+          schema.literal('exactMatch'),
+          schema.literal('aliasMatch'),
+          schema.literal('conflict'),
+        ]),
+        aliasTargetId: schema.maybe(schema.string()),
+        aliasPurpose: schema.maybe(
+          schema.oneOf([
+            schema.literal('savedObjectConversion'),
+            schema.literal('savedObjectImport'),
+          ])
+        ),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
 );
 
 const createOptionsSchema = schema.object({
@@ -82,8 +107,9 @@ const createOptionsSchema = schema.object({
   id: schema.maybe(schema.string()),
 });
 
-const hasReferenceSchema = schema.maybe(schema.oneOf([referenceSchema, referencesSchema]));
+// const hasReferenceSchema = schema.maybe(schema.oneOf([referenceSchema, referencesSchema]));
 
+/*
 const searchQuerySchema = schema.object(
   {
     search: schema.maybe(schema.string()),
@@ -99,6 +125,7 @@ const searchQuerySchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
+*/
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -136,23 +163,7 @@ export const serviceDefinition: ServicesDefinition = {
     },
   },
   search: {
-    in: {
-      query: {
-        schema: searchQuerySchema,
-      },
-    },
-    out: {
-      result: {
-        schema: schema.object(
-          {
-            hits: schema.arrayOf(dataViewSavedObjectSchema),
-            page: schema.number(),
-            total: schema.number(),
-            perPage: schema.number(),
-          },
-          { unknowns: 'forbid' }
-        ),
-      },
-    },
+    in: {},
+    out: {},
   },
 };

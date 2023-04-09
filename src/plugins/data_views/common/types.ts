@@ -264,15 +264,13 @@ export interface SavedObjectsClientCommon {
    * Search for saved objects
    * @param options - options for search
    */
-  find: (
-    options: SavedObjectsClientCommonFindArgs
-  ) => Promise<Array<SavedObject<DataViewAttributes>>>;
+  find: (options: SavedObjectsClientCommonFindArgs) => Promise<DataViewSpec[]>;
   /**
    * Get a single saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  get: (id: string) => Promise<SavedObject<DataViewAttributes>>;
+  get: (id: string) => Promise<DataViewSpec>;
   /**
    * Update a saved object by id
    * @param type - type of saved object
@@ -291,7 +289,7 @@ export interface SavedObjectsClientCommon {
    */
   update: (
     id: string,
-    attributes: DataViewAttributes,
+    attributes: DataViewSpec,
     options: { version?: string }
   ) => Promise<SavedObject>;
   /**
@@ -300,7 +298,7 @@ export interface SavedObjectsClientCommon {
    * @param attributes - attributes to set
    * @param options - client options
    */
-  create: (attributes: DataViewAttributes, options: { id?: string }) => Promise<SavedObject>;
+  create: (attributes: DataViewSpec, options: { id?: string }) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
    * @param type - type of saved object

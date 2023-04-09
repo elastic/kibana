@@ -423,6 +423,7 @@ export class DataView implements DataViewBase {
   /**
    * Returns index pattern as saved object body for saving
    */
+  // todo remove
   getAsSavedObjectBody(): DataViewAttributes {
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
