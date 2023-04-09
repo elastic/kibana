@@ -15,6 +15,7 @@ import { getAssets } from '../lib/get_assets';
 import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
+import { AssetNotFoundError } from '../lib/errors';
 
 const getAssetsQueryOptions = schema.object({
   from: schema.maybe(schema.string()),
@@ -108,6 +109,9 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
         });
       } catch (error: any) {
         debug('error looking up asset records', error);
+        if (error instanceof AssetNotFoundError) {
+          return res.customError({ statusCode: 404, body: error.message });
+        }
         return res.customError({ statusCode: 500, body: error.message });
       }
     }

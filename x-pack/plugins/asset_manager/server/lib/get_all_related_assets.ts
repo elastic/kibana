@@ -10,6 +10,7 @@ import { flatten } from 'lodash';
 import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
 import { getAssets } from './get_assets';
 import { getRelatedAssets } from './get_related_assets';
+import { AssetNotFoundError } from './errors';
 
 interface GetAllRelatedAssetsOptions {
   ean: string;
@@ -69,8 +70,7 @@ async function findPrimary(
   });
 
   if (primaryResults.length === 0) {
-    // This should probably result in a 404
-    throw new Error(`Could not find asset with ean=${ean}`);
+    throw new AssetNotFoundError(ean);
   }
 
   if (primaryResults.length > 1) {

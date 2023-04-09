@@ -315,7 +315,20 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /assets/related', () => {
-      describe('response shape validation', () => {
+      describe('response validation', () => {
+        it('should return 404 if primary asset not found', async () => {
+          await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'descendants',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: 'non-existing-ean',
+              maxDistance: 5,
+            })
+            .expect(404);
+        });
+
         it('should return the primary asset', async () => {
           await createSampleAssets(supertest);
 
