@@ -88,7 +88,7 @@ const ErrorMessageComponent = (error: ErrorProps) => (
         <h2>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
-            defaultMessage={ERROR_MESSAGE_TITLE}
+            defaultMessage="We couldn't fetch your cloud security posture benchmark data"
           />
         </h2>
       }
