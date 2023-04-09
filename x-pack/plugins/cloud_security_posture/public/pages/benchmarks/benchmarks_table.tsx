@@ -87,7 +87,7 @@ const ErrorMessageComponent = (error: ErrorProps) => (
       title={
         <h2>
           <FormattedMessage
-            id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
+            id="xpack.csp.benchmarks.benchmarksTable.errorRenderer.errorTitle"
             defaultMessage="We couldn't fetch your cloud security posture benchmark data"
           />
         </h2>
@@ -96,7 +96,7 @@ const ErrorMessageComponent = (error: ErrorProps) => (
         isCommonError(error) ? (
           <p>
             <FormattedMessage
-              id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
+              id="xpack.csp.benchmarks.benchmarksTable.errorRenderer.errorDescription"
               defaultMessage="{error} {statusCode}: {body}"
               values={{
                 error: error.body.error,
