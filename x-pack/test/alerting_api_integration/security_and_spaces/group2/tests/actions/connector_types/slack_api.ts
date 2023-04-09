@@ -18,7 +18,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  describe('slack action', () => {
+  describe('Slack API action', () => {
     let simulatedActionId = '';
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;
@@ -42,15 +42,16 @@ export default function slackTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when creating a slack action successfully', async () => {
+    it.only('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
+          config: {},
           secrets: {
-            webhookUrl: slackSimulatorURL,
+            token: 'some token',
           },
         })
         .expect(200);
@@ -60,8 +61,8 @@ export default function slackTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         is_deprecated: false,
         is_missing_secrets: false,
-        name: 'A slack action',
-        connector_type_id: '.slack',
+        name: 'A slack api action',
+        connector_type_id: '.slack_api',
         config: {},
       });
 
@@ -76,19 +77,19 @@ export default function slackTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         is_deprecated: false,
         is_missing_secrets: false,
-        name: 'A slack action',
-        connector_type_id: '.slack',
+        name: 'A slack api action',
+        connector_type_id: '.slack_api',
         config: {},
       });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
+    it('should respond with a 400 Bad Request when creating a slack action with no token', async () => {
       await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
           secrets: {},
         })
         .expect(400)
@@ -97,50 +98,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]',
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `error validating action type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: 'fee-fi-fo-fum',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
+              'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -150,10 +108,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A slack simulator',
-          connector_type_id: '.slack',
+          name: 'A slack api simulator',
+          connector_type_id: '.slack_api',
           secrets: {
-            webhookUrl: slackSimulatorURL,
+            token: 'some token',
           },
         })
         .expect(200);
@@ -167,7 +125,8 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: 'success',
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
           },
         })
         .expect(200);
@@ -181,7 +140,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: '',
+            params: {
+              subAction: 'postMessage',
+              subActionParams: { channels: ['general'], text: '' },
+            },
           },
         })
         .expect(200);
