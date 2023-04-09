@@ -7,7 +7,7 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
-import { Asset, Relation, RelationField } from '../../common/types_api';
+import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 
@@ -18,6 +18,7 @@ interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   from?: string;
   to?: string;
   relation: Relation;
+  type?: AssetType[];
 }
 
 export async function getRelatedAssets({
@@ -28,6 +29,7 @@ export async function getRelatedAssets({
   ean,
   excludeEans,
   relation,
+  type,
 }: GetRelatedAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
   const relationField = relationToIndirectField(relation);
@@ -46,13 +48,6 @@ export async function getRelatedAssets({
             },
           },
         ],
-        must: [
-          {
-            terms: {
-              [relationField]: [ean],
-            },
-          },
-        ],
       },
     },
     collapse: {
@@ -64,6 +59,24 @@ export async function getRelatedAssets({
       },
     },
   };
+
+  const musts = [
+    {
+      terms: {
+        [relationField]: [ean],
+      },
+    },
+  ];
+
+  if (type?.length) {
+    musts.push({
+      terms: {
+        ['asset.type']: type,
+      },
+    });
+  }
+
+  dsl.query!.bool!.must = musts;
 
   if (excludeEans && excludeEans.length) {
     dsl.query!.bool!.must_not = [

@@ -64,7 +64,7 @@ export async function getAssets({
       });
     }
 
-    if (filters.type) {
+    if (filters.type?.length) {
       musts.push({
         terms: {
           ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],

@@ -35,9 +35,16 @@ export async function getAllRelatedAssets(
   let currentDistance = 1;
   const relatedAssets = [];
   while (currentDistance <= maxDistance) {
+    const queryOptions: FindRelatedAssetsOptions = { relation, from, to };
+    // if we enforce the type filter before the last query we'll miss nodes with
+    // possible edges to the requested types
+    if (currentDistance === maxDistance && type.length) {
+      queryOptions.type = type;
+    }
+
     const results = flatten(
       await Promise.all(
-        assetsToFetch.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
+        assetsToFetch.map((asset) => findRelatedAssets(esClient, asset, queryOptions))
       )
     );
 
@@ -80,10 +87,15 @@ async function findPrimary(
   return primaryResults;
 }
 
+type FindRelatedAssetsOptions = Pick<
+  GetAllRelatedAssetsOptions,
+  'relation' | 'type' | 'from' | 'to'
+>;
+
 async function findRelatedAssets(
   esClient: ElasticsearchClient,
   primary: Asset,
-  { relation, from, to }: Pick<GetAllRelatedAssetsOptions, 'relation' | 'type' | 'from' | 'to'>
+  { relation, from, to, type }: FindRelatedAssetsOptions
 ): Promise<Asset[]> {
   const relationField = relationToDirectField(relation);
   // Why isn't it always an array?
@@ -93,8 +105,7 @@ async function findRelatedAssets(
   if (directlyRelatedEans.length) {
     directlyRelatedAssets = await getAssets({
       esClient,
-      size: 1,
-      filters: { ean: directlyRelatedEans, from, to },
+      filters: { ean: directlyRelatedEans, from, to, type },
     });
   }
 
@@ -105,6 +116,7 @@ async function findRelatedAssets(
     relation,
     from,
     to,
+    type,
   });
 
   return [...directlyRelatedAssets, ...indirectlyRelatedAssets];
