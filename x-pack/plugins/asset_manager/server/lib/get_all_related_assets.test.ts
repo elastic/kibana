@@ -44,7 +44,9 @@ describe('getAllRelatedAssets', () => {
         maxDistance: 1,
         size: 10,
       })
-    ).rejects.toThrow(`Could not find asset with ean=${primaryAsset['asset.ean']}`);
+    ).rejects.toThrow(
+      `Asset with ean (${primaryAsset['asset.ean']}) not found in the provided time range`
+    );
   });
 
   it('returns only the primary if it does not have any ancestors', async () => {
