@@ -120,7 +120,6 @@ export const ControlEditor = ({
   });
 
   const {
-    loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
       selectedDataView: undefined,
       fieldRegistry: undefined,
