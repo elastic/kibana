@@ -17,11 +17,8 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { getExportSettings } from './get_export_settings';
-import {
-  CsvConfig,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv-types';
+import { CsvConfig } from '@kbn/generate-csv-types';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;

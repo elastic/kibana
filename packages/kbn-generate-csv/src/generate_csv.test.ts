@@ -25,12 +25,8 @@ import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import { CsvGenerator } from './generate_csv';
 import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
-import {
-  CsvConfig,
-  JobParams,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv-types';
+import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
