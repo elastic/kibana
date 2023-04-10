@@ -19,7 +19,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapSavedObjectAttributes } from '../content_management';
+import type { MapAttributes } from '../content_management';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {
@@ -34,7 +34,7 @@ export class LayerStatsCollector {
   private _layerTypeCounts: { [key: string]: number } = {};
   private _sourceIds: Set<string> = new Set();
 
-  constructor(attributes: MapSavedObjectAttributes) {
+  constructor(attributes: MapAttributes) {
     if (!attributes || !attributes.layerListJSON) {
       return;
     }

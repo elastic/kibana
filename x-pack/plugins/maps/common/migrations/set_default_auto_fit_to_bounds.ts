@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { MapSavedObjectAttributes } from '../content_management';
+import type { MapAttributes } from '../content_management';
 
 export function setDefaultAutoFitToBounds({
   attributes,
 }: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+  attributes: MapAttributes;
+}): MapAttributes {
   if (!attributes || !attributes.mapStateJSON) {
     return attributes;
   }

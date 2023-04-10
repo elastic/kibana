@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapSavedObjectAttributes } from '../content_management';
+import type { MapAttributes } from '../content_management';
 import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 
@@ -15,8 +15,8 @@ import { SOURCE_TYPES } from '../constants';
 export function addTypeToTermJoin({
   attributes,
 }: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+  attributes: MapAttributes;
+}): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

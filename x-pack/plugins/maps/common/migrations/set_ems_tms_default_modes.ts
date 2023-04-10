@@ -7,7 +7,7 @@
 
 import { SOURCE_TYPES } from '../constants';
 import { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
-import type { MapSavedObjectAttributes } from '../content_management';
+import type { MapAttributes } from '../content_management';
 
 // LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0
 // to avoid changing auto selected light mode tiles for maps created < 8.0.0
@@ -16,8 +16,8 @@ import type { MapSavedObjectAttributes } from '../content_management';
 export function setEmsTmsDefaultModes({
   attributes,
 }: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+  attributes: MapAttributes;
+}): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

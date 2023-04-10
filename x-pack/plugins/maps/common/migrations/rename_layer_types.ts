@@ -7,7 +7,7 @@
 
 import { LAYER_TYPE } from '../constants';
 import { LayerDescriptor } from '../descriptor_types';
-import type { MapSavedObjectAttributes } from '../content_management';
+import type { MapAttributes } from '../content_management';
 
 // LAYER_TYPE constants renamed in 8.1 to provide more distinguishable names that better refect layer.
 // TILED_VECTOR replaced with MVT_VECTOR
@@ -17,8 +17,8 @@ import type { MapSavedObjectAttributes } from '../content_management';
 export function renameLayerTypes({
   attributes,
 }: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+  attributes: MapAttributes;
+}): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

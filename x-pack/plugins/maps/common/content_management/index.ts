@@ -10,7 +10,7 @@ export { LATEST_VERSION, CONTENT_ID } from './constants';
 export type { MapContentType } from './types';
 
 export type {
-  MapSavedObjectAttributes,
+  MapAttributes,
   MapItem,
   PartialMapItem,
   MapGetIn,

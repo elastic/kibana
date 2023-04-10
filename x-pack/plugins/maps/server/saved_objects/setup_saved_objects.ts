@@ -14,7 +14,7 @@ import { APP_ICON, getFullPath } from '../../common/constants';
 import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapSavedObjectAttributes } from '../../common/content_management';
+import type { MapAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -22,7 +22,7 @@ export function setupSavedObjects(
   getFilterMigrations: () => MigrateFunctionsObject,
   getDataViewMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType<MapSavedObjectAttributes>({
+  core.savedObjects.registerType<MapAttributes>({
     name: CONTENT_ID,
     hidden: false,
     namespaceType: 'multiple-isolated',
@@ -72,7 +72,7 @@ export const getMapsFilterMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     filterMigrations,
-    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
       try {
         const attributes = migrateDataPersistedState(doc, filterMigration);
 
@@ -96,7 +96,7 @@ export const getMapsDataViewMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     migrations,
-    (migration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+    (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
       try {
         const attributes = migrateDataViewsPersistedState(doc, migration);
 

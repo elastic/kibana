@@ -6,7 +6,7 @@
  */
 
 export type {
-  MapSavedObjectAttributes,
+  MapAttributes,
   MapItem,
   PartialMapItem,
   MapGetIn,

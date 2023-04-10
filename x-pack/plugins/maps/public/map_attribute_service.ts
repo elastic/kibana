@@ -9,7 +9,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import type { MapSavedObjectAttributes } from '../common/content_management';
+import type { MapAttributes } from '../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
 import { getCoreOverlays, getEmbeddableService } from './kibana_services';
@@ -24,7 +24,7 @@ export interface SharingSavedObjectProps {
   sourceId?: string;
 }
 
-type MapDoc = MapSavedObjectAttributes & {
+type MapDoc = MapAttributes & {
   references?: SavedObjectReference[];
 };
 export interface MapUnwrapMetaInfo {

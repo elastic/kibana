@@ -19,7 +19,7 @@ import type {
   MapItem,
   PartialMapItem,
   MapContentType,
-  MapSavedObjectAttributes,
+  MapAttributes,
   MapGetOut,
   MapCreateIn,
   MapCreateOut,
@@ -46,17 +46,17 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
 };
 
 function savedObjectToMapItem(
-  savedObject: SavedObject<MapSavedObjectAttributes>,
+  savedObject: SavedObject<MapAttributes>,
   partial: false
 ): MapItem;
 
 function savedObjectToMapItem(
-  savedObject: PartialSavedObject<MapSavedObjectAttributes>,
+  savedObject: PartialSavedObject<MapAttributes>,
   partial: true
 ): PartialMapItem;
 
 function savedObjectToMapItem(
-  savedObject: SavedObject<MapSavedObjectAttributes> | PartialSavedObject<MapSavedObjectAttributes>
+  savedObject: SavedObject<MapAttributes> | PartialSavedObject<MapAttributes>
 ): MapItem | PartialMapItem {
   const {
     id,
@@ -106,7 +106,7 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<MapSavedObjectAttributes>(SO_TYPE, id);
+    } = await soClient.resolve<MapAttributes>(SO_TYPE, id);
 
     const response: MapGetOut = {
       item: savedObjectToMapItem(savedObject, false),
@@ -147,8 +147,8 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      MapSavedObjectAttributes,
-      MapSavedObjectAttributes
+      MapAttributes,
+      MapAttributes
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -164,7 +164,7 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
 
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
-    const savedObject = await soClient.create<MapSavedObjectAttributes>(
+    const savedObject = await soClient.create<MapAttributes>(
       SO_TYPE,
       dataToLatest,
       optionsToLatest
@@ -199,8 +199,8 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      MapSavedObjectAttributes,
-      MapSavedObjectAttributes
+      MapAttributes,
+      MapAttributes
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -216,7 +216,7 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
 
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
-    const partialSavedObject = await soClient.update<MapSavedObjectAttributes>(
+    const partialSavedObject = await soClient.update<MapAttributes>(
       SO_TYPE,
       id,
       dataToLatest,
@@ -294,7 +294,7 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
     };
 
     // Execute the query in the DB
-    const response = await soClient.find<MapSavedObjectAttributes>(soQuery);
+    const response = await soClient.find<MapAttributes>(soQuery);
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<

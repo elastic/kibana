@@ -26,7 +26,7 @@ interface Reference {
 }
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
-export type MapSavedObjectAttributes = {
+export type MapAttributes = {
   title: string;
   description?: string;
   mapStateJSON?: string;
@@ -46,14 +46,14 @@ export interface MapItem {
     statusCode: number;
     metadata?: Record<string, unknown>;
   };
-  attributes: MapSavedObjectAttributes;
+  attributes: MapAttributes;
   references: Reference[];
   namespaces?: string[];
   originId?: string;
 }
 
 export type PartialMapItem = Omit<MapItem, 'attributes' | 'references'> & {
-  attributes: Partial<MapSavedObjectAttributes>;
+  attributes: Partial<MapAttributes>;
   references: Reference[] | undefined;
 };
 
@@ -77,7 +77,7 @@ export interface CreateOptions {
   references?: Reference[];
 }
 
-export type MapCreateIn = CreateIn<MapContentType, MapSavedObjectAttributes, CreateOptions>;
+export type MapCreateIn = CreateIn<MapContentType, MapAttributes, CreateOptions>;
 
 export type MapCreateOut = CreateResult<MapItem>;
 
@@ -88,7 +88,7 @@ export interface UpdateOptions {
   references?: Reference[];
 }
 
-export type MapUpdateIn = UpdateIn<MapContentType, MapSavedObjectAttributes, UpdateOptions>;
+export type MapUpdateIn = UpdateIn<MapContentType, MapAttributes, UpdateOptions>;
 
 export type MapUpdateOut = UpdateResult<PartialMapItem>;
 
