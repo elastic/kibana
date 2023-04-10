@@ -12,7 +12,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
-import { EuiBasicTable, EuiComboBox } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiComboBox } from '@elastic/eui';
 
 const DEFAULT_VALUES = {
   addInferencePipelineModal: {
@@ -68,6 +68,28 @@ describe('MultiFieldMapping', () => {
         label: 'my-source-field3',
       },
     ]);
+  });
+  it('disables add mapping button if no fields are selected', () => {
+    setMockValues(DEFAULT_VALUES);
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    const button = wrapper.find(EuiButton);
+    expect(button.prop('disabled')).toBe(true);
+  });
+  it('enables add mapping button if some fields are selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        selectedSourceFields: ['my-source-field1'],
+      },
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    const button = wrapper.find(EuiButton);
+    expect(button.prop('disabled')).toBe(false);
   });
 });
 

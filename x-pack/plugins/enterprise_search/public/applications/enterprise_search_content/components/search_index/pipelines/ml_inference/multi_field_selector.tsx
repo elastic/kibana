@@ -121,6 +121,7 @@ export const MultiFieldMapping: React.FC = () => {
           <EuiButton
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
+            disabled={selectedFields.length === 0}
             iconType="plusInCircle"
             onClick={addSelectedFieldsToMapping}
             style={{ width: '60px' }}
