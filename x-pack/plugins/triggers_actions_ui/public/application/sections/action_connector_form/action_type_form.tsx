@@ -272,8 +272,10 @@ export const ActionTypeForm = ({
       )}
       onThrottleChange={useCallback(
         (throttle: number | null, throttleUnit: string) => {
-          setActionThrottle(throttle);
-          setActionThrottleUnit(throttleUnit);
+          if (throttle) {
+            setActionThrottle(throttle);
+            setActionThrottleUnit(throttleUnit);
+          }
           setActionFrequencyProperty(
             'throttle',
             throttle ? `${throttle}${throttleUnit}` : null,
