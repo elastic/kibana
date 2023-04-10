@@ -69,46 +69,38 @@ describe('CaseCommentModel', () => {
         createdDate,
       });
 
-      expect(clientArgs.services.attachmentService.create).toMatchInlineSnapshot(`
-        [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "comment": "Wow, good luck catching that bad meanie!",
-                  "created_at": "2023-04-07T12:18:36.941Z",
-                  "created_by": Object {
-                    "email": "damaged_raccoon@elastic.co",
-                    "full_name": "Damaged Raccoon",
-                    "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-                    "username": "damaged_raccoon",
-                  },
-                  "owner": "securitySolution",
-                  "pushed_at": null,
-                  "pushed_by": null,
-                  "type": "user",
-                  "updated_at": null,
-                  "updated_by": null,
-                },
-                "id": "comment-1",
-                "references": Array [
-                  Object {
-                    "id": "mock-id-1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                ],
-                "refresh": false,
-              },
-            ],
-          ],
-          "results": Array [
+      expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
             Object {
-              "type": "return",
-              "value": Promise {},
+              "attributes": Object {
+                "comment": "Wow, good luck catching that bad meanie!",
+                "created_at": "2023-04-07T12:18:36.941Z",
+                "created_by": Object {
+                  "email": "damaged_raccoon@elastic.co",
+                  "full_name": "Damaged Raccoon",
+                  "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                  "username": "damaged_raccoon",
+                },
+                "owner": "securitySolution",
+                "pushed_at": null,
+                "pushed_by": null,
+                "type": "user",
+                "updated_at": null,
+                "updated_by": null,
+              },
+              "id": "comment-1",
+              "references": Array [
+                Object {
+                  "id": "mock-id-1",
+                  "name": "associated-cases",
+                  "type": "cases",
+                },
+              ],
+              "refresh": false,
             },
           ],
-        }
+        ]
       `);
     });
 
@@ -119,55 +111,47 @@ describe('CaseCommentModel', () => {
         createdDate,
       });
 
-      expect(clientArgs.services.attachmentService.create).toMatchInlineSnapshot(`
-        [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "alertId": Array [
-                    "test-id-1",
-                  ],
-                  "created_at": "2023-04-07T12:18:36.941Z",
-                  "created_by": Object {
-                    "email": "damaged_raccoon@elastic.co",
-                    "full_name": "Damaged Raccoon",
-                    "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-                    "username": "damaged_raccoon",
-                  },
-                  "index": Array [
-                    "test-index-1",
-                  ],
-                  "owner": "securitySolution",
-                  "pushed_at": null,
-                  "pushed_by": null,
-                  "rule": Object {
-                    "id": "rule-id-1",
-                    "name": "rule-name-1",
-                  },
-                  "type": "alert",
-                  "updated_at": null,
-                  "updated_by": null,
-                },
-                "id": "comment-1",
-                "references": Array [
-                  Object {
-                    "id": "mock-id-1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                ],
-                "refresh": false,
-              },
-            ],
-          ],
-          "results": Array [
+      expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
             Object {
-              "type": "return",
-              "value": Promise {},
+              "attributes": Object {
+                "alertId": Array [
+                  "test-id-1",
+                ],
+                "created_at": "2023-04-07T12:18:36.941Z",
+                "created_by": Object {
+                  "email": "damaged_raccoon@elastic.co",
+                  "full_name": "Damaged Raccoon",
+                  "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                  "username": "damaged_raccoon",
+                },
+                "index": Array [
+                  "test-index-1",
+                ],
+                "owner": "securitySolution",
+                "pushed_at": null,
+                "pushed_by": null,
+                "rule": Object {
+                  "id": "rule-id-1",
+                  "name": "rule-name-1",
+                },
+                "type": "alert",
+                "updated_at": null,
+                "updated_by": null,
+              },
+              "id": "comment-1",
+              "references": Array [
+                Object {
+                  "id": "mock-id-1",
+                  "name": "associated-cases",
+                  "type": "cases",
+                },
+              ],
+              "refresh": false,
             },
           ],
-        }
+        ]
       `);
     });
 
@@ -178,57 +162,49 @@ describe('CaseCommentModel', () => {
         createdDate,
       });
 
-      expect(clientArgs.services.attachmentService.create).toMatchInlineSnapshot(`
-        [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "alertId": Array [
-                    "test-id-3",
-                    "test-id-5",
-                  ],
-                  "created_at": "2023-04-07T12:18:36.941Z",
-                  "created_by": Object {
-                    "email": "damaged_raccoon@elastic.co",
-                    "full_name": "Damaged Raccoon",
-                    "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-                    "username": "damaged_raccoon",
-                  },
-                  "index": Array [
-                    "test-index-3",
-                    "test-index-5",
-                  ],
-                  "owner": "securitySolution",
-                  "pushed_at": null,
-                  "pushed_by": null,
-                  "rule": Object {
-                    "id": "rule-id-1",
-                    "name": "rule-name-1",
-                  },
-                  "type": "alert",
-                  "updated_at": null,
-                  "updated_by": null,
-                },
-                "id": "comment-1",
-                "references": Array [
-                  Object {
-                    "id": "mock-id-1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                ],
-                "refresh": false,
-              },
-            ],
-          ],
-          "results": Array [
+      expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
             Object {
-              "type": "return",
-              "value": Promise {},
+              "attributes": Object {
+                "alertId": Array [
+                  "test-id-3",
+                  "test-id-5",
+                ],
+                "created_at": "2023-04-07T12:18:36.941Z",
+                "created_by": Object {
+                  "email": "damaged_raccoon@elastic.co",
+                  "full_name": "Damaged Raccoon",
+                  "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                  "username": "damaged_raccoon",
+                },
+                "index": Array [
+                  "test-index-3",
+                  "test-index-5",
+                ],
+                "owner": "securitySolution",
+                "pushed_at": null,
+                "pushed_by": null,
+                "rule": Object {
+                  "id": "rule-id-1",
+                  "name": "rule-name-1",
+                },
+                "type": "alert",
+                "updated_at": null,
+                "updated_by": null,
+              },
+              "id": "comment-1",
+              "references": Array [
+                Object {
+                  "id": "mock-id-1",
+                  "name": "associated-cases",
+                  "type": "cases",
+                },
+              ],
+              "refresh": false,
             },
           ],
-        }
+        ]
       `);
     });
 
@@ -243,55 +219,47 @@ describe('CaseCommentModel', () => {
         createdDate,
       });
 
-      expect(clientArgs.services.attachmentService.create).toMatchInlineSnapshot(`
-        [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "alertId": Array [
-                    "test-id-4",
-                  ],
-                  "created_at": "2023-04-07T12:18:36.941Z",
-                  "created_by": Object {
-                    "email": "damaged_raccoon@elastic.co",
-                    "full_name": "Damaged Raccoon",
-                    "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-                    "username": "damaged_raccoon",
-                  },
-                  "index": Array [
-                    "test-index-4",
-                  ],
-                  "owner": "securitySolution",
-                  "pushed_at": null,
-                  "pushed_by": null,
-                  "rule": Object {
-                    "id": "rule-id-1",
-                    "name": "rule-name-1",
-                  },
-                  "type": "alert",
-                  "updated_at": null,
-                  "updated_by": null,
-                },
-                "id": "comment-1",
-                "references": Array [
-                  Object {
-                    "id": "mock-id-1",
-                    "name": "associated-cases",
-                    "type": "cases",
-                  },
-                ],
-                "refresh": false,
-              },
-            ],
-          ],
-          "results": Array [
+      expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
             Object {
-              "type": "return",
-              "value": Promise {},
+              "attributes": Object {
+                "alertId": Array [
+                  "test-id-4",
+                ],
+                "created_at": "2023-04-07T12:18:36.941Z",
+                "created_by": Object {
+                  "email": "damaged_raccoon@elastic.co",
+                  "full_name": "Damaged Raccoon",
+                  "profile_uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                  "username": "damaged_raccoon",
+                },
+                "index": Array [
+                  "test-index-4",
+                ],
+                "owner": "securitySolution",
+                "pushed_at": null,
+                "pushed_by": null,
+                "rule": Object {
+                  "id": "rule-id-1",
+                  "name": "rule-name-1",
+                },
+                "type": "alert",
+                "updated_at": null,
+                "updated_by": null,
+              },
+              "id": "comment-1",
+              "references": Array [
+                Object {
+                  "id": "mock-id-1",
+                  "name": "associated-cases",
+                  "type": "cases",
+                },
+              ],
+              "refresh": false,
             },
           ],
-        }
+        ]
       `);
     });
 
@@ -447,6 +415,14 @@ describe('CaseCommentModel', () => {
           },
           {
             id: 'comment-3',
+            ...singleAlert,
+          },
+          {
+            id: 'comment-4',
+            ...multipleAlert,
+          },
+          {
+            id: 'comment-5',
             ...multipleAlert,
           },
         ],
@@ -468,6 +444,55 @@ describe('CaseCommentModel', () => {
 
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    it('remove alerts from multiple attachments on the same request', async () => {
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...userComment,
+          },
+          {
+            id: 'comment-2',
+            ...singleAlert,
+          },
+          {
+            id: 'comment-3',
+            ...multipleAlert,
+            alertId: ['test-id-1', 'test-id-2'],
+            index: ['test-index-1', 'test-index-2'],
+          },
+          {
+            id: 'comment-4',
+            ...multipleAlert,
+            alertId: ['test-id-2', 'test-id-4', 'test-id-5'],
+            index: ['test-index-1', 'test-index-4', 'test-index-5'],
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      const alertOne = attachments[1] as SavedObject<AttributesTypeAlerts>;
+      const alertTwo = attachments[2] as SavedObject<AttributesTypeAlerts>;
+      const alertThree = attachments[3] as SavedObject<AttributesTypeAlerts>;
+
+      expect(attachments.length).toBe(4);
+      expect(attachments[0].attributes.type).toBe('user');
+      expect(attachments[1].attributes.type).toBe('alert');
+      expect(attachments[2].attributes.type).toBe('alert');
+      expect(attachments[3].attributes.type).toBe('alert');
+
+      expect(alertOne.attributes.alertId).toEqual(['test-id-1']);
+      expect(alertOne.attributes.index).toEqual(['test-index-1']);
+
+      expect(alertTwo.attributes.alertId).toEqual(['test-id-2']);
+      expect(alertTwo.attributes.index).toEqual(['test-index-2']);
+
+      expect(alertThree.attributes.alertId).toEqual(['test-id-5']);
+      expect(alertThree.attributes.index).toEqual(['test-index-5']);
     });
 
     it('remove alerts from multiple attachments with multiple alerts attached to the case', async () => {

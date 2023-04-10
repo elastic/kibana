@@ -125,7 +125,7 @@ export const createCaseAndBulkCreateAttachments = async ({
 };
 
 export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
-  return [...Array(numberOfAttachments)].map((index) => {
+  return [...Array(numberOfAttachments)].map((_, index) => {
     if (index % 0) {
       return {
         type: CommentType.user,
@@ -136,8 +136,8 @@ export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRe
 
     return {
       type: CommentType.alert,
-      alertId: `test-id-${index + 1}`,
-      index: `test-index-${index + 1}`,
+      alertId: [`test-id-${index + 1}`],
+      index: [`test-index-${index + 1}`],
       rule: {
         id: `rule-test-id-${index + 1}`,
         name: `Test ${index + 1}`,

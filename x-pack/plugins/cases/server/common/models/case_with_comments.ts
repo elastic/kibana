@@ -215,15 +215,15 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
-      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAlerts([
+      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAlerts([
         { ...commentReq, id },
       ]);
 
-      if (attachmentWithoutDuplicateAlerts.length === 0) {
+      if (attachmentsWithoutDuplicateAlerts.length === 0) {
         return this;
       }
 
-      const { id: commentId, ...attachment } = attachmentWithoutDuplicateAlerts[0];
+      const { id: commentId, ...attachment } = attachmentsWithoutDuplicateAlerts[0];
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
@@ -263,6 +263,7 @@ export class CaseCommentModel {
       items.filter((_, itemIndex) => !indices.some((index) => index === itemIndex));
 
     const filteredAlertAttachments: CommentRequestWithId = [];
+    const idsAlreadySeen = new Set();
     const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
       {
         caseId: this.caseInfo.id,
@@ -279,9 +280,11 @@ export class CaseCommentModel {
       const indicesOfIdsAttachedToCase: number[] = [];
 
       ids.forEach((id, index) => {
-        if (alertsAttachedToCase.has(id)) {
+        if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
           indicesOfIdsAttachedToCase.push(index);
         }
+
+        idsAlreadySeen.add(id);
       });
 
       const alertIdsNonAttachedToCase = filterByIndices(ids, indicesOfIdsAttachedToCase);
