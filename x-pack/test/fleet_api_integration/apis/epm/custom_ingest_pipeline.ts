@@ -19,6 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+
+  // TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
   const LOG_INTEGRATION_VERSION = '1.1.2';
   describe('custom ingest pipeline for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -59,8 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/154227
-    describe.skip('Without custom pipeline', () => {
+    describe('Without custom pipeline', () => {
       it('Should write doc correctly', async () => {
         const res = await es.index({
           index: 'logs-log.log-test',
