@@ -57,5 +57,6 @@
     "@kbn/expressions-plugin",
     "@kbn/react-field",
     "@kbn/field-types",
+    "@kbn/core-elasticsearch-server-mocks",
   ]
 }
