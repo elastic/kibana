@@ -19,7 +19,11 @@ import { ExpressionChart } from './expression_chart';
 
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
-  getAlertTimeRange: () => ({ from: '2023-03-28T10:43:13.802Z', to: '2023-03-29T13:14:09.581Z' }),
+  AlertActiveTimeRangeAnnotation: () => {},
+  getPaddedAlertTimeRange: () => ({
+    from: '2023-03-28T10:43:13.802Z',
+    to: '2023-03-29T13:14:09.581Z',
+  }),
 }));
 
 jest.mock('./expression_chart', () => ({
@@ -61,7 +65,7 @@ describe('AlertDetailsAppSection', () => {
     expect((await result.findByTestId('metricThresholdAppSection')).children.length).toBe(3);
   });
 
-  it('should render annotation', async () => {
+  it('should render annotations', async () => {
     const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
     (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
     renderComponent();
