@@ -22,6 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface TextExpansionCallOutState {
@@ -121,7 +123,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
               tagName="p"
             />
           </EuiText>
-          <EuiLink target="_blank" href="#">
+          <EuiLink target="_blank" href={docLinks.elser}>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
               defaultMessage="Learn more"
