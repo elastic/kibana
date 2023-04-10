@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { CanvasPlugin } from './plugin';
+import { ConfigSchema } from './config';
+
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+};
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CanvasPlugin(initializerContext);
