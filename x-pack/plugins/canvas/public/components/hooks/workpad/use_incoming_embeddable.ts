@@ -14,7 +14,7 @@ import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
 import { CanvasElement, CanvasPage } from '../../../../types';
 import { useEmbeddablesService, useLabsService, useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
-import { addElement } from '../../../state/actions/elements';
+import { addElement, fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-expect-error unconverted file
 import { selectToplevelNodes } from '../../../state/actions/transient';
 
@@ -54,11 +54,13 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         );
 
         if (functionIndex === -1) {
+          dispatch(fetchAllRenderables());
           return;
         }
 
         if (originalAst.chain[functionIndex].function === 'savedVisualization') {
           notifyService.error(strings.getConvertToLensUnsupportedSavedVisualization());
+          dispatch(fetchAllRenderables());
           return;
         }
 
