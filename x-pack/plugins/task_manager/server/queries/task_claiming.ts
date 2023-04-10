@@ -325,6 +325,7 @@ export class TaskClaiming {
       let searchAfter: SortResults | undefined;
       const updatedDocs: ConcreteTaskInstance[] = [];
       let tasksConflicted = 0;
+      let staleTasks = 0;
 
       do {
         // we're going to search for more docs than we need
@@ -348,12 +349,25 @@ export class TaskClaiming {
 
         do {
           const docsToUpdate: ConcreteTaskInstance[] = [];
+
+          // Searches can return stale documents. As a result, we are
+          // going to do a mget to use realtime search to get the most recent
+          // doc, and if it has been updated we will skip updating it below
+          const bulkGetResult = await this.taskStore.bulkGet(updateableDocs.map((docs) => docs.id));
+          const bulkGetResultVersions = bulkGetResult.reduce((acc, bulkGetResultItem) => {
+            if (isOk(bulkGetResultItem)) {
+              acc.set(bulkGetResultItem.value.id, bulkGetResultItem.value.version!);
+            }
+            return acc;
+          }, new Map<string, string>());
           while (
             docsToUpdate.length < claimSize - updatedDocs.length &&
             updateableDocs.length > 0
           ) {
             const doc = updateableDocs.shift()!;
-            if (taskTypesToClaim.includes(doc.taskType)) {
+            if (bulkGetResultVersions.get(doc.id) !== doc.version) {
+              ++staleTasks;
+            } else if (taskTypesToClaim.includes(doc.taskType)) {
               docsToUpdate.push(doc);
               if (doc.schedule != null || doc.attempts < this.taskMaxAttempts[doc.taskType]) {
                 if (doc.retryAt != null && doc.retryAt < new Date()) {
@@ -396,7 +410,7 @@ export class TaskClaiming {
       this.logger
         .get('claim')
         .debug(
-          `# task types: ${taskTypesToClaim.length}\t#claimed tasks: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}}`
+          `# task types: ${taskTypesToClaim.length}\t#claimed tasks: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale tasks: ${staleTasks}}`
         );
 
       // Not all of the updated docs are "claimed" and ready to be ran
