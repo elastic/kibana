@@ -39,25 +39,38 @@ export const duplicateExceptions = async ({
   // For rule_default list (exceptions that live only on a single rule), we need
   // to create a new rule_default list to assign to duplicated rule
   if (ruleDefaultList != null && exceptionsClient != null) {
-    const ruleDefaultExceptionList = await exceptionsClient.duplicateExceptionListAndItems({
+    // fetch list container
+    const listToDuplicate = await exceptionsClient.getExceptionList({
+      id: undefined,
       listId: ruleDefaultList.list_id,
       namespaceType: ruleDefaultList.namespace_type,
-      includeExpiredExceptions,
     });
 
-    if (ruleDefaultExceptionList == null) {
-      throw new Error(`Unable to duplicate rule default exception items for rule_id: ${ruleId}`);
-    }
+    if (listToDuplicate == null) {
+      throw new Error(
+        `Unable to duplicate rule default exceptions - exception list_id: "${ruleDefaultList.list_id}" not found`
+      );
+    } else {
+      const ruleDefaultExceptionList = await exceptionsClient.duplicateExceptionListAndItems({
+        list: listToDuplicate,
+        namespaceType: ruleDefaultList.namespace_type,
+        includeExpiredExceptions,
+      });
 
-    return [
-      ...sharedLists,
-      {
-        id: ruleDefaultExceptionList.id,
-        list_id: ruleDefaultExceptionList.list_id,
-        namespace_type: ruleDefaultExceptionList.namespace_type,
-        type: ruleDefaultExceptionList.type,
-      },
-    ];
+      if (ruleDefaultExceptionList == null) {
+        throw new Error(`Unable to duplicate rule default exception items for rule_id: ${ruleId}`);
+      }
+
+      return [
+        ...sharedLists,
+        {
+          id: ruleDefaultExceptionList.id,
+          list_id: ruleDefaultExceptionList.list_id,
+          namespace_type: ruleDefaultExceptionList.namespace_type,
+          type: ruleDefaultExceptionList.type,
+        },
+      ];
+    }
   }
 
   // If no rule_default list exists, we can just return

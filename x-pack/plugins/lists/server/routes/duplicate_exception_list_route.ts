@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  DuplicateExceptionListQuerySchemaDecoded,
   duplicateExceptionListQuerySchema,
   exceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,7 +26,10 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
       },
       path: `${EXCEPTION_LIST_URL}/_duplicate`,
       validate: {
-        query: buildRouteValidation(duplicateExceptionListQuerySchema),
+        query: buildRouteValidation<
+          typeof duplicateExceptionListQuerySchema,
+          DuplicateExceptionListQuerySchemaDecoded
+        >(duplicateExceptionListQuerySchema),
       },
     },
     async (context, request, response) => {
@@ -37,7 +41,22 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
           namespace_type: namespaceType,
           include_expired_exceptions: includeExpiredExceptionsString,
         } = request.query;
+
         const exceptionListsClient = await getExceptionListClient(context);
+
+        // fetch list container
+        const listToDuplicate = await exceptionListsClient.getExceptionList({
+          id: undefined,
+          listId,
+          namespaceType,
+        });
+
+        if (listToDuplicate == null) {
+          return siemResponse.error({
+            body: `exception list id: "${listId}" does not exist`,
+            statusCode: 404,
+          });
+        }
 
         // Defaults to including expired exceptions if query param is not present
         const includeExpiredExceptions =
@@ -46,14 +65,14 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
             : true;
         const duplicatedList = await exceptionListsClient.duplicateExceptionListAndItems({
           includeExpiredExceptions,
-          listId,
+          list: listToDuplicate,
           namespaceType,
         });
 
         if (duplicatedList == null) {
           return siemResponse.error({
-            body: `unable to duplicate exception list with list_id: ${listId}`,
-            statusCode: 500,
+            body: `unable to duplicate exception list with list_id: ${listId} - action not allowed`,
+            statusCode: 405,
           });
         }
 

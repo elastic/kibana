@@ -12,14 +12,12 @@ import {
   ExceptionListSchema,
   ExceptionListTypeEnum,
   FoundExceptionListItemSchema,
-  ListId,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 import { bulkCreateExceptionListItems } from './bulk_create_exception_list_items';
-import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
 
 const LISTS_ABLE_TO_DUPLICATE = [
@@ -28,7 +26,7 @@ const LISTS_ABLE_TO_DUPLICATE = [
 ];
 
 interface DuplicateExceptionListOptions {
-  listId: ListId;
+  list: ExceptionListSchema;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   user: string;
@@ -37,40 +35,28 @@ interface DuplicateExceptionListOptions {
 
 export const duplicateExceptionListAndItems = async ({
   includeExpiredExceptions,
-  listId,
+  list,
   savedObjectsClient,
   namespaceType,
   user,
-}: DuplicateExceptionListOptions): Promise<ExceptionListSchema> => {
+}: DuplicateExceptionListOptions): Promise<ExceptionListSchema | null> => {
   // Generate a new static listId
   const newListId = uuidv4();
 
-  // fetch list container
-  const listToDuplicate = await getExceptionList({
-    id: undefined,
-    listId,
-    namespaceType,
-    savedObjectsClient,
-  });
-
-  if (listToDuplicate == null) {
-    throw new Error(`Exception list to duplicate of list_id:${listId} not found.`);
-  }
-
-  if (!LISTS_ABLE_TO_DUPLICATE.includes(listToDuplicate.type)) {
-    throw new Error(`Exception list of type:${listToDuplicate.type} cannot be duplicated.`);
+  if (!LISTS_ABLE_TO_DUPLICATE.includes(list.type)) {
+    return null;
   }
 
   const newlyCreatedList = await createExceptionList({
-    description: listToDuplicate.description,
-    immutable: listToDuplicate.immutable,
+    description: list.description,
+    immutable: list.immutable,
     listId: newListId,
-    meta: listToDuplicate.meta,
-    name: `${listToDuplicate.name} [Duplicate]`,
-    namespaceType: listToDuplicate.namespace_type,
+    meta: list.meta,
+    name: `${list.name} [Duplicate]`,
+    namespaceType: list.namespace_type,
     savedObjectsClient,
-    tags: listToDuplicate.tags,
-    type: listToDuplicate.type,
+    tags: list.tags,
+    type: list.type,
     user,
     version: 1,
   });
@@ -108,7 +94,7 @@ export const duplicateExceptionListAndItems = async ({
   await findExceptionListsItemPointInTimeFinder({
     executeFunctionOnStream,
     filter,
-    listId: [listId],
+    listId: [list.list_id],
     maxSize: 10000,
     namespaceType: [namespaceType],
     perPage: undefined,

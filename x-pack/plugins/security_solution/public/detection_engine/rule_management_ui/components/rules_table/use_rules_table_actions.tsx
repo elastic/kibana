@@ -77,7 +77,13 @@ export const useRulesTableActions = ({
           ids: [rule.id],
           duplicatePayload: {
             include_exceptions:
-              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions ||
+              modalDuplicationConfirmationResult ===
+                DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            include_expired_exceptions: !(
+              modalDuplicationConfirmationResult ===
+              DuplicateOptions.withExceptionsExcludeExpiredExceptions
+            ),
           },
         });
         const createdRules = result?.attributes.results.created;

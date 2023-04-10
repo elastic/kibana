@@ -410,7 +410,61 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rules with exceptions', async () => {
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = getSimpleRule(ruleId);
+      await createRule(supertest, log, ruleToDuplicate);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        })
+        .expect(200);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rules without expired exceptions', async () => {
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = getSimpleRule(ruleId);
+      await createRule(supertest, log, ruleToDuplicate);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: false },
         })
         .expect(200);
 
@@ -456,7 +510,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
 

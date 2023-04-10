@@ -59,6 +59,10 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
             label: i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount),
           },
           {
+            id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            label: i18n.DUPLICATE_EXCLUDE_EXPIRED_EXCEPTIONS_TEXT(rulesCount),
+          },
+          {
             id: DuplicateOptions.withoutExceptions,
             label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
           },

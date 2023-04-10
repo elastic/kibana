@@ -323,14 +323,14 @@ export class ExceptionListClient {
    * @returns The exception list schema or null if it does not exist
    */
   public duplicateExceptionListAndItems = async ({
-    listId,
+    list,
     namespaceType,
     includeExpiredExceptions,
   }: DuplicateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return duplicateExceptionListAndItems({
       includeExpiredExceptions,
-      listId,
+      list,
       namespaceType,
       savedObjectsClient,
       user,

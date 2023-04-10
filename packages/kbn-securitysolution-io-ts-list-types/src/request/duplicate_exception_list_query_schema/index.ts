@@ -7,6 +7,7 @@
  */
 
 import * as t from 'io-ts';
+import { NamespaceType } from '../../common';
 
 import { includeExpiredExceptionsOrUndefined } from '../../common/include_expired_exceptions';
 import { list_id } from '../../common/list_id';
@@ -23,3 +24,11 @@ export const duplicateExceptionListQuerySchema = t.exact(
 export type DuplicateExceptionListQuerySchema = t.OutputOf<
   typeof duplicateExceptionListQuerySchema
 >;
+
+// This type is used after a decode since some things are defaults after a decode.
+export type DuplicateExceptionListQuerySchemaDecoded = Omit<
+  t.TypeOf<typeof duplicateExceptionListQuerySchema>,
+  'namespace_type'
+> & {
+  namespace_type: NamespaceType;
+};
