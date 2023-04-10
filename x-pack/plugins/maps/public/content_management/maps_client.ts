@@ -54,7 +54,7 @@ const deleteMap = async (id: string) => {
   });
 };
 
-const search = async (query: SearchQuery, options?: MapSearchOptions) => {
+const search = async (query: SearchQuery = {}, options?: MapSearchOptions) => {
   return getContentManagement().client.search<MapSearchIn, MapSearchOut>({
     contentTypeId: 'map',
     query,

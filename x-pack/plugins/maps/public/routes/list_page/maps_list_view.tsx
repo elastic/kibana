@@ -60,10 +60,9 @@ async function deleteMaps(items: Array<{ id: string }>) {
 
 interface Props {
   history: ScopedHistory;
-  onMapsLoaded: (error: null | any, maps: MapItem[], isFiltered?: boolean) => void;
 }
 
-function MapsListViewComp({ history, onMapsLoaded }: Props) {
+function MapsListViewComp({ history }: Props) {
   getExecutionContextService().set({
     type: 'application',
     name: APP_ID,
@@ -88,9 +87,6 @@ function MapsListViewComp({ history, onMapsLoaded }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      const isFiltered =
-        Boolean(searchTerm) || references.length > 0 || referencesToExclude.length > 0;
-
       return mapsClient
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
@@ -101,21 +97,19 @@ function MapsListViewComp({ history, onMapsLoaded }: Props) {
           },
         })
         .then(({ hits, pagination: { total } }) => {
-          onMapsLoaded(null, hits, isFiltered);
           return {
             total,
             hits: hits.map(toTableListViewSavedObject),
           };
         })
         .catch((e) => {
-          onMapsLoaded(e, []);
           return {
             total: 0,
             hits: [],
           };
         });
     },
-    [onMapsLoaded]
+    []
   );
 
   return (
