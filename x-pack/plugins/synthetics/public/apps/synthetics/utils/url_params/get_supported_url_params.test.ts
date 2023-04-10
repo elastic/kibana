@@ -40,8 +40,6 @@ describe('getSupportedUrlParams', () => {
     const expected = {
       absoluteDateRangeEnd: 20,
       absoluteDateRangeStart: 20,
-      autorefreshInterval: 23,
-      autorefreshIsPaused: false,
       dateRangeEnd: 'now',
       dateRangeStart: 'now-15m',
       search: 'monitor.status: down',
@@ -52,15 +50,17 @@ describe('getSupportedUrlParams', () => {
   });
 
   it('returns default values', () => {
-    const { AUTOREFRESH_INTERVAL, AUTOREFRESH_IS_PAUSED, FILTERS, SEARCH, STATUS_FILTER } =
-      CLIENT_DEFAULTS;
-    const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
+    const { FILTERS, SEARCH, STATUS_FILTER } = CLIENT_DEFAULTS;
+    const {
+      DATE_RANGE_START,
+      DATE_RANGE_END,
+      AUTOREFRESH_INTERVAL_SECONDS,
+      AUTOREFRESH_IS_PAUSED,
+    } = CLIENT_DEFAULTS_SYNTHETICS;
     const result = getSupportedUrlParams({});
     expect(result).toEqual({
       absoluteDateRangeStart: MOCK_DATE_VALUE,
       absoluteDateRangeEnd: MOCK_DATE_VALUE,
-      autorefreshInterval: AUTOREFRESH_INTERVAL,
-      autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
       excludedFilters: '',
@@ -75,6 +75,8 @@ describe('getSupportedUrlParams', () => {
       projects: [],
       schedules: [],
       tags: [],
+      refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+      refreshPaused: AUTOREFRESH_IS_PAUSED,
     });
   });
 
@@ -86,7 +88,6 @@ describe('getSupportedUrlParams', () => {
     const expected = {
       absoluteDateRangeEnd: 20,
       absoluteDateRangeStart: 20,
-      autorefreshInterval: 60000,
     };
 
     expect(result).toMatchObject(expected);

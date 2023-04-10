@@ -9,12 +9,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
 import type { CreateIn, UpdateIn, DeleteIn } from '../../common';
+import { queryKeyBuilder } from './content_client';
 
 export const useCreateContentMutation = <I extends CreateIn = CreateIn, O = unknown>() => {
   const contentClient = useContentClient();
   return useMutation({
     mutationFn: (input: I) => {
-      return contentClient.create(input);
+      return contentClient.create<I, O>(input);
+    },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
+      });
     },
   });
 };
@@ -23,7 +29,12 @@ export const useUpdateContentMutation = <I extends UpdateIn = UpdateIn, O = unkn
   const contentClient = useContentClient();
   return useMutation({
     mutationFn: (input: I) => {
-      return contentClient.update(input);
+      return contentClient.update<I, O>(input);
+    },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
+      });
     },
   });
 };
@@ -32,7 +43,12 @@ export const useDeleteContentMutation = <I extends DeleteIn = DeleteIn, O = unkn
   const contentClient = useContentClient();
   return useMutation({
     mutationFn: (input: I) => {
-      return contentClient.delete(input);
+      return contentClient.delete<I, O>(input);
+    },
+    onSuccess: (data, variables) => {
+      contentClient.queryClient.invalidateQueries({
+        queryKey: queryKeyBuilder.all(variables.contentTypeId),
+      });
     },
   });
 };

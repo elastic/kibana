@@ -12,6 +12,7 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -121,7 +122,12 @@ export class SpaceSelector extends Component<Props, State> {
         data-test-subj="kibanaSpaceSelector"
         panelled
       >
-        <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color="transparent">
+        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
+        <EuiPortal>
+          <div className="spcSelectorBackground" role="presentation" />
+        </EuiPortal>
+
+        <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
             {this.state.customLogo ? (

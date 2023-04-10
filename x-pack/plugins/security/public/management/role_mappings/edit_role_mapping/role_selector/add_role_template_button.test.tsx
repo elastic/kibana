@@ -24,7 +24,7 @@ describe('AddRoleTemplateButton', () => {
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         title={
           <FormattedMessage
             defaultMessage="Role templates unavailable"

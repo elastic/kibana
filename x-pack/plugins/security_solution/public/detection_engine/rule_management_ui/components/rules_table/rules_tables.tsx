@@ -224,13 +224,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const tableProps =
     selectedTab === AllRulesTabs.management
       ? {
-          'data-test-subj': 'rules-table',
+          'data-test-subj': 'rules-management-table',
           columns: rulesColumns,
         }
-      : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+      : { 'data-test-subj': 'rules-monitoring-table', columns: monitoringColumns };
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
+  const numberOfSelectedRules = isAllSelected ? pagination.total : selectedRuleIds?.length ?? 1;
 
   return (
     <>
@@ -275,7 +276,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
-          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
+          rulesCount={numberOfSelectedRules}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

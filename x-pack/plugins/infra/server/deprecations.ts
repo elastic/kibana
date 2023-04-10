@@ -198,7 +198,7 @@ export const getInfraDeprecationsFactory =
       const { name, fields } = configuration;
       for (const [key, defaultValue] of Object.entries(DEFAULT_VALUES)) {
         const configuredValue = Reflect.get(fields, key);
-        if (configuredValue !== defaultValue) {
+        if (configuredValue !== undefined && configuredValue !== defaultValue) {
           const affectedConfigNames = deprecatedFieldsToSourceConfigMap.get(key) ?? [];
           affectedConfigNames.push(name);
           deprecatedFieldsToSourceConfigMap.set(key, affectedConfigNames);

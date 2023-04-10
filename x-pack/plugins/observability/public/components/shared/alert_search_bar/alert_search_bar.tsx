@@ -11,7 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
 import { AlertsStatusFilter } from './components';
-import { observabilityAlertFeatureIds } from '../../../config';
+import { observabilityAlertFeatureIds } from '../../../config/alert_feature_ids';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
@@ -62,7 +62,7 @@ export function ObservabilityAlertSearchBar({
   const onSearchBarParamsChange = useCallback<
     (query: {
       dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
-      query: string;
+      query?: string;
     }) => void
   >(
     ({ dateRange, query }) => {
@@ -76,7 +76,7 @@ export function ObservabilityAlertSearchBar({
           query,
           [...getAlertStatusQuery(status), ...defaultSearchQueries]
         );
-        onKueryChange(query);
+        if (query) onKueryChange(query);
         timeFilterService.setTime(dateRange);
         onRangeFromChange(dateRange.from);
         onRangeToChange(dateRange.to);

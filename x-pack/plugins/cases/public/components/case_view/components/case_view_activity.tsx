@@ -7,8 +7,8 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
@@ -29,10 +29,15 @@ import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
-import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { AssignUsers } from './assign_users';
+import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
 import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
+import type { UserActivityParams } from '../../user_actions_activity_bar/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseViewTabs } from '../case_view_tabs';
+import { DescriptionWrapper } from '../../description/description_wrapper';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -81,16 +86,23 @@ export const CaseViewActivity = ({
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
+  const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
+    type: 'all',
+    sortOrder: 'asc',
+    page: 1,
+    perPage: 10,
+  });
+
   const { permissions } = useCasesContext();
+
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
     caseData.id
   );
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-    caseData.id
-  );
+  const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
+    useGetCaseUserActionsStats(caseData.id);
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
@@ -164,28 +176,60 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
+  const handleUserActionsActivityChanged = useCallback(
+    (params: UserActivityParams) => {
+      setUserActivityQueryParams((oldParams) => ({
+        ...oldParams,
+        page: 1,
+        type: params.type,
+        sortOrder: params.sortOrder,
+      }));
+    },
+    [setUserActivityQueryParams]
+  );
+
   const showUserActions =
-    !isLoadingUserActions &&
+    !isLoadingUserActionsStats &&
     !isLoadingCaseConnectors &&
-    userActionsData &&
+    !isLoadingCaseUsers &&
     caseConnectors &&
-    caseUsers;
+    caseUsers &&
+    userActionsStats;
 
   const showConnectorSidebar =
-    pushToServiceAuthorized && userActionsData && caseConnectors && supportedActionConnectors;
+    pushToServiceAuthorized && caseConnectors && supportedActionConnectors;
 
   const reporterAsArray =
     caseUsers?.reporter != null
       ? [caseUsers.reporter]
       : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
+  const isLoadingDescription = isLoading && loadingKey === 'description';
+
   return (
     <>
       <EuiFlexItem grow={6}>
-        {(isLoadingUserActions || isLoadingCaseConnectors) && (
-          <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <DescriptionWrapper
+          isLoadingDescription={isLoadingDescription}
+          data={caseData}
+          userProfiles={userProfiles}
+          onUpdateField={onUpdateField}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <UserActionsActivityBar
+            onUserActionsActivityChanged={handleUserActionsActivityChanged}
+            params={userActivityQueryParams}
+            userActionsStats={userActionsStats}
+            isLoading={isLoadingUserActionsStats}
+          />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+        {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
+          <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
         )}
-        {showUserActions && (
+        {showUserActions ? (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
@@ -194,11 +238,8 @@ export const CaseViewActivity = ({
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
-                caseUserActions={userActionsData.userActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
-                isLoadingDescription={isLoading && loadingKey === 'description'}
-                isLoadingUserActions={isLoadingUserActions}
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
@@ -211,10 +252,12 @@ export const CaseViewActivity = ({
                   ) : null
                 }
                 useFetchAlertData={useFetchAlertData}
+                userActivityQueryParams={userActivityQueryParams}
+                userActionsStats={userActionsStats}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
@@ -247,7 +290,7 @@ export const CaseViewActivity = ({
               dataTestSubj="case-view-user-list-participants"
               theCase={caseData}
               headline={i18n.PARTICIPANTS}
-              loading={isLoadingUserActions}
+              loading={isLoadingCaseUsers}
               users={[...caseUsers.participants, ...caseUsers.assignees]}
               userProfiles={userProfiles}
             />

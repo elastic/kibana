@@ -7,16 +7,21 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-const getFullIndexName = (indexName: string): string => {
-  return `.ds-logs-elastic_analytics.events-${indexName}-*`;
-};
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const analyticsEventsIndexExists = async (
   client: IScopedClusterClient,
-  indexName: string
+  datastreamName: string
 ): Promise<boolean> => {
-  return await client.asCurrentUser.indices.exists({
-    index: getFullIndexName(indexName),
-    allow_no_indices: false,
-  });
+  try {
+    const response = await client.asCurrentUser.indices.getDataStream({
+      name: datastreamName,
+    });
+    return response.data_streams.length > 0;
+  } catch (error) {
+    if (isIndexNotFoundException(error)) {
+      return false;
+    }
+    throw error;
+  }
 };

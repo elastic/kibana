@@ -21,6 +21,8 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.vmName = await enrollEndpointHost();
+
+    return this.vmName;
   }
 
   public cleanup() {

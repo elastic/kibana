@@ -15,11 +15,12 @@ interface Props {
   from: string;
   to: string;
   monitorIds: string[];
+  locations?: string[];
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Props) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
 
@@ -27,6 +28,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="overviewErrorsSparklines"
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
@@ -37,6 +39,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
           seriesType: 'area',
           reportDefinitions: {
             'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
+            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

@@ -19,11 +19,15 @@ interface MessageSigningKeys {
   private_key: string;
   public_key: string;
   passphrase: string;
+  passphrase_plain: string;
 }
 
 export interface MessageSigningServiceInterface {
-  generateKeyPair(providedPassphrase?: string): Promise<void>;
-  sign(serializedMessage: Buffer | object): Promise<{ data: Buffer; signature: string }>;
+  get isEncryptionAvailable(): boolean;
+  generateKeyPair(
+    providedPassphrase?: string
+  ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
 
@@ -32,15 +36,43 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  public async generateKeyPair(providedPassphrase?: string) {
-    this.checkForEncryptionKey();
+  public get isEncryptionAvailable(): boolean {
+    return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
+  }
+
+  public async generateKeyPair(providedPassphrase?: string): Promise<{
+    privateKey: string;
+    publicKey: string;
+    passphrase: string;
+  }> {
+    let passphrase = providedPassphrase || this.generatePassphrase();
 
     const currentKeyPair = await this.getCurrentKeyPair();
-    if (currentKeyPair.privateKey && currentKeyPair.publicKey && currentKeyPair.passphrase) {
-      return;
-    }
+    if (
+      currentKeyPair.privateKey &&
+      currentKeyPair.publicKey &&
+      (currentKeyPair.passphrase || currentKeyPair.passphrasePlain)
+    ) {
+      passphrase = currentKeyPair.passphrase || currentKeyPair.passphrasePlain;
 
-    const passphrase = providedPassphrase || this.generatePassphrase();
+      // newly configured encryption key, encrypt the passphrase
+      if (currentKeyPair.passphrasePlain && this.isEncryptionAvailable) {
+        await this.soClient.update<MessageSigningKeys>(
+          MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+          currentKeyPair.id,
+          {
+            passphrase,
+            passphrase_plain: '',
+          }
+        );
+      }
+
+      return {
+        privateKey: currentKeyPair.privateKey,
+        publicKey: currentKeyPair.publicKey,
+        passphrase,
+      };
+    }
 
     const keyPair = generateKeyPairSync('ec', {
       namedCurve: 'prime256v1',
@@ -56,19 +88,35 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       },
     });
 
-    await this.soClient.create<MessageSigningKeys>(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
-      private_key: keyPair.privateKey.toString('base64'),
-      public_key: keyPair.publicKey.toString('base64'),
-      passphrase,
-    });
+    const privateKey = keyPair.privateKey.toString('base64');
+    const publicKey = keyPair.publicKey.toString('base64');
+    let keypairSoObject: Partial<MessageSigningKeys> = {
+      private_key: privateKey,
+      public_key: publicKey,
+    };
+    keypairSoObject = this.isEncryptionAvailable
+      ? {
+          ...keypairSoObject,
+          passphrase,
+        }
+      : { ...keypairSoObject, passphrase_plain: passphrase };
 
-    return;
+    await this.soClient.create<Partial<MessageSigningKeys>>(
+      MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+      keypairSoObject
+    );
+
+    return {
+      privateKey,
+      publicKey,
+      passphrase,
+    };
   }
 
   public async sign(
     message: Buffer | Record<string, unknown>
   ): Promise<{ data: Buffer; signature: string }> {
-    this.checkForEncryptionKey();
+    const { privateKey: serializedPrivateKey, passphrase } = await this.generateKeyPair();
 
     const msgBuffer = Buffer.isBuffer(message)
       ? message
@@ -77,8 +125,6 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     const signer = createSign('SHA256');
     signer.update(msgBuffer);
     signer.end();
-
-    const { privateKey: serializedPrivateKey, passphrase } = await this.getCurrentKeyPair();
 
     if (!serializedPrivateKey) {
       throw new Error('unable to find private key');
@@ -99,9 +145,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   }
 
   public async getPublicKey(): Promise<string> {
-    this.checkForEncryptionKey();
-
-    const { publicKey } = await this.getCurrentKeyPair();
+    const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
       throw new Error('unable to find public key');
@@ -133,9 +177,11 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   }
 
   private async getCurrentKeyPair(): Promise<{
+    id: string;
     privateKey: string;
     publicKey: string;
     passphrase: string;
+    passphrasePlain: string;
   }> {
     const finder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<MessageSigningKeys>({
@@ -145,19 +191,24 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         sortOrder: 'desc',
       });
     let keyPair = {
+      id: '',
       privateKey: '',
       publicKey: '',
       passphrase: '',
+      passphrasePlain: '',
     };
     for await (const result of finder.find()) {
-      const attributes = result.saved_objects[0]?.attributes;
+      const savedObject = result.saved_objects[0];
+      const attributes = savedObject?.attributes;
       if (!attributes?.private_key) {
         break;
       }
       keyPair = {
+        id: savedObject.id,
         privateKey: attributes.private_key,
         publicKey: attributes.public_key,
         passphrase: attributes.passphrase,
+        passphrasePlain: attributes.passphrase_plain,
       };
       break;
     }
@@ -167,11 +218,5 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   private generatePassphrase(): string {
     return randomBytes(32).toString('hex');
-  }
-
-  private checkForEncryptionKey(): void {
-    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-      throw new Error('encryption key not set, message signing service is disabled');
-    }
   }
 }

@@ -381,6 +381,20 @@
           },
           {
             "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
             "id": "def-common.kibanaResponseFactory.custom",
             "type": "Function",
             "tags": [],

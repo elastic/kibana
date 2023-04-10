@@ -8,7 +8,7 @@
 
 import { useQuery, QueryObserverOptions } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
-import type { GetIn, SearchIn, SearchOut } from '../../common';
+import type { GetIn, SearchIn } from '../../common';
 
 /**
  * Exposed `useQuery` options
@@ -36,10 +36,7 @@ export const useGetContentQuery = <I extends GetIn = GetIn, O = unknown>(
  * @param input - get content identifier like "id" and "contentType"
  * @param queryOptions - query options
  */
-export const useSearchContentQuery = <
-  I extends SearchIn = SearchIn,
-  O extends SearchOut = SearchOut
->(
+export const useSearchContentQuery = <I extends SearchIn = SearchIn, O = unknown>(
   input: I,
   queryOptions?: QueryOptions
 ) => {

@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import {
   AlertConsumers,
   ALERT_REASON,
@@ -37,7 +37,7 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
+import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib/helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetSummarizedAlertsTest({ getService }: FtrProviderContext) {
@@ -80,7 +80,10 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: {
+          enabled: () => false,
+          getContextInitializationPromise: async () => ({ result: false }),
+        },
         pluginStop$,
       });
 
@@ -170,7 +173,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
@@ -329,7 +332,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,

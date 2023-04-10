@@ -8,13 +8,20 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { FieldButton, FieldIcon } from '@kbn/react-field';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
+import {
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSpacer,
+} from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldSearch } from './field_search';
+
+import { FieldTypeFilter } from './field_type_filter';
 
 import './field_picker.scss';
 
@@ -23,6 +30,7 @@ export interface FieldPickerProps {
   selectedFieldName?: string;
   filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
+  selectableProps?: Partial<EuiSelectableProps>;
 }
 
 export const FieldPicker = ({
@@ -30,116 +38,112 @@ export const FieldPicker = ({
   onSelectField,
   filterPredicate,
   selectedFieldName,
+  selectableProps,
 }: FieldPickerProps) => {
-  const [nameFilter, setNameFilter] = useState<string>('');
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
 
-  // Retrieve, filter, and sort fields from data view
-  const fields = dataView
-    ? sortBy(
-        dataView.fields
-          .filter(
-            (f) =>
-              f.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
-              (typesFilter.length === 0 || typesFilter.includes(f.type as string))
-          )
+  const availableFields = useMemo(
+    () =>
+      sortBy(
+        (dataView?.fields ?? [])
+          .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
-      )
-    : [];
+      ),
+    [dataView, filterPredicate, typesFilter]
+  );
 
-  const uniqueTypes = dataView
-    ? uniq(
-        dataView.fields
-          .filter((f) => (filterPredicate ? filterPredicate(f) : true))
-          .map((f) => f.type as string)
-      )
-    : [];
+  useEffect(() => {
+    if (!dataView) return;
+    const options: EuiSelectableOption[] = (availableFields ?? []).map((field) => {
+      return {
+        key: field.name,
+        label: field.displayName ?? field.name,
+        className: classNames('presFieldPicker__fieldButton', {
+          presFieldPickerFieldButtonActive: field.name === selectedFieldName,
+        }),
+        'data-test-subj': `field-picker-select-${field.name}`,
+        prepend: (
+          <FieldIcon
+            type={field.type}
+            label={field.name}
+            scripted={field.scripted}
+            className="eui-alignMiddle"
+          />
+        ),
+      };
+    });
+    setFieldSelectableOptions(options);
+  }, [availableFields, dataView, filterPredicate, selectedFieldName, typesFilter]);
+
+  const uniqueTypes = useMemo(
+    () =>
+      dataView
+        ? uniq(
+            dataView.fields
+              .filter((f) => (filterPredicate ? filterPredicate(f) : true))
+              .map((f) => f.type as string)
+          )
+        : [],
+    [dataView, filterPredicate]
+  );
+
+  const fieldTypeFilter = (
+    <EuiFormRow fullWidth={true}>
+      <FieldTypeFilter
+        onFieldTypesChange={(types) => setTypesFilter(types)}
+        fieldTypesValue={typesFilter}
+        availableFieldTypes={uniqueTypes}
+        buttonProps={{ disabled: Boolean(selectableProps?.isLoading) }}
+      />
+    </EuiFormRow>
+  );
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      alignItems="stretch"
-      gutterSize="s"
-      className={`presFieldPicker__container ${
-        !dataView && 'presFieldPicker__container--disabled'
-      }`}
+    <EuiSelectable
+      {...selectableProps}
+      className={classNames('fieldPickerSelectable', {
+        fieldPickerSelectableLoading: selectableProps?.isLoading,
+      })}
+      emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
+        defaultMessage: 'No matching fields',
+      })}
+      aria-label={i18n.translate('presentationUtil.fieldPicker.selectableAriaLabel', {
+        defaultMessage: 'Select a field',
+      })}
+      searchable
+      options={fieldSelectableOptions}
+      onChange={(options, _, changedOption) => {
+        setFieldSelectableOptions(options);
+        if (!dataView || !changedOption.key) return;
+        const field = dataView.getFieldByName(changedOption.key);
+        if (field) onSelectField?.(field);
+      }}
+      searchProps={{
+        'data-test-subj': 'field-search-input',
+        placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
+          defaultMessage: 'Search field names',
+        }),
+        disabled: Boolean(selectableProps?.isLoading),
+      }}
+      listProps={{
+        isVirtualized: true,
+        showIcons: false,
+        bordered: true,
+      }}
+      height="full"
     >
-      <EuiFlexItem grow={false}>
-        <FieldSearch
-          onSearchChange={(val) => setNameFilter(val)}
-          searchValue={nameFilter}
-          onFieldTypesChange={(types) => setTypesFilter(types)}
-          fieldTypesValue={typesFilter}
-          availableFieldTypes={uniqueTypes}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPanel
-          paddingSize="s"
-          hasShadow={false}
-          hasBorder={true}
-          className="presFieldPicker__fieldPanel"
-        >
-          {fields.length > 0 && (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              {fields.map((f, i) => {
-                return (
-                  <EuiFlexItem key={f.name}>
-                    <FieldButton
-                      data-test-subj={`field-picker-select-${f.name}`}
-                      className={classNames('presFieldPicker__fieldButton', {
-                        presFieldPickerFieldButtonActive: f.name === selectedFieldName,
-                      })}
-                      onClick={() => {
-                        onSelectField?.(f);
-                      }}
-                      isActive={f.name === selectedFieldName}
-                      fieldName={f.name}
-                      fieldIcon={<FieldIcon type={f.type} label={f.name} scripted={f.scripted} />}
-                    />
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGroup>
-          )}
-          {!dataView && (
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <EuiFlexItem>
-                <EuiText color="subdued">
-                  <FormattedMessage
-                    id="presentationUtil.fieldPicker.noDataViewLabel"
-                    defaultMessage="No data view selected"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-          {dataView && fields.length === 0 && (
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <EuiFlexItem>
-                <EuiText color="subdued">
-                  <FormattedMessage
-                    id="presentationUtil.fieldPicker.noFieldsLabel"
-                    defaultMessage="No matching fields"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {(list, search) => (
+        <>
+          {search}
+          <EuiSpacer size={'s'} />
+          {fieldTypeFilter}
+          <EuiSpacer size={'s'} />
+          {list}
+        </>
+      )}
+    </EuiSelectable>
   );
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DATASET_VAR_NAME } from '../constants';
 import type {
   RegistryPolicyTemplate,
   RegistryPolicyInputOnlyTemplate,
@@ -17,7 +18,7 @@ import type {
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
-  name: 'data_stream.dataset',
+  name: DATASET_VAR_NAME,
   type: 'text',
   title: 'Dataset name',
   description:

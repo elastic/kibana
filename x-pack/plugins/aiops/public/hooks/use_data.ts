@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
@@ -33,7 +33,7 @@ export const useData = (
   }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
-  selectedChangePoint?: ChangePoint,
+  selectedSignificantTerm?: SignificantTerm,
   selectedGroup?: GroupTableItem | null,
   barTarget: number = DEFAULT_BAR_TARGET
 ) => {
@@ -101,27 +101,27 @@ export const useData = (
     return fieldStatsRequest
       ? {
           ...fieldStatsRequest,
-          selectedChangePoint,
+          selectedSignificantTerm,
           selectedGroup,
-          includeSelectedChangePoint: false,
+          includeSelectedSignificantTerm: false,
         }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
+  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
 
-  const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest && (selectedChangePoint || selectedGroup)
+  const selectedSignificantTermStatsRequest = useMemo(() => {
+    return fieldStatsRequest && (selectedSignificantTerm || selectedGroup)
       ? {
           ...fieldStatsRequest,
-          selectedChangePoint,
+          selectedSignificantTerm,
           selectedGroup,
-          includeSelectedChangePoint: true,
+          includeSelectedSignificantTerm: true,
         }
       : undefined;
-  }, [fieldStatsRequest, selectedChangePoint, selectedGroup]);
+  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
 
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
-    selectedChangePointStatsRequest,
+    selectedSignificantTermStatsRequest,
     lastRefresh
   );
 

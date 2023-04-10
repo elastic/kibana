@@ -54,7 +54,10 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import {
+  migratePackagePolicyToV870,
+  migratePackagePolicyToV880,
+} from './migrations/security_solution';
 
 /*
  * Saved object types and mappings
@@ -212,6 +215,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
       '8.7.0': migratePackagePolicyToV870,
+      '8.8.0': migratePackagePolicyToV880,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -410,6 +414,6 @@ export function registerEncryptedSavedObjects(
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['private_key', 'passphrase']),
+    attributesToEncrypt: new Set(['passphrase']),
   });
 }

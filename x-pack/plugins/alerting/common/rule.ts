@@ -10,6 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
@@ -76,7 +77,25 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+  days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  timezone: string;
+  hours: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface AlertsFilter extends SavedObjectAttributes {
+  query: null | {
+    kql: string;
+    dsl?: string; // This fields is generated in the code by using "kql", therefore it's not optional but defined as optional to avoid modifying a lot of files in different plugins
+  };
+  timeframe: null | AlertsFilterTimeframe;
+}
+
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;
@@ -86,10 +105,24 @@ export interface RuleAction {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
+  alertsFilter?: AlertsFilter;
 }
 
-export interface RuleAggregations {
-  alertExecutionStatus: { [status: string]: number };
+export interface AggregateOptions {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string | KueryNode;
+  page?: number;
+  perPage?: number;
+}
+
+export interface RuleAggregationFormattedResult {
+  ruleExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
@@ -146,10 +179,27 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  revision: number;
   running?: boolean | null;
+  viewInAppRelativeUrl?: string;
 }
 
-export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+export interface SanitizedAlertsFilter extends AlertsFilter {
+  query: null | {
+    kql: string;
+  };
+  timeframe: null | AlertsFilterTimeframe;
+}
+
+export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
+  alertsFilter?: SanitizedAlertsFilter;
+};
+
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  Rule<Params>,
+  'apiKey' | 'actions'
+> & { actions: SanitizedRuleAction[] };
+
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
@@ -169,6 +219,7 @@ export type SanitizedRuleConfig = Pick<
   | 'throttle'
   | 'notifyWhen'
   | 'muteAll'
+  | 'revision'
   | 'snoozeSchedule'
 > & {
   producer: string;

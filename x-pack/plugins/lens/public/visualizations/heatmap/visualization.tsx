@@ -406,11 +406,11 @@ export const getHeatmapVisualization = ({
         // Y-axis
         isYAxisLabelVisible: false,
         isYAxisTitleVisible: false,
-        yTitle: state.gridConfig.yTitle ?? '',
+        yTitle: state.gridConfig.yTitle,
         // X-axis
         isXAxisLabelVisible: false,
         isXAxisTitleVisible: false,
-        xTitle: state.gridConfig.xTitle ?? '',
+        xTitle: state.gridConfig.xTitle,
       }
     );
 

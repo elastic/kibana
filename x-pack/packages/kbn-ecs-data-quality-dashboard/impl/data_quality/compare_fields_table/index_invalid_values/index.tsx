@@ -25,7 +25,7 @@ const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
   indexInvalidValues.length === 0 ? (
     <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="indexInvalidValues" direction="column" gutterSize="none">
       {indexInvalidValues.map(({ fieldName, count }, i) => (
         <IndexInvalidValueFlexItem grow={false} key={`${fieldName}_${i}`}>
           <div>

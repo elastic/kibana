@@ -54,7 +54,6 @@
     "@kbn/analytics",
     "@kbn/core-execution-context-common",
     "@kbn/chart-icons",
-    "@kbn/react-field",
     "@kbn/tinymath",
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
@@ -63,7 +62,9 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
+    "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
+    "@kbn/dom-drag-drop",
   ],
   "exclude": [
     "target/**/*",

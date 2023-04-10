@@ -32,6 +32,7 @@ import { AddToCaseAction } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
 
 export interface ExploratoryEmbeddableProps {
+  id?: string;
   appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
@@ -46,6 +47,7 @@ export interface ExploratoryEmbeddableProps {
   legendPosition?: Position;
   hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
+  onLoad?: (loading: boolean) => void;
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
@@ -58,6 +60,7 @@ export interface ExploratoryEmbeddableProps {
   fontSize?: number;
   lineHeight?: number;
   dataTestSubj?: string;
+  searchSessionId?: string;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -93,6 +96,8 @@ export default function Embeddable({
   noLabel,
   fontSize = 27,
   lineHeight = 32,
+  searchSessionId,
+  onLoad,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -188,6 +193,9 @@ export default function Embeddable({
     return <EuiText>No lens component</EuiText>;
   }
 
+  attributesJSON.state.searchSessionId = searchSessionId;
+  attributesJSON.searchSessionId = searchSessionId;
+
   return (
     <Wrapper
       $customHeight={customHeight}
@@ -229,6 +237,8 @@ export default function Embeddable({
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
         viewMode={ViewMode.VIEW}
+        searchSessionId={searchSessionId}
+        onLoad={onLoad}
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent

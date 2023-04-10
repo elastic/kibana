@@ -6,13 +6,13 @@
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, RecoveredActionGroup } from '../types';
+import { AlertInstanceContext, RecoveredActionGroup, RuleNotifyWhen } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { getAlertsForNotification, processAlerts, setFlapping } from '../lib';
+import { getAlertsForNotification, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
@@ -208,6 +208,10 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
+      currentActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
@@ -231,6 +235,7 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       shouldLogAndScheduleActionsForAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      notifyWhen: RuleNotifyWhen.CHANGE,
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -249,25 +254,13 @@ describe('Legacy Alerts Client', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
-    expect(setFlapping).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {}
-    );
-
     expect(getAlertsForNotification).toHaveBeenCalledWith(
       {
         enabled: true,
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
+      RuleNotifyWhen.CHANGE,
       'default',
       {},
       {

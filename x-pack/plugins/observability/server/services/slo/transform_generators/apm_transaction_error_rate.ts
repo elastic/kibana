@@ -21,8 +21,8 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
-import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
+import { parseIndex } from './common';
 
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
@@ -38,7 +38,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
+      this.buildGroupBy(slo),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -52,7 +52,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     const queryFilter: Query[] = [
       {
         range: {
-          [slo.settings.timestampField]: {
+          '@timestamp': {
             gte: `now-${slo.timeWindow.duration.format()}`,
           },
         },
@@ -96,16 +96,15 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     return {
-      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
-            {
-              match: {
-                'transaction.root': true,
-              },
-            },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
+            { exists: { field: 'transaction.duration.histogram' } },
+            { exists: { field: 'transaction.result' } },
             ...queryFilter,
           ],
         },

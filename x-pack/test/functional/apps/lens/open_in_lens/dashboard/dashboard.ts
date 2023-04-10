@@ -75,5 +75,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       expect(await dashboard.isNotificationExists(1)).to.be(false);
     });
+
+    it('should carry the visualizations filters to Lens', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickVisType('histogram');
+      await testSubjects.click('savedObjectTitlelogstash-*');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+      await testSubjects.exists('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
+      await dashboard.waitForRenderComplete();
+
+      expect(await dashboard.isNotificationExists(2)).to.be(true);
+      const panel = (await dashboard.getDashboardPanels())[2];
+      await panelActions.convertToLens(panel);
+      await lens.waitForVisualization('xyVisChart');
+
+      const filterCount = await filterBar.getFilterCount();
+      expect(filterCount).to.equal(1);
+      await lens.replaceInDashboard();
+      await dashboard.waitForRenderComplete();
+
+      expect(await dashboard.isNotificationExists(2)).to.be(false);
+    });
   });
 }

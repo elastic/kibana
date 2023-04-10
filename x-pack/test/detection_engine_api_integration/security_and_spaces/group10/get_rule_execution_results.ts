@@ -11,22 +11,20 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getRuleExecutionResultsUrl,
-  RuleExecutionStatus,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteAllEventLogExecutionEvents,
   deleteSignalsIndex,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
-  waitForRuleSuccessOrStatus,
+  waitForRulePartialFailure,
+  waitForRuleSuccess,
 } from '../../utils';
 import {
   failedGapExecution,
@@ -55,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
@@ -76,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed successfully', async () => {
       const rule = getRuleForSignalTesting(['auditbeat-*']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -102,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed in a warning state', async () => {
       const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
+      await waitForRulePartialFailure({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();

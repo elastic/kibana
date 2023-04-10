@@ -1299,6 +1299,35 @@ describe('state_helpers', () => {
         ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
       });
 
+      it('should keep the custom label when already in formula and a setting change', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
       it('should not carry over the managed reference default label to the new operation', () => {
         expect(
           replaceColumn({

@@ -7,14 +7,25 @@
  */
 
 export { PLUGIN_ID, API_ENDPOINT } from './constants';
+
 export type {
   ProcedureSchemas,
   ProcedureName,
   GetIn,
+  GetResult,
+  BulkGetIn,
+  BulkGetResult,
   CreateIn,
-  SearchIn,
-  SearchOut,
-  DeleteIn,
+  CreateResult,
   UpdateIn,
+  UpdateResult,
+  DeleteIn,
+  DeleteResult,
+  SearchIn,
+  SearchQuery,
+  SearchResult,
+  MSearchIn,
+  MSearchQuery,
+  MSearchResult,
+  MSearchOut,
 } from './rpc';
-export { procedureNames, schemas as rpcSchemas } from './rpc';

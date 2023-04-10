@@ -7,12 +7,8 @@
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
+import { ReportingUsageType } from '@kbn/reporting-plugin/server/usage/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ReportingUsageStats } from '../../services/reporting_upgrade_services';
-
-interface UsageStats {
-  reporting: ReportingUsageStats;
-}
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
@@ -43,15 +39,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('reporting ', () => {
     let completedReportCount: number;
-    let usage: UsageStats;
+    let usage: ReportingUsageType;
     describe('initial state', () => {
       before(async () => {
-        usage = (await usageAPI.getUsageStats()) as UsageStats;
+        const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+        usage = stats.stack_stats.kibana.plugins.reporting;
       });
 
       it('shows reporting as available and enabled', async () => {
-        expect(usage.reporting.available).to.be(true);
-        expect(usage.reporting.enabled).to.be(true);
+        expect(usage.available).to.be(true);
+        expect(usage.enabled).to.be(true);
       });
     });
     spaces.forEach(({ space, basePath }) => {
@@ -61,8 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          usage = (await usageAPI.getUsageStats()) as UsageStats;
-          completedReportCount = reportingAPI.getCompletedReportCount(usage);
+          const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+          usage = stats.stack_stats.kibana.plugins.reporting;
+          completedReportCount = reportingAPI.getCompletedReportCount(usage)!;
         });
         reportingTests.forEach(({ name, type, link }) => {
           it('name: ' + name + ' type: ' + type, async () => {
@@ -118,7 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             }
 
             await retry.tryForTime(50000, async () => {
-              usage = (await usageAPI.getUsageStats()) as UsageStats;
+              const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+              usage = stats.stack_stats.kibana.plugins.reporting;
               reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
             });
             log.debug(`Elapsed Time: ${new Date().getTime() - startTime.getTime()}`);

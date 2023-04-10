@@ -19,6 +19,7 @@ export interface IExecutionLog {
   connector_name: string;
   connector_id: string;
   timed_out: boolean;
+  source: string;
 }
 
 export interface IExecutionLogResult {

@@ -103,6 +103,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
         'map.emsFileApiUrl (string)',
@@ -164,6 +165,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
+        'xpack.cases.files.allowedMimeTypes (array)',
+        'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
@@ -172,6 +175,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
+        'xpack.cloud_integrations.chat.trialBuffer (number)',
         // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
         'xpack.cloud_integrations.experiments.flag_overrides (record)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
@@ -227,11 +231,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.unsafe.alertDetails.apm.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
-        'xpack.observability.unsafe.slo.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

@@ -19,6 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -64,7 +65,9 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerUpdateRoute(router, { coreUsageData, logger });
+
+    const config = setupConfig();
+    registerUpdateRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });

@@ -6,7 +6,7 @@
  */
 
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
-import type { SignalSourceHit } from '../../../signals/types';
+import type { SignalSourceHit } from '../../types';
 
 export const filterSource = (doc: SignalSourceHit) => {
   const docSource = doc._source ?? {};

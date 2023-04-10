@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useAbsoluteDate } from '../../../../../hooks';
+import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
@@ -26,7 +26,9 @@ export function OverviewErrors() {
 
   const loading = !status?.allIds || status?.allIds.length === 0;
 
-  const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
+  const { from, to } = useRefreshedRange(6, 'hours');
+
+  const params = useGetUrlParams();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -43,6 +45,7 @@ export function OverviewErrors() {
               from={from}
               to={to}
               monitorIds={status?.enabledMonitorQueryIds ?? []}
+              locations={params.locations}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
@@ -50,6 +53,7 @@ export function OverviewErrors() {
               from={from}
               to={to}
               monitorIds={status?.enabledMonitorQueryIds ?? []}
+              locations={params.locations}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

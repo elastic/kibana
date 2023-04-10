@@ -35,6 +35,7 @@ import('./font_awesome');
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -72,6 +73,7 @@ export interface GraphDependencies {
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
   inspect: InspectorPublicPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;

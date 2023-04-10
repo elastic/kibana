@@ -26,6 +26,7 @@ import {
   pushedCase,
   tags,
   findCaseUserActionsResponse,
+  getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
 } from '../mock';
 import type {
@@ -33,6 +34,7 @@ import type {
   CaseUpdateRequest,
   CaseUsers,
   ResolvedCase,
+  CaseUserActionsStats,
 } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
 import type {
@@ -75,6 +77,11 @@ export const findCaseUserActions = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => Promise.resolve(findCaseUserActionsResponse);
+
+export const getCaseUserActionsStats = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseUserActionsStats> => Promise.resolve(getCaseUserActionsStatsResponse);
 
 export const getCases = async ({
   filterOptions = {

@@ -26,6 +26,8 @@
     "@kbn/core-test-helpers-http-setup-browser",
     "@kbn/config-schema",
     "@kbn/utility-types-jest",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

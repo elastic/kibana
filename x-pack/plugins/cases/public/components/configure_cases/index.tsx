@@ -94,6 +94,20 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
 
+  const onConnectorCreated = useCallback(
+    async (createdConnector) => {
+      const caseConnector = normalizeActionConnector(createdConnector);
+
+      await persistCaseConfigure({
+        connector: caseConnector,
+        closureType,
+      });
+      onConnectorUpdated(createdConnector);
+      setConnector(caseConnector);
+    },
+    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
+  );
+
   const isLoadingAny =
     isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
@@ -168,7 +182,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         ? triggersActionsUi.getAddConnectorFlyout({
             onClose: onCloseAddFlyout,
             featureId: CasesConnectorFeatureId,
-            onConnectorCreated: onConnectorUpdated,
+            onConnectorCreated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps

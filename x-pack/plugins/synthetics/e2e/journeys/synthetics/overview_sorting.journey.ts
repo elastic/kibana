@@ -6,7 +6,7 @@
  */
 
 import { before, expect, journey, step } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -32,7 +32,7 @@ journey('OverviewSorting', async ({ page, params }) => {
   });
 
   step('Go to monitor-management', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('sort alphabetical asc', async () => {

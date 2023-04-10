@@ -236,7 +236,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
-      fields: ['id'],
       type: searchTypes,
       sortField: sort?.field,
       sortOrder: sort?.direction,

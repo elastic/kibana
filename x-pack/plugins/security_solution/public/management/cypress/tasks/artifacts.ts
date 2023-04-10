@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import type { GetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_LISTS,
@@ -13,8 +18,7 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-
-const API_HEADER = { 'kbn-xsrf': 'kibana' };
+import { request } from './common';
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -23,10 +27,9 @@ export const removeAllArtifacts = () => {
 };
 
 export const removeExceptionsList = (listId: string) => {
-  cy.request({
+  request({
     method: 'DELETE',
     url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
-    headers: API_HEADER,
     failOnStatusCode: false,
   }).then(({ status }) => {
     expect(status).to.be.oneOf([200, 404]); // should either be success or not found
@@ -42,10 +45,9 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
 };
 
 export const createArtifactList = (listId: string) => {
-  cy.request({
+  request<ExceptionListSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_URL,
-    headers: API_HEADER,
     body: {
       name: listId,
       description: 'This is a test list',
@@ -61,11 +63,9 @@ export const createArtifactList = (listId: string) => {
 };
 
 export const createPerPolicyArtifact = (name: string, body: object, policyId?: 'all' | string) => {
-  cy.request({
+  request<ExceptionListItemSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_ITEM_URL,
-
-    headers: API_HEADER,
     body: {
       name,
       description: '',
@@ -80,14 +80,11 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
   });
 };
 
-export const yieldFirstPolicyID = () => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
-    })
-    .then(({ body }) => {
-      expect(body.items.length).to.be.least(1);
-      return body.items[0].id;
-    });
-};
+export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
+  request<GetPackagePoliciesResponse>({
+    method: 'GET',
+    url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
+  }).then(({ body }) => {
+    expect(body.items.length).to.be.least(1);
+    return body.items[0].id;
+  });

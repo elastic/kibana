@@ -18,6 +18,7 @@ import type {
   GetPackagePoliciesResponse,
   GetStatsResponse,
   GetSettingsResponse,
+  GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type {
   DetailViewPanelName,
@@ -135,6 +136,16 @@ describe('when on integration detail', () => {
         item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
       });
       await render();
+    });
+
+    it('should NOT display agent policy usage count', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    });
+
+    it('should NOT display the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version text and no callout if prerelease setting disabled', async () => {
@@ -323,6 +334,7 @@ interface EpmPackageDetailsResponseProvidersMock {
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
   appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
   getSettings: jest.MockedFunction<() => GetSettingsResponse>;
+  getVerificationKeyId: jest.MockedFunction<() => GetVerificationKeyIdResponse>;
 }
 
 const mockApiCalls = (
@@ -804,6 +816,8 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
 
   const getSettingsResponse = { item: { prerelease_integrations_enabled: true } };
 
+  const getVerificationKeyIdResponse = { id: 'test-verification-key' };
+
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
@@ -823,6 +837,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
       appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
       getSettings: jest.fn().mockReturnValue(getSettingsResponse),
+      getVerificationKeyId: jest.fn().mockReturnValue(getVerificationKeyIdResponse),
     },
   };
 
@@ -878,6 +893,9 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       }
       if (path === '/api/fleet/settings') {
         return mockedApiInterface.responseProvider.getSettings();
+      }
+      if (path === '/api/fleet/epm/verification_key_id') {
+        return mockedApiInterface.responseProvider.getVerificationKeyId();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

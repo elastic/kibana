@@ -54,6 +54,23 @@ export const StepTabs = ({
     }
   }, [isFailedStep]);
 
+  const getBrowserConsoles = useCallback(
+    (index: number) => {
+      return stepsList
+        ?.filter(
+          (stepF) =>
+            stepF.synthetics?.type === 'journey/browserconsole' &&
+            stepF.synthetics?.step?.index! === index
+        )
+        .map((stepF) => stepF.synthetics?.payload?.text!);
+    },
+    [stepsList]
+  );
+
+  if (!loading && stepsList?.length === 0) {
+    return null;
+  }
+
   const onSelectedTabChanged = (id: TabId) => {
     setSelectedTabId(id);
   };
@@ -102,19 +119,6 @@ export const StepTabs = ({
         );
     }
   };
-
-  const getBrowserConsoles = useCallback(
-    (index: number) => {
-      return stepsList
-        ?.filter(
-          (stepF) =>
-            stepF.synthetics?.type === 'journey/browserconsole' &&
-            stepF.synthetics?.step?.index! === index
-        )
-        .map((stepF) => stepF.synthetics?.payload?.text!);
-    },
-    [stepsList]
-  );
 
   return (
     <>

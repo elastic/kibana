@@ -27,6 +27,17 @@ import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 
+jest.mock('../constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+    'limitedToZero',
+    'limitedToOne',
+    'anotherLimitedToZero',
+    'anotherLimitedToOne',
+    'limitedToTwo',
+    'limitedToFive',
+  ],
+}));
+
 const taskManagerLogger = mockLogger();
 
 beforeEach(() => jest.clearAllMocks());

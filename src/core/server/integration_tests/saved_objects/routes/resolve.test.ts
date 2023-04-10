@@ -24,6 +24,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
 
@@ -77,7 +78,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerResolveRoute(router, { coreUsageData, logger });
+    const config = setupConfig();
+
+    registerResolveRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });

@@ -12,8 +12,10 @@ import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
 import { useSummaryChartData, getAlertsQuery } from './use_summary_chart_data';
 import * as aggregations from './aggregations';
 import * as severityMock from '../severity_level_panel/mock_data';
-import * as alertTypeMock from '../alerts_by_type_panel/mock_data';
+import * as alertTypeMock from '../alerts_by_type_panel/mock_type_data';
+import * as alertRuleMock from '../alerts_by_type_panel/mock_rule_data';
 import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -47,6 +49,9 @@ jest.mock('../../../../common/containers/use_global_time', () => {
   };
 });
 
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+
 describe('getAlertsQuery', () => {
   test('it returns the expected severity query', () => {
     expect(
@@ -68,6 +73,14 @@ describe('getAlertsQuery', () => {
         aggregations: aggregations.alertTypeAggregations,
       })
     ).toEqual(alertTypeMock.query);
+    expect(
+      getAlertsQuery({
+        from,
+        to,
+        additionalFilters,
+        aggregations: aggregations.alertRuleAggregations,
+      })
+    ).toEqual(alertRuleMock.query);
   });
 
   test('it returns the expected alerts by grouping query', () => {
@@ -97,7 +110,7 @@ const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
     }
   );
 
-describe('get severity chart data', () => {
+describe('get summary charts data', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
@@ -177,8 +190,9 @@ describe('get severity chart data', () => {
       jest.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
       mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     });
-    it('should return default values', () => {
+    it('should return correct default values when alertsTypeChartsEnabled is true', () => {
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertTypeAggregations,
       });
@@ -197,7 +211,27 @@ describe('get severity chart data', () => {
       });
     });
 
-    it('should return parsed alerts by type items', () => {
+    it('should return correct default values when alertsTypeChartsEnabled is false', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      const { result } = renderUseSummaryChartData({
+        aggregations: aggregations.alertRuleAggregations,
+      });
+
+      expect(result.current).toEqual({
+        items: [],
+        isLoading: false,
+        updatedAt: dateNow,
+      });
+
+      expect(mockUseQueryAlerts).toBeCalledWith({
+        query: alertRuleMock.query,
+        indexName: 'signal-alerts',
+        skip: false,
+        queryName: ALERTS_QUERY_NAMES.COUNT,
+      });
+    });
+
+    it('should return parsed alerts by type items  when alertsTypeChartsEnabled is true', () => {
       mockUseQueryAlerts.mockReturnValue({
         ...defaultUseQueryAlertsReturn,
         data: alertTypeMock.mockAlertsData,
@@ -208,6 +242,23 @@ describe('get severity chart data', () => {
       });
       expect(result.current).toEqual({
         items: alertTypeMock.parsedAlerts,
+        isLoading: false,
+        updatedAt: dateNow,
+      });
+    });
+
+    it('should return parsed alerts by type items  when alertsTypeChartsEnabled is false', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseQueryAlerts.mockReturnValue({
+        ...defaultUseQueryAlertsReturn,
+        data: alertRuleMock.mockAlertsData,
+      });
+
+      const { result } = renderUseSummaryChartData({
+        aggregations: aggregations.alertRuleAggregations,
+      });
+      expect(result.current).toEqual({
+        items: alertRuleMock.parsedAlerts,
         isLoading: false,
         updatedAt: dateNow,
       });
