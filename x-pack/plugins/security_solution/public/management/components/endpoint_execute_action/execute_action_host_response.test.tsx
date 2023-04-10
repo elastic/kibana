@@ -98,7 +98,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     ).toContain(`Execution output (truncated)${getEmptyValue()}`);
   });
 
-  it('should show `-` in error accordion when no error content', async () => {
+  it('should NOT show the error accordion when no error content', async () => {
     (renderProps.action as ActionDetails).outputs = {
       'agent-a': {
         type: 'json',
@@ -110,9 +110,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
 
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput-error').textContent).toContain(
-      `Execution error (truncated)${getEmptyValue()}`
-    );
+    expect(renderResult.queryByTestId('test-executeResponseOutput-error')).not.toBeInTheDocument();
   });
 
   it('should not show execute output accordions when no output in action details', () => {
