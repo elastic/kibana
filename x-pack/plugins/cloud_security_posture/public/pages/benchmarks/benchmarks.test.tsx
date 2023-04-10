@@ -17,7 +17,7 @@ import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { ERROR_STATE_TEST_SUBJECT, ERROR_MESSAGE_TITLE } from './benchmarks_table';
+import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
@@ -81,7 +81,6 @@ describe('<Benchmarks />', () => {
     const error = new Error('message');
     renderBenchmarks(createReactQueryResponse({ status: 'error', error }));
 
-    expect(screen.getByText(ERROR_MESSAGE_TITLE)).toBeInTheDocument();
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 

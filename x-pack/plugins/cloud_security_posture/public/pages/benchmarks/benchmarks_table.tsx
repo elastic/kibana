@@ -32,7 +32,6 @@ import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
-export const ERROR_MESSAGE_TITLE = "We couldn't fetch your cloud security posture benchmark data";
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -40,10 +39,6 @@ interface BenchmarksTableProps
   benchmarks: Benchmark[];
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
   'data-test-subj'?: string;
-}
-
-interface ErrorProps {
-  error: unknown;
 }
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
@@ -78,7 +73,7 @@ const IntegrationButtonLink = ({
   );
 };
 
-const ErrorMessageComponent = (error: ErrorProps) => (
+const ErrorMessageComponent = (error: { error: unknown }) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
