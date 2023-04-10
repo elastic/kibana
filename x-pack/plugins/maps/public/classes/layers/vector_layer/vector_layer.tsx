@@ -276,8 +276,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       return isSourceLoading;
     }
     
-    const joins = this.getValidJoins();
-    return joins.some(join => {
+    return this.getValidJoins().some(join => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
       return !joinDataRequest || joinDataRequest.isLoading();
     });
