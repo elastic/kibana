@@ -302,10 +302,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
             reason: {
               type: 'keyword',
             },
-            // NO NEED TO BE INDEXED
-            // message: {
-            //   type: 'keyword',
-            // },
+            message: {
+              type: 'keyword',
+            },
           },
         },
         warning: {
@@ -313,10 +312,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
             reason: {
               type: 'keyword',
             },
-            // NO NEED TO BE INDEXED
-            // message: {
-            //   type: 'keyword',
-            // },
+            message: {
+              type: 'keyword',
+            },
           },
         },
       },

@@ -29,14 +29,13 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     enabled: {
       type: 'boolean',
     },
-    // NO NEED TO BE INDEXED
-    // schedule: {
-    //   properties: {
-    //     interval: {
-    //       type: 'keyword',
-    //     },
-    //   },
-    // },
+    schedule: {
+      properties: {
+        interval: {
+          type: 'keyword',
+        },
+      },
+    },
     attempts: {
       type: 'integer',
     },
