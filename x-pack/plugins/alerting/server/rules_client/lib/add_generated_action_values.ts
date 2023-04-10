@@ -6,7 +6,7 @@
  */
 
 import { v4 } from 'uuid';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { NormalizedAlertAction, NormalizedAlertActionWithGeneratedValues } from '..';
 
@@ -14,9 +14,9 @@ export function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = []
 ): NormalizedAlertActionWithGeneratedValues[] {
   return actions.map(({ uuid, alertsFilter, ...action }) => {
-    const generateDSL = (kql: string) => {
+    const generateDSL = (kql: string, filters: Filter[]) => {
       try {
-        return JSON.stringify(toElasticsearchQuery(fromKueryExpression(kql)));
+        return JSON.stringify(buildEsQuery(undefined, [{ query: kql, language: 'kql' }], filters));
       } catch (e) {
         throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
       }
@@ -35,7 +35,7 @@ export function addGeneratedActionValues(
                 : {
                     kql: alertsFilter.query.kql,
                     filters: alertsFilter.query.filters,
-                    dsl: generateDSL(alertsFilter.query.kql),
+                    dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters),
                   },
             },
           }
