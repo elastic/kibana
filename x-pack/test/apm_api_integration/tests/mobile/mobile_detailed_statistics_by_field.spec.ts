@@ -9,8 +9,12 @@ import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateMobileData, SERVICE_VERSIONS } from './generate_mobile_data';
+
+type MobileDetailedStatisticsResponse =
+  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -95,15 +99,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('when comparison is enable', () => {
-        it('returns some data for both periods', async () => {
-          const response = await getMobileDetailedStatisticsByField({
+        let mobiledetailedStatisticResponse: MobileDetailedStatisticsResponse;
+
+        before(async () => {
+          mobiledetailedStatisticResponse = await getMobileDetailedStatisticsByField({
             serviceName: 'synth-android',
             environment: 'production',
             field: 'service.version',
             offset: '8m',
           });
-          expect(isEmpty(response.currentPeriod)).to.be.equal(false);
-          expect(isEmpty(response.previousPeriod)).to.be.equal(false);
+        });
+        it('returns some data for both periods', async () => {
+          expect(isEmpty(mobiledetailedStatisticResponse.currentPeriod)).to.be.equal(false);
+          expect(isEmpty(mobiledetailedStatisticResponse.previousPeriod)).to.be.equal(false);
+        });
+
+        it('returns same number of buckets for both periods', () => {
+          const currentPeriod = mobiledetailedStatisticResponse.currentPeriod[SERVICE_VERSIONS[0]];
+          const previousPeriod =
+            mobiledetailedStatisticResponse.previousPeriod[SERVICE_VERSIONS[0]];
+
+          [
+            [currentPeriod.latency, previousPeriod.latency],
+            [currentPeriod.throughput, previousPeriod.throughput],
+          ].forEach(([currentTimeseries, previousTimeseries]) => {
+            expect(currentTimeseries.length).to.equal(previousTimeseries.length);
+          });
         });
       });
     }
