@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
@@ -129,6 +130,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
     type,
     'data-test-subj': dataTestSubj,
   }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
@@ -158,7 +160,9 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
         <StyledEuiText size={textSize}>
           {isFileTruncated && (
             <>
-              <EuiTextColor color="warning">{EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE}</EuiTextColor>
+              <EuiTextColor color="warning" data-test-subj={getTestId('fileTruncatedMsg')}>
+                {EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE}
+              </EuiTextColor>
               <EuiSpacer size="m" />
             </>
           )}
