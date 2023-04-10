@@ -192,6 +192,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       ),
       [dataTestSubj, outputContent.cwd, outputContent.shell, outputContent.shell_code, textSize]
     );
+
     return (
       <>
         <EuiFlexItem>
@@ -204,6 +205,19 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
           />
         </EuiFlexItem>
         <EuiFlexItem>
+          {outputContent.stderr.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <ExecutionActionOutputAccordion
+                content={outputContent.stderr.length ? outputContent.stderr : undefined}
+                data-test-subj={`${dataTestSubj}-error`}
+                isTruncated={outputContent.stderr_truncated}
+                textSize={textSize}
+                initialIsOpen
+                type="error"
+              />
+            </>
+          )}
           <EuiSpacer size="m" />
           <ExecutionActionOutputAccordion
             content={outputContent.stdout.length ? outputContent.stdout : undefined}
@@ -212,14 +226,6 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
             initialIsOpen
             textSize={textSize}
             type="output"
-          />
-          <EuiSpacer size="m" />
-          <ExecutionActionOutputAccordion
-            content={outputContent.stderr.length ? outputContent.stderr : undefined}
-            data-test-subj={`${dataTestSubj}-error`}
-            isTruncated={outputContent.stderr_truncated}
-            textSize={textSize}
-            type="error"
           />
         </EuiFlexItem>
       </>
