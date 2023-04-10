@@ -43,17 +43,42 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
   });
 
+  const outputSuffix = 'output';
+
+  it('should show shell info and shell code', async () => {
+    render();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-shell`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-cwd`)).toBeInTheDocument();
+  });
+
+  it('should show execute context accordion as `closed`', async () => {
+    render();
+    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).toEqual(
+      'euiAccordion'
+    );
+  });
+
+  it('should show current working directory', async () => {
+    render();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-cwd`)).toBeInTheDocument();
+  });
+
   it('should show execute output and execute errors', async () => {
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput')).toBeTruthy();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-error`)).toBeInTheDocument();
   });
 
   it('should show execute output accordion as `open`', async () => {
     render();
-    const accordionOutputButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
-    )[0];
-    expect(accordionOutputButton.className).toContain('isOpen');
+    expect(
+      renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`).className
+    ).toContain('isOpen');
   });
 
   it('should show `-` in output accordion when no output content', async () => {
@@ -66,13 +91,11 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         },
       },
     };
+
     render();
-    const accordionOutputButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
-    )[0];
-    expect(accordionOutputButton.textContent).toContain(
-      `Execution output (truncated)${getEmptyValue()}`
-    );
+    expect(
+      renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`).textContent
+    ).toContain(`Execution output (truncated)${getEmptyValue()}`);
   });
 
   it('should show `-` in error accordion when no error content', async () => {
@@ -85,18 +108,19 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         },
       },
     };
+
     render();
-    const accordionErrorButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
-    )[1];
-    expect(accordionErrorButton.textContent).toContain(
+    expect(renderResult.getByTestId('test-executeResponseOutput-error').textContent).toContain(
       `Execution error (truncated)${getEmptyValue()}`
     );
   });
 
   it('should not show execute output accordions when no output in action details', () => {
     (renderProps.action as ActionDetails).outputs = undefined;
+
     render();
-    expect(renderResult.queryByTestId('test-executeResponseOutput')).toBeNull();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).not.toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).not.toBeInTheDocument();
   });
 });
