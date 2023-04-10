@@ -84,7 +84,10 @@ describe('FetchAgentVersionsList', () => {
 
   describe('when a network error is thrown', () => {
     it('throws', async () => {
-      mockedFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockedFetch.mockResolvedValueOnce({
+        status: 503,
+        text: jest.fn().mockResolvedValueOnce('Gateway timeout'),
+      } as any);
 
       try {
         await FetchAgentVersionsList.run(config, new ToolingLog(), mockedBuild);

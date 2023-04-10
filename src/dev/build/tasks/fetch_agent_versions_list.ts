@@ -39,8 +39,13 @@ const getAvailableVersions = async (log: ToolingLog) => {
     log.info(`Retrieved available versions`);
     return versions;
   } catch (error) {
-    log.warning(`Failed to fetch versions list`);
-    log.warning(error);
+    log.warning(`Failed to fetch Elastic Agent versions list`);
+
+    if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+      log.warning(error);
+    } else {
+      throw new Error(error);
+    }
   }
   return [];
 };
