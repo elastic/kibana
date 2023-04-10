@@ -342,7 +342,7 @@ export function SavedQueryManagementList({
                 ? i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
                     {
-                      defaultMessage: 'Replace with selected query',
+                      defaultMessage: 'Load query',
                     }
                   )
                 : i18n.translate(

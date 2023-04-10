@@ -149,7 +149,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Replace with selected query');
+    ).toBe('Load query');
   });
 
   it('should render the modal on delete', async () => {
