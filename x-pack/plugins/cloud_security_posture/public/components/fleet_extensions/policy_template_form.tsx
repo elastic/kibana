@@ -244,7 +244,8 @@ const usePolicyTemplateInitialName = ({
     if (isEditPage) return;
     if (isLoading) return;
     const sequenceNumber = newPolicy.name.replace(/\D/g, '');
-    const currentIntegrationName = `${integration}${sequenceNumber ? `-${sequenceNumber}` : ''}`;
+    const sequenceSuffix = sequenceNumber ? `-${sequenceNumber}` : '';
+    const currentIntegrationName = `${integration}${sequenceSuffix}`;
     if (newPolicy.name === currentIntegrationName) {
       return;
     }
