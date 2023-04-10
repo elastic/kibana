@@ -58,7 +58,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
-  areLayersLoaded,
+  isMapLoading,
   getGeoFieldNames,
   getEmbeddableSearchContext,
   getLayerList,
@@ -782,13 +782,8 @@ export class MapEmbeddable
       });
     }
 
-    const layers = getLayerList(this._savedMap.getStore().getState());
-    const isLoading =
-      !areLayersLoaded(this._savedMap.getStore().getState()) ||
-      layers.some((layer) => {
-        return layer.isLayerLoading();
-      });
-    const firstLayerWithError = layers.find((layer) => {
+    const isLoading = isMapLoading(this._savedMap.getStore().getState());
+    const firstLayerWithError = getLayerList(this._savedMap.getStore().getState()).find((layer) => {
       return layer.hasErrors();
     });
     const output = this.getOutput();

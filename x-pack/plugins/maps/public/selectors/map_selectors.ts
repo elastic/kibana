@@ -488,13 +488,13 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   });
 });
 
-export const areLayersLoaded = createSelector(
+export const isMapLoading = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
   getMapZoom,
   (layerList, waitingForMapReadyLayerList, zoom) => {
     if (waitingForMapReadyLayerList.length) {
-      return false;
+      return true;
     }
 
     for (let i = 0; i < layerList.length; i++) {
@@ -503,11 +503,11 @@ export const areLayersLoaded = createSelector(
         layer.isVisible() &&
         layer.showAtZoomLevel(zoom) &&
         !layer.hasErrors() &&
-        !layer.isInitialDataLoadComplete()
+        layer.isLayerLoading()
       ) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 );

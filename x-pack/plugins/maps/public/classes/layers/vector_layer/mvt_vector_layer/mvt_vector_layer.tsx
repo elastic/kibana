@@ -74,10 +74,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
-      ? false
-      : super.isInitialDataLoadComplete();
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
