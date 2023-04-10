@@ -77,7 +77,7 @@ import {
   validateInferencePipelineFields,
   EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
   EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS,
-  EXISTING_PIPELINE_DISABLED_ELSER,
+  EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION,
 } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
@@ -531,7 +531,7 @@ export const MLInferenceLogic = kea<
               disabledReason = EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
             } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
               disabled = true;
-              disabledReason = EXISTING_PIPELINE_DISABLED_ELSER;
+              disabledReason = EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
             }
 
             return {
