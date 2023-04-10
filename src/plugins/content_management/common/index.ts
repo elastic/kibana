@@ -24,4 +24,8 @@ export type {
   SearchIn,
   SearchQuery,
   SearchResult,
+  MSearchIn,
+  MSearchQuery,
+  MSearchResult,
+  MSearchOut,
 } from './rpc';
