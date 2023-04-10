@@ -151,7 +151,7 @@ describe('isMapLoading', () => {
     showAtZoomLevel = true,
   }: {
     hasErrors?: boolean;
-    isInitialDataLoadComplete?: boolean;
+    isLayerLoading?: boolean;
     isVisible?: boolean;
     showAtZoomLevel?: boolean;
   }) {
