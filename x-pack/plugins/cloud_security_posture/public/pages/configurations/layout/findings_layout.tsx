@@ -81,7 +81,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '150px',
+    width: '180px',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -94,7 +94,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '120px',
+    width: '80px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -118,6 +118,7 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    width: '12%',
     render: (name: FindingsByResourcePage['resource.name']) => {
       if (!name) return;
 
@@ -175,6 +176,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
+    width: '150px',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
