@@ -57,8 +57,7 @@ export const SingleFieldMapping: React.FC = () => {
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
   const isEmptySourceFields = (sourceFields?.length ?? 0) === 0;
-
-  const inputsDisabled = configuration.existingPipeline !== false;
+  const areInputsDisabled = configuration.existingPipeline !== false;
   const selectedModel = supportedMLModels.find((model) => model.model_id === modelID);
   return (
     <>
@@ -77,8 +76,8 @@ export const SingleFieldMapping: React.FC = () => {
           >
             <EuiSelect
               fullWidth
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
-              disabled={inputsDisabled}
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-selectSchemaField`}
+              disabled={areInputsDisabled}
               value={sourceField}
               options={[
                 {
@@ -126,8 +125,8 @@ export const SingleFieldMapping: React.FC = () => {
             fullWidth
           >
             <EuiFieldText
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
-              disabled={inputsDisabled}
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
+              disabled={areInputsDisabled}
               placeholder="custom_field_name"
               value={destinationField}
               onChange={(e) =>

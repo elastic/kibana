@@ -34,7 +34,6 @@ type FieldNames = Array<{ label: string }>;
 export const MultiFieldMapping: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration, selectedSourceFields = [] },
-    formErrors,
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
@@ -80,10 +79,12 @@ export const MultiFieldMapping: React.FC = () => {
           >
             <EuiComboBox
               fullWidth
-              // data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-zeroShot-labels`}
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-selectSchemaField`}
               placeholder={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.selectedFields',
-                { defaultMessage: 'Selected fields' }
+                {
+                  defaultMessage: 'Selected fields',
+                }
               )}
               options={fieldOptions}
               selectedOptions={selectedFields}
@@ -106,12 +107,10 @@ export const MultiFieldMapping: React.FC = () => {
               }
             )}
             helpText="This name is automatically created based on your source field."
-            error={formErrors.destinationField}
-            isInvalid={formErrors.destinationField !== undefined}
             fullWidth
           >
             <EuiFieldText
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
               disabled
               value="This is automatically created"
               fullWidth
@@ -121,13 +120,13 @@ export const MultiFieldMapping: React.FC = () => {
         <EuiFlexItem style={{ paddingTop: '20px' }}>
           <EuiButton
             color="primary"
-            // data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             iconType="plusInCircle"
             onClick={addSelectedFieldsToMapping}
             style={{ width: '60px' }}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.fields.add',
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping',
               {
                 defaultMessage: 'Add',
               }
@@ -147,7 +146,7 @@ export const SelectedFieldMappings: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<FieldMapping>> = [
     {
-      // 'data-test-subj': 'sourceFieldCell',
+      'data-test-subj': 'sourceFieldCell',
       field: 'sourceField',
       name: 'Source fields',
     },
@@ -165,7 +164,7 @@ export const SelectedFieldMappings: React.FC = () => {
         {
           color: 'danger',
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.title',
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping',
             {
               defaultMessage: 'Delete this mapping',
             }
@@ -174,18 +173,21 @@ export const SelectedFieldMappings: React.FC = () => {
           isPrimary: true,
           name: (fieldMapping) =>
             i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.caption',
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption',
               {
-                defaultMessage: 'Delete mapping',
+                defaultMessage: `Delete mapping ${fieldMapping.sourceField} - ${fieldMapping.targetField}`,
               }
             ),
           onClick: (fieldMapping) => removeFieldFromMapping(fieldMapping.sourceField),
           type: 'icon',
         },
       ],
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
-        defaultMessage: 'Actions',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions',
+        {
+          defaultMessage: 'Actions',
+        }
+      ),
       width: '10%',
     },
   ];
@@ -194,11 +196,20 @@ export const SelectedFieldMappings: React.FC = () => {
     <>
       <EuiBasicTable
         columns={columns}
-        itemId={(fieldMapping) => fieldMapping.sourceField}
         items={configuration.fieldMappings ?? []}
         rowHeader="sourceField"
-        tableCaption="Field mappings"
-        noItemsMessage="No field mappings selected"
+        tableCaption={i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.tableCaption',
+          {
+            defaultMessage: 'Field mappings',
+          }
+        )}
+        noItemsMessage={i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.noFieldMappings',
+          {
+            defaultMessage: 'No field mappings selected',
+          }
+        )}
       />
     </>
   );
