@@ -15,16 +15,10 @@ import {
   FieldStatsServices,
   FieldStatsProps,
 } from '@kbn/unified-field-list-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common'; //
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { FieldStatsContent } from './field_stats_content';
-
-export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
-  return !!kql ? [toElasticsearchQuery(fromKueryExpression(kql))] : [];
-}
 
 export function FieldStatsPopover({
   dataView,
