@@ -11,7 +11,6 @@ import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useGetMaintenanceWindowsList } from './use_get_maintenance_windows_list';
 
 const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
 
 jest.mock('../utils/kibana_react', () => {
   const originalModule = jest.requireActual('../utils/kibana_react');
@@ -22,7 +21,7 @@ jest.mock('../utils/kibana_react', () => {
       return {
         services: {
           ...services,
-          notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
+          notifications: { toasts: { addDanger: mockAddDanger } },
         },
       };
     },
@@ -36,7 +35,7 @@ const { getMaintenanceWindowsList } = jest.requireMock('../services/maintenance_
 
 let appMockRenderer: AppMockRenderer;
 
-describe('useCreateMaintenanceWindow', () => {
+describe('useGetMaintenanceWindowsList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
