@@ -16,6 +16,12 @@ import {
 } from '@kbn/core/server';
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import { generateTransformSecondaryAuthHeaders } from '../../../common/utils/transform_api_key';
+import {
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -329,14 +335,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
               role_descriptors: {},
             }
           );
-          const secondaryAuth =
-            apiKeyWithCurrentUserPermission?.api_key !== undefined
-              ? {
-                  headers: {
-                    'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
-                  },
-                }
-              : undefined;
+          const secondaryAuth = generateTransformSecondaryAuthHeaders(
+            apiKeyWithCurrentUserPermission
+          );
 
           const authorizedTransforms = await reauthorizeAndStartTransforms(
             transformsInfo,
