@@ -101,7 +101,7 @@ export const MultiFieldMapping: React.FC = () => {
         <EuiFlexItem grow={4}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label',
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldLabel',
               {
                 defaultMessage: 'Target field',
               }
@@ -176,7 +176,11 @@ export const SelectedFieldMappings: React.FC = () => {
             i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption',
               {
-                defaultMessage: `Delete mapping ${fieldMapping.sourceField} - ${fieldMapping.targetField}`,
+                defaultMessage: `Delete mapping '{sourceField}' - '{targetField}'`,
+                values: {
+                  sourceField: fieldMapping.sourceField,
+                  targetField: fieldMapping.targetField,
+                },
               }
             ),
           onClick: (fieldMapping) => removeFieldFromMapping(fieldMapping.sourceField),
