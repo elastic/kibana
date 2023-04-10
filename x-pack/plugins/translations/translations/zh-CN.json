@@ -38314,7 +38314,6 @@
     "xpack.cloudDefend.errorConditionRequired": "每个选择器至少需要一个条件。",
     "xpack.cloudDefend.errorDuplicateName": "此名称已由其他选择器使用。",
     "xpack.cloudDefend.errorInvalidName": "选择器名称必须为字母数字，并且不包含空格。",
-    "xpack.cloudDefend.errorValueLengthExceeded": "值不能超过 32 个字符。",
     "xpack.cloudDefend.errorValueRequired": "至少需要一个值。",
     "xpack.cloudDefend.name": "名称",
     "xpack.cloudLinks.deploymentLinkLabel": "管理此部署",
