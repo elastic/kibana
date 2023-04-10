@@ -112,14 +112,8 @@ export const useGlobalUiSetting$ = <T>(key: string, defaultValue?: T): [T, Sette
     () => settings!.globalClient.get$(key, defaultValue),
     [key, defaultValue, settings!.globalClient]
   );
-  const value = useObservable<T>(
-    observable$,
-    settings!.globalClient.get(key, defaultValue)
-  );
-  const set = useCallback(
-    (newValue: T) => settings!.globalClient.set(key, newValue),
-    [key]
-  );
+  const value = useObservable<T>(observable$, settings!.globalClient.get(key, defaultValue));
+  const set = useCallback((newValue: T) => settings!.globalClient.set(key, newValue), [key]);
 
   return [value, set];
 };
