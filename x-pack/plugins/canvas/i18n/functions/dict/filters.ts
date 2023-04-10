@@ -16,7 +16,7 @@ export const help: FunctionHelp<FunctionFactory<ReturnType<typeof filtersFunctio
       'Aggregates element filters from the workpad for use elsewhere, usually a data source. {FILTER_FN} is deprecated and will be removed in a future release. Use {REPLACEMENT}.',
     values: {
       FILTER_FN: '`filters`',
-      REPLACEMENT: '‘kibana | selectFilter’',
+      REPLACEMENT: '`kibana | selectFilter`',
     },
   }),
   args: {
