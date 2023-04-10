@@ -37,33 +37,6 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
 
-  useEffect(() => {
-    const listener = editor.onDidChangeMarkers(([resource]) => {
-      const markers = editor.getModelMarkers({ resource });
-      const errs = markers.map((marker) => {
-        const error: EditorError = {
-          line: marker.startLineNumber,
-          message: marker.message,
-        };
-
-        return error;
-      });
-
-      // prevents infinite loop
-      if (JSON.stringify(errs) !== JSON.stringify(editorErrors)) {
-        onChange({
-          isValid: additionalErrors.length === 0 && errs.length === 0,
-          updatedPolicy: policy,
-        });
-        setEditorErrors(errs);
-      }
-    });
-
-    return () => {
-      listener.dispose();
-    };
-  }, [editorErrors, onChange, policy, additionalErrors.length]);
-
   // not all validations can be done via json-schema
   const validateAdditional = useCallback((value) => {
     const errors: string[] = [];
@@ -95,6 +68,42 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     return errors;
   }, []);
 
+  useEffect(() => {
+    // for on mount
+    const otherErrors = validateAdditional(configuration);
+    if (otherErrors.length !== additionalErrors.length) {
+      setAdditionalErrors(otherErrors);
+    }
+
+    const listener = editor.onDidChangeMarkers(([resource]) => {
+      const markers = editor.getModelMarkers({ resource });
+      const errs = markers.map((marker) => {
+        const error: EditorError = {
+          line: marker.startLineNumber,
+          message: marker.message,
+        };
+
+        return error;
+      });
+
+      // prevents infinite loop
+      if (
+        otherErrors.length !== additionalErrors.length ||
+        JSON.stringify(errs) !== JSON.stringify(editorErrors)
+      ) {
+        onChange({
+          isValid: otherErrors.length === 0 && errs.length === 0,
+          updatedPolicy: policy,
+        });
+        setEditorErrors(errs);
+      }
+    });
+
+    return () => {
+      listener.dispose();
+    };
+  }, [editorErrors, onChange, policy, additionalErrors.length, validateAdditional, configuration]);
+
   const onYamlChange = useCallback(
     (value) => {
       if (input?.vars) {
@@ -119,7 +128,13 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
           {i18n.controlYamlHelp}
         </EuiText>
         <EuiSpacer size="s" />
-        {!additionalErrors && <EuiForm isInvalid={true} error={additionalErrors} />}
+        {additionalErrors.length > 0 && (
+          <EuiForm
+            data-test-subj="cloudDefendAdditionalErrors"
+            isInvalid={true}
+            error={additionalErrors}
+          />
+        )}
         <div css={styles.yamlEditor}>
           <CodeEditor
             width="100%"

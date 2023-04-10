@@ -83,6 +83,7 @@ export function validateMaxSelectorsAndResponses(selectors: Selector[], response
         i18n.translate('xpack.cloudDefend.errorMaxSelectorsResponsesExceeded', {
           defaultMessage:
             'You cannot exceed {max} selectors + responses for a given type e.g file, process',
+          values: { max: MAX_SELECTORS_AND_RESPONSES_PER_TYPE },
         })
       );
     }

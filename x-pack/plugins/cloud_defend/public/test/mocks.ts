@@ -35,6 +35,20 @@ export const MOCK_YAML_CONFIGURATION = `file:
         - alert
 `;
 
+// block on it's own should be prevented
+export const MOCK_YAML_INVALID_ACTIONS = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+  responses:
+    - match:
+        - default
+      actions:
+        - block
+`;
+
 export const MOCK_YAML_INVALID_CONFIGURATION = `
 s
 `;
