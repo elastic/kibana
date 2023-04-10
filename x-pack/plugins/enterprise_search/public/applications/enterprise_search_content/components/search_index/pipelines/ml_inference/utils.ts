@@ -54,8 +54,8 @@ export const validateInferencePipelineFields = (
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
 
-  // TODO: update
-  if (Object.keys(config.fieldMappings || {}).length > 0) {
+  // If there are field mappings, we don't need to validate the single source field
+  if (config.fieldMappings && Object.keys(config.fieldMappings).length > 0) {
     return errors;
   }
 
