@@ -333,7 +333,7 @@ describe('formatSyntheticsPolicy', () => {
                 __ui: {
                   type: 'yaml',
                   value:
-                    '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":false}',
+                    '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":false}',
                 },
                 config_id: {
                   type: 'text',
@@ -408,44 +408,6 @@ describe('formatSyntheticsPolicy', () => {
                     '"step(\\"Visit /users api route\\", async () => {\\\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\\\n  expect(response.status()).toEqual(200);\\\\n});"',
                 },
                 'source.project.content': {
-                  type: 'text',
-                  value: '',
-                },
-                'source.zip_url.folder': {
-                  type: 'text',
-                  value: '',
-                },
-                'source.zip_url.password': {
-                  type: 'password',
-                  value: '',
-                },
-                'source.zip_url.proxy_url': {
-                  type: 'text',
-                  value: '',
-                },
-                'source.zip_url.ssl.certificate': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.certificate_authorities': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.key': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.key_passphrase': {
-                  type: 'text',
-                },
-                'source.zip_url.ssl.supported_protocols': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.verification_mode': {
-                  type: 'text',
-                },
-                'source.zip_url.url': {
-                  type: 'text',
-                  value: '',
-                },
-                'source.zip_url.username': {
                   type: 'text',
                   value: '',
                 },
@@ -918,39 +880,6 @@ describe('formatSyntheticsPolicy', () => {
                 'source.project.content': {
                   type: 'text',
                 },
-                'source.zip_url.folder': {
-                  type: 'text',
-                },
-                'source.zip_url.password': {
-                  type: 'password',
-                },
-                'source.zip_url.proxy_url': {
-                  type: 'text',
-                },
-                'source.zip_url.ssl.certificate': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.certificate_authorities': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.key': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.key_passphrase': {
-                  type: 'text',
-                },
-                'source.zip_url.ssl.supported_protocols': {
-                  type: 'yaml',
-                },
-                'source.zip_url.ssl.verification_mode': {
-                  type: 'text',
-                },
-                'source.zip_url.url': {
-                  type: 'text',
-                },
-                'source.zip_url.username': {
-                  type: 'text',
-                },
                 synthetics_args: {
                   type: 'text',
                 },
@@ -1147,10 +1076,6 @@ const testNewPolicy = {
             'service.name': { type: 'text' },
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
-            'source.zip_url.url': { type: 'text' },
-            'source.zip_url.username': { type: 'text' },
-            'source.zip_url.folder': { type: 'text' },
-            'source.zip_url.password': { type: 'password' },
             'source.inline.script': { type: 'yaml' },
             'source.project.content': { type: 'text' },
             params: { type: 'yaml' },
@@ -1161,13 +1086,6 @@ const testNewPolicy = {
             'throttling.config': { type: 'text' },
             'filter_journeys.tags': { type: 'yaml' },
             'filter_journeys.match': { type: 'text' },
-            'source.zip_url.ssl.certificate_authorities': { type: 'yaml' },
-            'source.zip_url.ssl.certificate': { type: 'yaml' },
-            'source.zip_url.ssl.key': { type: 'yaml' },
-            'source.zip_url.ssl.key_passphrase': { type: 'text' },
-            'source.zip_url.ssl.verification_mode': { type: 'text' },
-            'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
-            'source.zip_url.proxy_url': { type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
             config_id: { type: 'text' },
@@ -1212,7 +1130,6 @@ const browserConfig: any = {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: false,
   },
   params:
@@ -1221,11 +1138,6 @@ const browserConfig: any = {
   'source.inline.script':
     'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   playwright_text_assertion: '',
   urls: '',
   screenshots: 'on',
