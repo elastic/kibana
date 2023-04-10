@@ -15,6 +15,7 @@ import {
   FieldMapping,
   formatPipelineName,
   generateMlInferencePipelineBody,
+  getMlInferencePrefixedFieldName,
   getMlModelTypesForModelConfig,
   parseMlInferenceParametersFromPipeline,
 } from '../../../../../../../common/ml_inference_pipeline';
@@ -331,7 +332,7 @@ export const MLInferenceLogic = kea<
             ...(fieldMappings || []),
             ...(selectedSourceFields || []).map((fieldName) => ({
               sourceField: fieldName,
-              targetField: `ml.inference.${fieldName}_expanded`,
+              targetField: getMlInferencePrefixedFieldName(`${fieldName}_expanded`),
             })),
           ];
 
