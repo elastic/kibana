@@ -45,10 +45,7 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-function savedObjectToMapItem(
-  savedObject: SavedObject<MapAttributes>,
-  partial: false
-): MapItem;
+function savedObjectToMapItem(savedObject: SavedObject<MapAttributes>, partial: false): MapItem;
 
 function savedObjectToMapItem(
   savedObject: PartialSavedObject<MapAttributes>,

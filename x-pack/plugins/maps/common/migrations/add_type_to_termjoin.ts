@@ -12,11 +12,7 @@ import { SOURCE_TYPES } from '../constants';
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in
 // e.g. sample-data was missing the right.type field.
 // This is just to be safe.
-export function addTypeToTermJoin({
-  attributes,
-}: {
-  attributes: MapAttributes;
-}): MapAttributes {
+export function addTypeToTermJoin({ attributes }: { attributes: MapAttributes }): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

@@ -14,11 +14,7 @@ import type { MapAttributes } from '../content_management';
 // VECTOR_TILE replaced with EMS_VECTOR_TILE
 // VECTOR replaced with GEOJSON_VECTOR
 // TILE replaced with RASTER_TILE
-export function renameLayerTypes({
-  attributes,
-}: {
-  attributes: MapAttributes;
-}): MapAttributes {
+export function renameLayerTypes({ attributes }: { attributes: MapAttributes }): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

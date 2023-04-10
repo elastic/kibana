@@ -53,11 +53,7 @@ function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldN
   };
 }
 
-export function migrateJoinAggKey({
-  attributes,
-}: {
-  attributes: MapAttributes;
-}): MapAttributes {
+export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes }): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
