@@ -7,6 +7,7 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   useEuiBackgroundColor,
@@ -19,10 +20,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
@@ -32,6 +37,7 @@ import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
+import { FieldStatsPopover } from '../field_stats_popover';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
@@ -51,15 +57,21 @@ const viewInDiscoverMessage = i18n.translate(
 interface SpikeAnalysisTableProps {
   significantTerms: SignificantTerm[];
   dataViewId?: string;
+  dataView: DataView;
   loading: boolean;
   isExpandedRow?: boolean;
+  searchQuery: estypes.QueryDslQueryContainer;
+  timeRangeMs: TimeRangeMs;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   significantTerms,
   dataViewId,
+  dataView,
   loading,
   isExpandedRow,
+  searchQuery,
+  timeRangeMs,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -76,7 +88,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const [sortField, setSortField] = useState<keyof SignificantTerm>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
-  const { application, share, data } = useAiopsAppContext();
+  const { application, share, data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [uiSettings, data, fieldFormats, charts]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -141,6 +163,19 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
+      render: (_, { fieldName, fieldValue }) => (
+        <>
+          {fieldName}
+          <FieldStatsPopover
+            dataView={dataView}
+            fieldName={fieldName}
+            fieldValue={fieldValue}
+            fieldStatsServices={fieldStatsServices}
+            dslQuery={searchQuery}
+            timeRangeMs={timeRangeMs}
+          />
+        </>
+      ),
       sortable: true,
       valign: 'top',
     },

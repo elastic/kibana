@@ -25,10 +25,13 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -61,6 +64,9 @@ interface SpikeAnalysisTableProps {
   groupTableItems: GroupTableItem[];
   dataViewId?: string;
   loading: boolean;
+  searchQuery: estypes.QueryDslQueryContainer;
+  timeRangeMs: TimeRangeMs;
+  dataView: DataView;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
@@ -68,6 +74,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   groupTableItems,
   dataViewId,
   loading,
+  dataView,
+  timeRangeMs,
+  searchQuery,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -111,6 +120,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           loading={loading}
           dataViewId={dataViewId}
           isExpandedRow
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
         />
       );
     }
