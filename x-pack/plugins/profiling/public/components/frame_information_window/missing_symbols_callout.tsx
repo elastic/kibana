@@ -34,7 +34,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         <p>
           <FormattedMessage
             id="xpack.profiling.frameInformationWindow.missingSymbols.native"
-            defaultMessage="To see function names and line numbers in traces of applications written in programming languages that compile to native code (C, C++, Rust, Go, etc.), you need to push symbols to the cluster. {readMore} how to do that or download the binary."
+            defaultMessage="To see function names and line numbers in traces of applications written in programming languages that compile to native code (C, C++, Rust, Go, etc.), you need to push symbols to the cluster using the elastic-profiling binary. {readMore}, or download the binary below."
             values={{
               readMore: (
                 <EuiLink
@@ -74,21 +74,17 @@ export function MissingSymbolsCallout({ frameType }: Props) {
       iconType="help"
     >
       <p>
-        <FormattedMessage
-          id="xpack.profiling.frameInformationWindow.missingSymbols.interpreted"
-          defaultMessage="There is an error in our unwinder for that language or there is some special case in that interpreter which we simply can't handle for whatever reason, and means the symbols are not available. {reportProblem}."
-          values={{
-            reportProblem: (
-              <EuiLink href={PROFILING_FEEDBACK_LINK} target="_blank">
-                {i18n.translate(
-                  'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
-                  { defaultMessage: 'Report a problem' }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
+        {i18n.translate('xpack.profiling.frameInformationWindow.missingSymbols.interpreted', {
+          defaultMessage:
+            'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
+        })}
       </p>
+      <EuiButton href={PROFILING_FEEDBACK_LINK} target="_blank" color="warning">
+        {i18n.translate(
+          'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
+          { defaultMessage: 'Report a problem' }
+        )}
+      </EuiButton>
     </EuiCallOut>
   );
 }
