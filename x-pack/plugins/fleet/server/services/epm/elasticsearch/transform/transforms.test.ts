@@ -5,8 +5,27 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/order
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
+import { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
+
+import { getInstallation, getInstallationObject } from '../../packages';
+import type { Installation, RegistryPackage } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
+import { appContextService } from '../../../app_context';
+
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
+
+import { getESAssetMetadata } from '../meta';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
+
+import { installTransforms } from './install';
+import { getAsset } from './common';
 
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
@@ -18,30 +37,16 @@ jest.mock('./common', () => {
   };
 });
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
-
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
-import { getInstallation, getInstallationObject } from '../../packages';
-import type { Installation, RegistryPackage } from '../../../../types';
-import { ElasticsearchAssetType } from '../../../../types';
-import { appContextService } from '../../../app_context';
-
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
-
-import { getESAssetMetadata } from '../meta';
-
-import { installTransforms } from './install';
-import { getAsset } from './common';
-
 const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
 describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
+  const authorizationHeader = new HTTPAuthorizationHeader(
+    'Basic',
+    'bW9uaXRvcmluZ191c2VyOm1scWFfYWRtaW4='
+  );
   const getYamlTestData = (
     autoStart: boolean | undefined = undefined,
     transformVersion: string = '0.1.0'
@@ -411,6 +416,48 @@ _meta:
           refresh: false,
         },
       ],
+      // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+              deferred: false,
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
     ]);
   });
 
@@ -663,6 +710,47 @@ _meta:
           refresh: false,
         },
       ],
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.1.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+              deferred: false,
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
     ]);
   });
 
@@ -884,6 +972,46 @@ _meta:
           refresh: false,
         },
       ],
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              deferred: false,
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
     ]);
   });
 
@@ -931,7 +1059,8 @@ _meta:
       esClient,
       savedObjectsClient,
       loggerMock.create(),
-      previousInstallation.installed_es
+      previousInstallation.installed_es,
+      authorizationHeader
     );
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);

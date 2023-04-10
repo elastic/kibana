@@ -23,7 +23,7 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 

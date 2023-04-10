@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,

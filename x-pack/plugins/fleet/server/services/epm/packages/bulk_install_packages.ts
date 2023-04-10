@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';

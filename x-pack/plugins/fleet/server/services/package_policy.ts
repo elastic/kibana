@@ -23,11 +23,11 @@ import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   packageToPackagePolicy,

@@ -13,6 +13,8 @@ import { groupBy } from 'lodash';
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 
+import type { EsAssetReference } from '../../../../../../../../common';
+
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
@@ -31,11 +33,7 @@ import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
-// @TODO
 const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
-// const allowedAssetTypesLookup = new Set<string>(
-//   omit(allowedAssetTypes, ElasticsearchAssetType.transform)
-// );
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -57,7 +55,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
-  const [deferredInstallations, setDeferredInstallations] = useState<any[]>();
+  const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
 
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -251,16 +249,15 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       ) : null,
     ];
   }
-  const deferredInstallationsContent =
-    Array.isArray(deferredInstallations) && deferredInstallations.length > 0 ? (
-      <>
-        <DeferredAssetsSection
-          deferredInstallations={deferredInstallations}
-          packageInfo={packageInfo}
-        />
-        <EuiSpacer size="m" />
-      </>
-    ) : null;
+  const deferredInstallationsContent = showDeferredInstallations ? (
+    <>
+      <DeferredAssetsSection
+        deferredInstallations={deferredInstallations}
+        packageInfo={packageInfo}
+      />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 
   return (
     <EuiFlexGroup alignItems="flexStart">

@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import type { EsAssetReference } from '../../../../../../../../common';
+
 import {
   sendRequestReauthorizeTransforms,
   useAuthz,
@@ -36,13 +38,10 @@ import { AssetTitleMap } from '../../../constants';
 import type { PackageInfo } from '../../../../../types';
 import { ElasticsearchAssetType } from '../../../../../types';
 
-import type { AssetSavedObject } from './types';
-
 interface Props {
   packageInfo: PackageInfo;
-
   type: ElasticsearchAssetType.transform;
-  deferredInstallations: AssetSavedObject[];
+  deferredInstallations: EsAssetReference[];
 }
 
 export const getDeferredAssetDescription = (assetType: string, assetCount: number) => {
@@ -79,7 +78,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
         id: i.id,
         attributes: {
           title: i.id,
-          description: i._version,
+          description: i.type,
         },
       })),
     [deferredInstallations]
@@ -203,9 +202,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
             size={'m'}
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               e.preventDefault();
-              setTransformsToAuthorize(
-                deferredTransforms.map((t) => ({ transformId: t.attributes.title }))
-              );
+              setTransformsToAuthorize(deferredTransforms.map((t) => ({ transformId: t.id })));
             }}
             aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
           >
@@ -218,55 +215,45 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
 
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-          {deferredTransforms.map(
-            ({ id: transformId, attributes: { title, description } }, idx) => {
-              return (
-                <>
-                  <EuiSplitPanel.Inner grow={false} key={`${transformId}-${idx}`}>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={8}>
-                        <EuiText size="m">
-                          <p>{title}</p>
-                        </EuiText>
-                        {description && (
-                          <>
-                            <EuiSpacer size="s" />
-                            <EuiText size="s" color="subdued">
-                              <p>{description}</p>
-                            </EuiText>
-                          </>
-                        )}
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiToolTip
-                          content={getDeferredAssetDescription(type, 1)}
-                          data-test-subject={`fleetAssetsReauthorizeTooltip-${transformId}-${isLoading}`}
+          {deferredTransforms.map(({ id: transformId }, idx) => {
+            return (
+              <>
+                <EuiSplitPanel.Inner grow={false} key={`${transformId}-${idx}`}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={8}>
+                      <EuiText size="m">
+                        <p>{transformId}</p>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        content={getDeferredAssetDescription(type, 1)}
+                        data-test-subject={`fleetAssetsReauthorizeTooltip-${transformId}-${isLoading}`}
+                      >
+                        <EuiButton
+                          isLoading={isLoading}
+                          disabled={!canReauthorizeTransforms}
+                          size={'s'}
+                          onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                            e.preventDefault();
+                            setTransformsToAuthorize([{ transformId }]);
+                          }}
                         >
-                          <EuiButton
-                            isLoading={isLoading}
-                            disabled={!canReauthorizeTransforms}
-                            size={'s'}
-                            onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                              e.preventDefault();
-                              setTransformsToAuthorize([{ transformId }]);
-                            }}
-                          >
-                            {i18n.translate(
-                              'xpack.fleet.epm.packageDetails.assets.reauthorizeButton',
-                              {
-                                defaultMessage: 'Reauthorize',
-                              }
-                            )}
-                          </EuiButton>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiSplitPanel.Inner>
-                  {idx + 1 < deferredTransforms.length && <EuiHorizontalRule margin="none" />}
-                </>
-              );
-            }
-          )}
+                          {i18n.translate(
+                            'xpack.fleet.epm.packageDetails.assets.reauthorizeButton',
+                            {
+                              defaultMessage: 'Reauthorize',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiSplitPanel.Inner>
+                {idx + 1 < deferredTransforms.length && <EuiHorizontalRule margin="none" />}
+              </>
+            );
+          })}
         </EuiSplitPanel.Outer>
       </>
     </EuiAccordion>

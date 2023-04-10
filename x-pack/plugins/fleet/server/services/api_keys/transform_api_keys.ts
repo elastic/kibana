@@ -8,9 +8,10 @@
 import type { CreateAPIKeyParams } from '@kbn/security-plugin/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 
 import type { Logger } from '@kbn/logging';
+
+import type { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type {
   TransformAPIKey,
@@ -58,9 +59,7 @@ export async function generateTransformSecondaryAuthHeaders({
   logger: Logger;
 }): Promise<SecondaryAuthorizationHeader | undefined> {
   if (!authorizationHeader) {
-    throw Error(
-      'Unable to generate secondary authorization if authorizationHeader is not provided.'
-    );
+    return;
   }
 
   const fakeKibanaRequest = createKibanaRequestFromAuth(authorizationHeader);

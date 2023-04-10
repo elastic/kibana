@@ -379,7 +379,6 @@ const installTransformsAssets = async (
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
   authorizationHeader?: HTTPAuthorizationHeader | null
-  // apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
@@ -610,14 +609,6 @@ const installTransformsAssets = async (
   return { installedTransforms, esReferences };
 };
 
-// @todo: move to better spot
-export interface APIKey {
-  id: string;
-  name: string;
-  api_key: string;
-  encoded: string;
-}
-
 export const installTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
@@ -713,6 +704,9 @@ async function deleteAliasFromIndices({
   }
 }
 
+interface TransformEsAssetReference extends EsAssetReference {
+  version?: string;
+}
 /**
  * Create transform and optionally start transform
  * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
@@ -732,7 +726,7 @@ async function handleTransformInstall({
   transform: TransformInstallation;
   startTransform?: boolean;
   secondaryAuth?: SecondaryAuthorizationHeader;
-}): Promise<EsAssetReference> {
+}): Promise<TransformEsAssetReference> {
   let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(
@@ -746,7 +740,7 @@ async function handleTransformInstall({
             body: transform.content,
           },
           // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
-          { ...(secondaryAuth ? secondaryAuth : {}) }
+          secondaryAuth ? { ...secondaryAuth } : undefined
         ),
       { logger }
     );
@@ -801,6 +795,7 @@ async function handleTransformInstall({
     // that means the transform is created but not started.
     // Note in saved object this is a deferred installation so user can later reauthorize
     deferred: isUnauthorizedAPIKey,
+    version: transform.transformVersion,
   };
 }
 

@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import type {
   PostDeletePackagePoliciesResponse,

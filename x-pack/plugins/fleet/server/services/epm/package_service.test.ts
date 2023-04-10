@@ -129,7 +129,17 @@ function getTest(
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
         spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
-        spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
+        spyArgs: [
+          pkg,
+          paths,
+          mocks.esClient,
+          mocks.soClient,
+          mocks.logger,
+          // Undefined es references
+          undefined,
+          // Undefined secondary authorization
+          undefined,
+        ],
         spyResponse: {
           installedTransforms: [
             {

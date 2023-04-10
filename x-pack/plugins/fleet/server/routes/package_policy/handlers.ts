@@ -13,7 +13,7 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 

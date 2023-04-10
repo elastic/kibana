@@ -22,7 +22,7 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,

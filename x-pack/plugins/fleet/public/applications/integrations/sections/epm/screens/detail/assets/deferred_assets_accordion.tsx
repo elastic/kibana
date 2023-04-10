@@ -14,16 +14,16 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EsAssetReference } from '../../../../../../../../common';
+
 import type { PackageInfo } from '../../../../../types';
 import { ElasticsearchAssetType } from '../../../../../types';
 
 import { DeferredTransformAccordion } from './deferred_transforms_accordion';
 
-import type { AssetSavedObject } from './types';
-
 interface Props {
   packageInfo: PackageInfo;
-  deferredInstallations: AssetSavedObject[];
+  deferredInstallations: EsAssetReference[];
 }
 
 export const DeferredAssetsSection: FunctionComponent<Props> = ({

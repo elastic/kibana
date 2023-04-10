@@ -15,7 +15,7 @@ import type {
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';

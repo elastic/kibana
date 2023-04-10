@@ -12,7 +12,7 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';

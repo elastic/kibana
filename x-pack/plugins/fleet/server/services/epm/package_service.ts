@@ -14,7 +14,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type { PackageList } from '../../../common';
 
