@@ -19,6 +19,16 @@ export type GetLensAttributes = (
   alertsOptions?: ExtraOptions
 ) => LensAttributes;
 
+export interface UseLensAttributesProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraOptions?: ExtraOptions;
+  getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
+  stackByField?: string;
+  title?: string;
+}
+
 export interface VisualizationActionsProps {
   className?: string;
   extraActions?: Action[];

@@ -852,7 +852,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const caseIds = cases.map((theCase) => theCase.id);
 
-          expect(alert['kibana.alert.case_ids']).eql(caseIds);
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
 
           return { alert, cases };
         };
@@ -891,7 +891,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          expect(alert['kibana.alert.case_ids']).eql([postedCase.id]);
+          expect(alert[ALERT_CASE_IDS]).eql([postedCase.id]);
         });
 
         it('should not add more than 10 cases to an alert', async () => {

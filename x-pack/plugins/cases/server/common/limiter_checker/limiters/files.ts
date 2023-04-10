@@ -8,9 +8,9 @@
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { CommentType } from '../../../../common/api';
 import type { CommentRequest } from '../../../../common/api';
+import { MAX_FILES_PER_CASE } from '../../../../common/constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
-import { MAX_FILES_PER_CASE } from '../../../files';
 
 export class FileLimiter extends BaseLimiter {
   constructor(private readonly fileService: FileServiceStart) {

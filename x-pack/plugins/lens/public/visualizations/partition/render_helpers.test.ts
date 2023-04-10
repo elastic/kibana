@@ -8,7 +8,8 @@
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
 import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
-import { PieLayerState, PieChartTypes } from '../../../common';
+import { PieLayerState } from '../../../common/types';
+import { PieChartTypes } from '../../../common/constants';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {

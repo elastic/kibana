@@ -37,7 +37,7 @@ describe('StatusRuleExecutor', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -161,12 +161,8 @@ const testMonitors = [
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
       },
       'url.port': null,
-      'source.zip_url.url': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       playwright_text_assertion: '',
       urls: 'https://www.google.com',
       screenshots: 'on',
