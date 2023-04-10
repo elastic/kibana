@@ -12,7 +12,6 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
-import moment from 'moment';
 
 import QueryBarTopRow, { SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -313,8 +312,8 @@ describe('QueryBarTopRowTopRow', () => {
 
 describe('SharingMetaFields', () => {
   it('Should render the component with data-shared-timefilter-duration if time is set correctly', () => {
-    const from = moment('2023-04-07');
-    const to = moment('2023-04-08');
+    const from = '2023-04-07';
+    const to = '2023-04-08';
     const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY" />;
 
     expect(shallow(component)).toMatchInlineSnapshot(`
