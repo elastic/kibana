@@ -362,6 +362,7 @@ components:
           nullable: false
           required:
             - index
+            - timestampField
           properties:
             index:
               description: The index or index pattern to use
