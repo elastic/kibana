@@ -398,9 +398,9 @@ export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
   });
 });
 
-export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) => {
+export const isLoadingPreviewLayers = createSelector(getLayerList, getMapZoom, (layerList, zoom) => {
   return layerList.some((layer) => {
-    return layer.isPreviewLayer() && layer.isLayerLoading();
+    return layer.isPreviewLayer() && layer.isVisible() && layer.showAtZoomLevel(zoom) && layer.isLayerLoading();
   });
 });
 
