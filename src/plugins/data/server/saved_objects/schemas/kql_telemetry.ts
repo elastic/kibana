@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import { schema } from '@kbn/config-schema';
 
-import { Plugin } from './load_kibana_platform_plugin';
-import { Config } from './config';
-
-export interface BuildContext {
-  log: ToolingLog;
-  plugin: Plugin;
-  config: Config;
-  sourceDir: string;
-  buildDir: string;
-  kibanaVersion: string;
-}
+export const SCHEMA_KQL_TELEMETRY_V8_8_0 = schema.object({
+  optInCount: schema.maybe(schema.number()),
+  optOutCount: schema.maybe(schema.number()),
+});
