@@ -9,21 +9,14 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiForm,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiForm, EuiSpacer, EuiTitle, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
-import { SingleFieldMapping } from './single_field_selector';
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
+import { SingleFieldMapping } from './single_field_selector';
 
 export const ConfigureFields: React.FC = () => {
   const { isTextExpansionModelSelected } = useValues(MLInferenceLogic);
