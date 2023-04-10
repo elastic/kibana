@@ -214,6 +214,42 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [postExternalReferenceSOReq, ...fileRequests],
           });
         });
+
+        it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
+
+          const fileRequests = [...Array(99).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 200,
+          });
+        });
       });
     });
 
