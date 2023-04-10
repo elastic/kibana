@@ -14,6 +14,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -119,6 +120,12 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
               tagName="p"
             />
           </EuiText>
+          <EuiLink target="_blank" href="#">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.learnMoreLink"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
