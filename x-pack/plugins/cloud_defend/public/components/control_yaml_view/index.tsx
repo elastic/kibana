@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
+import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
@@ -65,7 +66,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
       }
     });
 
-    return errors;
+    return uniq(errors);
   }, []);
 
   useEffect(() => {

@@ -40,7 +40,7 @@ describe('<ControlYamlView />', () => {
   });
 
   it('handles additionalErrors: max selectors+responses exceeded ', async () => {
-    const { getByText, getByTestId, rerender } = render(
+    const { getByText, getByTestId } = render(
       <WrappedComponent
         policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
       />

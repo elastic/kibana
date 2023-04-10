@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const errorAlertActionRequired = i18n.translate('xpack.cloudDefend.alertActionRequired', {
-  defaultMessage:
-    '[Technical Preview] The "alert" action is required on all responses. This restriction will be removed once all responses become auditable.',
+  defaultMessage: 'The alert action is required when "block" action used.',
 });
 
 export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp', {
-  defaultMessage: 'Configure BPF/LSM controls by creating selectors, and responses below.',
+  defaultMessage:
+    'Configure your policy by creating "file" or "process" selectors and responses below.',
 });
