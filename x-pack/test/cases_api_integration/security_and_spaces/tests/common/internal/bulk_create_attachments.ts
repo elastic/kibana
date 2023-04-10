@@ -38,6 +38,8 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createAndUploadFile,
+  deleteAllFiles,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -64,6 +66,7 @@ import {
   getAlertById,
 } from '../../../../common/lib/alerts';
 import { User } from '../../../../common/lib/authentication/types';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -216,7 +219,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('errors', () => {
       describe('files', () => {
-        it('400s when attempting to create 100 file attachments when a file associated to the case exists', async () => {
+        afterEach(async () => {
+          await deleteAllFiles({
+            supertest,
+          });
+        });
+
+        it('should return a 400 when attempting to create 100 file attachments when a file associated to the case exists', async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolution' }),
@@ -224,9 +233,24 @@ export default ({ getService }: FtrProviderContext): void => {
             { user: superUser, space: null }
           );
 
-          // TODO: finish this once I have the changes from my other PR
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
 
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+          const fileRequests = [...Array(100).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
 
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
@@ -293,41 +317,6 @@ export default ({ getService }: FtrProviderContext): void => {
         it('400s when attempting to add more than 100 files to a case', async () => {
           const fileRequests = [...Array(101).keys()].map(() => getFilesAttachmentReq());
           const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when attempting to add a file to a case that already has 100 files', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [getFilesAttachmentReq()],
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when the case already has files and the sum of existing and new files exceed 100', async () => {
-          const fileRequests = [...Array(51).keys()].map(() => getFilesAttachmentReq());
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,

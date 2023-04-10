@@ -39,7 +39,6 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
-  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -180,75 +179,11 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseWithAttachments.totalComment).to.be(1);
           expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
-
-        it('should create a single file attachment with multiple file objects within it', async () => {
-          const postedCase = await createCase(supertest, getPostCaseRequest());
-
-          const files = [fileMetadata(), fileMetadata()];
-
-          const caseWithAttachments = await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: getFilesAttachmentReq({
-              externalReferenceMetadata: {
-                files,
-              },
-            }),
-          });
-
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
-        });
-
-        it('should create a file attachments when there are 99 attachments already within the case', async () => {
-          const fileRequests = [...Array(99).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          const caseWith100Files = await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: getFilesAttachmentReq(),
-          });
-
-          expect(caseWith100Files.comments?.length).to.be(100);
-        });
       });
     });
 
     describe('unhappy path', () => {
       describe('files', () => {
-        it('should return a 400 when attempting to create 100 file attachments when a file associated to the case exists', async () => {
-          const postedCase = await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolution' }),
-            200,
-            { user: superUser, space: null }
-          );
-
-          // TODO: finish this once I have the changes from my other PR
-
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          // TODO: this is a bit weird because the limiter check is looking for actual files but we're
-          // going to fail here based on the attachments
-          await bulkCreateAttachments({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            params: fileRequests,
-            auth: { user: superUser, space: null },
-            expectedHttpCode: 400,
-          });
-        });
-
         it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
@@ -291,24 +226,6 @@ export default ({ getService }: FtrProviderContext): void => {
             params: getFilesAttachmentReq({
               externalReferenceMetadata: {},
             }),
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('should return a 400 when attempting to create a file attachment when the case already has 100 files attached', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: getFilesAttachmentReq(),
             expectedHttpCode: 400,
           });
         });
