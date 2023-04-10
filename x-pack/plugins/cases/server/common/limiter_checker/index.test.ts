@@ -25,6 +25,13 @@ describe('AttachmentLimitChecker', () => {
         },
       };
     });
+
+    mockFileService.find.mockImplementation(async () => {
+      return {
+        files: [],
+        total: 5,
+      };
+    });
   });
 
   describe('validate', () => {
