@@ -35,9 +35,6 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
     const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
       application.capabilities.navLinks;
 
-    // console.log(`******* features: ${JSON.stringify(features)}`);
-    // console.log(`******* management: ${isManagementEnabled}, dev tools: ${isDevToolsEnabled}`);
-
     return (
       <KibanaPageTemplate.Section
         bottomBorder

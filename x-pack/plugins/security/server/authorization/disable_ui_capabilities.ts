@@ -68,21 +68,31 @@ export function disableUICapabilitiesFactory(
       };
     }, {});
 
+  function isCatalogueItemReferencedByFeatureSet(
+    catalogueEntry: string,
+    featureSet: Array<Partial<{ catalogue: RecursiveReadonlyArray<string> | undefined }>>
+  ) {
+    return featureSet.some((feature) => (feature.catalogue ?? []).includes(catalogueEntry));
+  }
+
   const shouldDisableFeatureUICapability = (
     featureId: keyof UICapabilities,
     uiCapability: string
   ) => {
     // This method answers: 'Do we wish to disable a feature based on privileges?'
 
-    // always toggle cataglogue features (Need to understand what this is actually doing)
-    if (featureId === 'catalogue') return true; // return uiCapability === 'indexPatterns';
+    // If the feature is 'catalogue', return true if we have a feature that references it
+    // (i.e. found in the 'catalogue' property of a registered Kibana or ES feature)
+    if (featureId === 'catalogue') {
+      return (
+        isCatalogueItemReferencedByFeatureSet(uiCapability, features) ||
+        isCatalogueItemReferencedByFeatureSet(uiCapability, elasticsearchFeatures)
+      );
+    }
 
     // if the feature is 'navLinks', return true if the nav link was registered
     // (i.e. found in the 'app' property of a registered Kibana feature)
     if (featureId === 'navLinks') {
-      // console.log(
-      //   `******** NAVLINK: ${uiCapability}, found: ${featureNavLinkIds.includes(uiCapability)}`
-      // );
       return featureNavLinkIds.includes(uiCapability);
     }
 
@@ -95,8 +105,6 @@ export function disableUICapabilitiesFactory(
 
     // Lastly return true if the feature is a registered es feature (we always want to affect these),
     // otherwise false(we don't know what this feature is so we don't touch it)
-    // if (!elasticsearchFeatureMap[featureId])
-    //   console.log(`****** unknown featureId: ${featureId}, capability: ${uiCapability}`);
     return !!elasticsearchFeatureMap[featureId];
   };
 
@@ -199,7 +207,7 @@ export function disableUICapabilitiesFactory(
         );
 
         // Catalogue and management capbility buckets can also be influenced by ES privileges,
-        // so the early return is not possible for these.
+        // so the early return is not possible for these *unless we have the required Kibana privileges.
         if ((!isCatalogueFeature && !isManagementFeature) || hasRequiredKibanaPrivileges) {
           return hasRequiredKibanaPrivileges;
         }
@@ -219,9 +227,6 @@ export function disableUICapabilitiesFactory(
           );
         } else if (isManagementFeature) {
           const [managementSectionId, managementEntryId] = uiCapabilityParts;
-          // console.log(
-          //   `**** management section: ${managementSectionId}, entry: ${managementEntryId}`
-          // );
           const featureGrantsManagementEntry =
             (esFeature.management ?? {}).hasOwnProperty(managementSectionId) &&
             esFeature.management![managementSectionId].includes(managementEntryId);
@@ -267,9 +272,6 @@ export function disableUICapabilitiesFactory(
 
           if (isObject(value)) {
             const res = mapValues(value, (enabled, subUiCapability) => {
-              // console.log(
-              //   `**** capability: ${uiCapability}, feature: ${featureId}, subCap: ${subUiCapability}, altered`
-              // );
               return checkPrivilegesForCapability(
                 enabled,
                 featureId!,
