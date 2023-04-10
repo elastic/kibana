@@ -684,6 +684,7 @@ describe('bulkEdit()', () => {
           query: {
             kql: 'name:test',
             dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+            filters: [],
           },
           timeframe: {
             days: [1],
@@ -702,7 +703,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
         uuid: '222',
-        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -721,7 +722,7 @@ describe('bulkEdit()', () => {
                   actionRef: 'action_1',
                   uuid: '222',
                   alertsFilter: {
-                    query: { kql: 'test:1', dsl: 'test' },
+                    query: { kql: 'test:1', dsl: 'test', filters: [] },
                     timeframe: null,
                   },
                 },
@@ -781,6 +782,7 @@ describe('bulkEdit()', () => {
                     query: {
                       dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
                       kql: 'test:1',
+                      filters: [],
                     },
                     timeframe: null,
                   },
@@ -812,6 +814,7 @@ describe('bulkEdit()', () => {
               query: {
                 dsl: 'test',
                 kql: 'test:1',
+                filters: [],
               },
               timeframe: null,
             },

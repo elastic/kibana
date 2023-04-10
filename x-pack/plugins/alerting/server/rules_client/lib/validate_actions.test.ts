@@ -42,7 +42,7 @@ describe('validateActions', () => {
           throttle: null,
         },
         alertsFilter: {
-          query: { kql: 'test:1' },
+          query: { kql: 'test:1', filters: [] },
           timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
         },
       },
@@ -197,7 +197,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {
-                query: { kql: 'test:1' },
+                query: { kql: 'test:1', filters: [] },
                 timeframe: { days: [1], hours: { start: '30:00', end: '17:00' }, timezone: 'UTC' },
               },
             },
@@ -234,7 +234,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {
-                query: { kql: 'test:1' },
+                query: { kql: 'test:1', filters: [] },
                 // @ts-ignore
                 timeframe: { days: [1], hours: { start: '10:00', end: '17:00' } },
               },
@@ -258,7 +258,7 @@ describe('validateActions', () => {
             {
               ...data.actions[0],
               alertsFilter: {
-                query: { kql: 'test:1' },
+                query: { kql: 'test:1', filters: [] },
                 timeframe: {
                   // @ts-ignore
                   days: [0, 8],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
@@ -15,6 +16,7 @@ export interface AlertsSearchBarProps {
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
+  filters?: Filter[];
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showSubmitButton?: boolean;
@@ -24,4 +26,5 @@ export interface AlertsSearchBarProps {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
 }

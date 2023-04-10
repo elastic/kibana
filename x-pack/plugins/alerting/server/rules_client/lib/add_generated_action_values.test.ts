@@ -24,7 +24,7 @@ describe('addGeneratedActionValues()', () => {
       throttle: null,
     },
     alertsFilter: {
-      query: { kql: 'test:testValue' },
+      query: { kql: 'test:testValue', filters: [] },
       timeframe: {
         days: [1, 2],
         hours: { start: '08:00', end: '17:00' },
@@ -48,7 +48,10 @@ describe('addGeneratedActionValues()', () => {
   test('throws error if KQL is not valid', async () => {
     expect(() =>
       addGeneratedActionValues([
-        { ...mockAction, alertsFilter: { query: { kql: 'foo:bar:1' }, timeframe: null } },
+        {
+          ...mockAction,
+          alertsFilter: { query: { kql: 'foo:bar:1', filters: [] }, timeframe: null },
+        },
       ])
     ).toThrowErrorMatchingInlineSnapshot('"Error creating DSL query: invalid KQL"');
   });

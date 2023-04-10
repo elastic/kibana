@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
@@ -21,7 +22,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
   state,
   onChange,
 }) => {
-  const [query, setQuery] = useState(state ?? { kql: '' });
+  const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
 
   const queryEnabled = useMemo(() => Boolean(state), [state]);
 
@@ -46,13 +47,18 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
     [updateQuery]
   );
 
+  const onFiltersUpdated = useCallback(
+    (filters: Filter[]) => updateQuery({ filters }),
+    [updateQuery]
+  );
+
   return (
     <>
       <EuiSwitch
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
           {
-            defaultMessage: 'Send alert notification only if fields match a query',
+            defaultMessage: 'Send alert notification only if alert fields match a query',
           }
         )}
         checked={queryEnabled}
@@ -66,7 +72,9 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
             appName="siem"
             featureIds={['siem']}
             query={query.kql}
+            filters={query.filters ?? []}
             onQueryChange={onQueryChange}
+            onFiltersUpdated={onFiltersUpdated}
             showFilterBar
             submitOnBlur
             showDatePicker={false}

@@ -32,6 +32,12 @@ export const actionsSchema = schema.arrayOf(
         query: schema.nullable(
           schema.object({
             kql: schema.string(),
+            filters: schema.arrayOf(
+              schema.object({
+                query: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+                meta: schema.recordOf(schema.string(), schema.any()),
+              })
+            ),
             dsl: schema.maybe(schema.string()),
           })
         ),

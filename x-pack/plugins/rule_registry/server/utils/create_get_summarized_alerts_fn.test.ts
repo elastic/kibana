@@ -2098,6 +2098,7 @@ describe('createGetSummarizedAlertsFn', () => {
         query: {
           kql: 'kibana.alert.rule.name:test',
           dsl: '{"bool":{"minimum_should_match":1,"should":[{"match":{"kibana.alert.rule.name":"test"}}]}}',
+          filters: [],
         },
         timeframe: {
           days: [1, 2, 3, 4, 5],

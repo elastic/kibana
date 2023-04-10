@@ -19,7 +19,9 @@ export function AlertsSearchBar({
   appName,
   featureIds,
   query,
+  filters,
   onQueryChange,
+  onFiltersUpdated,
   rangeFrom,
   rangeTo,
   showFilterBar = false,
@@ -59,11 +61,13 @@ export function AlertsSearchBar({
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
+      filters={filters}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"
       showFilterBar={showFilterBar}
       onQuerySubmit={onQuerySubmit}
+      onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showSubmitButton={showSubmitButton}

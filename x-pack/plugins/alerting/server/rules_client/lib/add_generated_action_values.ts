@@ -34,6 +34,7 @@ export function addGeneratedActionValues(
                 ? null
                 : {
                     kql: alertsFilter.query.kql,
+                    filters: alertsFilter.query.filters,
                     dsl: generateDSL(alertsFilter.query.kql),
                   },
             },
