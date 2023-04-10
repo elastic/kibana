@@ -168,6 +168,8 @@ describe('getVisualizationInstanceInput', () => {
   test('should create new instances of savedVis, vis and embeddableHandler', async () => {
     const input = {
       id: 'test-id',
+      description: 'description',
+      title: 'title',
       savedVis: {
         title: '',
         description: '',
@@ -194,7 +196,7 @@ describe('getVisualizationInstanceInput', () => {
         },
       },
     } as unknown as VisualizeInput;
-    const { savedVis, savedSearch, vis, embeddableHandler } =
+    const { savedVis, savedSearch, vis, embeddableHandler, panelDescription, panelTitle } =
       await getVisualizationInstanceFromInput(mockServices, input);
 
     expect(getSavedVisualization).toHaveBeenCalled();
@@ -212,5 +214,7 @@ describe('getVisualizationInstanceInput', () => {
     expect(savedVis.uiStateJSON).toBe(JSON.stringify(input.savedVis?.uiState));
     expect(embeddableHandler).toBeDefined();
     expect(savedSearch).toBeUndefined();
+    expect(panelDescription).toBe('description');
+    expect(panelTitle).toBe('title');
   });
 });
