@@ -376,13 +376,15 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
+    const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+
     if (this._isTiled()) {
-      return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded;
+      return hasOpenDataRequests || this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded;
     }
 
     return !this.getSourceDataRequest()
       ? true // layer is loading until source data request has been created
-      : this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+      : hasOpenDataRequests;
   }
 
   hasErrors(): boolean {
