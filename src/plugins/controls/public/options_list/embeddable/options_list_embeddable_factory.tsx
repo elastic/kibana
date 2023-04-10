@@ -9,6 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
@@ -20,8 +21,8 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../../../common/options_list/types';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
+import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
@@ -54,15 +55,13 @@ export class OptionsListEmbeddableFactory
     return newInput;
   };
 
-  public isFieldCompatible = (dataControlField: DataControlField) => {
-    if (
-      !dataControlField.field.spec.scripted &&
-      ((dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
-        dataControlField.field.type === 'boolean' ||
-        dataControlField.field.type === 'ip')
-    ) {
-      dataControlField.compatibleControlTypes.push(this.type);
-    }
+  public isFieldCompatible = (field: DataViewField) => {
+    return (
+      !field.spec.scripted &&
+      ((field.aggregatable && field.type === 'string') ||
+        field.type === 'boolean' ||
+        field.type === 'ip')
+    );
   };
 
   public controlEditorOptionsComponent = OptionsListEditorOptions;
