@@ -14,7 +14,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  MAX_DELETE_CASE_IDS,
+  MAX_FILES_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
@@ -95,22 +95,22 @@ export const getFileEntities = async (
 ): Promise<OwnerEntity[]> => {
   // using 50 just to be safe, each case can have 100 files = 50 * 100 = 5000 which is half the max number of docs that
   // the client can request
-  const chunkSize = MAX_DELETE_CASE_IDS / 2;
+  const chunkSize = MAX_FILES_PER_CASE / 2;
   const chunkedIds = chunk(caseIds, chunkSize);
 
-  const fileResults = await pMap(chunkedIds, async (ids: string[]) => {
-    const files = await fileService.find({
+  const entityResults = await pMap(chunkedIds, async (ids: string[]) => {
+    const findRes = await fileService.find({
       perPage: MAX_DOCS_PER_PAGE,
       meta: {
         caseIds: ids,
       },
     });
 
-    return files;
+    const fileEntities = createFileEntities(findRes.files);
+    return fileEntities;
   });
 
-  const files = fileResults.flatMap((res) => res.files);
-  const fileEntities = createFileEntities(files);
+  const entities = entityResults.flatMap((res) => res);
 
-  return fileEntities;
+  return entities;
 };

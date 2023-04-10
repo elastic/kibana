@@ -53,9 +53,17 @@ describe('delete', () => {
     });
 
     it('returns the number of entities equal to the case ids times the max files per case limit', async () => {
+      const expectedEntities = Array.from(Array(numCaseIds * MAX_FILES_PER_CASE).keys()).map(
+        () => ({
+          id: '123',
+          owner: 'securitySolution',
+        })
+      );
+
       const entities = await getFileEntities(caseIds, mockFileService);
 
       expect(entities.length).toEqual(numCaseIds * MAX_FILES_PER_CASE);
+      expect(entities).toEqual(expectedEntities);
     });
   });
 });

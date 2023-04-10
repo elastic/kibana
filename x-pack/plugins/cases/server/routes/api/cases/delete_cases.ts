@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASES_URL, MAX_DELETE_CASE_IDS } from '../../../../common/constants';
+import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -16,10 +16,7 @@ export const deleteCaseRoute = createCasesRoute({
   path: CASES_URL,
   params: {
     query: schema.object({
-      ids: schema.arrayOf(schema.string({ minLength: 1 }), {
-        minSize: 1,
-        maxSize: MAX_DELETE_CASE_IDS,
-      }),
+      ids: schema.arrayOf(schema.string()),
     }),
   },
   handler: async ({ context, request, response }) => {

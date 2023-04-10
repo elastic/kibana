@@ -13,7 +13,9 @@ import { constructOwnerFromFileKind } from '../../../common/files';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { OwnerEntity } from '../../authorization';
 
-export const createFileEntities = (files: FileJSON[]): OwnerEntity[] => {
+type FileEntityInfo = Pick<FileJSON, 'fileKind' | 'id'>;
+
+export const createFileEntities = (files: FileEntityInfo[]): OwnerEntity[] => {
   const fileEntities: OwnerEntity[] = [];
 
   // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user

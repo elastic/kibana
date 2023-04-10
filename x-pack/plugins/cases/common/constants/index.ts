@@ -96,11 +96,6 @@ export const CONNECTORS_URL = `${ACTION_URL}/connectors` as const;
 export const MAX_ALERTS_PER_CASE = 1000 as const;
 
 /**
- * Requests
- */
-export const MAX_DELETE_CASE_IDS = 100 as const;
-
-/**
  * Searching
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
