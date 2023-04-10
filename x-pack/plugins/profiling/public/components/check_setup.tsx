@@ -129,7 +129,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                                 target="_blank"
                               >
                                 {i18n.translate(
-                                  'xpack.profiling.frameInformationWindow.missingSymbols.native.readMore',
+                                  'xpack.profiling.noDataConfig.action.dataRetention.link',
                                   { defaultMessage: 'controlling data retention' }
                                 )}
                               </EuiLink>
