@@ -22,6 +22,68 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it.each([true, false])('should accept withAutomatedActions param', (value) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ withAutomatedActions: value });
+      }).not.toThrow();
+    });
+
+    it('should require at least 1 alert ID', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [] });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID if not in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: uuidv4() });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: '' });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [uuidv4()] });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [''] });
+      }).toThrow();
+    });
+
+    it('should accept multiple alert IDs in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), uuidv4(), uuidv4()],
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept multiple alert IDs in an array if one is an empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), '', uuidv4()],
+        });
+      }).toThrow();
+    });
+
+    it('should not limit multiple alert IDs', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          agentIds: Array(255)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).not.toThrow();
+    });
+
     it('should require at least 1 agent ID', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ agentIds: [] }); // no agent_ids provided

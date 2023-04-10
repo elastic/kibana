@@ -19,12 +19,12 @@ const visualizeFieldTrigger: typeof VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_T
 export const useEditVisualization = ({
   services,
   dataView,
-  getRelativeTimeRange,
+  relativeTimeRange,
   lensAttributes,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  getRelativeTimeRange: () => TimeRange;
+  relativeTimeRange?: TimeRange;
   lensAttributes: TypedLensByValueInput['attributes'];
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
@@ -53,11 +53,11 @@ export const useEditVisualization = ({
     return () => {
       services.lens.navigateToPrefilledEditor({
         id: '',
-        timeRange: getRelativeTimeRange(),
+        timeRange: relativeTimeRange,
         attributes: lensAttributes,
       });
     };
-  }, [canVisualize, getRelativeTimeRange, lensAttributes, services.lens]);
+  }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
 
   useEffect(() => {
     checkCanVisualize().then(setCanVisualize);
