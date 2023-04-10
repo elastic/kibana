@@ -21,8 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
-import { TEXT_EXPANSION_TYPE } from '../../../../../../../common/ml_inference_pipeline';
-
 import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface ELSERCallOutState {
@@ -43,7 +41,7 @@ export const useELSERCallOutData = ({
   const { supportedMLModels } = useValues(MLInferenceLogic);
 
   const doesNotHaveELSERModel = useMemo(() => {
-    return !supportedMLModels.some((m) => m.model_type === TEXT_EXPANSION_TYPE);
+    return !supportedMLModels.some((m) => m.inference_config?.text_expansion);
   }, [supportedMLModels]);
 
   const [show, setShow] = useState<boolean>(() => {
