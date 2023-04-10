@@ -502,6 +502,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`clearing search from options list`);
     await this.optionsListPopoverAssertOpen();
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSetSort(sort: OptionsListSortingType) {
