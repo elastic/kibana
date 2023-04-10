@@ -14,10 +14,13 @@ import { RecurringScheduleFormProps } from '../components/schema';
 
 export const recurringSummary = (
   startDate: Moment,
-  schedule: RecurringScheduleFormProps | undefined,
+  recurringSchedule: RecurringScheduleFormProps | undefined,
   presets: Record<Frequency, Partial<RecurringScheduleFormProps>>
 ) => {
-  if (schedule) {
+  if (!recurringSchedule) return '';
+
+  if (recurringSchedule) {
+    let schedule = recurringSchedule;
     if (schedule.frequency !== 'CUSTOM') {
       schedule = { ...schedule, ...presets[schedule.frequency] };
     }

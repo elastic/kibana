@@ -15,7 +15,7 @@ import { getPresets } from './get_presets';
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
-  form?: RecurringScheduleFormProps
+  recurringForm?: RecurringScheduleFormProps
 ): RRule => {
   const presets = getPresets(startDate);
 
@@ -24,9 +24,12 @@ export const convertToRRule = (
     tzid: timezone,
   };
 
-  if (form) {
-    if (form.frequency !== 'CUSTOM') {
-      form = { ...form, ...presets[form.frequency] };
+  if (!recurringForm) return rRule;
+
+  if (recurringForm) {
+    let form = recurringForm;
+    if (recurringForm.frequency !== 'CUSTOM') {
+      form = { ...recurringForm, ...presets[recurringForm.frequency] };
     }
 
     const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);
