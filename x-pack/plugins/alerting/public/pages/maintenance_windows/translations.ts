@@ -416,3 +416,21 @@ export const TABLE_START_TIME = i18n.translate(
 export const TABLE_END_TIME = i18n.translate('xpack.alerting.maintenanceWindows.table.endTime', {
   defaultMessage: 'End time',
 });
+
+export const TABLE_ACTION_EDIT = i18n.translate('xpack.alerting.maintenanceWindows.table.edit', {
+  defaultMessage: 'Edit',
+});
+
+export const EDIT_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alerting.maintenanceWindows.edit.maintenanceWindow',
+  {
+    defaultMessage: 'Edit maintenance window',
+  }
+);
+
+export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alerting.maintenanceWindows.save.maintenanceWindow',
+  {
+    defaultMessage: 'Save maintenance window',
+  }
+);

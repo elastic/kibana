@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { MaintenanceWindowResponse } from '../types';
 import * as i18n from '../translations';
 import { Status, StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
@@ -26,6 +27,8 @@ interface MaintenanceWindowsListProps {
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items }) => {
+    const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
+
     const [, setSelection] = useState<MaintenanceWindowResponse[]>([]);
     const styles = {
       status: css`
@@ -90,6 +93,20 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         dataType: 'date',
         render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:MM A'),
       },
+      {
+        name: '',
+        actions: [
+          {
+            name: i18n.TABLE_ACTION_EDIT,
+            isPrimary: true,
+            description: 'Edit maintenance window',
+            icon: 'pencil',
+            type: 'icon',
+            onClick: (mw) => navigateToEditMaintenanceWindows(mw.id),
+            'data-test-subj': 'action-edit',
+          },
+        ],
+      },
     ];
 
     return (
@@ -126,6 +143,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             },
           ],
         }}
+        hasActions={true}
       />
     );
   }

@@ -23,6 +23,9 @@ const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maint
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
   () => import('../pages/maintenance_windows/maintenance_window_create_page')
 );
+const MaintenanceWindowsEditLazy: React.FC = React.lazy(
+  () => import('../pages/maintenance_windows/maintenance_window_edit_page')
+);
 
 const App = React.memo(() => {
   return (
@@ -36,6 +39,11 @@ const App = React.memo(() => {
         <Route path={paths.alerting.maintenanceWindowsCreate} exact>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <MaintenanceWindowsCreateLazy />
+          </Suspense>
+        </Route>
+        <Route path={paths.alerting.maintenanceWindowsEdit} exact>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <MaintenanceWindowsEditLazy />
           </Suspense>
         </Route>
       </Switch>

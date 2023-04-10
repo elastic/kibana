@@ -11,7 +11,11 @@ import { EuiButton } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../translations';
 
-export const SubmitButton: React.FC = React.memo(() => {
+interface SubmitButtonProps {
+  editMode?: boolean;
+}
+
+export const SubmitButton: React.FC<SubmitButtonProps> = React.memo((editMode) => {
   const { submit, isSubmitting } = useFormContext();
 
   return (
@@ -22,7 +26,7 @@ export const SubmitButton: React.FC = React.memo(() => {
       isLoading={isSubmitting}
       onClick={submit}
     >
-      {i18n.CREATE_MAINTENANCE_WINDOW}
+      {editMode ? i18n.SAVE_MAINTENANCE_WINDOW : i18n.CREATE_MAINTENANCE_WINDOW}
     </EuiButton>
   );
 });

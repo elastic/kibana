@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { generatePath } from 'react-router-dom';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useKibana } from '../utils/kibana_react';
 import { paths, APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../config';
@@ -48,6 +49,25 @@ export const useMaintenanceWindowsNavigation = () => {
     getMaintenanceWindowsUrl: (absolute?: boolean) =>
       getAppUrl({
         path,
+        deepLinkId,
+        absolute,
+      }),
+  };
+};
+
+export const useEditMaintenanceWindowsNavigation = () => {
+  const { navigateTo, getAppUrl } = useNavigation(APP_ID);
+  const deepLinkId = MAINTENANCE_WINDOWS_APP_ID;
+
+  return {
+    navigateToEditMaintenanceWindows: (maintenanceWindowId: string) =>
+      navigateTo({
+        path: generatePath(paths.alerting.maintenanceWindowsEdit, { maintenanceWindowId }),
+        deepLinkId,
+      }),
+    getEditMaintenanceWindowsUrl: (maintenanceWindowId: string, absolute?: boolean) =>
+      getAppUrl({
+        path: generatePath(paths.alerting.maintenanceWindowsEdit, { maintenanceWindowId }),
         deepLinkId,
         absolute,
       }),
