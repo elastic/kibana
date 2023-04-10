@@ -43,7 +43,7 @@ export const useELSERCallOutData = ({
   const { supportedMLModels } = useValues(MLInferenceLogic);
 
   const doesNotHaveELSERModel = useMemo(() => {
-    return supportedMLModels.every((m) => m.model_type !== TEXT_EXPANSION_TYPE);
+    return !supportedMLModels.some((m) => m.model_type === TEXT_EXPANSION_TYPE);
   }, [supportedMLModels]);
 
   const [show, setShow] = useState<boolean>(() => {
