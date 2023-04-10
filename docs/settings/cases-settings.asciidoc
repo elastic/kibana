@@ -1,0 +1,18 @@
+[role="xpack"]
+[[cases-settings-kb]]
+=== Cases settings in {kib}
+++++
+<titleabbrev>Cases settings</titleabbrev>
+++++
+
+You do not need to configure any additional settings to use Cases in {kib}. Cases exposes certain settings to provide greater control over its features. You can configure the following settings in the `kibana.yml` file.
+
+[float]
+[[cases-settings]]
+==== Cases settings
+
+`xpack.cases.files.allowedMimeTypes`::
+An array of strings representing the allowed MIME types that can be attached to a case. Defaults to the MIME types specified https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/common/constants/mime_types.ts[here].
+
+`xpack.cases.files.maxSize`::
+A number representing the file size limit for files being attached to a case (in bytes). Defaults to 10 MiB for images and 100 MiB for all other MIME types.
