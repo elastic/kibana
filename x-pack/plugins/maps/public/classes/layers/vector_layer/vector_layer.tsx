@@ -277,14 +277,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
     
     const joins = this.getValidJoins();
-    for (let i = 0; i < joins.length; i++) {
-      const joinDataRequest = this.getDataRequest(joins[i].getSourceDataRequestId());
-      if (!joinDataRequest || joinDataRequest.isLoading()) {
-        return true;
-      }
-    }
-
-    return false;
+    return joins.some(join => {
+      const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+      return !joinDataRequest || joinDataRequest.isLoading();
+    });
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
