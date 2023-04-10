@@ -193,9 +193,7 @@ describe('isMapLoading', () => {
   });
 
   test('layer should be counted as loaded if its not shown at zoom level', () => {
-    const layerList = [
-      createLayerMock({ showAtZoomLevel: false, isLayerLoading: true }),
-    ];
+    const layerList = [createLayerMock({ showAtZoomLevel: false, isLayerLoading: true })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(isMapLoading.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);

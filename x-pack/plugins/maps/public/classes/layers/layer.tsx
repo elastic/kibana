@@ -377,7 +377,7 @@ export class AbstractLayer implements ILayer {
 
   isLayerLoading(): boolean {
     if (this._isTiled()) {
-      return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
+      return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded;
     }
 
     return !this.getSourceDataRequest()
