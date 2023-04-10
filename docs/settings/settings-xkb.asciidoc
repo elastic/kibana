@@ -13,7 +13,6 @@ For more {kib} configuration settings, see <<settings>>.
 include::alert-action-settings.asciidoc[]
 include::apm-settings.asciidoc[]
 include::banners-settings.asciidoc[]
-include::cases-settings.asciidoc[]
 include::infrastructure-ui-settings.asciidoc[]
 include::logs-ui-settings.asciidoc[]
 include::reporting-settings.asciidoc[]
