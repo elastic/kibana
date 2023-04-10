@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { isEmpty } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateMobileData, SERVICE_VERSIONS } from './generate_mobile_data';
 
@@ -39,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           path: { serviceName },
           query: {
             environment,
-            start: new Date(start).toISOString(),
+            start: moment(end).subtract(7, 'minutes').toISOString(),
             end: new Date(end).toISOString(),
             offset,
             kuery,
@@ -68,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Mobile main statistics when data is loaded',
+    'Mobile detailed statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
       before(async () => {
@@ -99,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'synth-android',
             environment: 'production',
             field: 'service.version',
-            offset: '15m',
+            offset: '8m',
           });
           expect(isEmpty(response.currentPeriod)).to.be.equal(false);
           expect(isEmpty(response.previousPeriod)).to.be.equal(false);
