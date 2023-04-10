@@ -56,6 +56,7 @@ export interface ChartProps {
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
+  relativeTimeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -66,7 +67,6 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  getRelativeTimeRange?: () => TimeRange;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -87,6 +87,7 @@ export function Chart({
   query: originalQuery,
   filters: originalFilters,
   timeRange: originalTimeRange,
+  relativeTimeRange: originalRelativeTimeRange,
   request,
   hits,
   chart,
@@ -100,7 +101,6 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  getRelativeTimeRange: originalGetRelativeTimeRange,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -214,15 +214,10 @@ export function Chart({
     ]
   );
 
-  const getRelativeTimeRange = useMemo(
-    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
-    [originalGetRelativeTimeRange, relativeTimeRange]
-  );
-
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    getRelativeTimeRange,
+    relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
     lensAttributes,
   });
 

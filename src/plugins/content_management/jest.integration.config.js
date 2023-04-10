@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-
-import { Plugin } from './load_kibana_platform_plugin';
-import { Config } from './config';
-
-export interface BuildContext {
-  log: ToolingLog;
-  plugin: Plugin;
-  config: Config;
-  sourceDir: string;
-  buildDir: string;
-  kibanaVersion: string;
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/content_management'],
+};
