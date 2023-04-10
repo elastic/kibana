@@ -79,7 +79,7 @@ const SHELL_INFO = Object.freeze({
   ),
 });
 
-export const FILE_TRUNCATED_MESSAGE = i18n.translate(
+export const EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
   {
     defaultMessage:
@@ -158,7 +158,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
         <StyledEuiText size={textSize}>
           {isFileTruncated && (
             <>
-              <EuiTextColor color="warning">{FILE_TRUNCATED_MESSAGE}</EuiTextColor>
+              <EuiTextColor color="warning">{EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE}</EuiTextColor>
               <EuiSpacer size="m" />
             </>
           )}
