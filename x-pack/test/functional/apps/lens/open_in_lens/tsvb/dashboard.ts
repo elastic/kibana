@@ -56,6 +56,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
+        const titles = await dashboard.getPanelTitles();
+        expect(titles[0]).to.be('My TSVB to Lens viz 1 (converted)');
       });
       await panelActions.removePanel();
     });
@@ -84,6 +86,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
+        const titles = await dashboard.getPanelTitles();
+        expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
       });
 
       const panel = await testSubjects.find(`embeddablePanelHeading-`);
