@@ -11,8 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 import { EuiBasicTable, EuiButton, EuiComboBox } from '@elastic/eui';
+
+import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 
 const DEFAULT_VALUES = {
   addInferencePipelineModal: {
@@ -41,7 +42,7 @@ describe('MultiFieldMapping', () => {
       },
       {
         label: 'my-source-field3',
-      }
+      },
     ]);
   });
   it('renders multi field selector with options excluding mapped and selected fields', () => {
@@ -115,12 +116,14 @@ describe('SelectedFieldMappings', () => {
           ],
         },
       },
-    }
+    };
     setMockValues(mockValues);
     const wrapper = shallow(<SelectedFieldMappings />);
 
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
     const table = wrapper.find(EuiBasicTable);
-    expect(table.prop('items')).toEqual(mockValues.addInferencePipelineModal.configuration.fieldMappings);
+    expect(table.prop('items')).toEqual(
+      mockValues.addInferencePipelineModal.configuration.fieldMappings
+    );
   });
 });
