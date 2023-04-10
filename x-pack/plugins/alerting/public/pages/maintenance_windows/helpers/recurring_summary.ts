@@ -21,8 +21,8 @@ export const recurringSummary = (
 
   if (recurringSchedule) {
     let schedule = recurringSchedule;
-    if (schedule.frequency !== 'CUSTOM') {
-      schedule = { ...schedule, ...presets[schedule.frequency] };
+    if (recurringSchedule.frequency !== 'CUSTOM') {
+      schedule = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
     }
 
     const frequency = schedule.customFrequency
