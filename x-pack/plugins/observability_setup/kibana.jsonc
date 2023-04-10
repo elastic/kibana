@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-setup-plugin",
+  "owner": "@elastic/apm-ui",
+  "plugin": {
+    "id": "observabilitySetup",
+    "server": false,
+    "browser": true,
+    "configPath": ["xpack", "observability"],
+    "requiredPlugins": [
+      "data",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+      "observability",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "observability",
+    ]
+  }
+}

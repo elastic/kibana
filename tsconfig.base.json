@@ -938,6 +938,8 @@
       "@kbn/observability-fixtures-plugin/*": ["x-pack/test/cases_api_integration/common/plugins/observability/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability/*"],
+      "@kbn/observability-setup-plugin": ["x-pack/plugins/observability_setup"],
+      "@kbn/observability-setup-plugin/*": ["x-pack/plugins/observability_setup/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],
       "@kbn/oidc-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/oidc_provider/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["test/common/plugins/otel_metrics"],

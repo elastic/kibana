@@ -487,6 +487,7 @@
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/observability-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/observability",
     "@kbn/observability-plugin": "link:x-pack/plugins/observability",
+    "@kbn/observability-setup-plugin": "link:x-pack/plugins/observability_setup",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
     "@kbn/open-telemetry-instrumented-plugin": "link:test/common/plugins/otel_metrics",
     "@kbn/osquery-io-ts-types": "link:packages/kbn-osquery-io-ts-types",
