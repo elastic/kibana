@@ -263,10 +263,8 @@ export function disableUICapabilitiesFactory(
         (value: boolean | Record<string, boolean>, uiCapability) => {
           if (typeof value === 'boolean') {
             if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
-              // console.log(`**** capability: ${uiCapability}, feature: ${featureId}, untouched`);
               return value;
             }
-            // console.log(`**** capability: ${uiCapability}, feature: ${featureId}, altered`);
             return checkPrivilegesForCapability(value, featureId!, uiCapability!);
           }
 
