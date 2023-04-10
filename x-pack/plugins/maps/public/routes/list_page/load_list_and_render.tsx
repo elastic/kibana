@@ -13,7 +13,7 @@ import { ScopedHistory } from '@kbn/core/public';
 import { getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
 import { APP_ID } from '../../../common/constants';
-import { mapsClient } from '../../content_management'
+import { mapsClient } from '../../content_management';
 
 interface Props {
   history: ScopedHistory;
