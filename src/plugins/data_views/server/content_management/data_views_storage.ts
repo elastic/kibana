@@ -113,7 +113,7 @@ export class DataViewsStorage implements ContentStorage<DataViewSpec> {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
-    return { item: value };
+    return value;
   }
 
   // note maps supports partial updates
@@ -170,7 +170,6 @@ export class DataViewsStorage implements ContentStorage<DataViewSpec> {
       utils: { getTransforms },
       version: { request: requestVersion },
     } = ctx;
-    console.log('############ search', query);
     const transforms = getTransforms(cmServicesDefinition, requestVersion);
     const soClient = await savedObjectClientFromRequest(ctx);
 

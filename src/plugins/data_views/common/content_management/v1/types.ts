@@ -17,6 +17,7 @@ import type {
   DeleteIn,
   SearchResult,
   GetResult,
+  CreateResult,
 } from '@kbn/content-management-plugin/common';
 
 import { DataViewAttributes, DataViewSpec } from '../../types';
@@ -51,9 +52,13 @@ export interface CreateOptions {
   references?: SavedObjectReference[];
 }
 
-export type DataViewCreateIn = CreateIn<typeof DataViewContentType, DataViewSpec, CreateOptions>;
+export type DataViewCreateIn = CreateIn<
+  typeof DataViewContentType,
+  Omit<DataViewSpec, 'fields'>,
+  CreateOptions
+>;
 
-export type DataViewCreateOut = DataViewSpec;
+export type DataViewCreateOut = CreateResult<DataViewSpec>;
 
 // ----------- UPDATE --------------
 

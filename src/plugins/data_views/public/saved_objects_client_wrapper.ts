@@ -100,12 +100,13 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async create(spec: DataViewSpec, options: CreateOptions) {
-    return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
+    const result = await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
       contentTypeId: 'index-pattern',
       data: spec,
       // this is required, shouldn't be.
       options,
-    })) as SavedObject<DataViewAttributes>;
+    });
+    return result;
   }
 
   async delete(id: string) {

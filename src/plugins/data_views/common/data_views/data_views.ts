@@ -538,6 +538,7 @@ export class DataViewsService {
     });
   };
 
+  /*
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
@@ -549,6 +550,7 @@ export class DataViewsService {
       indexFilter: options.indexFilter,
     });
   };
+*/
 
   private refreshFieldsFn = async (indexPattern: DataView) => {
     const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
@@ -608,6 +610,7 @@ export class DataViewsService {
    * @param options
    * @returns Record<string, FieldSpec>
    */
+  /*
   private refreshFieldSpecMap = async (
     fields: DataViewFieldMap,
     id: string,
@@ -654,7 +657,7 @@ export class DataViewsService {
       throw err;
     }
   };
-
+*/
   /**
    * Converts field array to map.
    * @param fields: FieldSpec[]
@@ -726,6 +729,7 @@ export class DataViewsService {
     };
   };
 
+  // todo consider getting rid of this, or renaming
   private getSavedObjectAndInit = async (
     id: string,
     displayErrors: boolean = true
@@ -735,6 +739,7 @@ export class DataViewsService {
     // return this.initFromSavedObject(savedObject, displayErrors);
   };
 
+  /*
   private initFromSavedObjectLoadFields = async ({
     savedObjectId,
     spec,
@@ -765,6 +770,7 @@ export class DataViewsService {
     return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [] };
   };
 
+  /*
   private initFromSavedObject = async (
     savedObject: SavedObject<DataViewAttributes>,
     displayErrors: boolean = true
@@ -822,6 +828,7 @@ export class DataViewsService {
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
+  */
 
   private getRuntimeFields = (
     runtimeFieldMap: Record<string, RuntimeFieldSpec> | undefined = {},
@@ -1003,16 +1010,12 @@ export class DataViewsService {
     }
 
     // const body = dataView.getAsSavedObjectBody();
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
-      dataView.toSpec(),
-      {
-        id: dataView.id,
-      }
-    )) as SavedObject<DataViewAttributes>;
-
-    const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
+    const response = await this.savedObjectsClient.create(dataView.toSpec(), {
+      id: dataView.id,
+    });
+    const createdIndexPattern = await this.create(response.item);
     if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      this.savedObjectsCache.push(response.item);
     }
     return createdIndexPattern;
   }

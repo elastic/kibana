@@ -143,22 +143,25 @@ export const serviceDefinition: ServicesDefinition = {
         schema: createOptionsSchema,
       },
       data: {
-        schema: dataViewAttributesSchema,
+        // todo
+        schema: schema.any(), // dataViewAttributesSchema,
       },
     },
     out: {
       result: {
-        schema: dataViewSavedObjectSchema,
+        // todo
+        schema: schema.any(), // dataViewSavedObjectSchema,
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        // todo
+        schema: schema.any(), // createOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: dataViewAttributesSchema,
+        schema: schema.any(), // dataViewAttributesSchema,
       },
     },
   },
