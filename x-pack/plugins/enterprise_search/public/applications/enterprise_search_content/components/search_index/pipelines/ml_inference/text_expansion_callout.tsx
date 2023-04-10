@@ -24,24 +24,25 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 
-export interface ELSERCallOutState {
+export interface TextExpansionCallOutState {
   dismiss: () => void;
   dismissable: boolean;
   show: boolean;
 }
 
-export interface ELSERCallOutProps {
+export interface TextExpansionCallOutProps {
   dismissable?: boolean;
 }
 
-export const ELSER_CALL_OUT_DISMISSED_KEY = 'enterprise-search-elser-callout-dismissed';
+export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
+  'enterprise-search-text-expansion-callout-dismissed';
 
-export const useELSERCallOutData = ({
+export const useTextExpansionCallOutData = ({
   dismissable = false,
-}: ELSERCallOutProps): ELSERCallOutState => {
+}: TextExpansionCallOutProps): TextExpansionCallOutState => {
   const { supportedMLModels } = useValues(MLInferenceLogic);
 
-  const doesNotHaveELSERModel = useMemo(() => {
+  const doesNotHaveTextExpansionModel = useMemo(() => {
     return !supportedMLModels.some((m) => m.inference_config?.text_expansion);
   }, [supportedMLModels]);
 
@@ -49,7 +50,7 @@ export const useELSERCallOutData = ({
     if (!dismissable) return true;
 
     try {
-      return localStorage.getItem(ELSER_CALL_OUT_DISMISSED_KEY) !== 'true';
+      return localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY) !== 'true';
     } catch {
       return true;
     }
@@ -57,7 +58,7 @@ export const useELSERCallOutData = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem(ELSER_CALL_OUT_DISMISSED_KEY, JSON.stringify(!show));
+      localStorage.setItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY, JSON.stringify(!show));
     } catch {
       return;
     }
@@ -67,11 +68,11 @@ export const useELSERCallOutData = ({
     setShow(false);
   }, []);
 
-  return { dismiss, dismissable, show: doesNotHaveELSERModel && show };
+  return { dismiss, dismissable, show: doesNotHaveTextExpansionModel && show };
 };
 
-export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
-  const { dismiss, dismissable, show } = useELSERCallOutData(props);
+export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
+  const { dismiss, dismissable, show } = useTextExpansionCallOutData(props);
 
   if (!show) return null;
 
@@ -82,7 +83,7 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
           <EuiFlexItem grow={false}>
             <EuiBadge color="success">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.titleBadge"
+                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
                 defaultMessage="New"
               />
             </EuiBadge>
@@ -92,7 +93,7 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
               <h4>
                 <EuiText color="text">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.title"
+                    id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
                     defaultMessage="Improve your results with ELSER"
                   />
                 </EuiText>
@@ -103,7 +104,7 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.elserCallOut.dismissButton',
+                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
                   { defaultMessage: 'Dismiss ELSER call out' }
                 )}
                 iconType="cross"
@@ -115,14 +116,14 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
         <EuiFlexGroup direction="column">
           <EuiText>
             <FormattedHTMLMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.body"
+              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
               defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently utilize context in natural language queries. Usage of this model provides better results than BM25 without further training on your data."
               tagName="p"
             />
           </EuiText>
           <EuiLink target="_blank" href="#">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.learnMoreLink"
+              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
               defaultMessage="Learn more"
             />
           </EuiLink>

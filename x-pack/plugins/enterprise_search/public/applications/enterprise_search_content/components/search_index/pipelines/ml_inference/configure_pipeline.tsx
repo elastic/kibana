@@ -32,11 +32,11 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { ELSERCallOut } from './elser_callout';
 import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
+import { TextExpansionCallOut } from './text_expansion_callout';
 import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
@@ -317,7 +317,7 @@ export const ConfigurePipeline: React.FC = () => {
               <InferenceConfiguration />
             </EuiForm>
             <EuiSpacer />
-            <ELSERCallOut />
+            <TextExpansionCallOut />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
