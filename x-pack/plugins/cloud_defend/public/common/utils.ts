@@ -62,29 +62,11 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
   const totalsByType: TotalByType = { process: 0, file: 0 };
 
   selectors.forEach((selector) => {
-    switch (selector.type) {
-      case 'process':
-        totalsByType.process++;
-        break;
-      case 'file':
-        totalsByType.file++;
-        break;
-      default:
-        throw new Error('Missing case for selector type: ' + selector.type);
-    }
+    totalsByType[selector.type]++;
   });
 
   responses.forEach((response) => {
-    switch (response.type) {
-      case 'process':
-        totalsByType.process++;
-        break;
-      case 'file':
-        totalsByType.file++;
-        break;
-      default:
-        throw Error('Missing case for response type: ' + response.type);
-    }
+    totalsByType[response.type]++;
   });
 
   return totalsByType;
@@ -95,17 +77,16 @@ export function validateMaxSelectorsAndResponses(selectors: Selector[], response
   const totalsByType = getTotalsByType(selectors, responses);
 
   // check selectors + responses doesn't exceed MAX_SELECTORS_AND_RESPONSES_PER_TYPE
-  if (
-    totalsByType.file > MAX_SELECTORS_AND_RESPONSES_PER_TYPE ||
-    totalsByType.file > MAX_SELECTORS_AND_RESPONSES_PER_TYPE
-  ) {
-    errors.push(
-      i18n.translate('xpack.cloudDefend.errorMaxSelectorsResponsesExceeded', {
-        defaultMessage:
-          'You cannot exceed {max} selectors + responses for a given type e.g file, process',
-      })
-    );
-  }
+  Object.values(totalsByType).forEach((count) => {
+    if (count > MAX_SELECTORS_AND_RESPONSES_PER_TYPE) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorMaxSelectorsResponsesExceeded', {
+          defaultMessage:
+            'You cannot exceed {max} selectors + responses for a given type e.g file, process',
+        })
+      );
+    }
+  });
 
   return errors;
 }
