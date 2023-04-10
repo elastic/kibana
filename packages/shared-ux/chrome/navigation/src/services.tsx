@@ -8,17 +8,41 @@
 
 import React, { FC, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { NavigationKibanaDependencies, NavigationServices } from '../types';
+import { BehaviorSubject } from 'rxjs';
+import { NavigationKibanaDependencies, NavigationServices, NavItemProps } from '../types';
+import { GetLocatorFn, LocatorNavigationFn, SetActiveNavItemIdFn } from '../types/internal';
 
 const Context = React.createContext<NavigationServices | null>(null);
+
+export const getLocatorNavigation = (
+  getLocator: GetLocatorFn,
+  setActiveNavItemId: SetActiveNavItemIdFn
+): LocatorNavigationFn => {
+  const locatorNavigation = (item: NavItemProps | undefined) => () => {
+    if (item) {
+      const { locator, id } = item;
+      setActiveNavItemId(id as string); // FIXME handle if navigation action fails
+      if (locator) {
+        const locatorInstance = getLocator(locator.id);
+
+        if (!locatorInstance) {
+          throw new Error(`Unresolved Locator instance for ${locator.id}`);
+        }
+
+        locatorInstance.navigateSync(locator.params ?? {});
+      }
+    }
+  };
+  return locatorNavigation;
+};
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
-  const { getLocator, recentItems, navIsOpen, setActiveNavItemId } = services;
+  const { recentItems, navIsOpen, locatorNavigation, activeNavItemId$ } = services;
   return (
-    <Context.Provider value={{ getLocator, recentItems, navIsOpen, setActiveNavItemId }}>
+    <Context.Provider value={{ recentItems, navIsOpen, locatorNavigation, activeNavItemId$ }}>
       {children}
     </Context.Provider>
   );
@@ -39,15 +63,18 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const getLocator = (id: string) => dependencies.share.url.locators.get(id);
   const navIsOpen = useObservable(dependencies.core.chrome.getProjectNavIsOpen$(), true);
 
-  const setActiveNavItemId = (id: string | number) => {
-    console.log({ newActiveItemId: id });
+  const activeNavItemId$ = new BehaviorSubject<string>('');
+  const setActiveNavItemId = (id: string) => {
+    activeNavItemId$.next(id);
   };
 
+  const locatorNavigation = getLocatorNavigation(getLocator, setActiveNavItemId);
+
   const value: NavigationServices = {
+    locatorNavigation,
     navIsOpen,
     recentItems,
-    getLocator,
-    setActiveNavItemId,
+    activeNavItemId$,
   };
 
   return (

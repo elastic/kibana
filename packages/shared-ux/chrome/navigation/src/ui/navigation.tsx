@@ -16,10 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { NavigationProps } from '../../types';
 import { NavigationModel } from '../model';
 import { useNavigation } from '../services';
-import { getLocatorNavigation } from '../utils';
 import { ElasticMark } from './elastic_mark';
 import './header_logo.scss';
 import { NavigationBucket } from './navigation_bucket';
@@ -28,11 +28,11 @@ export const Navigation = (props: NavigationProps) => {
   // const { euiTheme } = useEuiTheme();
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
-  const { getLocator, recentItems, navIsOpen, setActiveNavItemId } = useNavigation();
+
+  const { locatorNavigation, recentItems, navIsOpen, activeNavItemId$ } = useNavigation();
+  const activeNavItemId = useObservable(activeNavItemId$, props.activeNavItemId);
 
   const { euiTheme } = useEuiTheme();
-
-  const locatorNavigation = getLocatorNavigation(getLocator, setActiveNavItemId);
 
   let euiSideNavRecentItems: Array<EuiSideNavItemType<unknown>> | undefined;
   if (recentItems) {
@@ -54,11 +54,12 @@ export const Navigation = (props: NavigationProps) => {
 
   const nav = new NavigationModel(
     locatorNavigation,
-    props.activeNavItemId,
+    activeNavItemId ?? '',
     euiSideNavRecentItems,
     props.platformConfig,
     props.solutions
   );
+
   const recent = nav.getRecent();
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();

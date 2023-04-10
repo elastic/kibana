@@ -9,6 +9,8 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { SerializableRecord } from '@kbn/utility-types';
 import { action } from '@storybook/addon-actions';
+import { BehaviorSubject } from 'rxjs';
+import { getLocatorNavigation } from '../../src/services';
 import { NavigationProps, NavigationServices } from '../../types';
 import { GetLocatorFn } from '../../types/internal';
 
@@ -43,13 +45,17 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       },
     });
 
-    const setActiveNavItemId = (id: string | number) => {
+    const activeNavItemId$ = new BehaviorSubject(params.activeNavItemId ?? '');
+    const setActiveNavItemId = (id: string) => {
+      activeNavItemId$.next(id);
       activeNavItemIdAction(id);
     };
 
+    const locatorNavigation = getLocatorNavigation(getLocator, setActiveNavItemId);
+
     return {
-      getLocator,
-      setActiveNavItemId,
+      activeNavItemId$,
+      locatorNavigation,
       navIsOpen,
       recentItems,
     };

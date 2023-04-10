@@ -7,22 +7,16 @@
  */
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
-import { Observable } from 'rxjs';
-import {
-  GetLocatorFn,
-  ILocatorDefinition,
-  LocatorNavigationFn,
-  RecentItem,
-  SetActiveNavItemIdFn,
-} from './internal';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { GetLocatorFn, ILocatorDefinition, LocatorNavigationFn, RecentItem } from './internal';
 
 /**
  * A list of services that are consumed by this component.
  * @public
  */
 export interface NavigationServices {
-  getLocator: GetLocatorFn;
-  setActiveNavItemId: SetActiveNavItemIdFn;
+  locatorNavigation: LocatorNavigationFn;
+  activeNavItemId$: BehaviorSubject<string>;
   navIsOpen: boolean;
   recentItems: RecentItem[];
 }
@@ -124,6 +118,5 @@ export interface NavigationProps {
 
 export type NavigationBucketProps = (SolutionProperties &
   Pick<NavigationProps, 'activeNavItemId'>) & {
-  locatorNavigation: LocatorNavigationFn;
   platformConfig?: PlatformSectionConfig;
 };

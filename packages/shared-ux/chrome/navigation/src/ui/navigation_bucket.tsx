@@ -6,35 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavGroup, EuiIcon, EuiSideNav, EuiSideNavItemType } from '@elastic/eui';
+import { EuiCollapsibleNavGroup, EuiIcon, EuiSideNav } from '@elastic/eui';
 import React from 'react';
 import { NavigationBucketProps } from '../../types';
 import { useNavigation } from '../services';
 import { navigationStyles as styles } from '../styles';
-import { convertNavItemsToEui } from '../utils';
 
 export const NavigationBucket = (opts: NavigationBucketProps) => {
-  const { id, items, platformConfig, activeNavItemId, ...props } = opts;
+  const { id, items, activeNavItemId, ...props } = opts;
   const { navIsOpen } = useNavigation();
-
-  let euiSideNavItems: Array<EuiSideNavItemType<unknown>> | undefined;
-
-  if (platformConfig) {
-    // ability to turn off platform section in the nav
-    if (platformConfig?.enabled === false) {
-      return null;
-    }
-  }
-
-  if (items) {
-    euiSideNavItems = convertNavItemsToEui(
-      items,
-      props.locatorNavigation,
-      platformConfig,
-      activeNavItemId,
-      id
-    );
-  }
 
   if (navIsOpen) {
     return (
@@ -46,7 +26,7 @@ export const NavigationBucket = (opts: NavigationBucketProps) => {
         initialIsOpen={activeNavItemId?.startsWith(id + '.')}
         data-test-subj={`nav-bucket-${id}`}
       >
-        <EuiSideNav items={euiSideNavItems} css={styles.euiSideNavItems} />
+        <EuiSideNav items={items} css={styles.euiSideNavItems} />
       </EuiCollapsibleNavGroup>
     );
   }
