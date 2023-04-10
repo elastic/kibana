@@ -24,20 +24,17 @@ export const updateMlInferenceMappings = async (
   fieldMappings: FieldMapping[],
   esClient: ElasticsearchClient
 ) => {
-  const sourceFields = fieldMappings.map((fieldMapping) => {
-    return fieldMapping.sourceField;
-  });
+  const sourceFields = fieldMappings.map(({ sourceField }) => sourceField);
 
   const nonDefaultTargetFields = fieldMappings
-    .filter((fieldMapping) => {
-      return fieldMapping.targetField !== `ml.inference.${fieldMapping.sourceField}_expanded`;
-    })
-    .map((fieldMapping) => {
-      return fieldMapping.targetField;
-    });
+    .filter(
+      (fieldMapping) =>
+        fieldMapping.targetField !== `ml.inference.${fieldMapping.sourceField}_expanded`
+    )
+    .map((fieldMapping) => fieldMapping.targetField);
 
-  // Today, we only update mappings for ELSER-analyzed fields.
-  const mapping = formElserMappingProperties(sourceFields, nonDefaultTargetFields);
+  // Today, we only update mappings for text_expansion fields.
+  const mapping = generateTextExpansionMappingProperties(sourceFields, nonDefaultTargetFields);
   try {
     return await esClient.indices.putMapping({
       index: indexName,
@@ -52,7 +49,7 @@ export const updateMlInferenceMappings = async (
   }
 };
 
-const formElserMappingProperties = (sourceFields: string[], targetFields: string[]) => {
+const generateTextExpansionMappingProperties = (sourceFields: string[], targetFields: string[]) => {
   return {
     ml: {
       properties: {
