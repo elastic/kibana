@@ -61,11 +61,11 @@ export function buildDefaultSettings({
       : defaultFields
   ).map((field) => field.name);
 
-  const ILMPolicyDisabled = appContextService.getConfig()?.internal?.ILMPoliciesDisabled ?? false;
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
 
   return {
     index: {
-      ...(ILMPolicyDisabled
+      ...(isILMPolicyDisabled
         ? {}
         : {
             // ILM Policy must be added here, for now point to the default global ILM policy name

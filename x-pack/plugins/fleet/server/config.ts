@@ -161,7 +161,7 @@ export const config: PluginConfigDescriptor = {
 
     internal: schema.maybe(
       schema.object({
-        ILMPoliciesDisabled: schema.boolean({
+        disableILMPolicies: schema.boolean({
           defaultValue: false,
         }),
       })

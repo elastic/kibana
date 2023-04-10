@@ -45,7 +45,7 @@ export interface FleetConfigType {
     bundledPackageLocation?: string;
   };
   internal?: {
-    ILMPoliciesDisabled: boolean;
+    disableILMPolicies: boolean;
   };
 }
 
