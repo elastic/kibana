@@ -8,7 +8,7 @@ You do not need to configure any additional settings to use <<cases,cases>> in {
 To provide greater control over case features, you can configure the following settings in the `kibana.yml` file:
 
 `xpack.cases.files.allowedMimeTypes`::
-The MIME types that you can attach to a case, represented in an array of strings.
+The MIME types that you can attach to a case, represented in an array of strings. For example: `['image/tiff','text/csv','application/zip'].`
 The default MIME types are specified in https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/cases/common/constants/mime_types.ts[mime_types.ts].
 
 `xpack.cases.files.maxSize`::
