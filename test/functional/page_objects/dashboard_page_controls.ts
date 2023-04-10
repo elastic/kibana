@@ -583,10 +583,9 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
-    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
-    expect(
-      await (await this.testSubjects.find(`optionsList-control-${controlId}`)).isEnabled()
-    ).to.be(true);
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`, 10000);
+    const control = await this.testSubjects.find(`optionsList-control-${controlId}`);
+    expect(await control.isEnabled()).to.be(true);
   }
 
   public async optionsListPopoverWaitForLoading() {

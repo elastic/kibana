@@ -202,8 +202,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Creating "does not exist" query from first control filters the second and third controls', async () => {
-      await common.sleep(5000);
-
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
       await dashboardControls.optionsListPopoverSelectExists();
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
