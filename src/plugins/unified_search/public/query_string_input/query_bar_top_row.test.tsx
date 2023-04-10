@@ -313,12 +313,16 @@ describe('QueryBarTopRowTopRow', () => {
 describe('SharingMetaFields', () => {
   it('Should render the component with data-shared-timefilter-duration if time is set correctly', () => {
     const component = (
-      <SharingMetaFields from="now-24h" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />
+      <SharingMetaFields
+        from="Apr 8, 2023"
+        to="Apr 9, 2023"
+        dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+      />
     );
 
     expect(shallow(component)).toMatchInlineSnapshot(`
       <div
-        data-shared-timefilter-duration="Apr 9, 2023 @ 03:12:50.444 to Apr 10, 2023 @ 03:12:50.444"
+        data-shared-timefilter-duration="Apr 7, 2023 @ 17:00:00.000 to Apr 8, 2023 @ 17:00:00.000"
         data-test-subj="dataSharedTimefilterDuration"
       />
     `);
