@@ -377,7 +377,7 @@ describe('enable()', () => {
     });
     await expect(
       async () => await rulesClient.enable({ id: '1' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: no"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule - no"`);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 

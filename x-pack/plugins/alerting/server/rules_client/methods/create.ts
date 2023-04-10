@@ -94,16 +94,18 @@ export async function create<Params extends RuleTypeParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(ruleType.id, data.name);
-    const span = {
-      name: isAuthTypeApiKey ? 'getAuthenticationAPIKey' : 'createAPIKey',
-      type: 'rules',
-    };
     createdAPIKey = data.enabled
-      ? await withSpan(span, () =>
-          isAuthTypeApiKey ? context.getAuthenticationAPIKey(name) : context.createAPIKey(name)
-        )
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await withSpan(
+            {
+              name: 'createAPIKey',
+              type: 'rules',
+            },
+            () => context.createAPIKey(name)
+          )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);

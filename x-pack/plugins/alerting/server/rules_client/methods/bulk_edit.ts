@@ -41,8 +41,6 @@ import {
   applyBulkEditOperation,
   buildKueryNodeFilter,
   injectReferencesIntoActions,
-  generateAPIKeyName,
-  apiKeyAsAlertAttributes,
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
   verifySnoozeScheduleLimit,
@@ -61,13 +59,13 @@ import {
   validateActions,
   updateMeta,
   addGeneratedActionValues,
+  createNewAPIKeySet,
 } from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
-  CreateAPIKeyResult,
   NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
@@ -745,23 +743,14 @@ async function prepareApiKeys(
   hasUpdateApiKeyOperation: boolean,
   username: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
-  const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName: attributes.name,
+    username,
+    shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
+    errorMessage: 'Error updating rule: could not create API key',
+  });
 
-  let createdAPIKey: CreateAPIKeyResult | null = null;
-  let isAuthTypeApiKey = false;
-  try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, attributes.name);
-    createdAPIKey = shouldUpdateApiKey
-      ? isAuthTypeApiKey
-        ? await context.getAuthenticationAPIKey(name)
-        : await context.createAPIKey(name)
-      : null;
-  } catch (error) {
-    throw Error(`Error updating rule: could not create API key - ${error.message}`);
-  }
-
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
   // collect generated API keys
   if (apiKeyAttributes.apiKey) {
     apiKeysMap.set(rule.id, {

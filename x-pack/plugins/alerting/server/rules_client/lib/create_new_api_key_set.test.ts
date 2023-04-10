@@ -87,7 +87,12 @@ describe('createNewAPIKeySet', () => {
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    const apiKey = await createNewAPIKeySet(rulesClientParams, { attributes, username });
+    const apiKey = await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      shouldUpdateApiKey: true,
+    });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyCreatedByUser: undefined,
@@ -97,12 +102,17 @@ describe('createNewAPIKeySet', () => {
   });
 
   test('should get api key from the request if the user is authenticated using api keys', async () => {
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
-    const apiKey = await createNewAPIKeySet(rulesClientParams, { attributes, username });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    const apiKey = await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      shouldUpdateApiKey: true,
+    });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyCreatedByUser: true,
@@ -112,10 +122,48 @@ describe('createNewAPIKeySet', () => {
     expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
   });
 
-  test('should throw an ereror if getting the api key fails', async () => {
+  test('should throw an error if getting the api key fails', async () => {
     rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
     await expect(
-      async () => await createNewAPIKeySet(rulesClientParams, { attributes, username })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: Test failure"`);
+      async () =>
+        await createNewAPIKeySet(rulesClientParams, {
+          id: attributes.alertTypeId,
+          ruleName: attributes.name,
+          username,
+          shouldUpdateApiKey: true,
+        })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error creating API key for rule - Test failure"`
+    );
+  });
+
+  test('should throw an error if getting the api key fails and an error message is passed in', async () => {
+    rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
+    await expect(
+      async () =>
+        await createNewAPIKeySet(rulesClientParams, {
+          id: attributes.alertTypeId,
+          ruleName: attributes.name,
+          username,
+          shouldUpdateApiKey: true,
+          errorMessage: 'Error updating rule: could not create API key',
+        })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: could not create API key - Test failure"`
+    );
+  });
+
+  test('should return null if shouldUpdateApiKey: false', async () => {
+    const apiKey = await createNewAPIKeySet(rulesClientParams, {
+      id: attributes.alertTypeId,
+      ruleName: attributes.name,
+      username,
+      shouldUpdateApiKey: false,
+    });
+    expect(apiKey).toEqual({
+      apiKey: null,
+      apiKeyCreatedByUser: null,
+      apiKeyOwner: null,
+    });
   });
 });

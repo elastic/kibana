@@ -355,14 +355,18 @@ describe('bulkDelete', () => {
 
   test('should not mark API keys for invalidation if the user is authenticated using an api key', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-      statuses: [{ id: 'id3', type: 'alert', success: true }],
+      statuses: [
+        { id: 'id3', type: 'alert', success: true },
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
     });
 
     await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: [] },
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
       expect.anything(),
       expect.anything()
     );

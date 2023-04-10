@@ -2081,8 +2081,8 @@ describe('bulkEdit()', () => {
 
     describe('set by the user when authenticated using api keys', () => {
       beforeEach(() => {
-        isAuthenticationTypeApiKeyMock.mockResolvedValue(true);
-        getAuthenticationApiKeyMock.mockResolvedValueOnce({
+        isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+        getAuthenticationApiKeyMock.mockReturnValue({
           apiKeysEnabled: true,
           result: { api_key: '111' },
         });
@@ -2210,7 +2210,7 @@ describe('bulkEdit()', () => {
           ],
         });
         expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledWith(
-          'Alerting: myType/my rule name'
+          'Alerting: myType/my rule name-user-created'
         );
       });
     });

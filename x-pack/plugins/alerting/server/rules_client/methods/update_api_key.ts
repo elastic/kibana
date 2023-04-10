@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
-import { updateMeta } from '../lib';
+import { createNewAPIKeySet, updateMeta } from '../lib';
 import { RulesClientContext } from '../types';
 
 export async function updateApiKey(
@@ -27,8 +25,8 @@ export async function updateApiKey(
 }
 
 async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: string }) {
-  let apiKeyToInvalidate: string | null = null;
-  let apiKeyCreatedByUser: boolean | undefined | null = false;
+  let oldApiKeyToInvalidate: string | null = null;
+  let oldApiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
   let version: string | undefined;
 
@@ -37,8 +35,8 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
       await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
         namespace: context.namespace,
       });
-    apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
-    apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
+    oldApiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+    oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
   } catch (e) {
@@ -75,23 +73,17 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
 
   const username = await context.getUserName();
 
-  let createdAPIKey = null;
-  let isAuthTypeApiKey = false;
-  try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(attributes.alertTypeId, attributes.name);
-    createdAPIKey = isAuthTypeApiKey
-      ? await context.getAuthenticationAPIKey(name)
-      : await context.createAPIKey(name);
-  } catch (error) {
-    throw Boom.badRequest(
-      `Error updating API key for rule: could not create API key - ${error.message}`
-    );
-  }
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: attributes.alertTypeId,
+    ruleName: attributes.name,
+    username,
+    shouldUpdateApiKey: true,
+    errorMessage: 'Error updating API key for rule: could not create API key',
+  });
 
   const updateAttributes = updateMeta(context, {
     ...attributes,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
+    ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
   });
@@ -123,9 +115,9 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     throw e;
   }
 
-  if (apiKeyToInvalidate && !apiKeyCreatedByUser) {
+  if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: [apiKeyToInvalidate] },
+      { apiKeys: [oldApiKeyToInvalidate] },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

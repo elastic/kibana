@@ -2735,8 +2735,8 @@ describe('update()', () => {
   });
 
   it('calls the authentication API key function if the user is authenticated using an api key', async () => {
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
@@ -2897,8 +2897,8 @@ describe('update()', () => {
   });
 
   test('throws when unsecuredSavedObjectsClient update fails and does not invalidate newly created API key if the user is authenticated using an api key', async () => {
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });

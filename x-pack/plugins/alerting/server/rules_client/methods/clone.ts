@@ -17,8 +17,7 @@ import { parseDuration } from '../../../common/parse_duration';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
 import { isDetectionEngineAADRuleType } from '../../saved_objects/migrations/utils';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
-import { createRuleSavedObject } from '../lib';
+import { createNewAPIKeySet, createRuleSavedObject } from '../lib';
 import { RulesClientContext } from '../types';
 
 export type CloneArguments = [string, { newId?: string }];
@@ -95,23 +94,18 @@ export async function clone<Params extends RuleTypeParams = never>(
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;
-  let createdAPIKey = null;
-  let isAuthTypeApiKey = false;
-  try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, ruleName);
-    createdAPIKey = ruleSavedObject.attributes.enabled
-      ? isAuthTypeApiKey
-        ? await context.getAuthenticationAPIKey(name)
-        : await context.createAPIKey(name)
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
-  }
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName,
+    username,
+    shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
+    errorMessage: 'Error creating rule: could not create API key',
+  });
+
   const rawRule: RawRule = {
     ...ruleSavedObject.attributes,
     name: ruleName,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
+    ...apiKeyAttributes,
     legacyId,
     createdBy: username,
     updatedBy: username,

@@ -101,7 +101,7 @@ describe('updateApiKey()', () => {
   });
 
   test('updates the API key for the alert', async () => {
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(false);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
@@ -158,7 +158,7 @@ describe('updateApiKey()', () => {
         apiKeyCreatedByUser: true,
       },
     });
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(false);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
@@ -210,8 +210,8 @@ describe('updateApiKey()', () => {
         apiKeyCreatedByUser: true,
       },
     });
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
     });

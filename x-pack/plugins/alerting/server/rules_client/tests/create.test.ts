@@ -3324,11 +3324,11 @@ describe('create()', () => {
 
   test('calls the authentication API key function if the user is authenticated using an api key', async () => {
     const data = getMockData();
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -3436,11 +3436,11 @@ describe('create()', () => {
 
   test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
     const data = getMockData();
-    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
