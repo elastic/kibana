@@ -39,14 +39,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
       [action.outputs, agentId]
     );
 
-    const isTruncatedFile = useMemo<boolean>(
-      () =>
-        (outputContent?.output_file_stderr_truncated ||
-          outputContent?.output_file_stdout_truncated) ??
-        false,
-      [outputContent]
-    );
-
     return (
       <>
         <EuiFlexItem>
@@ -54,7 +46,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
             action={action}
             buttonTitle={EXECUTE_FILE_LINK_TITLE}
             canAccessFileDownloadLink={canAccessFileDownloadLink}
-            isTruncatedFile={isTruncatedFile}
             data-test-subj={`${dataTestSubj}-getExecuteLink`}
             textSize={textSize}
           />

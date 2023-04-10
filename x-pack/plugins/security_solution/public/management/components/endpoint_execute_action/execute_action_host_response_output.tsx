@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -78,6 +79,14 @@ const SHELL_INFO = Object.freeze({
   ),
 });
 
+export const FILE_TRUNCATED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
+  {
+    defaultMessage:
+      'Output data in the provided zip file is truncated due to file size limitations.',
+  }
+);
+
 const StyledEuiText = euiStyled(EuiText)`
   white-space: pre-wrap;
   line-break: anywhere;
@@ -104,6 +113,7 @@ interface ExecuteActionOutputProps {
   content?: string | React.ReactNode;
   initialIsOpen?: boolean;
   isTruncated?: boolean;
+  isFileTruncated?: boolean;
   textSize?: 's' | 'xs';
   type: 'error' | 'output' | 'context';
   'data-test-subj'?: string;
@@ -114,6 +124,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
     content = emptyValue,
     initialIsOpen = false,
     isTruncated = false,
+    isFileTruncated = false,
     textSize,
     type,
     'data-test-subj': dataTestSubj,
@@ -145,6 +156,12 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
         data-test-subj={dataTestSubj}
       >
         <StyledEuiText size={textSize}>
+          {isFileTruncated && (
+            <>
+              <EuiTextColor color="warning">{FILE_TRUNCATED_MESSAGE}</EuiTextColor>
+              <EuiSpacer size="m" />
+            </>
+          )}
           {typeof content === 'string' ? <p>{content}</p> : content}
         </StyledEuiText>
       </EuiAccordion>
@@ -212,6 +229,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
                 content={outputContent.stderr.length ? outputContent.stderr : undefined}
                 data-test-subj={`${dataTestSubj}-error`}
                 isTruncated={outputContent.stderr_truncated}
+                isFileTruncated={outputContent.output_file_stderr_truncated}
                 textSize={textSize}
                 initialIsOpen
                 type="error"
@@ -223,6 +241,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
             content={outputContent.stdout.length ? outputContent.stdout : undefined}
             data-test-subj={`${dataTestSubj}-output`}
             isTruncated={outputContent.stdout_truncated}
+            isFileTruncated={outputContent.output_file_stdout_truncated}
             initialIsOpen
             textSize={textSize}
             type="output"
