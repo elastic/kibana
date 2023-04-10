@@ -55,9 +55,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "6cfc277ed3211639e37546ac625f4a68f2494215",
-        "action_task_params": "5f419caba96dd8c77d0f94013e71d43890e3d5d6",
-        "alert": "1e4cd6941f1eb39c729c646e91fbfb9700de84b9",
+        "action": "12c6b25ef1fffb36d8de893318f8a2bc5d6a46a6",
+        "action_task_params": "c725c37de66135934150465f9b1e76fe349e8a23",
+        "alert": "0dd6e12f1f79edf3fe07850c8fc55ddfe6301b31",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
@@ -77,7 +77,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-user-actions": "8ad74294b71edffa58fad7a40eea2388209477c9",
         "config": "97e16b8f5dc10c404fd3b201ef36bc6c3c63dc80",
         "config-global": "d9791e8f73edee884630e1cb6e4954ae513ce75e",
-        "connector_token": "fb05ff5afdcb6e2f20c9c6513ff7a1ab12b66f36",
+        "connector_token": "aff1aa0ebc0a6b44b570057972af25178b0bca42",
         "core-usage-stats": "b3c04da317c957741ebcdedfea4524049fdc79ff",
         "csp-rule-template": "099c229bf97578d9ca72b3a672d397559b84ee0b",
         "dashboard": "71e3f8dfcffeb5fbd410dec81ce46f5691763c43",
@@ -141,7 +141,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-param": "9776c9b571d35f0d0397e8915e035ea1dc026db7",
         "synthetics-privates-locations": "7d032fc788905e32152029ae7ab3d6038c48ae44",
         "tag": "87f21f07df9cc37001b15a26e413c18f50d1fbfe",
-        "task": "ff760534a44c4cfabcf4baf8cfe8283f717cab02",
+        "task": "2691bdbd92638821e1f7f6170271d168c8b6fa84",
         "telemetry": "561b329aaed3c15b91aaf2075645be3097247612",
         "ui-metric": "410a8ad28e0f44b161c960ff0ce950c712b17c52",
         "upgrade-assistant-ml-upgrade-operation": "d8816e5ce32649e7a3a43e2c406c632319ff84bb",
