@@ -96,6 +96,8 @@ export function getInstallCommandForPlatform(
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
+  commandArguments.push(['fleet-server-port', '8220']);
+
   const commandArgumentsStr = commandArguments
     .reduce((acc, [key, val]) => {
       if (acc === '' && key === 'url') {
