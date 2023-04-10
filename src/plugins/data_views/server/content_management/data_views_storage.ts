@@ -194,8 +194,8 @@ export class DataViewsStorage implements ContentStorage<DataViewSpec> {
       perPage: query.limit,
       page: query.cursor ? +query.cursor : undefined,
       defaultSearchOperator: 'AND',
-      searchFields: ['title'],
-      fields: ['title'],
+      searchFields: ['title', 'name'],
+      fields: ['title', 'name', 'type', 'typeMeta'],
       hasReference,
       hasNoReference,
     };
