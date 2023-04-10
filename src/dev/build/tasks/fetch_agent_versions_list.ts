@@ -19,12 +19,18 @@ const getAvailableVersions = async (log: ToolingLog) => {
   };
   // Endpoint maintained by the web-team and hosted on the elastic website
   // See https://github.com/elastic/website-development/issues/9331
-  const url = 'https://www.elastic.co/api/product_versions';
-  try {
-    log.info('Fetching Elastic Agent versions list');
-    const results = await fetch(url, options);
+  const url = 'https://www.elastic.co/content/product_versions';
+  log.info('Fetching Elastic Agent versions list');
 
-    const jsonBody = await results.json();
+  try {
+    const results = await fetch(url, options);
+    const rawBody = await results.text();
+
+    if (results.status >= 400) {
+      throw new Error(`Status code ${results.status} received from versions API: ${rawBody}`);
+    }
+
+    const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
