@@ -4995,6 +4995,15 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "name": "keyword",
+                              "count": "long"
+                            }
+                          }
                         }
                       }
                     }
@@ -5082,6 +5091,15 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "name": "keyword",
+                              "count": "long"
+                            }
+                          }
                         }
                       }
                     }
@@ -5169,6 +5187,15 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "name": "keyword",
+                              "count": "long"
+                            }
+                          }
                         }
                       }
                     }

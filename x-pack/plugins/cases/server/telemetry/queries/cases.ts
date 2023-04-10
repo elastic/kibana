@@ -234,6 +234,7 @@ const getCommentsSavedObjectTelemetry = async (
     externalReferenceTypes: {
       terms: {
         field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId`,
+        size: 10,
       },
       aggs: {
         ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
@@ -242,6 +243,7 @@ const getCommentsSavedObjectTelemetry = async (
     persistableReferenceTypes: {
       terms: {
         field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.persistableStateAttachmentTypeId`,
+        size: 10,
       },
       aggs: {
         ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
@@ -320,7 +322,7 @@ const getFilesTelemetry = async (
     {}
   );
 
-  const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseId: *`);
+  const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseIds: *`);
 
   return savedObjectsClient.find<unknown, FileAttachmentAggregationResults>({
     page: 0,
