@@ -94,20 +94,17 @@ export const getMapsFilterMigrations = (
 export const getMapsDataViewMigrations = (
   migrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
-  mapValues(
-    migrations,
-    (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
-      try {
-        const attributes = migrateDataViewsPersistedState(doc, migration);
+  mapValues(migrations, (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
+    try {
+      const attributes = migrateDataViewsPersistedState(doc, migration);
 
-        return {
-          ...doc,
-          attributes,
-        };
-      } catch (e) {
-        // Do not fail migration
-        // Maps application can display error when saved object is viewed
-        return doc;
-      }
+      return {
+        ...doc,
+        attributes,
+      };
+    } catch (e) {
+      // Do not fail migration
+      // Maps application can display error when saved object is viewed
+      return doc;
     }
-  );
+  });
