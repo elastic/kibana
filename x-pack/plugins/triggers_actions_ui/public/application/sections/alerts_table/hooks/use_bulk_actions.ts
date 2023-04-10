@@ -22,7 +22,13 @@ import {
   GetLeadingControlColumn,
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
-import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
+import {
+  ADD_TO_CASE_DISABLED,
+  ADD_TO_EXISTING_CASE,
+  ADD_TO_NEW_CASE,
+  ALERTS_ALREADY_ATTACHED_TO_CASE,
+  NO_ALERTS_ADDED_TO_CASE,
+} from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
 
 interface BulkActionsProps {
@@ -83,7 +89,13 @@ export const useBulkAddToCaseActions = ({
   }, [clearSelection, refresh]);
 
   const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess,
+    noAttachmentsToaster: {
+      title: NO_ALERTS_ADDED_TO_CASE,
+      content: ALERTS_ALREADY_ATTACHED_TO_CASE,
+    },
+  });
 
   return useMemo(() => {
     return isCasesContextAvailable &&

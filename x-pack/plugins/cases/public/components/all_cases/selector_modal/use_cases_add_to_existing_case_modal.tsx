@@ -16,10 +16,17 @@ import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
+import { NO_ATTACHMENTS_ADDED } from '../translations';
 
-type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
-  toastTitle?: string;
-  toastContent?: string;
+export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
+  successToaster?: {
+    title?: string;
+    content?: string;
+  };
+  noAttachmentsToaster?: {
+    title?: string;
+    content?: string;
+  };
   onSuccess?: (theCase: Case) => void;
 };
 
@@ -31,8 +38,8 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
         return props.onSuccess(theCase);
       }
     },
-    toastTitle: props.toastTitle,
-    toastContent: props.toastContent,
+    toastTitle: props.successToaster?.title,
+    toastContent: props.successToaster?.content,
   });
 
   const { dispatch, appId } = useCasesContext();
@@ -67,27 +74,33 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
 
       try {
         // add attachments to the case
-        if (attachments !== undefined && attachments.length > 0) {
-          startTransaction({ appId, attachments });
+        if (attachments === undefined || attachments.length === 0) {
+          const title = props.noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
+          const content = props.noAttachmentsToaster?.content;
+          casesToasts.showInfoToast(title, content);
 
-          await createAttachments({
-            caseId: theCase.id,
-            caseOwner: theCase.owner,
-            data: attachments,
-            throwOnError: true,
-          });
-
-          if (props.onSuccess) {
-            props.onSuccess(theCase);
-          }
-
-          casesToasts.showSuccessAttach({
-            theCase,
-            attachments,
-            title: props.toastTitle,
-            content: props.toastContent,
-          });
+          return;
         }
+
+        startTransaction({ appId, attachments });
+
+        await createAttachments({
+          caseId: theCase.id,
+          caseOwner: theCase.owner,
+          data: attachments,
+          throwOnError: true,
+        });
+
+        if (props.onSuccess) {
+          props.onSuccess(theCase);
+        }
+
+        casesToasts.showSuccessAttach({
+          theCase,
+          attachments,
+          title: props.successToaster?.title,
+          content: props.successToaster?.content,
+        });
       } catch (error) {
         // error toast is handled
         // inside the createAttachments method

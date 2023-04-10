@@ -80,6 +80,20 @@ describe('bulk action hooks', () => {
       expect(refresh).toHaveBeenCalled();
     });
 
+    it('should useCasesAddToExistingCaseModal with correct toaster params', async () => {
+      renderHook(() => useBulkAddToCaseActions({ casesConfig, refresh, clearSelection }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      expect(addExistingCaseMock).toHaveBeenCalledWith({
+        noAttachmentsToaster: {
+          title: 'No alerts added to the case',
+          content: 'All selected alerts are already attached to the case',
+        },
+        onSuccess: expect.anything(),
+      });
+    });
+
     it('should open the case flyout', async () => {
       const { result } = renderHook(
         () => useBulkAddToCaseActions({ casesConfig, refresh, clearSelection }),
