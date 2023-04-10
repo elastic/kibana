@@ -13,10 +13,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     taskType: {
       type: 'keyword',
     },
-    // NO NEED TO BE INDEXED
-    // scheduledAt: {
-    //   type: 'date',
-    // },
+    scheduledAt: {
+      type: 'date',
+    },
     runAt: {
       type: 'date',
     },
