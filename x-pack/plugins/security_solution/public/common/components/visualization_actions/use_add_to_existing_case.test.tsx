@@ -59,7 +59,9 @@ describe('useAddToExistingCase', () => {
     );
     expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
       onClose: mockOnAddToCaseClicked,
-      toastContent: 'Successfully added visualization to the case',
+      successToaster: {
+        title: 'Successfully added visualization to the case',
+      },
     });
     expect(result.current.disabled).toEqual(false);
   });
