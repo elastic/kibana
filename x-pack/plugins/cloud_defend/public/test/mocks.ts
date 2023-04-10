@@ -49,6 +49,21 @@ export const MOCK_YAML_INVALID_ACTIONS = `file:
         - block
 `;
 
+export const MOCK_YAML_INVALID_STRING_ARRAY_CONDITION = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+      sessionLeaderName:
+        - reallylongsessionleadernamethatshouldnotbeallowed
+  responses:
+    - match:
+        - default
+      actions:
+        - log
+`;
+
 export const MOCK_YAML_INVALID_CONFIGURATION = `
 s
 `;

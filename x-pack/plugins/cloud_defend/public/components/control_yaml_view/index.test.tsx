@@ -13,6 +13,7 @@ import {
   MOCK_YAML_INVALID_CONFIGURATION,
   MOCK_YAML_INVALID_ACTIONS,
   MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
+  MOCK_YAML_INVALID_STRING_ARRAY_CONDITION,
 } from '../../test/mocks';
 import { ControlYamlView } from '.';
 import * as i18n from './translations';
@@ -61,5 +62,16 @@ describe('<ControlYamlView />', () => {
 
     expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
     expect(getByText(i18n.errorAlertActionRequired)).toBeTruthy();
+  });
+
+  it('handles additionalErrors: selector condition value byte length', async () => {
+    const { getByText, getByTestId } = render(
+      <WrappedComponent
+        policy={getCloudDefendNewPolicyMock(MOCK_YAML_INVALID_STRING_ARRAY_CONDITION)}
+      />
+    );
+
+    expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
+    expect(getByText('"sessionLeaderName" values cannot exceed 16 bytes')).toBeTruthy();
   });
 });
