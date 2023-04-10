@@ -490,7 +490,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.__metaFromTiles || [];
   }
 
-  _isTiled() {
+  _isTiled(): boolean {
     throw new Error('Must implement AbstractLayer#_isTiled');
   }
 }
