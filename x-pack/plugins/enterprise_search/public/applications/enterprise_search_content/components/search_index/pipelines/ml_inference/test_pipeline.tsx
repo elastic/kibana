@@ -62,7 +62,6 @@ export const TestPipeline: React.FC = () => {
               )}
             </h4>
           </EuiTitle>
-          <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiText color="subdued" size="s">

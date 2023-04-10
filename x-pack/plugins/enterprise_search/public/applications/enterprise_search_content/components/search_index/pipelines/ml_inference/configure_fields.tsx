@@ -14,6 +14,8 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -27,27 +29,32 @@ export const ConfigureFields: React.FC = () => {
   const { isTextExpansionModelSelected } = useValues(MLInferenceLogic);
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
-            { defaultMessage: 'Select field mappings' }
-          )}
-        </h4>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={3}>
+          <EuiTitle size="s">
+            <h4>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
+                { defaultMessage: 'Select field mappings' }
+              )}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiText color="subdued" size="s">
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
+                {
+                  defaultMessage:
+                    'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
+                }
+              )}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiText color="subdued">
-        <p>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
-            {
-              defaultMessage:
-                'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
-            }
-          )}
-        </p>
-      </EuiText>
-      <EuiSpacer />
       <EuiForm component="form">
         {isTextExpansionModelSelected ? (
           <>
