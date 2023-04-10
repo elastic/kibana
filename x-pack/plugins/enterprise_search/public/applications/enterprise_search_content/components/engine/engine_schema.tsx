@@ -183,27 +183,23 @@ export const EngineSchema: React.FC = () => {
     return selectedDataTypes;
   }, [selectedEsFieldTypes]);
 
-  const [filteredSchemaFields, totalFieldsWithConflicts] = useMemo(() => {
-    let totalFieldsWithConflict = 0;
-    if (onlyShowConflicts) {
-      const fieldsWithConflicts = schemaFields.filter((field) => field.type === 'conflict');
-      // apply filters on fields with conflicts
-      if (filteredDataTypes.length > 0) {
-        const filteredFieldsWithConflicts = fieldsWithConflicts.filter((field) =>
-          field.indices.some((i) => filteredDataTypes.includes(i.type))
-        );
-        totalFieldsWithConflict = fieldsWithConflicts.length - filteredFieldsWithConflicts.length;
-        return [filteredFieldsWithConflicts, totalFieldsWithConflict];
-      }
-      return [fieldsWithConflicts, totalFieldsWithConflict];
-    }
-    return filteredDataTypes.length > 0
-      ? [
-          schemaFields.filter((field) => filteredDataTypes.includes(field.type)),
-          totalFieldsWithConflict,
-        ]
-      : [schemaFields, totalFieldsWithConflict];
+  // return schema fields may be with conflicts
+  const schemaFieldsMaybeWithConflicts = useMemo(() => {
+    if (onlyShowConflicts) return schemaFields.filter((field) => field.type === 'conflict');
+    return schemaFields;
+  }, [onlyShowConflicts, schemaFields]);
+
+  const filteredSchemaFields = useMemo(() => {
+    if (filteredDataTypes.length > 0)
+      return schemaFieldsMaybeWithConflicts.filter((field) =>
+        field.indices.some((i) => filteredDataTypes.includes(i.type))
+      );
+    return schemaFieldsMaybeWithConflicts;
   }, [onlyShowConflicts, schemaFields, filteredDataTypes]);
+
+  const totalConflictsHiddenByTypeFilters = onlyShowConflicts
+    ? schemaFieldsMaybeWithConflicts.length - filteredSchemaFields.length
+    : 0;
 
   useEffect(() => {
     fetchEngineSchema({ engineName });
@@ -436,13 +432,13 @@ export const EngineSchema: React.FC = () => {
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isExpandable
           />
-          {totalFieldsWithConflicts > 0 && (
+          {totalConflictsHiddenByTypeFilters > 0 && (
             <EuiCallOut
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.title"
-                  defaultMessage="There are {totalFieldsWithConflicts} more conflicts not displayed here"
-                  values={{ totalFieldsWithConflicts }}
+                  defaultMessage="There are {totalConflictsHiddenByTypeFilters, number} more {totalConflictsHiddenByTypeFilters, plural, one {conflict} other {conflicts}}   not displayed here"
+                  values={{ totalConflictsHiddenByTypeFilters }}
                 />
               }
               color="danger"
