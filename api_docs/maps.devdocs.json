@@ -4020,7 +4020,9 @@
             "section": "def-public.RenderWizardArguments",
             "text": "RenderWizardArguments"
           },
-          "): React.ReactElement<any, string | React.JSXElementConstructor<any>>; prerequisiteSteps?: { id: string; label: string; }[] | undefined; disabledReason?: string | undefined; getIsDisabled?: (() => boolean | Promise<boolean>) | undefined; isBeta?: boolean | undefined; checkVisibility?: (() => Promise<boolean>) | undefined; showFeatureEditTools?: boolean | undefined; }"
+          "): React.ReactElement<any, string | React.JSXElementConstructor<any>>; prerequisiteSteps?: ",
+          "LayerWizardStep",
+          "[] | undefined; disabledReason?: string | undefined; getIsDisabled?: (() => boolean | Promise<boolean>) | undefined; isBeta?: boolean | undefined; checkVisibility?: (() => Promise<boolean>) | undefined; showFeatureEditTools?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
