@@ -288,7 +288,6 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
       page: query.cursor ? +query.cursor : undefined,
       defaultSearchOperator: 'AND',
       searchFields: onlyTitle ? ['title'] : ['title^3', 'description'],
-      fields: ['description', 'title'],
       hasReference,
       hasNoReference,
     };
