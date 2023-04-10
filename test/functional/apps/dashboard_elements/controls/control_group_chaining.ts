@@ -137,127 +137,127 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // it('Can select an option in the third Options List', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[2]);
-    //   await dashboardControls.optionsListPopoverSelectOptions('meow');
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
-    // });
+    it('Can select an option in the third Options List', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      await dashboardControls.optionsListPopoverSelectOptions('meow');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
 
-    // it('Selecting a conflicting option in the first control will validate the second and third controls', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //   await dashboardControls.optionsListPopoverClearSelections();
-    //   await dashboardControls.optionsListPopoverSelectOptions('dog');
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+    it('Selecting a conflicting option in the first control will validate the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverClearSelections();
+      await dashboardControls.optionsListPopoverSelectOptions('dog');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
-    //     Fluffy: 6,
-    //     'Fee Fee': 3,
-    //     Rover: 3,
-    //   });
-    //   await dashboardControls.ensureInvalidSelectionsEqual(controlIds[1], ['sylvester']);
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
+        Fluffy: 6,
+        'Fee Fee': 3,
+        Rover: 3,
+      });
+      await dashboardControls.ensureInvalidSelectionsEqual(controlIds[1], ['sylvester']);
 
-    //   const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
-    //     'ruff',
-    //     'bark',
-    //     'grrr',
-    //     'bow ow ow',
-    //     'grr',
-    //   ]);
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-    //     ...suggestions,
-    //     grr: suggestions.grr - 1,
-    //   });
-    //   await dashboardControls.ensureInvalidSelectionsEqual(controlIds[2], ['meow']);
-    // });
+      const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
+        'ruff',
+        'bark',
+        'grrr',
+        'bow ow ow',
+        'grr',
+      ]);
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
+        ...suggestions,
+        grr: suggestions.grr - 1,
+      });
+      await dashboardControls.ensureInvalidSelectionsEqual(controlIds[2], ['meow']);
+    });
 
-    // it('Excluding selections in the first control will validate the second and third controls', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //   await dashboardControls.optionsListPopoverSetIncludeSelections(false);
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+    it('Excluding selections in the first control will validate the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
-    //     Tiger: 6,
-    //     sylvester: 5,
-    //     Max: 1,
-    //   });
-    //   const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, ['meow', 'hiss']);
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-    //     ...suggestions,
-    //     hiss: suggestions.hiss - 3,
-    //   });
-    // });
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
+        Tiger: 6,
+        sylvester: 5,
+        Max: 1,
+      });
+      const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, ['meow', 'hiss']);
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
+        ...suggestions,
+        hiss: suggestions.hiss - 3,
+      });
+    });
 
-    // it('Excluding all options of first control removes all options in second and third controls', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //   await dashboardControls.optionsListPopoverSelectOptions('cat');
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+    it('Excluding all options of first control removes all options in second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectOptions('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-    //   await dashboardControls.optionsListOpenPopover(controlIds[1]);
-    //   expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[1]);
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[1]);
 
-    //   await dashboardControls.optionsListOpenPopover(controlIds[2]);
-    //   expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
-    // });
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
 
-    // it('Creating "does not exist" query from first control filters the second and third controls', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //   await dashboardControls.optionsListPopoverSelectExists();
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-    //   await dashboard.waitForRenderComplete();
+    it('Creating "does not exist" query from first control filters the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectExists();
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      await dashboard.waitForRenderComplete();
 
-    //   await dashboardControls.optionsListOpenPopover(controlIds[1]);
-    //   await dashboardControls.optionsListPopoverClearSelections();
-    //   expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], { Max: 1 });
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      await dashboardControls.optionsListPopoverClearSelections();
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], { Max: 1 });
 
-    //   await dashboardControls.optionsListOpenPopover(controlIds[2]);
-    //   await dashboardControls.optionsListPopoverClearSelections();
-    //   expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
-    //   await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], { woof: 1 });
-    // });
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      await dashboardControls.optionsListPopoverClearSelections();
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+      await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], { woof: 1 });
+    });
 
-    // it('Creating "exists" query from first control filters the second and third controls', async () => {
-    //   await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //   await dashboardControls.optionsListPopoverSetIncludeSelections(true);
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-    //   await dashboard.waitForRenderComplete();
+    it('Creating "exists" query from first control filters the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(true);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      await dashboard.waitForRenderComplete();
 
-    //   await dashboardControls.optionsListOpenPopover(controlIds[1]);
-    //   let suggestionKeys = Object.keys(
-    //     await dashboardControls.optionsListPopoverGetAvailableOptions()
-    //   );
-    //   expect(suggestionKeys).to.not.contain('Max');
-    //   await dashboardControls.optionsListOpenPopover(controlIds[2]);
-    //   suggestionKeys = Object.keys(await dashboardControls.optionsListPopoverGetAvailableOptions());
-    //   expect(suggestionKeys).to.not.contain('woof');
-    //   await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
-    // });
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      let suggestionKeys = Object.keys(
+        await dashboardControls.optionsListPopoverGetAvailableOptions()
+      );
+      expect(suggestionKeys).to.not.contain('Max');
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      suggestionKeys = Object.keys(await dashboardControls.optionsListPopoverGetAvailableOptions());
+      expect(suggestionKeys).to.not.contain('woof');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
 
-    // describe('Hierarchical chaining off', async () => {
-    //   before(async () => {
-    //     await dashboardControls.updateChainingSystem('NONE');
-    //   });
+    describe('Hierarchical chaining off', async () => {
+      before(async () => {
+        await dashboardControls.updateChainingSystem('NONE');
+      });
 
-    //   it('Selecting an option in the first Options List will not filter the second or third controls', async () => {
-    //     await dashboardControls.optionsListOpenPopover(controlIds[0]);
-    //     await dashboardControls.optionsListPopoverSelectOptions('cat');
-    //     await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      it('Selecting an option in the first Options List will not filter the second or third controls', async () => {
+        await dashboardControls.optionsListOpenPopover(controlIds[0]);
+        await dashboardControls.optionsListPopoverSelectOptions('cat');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-    //     await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
-    //       Fluffy: 6,
-    //       Tiger: 6,
-    //       sylvester: 5,
-    //       'Fee Fee': 3,
-    //       Rover: 3,
-    //       Max: 1,
-    //     });
-    //     await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-    //       ...OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-    //       woof: 1,
-    //     });
-    //   });
-    // });
+        await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
+          Fluffy: 6,
+          Tiger: 6,
+          sylvester: 5,
+          'Fee Fee': 3,
+          Rover: 3,
+          Max: 1,
+        });
+        await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
+          ...OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
+          woof: 1,
+        });
+      });
+    });
   });
 }

@@ -401,14 +401,6 @@ export class DashboardPageControls extends FtrService {
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
-  public async optionsListPopoverGetSelections() {
-    this.log.debug(`getting selections from options list popover`);
-    await this.optionsListPopoverClickShowOnlySelected();
-    const selections = await this.optionsListPopoverGetAvailableOptions();
-    await this.optionsListPopoverClickShowOnlySelected();
-    return selections;
-  }
-
   public async optionsListPopoverGetInvalidSelections() {
     this.log.debug(`getting invalid selections from options list`);
     await this.optionsListPopoverAssertOpen();
@@ -496,6 +488,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
     await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverClearSearch() {
@@ -521,6 +514,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.missingOrFail(`optionsListControl__sortingOptionsPopover`);
     });
+    await this.optionsListPopoverWaitForLoading();
   }
 
   public async optionsListPopoverSelectExists() {
@@ -532,15 +526,6 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async optionsListPopoverClickShowOnlySelected() {
-    this.log.debug(`click "show only selected" button in options list popover`);
-    await this.optionsListPopoverAssertOpen();
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-show-only-selected`);
-      await this.testSubjects.click(`optionsList-control-show-only-selected`);
-    });
-  }
-
   public async optionsListPopoverSelectOptions(availableOptions: string | string[]) {
     await this.optionsListPopoverAssertOpen();
 
@@ -548,7 +533,6 @@ export class DashboardPageControls extends FtrService {
     for (const availableOption of availableOptions) {
       this.log.debug(`selecting ${availableOption} from options list`);
       await this.optionsListPopoverSearchForOption(availableOption);
-      await this.optionsListPopoverWaitForLoading();
 
       await this.retry.try(async () => {
         await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
@@ -583,13 +567,8 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async optionsListWaitForLoading(controlId: string) {
-    await this.retry.waitFor(`${controlId} to load`, async () => {
-      const control = await this.testSubjects.find(`optionsList-control-${controlId}`);
-      return await control.isEnabled();
-    });
-    expect(
-      await (await this.testSubjects.find(`optionsList-control-${controlId}`)).isEnabled()
-    ).to.be(true);
+    this.log.debug(`wait for ${controlId} to load`);
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
   }
 
   public async optionsListPopoverWaitForLoading() {
@@ -724,7 +703,6 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.rangeSliderWaitForLoading();
     await this.retry.try(async () => {
       await this.testSubjects.click(`range-slider-control-${controlId}`);
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
