@@ -410,7 +410,7 @@ export class TaskClaiming {
       this.logger
         .get('claim')
         .debug(
-          `# task types: ${taskTypesToClaim.length}\t#claimed tasks: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale tasks: ${staleTasks}}`
+          `# task types: ${taskTypesToClaim.length}\t# claim size: ${claimSize}\t# claimed: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale pruned: ${staleTasks}}`
         );
 
       // Not all of the updated docs are "claimed" and ready to be ran
