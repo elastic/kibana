@@ -56,5 +56,6 @@
     "@kbn/datemath",
     "@kbn/expressions-plugin",
     "@kbn/react-field",
+    "@kbn/field-types",
   ]
 }
