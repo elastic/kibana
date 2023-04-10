@@ -66,7 +66,7 @@ export const useELSERCallOutData = ({
 
   const dismiss = useCallback(() => {
     setShow(false);
-  });
+  }, []);
 
   return { dismiss, dismissable, show: doesNotHaveELSERModel && show };
 };
@@ -89,12 +89,14 @@ export const ELSERCallOut: React.FC<ELSERCallOutProps> = (props) => {
             </EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiTitle color="text" size="xs">
+            <EuiTitle size="xs">
               <h4>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.title"
-                  defaultMessage="Improve your results with ELSER"
-                />
+                <EuiText color="text">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.index.pipelines.elserCallOut.title"
+                    defaultMessage="Improve your results with ELSER"
+                  />
+                </EuiText>
               </h4>
             </EuiTitle>
           </EuiFlexItem>
