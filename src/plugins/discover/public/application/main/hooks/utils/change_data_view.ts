@@ -53,7 +53,7 @@ export async function changeDataView(
       state.query
     );
 
-    appState.update(nextAppState);
+    appState.updateUrl(nextAppState, false);
     if (internalState.getState().expandedDoc) {
       internalState.transitions.setExpandedDoc(undefined);
     }

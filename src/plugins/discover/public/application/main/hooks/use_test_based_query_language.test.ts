@@ -26,7 +26,7 @@ function getHookProps(
 ) {
   const replaceUrlState = jest.fn();
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.replaceUrlState = replaceUrlState;
+  stateContainer.appState.updateUrl = replaceUrlState;
   stateContainer.appState.update({ columns: [] });
   stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 

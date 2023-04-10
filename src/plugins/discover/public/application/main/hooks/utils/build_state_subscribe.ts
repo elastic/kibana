@@ -64,7 +64,7 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        appState.update({ index: nextDataView.id }, true);
+        appState.updateUrl({ index: nextDataView.id }, true);
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);

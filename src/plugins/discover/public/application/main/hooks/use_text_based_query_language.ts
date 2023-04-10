@@ -111,7 +111,7 @@ export function useTextBasedQueryLanguage({
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
         };
-        stateContainer.appState.replaceUrlState(nextState);
+        stateContainer.appState.updateUrl(nextState);
       } else {
         // cleanup for a "regular" query
         cleanup();
