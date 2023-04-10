@@ -31,7 +31,12 @@ import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
+// @TODO
 const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
+// const allowedAssetTypesLookup = new Set<string>(
+//   omit(allowedAssetTypes, ElasticsearchAssetType.transform)
+// );
+
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
@@ -98,11 +103,12 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           return;
         }
         try {
-          const objectsToGet = packageAttributes.installed_kibana.map(({ id, type }) => ({
-            id,
-            type,
-          }));
-
+          const objectsToGet = [...authorizedTransforms, ...packageAttributes.installed_kibana].map(
+            ({ id, type }) => ({
+              id,
+              type,
+            })
+          );
           // We don't have an API to know which SO types a user has access to, so instead we make a request for each
           // SO type and ignore the 403 errors
           const objectsByType = await Promise.all(
@@ -135,10 +141,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                 )
             )
           );
-          setAssetsSavedObjects([
-            ...authorizedTransforms.map((d) => ({ ...d, attributes: { title: d.id } })),
-            ...objectsByType.flat(),
-          ]);
+          setAssetsSavedObjects([...objectsByType.flat()]);
         } catch (e) {
           setFetchError(e);
         } finally {
@@ -160,7 +163,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const showDeferredInstallations =
     Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
 
-  let content: JSX.Element | Array<JSX.Element | null>;
+  let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
     content = <Loading />;
   } else if (fetchError) {
@@ -226,7 +229,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
     }
   } else {
     content = [
-      ...[...allowedAssetTypes, ElasticsearchAssetType.transform].map((assetType) => {
+      ...allowedAssetTypes.map((assetType) => {
         const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
 
         if (!sectionAssetSavedObjects.length) {

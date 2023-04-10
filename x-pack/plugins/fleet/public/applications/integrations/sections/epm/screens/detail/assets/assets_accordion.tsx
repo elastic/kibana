@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
   EuiHorizontalRule,
+  EuiLink,
   EuiNotificationBadge,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
-import { KibanaAssetType } from '../../../../../types';
+import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
 
 import type { AllowedAssetType, AssetSavedObject } from './types';
 
@@ -60,8 +60,8 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
       <>
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-          {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
-            // Ignore custom asset views
+          {savedObjects.map(({ id, attributes: { title: soTitle, description } }, idx) => {
+            // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
             }
@@ -69,8 +69,9 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
             const pathToObjectInApp = getHrefToObjectInKibanaApp({
               http,
               id,
-              type,
+              type: type === ElasticsearchAssetType.transform ? undefined : type,
             });
+            const title = soTitle ?? id;
             return (
               <>
                 <EuiSplitPanel.Inner grow={false} key={idx}>

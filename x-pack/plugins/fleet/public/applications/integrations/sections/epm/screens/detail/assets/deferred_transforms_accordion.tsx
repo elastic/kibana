@@ -49,7 +49,7 @@ export const getDeferredAssetDescription = (assetType: string, assetCount: numbe
   switch (assetType) {
     case ElasticsearchAssetType.transform:
       return i18n.translate(
-        'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsCallout',
+        'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsDescription',
         {
           defaultMessage:
             '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Reauthorize from a user with transform_admin built-in role or manage_transform cluster privileges to start operations.',
@@ -57,9 +57,12 @@ export const getDeferredAssetDescription = (assetType: string, assetCount: numbe
         }
       );
     default:
-      return i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout', {
-        defaultMessage: 'Asset requires additional permissions.',
-      });
+      return i18n.translate(
+        'xpack.fleet.epm.packageDetails.assets.deferredInstallationsDescription',
+        {
+          defaultMessage: 'Asset requires additional permissions.',
+        }
+      );
   }
 };
 
@@ -123,11 +126,11 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
               { name: errorMsg, message: errorMsg },
               {
                 title: i18n.translate(
-                  'xpack.fleet.epm.packageDetails.assets.authorizeTransformsSuccessful',
+                  'xpack.fleet.epm.packageDetails.assets.authorizeTransformsUnsuccessful',
                   {
                     defaultMessage:
                       'Unable to authorize {cntUnauthorized, plural, one {# transform} other {# transforms}}.',
-                    values: { cntAuthorized, cntUnauthorized: transformIds.length - cntAuthorized },
+                    values: { cntUnauthorized: transformIds.length - cntAuthorized },
                   }
                 ),
                 toastLifeTimeMs: 1000,

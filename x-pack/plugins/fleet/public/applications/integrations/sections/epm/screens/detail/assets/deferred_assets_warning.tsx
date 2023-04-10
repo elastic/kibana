@@ -30,7 +30,7 @@ export const DeferredAssetsWarning = ({
 }) => {
   const tooltipContent =
     numOfDeferredInstallations !== undefined
-      ? i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout', {
+      ? i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsWarning', {
           defaultMessage:
             'This package has {numOfDeferredInstallations, plural, one {one deferred installation} other {# deferred installations}} which might require additional permissions to install and operate correctly.',
           values: { numOfDeferredInstallations },
