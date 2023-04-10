@@ -24,6 +24,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
   isPivotTransform,
@@ -150,7 +151,23 @@ export const useColumns = (
       ),
       width: '30px',
       render: (item) => {
-        return Array.isArray(item.alerting_rules) ? (
+        const needsReauth = needsReauthorization(item);
+
+        const needsReauthTooltipIcon = needsReauth ? (
+          <>
+            <EuiToolTip
+              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This transform was created with insufficient permissions. Reauthorize from a user with transforms_admin privilege to start and run the transform.',
+              })}
+            >
+              <EuiIcon size="s" color="warning" type={'alert'} />
+            </EuiToolTip>
+            &nbsp;
+          </>
+        ) : null;
+
+        const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
           <EuiToolTip
             position="bottom"
             content={
@@ -165,6 +182,12 @@ export const useColumns = (
           </EuiToolTip>
         ) : (
           <span />
+        );
+        return (
+          <>
+            {needsReauthTooltipIcon}
+            {alertingRulesTooltipIcon}
+          </>
         );
       },
     },

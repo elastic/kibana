@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   getPrivilegesAndCapabilities,
   INITIAL_CAPABILITIES,
@@ -18,7 +17,7 @@ export const TRANSFORM_PLUGIN_ID = 'transform' as const;
 
 export const setupCapabilities = (
   core: Pick<CoreSetup<PluginStartDependencies>, 'capabilities' | 'getStartServices'>,
-  securitySetup?: SecurityPluginSetup
+  isSecurityPluginEnabled: boolean
 ) => {
   core.capabilities.registerProvider(() => {
     return {
@@ -27,25 +26,33 @@ export const setupCapabilities = (
   });
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
+    const fullTransformCapabilities = Object.keys(INITIAL_CAPABILITIES).reduce<
+      Record<string, boolean>
+    >((acc, p) => {
+      acc[p] = true;
+      return acc;
+    }, {});
+    // If security is not enabled, it should have full permission
+    if (!isSecurityPluginEnabled)
+      return {
+        transform: fullTransformCapabilities,
+      };
+
     if (useDefaultCapabilities) {
       return {};
     }
 
-    const isSecurityPluginEnabled = securitySetup?.license.isEnabled() ?? false;
     const startServices = await core.getStartServices();
-    const [, { security: securityStart }] = startServices;
+    const [, { security }] = startServices;
 
-    // If security is not enabled or not available, transform should have full permission
-    if (!isSecurityPluginEnabled || !securityStart) {
+    // If security is not available, it should have full permission
+    if (!security) {
       return {
-        transform: Object.keys(INITIAL_CAPABILITIES).reduce<Record<string, boolean>>((acc, p) => {
-          acc[p] = true;
-          return acc;
-        }, {}),
+        transform: fullTransformCapabilities,
       };
     }
 
-    const checkPrivileges = securityStart.authz.checkPrivilegesDynamicallyWithRequest(request);
+    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
     const { hasAllRequested, privileges } = await checkPrivileges({
       elasticsearch: {

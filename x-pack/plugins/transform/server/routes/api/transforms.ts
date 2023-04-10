@@ -72,6 +72,7 @@ import { transformHealthServiceProvider } from '../../lib/alerting/transform_hea
 
 enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
+  REAUTHORIZE = 'reauthorize',
   RESET = 'reset',
   SCHEDULE_NOW = 'schedule_now',
   STOP = 'stop',
@@ -79,7 +80,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, coreStart, dataViews } = routeDependencies;
+  const { router, license, coreStart, dataViews, security } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -290,6 +291,63 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           });
         } catch (e) {
           return res.customError(wrapError(e));
+        }
+      }
+    )
+  );
+
+  /**
+   * @apiGroup Reauthorize transforms with API key generated from currently logged in suer
+   *
+   * @api {post} /api/transform/reauthorize_transforms Post delete transforms
+   * @apiName DeleteTransforms
+   * @apiDescription Deletes transforms
+   *
+   * @apiSchema (body) deleteTransformsRequestSchema
+   */
+  router.post<undefined, undefined, StartTransformsRequestSchema>(
+    {
+      path: addBasePath('reauthorize_transforms'),
+      validate: {
+        body: startTransformsRequestSchema,
+      },
+    },
+    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+      async (ctx, req, res) => {
+        try {
+          const transformsInfo = req.body;
+          const { elasticsearch } = coreStart;
+          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+
+          if (!security) {
+            throw Error('Security not enabled');
+          }
+          const apiKeyWithCurrentUserPermission = await security.authc.apiKeys.grantAsInternalUser(
+            req,
+            {
+              name: `auto-generated-transform-api-key`,
+              role_descriptors: {},
+            }
+          );
+          const secondaryAuth =
+            apiKeyWithCurrentUserPermission?.api_key !== undefined
+              ? {
+                  headers: {
+                    'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
+                  },
+                }
+              : undefined;
+
+          const authorizedTransforms = await reauthorizeAndStartTransforms(
+            transformsInfo,
+            esClient,
+            {
+              ...(secondaryAuth ? secondaryAuth : {}),
+            }
+          );
+          return res.ok({ body: authorizedTransforms });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
         }
       }
     )
@@ -853,6 +911,47 @@ async function scheduleNowTransforms(
           id: transformId,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
+        });
+      }
+      results[transformId] = { success: false, error: e.meta.body.error };
+    }
+  }
+  return results;
+}
+
+async function reauthorizeAndStartTransforms(
+  transformsInfo: ReauthorizeTransformsRequestSchema,
+  esClient: ElasticsearchClient,
+  options?: TransportRequestOptions
+) {
+  const results: ReauthorizeTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformId = transformInfo.id;
+    try {
+      await esClient.transform.updateTransform(
+        {
+          body: {},
+          transform_id: transformId,
+        },
+        options ?? {}
+      );
+
+      await esClient.transform.startTransform(
+        {
+          transform_id: transformId,
+        },
+        { ignore: [409] }
+      );
+
+      results[transformId] = { success: true };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformId,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.REAUTHORIZE,
         });
       }
       results[transformId] = { success: false, error: e.meta.body.error };
