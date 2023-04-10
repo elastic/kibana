@@ -93,11 +93,11 @@ export const CisKubernetesIcons = ({
   benchmarkId: BenchmarkId;
   benchmarkName: BenchmarkName;
 }) => (
-  <EuiFlexGroup gutterSize="s">
+  <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiIcon type={cisLogoIcon} size="xxl" />
     </EuiFlexItem>
-    <EuiFlexItem grow={false} style={{ marginTop: 4 }}>
+    <EuiFlexItem grow={false}>
       <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
     </EuiFlexItem>
   </EuiFlexGroup>
