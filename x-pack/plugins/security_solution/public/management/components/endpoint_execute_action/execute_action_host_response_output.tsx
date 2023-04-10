@@ -213,7 +213,6 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     return (
       <>
         <EuiFlexItem>
-          <EuiSpacer size="m" />
           <ExecutionActionOutputAccordion
             content={contextContent}
             data-test-subj={`${dataTestSubj}-context`}
