@@ -174,6 +174,7 @@ export function SavedQueryManagementList({
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
           onClearSavedQuery();
+          setSelectedSavedQuery(undefined);
         }
 
         await savedQueryService.deleteSavedQuery(savedQueryId);
