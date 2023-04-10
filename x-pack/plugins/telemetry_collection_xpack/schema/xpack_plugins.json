@@ -2762,6 +2762,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/rust": {
+              "type": "long"
+            },
             "opentelemetry/swift": {
               "type": "long"
             },

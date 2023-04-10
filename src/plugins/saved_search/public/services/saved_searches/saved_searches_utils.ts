@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { pick } from 'lodash';
 import type { SavedSearchAttributes } from '../../../common';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../../../common';
 import type { SavedSearch } from './types';
@@ -54,7 +55,7 @@ export const toSavedSearchAttributes = (
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
   usesAdHocDataView: savedSearch.usesAdHocDataView,
   timeRestore: savedSearch.timeRestore ?? false,
-  timeRange: savedSearch.timeRange,
+  timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
   breakdownField: savedSearch.breakdownField,
