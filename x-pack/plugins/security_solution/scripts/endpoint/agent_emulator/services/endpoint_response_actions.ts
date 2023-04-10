@@ -329,9 +329,11 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       if (commentUppercase.indexOf('EXECUTE:FAILURE') > -1) {
         executeOutput.stdout = '';
         executeOutput.stdout_truncated = false;
+        executeOutput.output_file_stdout_truncated = false;
       } else {
         executeOutput.stderr = '';
         executeOutput.stderr_truncated = false;
+        executeOutput.output_file_stderr_truncated = false;
       }
 
       return {
