@@ -27,3 +27,38 @@ export const ANALYZER_GRAPH_BUTTON = i18n.translate(
     defaultMessage: 'Analyzer Graph',
   }
 );
+
+export const INSIGHTS_BUTTONGROUP_OPTIONS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.insightsOptions',
+  {
+    defaultMessage: 'Insights options',
+  }
+);
+
+export const ENTITIES_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesButton',
+  {
+    defaultMessage: 'Entities',
+  }
+);
+
+export const THREAT_INTELLIGENCE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton',
+  {
+    defaultMessage: 'Threat Intelligence',
+  }
+);
+
+export const PREVALENCE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceButton',
+  {
+    defaultMessage: 'Prevalence',
+  }
+);
+
+export const CORRELATIONS_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlationsButton',
+  {
+    defaultMessage: 'Correlations',
+  }
+);

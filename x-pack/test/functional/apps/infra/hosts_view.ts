@@ -244,6 +244,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(metadataTab).to.contain('Metadata');
       });
 
+      it('should navigate to Uptime after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(
+          'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
+        );
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
+      });
+
+      it('should navigate to APM services after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
+      });
+
       describe('should render processes tab', async () => {
         const processTitles = [
           'Total processes',
