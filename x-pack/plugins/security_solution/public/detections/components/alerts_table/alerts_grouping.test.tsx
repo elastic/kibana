@@ -126,6 +126,7 @@ const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
 describe('GroupedAlertsTable', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let store: ReturnType<typeof createStore>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
@@ -143,12 +144,51 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
+  const renderAsGroping = (theStore: ReturnType<typeof createStore>) => {
+    const { getByTestId, getAllByTestId, queryByTestId, rerender, unmount } = render(
+      <TestProviders store={theStore}>
+        <GroupedAlertsTableComponent {...testProps} />
+      </TestProviders>
+    );
+    const {
+      getByTestId: getByTestIdGroupSelector,
+      unmount: unmountGroupSelector,
+      getAllByTestId: getAllByTestIdGroupSelector,
+    } = render(mockDispatch.mock.calls[0][0].payload.groupSelector);
+
+    return {
+      getByTestId,
+      getAllByTestId,
+      queryByTestId,
+      rerender,
+      selectGroup: async (group: string) => {
+        await waitFor(() => {
+          fireEvent.click(getByTestIdGroupSelector('group-selector-dropdown'));
+          fireEvent.click(getByTestIdGroupSelector(group));
+        });
+      },
+      unmount: async () => {
+        await waitFor(() => {
+          fireEvent.click(getAllByTestIdGroupSelector('group-selector-dropdown')[0]);
+          // for some reason without physically setting state back to none,
+          // the tests do not reset state in each execution
+          fireEvent.click(getByTestIdGroupSelector('panel-none'));
+        });
+        unmount();
+        unmountGroupSelector();
+      },
+    };
+  };
+
   it('calls the proper initial dispatch actions for groups', () => {
-    render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
+    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+    expect(queryByTestId('group-selector-dropdown')).not.toBeInTheDocument();
+    expect(getByTestId('alerts-table')).toBeInTheDocument();
     expect(mockDispatch).toHaveBeenCalledTimes(1);
     expect(mockDispatch.mock.calls[0][0].type).toEqual(
       'x-pack/security_solution/groups/UPDATE_GROUP_SELECTOR'
@@ -164,47 +204,33 @@ describe('GroupedAlertsTable', () => {
       request: '',
       refetch: () => {},
     });
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId, selectGroup, unmount } = renderAsGroping(store);
 
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
     expect(getByTestId('alerts-table')).toBeInTheDocument();
-    const { getByTestId: getByTestIdGroupSelector } = render(
-      mockDispatch.mock.calls[0][0].payload.groupSelector
-    );
 
-    await waitFor(() => {
-      fireEvent.click(getByTestIdGroupSelector('group-selector-dropdown'));
-      fireEvent.click(getByTestIdGroupSelector('panel-host.name'));
-    });
+    await selectGroup('panel-host.name');
     expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
+
+    await unmount();
   });
   it('renders grouping table when single group is selected', async () => {
-    const { getByTestId, getAllByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-kibana.alert.rule.name'));
-
+    const { getByTestId, queryByTestId, getAllByTestId, selectGroup, unmount } =
+      renderAsGroping(store);
+    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
+    expect(getByTestId('alerts-table')).toBeInTheDocument();
+    await selectGroup('panel-kibana.alert.rule.name');
     expect(getByTestId('unit-count')).toHaveTextContent('6,048 alerts');
     expect(getByTestId('group-count')).toHaveTextContent('32 groups');
     expect(getAllByTestId('grouping-accordion').length).toEqual(25);
+
+    await unmount();
   });
 
   it('resets pagination when selected group changes', async () => {
-    const { getByTestId, getAllByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-kibana.alert.rule.name'));
+    const { getByTestId, getAllByTestId, selectGroup, unmount } = renderAsGroping(store);
+    await selectGroup('panel-kibana.alert.rule.name');
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
     fireEvent.click(getByTestId('pagination-button-1'));
@@ -214,16 +240,12 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getAllByTestId('panel-user.name')[0]);
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+    await unmount();
   });
 
-  it('resets grouping pagination when global query updates', () => {
-    const { getByTestId, getAllByTestId, rerender } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-kibana.alert.rule.name'));
+  it('resets grouping pagination when global query updates', async () => {
+    const { getByTestId, getAllByTestId, selectGroup, rerender, unmount } = renderAsGroping(store);
+    await selectGroup('panel-kibana.alert.rule.name');
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
     fireEvent.click(getByTestId('pagination-button-1'));
@@ -240,5 +262,6 @@ describe('GroupedAlertsTable', () => {
     );
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+    await unmount();
   });
 });
