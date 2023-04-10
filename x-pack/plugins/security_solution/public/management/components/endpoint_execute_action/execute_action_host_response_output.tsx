@@ -74,7 +74,7 @@ const SHELL_INFO = Object.freeze({
   currentDir: i18n.translate(
     'xpack.securitySolution.responseActionExecuteAccordion.currentWorkingDirectory',
     {
-      defaultMessage: 'Current working directory',
+      defaultMessage: 'Executed from',
     }
   ),
 });
