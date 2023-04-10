@@ -18,7 +18,12 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { INPUT_CONTROL, CLOUD_DEFEND_FLEET_PACKAGE_KUERY } from '../../common/constants';
+import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
+import {
+  INPUT_CONTROL,
+  CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
+  INTEGRATION_PACKAGE_NAME,
+} from '../../common/constants';
 import { POLICIES_PACKAGE_POLICY_PREFIX, PoliciesQueryParams } from '../../common/schemas/policy';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -65,6 +70,28 @@ export const getAgentStatusesByAgentPolicies = async (
 
   return result;
 };
+
+export const onPackagePolicyPostCreateCallback = async (
+  logger: Logger,
+  packagePolicy: PackagePolicy,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<void> => {
+  return addDataViewToAllSpaces(savedObjectsClient);
+};
+
+async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientContract) {
+  const cloudDefendDataViews = await savedObjectsClient.find<DataViewSavedObjectAttrs>({
+    type: 'index-pattern',
+    fields: ['title'],
+    search: INTEGRATION_PACKAGE_NAME + '*',
+    searchFields: ['title'],
+    perPage: 100,
+  });
+
+  cloudDefendDataViews.saved_objects.forEach((dataView) => {
+    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
+  });
+}
 
 export const getCloudDefendAgentPolicies = async (
   soClient: SavedObjectsClientContract,
