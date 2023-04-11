@@ -31,6 +31,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       // TODO Improve schema
       significantTerms: schema.maybe(schema.arrayOf(schema.any())),
+      regroupOnly: schema.maybe(schema.boolean()),
     })
   ),
   /** Probability used for the random sampler aggregations */

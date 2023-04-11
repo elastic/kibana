@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
+  const ml = getService('ml');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -118,6 +119,76 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
         await testSubjects.existOrFail(
           `aiopsExplainLogRateSpikesGroupSwitch${!checked ? ' checked' : ''}`
         );
+      });
+    },
+
+    async assertFieldFilterPopoverButtonExists(isOpen: boolean) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('aiopsFieldFilterButton');
+
+        if (isOpen) {
+          await testSubjects.existOrFail('aiopsFieldSelectorSearch');
+        } else {
+          await testSubjects.missingOrFail('aiopsFieldSelectorSearch');
+        }
+      });
+    },
+
+    async clickFieldFilterPopoverButton(expectPopoverToBeOpen: boolean) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterButton');
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertFieldFilterPopoverButtonExists(expectPopoverToBeOpen);
+      });
+    },
+
+    async assertFieldSelectorFieldNameList(expectedFields: string[]) {
+      const currentFields = await testSubjects.getVisibleText('aiopsFieldSelectorFieldNameList');
+      expect(currentFields).to.be(expectedFields.join('\n'));
+    },
+
+    async setFieldSelectorSearch(searchText: string) {
+      await ml.commonUI.setValueWithChecks('aiopsFieldSelectorSearch', searchText, {
+        clearWithKeyboard: true,
+        enforceDataTestSubj: true,
+      });
+      await this.assertFieldSelectorSearchValue(searchText);
+    },
+
+    async clickFieldSelectorDisableAllSelectedButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsFieldSelectorDeselectAllFieldsButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await retry.tryForTime(5000, async () => {
+          await testSubjects.missingOrFail('aiopsFieldSelectorFieldNameListItem checked');
+        });
+      });
+    },
+
+    async assertFieldSelectorSearchValue(expectedValue: string) {
+      const actualSearchValue = await testSubjects.getAttribute(
+        'aiopsFieldSelectorSearch',
+        'value'
+      );
+      expect(actualSearchValue).to.eql(
+        expectedValue,
+        `Field selector search input text should be '${expectedValue}' (got '${actualSearchValue}')`
+      );
+    },
+
+    async assertFieldFilterApplyButtonExists(disabled: boolean) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`aiopsFieldFilterApplyButton${disabled ? ' disabled' : ''}`);
+      });
+    },
+
+    async clickFieldFilterApplyButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsFieldFilterApplyButton');
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertFieldFilterPopoverButtonExists(false);
       });
     },
 
