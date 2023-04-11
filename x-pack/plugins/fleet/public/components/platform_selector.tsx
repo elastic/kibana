@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiText,
@@ -19,10 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../hooks';
+import { CLOUD_FORMATION_PLATFORM_OPTION, type PLATFORM_TYPE } from '../hooks';
 import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
+import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
 interface Props {
   linuxCommand: string;
@@ -52,6 +53,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
+  hasCloudFormationIntegration = true,
   hasK8sIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
@@ -68,7 +70,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
-  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration);
+  const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
+
+  const getPlatformOptions = useCallback(() => {
+    const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+
+    if (hasCloudFormationIntegration) {
+      return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
+    }
+
+    return platformOptions;
+  }, [hasCloudFormationIntegration, isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -116,7 +128,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
       <>
         {!hasK8sIntegrationMultiPage && (
           <EuiButtonGroup
-            options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
+            options={getPlatformOptions()}
             idSelected={platform}
             onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
             legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
@@ -144,6 +156,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               onDownload={onCopy}
               enrollmentAPIKey={enrollToken}
             />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {platform === 'cloudFormation' && (
+          <>
+            <CloudFormationInstructions enrollmentAPIKey={enrollToken} />
             <EuiSpacer size="s" />
           </>
         )}
