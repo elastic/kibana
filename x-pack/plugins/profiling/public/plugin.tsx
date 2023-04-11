@@ -74,7 +74,7 @@ export class ProfilingPlugin implements Plugin {
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
+    pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
     coreSetup.application.register({
       id: 'profiling',
