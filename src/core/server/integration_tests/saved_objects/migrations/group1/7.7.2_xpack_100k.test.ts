@@ -106,10 +106,6 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  const migratedIndices = SavedObjectsIndexPatterns.map(
-    (indexPattern) => `${indexPattern}_${kibanaVersion}_001`
-  );
-
   beforeAll(async () => {
     await removeLogFile();
     await startServers({
@@ -124,7 +120,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
   it('copies all the document of the previous index to the new one', async () => {
     const migratedIndexResponse = await esClient.count({
-      index: migratedIndices,
+      index: SavedObjectsIndexPatterns,
     });
     const oldIndexResponse = await esClient.count({
       index: '.kibana_1',
