@@ -137,6 +137,13 @@ export const mockCore: () => Partial<CoreStart> = () => {
     data: dataPluginMock.createStartContract(),
     observability: {
       useRulesLink: () => ({ href: 'newRuleLink' }),
+      observabilityRuleTypeRegistry: {
+        register: jest.fn(),
+        getFormatter: jest.fn(),
+        list: jest.fn(),
+      },
+    },
+    observabilityShared: {
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,

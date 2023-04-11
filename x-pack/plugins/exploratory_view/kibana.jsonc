@@ -19,6 +19,7 @@
       "inspector",
       "lens",
       "observability",
+      "observabilityShared",
       "security",
       "share",
       "triggersActionsUi",

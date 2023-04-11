@@ -39,12 +39,12 @@ export function ExploratoryViewPage({
   useSessionStorage = false,
 }: ExploratoryViewPageProps) {
   const {
-    services: { uiSettings, notifications, observability },
+    services: { uiSettings, notifications, observabilityShared },
   } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const history = useHistory();
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({

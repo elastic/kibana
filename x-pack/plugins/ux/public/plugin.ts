@@ -126,7 +126,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
+    plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart]) => {
           // checking apm capability, since ux for now doesn't have it's
