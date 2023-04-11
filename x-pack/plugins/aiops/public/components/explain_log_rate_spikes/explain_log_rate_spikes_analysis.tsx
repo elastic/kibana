@@ -68,6 +68,8 @@ interface ExplainLogRateSpikesAnalysisProps {
   windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
   searchQuery: Query['query'];
+  /** Sample probability to be applied to random sampler aggregations */
+  sampleProbability: number;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -76,6 +78,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   latest,
   windowParameters,
   searchQuery,
+  sampleProbability,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -130,6 +133,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       flushFix: true,
       ...windowParameters,
       overrides,
+      sampleProbability,
     },
     { reducer: streamReducer, initialState }
   );
