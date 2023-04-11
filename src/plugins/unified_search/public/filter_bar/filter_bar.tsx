@@ -22,6 +22,7 @@ export interface Props {
   indexPatterns: DataView[];
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   hiddenPanelOptions?: FilterItemsProps['hiddenPanelOptions'];
   /**
    * Applies extra styles necessary when coupled with the query bar
@@ -54,6 +55,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         onFiltersUpdated={props.onFiltersUpdated}
         indexPatterns={props.indexPatterns!}
         timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+        filtersForSuggestions={props.filtersForSuggestions}
         hiddenPanelOptions={props.hiddenPanelOptions}
         readOnly={props.isDisabled}
       />

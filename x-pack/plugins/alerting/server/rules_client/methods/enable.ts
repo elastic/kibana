@@ -83,7 +83,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
 
     const updateAttributes = updateMeta(context, {
       ...attributes,
-      ...(!existingApiKey && (await createNewAPIKeySet(context, { attributes, username }))),
+      ...(!existingApiKey &&
+        (await createNewAPIKeySet(context, {
+          id: attributes.alertTypeId,
+          ruleName: attributes.name,
+          username,
+          shouldUpdateApiKey: true,
+        }))),
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),

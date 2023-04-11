@@ -110,7 +110,7 @@ const bulkDeleteWithOCC = async (
     async () => {
       for await (const response of rulesFinder.find()) {
         for (const rule of response.saved_objects) {
-          if (rule.attributes.apiKey) {
+          if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
             apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
           }
           if (rule.attributes.name) {

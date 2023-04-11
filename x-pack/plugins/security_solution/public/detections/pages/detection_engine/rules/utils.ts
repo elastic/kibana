@@ -24,6 +24,7 @@ import {
   RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
 } from '../../../../detection_engine/rule_details_ui/pages/rule_details';
+import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -93,6 +94,10 @@ export const getTrailingBreadcrumbs = (
         href: '',
       },
     ];
+  }
+
+  if (!isRuleEditPage(params.pathName) && params.state && !params.state.isExistingRule) {
+    breadcrumb = [...breadcrumb, { text: DELETED_RULE, href: '' }];
   }
 
   return breadcrumb;
