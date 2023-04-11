@@ -33,7 +33,7 @@ import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { getMlInferenceErrors } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_errors';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
-import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
+import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
@@ -388,6 +388,11 @@ export function registerIndexRoutes({
         }),
         body: schema.object({
           destination_field: schema.maybe(schema.nullable(schema.string())),
+          field_mappings: schema.maybe(
+            schema.arrayOf(
+              schema.object({ sourceField: schema.string(), targetField: schema.string() })
+            )
+          ),
           inference_config: schema.maybe(
             schema.object({
               zero_shot_classification: schema.maybe(
@@ -421,30 +426,31 @@ export function registerIndexRoutes({
         source_field: sourceField,
         destination_field: destinationField,
         inference_config: inferenceConfig,
+        field_mappings: fieldMappings,
       } = request.body;
 
       // additional validations
-      if (pipelineDefinition && (sourceField || destinationField || modelId)) {
+      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
         return createError({
           errorCode: ErrorCode.PARAMETER_CONFLICT,
           message: i18n.translate(
             'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
             {
               defaultMessage:
-                'pipeline_definition should only be provided if source_field and destination_field and model_id are not provided',
+                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
             }
           ),
           response,
           statusCode: 400,
         });
-      } else if (!(pipelineDefinition || (sourceField && modelId))) {
+      } else if (!((pipelineDefinition && fieldMappings) || (sourceField && modelId))) {
         return createError({
           errorCode: ErrorCode.PARAMETER_CONFLICT,
           message: i18n.translate(
             'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
             {
               defaultMessage:
-                'either pipeline_definition or source_field AND model_id must be provided',
+                'either pipeline_definition AND fieldMappings or source_field AND model_id must be provided',
             }
           ),
           response,
@@ -454,19 +460,21 @@ export function registerIndexRoutes({
 
       try {
         // Create the sub-pipeline for inference
-        const createPipelineResult = await createAndReferenceMlInferencePipeline(
+        const createPipelineResult = await preparePipelineAndIndexForMlInference(
           indexName,
           pipelineName,
           pipelineDefinition,
           modelId,
           sourceField,
           destinationField,
+          fieldMappings,
           inferenceConfig,
           client.asCurrentUser
         );
         return response.ok({
           body: {
-            created: createPipelineResult?.id,
+            created: createPipelineResult.pipeline_id,
+            mapping_updated: createPipelineResult.mapping_updated,
           },
           headers: { 'content-type': 'application/json' },
         });
@@ -484,7 +492,15 @@ export function registerIndexRoutes({
             statusCode: 409,
           });
         }
-
+        if (fieldMappings && (error as Error).message === ErrorCode.MAPPING_UPDATE_FAILED) {
+          return createError({
+            errorCode: (error as Error).message as ErrorCode,
+            message:
+              'One or more target fields for this pipeline already exist with a type that is incompatible with the specified model. Ensure that each target field is unique and not already in use.',
+            response,
+            statusCode: 409,
+          });
+        }
         throw error;
       }
     })
