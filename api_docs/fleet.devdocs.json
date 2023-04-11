@@ -19104,9 +19104,9 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Record<",
+              "{ data_stream: string; features: Partial<Record<",
               "ExperimentalIndexingFeature",
-              ", boolean>; }[] | undefined"
+              ", boolean>>; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
