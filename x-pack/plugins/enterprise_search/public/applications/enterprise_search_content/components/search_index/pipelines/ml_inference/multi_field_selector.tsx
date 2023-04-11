@@ -18,7 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -98,10 +98,8 @@ export const MultiFieldMapping: React.FC = () => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText style={{ paddingTop: '25px' }}>
-            <p>-&gt;</p>
-          </EuiText>
+        <EuiFlexItem grow={false} style={{ paddingTop: '32px' }}>
+          <EuiIcon type='sortRight' />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
           <EuiFormRow
@@ -172,9 +170,10 @@ export const SelectedFieldMappings: React.FC = () => {
       ),
     },
     {
+      align: 'left',
       name: '',
-      render: () => <p>-&gt;</p>,
-      width: '30px',
+      render: () => <EuiIcon type='sortRight' />,
+      width: '60px',
     },
     {
       field: 'targetField',
