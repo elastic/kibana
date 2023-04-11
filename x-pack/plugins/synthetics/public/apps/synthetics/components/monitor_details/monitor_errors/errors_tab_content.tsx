@@ -31,10 +31,10 @@ export const ErrorsTabContent = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={1}>
-          <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign>
-            <EuiFlexGroup>
+          <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign css={{ minWidth: 260 }}>
+            <EuiFlexGroup wrap={true} responsive={false}>
               <EuiFlexItem>
                 {monitorId && (
                   <MonitorErrorsCount
@@ -58,8 +58,8 @@ export const ErrorsTabContent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="m" wrap={true}>
+        <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
           <PanelWithTitle title={ERRORS_LABEL}>
             <ErrorsList errorStates={errorStates} loading={loading} />
           </PanelWithTitle>
