@@ -30,6 +30,7 @@ import { sortOrderSchema } from './common_schemas';
  * - adjacency_matrix
  * - auto_date_histogram
  * - children
+ * - date_histogram
  * - diversified_sampler
  * - geo_distance
  * - geohash_grid
