@@ -98,7 +98,7 @@ paths:
           schema:
             type: string
             enum:
-              - name
+              - creationTime
               - indicatorType
             default: name
           example: name
