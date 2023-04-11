@@ -41,6 +41,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           query: {
             match_all: {},
           },
+          ignore_unavailable: true,
           refresh: true,
         }),
         es.deleteByQuery({
@@ -48,6 +49,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           query: {
             match_all: {},
           },
+          ignore_unavailable: true,
           refresh: true,
         }),
       ]),
