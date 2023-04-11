@@ -386,11 +386,15 @@ export const MLInferenceLogic = kea<
         if (!model) return undefined;
 
         return generateMlInferencePipelineBody({
-          destinationField:
-            configuration.destinationField || formatPipelineName(configuration.pipelineName),
           model,
           pipelineName: configuration.pipelineName,
-          sourceField: configuration.sourceField,
+          fieldMappings: [
+            {
+              sourceField: configuration.sourceField,
+              targetField:
+                configuration.destinationField || formatPipelineName(configuration.pipelineName),
+            },
+          ],
           inferenceConfig: configuration.inferenceConfig,
         });
       },

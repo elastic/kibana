@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { AttachmentAction } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { UserActionPropertyActions } from './property_actions';
@@ -14,11 +15,13 @@ import { useDeletePropertyAction } from './use_delete_property_action';
 
 interface Props {
   isLoading: boolean;
+  registeredAttachmentActions: AttachmentAction[];
   onDelete: () => void;
 }
 
 const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   isLoading,
+  registeredAttachmentActions,
   onDelete,
 }) => {
   const { permissions } = useCasesContext();
@@ -40,8 +43,9 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
             },
           ]
         : []),
+      ...registeredAttachmentActions,
     ];
-  }, [permissions.delete, onModalOpen]);
+  }, [permissions.delete, onModalOpen, registeredAttachmentActions]);
 
   return (
     <>
