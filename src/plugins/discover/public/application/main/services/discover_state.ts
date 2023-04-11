@@ -293,7 +293,7 @@ export function getDiscoverStateContainer({
     updateFiltersReferences(prevDataView, newDataView);
 
     internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-    await appStateContainer.replaceUrlState({ index: newDataView.id });
+    await appStateContainer.updateUrl({ index: newDataView.id });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
@@ -344,7 +344,7 @@ export function getDiscoverStateContainer({
     services.dataViews.clearInstanceCache(adHocDataView.id);
     updateFiltersReferences(adHocDataView, persistedDataView);
     internalStateContainer.transitions.removeAdHocDataViewById(adHocDataView.id!);
-    await appStateContainer.update({ index: persistedDataView.id }, true);
+    await appStateContainer.updateUrl({ index: persistedDataView.id }, true);
     return persistedDataView;
   };
 
