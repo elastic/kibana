@@ -10,6 +10,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import type { HostPolicyResponse } from '../../../common/endpoint/types';
 import type { IndexEndpointHostsCyTaskOptions } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -101,6 +103,18 @@ declare global {
         arg: IndexedEndpointRuleAlerts['alerts'],
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<DeletedIndexedEndpointRuleAlerts>;
+
+      task(
+        name: 'indexEndpointPolicyResponse',
+        arg: HostPolicyResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<IndexedEndpointPolicyResponse>;
+
+      task(
+        name: 'deleteIndexedEndpointPolicyResponse',
+        arg: IndexedEndpointPolicyResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
     }
   }
 }
