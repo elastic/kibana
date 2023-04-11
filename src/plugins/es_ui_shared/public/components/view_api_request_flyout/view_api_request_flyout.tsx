@@ -30,7 +30,6 @@ import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {
   title: string;
-  subtitle: string;
   description: string;
   request: string;
   closeFlyout: () => void;
@@ -41,7 +40,6 @@ interface ViewApiRequestFlyoutProps {
 
 export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps> = ({
   title,
-  subtitle,
   description,
   request,
   closeFlyout,
@@ -71,9 +69,6 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
         <EuiTitle>
           <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
         </EuiTitle>
-        <EuiText>
-          <p data-test-subj="apiRequestFlyoutSubtitle">{subtitle}</p>
-        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

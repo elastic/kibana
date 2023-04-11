@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -88,27 +88,25 @@ export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = 
     <ViewApiRequestFlyout
       // @ts-expect-error ViewApiRequestFlyout title type only allow string
       title={
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="baseline">
           <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      subtitle={
-        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.fleet.apiRequestFlyout.devtoolsRequestDescription"
-              defaultMessage="{learnMore}"
-              values={{
-                learnMore: (
-                  <EuiLink href={docLinks.links.fleet.api}>
-                    <FormattedMessage
-                      id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
-                      defaultMessage="Learn more about Fleet API"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.fleet.apiRequestFlyout.devtoolsRequestDescription"
+                defaultMessage="{learnMore}"
+                values={{
+                  learnMore: (
+                    <EuiLink href={docLinks.links.fleet.api}>
+                      <FormattedMessage
+                        id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
+                        defaultMessage="Learn more about Fleet API"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
