@@ -30,7 +30,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleActionParam, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -45,6 +45,7 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   ActionConnectorMode,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -72,7 +73,8 @@ export type ActionTypeFormProps = {
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
-  isSiem?: boolean;
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -114,7 +116,8 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
-  isSiem,
+  notifyWhenSelectOptions,
+  defaultNotifyWhenValue,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -282,7 +285,8 @@ export const ActionTypeForm = ({
       )}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-      isSiem={isSiem}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
   );
 

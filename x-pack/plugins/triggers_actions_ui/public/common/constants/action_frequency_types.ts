@@ -12,9 +12,3 @@ export const DEFAULT_FREQUENCY = {
   throttle: null,
   summary: false,
 };
-
-export const DEFAULT_SIEM_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.ACTIVE,
-  throttle: null,
-  summary: true,
-};

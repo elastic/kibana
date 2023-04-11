@@ -19,7 +19,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { ActionGroup, RuleActionFrequency, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -29,17 +29,14 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import {
-  DEFAULT_FREQUENCY,
-  DEFAULT_SIEM_FREQUENCY,
-  VIEW_LICENSE_OPTIONS_LINK,
-} from '../../../common/constants';
+import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
@@ -72,6 +69,8 @@ export interface ActionAccordionFormProps {
   defaultSummaryMessage?: string;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions: NotifyWhenSelectOptions[]; // TODO: make optional
+  defaultRuleFrequency: RuleActionFrequency; // TODO: make optional
 }
 
 interface ActiveActionConnectorState {
@@ -101,6 +100,8 @@ export const ActionForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  defaultRuleFrequency = DEFAULT_FREQUENCY,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -116,8 +117,6 @@ export const ActionForm = ({
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
-
-  const isSiem = featureId === 'siem';
 
   const closeAddConnectorModal = useCallback(
     () => setAddModalVisibility(false),
@@ -226,7 +225,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: isSiem ? DEFAULT_SIEM_FREQUENCY : DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -238,7 +237,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: isSiem ? DEFAULT_SIEM_FREQUENCY : DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -408,7 +407,8 @@ export const ActionForm = ({
               defaultSummaryMessage={defaultSummaryMessage}
               hasSummary={hasSummary}
               minimumThrottleInterval={minimumThrottleInterval}
-              isSiem={isSiem}
+              notifyWhenSelectOptions={notifyWhenSelectOptions}
+              defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
             />
           );
         })}
