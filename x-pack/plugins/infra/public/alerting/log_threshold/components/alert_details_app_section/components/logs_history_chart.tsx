@@ -34,12 +34,11 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
     lte: DateMath.parse(dateRange.to, { roundUp: true })!.valueOf(),
   };
 
-  const { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts, loading } =
-    useAlertsHistory({
-      featureIds: [AlertConsumers.LOGS],
-      ruleId: rule.id,
-      dateRange,
-    });
+  const { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts } = useAlertsHistory({
+    featureIds: [AlertConsumers.LOGS],
+    ruleId: rule.id,
+    dateRange,
+  });
 
   const alertHistoryAnnotations =
     histogramTriggeredAlerts

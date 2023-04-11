@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
-import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LIGHT_THEME } from '@elastic/charts';
+
+import { ALERT_DURATION, ALERT_END, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import moment from 'moment';
+import { useTheme } from '@emotion/react';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
-import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
+import {
+  ComparatorToi18nSymbolsMap,
+  type PartialCriterion,
+} from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertAnnotation } from './components/alert_annotation';
 import { AlertDetailsAppSectionProps } from './types';
+import { Threshold } from '../../../common/components/threshold';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
-
 const AlertDetailsAppSection = ({
   rule,
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
   const [selectedSeries, setSelectedSeries] = useState<string>('');
-
+  const theme = useTheme();
   /* For now we show the history chart only if we have one criteria */
   const [showHistoryChart, setShowHistoryChart] = useState<boolean>(false);
-
   const ruleWindowSizeMS = moment
     .duration(rule.params.timeSize, rule.params.timeUnit)
     .asMilliseconds();
@@ -62,7 +67,7 @@ const AlertDetailsAppSection = ({
 
     setAlertSummaryFields(test);
   }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
-
+  const formatValue = (threshold: number) => String(threshold);
   /**
    * This is part or the requirements (RFC).
    * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
@@ -84,25 +89,40 @@ const AlertDetailsAppSection = ({
         {rule.params.criteria.map((criteria, idx) => {
           const chartCriterion = criteria as PartialCriterion;
           return (
-            <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
-              <CriterionPreview
-                ruleParams={rule.params}
-                logViewReference={{
-                  type: 'log-view-reference',
-                  logViewId: rule.params.logView.logViewId,
-                }}
-                chartCriterion={chartCriterion}
-                showThreshold={true}
-                executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
-                annotations={[
-                  <AlertAnnotation
-                    key={`${alert.start}${chartCriterion.field}${idx}`}
-                    alertStarted={alert.start}
-                  />,
-                ]}
-                filterSeriesByGroupName={[selectedSeries]}
-              />
-            </EuiFlexItem>
+            <EuiFlexGroup key={`${chartCriterion.field}${idx}`}>
+              <EuiFlexItem grow={1}>
+                {chartCriterion.comparator && (
+                  <Threshold
+                    title={`Threshold breached - ${chartCriterion.field}: ${chartCriterion.value}`}
+                    chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                    comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
+                    id={`${chartCriterion.field}-${chartCriterion.value}`}
+                    threshold={rule.params.count.value}
+                    value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
+                    valueFormatter={formatValue}
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={5}>
+                <CriterionPreview
+                  ruleParams={rule.params}
+                  logViewReference={{
+                    type: 'log-view-reference',
+                    logViewId: rule.params.logView.logViewId,
+                  }}
+                  chartCriterion={chartCriterion}
+                  showThreshold={true}
+                  executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+                  annotations={[
+                    <AlertAnnotation
+                      key={`${alert.start}${chartCriterion.field}${idx}`}
+                      alertStarted={alert.start}
+                    />,
+                  ]}
+                  filterSeriesByGroupName={[selectedSeries]}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         })}
         {showHistoryChart && (
