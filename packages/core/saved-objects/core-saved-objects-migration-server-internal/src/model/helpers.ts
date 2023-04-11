@@ -65,7 +65,6 @@ export function mergeMigrationMappingPropertyHashes(
   return {
     ...targetMappings,
     _meta: {
-      ...targetMappings._meta,
       migrationMappingPropertyHashes: {
         ...indexMappings._meta?.migrationMappingPropertyHashes,
         ...targetMappings._meta?.migrationMappingPropertyHashes,
