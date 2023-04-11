@@ -37,7 +37,6 @@ interface CyLoadEndpointDataOptions {
   enableFleetIntegration: boolean;
   generatorSeed: string;
   waitUntilTransformed: boolean;
-  customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
 }
 
 /**
@@ -58,7 +57,6 @@ export const cyLoadEndpointDataHandler = async (
     enableFleetIntegration = true,
     generatorSeed = `cy.${Math.random()}`,
     waitUntilTransformed = true,
-    customIndexFn,
   } = options;
 
   if (waitUntilTransformed) {
@@ -69,23 +67,21 @@ export const cyLoadEndpointDataHandler = async (
   }
 
   // load data into the system
-  const indexedData = customIndexFn
-    ? await customIndexFn()
-    : await indexHostsAndAlerts(
-        esClient as Client,
-        kbnClient,
-        generatorSeed,
-        numHosts,
-        numHostDocs,
-        METADATA_DATASTREAM,
-        POLICY_RESPONSE_INDEX,
-        ENDPOINT_EVENTS_INDEX,
-        ENDPOINT_ALERTS_INDEX,
-        alertsPerHost,
-        enableFleetIntegration,
-        undefined,
-        CurrentKibanaVersionDocGenerator
-      );
+  const indexedData = await indexHostsAndAlerts(
+    esClient as Client,
+    kbnClient,
+    generatorSeed,
+    numHosts,
+    numHostDocs,
+    METADATA_DATASTREAM,
+    POLICY_RESPONSE_INDEX,
+    ENDPOINT_EVENTS_INDEX,
+    ENDPOINT_ALERTS_INDEX,
+    alertsPerHost,
+    enableFleetIntegration,
+    undefined,
+    CurrentKibanaVersionDocGenerator
+  );
 
   if (waitUntilTransformed) {
     await startTransform(esClient, metadataTransformPrefix);

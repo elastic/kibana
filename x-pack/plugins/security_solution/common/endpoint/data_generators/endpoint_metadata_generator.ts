@@ -18,7 +18,7 @@ import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
 interface GetCustomEndpointMetadataGeneratorOptions {
   /** Version for agent/endpoint. Defaults to the stack version */
   version: string;
-  /** OS type for hte generated endpoint hosts */
+  /** OS type for the generated endpoint hosts */
   os: 'macOS' | 'windows' | 'linux';
 }
 
