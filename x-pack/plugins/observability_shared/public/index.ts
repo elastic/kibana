@@ -18,7 +18,7 @@ export type {
 } from './components/page_template/page_template';
 
 export type { NavigationEntry } from './components/page_template/page_template';
-
+export { useObservabilityTourContext } from './components/tour';
 export const plugin = () => {
   return new ObservabilitySharedPlugin();
 };

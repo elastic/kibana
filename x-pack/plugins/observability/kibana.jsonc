@@ -15,34 +15,17 @@
       "dataViews",
       "features",
       "files",
+      "guidedOnboarding",
       "inspector",
       "ruleRegistry",
       "triggersActionsUi",
-      "inspector",
       "unifiedSearch",
       "security",
-      "guidedOnboarding",
-      "share"
+      "share",
+      "observabilityShared"
     ],
-    "optionalPlugins": [
-      "discover",
-      "embeddable",
-      "home",
-      "lens",
-      "licensing",
-      "spaces",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "unifiedSearch",
-      "data",
-      "dataViews",
-      "embeddable",
-      "kibanaReact",
-      "kibanaUtils",
-      "lens",
-      "visualizations"
-    ],
+    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
+    "requiredBundles": ["unifiedSearch", "data", "kibanaReact", "kibanaUtils"],
     "extraPublicDirs": ["common"]
   }
 }
