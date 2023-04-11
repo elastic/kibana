@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
-import { CopyTextIconButton } from '../../../../common/components/copy_text_icon_button';
+import { CopyTextIconButton } from './copy_text_icon_button';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 

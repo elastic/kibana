@@ -19,7 +19,7 @@ import type {
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { CopyTextIconButton } from '../../../../../common/components/copy_text_icon_button';
+import { CopyTextIconButton } from '../../../../../detections/components/rules/rule_execution_status/copy_text_icon_button';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
