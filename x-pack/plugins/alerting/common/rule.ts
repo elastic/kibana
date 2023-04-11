@@ -77,7 +77,7 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface RuleActionFrequency {
+export interface RuleActionFrequency extends SavedObjectAttributes {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
