@@ -101,7 +101,9 @@ export async function storedPackagePoliciesToAgentPermissions(
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
 
-                  const pkgDefinedEs = dataStreams.find(d => d.type == ds.type && d.dataset == ds.dataset)?.elasticsearch;
+                  const pkgDefinedEs = dataStreams.find(
+                    (d) => d.type == ds.type && d.dataset == ds.dataset
+                  )?.elasticsearch;
 
                   if (pkgDefinedEs) {
                     ds.elasticsearch = pkgDefinedEs;
