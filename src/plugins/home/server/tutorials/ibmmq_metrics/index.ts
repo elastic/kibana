@@ -57,6 +57,6 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

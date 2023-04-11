@@ -8,7 +8,7 @@
 import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { EnterpriseSearchEngineDetails, SchemaField } from '../../../common/types/engines';
+import { EnterpriseSearchEngine, SchemaField } from '../../../common/types/engines';
 
 import { fetchEngineFieldCapabilities, parseFieldsCapabilities } from './field_capabilities';
 
@@ -19,8 +19,8 @@ describe('engines field_capabilities', () => {
     },
     asInternalUser: {},
   };
-  const mockEngine: EnterpriseSearchEngineDetails = {
-    indices: [],
+  const mockEngine: EnterpriseSearchEngine = {
+    indices: ['index-001'],
     name: 'unit-test-engine',
     updated_at_millis: 2202018295,
   };
@@ -48,17 +48,18 @@ describe('engines field_capabilities', () => {
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
       ).resolves.toEqual({
-        field_capabilities: fieldCapsResponse,
         fields: [
           {
-            fields: [],
+            aggregatable: false,
             indices: [
               {
                 name: 'index-001',
                 type: 'text',
               },
             ],
+            metadata_field: false,
             name: 'body',
+            searchable: true,
             type: 'text',
           },
         ],
@@ -70,7 +71,7 @@ describe('engines field_capabilities', () => {
       expect(mockClient.asCurrentUser.fieldCaps).toHaveBeenCalledWith({
         fields: '*',
         include_unmapped: true,
-        index: 'search-engine-unit-test-engine',
+        index: ['index-001'],
       });
     });
   });
@@ -100,25 +101,29 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
               type: 'text',
             },
           ],
+          metadata_field: false,
           name: 'body',
+          searchable: true,
           type: 'text',
         },
         {
-          fields: [],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
               type: 'number',
             },
           ],
+          metadata_field: false,
           name: 'views',
+          searchable: false,
           type: 'number',
         },
       ];
@@ -148,27 +153,30 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'keyword',
-                },
-              ],
-              name: 'keyword',
-              type: 'keyword',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
               type: 'text',
             },
           ],
+          metadata_field: false,
           name: 'body',
+          searchable: true,
           type: 'text',
+        },
+        {
+          aggregatable: true,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'keyword',
+            },
+          ],
+          metadata_field: false,
+          name: 'body.keyword',
+          searchable: true,
+          type: 'keyword',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -205,38 +213,43 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
               type: 'object',
             },
           ],
+          metadata_field: false,
           name: 'name',
+          searchable: false,
           type: 'object',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -273,38 +286,43 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
               type: 'nested',
             },
           ],
+          metadata_field: false,
           name: 'name',
+          searchable: false,
           type: 'nested',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -333,7 +351,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -344,7 +362,9 @@ describe('engines field_capabilities', () => {
               type: 'unmapped',
             },
           ],
+          metadata_field: false,
           name: 'body',
+          searchable: true,
           type: 'text',
         },
       ];
@@ -406,50 +426,55 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
-            {
-              name: 'index-002',
-              type: 'object',
-            },
             {
               name: 'index-001',
               type: 'text',
             },
+            {
+              name: 'index-002',
+              type: 'object',
+            },
           ],
+          metadata_field: false,
           name: 'name',
+          searchable: true,
           type: 'conflict',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -518,63 +543,72 @@ describe('engines field_capabilities', () => {
 
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-003',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
-              name: 'index-003',
-              type: 'keyword',
+              name: 'index-001',
+              type: 'text',
             },
             {
               name: 'index-002',
               type: 'object',
             },
             {
+              name: 'index-003',
+              type: 'keyword',
+            },
+          ],
+          metadata_field: false,
+          name: 'name',
+          searchable: true,
+          type: 'conflict',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
               name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+            {
+              name: 'index-003',
               type: 'text',
             },
           ],
-          name: 'name',
-          type: 'conflict',
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+            {
+              name: 'index-003',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
     });
-    it('handles conflicts  & unmapped fields together', () => {
+    it('handles conflicts & unmapped fields together', () => {
       const fieldCapabilities: FieldCapsResponse = {
         fields: {
           body: {
@@ -653,12 +687,8 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [],
+          aggregatable: false,
           indices: [
-            {
-              name: 'index-003',
-              type: 'text',
-            },
             {
               name: 'index-001',
               type: 'unmapped',
@@ -667,58 +697,46 @@ describe('engines field_capabilities', () => {
               name: 'index-002',
               type: 'unmapped',
             },
+            {
+              name: 'index-003',
+              type: 'text',
+            },
           ],
+          metadata_field: false,
           name: 'body',
+          searchable: true,
           type: 'text',
         },
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-                {
-                  name: 'index-003',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-                {
-                  name: 'index-001',
-                  type: 'unmapped',
-                },
-                {
-                  name: 'index-003',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
             {
               name: 'index-002',
               type: 'object',
             },
             {
+              name: 'index-003',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'name',
+          searchable: true,
+          type: 'conflict',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
               name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
               type: 'text',
             },
             {
@@ -726,8 +744,31 @@ describe('engines field_capabilities', () => {
               type: 'unmapped',
             },
           ],
-          name: 'name',
-          type: 'conflict',
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'unmapped',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+            {
+              name: 'index-003',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -772,38 +813,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-                {
-                  name: 'index-002',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -814,8 +824,44 @@ describe('engines field_capabilities', () => {
               type: 'object',
             },
           ],
+          metadata_field: false,
           name: 'name',
+          searchable: false,
           type: 'object',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -860,38 +906,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-                {
-                  name: 'index-002',
-                  type: 'text',
-                },
-              ],
-              name: 'first',
-              type: 'text',
-            },
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-                {
-                  name: 'index-002',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'last',
-              type: 'text',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -902,8 +917,44 @@ describe('engines field_capabilities', () => {
               type: 'nested',
             },
           ],
+          metadata_field: false,
           name: 'name',
+          searchable: false,
           type: 'nested',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'text',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.first',
+          searchable: true,
+          type: 'text',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'name.last',
+          searchable: true,
+          type: 'text',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -940,23 +991,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-001',
-                  type: 'keyword',
-                },
-                {
-                  name: 'index-002',
-                  type: 'unmapped',
-                },
-              ],
-              name: 'keyword',
-              type: 'keyword',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -967,8 +1002,27 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
           ],
+          metadata_field: false,
           name: 'body',
+          searchable: true,
           type: 'text',
+        },
+        {
+          aggregatable: true,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'keyword',
+            },
+            {
+              name: 'index-002',
+              type: 'unmapped',
+            },
+          ],
+          metadata_field: false,
+          name: 'body.keyword',
+          searchable: true,
+          type: 'keyword',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -1005,23 +1059,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'number',
-                },
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'id',
-              type: 'conflict',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -1032,8 +1070,27 @@ describe('engines field_capabilities', () => {
               type: 'object',
             },
           ],
+          metadata_field: false,
           name: 'order',
-          type: 'object', // Should this be 'conflict' too?
+          searchable: false,
+          type: 'object',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'number',
+            },
+          ],
+          metadata_field: false,
+          name: 'order.id',
+          searchable: true,
+          type: 'conflict',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
@@ -1070,23 +1127,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
-          fields: [
-            {
-              fields: [],
-              indices: [
-                {
-                  name: 'index-002',
-                  type: 'number',
-                },
-                {
-                  name: 'index-001',
-                  type: 'text',
-                },
-              ],
-              name: 'id',
-              type: 'conflict',
-            },
-          ],
+          aggregatable: false,
           indices: [
             {
               name: 'index-001',
@@ -1097,8 +1138,27 @@ describe('engines field_capabilities', () => {
               type: 'nested',
             },
           ],
+          metadata_field: false,
           name: 'order',
-          type: 'nested', // Should this be 'conflict' too?
+          searchable: false,
+          type: 'nested',
+        },
+        {
+          aggregatable: false,
+          indices: [
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-002',
+              type: 'number',
+            },
+          ],
+          metadata_field: false,
+          name: 'order.id',
+          searchable: true,
+          type: 'conflict',
         },
       ];
       expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);

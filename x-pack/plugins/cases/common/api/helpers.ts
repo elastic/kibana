@@ -20,6 +20,8 @@ import {
   INTERNAL_BULK_GET_ATTACHMENTS_URL,
   INTERNAL_CONNECTORS_URL,
   INTERNAL_CASE_USERS_URL,
+  INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  CASE_FIND_ATTACHMENTS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -36,6 +38,10 @@ export const getCaseCommentsUrl = (id: string): string => {
 
 export const getCaseCommentDetailsUrl = (caseId: string, commentId: string): string => {
   return CASE_COMMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{comment_id}', commentId);
+};
+
+export const getCaseFindAttachmentsUrl = (caseId: string): string => {
+  return CASE_FIND_ATTACHMENTS_URL.replace('{case_id}', caseId);
 };
 
 export const getCaseCommentDeleteUrl = (caseId: string, commentId: string): string => {
@@ -76,4 +82,8 @@ export const getCaseConnectorsUrl = (id: string): string => {
 
 export const getCaseUsersUrl = (id: string): string => {
   return INTERNAL_CASE_USERS_URL.replace('{case_id}', id);
+};
+
+export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
+  return INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', id);
 };

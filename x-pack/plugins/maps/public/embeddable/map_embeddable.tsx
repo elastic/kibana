@@ -21,6 +21,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -46,6 +47,7 @@ import {
   updateLayerById,
   setGotoWithCenter,
   setEmbeddableSearchContext,
+  setExecutionContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -80,13 +82,14 @@ import {
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
-  getUiActions,
-  getCoreI18n,
-  getHttp,
   getChartsPaletteServiceGetColor,
-  getSpacesApi,
+  getCoreI18n,
+  getExecutionContextService,
+  getHttp,
   getSearchService,
+  getSpacesApi,
   getTheme,
+  getUiActions,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -194,6 +197,8 @@ export class MapEmbeddable
       return;
     }
 
+    this._savedMap.getStore().dispatch(setExecutionContext(this.getExecutionContext()));
+
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
 
@@ -201,6 +206,23 @@ export class MapEmbeddable
     if (this._domNode) {
       this.render(this._domNode);
     }
+  }
+
+  private getExecutionContext() {
+    const parentContext = getExecutionContextService().get();
+    const mapContext: KibanaExecutionContext = {
+      type: APP_ID,
+      name: APP_ID,
+      id: this.id,
+      url: this.output.editPath,
+    };
+
+    return parentContext
+      ? {
+          ...parentContext,
+          child: mapContext,
+        }
+      : mapContext;
   }
 
   private _initializeStore() {
