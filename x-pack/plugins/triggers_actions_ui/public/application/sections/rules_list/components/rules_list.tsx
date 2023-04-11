@@ -409,20 +409,17 @@ export const RulesList = ({
   }, [tableItems]);
 
   const makeRequest = () => {
-    http.post(
-      `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
-      {
-        body: JSON.stringify({
-          title: 'test',
-          duration: 5 * 60 * 60 * 1000,
-          r_rule: {
-            dtstart: '2023-04-11T16:35:29.166Z',
-            count: 1,
-            tzid: 'America/Vancouver',
-          },
-        })
-      }
-    );
+    http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`, {
+      body: JSON.stringify({
+        title: 'test',
+        duration: 5 * 60 * 60 * 1000,
+        r_rule: {
+          dtstart: '2023-04-11T16:35:29.166Z',
+          count: 1,
+          tzid: 'America/Vancouver',
+        },
+      }),
+    });
 
     // http.get(
     //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/0347baf0-c843-11ed-9d9b-1fe3368f7361`,
@@ -434,7 +431,7 @@ export const RulesList = ({
     //     body: JSON.stringify({})
     //   }
     // );
-  }
+  };
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -713,9 +710,7 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openFlyout}
       />
-      <EuiButton onClick={makeRequest}>
-        Make Request
-      </EuiButton>
+      <EuiButton onClick={makeRequest}>Make Request</EuiButton>
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
