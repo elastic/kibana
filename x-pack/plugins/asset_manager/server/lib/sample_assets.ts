@@ -103,6 +103,7 @@ const sampleK8sPods: AssetWithoutTimestamp[] = [
     'asset.name': 'k8s-pod-200xrg1-aws',
     'asset.ean': 'k8s.pod:pod-200xrg1',
     'asset.parents': ['k8s.node:node-101'],
+    'asset.references': ['k8s.cluster:cluster-001'],
   },
   {
     'asset.type': 'k8s.pod',

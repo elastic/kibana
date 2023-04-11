@@ -315,6 +315,48 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /assets/related', () => {
+      describe('basic validation of all relations', () => {
+        const relations = [
+          {
+            name: 'ancestors',
+            ean: 'k8s.node:node-101',
+            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+          },
+          {
+            name: 'descendants',
+            ean: 'k8s.cluster:cluster-001',
+            expectedRelatedEans: ['k8s.node:node-101', 'k8s.node:node-102', 'k8s.node:node-103'],
+          },
+          {
+            name: 'references',
+            ean: 'k8s.pod:pod-200xrg1',
+            expectedRelatedEans: ['k8s.cluster:cluster-001'],
+          },
+        ];
+
+        relations.forEach((relation) => {
+          it(`should return the ${relation.name} assets`, async () => {
+            await createSampleAssets(supertest);
+
+            const getResponse = await supertest
+              .get(RELATED_ASSETS_ENDPOINT)
+              .query({
+                relation: relation.name,
+                size: sampleAssetDocs.length,
+                from: 'now-1d',
+                ean: relation.ean,
+                maxDistance: 1,
+              })
+              .expect(200);
+
+            const relatedEans = getResponse.body.results[relation.name].map(
+              (asset: Asset) => asset['asset.ean']
+            );
+            expect(relatedEans).to.eql(relation.expectedRelatedEans);
+          });
+        });
+      });
+
       describe('response validation', () => {
         it('should return 404 if primary asset not found', async () => {
           await supertest
