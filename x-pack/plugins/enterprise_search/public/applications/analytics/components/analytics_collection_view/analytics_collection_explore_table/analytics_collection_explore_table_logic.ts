@@ -226,7 +226,7 @@ const tablesParams: {
   },
 };
 
-export interface AnalyticsCollectionToolbarLogicValues {
+export interface AnalyticsCollectionExploreTableLogicValues {
   dataView: DataView | null;
   isLoading: boolean;
   items: ExploreTableItem[];
@@ -234,7 +234,7 @@ export interface AnalyticsCollectionToolbarLogicValues {
   sorting: Sorting | null;
 }
 
-export interface AnalyticsCollectionToolbarLogicActions {
+export interface AnalyticsCollectionExploreTableLogicActions {
   findDataView(collection: AnalyticsCollection): { collection: AnalyticsCollection };
   setDataView(dataView: DataView): { dataView: DataView };
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
@@ -245,8 +245,11 @@ export interface AnalyticsCollectionToolbarLogicActions {
   setSorting(sorting?: Sorting): { sorting?: Sorting };
 }
 
-export const AnalyticsCollectionExplorerTablesLogic = kea<
-  MakeLogicType<AnalyticsCollectionToolbarLogicValues, AnalyticsCollectionToolbarLogicActions>
+export const AnalyticsCollectionExploreTableLogic = kea<
+  MakeLogicType<
+    AnalyticsCollectionExploreTableLogicValues,
+    AnalyticsCollectionExploreTableLogicActions
+  >
 >({
   actions: {
     findDataView: (collection) => ({ collection }),
@@ -305,7 +308,7 @@ export const AnalyticsCollectionExplorerTablesLogic = kea<
       },
     };
   },
-  path: ['enterprise_search', 'analytics', 'collections', 'explore', 'tables'],
+  path: ['enterprise_search', 'analytics', 'collections', 'explore', 'table'],
   reducers: () => ({
     dataView: [null, { setDataView: (_, { dataView }) => dataView }],
     isLoading: [

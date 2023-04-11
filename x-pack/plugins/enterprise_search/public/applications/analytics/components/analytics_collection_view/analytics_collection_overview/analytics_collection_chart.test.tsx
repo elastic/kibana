@@ -42,6 +42,8 @@ describe('AnalyticsCollectionChart', () => {
     dataViewQuery: mockedDataViewQuery,
     id: 'mockedId',
     isLoading: false,
+    selectedChart: FilterBy.Searches,
+    setSelectedChart: jest.fn(),
     timeRange: mockedTimeRange,
   };
 

@@ -35,7 +35,7 @@ import { COLLECTION_EXPLORER_PATH } from '../../../routes';
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
-import { AnalyticsCollectionExplorerTablesLogic } from './analytics_collection_explore_table_logic';
+import { AnalyticsCollectionExploreTableLogic } from './analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
   ExploreTableItem,
@@ -235,10 +235,10 @@ export const AnalyticsCollectionExploreTable: React.FC<AnalyticsCollectionExplor
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
   const { findDataView, setSelectedTable, setSorting } = useActions(
-    AnalyticsCollectionExplorerTablesLogic
+    AnalyticsCollectionExploreTableLogic
   );
   const { items, isLoading, selectedTable, sorting } = useValues(
-    AnalyticsCollectionExplorerTablesLogic
+    AnalyticsCollectionExploreTableLogic
   );
   const tabs = tabsByFilter[filterBy];
 
