@@ -194,7 +194,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     </EuiFlexItem>
                   )}
                   {packageInputStream.data_stream.release &&
-                    packageInputStream.data_stream.release !== 'ga' ? (
+                  packageInputStream.data_stream.release !== 'ga' ? (
                     <EuiFlexItem grow={false}>
                       <InlineReleaseBadge
                         release={mapPackageReleaseToIntegrationCardRelease(
@@ -303,15 +303,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                       value: newValue,
                                     },
                                   },
-                              });
-                            }}
-                            errors={inputStreamValidationResults?.vars![varName]}
-                            forceShowErrors={forceShowErrors}
-                            packageType={packageInfo.type}
-                            packageName={packageInfo.name}
-                            datastreams={datastreams}
-                            isEditPage={isEditPage}
-                          />
+                                });
+                              }}
+                              errors={inputStreamValidationResults?.vars![varName]}
+                              forceShowErrors={forceShowErrors}
+                              packageType={packageInfo.type}
+                              packageName={packageInfo.name}
+                              datastreams={datastreams}
+                              isEditPage={isEditPage}
+                            />
                           </EuiFlexItem>
                         );
                       })}
