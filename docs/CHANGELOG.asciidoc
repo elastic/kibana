@@ -47,6 +47,23 @@ Review important information about the {kib} 8.7.0 release.
 Review the following information about the {kib} 8.7.0 release.
 
 [float]
+[[known-issues-8.7.0]]
+=== Known issues
+
+// tag::known-issue-151698[]
+[discrete]
+.Observability Overview shows empty User Experience panel
+[%collapsible]
+====
+*Details* +
+Release 8.7.0 has a bug causing the Observability Overview page to show an empty User Experience panel, even when there is RUM data (fixed in {kibana-pull}154419[#154419]).
+
+*Impact* +
+While the User Experience panel on the Observability Overview page is empty, any RUM data will still be available from the User Experience Dashboard.
+====
+// end::known-issue-151698[]
+
+[float]
 [[breaking-changes-8.7.0]]
 === Breaking changes
 
