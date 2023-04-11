@@ -56,7 +56,6 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
  * on it to which should not be typical but possible due to the split nature of the API's, this will prefer the
  * usage of the non-legacy version. Eventually the "legacyRuleActions" should be removed.
  * @param throttle The throttle from a  "alerting" Saved Object (SO)
- * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
  * @returns The "security_solution" throttle
  */
 export const transformFromAlertThrottle = (rule: RuleAlertType): string => {

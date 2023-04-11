@@ -63,6 +63,8 @@ export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';
+export const CLOUDBEAT_AKS = 'cloudbeat/cis_aks';
+export const CLOUDBEAT_GKE = 'cloudbeat/cis_gke';
 export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
