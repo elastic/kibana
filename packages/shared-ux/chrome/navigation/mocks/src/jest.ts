@@ -11,9 +11,11 @@ import { NavigationServices } from '../../types';
 export const getServicesMock = (): NavigationServices => {
   const getLocator = jest.fn();
   const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
+  const registerNavItemClick = jest.fn();
 
   return {
     getLocator,
+    registerNavItemClick,
     activeNavItemId: 'test.hello.lamp',
     navIsOpen: true,
     recentItems,

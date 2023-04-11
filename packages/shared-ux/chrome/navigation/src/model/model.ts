@@ -16,21 +16,29 @@ import {
   PlatformSectionConfig,
   SolutionProperties,
 } from '../../types';
-import { GetLocatorFn, ILocatorPublic } from '../../types/internal';
+import { GetLocatorFn, ILocatorPublic, NavItemClickFn } from '../../types/internal';
 
 type MyEuiSideNavItem = EuiSideNavItemType<unknown>;
 type OnClickFn = MyEuiSideNavItem['onClick'];
 
-const createSideNavDataFactory = (getLocator: GetLocatorFn, activeNav?: string | number) => {
+/**
+ * Factory function to return a function that processes modeled nav items into EuiSideNavItemType
+ * The factory puts memoized function arguments in scope for iterations of the recursive item processing.
+ */
+const createSideNavDataFactory = (
+  getLocator: GetLocatorFn,
+  registerNavItemClick: NavItemClickFn,
+  activeNav?: string | number
+) => {
   const createSideNavData = (
     parentIds: string | number = '',
     navItems: NavItemProps[],
-    config?: PlatformSectionConfig
-  ): Array<EuiSideNavItemType<unknown>> => {
-    return navItems.reduce<MyEuiSideNavItem[]>((accum, item) => {
+    platformSectionConfig?: PlatformSectionConfig
+  ): Array<EuiSideNavItemType<unknown>> =>
+    navItems.reduce<MyEuiSideNavItem[]>((accum, item) => {
       const { id, name, items: subNav, locator: locatorDefinition } = item;
-      const matcher = config?.properties?.[id];
-      if (matcher?.enabled === false) {
+      const config = platformSectionConfig?.properties?.[id];
+      if (config?.enabled === false) {
         // return accumulated set without the item that is not enabled
         return accum;
       }
@@ -42,22 +50,25 @@ const createSideNavDataFactory = (getLocator: GetLocatorFn, activeNav?: string |
       }
 
       if (locatorId && !locator) {
-        console.warn(`Invalid locator ID provided: ${locatorId}`);
+        // console.warn(`Invalid locator ID provided: ${locatorId}`);
+        return accum;
       }
 
       const fullId = [parentIds, id].filter(Boolean).join('.');
 
       let onClick: OnClickFn | undefined;
-      if (locatorParams) {
+      if (locator && locatorParams) {
+        const outerLocator = locator;
         onClick = () => {
-          locator?.navigateSync(locatorParams ?? {});
+          outerLocator.navigateSync(locatorParams ?? {});
+          registerNavItemClick(fullId);
         };
       }
 
       let filteredSubNav: MyEuiSideNavItem[] | undefined;
       if (subNav) {
         // recursion
-        const nextConfig = config?.properties?.[id];
+        const nextConfig = platformSectionConfig?.properties?.[id];
         filteredSubNav = createSideNavData(fullId, subNav, nextConfig);
       }
 
@@ -77,7 +88,6 @@ const createSideNavDataFactory = (getLocator: GetLocatorFn, activeNav?: string |
       };
       return [...accum, next];
     }, []);
-  };
 
   return createSideNavData;
 };
@@ -94,12 +104,17 @@ export class NavigationModel {
 
   constructor(
     getLocator: GetLocatorFn,
+    registerNavItemClick: NavItemClickFn,
     private activeNavItemId: string | undefined,
     private recentItems: Array<EuiSideNavItemType<unknown>> | undefined,
     private platformConfig: NavigationProps['platformConfig'] | undefined,
     private solutions: SolutionProperties[]
   ) {
-    this.createSideNavData = createSideNavDataFactory(getLocator, activeNavItemId);
+    this.createSideNavData = createSideNavDataFactory(
+      getLocator,
+      registerNavItemClick,
+      activeNavItemId
+    );
   }
 
   public getRecent(): NavigationBucketProps {

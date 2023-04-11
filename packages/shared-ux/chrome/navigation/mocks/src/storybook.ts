@@ -9,6 +9,7 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { SerializableRecord } from '@kbn/utility-types';
 import { action } from '@storybook/addon-actions';
+import { BehaviorSubject } from 'rxjs';
 import { NavigationProps, NavigationServices } from '../../types';
 import { GetLocatorFn } from '../../types/internal';
 
@@ -35,6 +36,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     const { navIsOpen, recentItems } = params;
 
     const navAction = action('Navigate to');
+    const registerNavItemClickAction = action('Register click');
 
     const getLocator: GetLocatorFn = (locatorId: string) => ({
       navigateSync: (locatorParams?: SerializableRecord) => {
@@ -42,19 +44,24 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       },
     });
 
+    const activeNavItemId$ = new BehaviorSubject<string | undefined>(undefined);
+    const registerNavItemClick = (id: string) => {
+      activeNavItemId$.next(id);
+      registerNavItemClickAction(id);
+    };
+
     return {
-      activeNavItemId: 'test1',
+      ...params,
       getLocator,
       navIsOpen,
       recentItems,
+      registerNavItemClick,
     };
   }
 
   getProps(params: Params): NavigationProps {
-    const { activeNavItemId: initiallyOpenSections } = params;
     return {
       ...params,
-      activeNavItemId: initiallyOpenSections,
       homeHref: '#',
     };
   }

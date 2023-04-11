@@ -28,7 +28,8 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
-  const { recentItems, navIsOpen, activeNavItemId, getLocator } = useNavigation();
+  const { recentItems, navIsOpen, activeNavItemId, getLocator, registerNavItemClick } =
+    useNavigation();
 
   const { euiTheme } = useEuiTheme();
 
@@ -52,6 +53,7 @@ export const Navigation = (props: NavigationProps) => {
 
   const nav = new NavigationModel(
     getLocator,
+    registerNavItemClick,
     activeNavItemId,
     euiSideNavRecentItems,
     props.platformConfig,

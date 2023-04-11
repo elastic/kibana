@@ -23,6 +23,11 @@ export type GetLocatorFn = (locatorId: string) => ILocatorPublic | undefined;
 /**
  * @internal
  */
+export type NavItemClickFn = (id: string) => void;
+
+/**
+ * @internal
+ */
 export type SetActiveNavItemIdFn = (activeNavItemId: string) => void;
 
 /**

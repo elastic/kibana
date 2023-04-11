@@ -15,7 +15,7 @@ import { Navigation } from './navigation';
 describe('<Navigation />', () => {
   test('renders with minimal props', () => {
     const div = document.createElement('div');
-    const { getLocator } = getServicesMock();
+    const { getLocator, registerNavItemClick } = getServicesMock();
 
     const homeHref = '#';
     const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
@@ -32,6 +32,7 @@ describe('<Navigation />', () => {
     render(
       <NavigationProvider
         getLocator={getLocator}
+        registerNavItemClick={registerNavItemClick}
         activeNavItemId={activeNavItemId}
         navIsOpen={true}
         recentItems={recentItems}
