@@ -89,6 +89,8 @@ describe('AnalyticsOverView', () => {
       dataViewQuery: 'analytics-events-example',
       id: 'analytics-collection-chart-Analytics-Collection-1',
       searchSessionId: 'session-id',
+      selectedChart: 'Searches',
+      setSelectedChart: expect.any(Function),
       setTimeRange: mockActions.setTimeRange,
       timeRange: {
         from: 'now-90d',
