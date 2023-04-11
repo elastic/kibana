@@ -67,9 +67,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * Start state syncing and fetch data if necessary
    */
   useEffect(() => {
-    const unsubscribe = stateContainer.actions.initializeAndSync();
-    stateContainer.actions.fetchData(true);
-    return () => unsubscribe();
+    const initAndFetch = async () => {
+      await stateContainer.actions.startSync();
+      stateContainer.actions.fetchData(true);
+    };
+    initAndFetch();
+    return () => {
+      stateContainer.actions.stopSync();
+    };
   }, [stateContainer]);
 
   /**

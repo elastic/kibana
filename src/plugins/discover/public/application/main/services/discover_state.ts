@@ -125,9 +125,13 @@ export interface DiscoverStateContainer {
      */
     fetchData: (initial?: boolean) => void;
     /**
-     * Initialize state with filters and query,  start state syncing
+     * Initialize state with filters and query, start state syncing
      */
-    initializeAndSync: () => () => void;
+    startSync: () => Promise<() => void>;
+    /**
+     * stop state syncing
+     */
+    stopSync: () => void;
     /**
      * Load current list of data views, add them to internal state
      */
@@ -201,6 +205,7 @@ export function getDiscoverStateContainer({
   history,
   services,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
+  let unsubscribe: () => void;
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const stateStorage = createKbnUrlStateStorage({
@@ -383,12 +388,12 @@ export function getDiscoverStateContainer({
     return nextSavedSearch;
   };
 
-  const initializeAndSync = () => {
+  const startSync = async () => {
     /**
      * state containers initializing and starting to notify each other about changes
      */
     const unsubscribeData = dataStateContainer.subscribe();
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
+    const appStateInitAndSyncUnsubscribe = await appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
     // updates saved search when app state changes, triggers data fetching if required
@@ -414,12 +419,19 @@ export function getDiscoverStateContainer({
       fetchData();
     });
 
-    return () => {
+    unsubscribe = () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
     };
+    return unsubscribe;
+  };
+
+  const stopSync = () => {
+    if (unsubscribe) {
+      unsubscribe();
+    }
   };
 
   const onCreateDefaultAdHocDataView = async (pattern: string) => {
@@ -464,7 +476,7 @@ export function getDiscoverStateContainer({
       timefilter: services.timefilter,
     });
     const newAppState = getDefaultAppState(nextSavedSearch, services);
-    await appStateContainer.replaceUrlState(newAppState);
+    await appStateContainer.updateUrl(newAppState);
     return nextSavedSearch;
   };
   const fetchData = (initial: boolean = false) => {
@@ -482,7 +494,6 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     searchSessionManager,
     actions: {
-      initializeAndSync,
       fetchData,
       loadDataViewList,
       loadSavedSearch,
@@ -494,6 +505,8 @@ export function getDiscoverStateContainer({
       onUpdateQuery,
       persistAdHocDataView,
       setDataView,
+      startSync,
+      stopSync,
       undoChanges,
       updateAdHocDataViewId,
     },
