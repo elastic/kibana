@@ -126,7 +126,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
             isInvalid={getFieldState('indicator.params.goodStatusCodes').invalid}
           >
             <Controller
-              shouldUnregister={true}
+              shouldUnregister
               name="indicator.params.goodStatusCodes"
               control={control}
               defaultValue={['2xx', '3xx', '4xx']}
@@ -156,7 +156,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
                     field.onChange([]);
                   }}
-                  isClearable={true}
+                  isClearable
                   data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
                 />
               )}

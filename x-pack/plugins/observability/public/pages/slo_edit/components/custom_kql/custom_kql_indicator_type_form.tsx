@@ -71,7 +71,7 @@ export function CustomKqlIndicatorTypeForm() {
                     { defaultMessage: 'Select a timestamp field' }
                   )}
                   data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
-                  isClearable={true}
+                  isClearable
                   isDisabled={!watch('indicator.params.index')}
                   isInvalid={fieldState.invalid}
                   isLoading={!!watch('indicator.params.index') && isLoading}

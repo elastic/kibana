@@ -77,7 +77,7 @@ export function FieldSelector({
         isInvalid={getFieldState(name).invalid}
       >
         <Controller
-          shouldUnregister={true}
+          shouldUnregister
           defaultValue=""
           name={name}
           control={control}
@@ -88,7 +88,7 @@ export function FieldSelector({
               aria-label={placeholder}
               async
               data-test-subj={dataTestSubj}
-              isClearable={true}
+              isClearable
               isDisabled={name !== 'indicator.params.service' && !serviceName}
               isInvalid={fieldState.invalid}
               isLoading={isLoading}

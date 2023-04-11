@@ -69,7 +69,7 @@ export function IndexSelection() {
       isInvalid={getFieldState('indicator.params.index').invalid}
     >
       <Controller
-        shouldUnregister={true}
+        shouldUnregister
         defaultValue=""
         name="indicator.params.index"
         control={control}
@@ -85,7 +85,7 @@ export function IndexSelection() {
             )}
             async
             data-test-subj="indexSelection"
-            isClearable={true}
+            isClearable
             isInvalid={fieldState.invalid}
             isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {

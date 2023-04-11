@@ -34,7 +34,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister={true}
+            shouldUnregister
             name="objective.timesliceTarget"
             control={control}
             defaultValue={95}
@@ -78,7 +78,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
           }
         >
           <Controller
-            shouldUnregister={true}
+            shouldUnregister
             name="objective.timesliceWindow"
             defaultValue="1"
             control={control}

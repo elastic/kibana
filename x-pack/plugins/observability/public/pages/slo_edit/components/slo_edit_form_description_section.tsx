@@ -107,7 +107,7 @@ export function SloEditFormDescriptionSection() {
             })}
           >
             <Controller
-              shouldUnregister={true}
+              shouldUnregister
               name="tags"
               control={control}
               defaultValue={[]}
@@ -153,7 +153,7 @@ export function SloEditFormDescriptionSection() {
                       field.onChange([...values, searchValue]);
                     }
                   }}
-                  isClearable={true}
+                  isClearable
                   data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
                 />
               )}
