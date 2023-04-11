@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
+import { createLiteralValueFromUndefinedRT, inRangeRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const HostMetricTypeRT = rt.keyof({
@@ -40,19 +40,6 @@ export const HostMetadataRT = rt.type({
 
 export const HostSortFieldRT = rt.keyof({ name: null, ...HostMetricTypeRT.keys });
 
-export interface InRangeBrand {
-  readonly InRange: unique symbol;
-}
-
-export type InRange = rt.Branded<number, InRangeBrand>;
-
-export const InRangeRT = rt.brand(
-  rt.number, // codec
-  (n): n is InRange => n > 0 && n <= 100,
-  // refinement of the number type
-  'InRange' // name of this codec
-);
-
 export const GetHostsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     sortField: HostSortFieldRT,
@@ -60,7 +47,7 @@ export const GetHostsRequestBodyPayloadRT = rt.intersection([
     query: rt.UnknownRecord,
   }),
   rt.type({
-    limit: rt.union([InRangeRT, createLiteralValueFromUndefinedRT(10)]),
+    limit: rt.union([inRangeRT(1, 10), createLiteralValueFromUndefinedRT(10)]),
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
     sourceId: rt.string,
     timeRange: TimerangeRT,

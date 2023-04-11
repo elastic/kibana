@@ -21,3 +21,4 @@ export { toJsonSchema } from './src/to_json_schema';
 export { nonEmptyStringRt } from './src/non_empty_string_rt';
 export { createLiteralValueFromUndefinedRT } from './src/literal_value_from_undefined_rt';
 export { createRouteValidationFunction } from './src/route_validation';
+export { inRangeRT, type InRangeBrand, type InRange } from './src/in_range_rt';

@@ -10,7 +10,7 @@ import { assertQueryStructure, hasFilters } from './utils';
 const query = { bool: { must_not: [], filter: [], should: [], must: [] } };
 
 describe('utils', () => {
-  describe('parseFilters', () => {
+  describe('assertQueryStructure', () => {
     test('should successfully parse a partial query object', () => {
       const partialQuery = {
         ...query,
