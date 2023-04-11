@@ -13,7 +13,7 @@ import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { SloActiveAlertsBadge } from './slo_active_alerts_badge';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
