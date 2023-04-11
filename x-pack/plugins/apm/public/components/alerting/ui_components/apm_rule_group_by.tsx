@@ -9,12 +9,11 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import {
-  CONTAINER_ID,
-  KUBERNETES_POD_NAME,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
 } from '../../../../common/es_fields/apm';
+import { TRANSACTION_TYPE } from './alert_details_app_section/types';
 
 interface Props {
   options: { groupBy: string[] | string | undefined };
@@ -22,36 +21,46 @@ interface Props {
   errorOptions?: string[];
 }
 
-const fields: string[] = [
-  SERVICE_VERSION,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_NODE_NAME,
-  KUBERNETES_POD_NAME,
-  CONTAINER_ID,
+const preSelectedFields: string[] = [
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
 ];
+
+const fields: string[] = [TRANSACTION_NAME];
 
 export function APMRuleGroupBy({ options, onChange, errorOptions }: Props) {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupByOption = selectedOptions.map((option) => option.label);
-      onChange(groupByOption);
+      onChange(
+        groupByOption.filter((group) => !preSelectedFields.includes(group))
+      );
     },
     [onChange]
   );
 
-  const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({
-        label: field,
-        color: errorOptions?.includes(field) ? 'danger' : undefined,
-      }))
-    : options.groupBy
-    ? [
-        {
-          label: options.groupBy,
-          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-        },
-      ]
-    : [];
+  const selectedOptions = [
+    ...preSelectedFields.map((field) => ({
+      label: field,
+      color: 'lightgray',
+    })),
+    ...(Array.isArray(options.groupBy)
+      ? options.groupBy.map((field) => ({
+          label: field,
+          color: errorOptions?.includes(field) ? 'danger' : undefined,
+        }))
+      : options.groupBy
+      ? [
+          {
+            label: options.groupBy,
+            color: errorOptions?.includes(options.groupBy)
+              ? 'danger'
+              : undefined,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <EuiComboBox

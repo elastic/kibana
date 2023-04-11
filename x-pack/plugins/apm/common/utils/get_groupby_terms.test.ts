@@ -9,19 +9,28 @@ import { getGroupByTerms } from './get_groupby_terms';
 
 describe('get terms fields based on group-by', () => {
   it('returns single terms field', () => {
-    const ruleParams = { groupBy: 'service.version' };
+    const ruleParams = { groupBy: 'service.name' };
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
-      { field: 'service.version', missing: 'SERVICE_VERSION_NOT_DEFINED' },
+      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
     ]);
   });
 
   it('returns multiple terms fields', () => {
-    const ruleParams = { groupBy: ['service.version', 'container.id'] };
+    const ruleParams = {
+      groupBy: [
+        'service.name',
+        'service.environment',
+        'transaction.type',
+        'transaction.name',
+      ],
+    };
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
-      { field: 'service.version', missing: 'SERVICE_VERSION_NOT_DEFINED' },
-      { field: 'container.id', missing: 'CONTAINER_ID_NOT_DEFINED' },
+      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
+      { field: 'service.environment', missing: 'ENVIRONMENT_NOT_DEFINED' },
+      { field: 'transaction.type', missing: 'TRANSACTION_TYPE_NOT_DEFINED' },
+      { field: 'transaction.name', missing: 'TRANSACTION_NAME_NOT_DEFINED' },
     ]);
   });
 

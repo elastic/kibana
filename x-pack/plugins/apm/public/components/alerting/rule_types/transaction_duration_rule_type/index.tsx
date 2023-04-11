@@ -227,7 +227,7 @@ export function TransactionDurationRuleType(props: Props) {
           'xpack.apm.ruleFlyout.createAlertPerHelpText',
           {
             defaultMessage:
-              'Create an alert for every unique value. For example: "kubernetes.pod.name" or "container.id".',
+              'Create an alert for every unique value. For example: "transaction.name".',
           }
         )}
         fullWidth

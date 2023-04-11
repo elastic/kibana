@@ -11,17 +11,12 @@ import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
 
 export class Service extends Entity<ApmFields> {
-  instance(instanceName: string, kubernetesPodName: string = '', containerId: string = '') {
-    const instanceObj = {
+  instance(instanceName: string) {
+    return new Instance({
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
-    };
-
-    if (kubernetesPodName !== '') instanceObj['kubernetes.pod.name'] = kubernetesPodName;
-    if (containerId !== '') instanceObj['container.id'] = containerId;
-
-    return new Instance(instanceObj);
+    });
   }
 }
 
@@ -39,6 +34,5 @@ export function service(
     'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
-    'service.version': '1.0.0',
   });
 }
