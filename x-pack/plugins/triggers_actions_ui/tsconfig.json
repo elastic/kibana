@@ -51,7 +51,8 @@
     "@kbn/cases-components",
     "@kbn/field-types",
     "@kbn/ecs",
-    "@kbn/alerts-as-data-utils"
+    "@kbn/alerts-as-data-utils",
+    "@kbn/core-ui-settings-server-internal"
   ],
   "exclude": [
     "target/**/*"
