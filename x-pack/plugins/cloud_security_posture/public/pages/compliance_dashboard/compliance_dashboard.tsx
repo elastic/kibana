@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
+import type {
+  PosturePolicyTemplate,
+  ComplianceDashboardData,
+  BaseCspSetupStatus,
+} from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import {
   CloudPosturePage,
@@ -176,6 +180,43 @@ const IntegrationPostureDashboard = ({
   );
 };
 
+const getDefaultTab = (
+  pluginStatus?: BaseCspSetupStatus,
+  cspmStats?: ComplianceDashboardData,
+  kspmStats?: ComplianceDashboardData
+) => {
+  const cspmTotalFindings = cspmStats?.stats.totalFindings;
+  const kspmTotalFindings = kspmStats?.stats.totalFindings;
+  const installedPolicyTemplatesCspm = pluginStatus?.cspm?.status;
+  const installedPolicyTemplatesKspm = pluginStatus?.kspm?.status;
+  let preferredDashboard = CSPM_POLICY_TEMPLATE;
+
+  // cspm has findings
+  if (!!cspmTotalFindings) {
+    preferredDashboard = CSPM_POLICY_TEMPLATE;
+  }
+  // kspm has findings
+  else if (!!kspmTotalFindings) {
+    preferredDashboard = KSPM_POLICY_TEMPLATE;
+  }
+  // cspm is installed
+  else if (
+    installedPolicyTemplatesCspm !== 'unprivileged' &&
+    installedPolicyTemplatesCspm !== 'not-installed'
+  ) {
+    preferredDashboard = CSPM_POLICY_TEMPLATE;
+  }
+  // kspm is installed
+  else if (
+    installedPolicyTemplatesKspm !== 'unprivileged' &&
+    installedPolicyTemplatesKspm !== 'not-installed'
+  ) {
+    preferredDashboard = KSPM_POLICY_TEMPLATE;
+  }
+
+  return preferredDashboard;
+};
+
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const { data: getSetupStatus } = useCspSetupStatusApi();
@@ -192,38 +233,18 @@ export const ComplianceDashboard = () => {
   });
 
   useEffect(() => {
-    const cspmTotalFindings = getCspmDashboardData.data?.stats.totalFindings;
-    const kspmTotalFindings = getKspmDashboardData.data?.stats.totalFindings;
-    const installedPolicyTemplatesCspm = getSetupStatus?.cspm?.status;
-    const installedPolicyTemplatesKspm = getSetupStatus?.kspm?.status;
-    let preferredDashboard = CSPM_POLICY_TEMPLATE;
-
-    // cspm has findings
-    if (!!cspmTotalFindings) {
-      preferredDashboard = CSPM_POLICY_TEMPLATE;
-    }
-    // kspm has findings
-    else if (!!kspmTotalFindings) {
-      preferredDashboard = KSPM_POLICY_TEMPLATE;
-    }
-    // cspm is installed
-    else if (
-      installedPolicyTemplatesCspm !== 'unprivileged' &&
-      installedPolicyTemplatesCspm !== 'not-installed'
-    ) {
-      preferredDashboard = CSPM_POLICY_TEMPLATE;
-    }
-    // kspm is installed
-    else if (
-      installedPolicyTemplatesKspm !== 'unprivileged' &&
-      installedPolicyTemplatesKspm !== 'not-installed'
-    ) {
-      preferredDashboard = KSPM_POLICY_TEMPLATE;
-    }
+    const preferredDashboard = getDefaultTab(
+      getSetupStatus,
+      getCspmDashboardData.data,
+      getKspmDashboardData.data
+    );
     setSelectedTab(preferredDashboard);
   }, [
+    getCspmDashboardData.data,
     getCspmDashboardData.data?.stats.totalFindings,
+    getKspmDashboardData.data,
     getKspmDashboardData.data?.stats.totalFindings,
+    getSetupStatus,
     getSetupStatus?.cspm?.status,
     getSetupStatus?.kspm?.status,
   ]);
