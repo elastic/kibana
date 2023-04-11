@@ -111,7 +111,7 @@ describe('Single Host Metadata (Hosts View)', () => {
     const result = renderHostMetadata();
 
     expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataNoData')).toBeInTheDocument();
   });
 
   it('should show the metadata table if metadata is returned', async () => {

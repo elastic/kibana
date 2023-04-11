@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiSearchBarProps,
-  EuiLoadingChart,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -43,6 +42,27 @@ const FIELD_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadat
 
 const VALUE_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.value', {
   defaultMessage: 'Value',
+});
+
+/**
+ * Component translations
+ */
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.infra.hostsViewPage.hostDetail.metadata.searchForMetadata',
+  {
+    defaultMessage: 'Search for metadata…',
+  }
+);
+
+const NO_METADATA_FOUND = i18n.translate(
+  'xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound',
+  {
+    defaultMessage: 'No metadata found.',
+  }
+);
+
+const LOADING = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.loading', {
+  defaultMessage: 'Loading...',
 });
 
 export const Table = (props: Props) => {
@@ -80,9 +100,7 @@ export const Table = (props: Props) => {
       'data-test-subj': 'infraHostMetadataSearchBarInput',
       incremental: true,
       schema: true,
-      placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForMetadata', {
-        defaultMessage: 'Search for metadata…',
-      }),
+      placeholder: SEARCH_PLACEHOLDER,
     },
     query: searchBarState,
   };
@@ -119,13 +137,9 @@ export const Table = (props: Props) => {
       error={searchError ? `Invalid search: ${searchError.message}` : ''}
       message={
         loading ? (
-          <LoadingPlaceholder />
+          <div>{LOADING}</div>
         ) : (
-          <div data-test-subj="infraMetadataNoData">
-            {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-              defaultMessage: 'No metadata found.',
-            })}
-          </div>
+          <div data-test-subj="infraMetadataNoData">{NO_METADATA_FOUND}</div>
         )
       }
     />
@@ -180,22 +194,5 @@ const ExpandableContent = (props: ExpandableContentProps) => {
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-};
-
-const LoadingPlaceholder = () => {
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '200px',
-        padding: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
-    </div>
   );
 };
