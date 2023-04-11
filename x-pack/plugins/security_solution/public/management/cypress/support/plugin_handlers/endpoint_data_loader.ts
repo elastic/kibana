@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
-import type seedrandom from 'seedrandom';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import pRetry from 'p-retry';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
@@ -26,11 +23,13 @@ import {
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import type { GetCustomEndpointMetadataGeneratorOptions } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
 import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data';
 
-interface CyLoadEndpointDataOptions {
+export interface CyLoadEndpointDataOptions
+  extends Pick<GetCustomEndpointMetadataGeneratorOptions, 'version' | 'os'> {
   numHosts: number;
   numHostDocs: number;
   alertsPerHost: number;
@@ -57,7 +56,13 @@ export const cyLoadEndpointDataHandler = async (
     enableFleetIntegration = true,
     generatorSeed = `cy.${Math.random()}`,
     waitUntilTransformed = true,
+    version = kibanaPackageJson.version,
+    os,
   } = options;
+
+  const DocGenerator = EndpointDocGenerator.custom({
+    CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os }),
+  });
 
   if (waitUntilTransformed) {
     // need this before indexing docs so that the united transform doesn't
@@ -80,7 +85,7 @@ export const cyLoadEndpointDataHandler = async (
     alertsPerHost,
     enableFleetIntegration,
     undefined,
-    CurrentKibanaVersionDocGenerator
+    DocGenerator
   );
 
   if (waitUntilTransformed) {
@@ -97,20 +102,6 @@ export const cyLoadEndpointDataHandler = async (
   }
 
   return indexedData;
-};
-
-// Document Generator override that uses a custom Endpoint Metadata generator and sets the
-// `agent.version` to the current version
-const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
-
-    super(seedValue, MetadataGenerator);
-  }
 };
 
 const stopTransform = async (esClient: Client, transformId: string): Promise<void> => {

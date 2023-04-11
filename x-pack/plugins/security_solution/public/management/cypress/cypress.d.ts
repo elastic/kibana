@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { IndexEndpointHostsCyTaskOptions } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -79,7 +80,7 @@ declare global {
 
       task(
         name: 'indexEndpointHosts',
-        arg?: { count?: number },
+        arg?: IndexEndpointHostsCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<IndexedHostsAndAlertsResponse>;
 

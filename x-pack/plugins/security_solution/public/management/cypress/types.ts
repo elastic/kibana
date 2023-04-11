@@ -7,6 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
+
 type PossibleChainable =
   | Cypress.Chainable<any>
   | ((args?: any) => Cypress.Chainable<any>)
@@ -37,3 +39,7 @@ export type ReturnTypeFromChainable<C extends PossibleChainable> = C extends Cyp
   : C extends (args?: any) => Promise<Cypress.Chainable<infer ValueFromPromiseChainable>>
   ? ValueFromPromiseChainable
   : never;
+
+export type IndexEndpointHostsCyTaskOptions = Partial<
+  { count: number } & Pick<CyLoadEndpointDataOptions, 'version' | 'os'>
+>;

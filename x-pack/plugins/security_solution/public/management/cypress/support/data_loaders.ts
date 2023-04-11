@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
@@ -86,10 +87,14 @@ export const dataLoaders = (
       return null;
     },
 
-    indexEndpointHosts: async (options: { count?: number }) => {
+    indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
       const { kbnClient, esClient } = await stackServicesPromise;
+      const { count: numHosts, version, os } = options;
+
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
-        numHosts: options.count,
+        numHosts,
+        version,
+        os,
       });
     },
 

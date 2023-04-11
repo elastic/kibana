@@ -15,7 +15,7 @@ import { BaseDataGenerator } from './base_data_generator';
 import type { HostMetadataInterface, OSFields } from '../types';
 import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
 
-interface GetCustomEndpointMetadataGeneratorOptions {
+export interface GetCustomEndpointMetadataGeneratorOptions {
   /** Version for agent/endpoint. Defaults to the stack version */
   version: string;
   /** OS type for the generated endpoint hosts */
