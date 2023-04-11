@@ -972,4 +972,88 @@ export function registerIndexRoutes({
       }
     })
   );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      validate: {
+        params: schema.object({
+          modelName: schema.string()
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+
+      try {
+        /*
+        const detachResult = await detachMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: detachResult,
+          headers: { 'content-type': 'application/json' },
+        });
+        */
+        return response.ok({});
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}',
+      validate: {
+        params: schema.object({
+          modelName: schema.string()
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+
+      try {
+        /*
+        const detachResult = await detachMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: detachResult,
+          headers: { 'content-type': 'application/json' },
+        });
+        */
+       return response.ok({});
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
 }
