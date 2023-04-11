@@ -122,7 +122,14 @@ function findChangedProp(actual: any, expected: any) {
 export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
-    dynamic_templates: [],
+    dynamic_templates: [
+      {
+        migration_version: {
+          match: 'migrationVersion.*',
+          mapping: { type: 'version' },
+        },
+      },
+    ],
     properties: {
       type: {
         type: 'keyword',
