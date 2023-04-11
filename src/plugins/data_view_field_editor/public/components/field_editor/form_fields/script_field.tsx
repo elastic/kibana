@@ -258,7 +258,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
                 height="210px"
                 value={value}
                 onChange={setValue}
-                editorDidMount={onEditorDidMount}
+                // editorDidMount={onEditorDidMount}
                 options={{
                   fontSize: 12,
                   minimap: {
