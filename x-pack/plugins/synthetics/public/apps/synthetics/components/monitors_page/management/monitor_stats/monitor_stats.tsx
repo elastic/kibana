@@ -35,7 +35,7 @@ export const MonitorStats = ({
       <EuiFlexGroup gutterSize="l">
         <EuiPanel
           data-test-subj="syntheticsManagementSummaryStats"
-          css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.l, flexGrow: 0 }}
+          css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.l, flexGrow: 1 }}
           hasBorder={true}
           hasShadow={false}
         >
@@ -56,7 +56,13 @@ export const MonitorStats = ({
         </EuiPanel>
 
         <EuiPanel
-          css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.l }}
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: euiTheme.size.l,
+            flexGrow: 12,
+            minWidth: 260,
+          }}
           hasBorder={true}
           hasShadow={false}
         >
