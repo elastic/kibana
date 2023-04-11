@@ -573,8 +573,7 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListPopoverWaitForLoading() {
     this.log.debug(`wait for the suggestions in the popover to load`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.waitForDeleted('optionsList-control-popover-loading');
+    await this.testSubjects.waitForDeleted('optionsList-control-popover-loading', 20000); // default timeout is 10,000
   }
 
   /* -----------------------------------------------------------

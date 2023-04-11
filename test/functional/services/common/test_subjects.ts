@@ -338,11 +338,17 @@ export class TestSubjects extends FtrService {
     });
   }
 
-  public async waitForDeleted(selectorOrElement: string | WebElementWrapper): Promise<void> {
+  public async waitForDeleted(
+    selectorOrElement: string | WebElementWrapper,
+    timeout?: number
+  ): Promise<void> {
     if (typeof selectorOrElement === 'string') {
-      await this.findService.waitForDeletedByCssSelector(testSubjSelector(selectorOrElement));
+      await this.findService.waitForDeletedByCssSelector(
+        testSubjSelector(selectorOrElement),
+        timeout
+      );
     } else {
-      await this.findService.waitForElementStale(selectorOrElement);
+      await this.findService.waitForElementStale(selectorOrElement, timeout);
     }
   }
 
@@ -354,7 +360,7 @@ export class TestSubjects extends FtrService {
     await this.findService.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
   }
 
-  public async waitForHidden(selector: string, timeout?: number): Promise<void> {
+  public async waitForHidden(selector: string, timeout?: number): Promise<voisd> {
     this.log.debug(`TestSubjects.waitForHidden(${selector})`);
     const element = await this.find(selector);
     await this.findService.waitForElementHidden(element, timeout);
