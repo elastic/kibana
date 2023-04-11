@@ -338,11 +338,17 @@ export class TestSubjects extends FtrService {
     });
   }
 
-  public async waitForDeleted(selectorOrElement: string | WebElementWrapper): Promise<void> {
+  public async waitForDeleted(
+    selectorOrElement: string | WebElementWrapper,
+    timeout: number = this.TRY_TIME
+  ): Promise<void> {
     if (typeof selectorOrElement === 'string') {
-      await this.findService.waitForDeletedByCssSelector(testSubjSelector(selectorOrElement));
+      await this.findService.waitForDeletedByCssSelector(
+        testSubjSelector(selectorOrElement),
+        timeout
+      );
     } else {
-      await this.findService.waitForElementStale(selectorOrElement);
+      await this.findService.waitForElementStale(selectorOrElement, timeout);
     }
   }
 
@@ -361,10 +367,14 @@ export class TestSubjects extends FtrService {
   }
 
   public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<void> {
-    await this.retry.tryForTime(timeout, async () => {
+    this.log.debug(`TestSubjects.waitForEnabled(${selector}) with timeout=${timeout}`);
+    const success = await this.retry.tryForTime(timeout, async () => {
       const element = await this.find(selector);
       return (await element.isDisplayed()) && (await element.isEnabled());
     });
+    if (!success) {
+      throw new Error(`The element ${selector} was not enabled within the ${timeout}ms timeout.`);
+    }
   }
 
   public getCssSelector(selector: string): string {
