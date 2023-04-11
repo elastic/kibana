@@ -8,9 +8,7 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 
-export const transformSetManagedDefault = (
-  doc: SavedObjectUnsanitizedDoc<unknown> | undefined
-) => ({
-  transformedDoc: { ...doc!, managed: doc!.managed ?? false },
+export const transformSetManagedDefault = (doc: SavedObjectUnsanitizedDoc) => ({
+  transformedDoc: { ...doc, managed: doc.managed ?? false },
   additionalDocs: [],
 });

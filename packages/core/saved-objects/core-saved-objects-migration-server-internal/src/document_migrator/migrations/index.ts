@@ -7,7 +7,7 @@
  */
 
 import { flow } from 'lodash';
-import { default as get } from 'lodash/fp/get';
+import get from 'lodash/fp/get';
 import { TransformFn } from '../types';
 import { transformMigrationVersion } from './transform_migration_version';
 import { transformSetManagedDefault } from './transform_set_managed_default';

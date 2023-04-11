@@ -254,3 +254,27 @@ export function normalizeNamespace(namespace?: string) {
 export function getCurrentTime() {
   return new Date(Date.now()).toISOString();
 }
+
+/**
+ * Returns the managed boolean to apply to a document. For use by applications to modify behavior for managed saved objects.
+ *
+ * @internal
+ */
+// if managed is provided as an option, set object managed as that
+// if managed isn't provided, then:
+//  if the object has managed set, keep it as is
+// if the object doesn't have manages set, default it to false on create
+// managed: optionsManaged ? optionsManaged : objectManaged ?? false,
+export function setManaged(optionsManaged?: boolean, objectManaged?: boolean) {
+  let managedToReturn: boolean;
+  if (optionsManaged !== undefined) {
+    managedToReturn = optionsManaged;
+  } else {
+    if (objectManaged !== undefined) {
+      managedToReturn = objectManaged;
+    } else {
+      managedToReturn = false;
+    }
+  }
+  return managedToReturn;
+}

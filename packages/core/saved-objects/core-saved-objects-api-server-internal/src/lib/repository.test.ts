@@ -189,6 +189,7 @@ describe('SavedObjectsRepository', () => {
       ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
     },
     migrationVersion: mockMigrationVersion,
+    managed: doc.managed ?? false,
     references: [{ name: 'search_0', type: 'search', id: '123' }],
   });
 
@@ -205,12 +206,14 @@ describe('SavedObjectsRepository', () => {
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
+      managed: false,
     };
     const obj2 = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
+      managed: false,
     };
     const namespace = 'foo-namespace';
 
@@ -259,7 +262,6 @@ describe('SavedObjectsRepository', () => {
         ...mockTimestampFields,
       }),
     ];
-
     describe('client calls', () => {
       it(`should use the ES bulk action by default`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
@@ -318,6 +320,7 @@ describe('SavedObjectsRepository', () => {
 
         const obj1WithSeq = {
           ...obj1,
+          managed: obj1.managed,
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
@@ -330,9 +333,33 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([obj1, obj2], { method: 'create' });
       });
 
+      it(`should use the ES index method if ID is defined, overwrite=true and managed=true in a document`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], {
+          overwrite: true,
+          managed: true,
+        });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index' });
+      });
+
+      it(`should use the ES create method if ID is defined, overwrite=false and managed=true in a document`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { managed: true });
+        expectClientCallArgsAction([obj1, obj2], { method: 'create' });
+      });
+
       it(`formats the ES request`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+      // this test only ensures that the client accepts the managed field in a document
+      it(`formats the ES request with managed=true in a document`, async () => {
+        const obj1WithManagedTrue = { ...obj1, managed: true };
+        const obj2WithManagedTrue = { ...obj2, managed: true };
+        await bulkCreateSuccess(client, repository, [obj1WithManagedTrue, obj2WithManagedTrue]);
+        const body = [...expectObjArgs(obj1WithManagedTrue), ...expectObjArgs(obj2WithManagedTrue)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
@@ -432,6 +459,27 @@ describe('SavedObjectsRepository', () => {
       it(`adds namespace to request body for any types that are single-namespace`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
         const expected = expect.objectContaining({ namespace });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      // this only ensures we don't override any other options
+      it(`adds managed=false to request body if declared for any types that are single-namespace`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: false });
+        const expected = expect.objectContaining({ namespace, managed: false });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+      // this only ensures we don't override any other options
+      it(`adds managed=true to request body if declared for any types that are single-namespace`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: true });
+        const expected = expect.objectContaining({ namespace, managed: true });
         const body = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
@@ -825,10 +873,8 @@ describe('SavedObjectsRepository', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
-
         await bulkCreateSuccess(client, repository, [modifiedObj1, obj2]);
         const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFieldsWithCreated }));
-
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -954,6 +1000,72 @@ describe('SavedObjectsRepository', () => {
           expect.stringMatching(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/)
         );
         expect(result.saved_objects[1].id).toEqual(obj2.id);
+
+        // Assert that managed is not changed
+        expect(result.saved_objects[0].managed).toBeFalsy();
+        expect(result.saved_objects[1].managed).toEqual(obj2.managed);
+      });
+
+      it(`applies the default to managed if not already set`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(client, repository, [
+          obj1WithoutManaged,
+          obj2WithoutManaged,
+        ]);
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`applies the default to managed only to documents without managed`, async () => {
+        const objWithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const result = await bulkCreateSuccess(client, repository, [objWithoutManaged, obj2]);
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`applies the given boolean to managed if not already set`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(
+          client,
+          repository,
+          [obj1WithoutManaged, obj2WithoutManaged],
+          { managed: true }
+        );
+        expect(result).toEqual({
+          saved_objects: [
+            { ...obj1WithoutManaged, managed: true },
+            { ...obj2WithoutManaged, managed: true },
+          ].map((x) => expectCreateResult(x)),
+        });
       });
     });
   });
@@ -2344,7 +2456,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
   });
-
+  // @TINA: expand test suite to include setting managed
   describe('#create', () => {
     beforeEach(() => {
       mockPreflightCheckForCreate.mockReset();
@@ -2953,6 +3065,26 @@ describe('SavedObjectsRepository', () => {
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
           managed: false,
+        });
+      });
+      it(`allows setting 'managed' to true`, async () => {
+        const result = await createSuccess(MULTI_NAMESPACE_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+          managed: true,
+        });
+        expect(result).toEqual({
+          type: MULTI_NAMESPACE_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: true,
         });
       });
     });
@@ -4089,7 +4221,7 @@ describe('SavedObjectsRepository', () => {
       await expect(repository.resolve('foo', '2')).rejects.toEqual(error);
     });
   });
-
+  // @TINA: expand test suite to include (setting?) managed
   describe('#incrementCounter', () => {
     const type = 'config';
     const id = 'one';

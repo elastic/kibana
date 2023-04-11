@@ -115,6 +115,7 @@ import {
   type Either,
   isLeft,
   isRight,
+  setManaged,
 } from './internal_utils';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import { updateObjectsSpaces } from './update_objects_spaces';
@@ -434,7 +435,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
-    const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      overwrite = false,
+      refresh = DEFAULT_REFRESH_SETTING,
+      managed: optionsManaged,
+    } = options;
     const time = getCurrentTime();
 
     let preflightCheckIndexCounter = 0;
@@ -447,9 +452,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }
     >;
     const expectedResults = objects.map<ExpectedResult>((object) => {
-      const { type, id: requestId, initialNamespaces, version } = object;
+      const { type, id: requestId, initialNamespaces, version, managed } = object;
       let error: DecoratedError | undefined;
       let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
+      const objectManaged = managed;
       if (!this._allowedTypes.includes(type)) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else {
@@ -476,7 +482,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         tag: 'Right',
         value: {
           method,
-          object: { ...object, id },
+          object: {
+            ...object,
+            id,
+            managed: setManaged(optionsManaged, objectManaged),
+          },
           ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
         },
       };
@@ -598,6 +608,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           typeMigrationVersion: object.typeMigrationVersion,
           ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+          managed: setManaged(optionsManaged, object.managed),
           updated_at: time,
           created_at: time,
           references: object.references || [],
@@ -675,7 +686,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         });
       }),
     };
-
     return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap, objects);
   }
 
@@ -2446,6 +2456,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       references: body.get?._source.references ?? [],
       version: encodeHitVersion(body),
       attributes: body.get?._source[type],
+      ...(managed && { managed }),
     };
   }
 
