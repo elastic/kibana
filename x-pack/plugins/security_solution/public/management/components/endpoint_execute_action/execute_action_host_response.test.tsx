@@ -18,18 +18,21 @@ import {
   type ExecuteActionHostResponseProps,
 } from './execute_action_host_response';
 import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
+import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from './execute_action_host_response_output';
 
 describe('When using the `ExecuteActionHostResponse` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderProps: ExecuteActionHostResponseProps;
-  const action = new EndpointActionGenerator('seed').generateActionDetails<
-    ResponseActionExecuteOutputContent,
-    ResponseActionsExecuteParameters
-  >({ command: 'execute', agents: ['agent-a'] });
+  let action: ActionDetails;
 
   beforeEach(() => {
     const appTestContext = createAppRootMockRenderer();
+
+    action = new EndpointActionGenerator('seed').generateActionDetails<
+      ResponseActionExecuteOutputContent,
+      ResponseActionsExecuteParameters
+    >({ command: 'execute', agents: ['agent-a'] });
 
     renderProps = {
       action,
@@ -60,7 +63,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     );
   });
 
-  it('should show current working directory', async () => {
+  it('should show execute from directory', async () => {
     render();
     const { queryByTestId } = renderResult;
     expect(queryByTestId(`test-executeResponseOutput-context`)).toBeInTheDocument();
@@ -81,6 +84,13 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     ).toContain('isOpen');
   });
 
+  it('should show execute error output accordion as `open`', async () => {
+    render();
+    expect(renderResult.getByTestId('test-executeResponseOutput-error').className).toContain(
+      'isOpen'
+    );
+  });
+
   it('should show `-` in output accordion when no output content', async () => {
     (renderProps.action as ActionDetails).outputs = {
       'agent-a': {
@@ -98,7 +108,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     ).toContain(`Execution output (truncated)${getEmptyValue()}`);
   });
 
-  it('should show `-` in error accordion when no error content', async () => {
+  it('should NOT show the error accordion when no error content', async () => {
     (renderProps.action as ActionDetails).outputs = {
       'agent-a': {
         type: 'json',
@@ -110,9 +120,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
 
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput-error').textContent).toContain(
-      `Execution error (truncated)${getEmptyValue()}`
-    );
+    expect(renderResult.queryByTestId('test-executeResponseOutput-error')).not.toBeInTheDocument();
   });
 
   it('should not show execute output accordions when no output in action details', () => {
@@ -122,5 +130,28 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     const { queryByTestId } = renderResult;
     expect(queryByTestId(`test-executeResponseOutput-context`)).not.toBeInTheDocument();
     expect(queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).not.toBeInTheDocument();
+  });
+
+  it('should show file truncate messages for STDOUT and STDERR', () => {
+    (renderProps.action as ActionDetails<ResponseActionExecuteOutputContent>).outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          ...(renderProps.action as ActionDetails<ResponseActionExecuteOutputContent>).outputs?.[
+            action.agents[0]
+          ].content!,
+          output_file_stdout_truncated: true,
+          output_file_stderr_truncated: true,
+        },
+      },
+    };
+    const { getByTestId } = render();
+
+    expect(getByTestId('test-executeResponseOutput-output-fileTruncatedMsg')).toHaveTextContent(
+      EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE
+    );
+    expect(getByTestId('test-executeResponseOutput-error-fileTruncatedMsg')).toHaveTextContent(
+      EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE
+    );
   });
 });
