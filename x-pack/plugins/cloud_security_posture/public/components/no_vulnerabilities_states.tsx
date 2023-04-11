@@ -192,7 +192,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
  * */
 export const NoVulnerabilitiesStates = () => {
   const getSetupStatus = useCspSetupStatusApi({
-    options: { refetchInterval: REFETCH_INTERVAL_MS },
+    refetchInterval: REFETCH_INTERVAL_MS,
   });
   const vulnMgmtIntegrationLink = useCspIntegrationLink(VULN_MGMT_POLICY_TEMPLATE);
 
