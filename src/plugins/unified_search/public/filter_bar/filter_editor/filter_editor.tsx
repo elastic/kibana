@@ -126,6 +126,7 @@ export interface FilterEditorComponentProps {
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
   onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   mode?: 'edit' | 'add';
 }
 
@@ -334,6 +335,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <FiltersBuilder
               filters={[localFilter]}
               timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={this.props.filtersForSuggestions}
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}

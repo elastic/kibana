@@ -912,6 +912,8 @@
       "@kbn/ml-plugin/*": ["x-pack/plugins/ml/*"],
       "@kbn/ml-query-utils": ["x-pack/packages/ml/query_utils"],
       "@kbn/ml-query-utils/*": ["x-pack/packages/ml/query_utils/*"],
+      "@kbn/ml-random-sampler-utils": ["x-pack/packages/ml/random_sampler_utils"],
+      "@kbn/ml-random-sampler-utils/*": ["x-pack/packages/ml/random_sampler_utils/*"],
       "@kbn/ml-route-utils": ["x-pack/packages/ml/route_utils"],
       "@kbn/ml-route-utils/*": ["x-pack/packages/ml/route_utils/*"],
       "@kbn/ml-string-hash": ["x-pack/packages/ml/string_hash"],

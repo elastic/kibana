@@ -62,7 +62,8 @@ const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-describe('Detection rules, bulk edit of rule actions', () => {
+// TODO: Fix flakiness and unskip https://github.com/elastic/kibana/issues/154721
+describe.skip('Detection rules, bulk edit of rule actions', () => {
   before(() => {
     cleanKibana();
     login();
