@@ -189,7 +189,7 @@ describe('getCasesTelemetryData', () => {
 
       const filesRes: FileAttachmentAggregationResults = {
         securitySolution: {
-          averageSize: 500,
+          averageSize: { value: 500 },
           topMimeTypes: {
             buckets: [
               {
@@ -204,7 +204,7 @@ describe('getCasesTelemetryData', () => {
           },
         },
         observability: {
-          averageSize: 500,
+          averageSize: { value: 500 },
           topMimeTypes: {
             buckets: [
               {
@@ -219,7 +219,7 @@ describe('getCasesTelemetryData', () => {
           },
         },
         cases: {
-          averageSize: 500,
+          averageSize: { value: 500 },
           topMimeTypes: {
             buckets: [
               {
@@ -233,7 +233,7 @@ describe('getCasesTelemetryData', () => {
             ],
           },
         },
-        averageSize: 500,
+        averageSize: { value: 500 },
         topMimeTypes: {
           buckets: [
             {

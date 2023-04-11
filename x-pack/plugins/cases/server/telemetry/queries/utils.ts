@@ -230,7 +230,7 @@ export const getAttachmentsFrameworkStats = ({
     return emptyAttachmentFramework();
   }
 
-  const averageFileSize = filesAggregations?.averageSize;
+  const averageFileSize = filesAggregations?.averageSize?.value;
   const topMimeTypes = filesAggregations?.topMimeTypes;
 
   return {

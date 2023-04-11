@@ -170,7 +170,7 @@ describe('utils', () => {
 
     const filesRes: FileAttachmentAggregationResults = {
       securitySolution: {
-        averageSize: 500,
+        averageSize: { value: 500 },
         topMimeTypes: {
           buckets: [
             {
@@ -185,7 +185,7 @@ describe('utils', () => {
         },
       },
       observability: {
-        averageSize: 500,
+        averageSize: { value: 500 },
         topMimeTypes: {
           buckets: [
             {
@@ -200,7 +200,7 @@ describe('utils', () => {
         },
       },
       cases: {
-        averageSize: 500,
+        averageSize: { value: 500 },
         topMimeTypes: {
           buckets: [
             {
@@ -214,7 +214,7 @@ describe('utils', () => {
           ],
         },
       },
-      averageSize: 500,
+      averageSize: { value: 500 },
       topMimeTypes: {
         buckets: [
           {
@@ -592,7 +592,7 @@ describe('utils', () => {
             attachmentAggregations: attachmentFramework,
             totalCasesForOwner: 5,
             filesAggregations: {
-              averageSize: 0,
+              averageSize: { value: 0 },
               topMimeTypes: {
                 buckets: [],
               },
@@ -635,7 +635,7 @@ describe('utils', () => {
           getAttachmentsFrameworkStats({
             attachmentAggregations: attachmentFramework,
             filesAggregations: {
-              averageSize: 500,
+              averageSize: { value: 500 },
               topMimeTypes: {
                 buckets: [
                   {
@@ -685,7 +685,7 @@ describe('utils', () => {
           getAttachmentsFrameworkStats({
             attachmentAggregations: attachmentFramework,
             filesAggregations: {
-              averageSize: 0,
+              averageSize: { value: 0 },
               topMimeTypes: {
                 buckets: [
                   {

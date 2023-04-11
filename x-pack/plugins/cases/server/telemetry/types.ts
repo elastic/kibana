@@ -62,7 +62,9 @@ export interface AssigneesFilters {
 }
 
 export interface FileAttachmentAggsResult {
-  averageSize: number;
+  averageSize: {
+    value: number;
+  };
   topMimeTypes: Buckets<string>;
 }
 
