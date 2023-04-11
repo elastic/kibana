@@ -168,7 +168,9 @@ describe('Task Runner', () => {
       },
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
-    getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClientMock.create()),
+    getMaintenanceWindowClientWithRequest: jest
+      .fn()
+      .mockReturnValue(maintenanceWindowClientMock.create()),
   };
 
   const ephemeralTestParams: Array<
