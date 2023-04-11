@@ -33,10 +33,10 @@ import { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/len
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { KibanaLogic } from '../../../shared/kibana';
+import { KibanaLogic } from '../../../../shared/kibana';
 
-import { withLensData, WithLensDataInputProps } from '../../hoc/with_lens_data';
-import { FilterBy, getFormulaByFilter } from '../../utils/get_formula_by_filter';
+import { withLensData, WithLensDataInputProps } from '../../../hoc/with_lens_data';
+import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 const DEFAULT_STROKE_WIDTH = 1;
 const HOVER_STROKE_WIDTH = 3;

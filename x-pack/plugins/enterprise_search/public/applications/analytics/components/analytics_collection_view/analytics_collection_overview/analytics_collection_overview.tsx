@@ -13,16 +13,18 @@ import { EuiFlexGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { FilterBy, getFormulaByFilter } from '../../utils/get_formula_by_filter';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
+
+import { AnalyticsCollectionExploreTable } from '../analytics_collection_explore_table/analytics_collection_explore_table';
+
+import { AnalyticsCollectionToolbar } from '../analytics_collection_toolbar/analytics_collection_toolbar';
+import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
-import { AnalyticsCollectionExploreTable } from './analytics_collection_explore_table/analytics_collection_explore_table';
 import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
-import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar/analytics_collection_toolbar';
-import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const filters = [
   {

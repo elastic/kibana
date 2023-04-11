@@ -26,7 +26,7 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate/analytics_collection_integrate_view';
-import { AnalyticsCollectionOverview } from './analytics_collection_overview';
+import { AnalyticsCollectionOverview } from './analytics_collection_overview/analytics_collection_overview';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';

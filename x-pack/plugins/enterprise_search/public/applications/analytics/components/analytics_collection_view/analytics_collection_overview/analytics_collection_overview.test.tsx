@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
+import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
-import { mockUseParams } from '../../../__mocks__/react_router';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../../__mocks__/react_router';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 
