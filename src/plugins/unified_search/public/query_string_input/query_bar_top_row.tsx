@@ -100,6 +100,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
@@ -121,7 +122,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onTextLangQueryChange: (query: AggregateQuery) => void;
 }
 
-const SharingMetaFields = React.memo(function SharingMetaFields({
+export const SharingMetaFields = React.memo(function SharingMetaFields({
   from,
   to,
   dateFormat,
@@ -138,19 +139,22 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
     return valueAsMoment.toISOString();
   }
 
-  const dateRangePretty = usePrettyDuration({
-    timeFrom: toAbsoluteString(from),
-    timeTo: toAbsoluteString(to),
-    quickRanges: [],
-    dateFormat,
-  });
-
-  return (
-    <div
-      data-shared-timefilter-duration={dateRangePretty}
-      data-test-subj="dataSharedTimefilterDuration"
-    />
-  );
+  try {
+    const dateRangePretty = usePrettyDuration({
+      timeFrom: toAbsoluteString(from),
+      timeTo: toAbsoluteString(to),
+      quickRanges: [],
+      dateFormat,
+    });
+    return (
+      <div
+        data-shared-timefilter-duration={dateRangePretty}
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    );
+  } catch (e) {
+    return <div data-test-subj="dataSharedTimefilterDuration" />;
+  }
 });
 
 type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
@@ -501,6 +505,7 @@ export const QueryBarTopRow = React.memo(
               indexPatterns={props.indexPatterns}
               filters={props.filters}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
@@ -545,6 +550,7 @@ export const QueryBarTopRow = React.memo(
                 iconType={props.iconType}
                 nonKqlMode={props.nonKqlMode}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}

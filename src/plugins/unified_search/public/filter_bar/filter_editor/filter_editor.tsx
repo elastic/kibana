@@ -126,6 +126,7 @@ export interface FilterEditorComponentProps {
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
   onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   mode?: 'edit' | 'add';
 }
 
@@ -334,6 +335,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <FiltersBuilder
               filters={[localFilter]}
               timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={this.props.filtersForSuggestions}
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
@@ -510,7 +512,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     const alias = customLabel || null;
     const {
       $state,
-      meta: { disabled = false, negate = false },
+      meta: { disabled = false },
     } = this.props.filter;
 
     if (!$state || !$state.store || !selectedDataView) {
@@ -533,12 +535,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         },
       };
     } else {
+      // for the combined filters created on the builder, negate should always be false,
+      // the global negation changes only from the exclude/inclue results panel item
       newFilter = buildCombinedFilter(
         BooleanRelation.AND,
         updatedFilters,
         selectedDataView,
         disabled,
-        negate,
+        false,
         alias,
         $state.store
       );
