@@ -7,9 +7,9 @@
 
 import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
+import { pick } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
-import { pick } from 'lodash';
 
 const ASSETS_ENDPOINT = '/api/asset-manager/assets';
 const DIFF_ENDPOINT = `${ASSETS_ENDPOINT}/diff`;
