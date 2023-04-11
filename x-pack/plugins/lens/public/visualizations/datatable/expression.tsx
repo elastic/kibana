@@ -76,7 +76,7 @@ export async function getColumnCellValueActions(
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
-  getType: Promise<(name: string) => IAggType>;
+  getType: Promise<(name: string) => IAggType | undefined>;
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
