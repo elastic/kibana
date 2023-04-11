@@ -147,7 +147,7 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "field": "@timestamp",
+          "field": "log_timestamp",
           "fixed_interval": "2m",
         },
       },
@@ -198,7 +198,7 @@ Object {
   "sync": Object {
     "time": Object {
       "delay": "1m",
-      "field": "@timestamp",
+      "field": "log_timestamp",
     },
   },
   "transform_id": Any<String>,
@@ -243,7 +243,7 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "field": "@timestamp",
+          "field": "log_timestamp",
           "fixed_interval": "1m",
         },
       },
@@ -294,7 +294,7 @@ Object {
   "sync": Object {
     "time": Object {
       "delay": "1m",
-      "field": "@timestamp",
+      "field": "log_timestamp",
     },
   },
   "transform_id": Any<String>,
