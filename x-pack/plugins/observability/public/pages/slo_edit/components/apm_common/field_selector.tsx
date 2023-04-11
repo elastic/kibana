@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
@@ -28,6 +28,7 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  tooltip?: ReactNode;
 }
 
 export function FieldSelector({
@@ -37,6 +38,7 @@ export function FieldSelector({
   label,
   name,
   placeholder,
+  tooltip,
 }: Props) {
   const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
   const serviceName = watch('indicator.params.service');
@@ -62,7 +64,18 @@ export function FieldSelector({
 
   return (
     <EuiFlexItem>
-      <EuiFormRow label={label} isInvalid={getFieldState(name).invalid}>
+      <EuiFormRow
+        label={
+          !!tooltip ? (
+            <span>
+              {label} {tooltip}
+            </span>
+          ) : (
+            label
+          )
+        }
+        isInvalid={getFieldState(name).invalid}
+      >
         <Controller
           shouldUnregister={true}
           defaultValue=""

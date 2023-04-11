@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
 } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -38,13 +39,19 @@ export function ApmAvailabilityIndicatorTypeForm() {
           })}
           placeholder={i18n.translate(
             'xpack.observability.slo.sloEdit.apmAvailability.serviceName.placeholder',
-            {
-              defaultMessage: 'Select the APM service',
-            }
+            { defaultMessage: 'Select the APM service' }
           )}
           fieldName="service.name"
           name="indicator.params.service"
           dataTestSubj="apmAvailabilityServiceSelector"
+          tooltip={
+            <EuiIconTip
+              content={i18n.translate('xpack.observability.slo.sloEdit.apm.serviceName.tooltip', {
+                defaultMessage: 'This is the APM service monitored by this SLO.',
+              })}
+              position="top"
+            />
+          }
         />
         <FieldSelector
           label={i18n.translate(
@@ -99,12 +106,23 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes',
-              {
-                defaultMessage: 'Good status codes',
-              }
-            )}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
+                  defaultMessage: 'Good status codes',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.tooltip',
+                    {
+                      defaultMessage:
+                        'Configure the HTTP status codes defining the "good" or "successful" requests for the SLO.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
             isInvalid={getFieldState('indicator.params.goodStatusCodes').invalid}
           >
             <Controller
@@ -160,6 +178,15 @@ export function ApmAvailabilityIndicatorTypeForm() {
                 defaultMessage: 'Custom filter to apply on the index',
               }
             )}
+            tooltip={
+              <EuiIconTip
+                content={i18n.translate('xpack.observability.slo.sloEdit.apm.filter.tooltip', {
+                  defaultMessage:
+                    'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                })}
+                position="top"
+              />
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
