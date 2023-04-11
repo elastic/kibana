@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import type SuperTest from 'supertest';
+import { MAX_DOCS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
+  getFilesAttachmentReq,
+  getPostCaseRequest,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
+import {
   createCase,
   deleteCases,
   createComment,
@@ -20,6 +23,12 @@ import {
   getCase,
   superUserSpace1Auth,
   getCaseUserActions,
+  deleteAllCaseItems,
+  createAndUploadFile,
+  deleteAllFiles,
+  listFiles,
+  findAttachments,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -31,6 +40,17 @@ import {
   obsOnly,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import {
+  secAllUser,
+  users as api_int_users,
+} from '../../../../../api_integration/apis/cases/common/users';
+import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import {
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../../common/lib/constants';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -40,9 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('delete_cases', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
-      await deleteComments(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should delete a case', async () => {
@@ -106,7 +124,204 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
+    describe('files', () => {
+      afterEach(async () => {
+        await deleteAllFiles({
+          supertest,
+        });
+      });
+
+      it('should delete all files associated with a case', async () => {
+        const { caseInfo: postedCase } = await createCaseWithFiles({
+          supertest: supertestWithoutAuth,
+          fileKind: SECURITY_SOLUTION_FILE_KIND,
+          owner: 'securitySolution',
+        });
+
+        await deleteCases({ supertest: supertestWithoutAuth, caseIDs: [postedCase.id] });
+
+        const [filesAfterDelete, attachmentsAfterDelete] = await Promise.all([
+          listFiles({
+            supertest: supertestWithoutAuth,
+            params: {
+              kind: SECURITY_SOLUTION_FILE_KIND,
+            },
+          }),
+          findAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            query: {
+              perPage: MAX_DOCS_PER_PAGE,
+            },
+          }),
+        ]);
+
+        expect(filesAfterDelete.total).to.be(0);
+        expect(attachmentsAfterDelete.comments.length).to.be(0);
+      });
+
+      it('should delete all files associated with multiple cases', async () => {
+        const [{ caseInfo: postedCase1 }, { caseInfo: postedCase2 }] = await Promise.all([
+          createCaseWithFiles({
+            supertest: supertestWithoutAuth,
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
+          }),
+          createCaseWithFiles({
+            supertest: supertestWithoutAuth,
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
+          }),
+        ]);
+
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [postedCase1.id, postedCase2.id],
+        });
+
+        const [filesAfterDelete, attachmentsAfterDelete, attachmentsAfterDelete2] =
+          await Promise.all([
+            listFiles({
+              supertest: supertestWithoutAuth,
+              params: {
+                kind: SECURITY_SOLUTION_FILE_KIND,
+              },
+            }),
+            findAttachments({
+              supertest: supertestWithoutAuth,
+              caseId: postedCase1.id,
+              query: {
+                perPage: MAX_DOCS_PER_PAGE,
+              },
+            }),
+            findAttachments({
+              supertest: supertestWithoutAuth,
+              caseId: postedCase2.id,
+              query: {
+                perPage: MAX_DOCS_PER_PAGE,
+              },
+            }),
+          ]);
+
+        expect(filesAfterDelete.total).to.be(0);
+        expect(attachmentsAfterDelete.comments.length).to.be(0);
+        expect(attachmentsAfterDelete2.comments.length).to.be(0);
+      });
+    });
+
     describe('rbac', () => {
+      describe('files', () => {
+        // we need api_int_users and roles because they have authorization for the actual plugins (not the fixtures). This
+        // is needed because the fixture plugins are not registered as file kinds
+        before(async () => {
+          await createUsersAndRoles(getService, api_int_users, api_int_roles);
+        });
+
+        after(async () => {
+          await deleteUsersAndRoles(getService, api_int_users, api_int_roles);
+        });
+
+        it('should delete a case when the user has access to delete the case and files', async () => {
+          const { caseInfo: postedCase } = await createCaseWithFiles({
+            supertest: supertestWithoutAuth,
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
+            auth: { user: secAllUser, space: 'space1' },
+          });
+
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [postedCase.id],
+            auth: { user: secAllUser, space: 'space1' },
+          });
+
+          const [filesAfterDelete, attachmentsAfterDelete] = await Promise.all([
+            listFiles({
+              supertest: supertestWithoutAuth,
+              params: {
+                kind: SECURITY_SOLUTION_FILE_KIND,
+              },
+              auth: { user: secAllUser, space: 'space1' },
+            }),
+            findAttachments({
+              supertest: supertestWithoutAuth,
+              caseId: postedCase.id,
+              query: {
+                perPage: MAX_DOCS_PER_PAGE,
+              },
+              auth: { user: secAllUser, space: 'space1' },
+            }),
+          ]);
+
+          expect(filesAfterDelete.total).to.be(0);
+          expect(attachmentsAfterDelete.comments.length).to.be(0);
+        });
+
+        it('should not delete a case when the user does not have access to the file kind of the files', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: secAllUser, space: 'space1' }
+          );
+          const { create: createdFile } = await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              // use observability for the file kind which the security user should not have access to
+              kind: OBSERVABILITY_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceId: createdFile.file.id,
+                owner: 'securitySolution',
+              }),
+            ],
+            auth: { user: secAllUser, space: 'space1' },
+          });
+
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [postedCase.id],
+            auth: { user: secAllUser, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+
+          const [filesAfterDelete, attachmentsAfterDelete] = await Promise.all([
+            listFiles({
+              supertest: supertestWithoutAuth,
+              params: {
+                kind: OBSERVABILITY_FILE_KIND,
+              },
+              auth: { user: superUser, space: 'space1' },
+            }),
+            findAttachments({
+              supertest: supertestWithoutAuth,
+              caseId: postedCase.id,
+              query: {
+                perPage: MAX_DOCS_PER_PAGE,
+              },
+              auth: { user: secAllUser, space: 'space1' },
+            }),
+          ]);
+
+          expect(filesAfterDelete.total).to.be(1);
+          expect(attachmentsAfterDelete.comments.length).to.be(1);
+        });
+      });
+
       it('User: security solution only - should delete a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
@@ -254,4 +469,70 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
   });
+};
+
+const createCaseWithFiles = async ({
+  supertest,
+  fileKind,
+  owner,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  fileKind: string;
+  owner: string;
+  auth?: { user: User; space: string | null };
+}) => {
+  const postedCase = await createCase(supertest, getPostCaseRequest({ owner }), 200, auth);
+
+  const files = await Promise.all([
+    createAndUploadFile({
+      supertest,
+      createFileParams: {
+        name: 'testfile',
+        kind: fileKind,
+        mimeType: 'text/plain',
+        meta: {
+          caseIds: [postedCase.id],
+          owner: [postedCase.owner],
+        },
+      },
+      data: 'abc',
+      auth,
+    }),
+    createAndUploadFile({
+      supertest,
+      createFileParams: {
+        name: 'testfile',
+        kind: fileKind,
+        mimeType: 'text/plain',
+        meta: {
+          caseIds: [postedCase.id],
+          owner: [postedCase.owner],
+        },
+      },
+      data: 'abc',
+      auth,
+    }),
+  ]);
+
+  const caseWithAttachments = await bulkCreateAttachments({
+    supertest,
+    caseId: postedCase.id,
+    params: [
+      getFilesAttachmentReq({
+        externalReferenceId: files[0].create.file.id,
+        owner,
+      }),
+      getFilesAttachmentReq({
+        externalReferenceId: files[1].create.file.id,
+        owner,
+      }),
+    ],
+    auth,
+  });
+
+  return {
+    caseInfo: caseWithAttachments,
+    attachments: files,
+  };
 };
