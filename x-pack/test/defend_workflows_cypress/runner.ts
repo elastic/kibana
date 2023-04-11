@@ -12,7 +12,7 @@ import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endp
 import { FtrProviderContext } from './ftr_provider_context';
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-// import { getLatestAvailableAgentVersion } from './utils';
+import { getLatestAvailableAgentVersion } from './utils';
 
 type RunnerEnv = Record<string, string | undefined>;
 
@@ -22,7 +22,7 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
-  // const kbnClient = getService('kibanaServer');
+  const kbnClient = getService('kibanaServer');
 
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
@@ -35,7 +35,7 @@ async function withFleetAgent(
     kibanaUrl,
     username,
     password,
-    version: '8.7.1-SNAPSHOT',
+    version: getLatestAvailableAgentVersion(kbnClient),
   });
 
   const fleetManager = new FleetManager(log);
