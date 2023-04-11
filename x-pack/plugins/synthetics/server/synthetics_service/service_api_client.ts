@@ -170,6 +170,11 @@ export class ServiceAPIClient {
     }
     const { license } = await this.getLicense();
 
+    if (license.status === 'expired') {
+      this.logger.error('Cannot sync monitors with the Synthetics service. License is expired.');
+      return;
+    }
+
     const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];

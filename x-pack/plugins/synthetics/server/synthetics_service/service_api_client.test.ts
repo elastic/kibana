@@ -6,6 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('axios', () => jest.fn());
 
@@ -17,15 +19,35 @@ import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 
 jest.mock('@kbn/server-http-tools', () => ({
+  ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
 }));
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
 
 describe('getHttpsAgent', () => {
   it('does not use certs if basic auth is set', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
-      { isDev: true } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
     );
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
     expect(result).not.toHaveProperty('cert');
@@ -36,7 +58,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: true } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://example.com');
@@ -47,7 +69,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -58,7 +80,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -77,7 +99,7 @@ describe('checkAccountAccessStatus', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, stackVersion: '8.4' } as UptimeServerSetup
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as UptimeServerSetup
     );
 
     apiClient.locations = [
@@ -134,6 +156,7 @@ describe('callAPI', () => {
     const apiClient = new ServiceAPIClient(logger, config, {
       isDev: true,
       stackVersion: '8.7.0',
+      coreStart: mockCoreStart,
     } as UptimeServerSetup);
 
     const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
@@ -273,6 +296,7 @@ describe('callAPI', () => {
       {
         isDev: true,
         stackVersion: '8.7.0',
+        coreStart: mockCoreStart,
       } as UptimeServerSetup
     );
 
@@ -301,6 +325,57 @@ describe('callAPI', () => {
       method: 'POST',
       url: 'https://service.dev/monitors',
     });
+  });
+
+  it('does not call api when license is expired', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+      license: {
+        status: 'expired',
+        uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+        type: 'platinum',
+        issue_date: '2022-11-29T00:00:00.000Z',
+        issue_date_in_millis: 1669680000000,
+        expiry_date: '2022-12-31T23:59:59.999Z',
+        expiry_date_in_millis: 1735689599999,
+        max_nodes: 100,
+        max_resource_units: null,
+        issued_to: 'Elastic - INTERNAL (development environments)',
+        issuer: 'API',
+        start_date_in_millis: 1669680000000,
+      },
+    });
+
+    const apiClient = new ServiceAPIClient(logger, config, {
+      isDev: true,
+      stackVersion: '8.7.0',
+      coreStart: mockCoreStart,
+    } as UptimeServerSetup);
+
+    const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.callAPI('POST', {
+      monitors: testMonitors,
+      output,
+    });
+
+    expect(axiosSpy).not.toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Cannot sync monitors with the Synthetics service. License is expired.'
+    );
   });
 });
 
