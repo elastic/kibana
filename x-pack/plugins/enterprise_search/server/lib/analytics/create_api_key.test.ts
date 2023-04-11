@@ -37,7 +37,7 @@ describe('createApiKey lib function', () => {
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'website key',
       role_descriptors: {
-        'my-index-key-role': {
+        'website-key-role': {
           cluster: ['post_behavioral_analytics_event'],
         },
       },
