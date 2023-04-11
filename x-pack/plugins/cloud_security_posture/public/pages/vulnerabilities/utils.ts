@@ -6,86 +6,82 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export const getVulnerabilitiesColumns = (): EuiDataGridColumn[] => {
+export const vulnerabilitiesColumns = {
+  actions: 'actions',
+  vulnerability: 'vulnerability',
+  cvss: 'cvss',
+  resource: 'resource',
+  severity: 'severity',
+  package_version: 'package_version',
+  fix_version: 'fix_version',
+};
+
+const defaultColumnProps = () => ({
+  isExpandable: false,
+  actions: {
+    showHide: false,
+    showMoveLeft: false,
+    showMoveRight: false,
+  },
+});
+
+export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => {
   return [
     {
-      id: 'actions',
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.actions,
       initialWidth: 40,
       display: [],
-      isSortable: false,
-      isExpandable: false,
       actions: false,
+      isSortable: false,
       isResizable: false,
     },
     {
-      id: 'vulnerability',
-      displayAsText: 'Vulnerability',
-      isExpandable: false,
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.vulnerability,
+      displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.vulnerability', {
+        defaultMessage: 'Vulnerability',
+      }),
+      initialWidth: 150,
       isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-      initialWidth: 140,
     },
     {
-      id: 'cvss',
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.cvss,
       displayAsText: 'CVSS',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
       initialWidth: 84,
+      isResizable: false,
     },
     {
-      id: 'resource',
-      displayAsText: 'Resource',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.resource,
+      displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.resource', {
+        defaultMessage: 'Resource',
+      }),
     },
     {
-      id: 'severity',
-      displayAsText: 'Severity',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.severity,
+      displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.severity', {
+        defaultMessage: 'Severity',
+      }),
       initialWidth: 100,
     },
     {
-      id: 'package-version',
-      displayAsText: 'Package and Version',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.package_version,
+      displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.packageAndVersion', {
+        defaultMessage: 'Package and Version',
+      }),
     },
     {
-      id: 'fix-version',
-      displayAsText: 'Fix Version',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
+      ...defaultColumnProps(),
+      id: vulnerabilitiesColumns.fix_version,
+      displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.fixVersion', {
+        defaultMessage: 'Fix Version',
+      }),
     },
   ];
 };
