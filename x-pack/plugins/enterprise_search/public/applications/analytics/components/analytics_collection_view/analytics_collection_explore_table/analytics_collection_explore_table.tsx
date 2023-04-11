@@ -166,6 +166,12 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.page',
           { defaultMessage: 'Page' }
         ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) =>
+          (
+            <EuiText size="s" color={euiTheme.colors.primaryText}>
+              <p>{value}</p>
+            </EuiText>
+          ),
         truncateText: true,
       },
       {
