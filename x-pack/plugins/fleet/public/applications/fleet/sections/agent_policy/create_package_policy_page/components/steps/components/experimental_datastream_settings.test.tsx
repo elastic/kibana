@@ -198,7 +198,7 @@ describe('ExperimentDatastreamSettings', () => {
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
     });
 
-    it('should be enabled and checked if registry data streams includes "elasticsearch.index_mode: time_series"', () => {
+    it('should be disabled and checked with a tooltip if registry data streams includes "elasticsearch.index_mode: time_series"', () => {
       const mockSetNewExperimentalDataFeatures = jest.fn();
       const res = createFleetTestRendererMock().render(
         <ExperimentDatastreamSettings
@@ -216,7 +216,7 @@ describe('ExperimentDatastreamSettings', () => {
         />
       );
 
-      const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch');
+      const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switchTooltip');
 
       expect(tsdbSwitch).toBeDisabled();
       expect(tsdbSwitch).toBeChecked();
