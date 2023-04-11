@@ -29,6 +29,7 @@ import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -241,7 +242,7 @@ describe('<Findings />', () => {
     renderFindingsPage();
 
     expectIdsInDoc({
-      be: [],
+      be: [PACKAGE_NOT_INSTALLED_TEST_SUBJECT],
       notToBe: [
         TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,

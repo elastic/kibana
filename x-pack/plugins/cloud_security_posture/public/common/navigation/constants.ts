@@ -6,19 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  CONFIGURATIONS,
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  VULNERABILITIES,
-} from '../../../common/constants';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { PosturePolicyTemplate } from '../../../common/types';
 import type {
   CspBenchmarksPage,
   CspIntegrationDocNavigationItem,
   CspPage,
   CspPageNavigationItem,
-  FindingsTabsType,
 } from './types';
 
 const NAV_ITEMS_NAMES = {
@@ -102,11 +96,4 @@ export const cspIntegrationDocsNavigation: Record<
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
     getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
   },
-};
-
-export const findingsTabs: {
-  [x: string]: FindingsTabsType;
-} = {
-  [findingsNavigation.findings_default.path]: CONFIGURATIONS,
-  [findingsNavigation.vulnerabilities.path]: VULNERABILITIES,
 };
