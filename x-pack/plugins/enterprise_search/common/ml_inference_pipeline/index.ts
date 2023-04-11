@@ -85,7 +85,7 @@ export const generateMlInferencePipelineBody = ({
         { inference },
       ];
     }),
-    // Add single append processor  
+    // Add single append processor
     {
       append: {
         field: '_source._ingest.processors',
@@ -97,12 +97,12 @@ export const generateMlInferencePipelineBody = ({
             types: getMlModelTypesForModelConfig(model),
           },
         ],
-      }
+      },
     },
     // Add set processors
     ...fieldMappings.flatMap(({ targetField }) => {
       const set = getSetProcessorForInferenceType(targetField, inferenceType);
-  
+
       return set ? [{ set }] : [];
     }),
   ];
