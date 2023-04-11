@@ -82,6 +82,32 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     sortText: 'B',
   },
   {
+    label: 'rename',
+    insertText: 'rename',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.renameDoc', {
+      defaultMessage: 'Renames an old column to a new one',
+    }),
+    documentation: {
+      value: buildDocumentation('rename new = old', ['… | rename a = b']),
+    },
+    sortText: 'B',
+  },
+  {
+    label: 'drop',
+    insertText: 'drop',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dropDoc', {
+      defaultMessage: 'Drops columns',
+    }),
+    documentation: {
+      value: buildDocumentation('drop fieldSpecification `,` fieldSpecification *', [
+        '… | drop a,b',
+      ]),
+    },
+    sortText: 'B',
+  },
+  {
     label: 'sort',
     insertText: 'sort',
     kind: 1,

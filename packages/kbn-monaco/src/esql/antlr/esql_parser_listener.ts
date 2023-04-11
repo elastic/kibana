@@ -44,6 +44,10 @@ import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { ProjectCommandContext } from "./esql_parser";
+import { DropCommandContext } from "./esql_parser";
+import { RenameVariableContext } from "./esql_parser";
+import { RenameCommandContext } from "./esql_parser";
+import { RenameClauseContext } from "./esql_parser";
 import { DissectCommandContext } from "./esql_parser";
 import { GrokCommandContext } from "./esql_parser";
 import { CommandOptionsContext } from "./esql_parser";
@@ -516,6 +520,50 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProjectCommand?: (ctx: ProjectCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.dropCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterDropCommand?: (ctx: DropCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dropCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitDropCommand?: (ctx: DropCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.renameVariable`.
+	 * @param ctx the parse tree
+	 */
+	enterRenameVariable?: (ctx: RenameVariableContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.renameVariable`.
+	 * @param ctx the parse tree
+	 */
+	exitRenameVariable?: (ctx: RenameVariableContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.renameCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRenameCommand?: (ctx: RenameCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.renameCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRenameCommand?: (ctx: RenameCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.renameClause`.
+	 * @param ctx the parse tree
+	 */
+	enterRenameClause?: (ctx: RenameClauseContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.renameClause`.
+	 * @param ctx the parse tree
+	 */
+	exitRenameClause?: (ctx: RenameClauseContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.dissectCommand`.

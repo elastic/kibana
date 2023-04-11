@@ -29,6 +29,8 @@ processingCommand
     : evalCommand
     | limitCommand
     | projectCommand
+    | renameCommand
+    | dropCommand
     | dissectCommand
     | grokCommand
     | sortCommand
@@ -168,6 +170,22 @@ orderExpression
 
 projectCommand
     :  PROJECT qualifiedNames
+    ;
+
+dropCommand
+    :  DROP qualifiedNames
+    ;
+
+renameVariable
+   :  identifier
+   ;
+
+renameCommand
+    : RENAME renameClause (COMMA renameClause)*
+    ;
+
+renameClause
+    : renameVariable ASSIGN qualifiedName
     ;
 
 dissectCommand

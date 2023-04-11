@@ -44,10 +44,13 @@ import {
   ProcessingCommandContext,
   SourceIdentifierContext,
   UserVariableContext,
+  RenameVariableContext,
   BooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
   ProjectCommandContext,
+  DropCommandContext,
+  RenameCommandContext,
   DissectCommandContext,
   GrokCommandContext,
 } from '../../antlr/esql_parser';
@@ -173,6 +176,33 @@ export class AutocompleteListener implements ESQLParserListener {
     }
   }
 
+  exitDropCommand?(ctx: DropCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
+      if (qn.text.slice(-1) !== ',') {
+        this.suggestions = this.getEndCommandSuggestions();
+      }
+    }
+  }
+
+  enterRenameCommand(ctx: RenameCommandContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.RENAME;
+  }
+
+  exitRenameCommand?(ctx: RenameCommandContext) {
+    const rc = ctx.renameClause();
+    const commaExists = ctx.COMMA();
+    if (!rc[0].exception) {
+      const qn = rc[0].qualifiedName();
+      if (qn && qn.text) {
+        if (!commaExists.length) {
+          this.suggestions = this.getEndCommandSuggestions();
+        }
+      }
+    }
+  }
+
   exitDissectCommand?(ctx: DissectCommandContext) {
     const qn = ctx.qualifiedNames();
     const pattern = ctx.string();
@@ -221,6 +251,21 @@ export class AutocompleteListener implements ESQLParserListener {
       if (!hasAssign) {
         this.suggestions = [assignOperatorDefinition];
       }
+    }
+  }
+
+  enterRenameVariable?(ctx: RenameVariableContext) {
+    this.suggestions = [];
+  }
+
+  exitRenameVariable(ctx: RenameVariableContext) {
+    if (!ctx.exception && !ctx.text) {
+      this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
+    }
+
+    if (!ctx.exception && ctx.text && ctx.text.slice(-1) !== '=') {
+      this.tables.at(-1)?.push(ctx.text);
+      this.suggestions = [assignOperatorDefinition];
     }
   }
 

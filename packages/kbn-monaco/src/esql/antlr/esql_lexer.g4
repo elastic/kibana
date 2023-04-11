@@ -18,6 +18,8 @@ WHERE : 'where' -> pushMode(EXPRESSION);
 SORT : 'sort' -> pushMode(EXPRESSION);
 LIMIT : 'limit' -> pushMode(EXPRESSION);
 PROJECT : 'project' -> pushMode(EXPRESSION);
+DROP : 'drop' -> pushMode(EXPRESSION);
+RENAME : 'rename' -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
