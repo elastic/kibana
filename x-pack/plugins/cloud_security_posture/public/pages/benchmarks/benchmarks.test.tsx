@@ -17,6 +17,7 @@ import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
@@ -31,7 +32,14 @@ describe('<Benchmarks />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: {
+          cspm: { status: 'indexed' },
+          kspm: { status: 'indexed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
       })
     );
 
@@ -73,7 +81,7 @@ describe('<Benchmarks />', () => {
     const error = new Error('message');
     renderBenchmarks(createReactQueryResponse({ status: 'error', error }));
 
-    expect(screen.getByText(error.message)).toBeInTheDocument();
+    expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('renders the benchmarks table', () => {

@@ -54,6 +54,7 @@ export const getLegendActions = (
       visData,
       columnIndex,
       formatter.deserialize,
+      // FIXME key could be a RangeKey see https://github.com/elastic/kibana/issues/153437
       pieSeries.key
     );
 

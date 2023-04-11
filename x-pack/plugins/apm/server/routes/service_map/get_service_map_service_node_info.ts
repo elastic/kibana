@@ -33,6 +33,8 @@ import {
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -136,12 +138,25 @@ async function getFailedTransactionsRateStats({
       environment,
       apmEventClient,
       serviceName,
-      searchAggregatedTransactions,
       start,
       end,
       kuery: '',
-      numBuckets,
       transactionTypes: defaultTransactionTypes,
+      bucketSizeInSeconds: getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        numBuckets,
+        searchAggregatedTransactions,
+      }).bucketSize,
+      ...(searchAggregatedTransactions
+        ? {
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+          }
+        : {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+          }),
     });
     return {
       value: average,

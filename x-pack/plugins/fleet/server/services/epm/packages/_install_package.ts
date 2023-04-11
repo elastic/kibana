@@ -48,6 +48,8 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import {
   createInstallation,
   restartInstallation,
@@ -151,20 +153,24 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    esReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
-    );
+    const isILMPoliciesDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+    if (!isILMPoliciesDisabled) {
+      esReferences = await withPackageSpan('Install ILM policies', () =>
+        installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      );
 
-    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
-      installIlmForDataStream(
-        packageInfo,
-        paths,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences
-      )
-    ));
+      ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
+        installIlmForDataStream(
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences
+        )
+      ));
+    }
 
     // installs ml models
     esReferences = await withPackageSpan('Install ML models', () =>
@@ -288,6 +294,12 @@ export async function _installPackage({
         type: ASSETS_SAVED_OBJECT_TYPE,
       })
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {

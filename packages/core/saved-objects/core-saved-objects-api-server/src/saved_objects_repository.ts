@@ -306,9 +306,17 @@ export interface ISavedObjectsRepository {
   /**
    * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
    *
-   * @remarks Will throw a conflict error if the `update_by_query` operation returns any failure. In that case
-   *          some references might have been removed, and some were not. It is the caller's responsibility
-   *          to handle and fix this situation if it was to happen.
+   * @remarks
+   * Will throw a conflict error if the `update_by_query` operation returns any failure. In that case some
+   * references might have been removed, and some were not. It is the caller's responsibility to handle and fix
+   * this situation if it was to happen.
+   *
+   * Intended use is to provide clean up of any references to an object which is being deleted (e.g. deleting
+   * a tag). See discussion here: https://github.com/elastic/kibana/issues/135259#issuecomment-1482515139
+   *
+   * When security is enabled, authorization for this method is based only on authorization to delete the object
+   * represented by the {type, id} tuple. Therefore it is recommended only to call this method for the intended
+   * use case.
    *
    * @param {string} type - the type of the object to remove references to
    * @param {string} id - the ID of the object to remove references to
@@ -525,4 +533,14 @@ export interface ISavedObjectsRepository {
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): ISavedObjectsPointInTimeFinder<T, A>;
+
+  /**
+   * If the spaces extension is enabled, it's used to get the current namespace (and optionally throws an error if a
+   * consumer attempted to specify the namespace explicitly).
+   *
+   * If the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that
+   * `'default'` can be used interchangeably with `undefined` i.e. the method always returns `undefined` for the default
+   * namespace.
+   */
+  getCurrentNamespace(namespace?: string): string | undefined;
 }

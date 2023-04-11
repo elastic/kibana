@@ -141,6 +141,10 @@ export const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+    },
+    exploratoryView: {
+      createExploratoryViewUrl: jest.fn(),
+      getAppDataView: jest.fn(),
       ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
@@ -164,6 +168,7 @@ export function MockKibanaProvider<ExtraCore>({
         <SyntheticsStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
