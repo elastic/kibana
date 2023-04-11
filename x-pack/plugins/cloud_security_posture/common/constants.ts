@@ -12,7 +12,7 @@ export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
-
+// TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
 export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';

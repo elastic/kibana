@@ -13,19 +13,19 @@ import { CspClientPluginStartDeps } from '../../types';
 /**
  *  TODO: use perfected kibana data views
  */
-export const useLatestFindingsDataView = (latestFindingsDataView: string) => {
+export const useLatestFindingsDataView = (dataView: string) => {
   const {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const findDataView = async (): Promise<DataView> => {
-    const dataView = (await dataViews.find(latestFindingsDataView))?.[0];
-    if (!dataView) {
-      throw new Error(`${latestFindingsDataView} Findings data view not found`);
+    const dataViewObj = (await dataViews.find(dataView))?.[0];
+    if (!dataViewObj) {
+      throw new Error(`Data view not found [Name: {${dataView}}]`);
     }
 
-    return dataView;
+    return dataViewObj;
   };
 
-  return useQuery(['latest_findings_data_view'], findDataView);
+  return useQuery([`useDataView-${dataView}`], findDataView);
 };

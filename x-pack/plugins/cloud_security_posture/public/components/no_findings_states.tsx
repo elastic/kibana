@@ -30,7 +30,6 @@ import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails, PostureTypes } from '../../common/types';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
-import { getCpmStatus } from '../common/utils/get_cpm_status';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 const REFETCH_INTERVAL_MS = 20000;
@@ -255,7 +254,9 @@ export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes })
   const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
   const status = posturetype === 'cspm' ? statusCspm : statusKspm;
-  const { isLatestFindingsIndexEmpty } = getCpmStatus(getSetupStatus.data);
+  const showConfigurationInstallPrompt =
+    getSetupStatus.data?.kspm?.status === 'not-installed' &&
+    getSetupStatus.data?.cspm?.status === 'not-installed';
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
 
@@ -271,7 +272,7 @@ export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes })
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
-    if (isLatestFindingsIndexEmpty)
+    if (showConfigurationInstallPrompt)
       return (
         <ConfigurationFindingsInstalledEmptyPrompt
           kspmIntegrationLink={kspmIntegrationLink}

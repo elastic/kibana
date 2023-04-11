@@ -16,17 +16,20 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
-import { getCpmStatus } from '../../common/utils/get_cpm_status';
 
 export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
   const { data: getSetupStatus } = useCspSetupStatusApi();
-  const { hasFindings, isCspmInstalled } = getCpmStatus(getSetupStatus);
+  const hasConfigurationFindings =
+    getSetupStatus?.kspm.status === 'indexed' || getSetupStatus?.cspm.status === 'indexed';
 
-  const noFindingsForPostureType = isCspmInstalled ? 'cspm' : 'kspm';
+  // For now, when there are no findings we prompt first to install cspm, if it is already installed we will prompt to
+  // install kspm
+  const noFindingsForPostureType =
+    getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
+  if (!hasConfigurationFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>
