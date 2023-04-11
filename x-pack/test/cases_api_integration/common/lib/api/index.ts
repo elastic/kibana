@@ -13,6 +13,7 @@ import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type SuperTest from 'supertest';
 import {
+  CASES_INDEX,
   CASES_INTERNAL_URL,
   CASES_URL,
   CASE_CONFIGURE_URL,
@@ -43,7 +44,6 @@ import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -191,7 +191,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: SavedObjectsIndexPatterns,
+    index: CASES_INDEX,
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -202,7 +202,7 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
 
 export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: SavedObjectsIndexPatterns,
+    index: CASES_INDEX,
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -213,7 +213,7 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
 
 export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: SavedObjectsIndexPatterns,
+    index: CASES_INDEX,
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -224,7 +224,7 @@ export const deleteComments = async (es: Client): Promise<void> => {
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: SavedObjectsIndexPatterns,
+    index: CASES_INDEX,
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,
@@ -235,7 +235,7 @@ export const deleteConfiguration = async (es: Client): Promise<void> => {
 
 export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: SavedObjectsIndexPatterns,
+    index: CASES_INDEX,
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
@@ -290,7 +290,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: SavedObjectsIndexPatterns,
+      index: CASES_INDEX,
       body: {
         query: {
           term: {
@@ -320,7 +320,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
     unknown
   > = await es.search(
     {
-      index: SavedObjectsIndexPatterns,
+      index: CASES_INDEX,
       body: {
         query: {
           term: {
@@ -343,7 +343,7 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: SavedObjectsIndexPatterns,
+      index: CASES_INDEX,
       body: {
         query: {
           term: {
@@ -725,7 +725,7 @@ export const getSOFromKibanaIndex = async ({
 }) => {
   const esResponse = await es.get<SavedObjectsRawDocSource>(
     {
-      index: SavedObjectsIndexPatterns,
+      index: CASES_INDEX,
       id: `${soType}:${soId}`,
     },
     { meta: true }
