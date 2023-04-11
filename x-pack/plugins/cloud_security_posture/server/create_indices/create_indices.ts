@@ -229,7 +229,6 @@ const updateIndexSafe = async (
   mappings: MappingTypeMapping
 ) => {
   try {
-    // Todo: fix error field [json] doesn't exist, that is preventing putMapping from executing
     await esClient.indices.putMapping({
       index,
       properties: mappings.properties,
