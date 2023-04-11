@@ -157,7 +157,7 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
 
     async clickFieldSelectorDisableAllSelectedButton() {
       await testSubjects.clickWhenNotDisabledWithoutRetry(
-        'aiopsFieldSelectorDisableAllSelectedButton'
+        'aiopsFieldSelectorDeselectAllFieldsButton'
       );
 
       await retry.tryForTime(30 * 1000, async () => {
