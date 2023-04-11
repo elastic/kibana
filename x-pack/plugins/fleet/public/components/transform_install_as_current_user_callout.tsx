@@ -28,7 +28,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
     <EuiCallOut color="primary">
       <FormattedMessage
         id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout"
-        defaultMessage="This package has {count, plural, one {one transform asset} other {# transform assets}} which will be installed with the current user's privileges."
+        defaultMessage="This package has {count, plural, one {one transform asset} other {# transform assets}} which will be created and started with the same roles as the user installing the package."
         values={{ count }}
       />
     </EuiCallOut>

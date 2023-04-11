@@ -192,25 +192,25 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
     >
       <>
         <EuiSpacer size="m" />
-        <EuiToolTip
-          content={getDeferredAssetDescription(type, deferredInstallations.length)}
-          data-test-subject={`fleetAssetsReauthorizeAllTooltip-${isLoading}`}
+
+        <EuiText>{getDeferredAssetDescription(type, deferredInstallations.length)} </EuiText>
+        <EuiSpacer size="m" />
+
+        <EuiButton
+          data-test-subject={`fleetAssetsReauthorizeAll`}
+          disabled={!canReauthorizeTransforms}
+          isLoading={isLoading}
+          size={'m'}
+          onClick={(e: MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            setTransformsToAuthorize(deferredTransforms.map((t) => ({ transformId: t.id })));
+          }}
+          aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
         >
-          <EuiButton
-            isLoading={isLoading}
-            disabled={!canReauthorizeTransforms}
-            size={'m'}
-            onClick={(e: MouseEvent<HTMLButtonElement>) => {
-              e.preventDefault();
-              setTransformsToAuthorize(deferredTransforms.map((t) => ({ transformId: t.id })));
-            }}
-            aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
-          >
-            {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
-              defaultMessage: 'Reauthorize all',
-            })}
-          </EuiButton>
-        </EuiToolTip>
+          {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
+            defaultMessage: 'Reauthorize all',
+          })}
+        </EuiButton>
 
         <EuiSpacer size="m" />
 
@@ -227,7 +227,11 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiToolTip
-                        content={getDeferredAssetDescription(type, 1)}
+                        content={
+                          canReauthorizeTransforms
+                            ? undefined
+                            : getDeferredAssetDescription(type, 1)
+                        }
                         data-test-subject={`fleetAssetsReauthorizeTooltip-${transformId}-${isLoading}`}
                       >
                         <EuiButton

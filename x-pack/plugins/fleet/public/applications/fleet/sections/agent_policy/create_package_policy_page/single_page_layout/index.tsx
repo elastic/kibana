@@ -109,7 +109,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     }
   }, [packageInfoData]);
 
-  console.log('--packageInfo', packageInfo);
   const [agentCount, setAgentCount] = useState<number>(0);
 
   const integrationInfo = useMemo(
