@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { generateAnalyticsApiKey } from './generate_analytics_api_key_logic';
 
-describe('GenerateEngineApiKeyLogic', () => {
+describe('GenerateAnalyticsApiKeyLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
