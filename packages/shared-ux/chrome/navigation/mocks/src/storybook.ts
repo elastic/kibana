@@ -66,6 +66,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     return {
       ...params,
       activeNavItemId: initiallyOpenSections,
+      homeHref: '#',
     };
   }
 }

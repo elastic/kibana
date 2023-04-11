@@ -73,7 +73,7 @@ export const Navigation = (props: NavigationProps) => {
         >
           <EuiHeaderLogo
             iconType="logoElastic"
-            href="#"
+            href={props.homeHref}
             onClick={(e) => e.preventDefault()}
             aria-label="Go to home page"
           />
@@ -86,8 +86,8 @@ export const Navigation = (props: NavigationProps) => {
           return <NavigationBucket {...solutionBucket} key={`solution${idx}`} />;
         })}
 
-        <NavigationBucket {...analytics} />
-        <NavigationBucket {...ml} />
+        {nav.isEnabled('analytics') ? <NavigationBucket {...analytics} /> : null}
+        {nav.isEnabled('ml') ? <NavigationBucket {...ml} /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -95,8 +95,8 @@ export const Navigation = (props: NavigationProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <NavigationBucket {...devTools} />
-        <NavigationBucket {...management} />
+        {nav.isEnabled('devTools') ? <NavigationBucket {...devTools} /> : null}
+        {nav.isEnabled('management') ? <NavigationBucket {...management} /> : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

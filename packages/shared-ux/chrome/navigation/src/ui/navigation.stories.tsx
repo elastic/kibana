@@ -110,11 +110,17 @@ ReducedSections.args = {
     [Platform.DevTools]: { enabled: false },
     [Platform.Management]: {
       properties: {
-        management_stack_monitoring: {
-          enabled: false,
+        root: {
+          enabled: false, // disables the un-named section that contains only "Stack Monitoring"
         },
-        management_integration_management: {
-          enabled: false,
+        integration_management: {
+          properties: {
+            integrations: { enabled: false }, // enable only osquery
+            fleet: { enabled: false }, // enable only osquery
+          },
+        },
+        stack_management: {
+          enabled: false, // disables the stack management section
         },
       },
     },

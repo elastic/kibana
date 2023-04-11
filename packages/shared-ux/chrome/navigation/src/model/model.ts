@@ -159,4 +159,8 @@ export class NavigationModel {
       activeNavItemId: this.activeNavItemId,
     }));
   }
+
+  public isEnabled(sectionId: PlatformId) {
+    return this.platformConfig?.[sectionId]?.enabled !== false;
+  }
 }

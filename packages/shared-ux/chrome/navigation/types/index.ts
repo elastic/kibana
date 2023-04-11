@@ -114,6 +114,10 @@ export interface NavigationProps {
    * Controls over how Platform nav sections appear
    */
   platformConfig?: Partial<PlatformConfigSet>;
+  /**
+   * Target for the logo icon
+   */
+  homeHref: string;
 }
 
 export type NavigationBucketProps = (SolutionProperties &

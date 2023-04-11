@@ -18,6 +18,7 @@ describe('<Navigation />', () => {
     const div = document.createElement('div');
     const { locatorNavigation } = getServicesMock();
 
+    const homeHref = '#';
     const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
     const platformSections = {};
     const solutions = [
@@ -36,7 +37,7 @@ describe('<Navigation />', () => {
         recentItems={recentItems}
         locatorNavigation={locatorNavigation}
       >
-        <Navigation platformConfig={platformSections} solutions={solutions} />
+        <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
       </NavigationProvider>,
       div
     );
