@@ -514,6 +514,13 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
     } else {
       connectKernelAction.message = actionMessage;
       connectKernelAction.status = HostPolicyResponseActionStatus.failure;
+
+      // Find every response config with this action and set it to failure
+      Object.values(appliedPolicy.response.configurations).forEach((responseConfig) => {
+        if (responseConfig.concerned_actions.includes(connectKernelAction.name)) {
+          responseConfig.status = HostPolicyResponseActionStatus.failure;
+        }
+      });
     }
 
     return policyResponse;
