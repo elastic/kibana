@@ -10,15 +10,19 @@ import type { HostPolicyResponse } from '../types';
 import { wrapErrorAndRejectPromise } from './utils';
 import { POLICY_RESPONSE_INDEX } from '../constants';
 
-interface IndexEndpointPolicyResponseOutput {
+export interface IndexedEndpointPolicyResponse {
   policyResponses: HostPolicyResponse[];
+  /** Index (actual, not an alias) where document was created */
+  index: string;
+  /** The document's id in ES */
+  id: string;
 }
 
 export const indexEndpointPolicyResponse = async (
   esClient: Client,
   policyResponse: HostPolicyResponse
-): Promise<IndexEndpointPolicyResponseOutput> => {
-  await esClient
+): Promise<IndexedEndpointPolicyResponse> => {
+  const { _index: index, _id: id } = await esClient
     .index({
       index: POLICY_RESPONSE_INDEX,
       body: policyResponse,
@@ -27,9 +31,29 @@ export const indexEndpointPolicyResponse = async (
     })
     .catch(wrapErrorAndRejectPromise);
 
-  const response: IndexEndpointPolicyResponseOutput = {
+  const response: IndexedEndpointPolicyResponse = {
     policyResponses: [policyResponse],
+    index,
+    id,
   };
 
   return response;
+};
+
+export const deleteIndexedEndpointPolicyResponse = async (
+  esClient: Client,
+  indexedData: IndexedEndpointPolicyResponse
+) => {
+  await esClient
+    .delete(
+      {
+        index: indexedData.index,
+        id: indexedData.id,
+        refresh: 'wait_for',
+      },
+      {
+        ignore: [404],
+      }
+    )
+    .catch(wrapErrorAndRejectPromise);
 };

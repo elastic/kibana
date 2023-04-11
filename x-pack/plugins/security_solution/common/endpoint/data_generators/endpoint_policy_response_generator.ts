@@ -6,7 +6,6 @@
  */
 
 import type { DeepPartial } from '@kbn/utility-types';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
 import type { HostPolicyResponse, HostPolicyResponseAppliedAction } from '../types';
@@ -56,7 +55,7 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
       '@timestamp': ts,
       agent: {
         id: agentVersion,
-        version: kibanaPackageJson.version,
+        version: '8.8.0',
       },
       elastic: {
         agent: {
@@ -484,6 +483,7 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
     const policyResponse = this.generate(
       mergeAndReplaceArrays(
         {
+          // using `success` below for status only so that we don't get back any other errors
           Endpoint: { policy: { applied: { status: HostPolicyResponseActionStatus.success } } },
         },
         overrides
