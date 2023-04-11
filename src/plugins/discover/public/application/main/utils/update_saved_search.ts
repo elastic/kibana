@@ -12,20 +12,30 @@ import { cloneDeep } from 'lodash';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 
-export function updateSavedSearch(
-  {
-    savedSearch,
-    dataView,
-    state,
-    services,
-  }: {
-    savedSearch: SavedSearch;
-    dataView?: DataView;
-    state?: DiscoverAppState;
-    services: DiscoverServices;
-  },
-  updateByFilterAndQuery: boolean = false
-) {
+/**
+ * Updates the given savedSearch by the dataView / appState
+ * Given updateByFilterAndQuery is set to true, data service part responsible for filter and query
+ * are used to update which is usually the case, but not when the savedSearch is loaded and updated
+ * since then the services are not set to the right values
+ * @param savedSearch
+ * @param dataView
+ * @param state
+ * @param services
+ * @param updateByFilterAndQuery
+ */
+export function updateSavedSearch({
+  savedSearch,
+  dataView,
+  state,
+  services,
+  updateByFilterAndQuery = false,
+}: {
+  savedSearch: SavedSearch;
+  dataView?: DataView;
+  state?: DiscoverAppState;
+  services: DiscoverServices;
+  updateByFilterAndQuery?: boolean;
+}) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();

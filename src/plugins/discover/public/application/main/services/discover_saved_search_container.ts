@@ -141,15 +141,13 @@ export function getSavedSearchContainer({
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     const actualDataView = dataView ? dataView : nextSavedSearch.searchSource.getField('index')!;
-    const nextSavedSearchToSet = updateSavedSearch(
-      {
-        savedSearch: { ...nextSavedSearch },
-        dataView: actualDataView,
-        state: newAppState,
-        services,
-      },
-      true
-    );
+    const nextSavedSearchToSet = updateSavedSearch({
+      savedSearch: { ...nextSavedSearch },
+      dataView: actualDataView,
+      state: newAppState,
+      services,
+      updateByFilterAndQuery: true,
+    });
     return set(nextSavedSearchToSet);
   };
 
@@ -177,15 +175,13 @@ export function getSavedSearchContainer({
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
 
-    const nextSavedSearch = updateSavedSearch(
-      {
-        savedSearch: { ...previousSavedSearch },
-        dataView,
-        state: nextState || {},
-        services,
-      },
-      updateByFilterAndQuery
-    );
+    const nextSavedSearch = updateSavedSearch({
+      savedSearch: { ...previousSavedSearch },
+      dataView,
+      state: nextState || {},
+      services,
+      updateByFilterAndQuery,
+    });
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);

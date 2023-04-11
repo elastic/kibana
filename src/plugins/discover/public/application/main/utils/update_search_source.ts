@@ -14,7 +14,7 @@ import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
 /**
- * Helper function to update the given searchSource before fetching/sharing/persisting
+ * Helper function to update the given searchSource before fetching
  */
 export function updateVolatileSearchSource(
   searchSource: ISearchSource,
