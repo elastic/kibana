@@ -15,7 +15,9 @@ import {
   CommentPatchRequest,
   CommentRequest,
   CommentResponse,
+  CommentsResponse,
   CommentType,
+  getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
@@ -279,4 +281,27 @@ export const bulkDeleteFileAttachments = async ({
     .send({ ids: fileIds })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+};
+
+export const findAttachments = async ({
+  supertest,
+  caseId,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CommentsResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return body;
 };

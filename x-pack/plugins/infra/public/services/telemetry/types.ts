@@ -21,7 +21,7 @@ export interface HostsViewQuerySubmittedParams {
   control_filters: string[];
   filters: string[];
   interval: string;
-  query: string;
+  query: string | { [key: string]: any };
 }
 
 export interface HostEntryClickedParams {
