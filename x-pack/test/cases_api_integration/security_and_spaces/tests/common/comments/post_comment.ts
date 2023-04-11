@@ -39,7 +39,6 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
-  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -180,13 +179,17 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseWithAttachments.totalComment).to.be(1);
           expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
+      });
+    });
 
-        it('should create a single file attachment with multiple file objects within it', async () => {
+    describe('unhappy path', () => {
+      describe('files', () => {
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
           const files = [fileMetadata(), fileMetadata()];
 
-          const caseWithAttachments = await createComment({
+          await createComment({
             supertest,
             caseId: postedCase.id,
             params: getFilesAttachmentReq({
@@ -194,38 +197,10 @@ export default ({ getService }: FtrProviderContext): void => {
                 files,
               },
             }),
+            expectedHttpCode: 400,
           });
-
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
         });
 
-        it('should create a file attachments when there are 99 attachments already within the case', async () => {
-          const fileRequests = [...Array(99).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          const caseWith100Files = await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: getFilesAttachmentReq(),
-          });
-
-          expect(caseWith100Files.comments?.length).to.be(100);
-        });
-      });
-    });
-
-    describe('unhappy path', () => {
-      describe('files', () => {
         it('should return a 400 when attaching a file with metadata that is missing the file field', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
@@ -251,24 +226,6 @@ export default ({ getService }: FtrProviderContext): void => {
             params: getFilesAttachmentReq({
               externalReferenceMetadata: {},
             }),
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('should return a 400 when attempting to create a file attachment when the case already has 100 files attached', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: getFilesAttachmentReq(),
             expectedHttpCode: 400,
           });
         });
@@ -812,7 +769,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const caseIds = cases.map((theCase) => theCase.id);
 
-          expect(alert['kibana.alert.case_ids']).eql(caseIds);
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
 
           return { alert, cases };
         };
@@ -851,7 +808,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          expect(alert['kibana.alert.case_ids']).eql([postedCase.id]);
+          expect(alert[ALERT_CASE_IDS]).eql([postedCase.id]);
         });
 
         it('should not add more than 10 cases to an alert', async () => {

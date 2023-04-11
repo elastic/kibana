@@ -167,6 +167,5 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasConnectors: true,
   hasDefaultIngestPipeline: true,
   hasNativeConnectors: true,
-  hasSearchApplications: false,
   hasWebCrawler: true,
 };

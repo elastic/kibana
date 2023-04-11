@@ -159,11 +159,6 @@ export const ActionTypeForm = ({
     return defaultParams;
   };
 
-  const handleOnConnectorSelected = (id: string) => {
-    onConnectorSelected(id);
-    setUseDefaultMessage(true);
-  };
-
   const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
     try {
       if (!actionThrottle) return [false, false];
@@ -263,8 +258,10 @@ export const ActionTypeForm = ({
       )}
       onThrottleChange={useCallback(
         (throttle: number | null, throttleUnit: string) => {
-          setActionThrottle(throttle);
-          setActionThrottleUnit(throttleUnit);
+          if (throttle) {
+            setActionThrottle(throttle);
+            setActionThrottleUnit(throttleUnit);
+          }
           setActionFrequencyProperty(
             'throttle',
             throttle ? `${throttle}${throttleUnit}` : null,
@@ -347,7 +344,7 @@ export const ActionTypeForm = ({
             actionTypesIndex={actionTypesIndex}
             actionTypeRegistered={actionTypeRegistered}
             connectors={connectors}
-            onConnectorSelected={handleOnConnectorSelected}
+            onConnectorSelected={onConnectorSelected}
           />
         </EuiFormRow>
         <EuiSpacer size="xl" />

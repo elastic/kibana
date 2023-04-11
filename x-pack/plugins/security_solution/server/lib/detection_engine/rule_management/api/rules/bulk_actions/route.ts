@@ -332,6 +332,7 @@ export const performBulkActionRoute = (
         const rulesClient = ctx.alerting.getRulesClient();
         const exceptionsClient = ctx.lists?.getExceptionListClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const actionsClient = (await ctx.actions)?.getActionsClient();
 
         const { getExporter, getClient } = (await ctx.core).savedObjects;
         const client = getClient({ includedHiddenTypes: ['action'] });
@@ -568,7 +569,8 @@ export const performBulkActionRoute = (
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
               logger,
               exporter,
-              request
+              request,
+              actionsClient
             );
 
             const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;

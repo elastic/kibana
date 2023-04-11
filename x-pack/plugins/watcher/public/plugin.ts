@@ -29,7 +29,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
 
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home, charts }: Dependencies
+    { licensing, management, data, home, charts, licenseManagement }: Dependencies
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
 
@@ -48,7 +48,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           chrome: { docTitle },
           i18n: i18nDep,
           docLinks,
-          savedObjects,
           application,
           executionContext,
         } = coreStart;
@@ -69,12 +68,12 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           docLinks,
           setBreadcrumbs,
           theme: charts.theme,
-          savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
           getUrlForApp: application.getUrlForApp,
           theme$,
+          licenseManagementLocator: licenseManagement?.locator,
           executionContext,
         });
 

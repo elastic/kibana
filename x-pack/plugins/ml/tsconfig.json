@@ -46,6 +46,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/ml-string-hash",
+    "@kbn/ml-trained-models-utils",
     "@kbn/core-http-browser",
     "@kbn/home-plugin",
     "@kbn/management-plugin",
@@ -67,7 +68,6 @@
     "@kbn/field-types",
     "@kbn/es-ui-shared-plugin",
     "@kbn/ace",
-    "@kbn/saved-objects-plugin",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
@@ -87,5 +87,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/monaco",
     "@kbn/repo-info",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/ml-route-utils",
   ],
 }

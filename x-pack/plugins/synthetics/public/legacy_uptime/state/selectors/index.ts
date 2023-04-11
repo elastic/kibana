@@ -19,15 +19,6 @@ export const monitorDetailsSelector = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];
 };
 
-export const deleteMonitorLoadingSelector = (state: AppState, id?: string) => {
-  if (!id) return (state.deleteMonitor.loading ?? []).length > 0;
-  return state.deleteMonitor.loading?.includes(id) ?? false;
-};
-
-export const deleteMonitorSuccessSelector = (state: AppState, id: string) => {
-  return state.deleteMonitor.deletedMonitorIds?.includes(id) ?? false;
-};
-
 export const monitorDetailsLoadingSelector = (state: AppState) => state.monitor.loading;
 
 export const monitorLocationsSelector = (state: AppState, monitorId: string) => {
@@ -67,8 +58,6 @@ export const hasNewMLJobSelector = ({ ml }: AppState) => ml.createJob;
 export const isMLJobCreatingSelector = ({ ml }: AppState) => ml.createJob.loading;
 
 export const isMLJobDeletingSelector = ({ ml }: AppState) => ml.deleteJob.loading;
-export const isAnomalyAlertDeletingSelector = ({ alerts }: AppState) =>
-  alerts.alertDeletion.loading;
 
 export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
@@ -85,9 +74,6 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.in
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
-export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
-  monitorManagementList;
-
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
@@ -101,8 +87,3 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
-
-export const uptimeWriteSelector = (state: AppState) => state;
-
-export const syntheticsServiceAllowedSelector = (state: AppState) =>
-  state.monitorManagementList.syntheticsService;

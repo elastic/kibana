@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
-import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
@@ -41,7 +40,18 @@ const bodySchema = schema.object({
   throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: actionsSchema,
-  notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
+  notify_when: schema.maybe(
+    schema.nullable(
+      schema.oneOf(
+        [
+          schema.literal('onActionGroupChange'),
+          schema.literal('onActiveAlert'),
+          schema.literal('onThrottleInterval'),
+        ],
+        { validate: validateNotifyWhenType }
+      )
+    )
+  ),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
@@ -64,6 +74,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -103,6 +114,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });
 
 export const updateRuleRoute = (
@@ -124,15 +136,7 @@ export const updateRuleRoute = (
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await rulesClient.update(
-              rewriteBodyReq({
-                id,
-                data: {
-                  ...rule,
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
-                },
-              })
-            );
+            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

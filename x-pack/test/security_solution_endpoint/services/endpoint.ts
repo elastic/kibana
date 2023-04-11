@@ -116,7 +116,7 @@ export class EndpointTestResources extends FtrService {
       customIndexFn,
     } = options;
 
-    if (waitUntilTransformed) {
+    if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
       await this.stopTransform(metadataTransformPrefix);
@@ -139,15 +139,17 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator,
-          false
+          CurrentKibanaVersionDocGenerator
         );
 
-    if (waitUntilTransformed) {
+    if (waitUntilTransformed && customIndexFn) {
       await this.startTransform(metadataTransformPrefix);
       const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
       await this.waitForEndpoints(metadataIds, waitTimeout);
       await this.startTransform(METADATA_UNITED_TRANSFORM);
+    }
+
+    if (waitUntilTransformed) {
       const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
       await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
