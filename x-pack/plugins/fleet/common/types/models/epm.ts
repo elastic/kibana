@@ -472,7 +472,7 @@ export type ExperimentalIndexingFeature =
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;
-  features: Record<ExperimentalIndexingFeature, boolean>;
+  features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
 export interface Installation extends SavedObjectAttributes {
@@ -494,7 +494,7 @@ export interface Installation extends SavedObjectAttributes {
   // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
   experimental_data_stream_features?: Array<{
     data_stream: string;
-    features: Record<ExperimentalIndexingFeature, boolean>;
+    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
 }
 

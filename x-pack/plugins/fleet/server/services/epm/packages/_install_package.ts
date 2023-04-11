@@ -157,20 +157,24 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    esReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
-    );
+    const isILMPoliciesDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+    if (!isILMPoliciesDisabled) {
+      esReferences = await withPackageSpan('Install ILM policies', () =>
+        installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      );
 
-    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
-      installIlmForDataStream(
-        packageInfo,
-        paths,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences
-      )
-    ));
+      ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
+        installIlmForDataStream(
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences
+        )
+      ));
+    }
 
     // installs ml models
     esReferences = await withPackageSpan('Install ML models', () =>
