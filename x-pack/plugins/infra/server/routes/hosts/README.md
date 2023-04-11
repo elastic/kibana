@@ -71,22 +71,46 @@ Response
 
 ```json
 {
-  hosts: [
-    {
-      metadata: [
-        { name: 'host.os.name', value: null },
-        { name: 'cloud.provider', value: null },
-      ],
-      metrics: [
-        { name: 'cpu', value: 0.13271302652800487 },
-        { name: 'diskLatency', value: 0 },
-        { name: 'memory', value: 0.542838307852529 },
-        { name: 'memoryTotal', value: 66640704.099216014 },
-        { name: 'rx', value: 3959.4930095127706 },
-        { name: 'tx', value: 100.26926542816672 },
-      ],
-      name: 'host-0',
-    },
-  ],
+   "hosts":[
+      {
+         "metadata":[
+            {
+               "name":"host.os.name",
+               "value":null
+            },
+            {
+               "name":"cloud.provider",
+               "value":null
+            }
+         ],
+         "metrics":[
+            {
+               "name":"cpu",
+               "value":0.13271302652800487
+            },
+            {
+               "name":"diskLatency",
+               "value":0
+            },
+            {
+               "name":"memory",
+               "value":0.542838307852529
+            },
+            {
+               "name":"memoryTotal",
+               "value":66640704.099216014
+            },
+            {
+               "name":"rx",
+               "value":3959.4930095127706
+            },
+            {
+               "name":"tx",
+               "value":100.26926542816672
+            }
+         ],
+         "name":"host-0"
+      }
+   ]
 }
 ```
