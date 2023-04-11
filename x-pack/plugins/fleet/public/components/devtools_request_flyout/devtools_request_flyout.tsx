@@ -99,7 +99,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = 
                   learnMore: (
                     <EuiLink href={docLinks.links.fleet.api}>
                       <FormattedMessage
-                        id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
+                        id="xpack.fleet.apiRequestFlyout.learnMoreLink"
                         defaultMessage="Learn more about Fleet API"
                       />
                     </EuiLink>
