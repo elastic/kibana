@@ -69,8 +69,8 @@ export interface ActionAccordionFormProps {
   defaultSummaryMessage?: string;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
-  notifyWhenSelectOptions: NotifyWhenSelectOptions[]; // TODO: make optional
-  defaultRuleFrequency: RuleActionFrequency; // TODO: make optional
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultRuleFrequency?: RuleActionFrequency;
 }
 
 interface ActiveActionConnectorState {
