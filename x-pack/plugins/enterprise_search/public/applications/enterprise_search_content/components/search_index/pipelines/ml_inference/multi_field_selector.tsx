@@ -99,7 +99,7 @@ export const MultiFieldMapping: React.FC = () => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ paddingTop: '32px' }}>
-          <EuiIcon type='sortRight' />
+          <EuiIcon type="sortRight" />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
           <EuiFormRow
@@ -172,7 +172,7 @@ export const SelectedFieldMappings: React.FC = () => {
     {
       align: 'left',
       name: '',
-      render: () => <EuiIcon type='sortRight' />,
+      render: () => <EuiIcon type="sortRight" />,
       width: '60px',
     },
     {
