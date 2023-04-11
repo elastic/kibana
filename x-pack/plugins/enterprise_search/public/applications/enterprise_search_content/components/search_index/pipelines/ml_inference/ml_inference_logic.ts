@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-
 import {
   FieldMapping,
   formatPipelineName,
@@ -74,11 +72,9 @@ import {
 } from './types';
 
 import {
+  getDisabledReason,
   validateInferencePipelineConfiguration,
   validateInferencePipelineFields,
-  EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
-  EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS,
-  EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION,
 } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
@@ -183,24 +179,6 @@ export interface MLInferenceProcessorsValues {
   sourceFields: string[] | undefined;
   supportedMLModels: TrainedModel[];
 }
-
-const getDisabledReason = (
-  sourceFields: string[] | undefined,
-  sourceField: string,
-  indexProcessorNames: string[],
-  pipelineName: string,
-  modelType: string
-): string | undefined => {
-  if (!(sourceFields?.includes(sourceField) ?? false)) {
-    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
-  } else if (indexProcessorNames.includes(pipelineName)) {
-    return EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
-  } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
-    return EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
-  }
-
-  return undefined;
-};
 
 export const MLInferenceLogic = kea<
   MakeLogicType<MLInferenceProcessorsValues, MLInferenceProcessorsActions>

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 export const isValidPipelineName = (input: string): boolean => {
@@ -88,6 +89,24 @@ export const EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION = i18n.translate(
       'This pipeline cannot be selected because attaching an ELSER pipeline is not supported yet.',
   }
 );
+
+export const getDisabledReason = (
+  sourceFields: string[] | undefined,
+  sourceField: string,
+  indexProcessorNames: string[],
+  pipelineName: string,
+  modelType: string
+): string | undefined => {
+  if (!(sourceFields?.includes(sourceField) ?? false)) {
+    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
+  } else if (indexProcessorNames.includes(pipelineName)) {
+    return EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
+  } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
+    return EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
+  }
+
+  return undefined;
+};
 
 export const MODEL_SELECT_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',
