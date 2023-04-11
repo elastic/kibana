@@ -89,7 +89,7 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
   data: DataPluginStart;
 }
@@ -136,7 +136,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     ];
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(http, customIntegrations);
+      registerEnterpriseSearchIntegrations(config, http, customIntegrations);
     }
 
     /*

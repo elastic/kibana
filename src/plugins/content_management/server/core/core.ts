@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Logger } from '@kbn/core/server';
 
+import { Logger } from '@kbn/core/server';
+import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
@@ -20,9 +21,14 @@ export interface CoreApi {
    */
   register: ContentRegistry['register'];
   /** Handler to retrieve a content crud instance */
-  crud: (contentType: string) => ContentCrud;
+  crud: <T = unknown>(contentType: string) => ContentCrud<T>;
   /** Content management event bus */
   eventBus: EventBus;
+}
+
+export interface CoreInitializerContext {
+  logger: Logger;
+  eventStream: EventStreamService;
 }
 
 export interface CoreSetup {
@@ -36,7 +42,7 @@ export class Core {
   private contentRegistry: ContentRegistry;
   private eventBus: EventBus;
 
-  constructor({ logger }: { logger: Logger }) {
+  constructor(private readonly ctx: CoreInitializerContext) {
     const contentTypeValidator = (contentType: string) =>
       this.contentRegistry?.isContentRegistered(contentType) ?? false;
     this.eventBus = new EventBus(contentTypeValidator);
@@ -44,6 +50,8 @@ export class Core {
   }
 
   setup(): CoreSetup {
+    this.setupEventStream();
+
     return {
       contentRegistry: this.contentRegistry,
       api: {
@@ -52,5 +60,17 @@ export class Core {
         eventBus: this.eventBus,
       },
     };
+  }
+
+  private setupEventStream() {
+    // TODO: This should be cleaned up and support added for all CRUD events.
+    this.eventBus.on('deleteItemSuccess', (event) => {
+      this.ctx.eventStream.addEvent({
+        // TODO: add "subject" field to event
+        predicate: ['delete'],
+        // TODO: the `.contentId` should be easily available on most events.
+        object: [event.contentTypeId, (event as any).contentId],
+      });
+    });
   }
 }

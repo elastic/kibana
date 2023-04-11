@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import React, { ReactElement } from 'react';
+import {
+  Axis,
+  Chart,
+  LineAnnotation,
+  niceTimeFormatter,
+  Position,
+  RectAnnotation,
+  Settings,
+} from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
@@ -16,7 +24,7 @@ import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression } from '../types';
+import { MetricExpression, TimeRange } from '../types';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
@@ -40,10 +48,12 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: DataViewBase;
-  source: MetricsSourceConfiguration | null;
+  source?: MetricsSourceConfiguration;
   filterQuery?: string;
   groupBy?: string | string[];
   chartType?: MetricsExplorerChartType;
+  timeRange?: TimeRange;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
@@ -53,6 +63,8 @@ export const ExpressionChart: React.FC<Props> = ({
   filterQuery,
   groupBy,
   chartType = MetricsExplorerChartType.bar,
+  timeRange,
+  annotations,
 }) => {
   const { uiSettings } = useKibanaContextForPlugin().services;
 
@@ -61,7 +73,8 @@ export const ExpressionChart: React.FC<Props> = ({
     derivedIndexPattern,
     source,
     filterQuery,
-    groupBy
+    groupBy,
+    timeRange
   );
 
   if (isLoading) {
@@ -158,6 +171,7 @@ export const ExpressionChart: React.FC<Props> = ({
               domain={domain}
             />
           )}
+          {annotations}
           <Axis
             id={'timestamp'}
             position={Position.Bottom}

@@ -109,7 +109,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const conditions = getSelectorConditions('file');
     expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => userEvent.click(options[0])); // add first option "containerImageName"
+    await waitFor(() => userEvent.click(options[1])); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
     const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
@@ -213,6 +213,33 @@ describe('<ControlGeneralViewSelector />', () => {
     }
 
     expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+  });
+
+  it('shows an error if condition values fail their pattern regex', async () => {
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Container image name').click()); // add containerImageName
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-containerImageName').querySelector(
+      'input'
+    );
+
+    if (el) {
+      userEvent.type(el, 'bad*imagename{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+
+    expect(getByText(expectedError)).toBeTruthy();
   });
 
   it('allows the user to remove conditions', async () => {

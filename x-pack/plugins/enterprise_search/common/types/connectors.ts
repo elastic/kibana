@@ -8,7 +8,7 @@
 export interface KeyValuePair {
   label: string;
   order?: number | null;
-  value: string | null;
+  value: string | number | boolean | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
@@ -149,6 +149,7 @@ export interface Connector {
   language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
+  last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
@@ -173,9 +174,9 @@ export interface ConnectorSyncJob {
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
-    language: string;
+    language: string | null;
     pipeline: IngestPipelineParams | null;
-    service_type: string;
+    service_type: string | null;
   };
   created_at: string;
   deleted_document_count: number;
@@ -183,12 +184,12 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
-  last_seen: string;
+  last_seen: string | null;
   metadata: Record<string, unknown>;
-  started_at: string;
+  started_at: string | null;
   status: SyncStatus;
   trigger_method: TriggerMethod;
-  worker_hostname: string;
+  worker_hostname: string | null;
 }
 
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
