@@ -16,6 +16,7 @@ export type ScreenshotImageSize =
   | 'full';
 
 export const THUMBNAIL_SCREENSHOT_SIZE: ScreenshotImageSize = [96, 64];
+export const THUMBNAIL_SCREENSHOT_SIZE_MOBILE: ScreenshotImageSize = [180, 112];
 export const POPOVER_SCREENSHOT_SIZE: ScreenshotImageSize = [640, 360];
 
 export function getConfinedScreenshotSize(
