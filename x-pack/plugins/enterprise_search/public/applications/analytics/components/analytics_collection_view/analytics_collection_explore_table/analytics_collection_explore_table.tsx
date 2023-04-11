@@ -85,33 +85,6 @@ const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>>
   ],
 };
 
-// const progressColumnsProps = {
-//   css: { height: 40, padding: '0 8px 0 0' },
-//   width: '90%',
-//   render(value, record) {
-//     return (
-//       <EuiFlexItem css={{ height: '100%', position: 'relative' }}>
-//         <EuiProgress
-//           css={{ borderRadius: 'unset', height: '100%' }}
-//           value={record.percentage}
-//           max={100}
-//           size="l"
-//           color="#E6F1FA"
-//           position="absolute"
-//           label={
-//             <EuiText
-//               css={{ position: 'relative', zIndex: 1, paddingLeft: 8, paddingTop: 8 }}
-//               size="s"
-//             >
-//               <p>{value}</p>
-//             </EuiText>
-//           }
-//         />
-//       </EuiFlexItem>
-//     );
-//   },
-// };
-
 interface TableSetting<T = ExploreTableItem, K = T> {
   columns: Array<
     EuiBasicTableColumn<T & K> & {
@@ -119,7 +92,6 @@ interface TableSetting<T = ExploreTableItem, K = T> {
     }
   >;
   sorting: EuiTableSortingType<T>;
-  // transformItems?: (items: T[]) => K[];
 }
 
 const tableSettings: {
@@ -137,7 +109,6 @@ const tableSettings: {
           { defaultMessage: 'Search Terms' }
         ),
         truncateText: true,
-        // ...progressColumnsProps,
       },
       {
         align: 'right',
@@ -157,14 +128,6 @@ const tableSettings: {
         field: ExploreTableColumns.count,
       },
     },
-    // transformItems: (items) => {
-    //   const countMax = items.reduce((res, item) => res + item[ExploreTableColumns.count], 0);
-    //   return items.map((item) => ({
-    //     ...item,
-    //     [ExploreTableColumns.searchTerms]: `"${item[ExploreTableColumns.searchTerms]}"`,
-    //     percentage: Math.round((item.count / countMax) * 100),
-    //   }));
-    // },
   },
   [ExploreTables.WorsePerformers]: {
     columns: [
@@ -194,14 +157,6 @@ const tableSettings: {
         field: ExploreTableColumns.count,
       },
     },
-    // transformItems: (items: WorsePerformersTable[]) => {
-    //   const countMax = items.reduce((res, item) => res + item[ExploreTableColumns.count], 0);
-    //   return items.map((item) => ({
-    //     ...item,
-    //     [ExploreTableColumns.query]: `"${item[ExploreTableColumns.query]}"`,
-    //     percentage: Math.round((item.count / countMax) * 100),
-    //   }));
-    // },
   },
   [ExploreTables.TopClicked]: {
     columns: [
@@ -231,13 +186,6 @@ const tableSettings: {
         field: ExploreTableColumns.count,
       },
     },
-    // transformItems: (items) => {
-    //   const countMax = items.reduce((res, item) => res + item[ExploreTableColumns.count], 0);
-    //   return items.map((item) => ({
-    //     ...item,
-    //     percentage: Math.round((item.count / countMax) * 100),
-    //   }));
-    // },
   },
   [ExploreTables.TopReferrers]: {
     columns: [
