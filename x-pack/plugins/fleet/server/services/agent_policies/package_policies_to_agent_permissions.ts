@@ -101,8 +101,10 @@ export async function storedPackagePoliciesToAgentPermissions(
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
 
-                  if (stream.data_stream.elasticsearch) {
-                    ds.elasticsearch = stream.data_stream.elasticsearch;
+                  const pkgDefinedEs = dataStreams.find(d => d.type == ds.type && d.dataset == ds.dataset)?.elasticsearch;
+
+                  if (pkgDefinedEs) {
+                    ds.elasticsearch = pkgDefinedEs;
                   }
 
                   dataStreams_.push(ds);
@@ -142,21 +144,29 @@ interface DataStreamMeta {
   hidden?: boolean;
   elasticsearch?: {
     privileges?: RegistryDataStreamPrivileges;
+    dynamic_namespace?: boolean;
+    dynamic_dataset?: boolean;
   };
 }
 
 export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
-  let index = `${dataStream.type}-${dataStream.dataset}`;
+  let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
-  if (dataStream.dataset_is_prefix) {
-    index = `${index}.*`;
+  // Determine dataset
+  if (dataStream.elasticsearch?.dynamic_dataset) {
+    index += `*`;
+  } else if (dataStream.dataset_is_prefix) {
+    index += `${dataStream.dataset}.*`;
+  } else {
+    index += dataStream.dataset;
   }
 
-  if (dataStream.hidden) {
-    index = `.${index}`;
+  // Determine namespace
+  if (dataStream.elasticsearch?.dynamic_namespace) {
+    index += `-*`;
+  } else {
+    index += `-${namespace}`;
   }
-
-  index += `-${namespace}`;
 
   const privileges = dataStream?.elasticsearch?.privileges?.indices?.length
     ? dataStream.elasticsearch.privileges.indices

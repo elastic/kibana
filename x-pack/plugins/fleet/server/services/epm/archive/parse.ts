@@ -578,6 +578,14 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
 
+  if (expandedElasticsearch?.dynamic_dataset) {
+    parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
+  }
+
+  if (expandedElasticsearch?.dynamic_namespace) {
+    parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
+  }
+
   return parsedElasticsearchEntry;
 }
 
