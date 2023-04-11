@@ -153,7 +153,7 @@ export function useLogStream({
     (params) => {
       if (state.topCursor === null && state.hasMoreBefore) {
         throw new Error(
-          'useLogStream: Cannot fetch previous entries.\nIt seems there more entries available, but no cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          'useLogStream: Cannot fetch previous entries.\nIt seems there are more entries available, but no cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
       }
 
