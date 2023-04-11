@@ -8,22 +8,24 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
-import { selectOverviewState } from '../../../state';
+import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
 import { useAlertingDefaults } from '../../settings/alerting_defaults/hooks/use_alerting_defaults';
 import { useSyntheticsStartPlugins } from '../../../contexts';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boolean }) => {
   const dispatch = useDispatch();
   const [url, setUrl] = useState<string | undefined>('');
 
-  const { connectors, loading } = useAlertingDefaults();
+  const { defaultConnectors, settingsLoading } = useAlertingDefaults();
 
   const {
     data: { monitors },
-  } = useSelector(selectOverviewState);
+    loaded: monitorsLoaded,
+  } = useSelector(selectMonitorListState);
 
   const syntheticsLocators = useSyntheticsStartPlugins()?.share?.url.locators;
   const locator = syntheticsLocators?.get(syntheticsSettingsLocatorID);
@@ -36,9 +38,12 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     generateUrl();
   }, [locator]);
 
-  const hasDefaultConnector = !loading && connectors?.length;
+  const hasDefaultConnector =
+    Boolean(defaultConnectors?.length) || (!settingsLoading && Boolean(defaultConnectors?.length));
   const hasAlertingConfigured =
-    isAlertingEnabled ?? monitors.some((monitor) => monitor.isStatusAlertEnabled);
+    isAlertingEnabled ??
+    (monitorsLoaded &&
+      monitors.some((monitor) => monitor.attributes[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
   const showCallout = url && !hasDefaultConnector && hasAlertingConfigured;
 
@@ -61,19 +66,19 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         <p>
           <FormattedMessage
             id="xpack.synthetics.alerting.noConnectorsCallout.content"
-            defaultMessage="You have monitors with alerting enabled, but there is no default connector configured to send those alerts. Configure your default connector {here}."
-            values={{
-              here: (
-                <EuiLink data-test-subj="syntheticsAlertingCalloutHeresALinkLink" href={url}>
-                  <FormattedMessage
-                    id="xpack.synthetics.alerting.noConnectorsCallout.here.label"
-                    defaultMessage="here"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="You have monitors with alerting enabled, but there is no default connector configured to send those alerts."
           />
         </p>
+        <EuiButton
+          data-test-subj="syntheticsAlertingCalloutLinkButtonButton"
+          href={url}
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.synthetics.alerting.noConnectorsCallout.button"
+            defaultMessage="Configure now"
+          />
+        </EuiButton>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

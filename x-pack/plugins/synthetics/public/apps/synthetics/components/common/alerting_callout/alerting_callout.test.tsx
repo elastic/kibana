@@ -34,21 +34,11 @@ describe('AlertingCallout', () => {
     [true, true, false],
   ])('renders correctly', async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
     jest.spyOn(alertingHooks, 'useAlertingDefaults').mockReturnValue({
-      loading: false,
+      settingsLoading: false,
+      connectorsLoading: false,
       connectors: [],
-      actionTypes: hasConnectors
-        ? [
-            {
-              id: 'id',
-              name: 'name',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'platinum',
-              supportedFeatureIds: ['synthetics'],
-            },
-          ]
-        : [],
+      defaultConnectors: hasConnectors ? ['default-connector'] : [],
+      actionTypes: [],
       options: [
         {
           value: 'test',
@@ -60,23 +50,19 @@ describe('AlertingCallout', () => {
 
     const { getByText, queryByText } = render(<AlertingCallout />, {
       state: {
-        overview: {
+        monitorList: {
+          loaded: true,
           data: {
             total: 1,
-            allMonitorIds: ['1'],
             monitors: [
               {
-                id: '1',
-                configId: '1',
-                location: {
-                  id: 'us_central',
-                  isServiceManaged: true,
+                attributes: {
+                  alert: {
+                    status: {
+                      enabled: statusAlertEnabled,
+                    },
+                  },
                 },
-                name: `Monitor 1`,
-                isEnabled: true,
-                isStatusAlertEnabled: statusAlertEnabled,
-                type: 'browser',
-                tags: [],
               },
             ],
           },
@@ -86,9 +72,9 @@ describe('AlertingCallout', () => {
 
     await waitFor(() => {
       if (shouldShowCallout) {
-        expect(getByText(/Alert connectors missing/)).toBeInTheDocument();
+        expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
       } else {
-        expect(queryByText(/Alert connectors missing/)).not.toBeInTheDocument();
+        expect(queryByText(/Alerts are not being sent/)).not.toBeInTheDocument();
       }
     });
   });
@@ -102,21 +88,11 @@ describe('AlertingCallout', () => {
     'overwrites rendering with isAlertingEnabled prop',
     async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
       jest.spyOn(alertingHooks, 'useAlertingDefaults').mockReturnValue({
-        loading: false,
+        settingsLoading: false,
+        connectorsLoading: false,
+        defaultConnectors: hasConnectors ? ['default-connector'] : [],
         connectors: [],
-        actionTypes: hasConnectors
-          ? [
-              {
-                id: 'id',
-                name: 'name',
-                enabled: true,
-                enabledInConfig: true,
-                enabledInLicense: true,
-                minimumLicenseRequired: 'platinum',
-                supportedFeatureIds: ['synthetics'],
-              },
-            ]
-          : [],
+        actionTypes: [],
         options: [
           {
             value: 'test',
@@ -132,9 +108,9 @@ describe('AlertingCallout', () => {
 
       await waitFor(() => {
         if (shouldShowCallout) {
-          expect(getByText(/Alert connectors missing/)).toBeInTheDocument();
+          expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
         } else {
-          expect(queryByText(/Alert connectors missing/)).not.toBeInTheDocument();
+          expect(queryByText(/Alerts are not being sent/)).not.toBeInTheDocument();
         }
       });
     }
