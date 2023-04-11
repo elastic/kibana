@@ -201,20 +201,10 @@ async function updateFleetServerPoliciesDataOutputId(
   // update them to use the default output
   if (data?.type === outputType.Logstash && isDefault) {
     for (const policy of fleetServerPolicies) {
-      if (
-        !policy.data_output_id ||
-        !policy.is_preconfigured ||
-        policy.data_output_id === data?.id
-      ) {
-        await agentPolicyService.update(
-          soClient,
-          esClient,
-          policy.id,
-          { data_output_id: defaultDataOutputId },
-          {
-            force: true,
-          }
-        );
+      if (!policy.data_output_id || policy.data_output_id === data?.id) {
+        await agentPolicyService.update(soClient, esClient, policy.id, {
+          data_output_id: defaultDataOutputId,
+        });
       }
     }
   }
