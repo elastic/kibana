@@ -18,7 +18,7 @@ import {
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
-export type ResetAction = ReturnType<typeof useReauthorizeAction>;
+export type ReauthorizeAction = ReturnType<typeof useReauthorizeAction>;
 export const useReauthorizeAction = (forceDisable: boolean, transformNodes: number) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
@@ -29,7 +29,7 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
 
   const closeModal = () => setModalVisible(false);
 
-  const startAndCloseModal = () => {
+  const reauthorizeAndCloseModal = () => {
     setModalVisible(false);
     reauthorizeTransforms(items.map((i) => ({ id: i.id })));
   };
@@ -69,6 +69,6 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
     isModalVisible,
     items,
     openModal,
-    startAndCloseModal,
+    reauthorizeAndCloseModal,
   };
 };

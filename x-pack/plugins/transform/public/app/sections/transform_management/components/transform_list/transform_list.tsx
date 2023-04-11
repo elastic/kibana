@@ -24,7 +24,12 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 
-import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
+import {
+  isReauthorizeActionDisabled,
+  ReauthorizeActionModal,
+  ReauthorizeActionName,
+  useReauthorizeAction,
+} from '../action_reauthorize';
 import type { TransformId } from '../../../../../../common/types/transform';
 
 import {
@@ -223,22 +228,20 @@ export const TransformList: FC<TransformListProps> = ({
         <StopActionName items={transformSelection} />
       </EuiButtonEmpty>
     </div>,
-    // <div key="reauthorizeAction" className="transform__BulkActionItem">
-    //   <EuiButtonEmpty
-    //     onClick={() => {
-    //       bulkReauthorizeAction.openModal(transformSelection);
-    //     }}
-    //   >
-    //     <ReauthorizeActionName
-    //       // disabled={isReauthorizeActionDisabled(
-    //       //   transformSelection,
-    //       //   capabilities.canStartStopTransform,
-    //       //   transformNodes
-    //       // )}
-    //       isBulkAction={true}
-    //     />
-    //   </EuiButtonEmpty>
-    // </div>,
+    <div key="reauthorizeAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() => {
+          bulkReauthorizeAction.openModal(transformSelection);
+        }}
+        disabled={isReauthorizeActionDisabled(
+          transformSelection,
+          capabilities.canStartStopTransform,
+          transformNodes
+        )}
+      >
+        <ReauthorizeActionName items={transformSelection} transformNodes={transformNodes} />
+      </EuiButtonEmpty>
+    </div>,
     <div key="resetAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
         onClick={() => {

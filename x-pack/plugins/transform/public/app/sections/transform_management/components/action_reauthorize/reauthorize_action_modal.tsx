@@ -8,12 +8,12 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
-import { StartAction } from '../action_start/use_start_action';
+import type { ReauthorizeAction } from './use_reauthorize_action';
 
-export const ReauthorizeActionModal: FC<StartAction> = ({
+export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
   closeModal,
   items,
-  startAndCloseModal,
+  reauthorizeAndCloseModal,
 }) => {
   const isBulkAction = items.length > 1;
 
@@ -31,7 +31,7 @@ export const ReauthorizeActionModal: FC<StartAction> = ({
       data-test-subj="transformReauthorizeModal"
       title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
       onCancel={closeModal}
-      onConfirm={startAndCloseModal}
+      onConfirm={reauthorizeAndCloseModal}
       cancelButtonText={i18n.translate('xpack.transform.transformList.startModalCancelButton', {
         defaultMessage: 'Cancel',
       })}

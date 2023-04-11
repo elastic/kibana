@@ -13,6 +13,10 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
+import {
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
   DeleteTransformsRequestSchema,
@@ -167,8 +171,8 @@ export const useApi = () => {
         }
       },
       async reauthorizeTransforms(
-        reqBody: StartTransformsRequestSchema
-      ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
+        reqBody: ReauthorizeTransformsRequestSchema
+      ): Promise<ReauthorizeTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}reauthorize_transforms`, {
             body: JSON.stringify(reqBody),

@@ -930,7 +930,7 @@ async function reauthorizeAndStartTransforms(
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await esClient.transform.updateTransform(
+      const updatedTransform = await esClient.transform.updateTransform(
         {
           body: {},
           transform_id: transformId,
@@ -938,7 +938,7 @@ async function reauthorizeAndStartTransforms(
         options ?? {}
       );
 
-      await esClient.transform.startTransform(
+      const startedTransform = await esClient.transform.startTransform(
         {
           transform_id: transformId,
         },
