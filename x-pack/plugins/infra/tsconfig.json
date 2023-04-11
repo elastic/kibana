@@ -61,7 +61,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/observability-alert-details",
     "@kbn/actions-plugin",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/observability-shared-plugin"
   ],
   "exclude": ["target/**/*"]
 }
