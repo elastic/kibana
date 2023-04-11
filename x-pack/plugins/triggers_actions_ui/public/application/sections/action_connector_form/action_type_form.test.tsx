@@ -15,14 +15,38 @@ import {
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { DEFAULT_FREQUENCY, DEFAULT_SIEM_FREQUENCY } from '../../../common/constants';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+
+const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActiveAlert',
+      inputDisplay: 'Per rule run',
+      'data-test-subj': 'onActiveAlert',
+      dropdownDisplay: <>{'Per rule run'}</>,
+    },
+  },
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: false,
+    value: {
+      value: 'onThrottleInterval',
+      inputDisplay: 'Custom frequency',
+      'data-test-subj': 'onThrottleInterval',
+      dropdownDisplay: <>{'Custom frequency'}</>,
+    },
+  },
+];
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -364,7 +388,7 @@ describe('action_type_form', () => {
     ]);
   });
 
-  describe('Security Solution', () => {
+  describe('Customize notify when options', () => {
     it('should not have "On status changes" notify when option for summary actions', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.pagerduty',
@@ -387,14 +411,19 @@ describe('action_type_form', () => {
         actionTypeId: '.pagerduty',
         group: 'default',
         params: {},
-        frequency: DEFAULT_SIEM_FREQUENCY,
+        frequency: {
+          notifyWhen: RuleNotifyWhen.ACTIVE,
+          throttle: null,
+          summary: true,
+        },
       };
       const wrapper = render(
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
             actionItem,
-            isSiem: true,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -447,7 +476,8 @@ describe('action_type_form', () => {
           {getActionTypeForm({
             index: 1,
             actionItem,
-            isSiem: true,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -482,7 +512,8 @@ function getActionTypeForm({
   setActionFrequencyProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
-  isSiem = false,
+  notifyWhenSelectOptions,
+  defaultNotifyWhenValue,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
@@ -496,7 +527,8 @@ function getActionTypeForm({
   setActionFrequencyProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
-  isSiem?: boolean;
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -580,7 +612,8 @@ function getActionTypeForm({
       actionTypeRegistry={actionTypeRegistry}
       hasSummary={hasSummary}
       messageVariables={messageVariables}
-      isSiem={isSiem}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
   );
 }

@@ -13,3 +13,17 @@ export const FORM_ERRORS_TITLE = i18n.translate(
     defaultMessage: 'Please fix issues listed below',
   }
 );
+
+export const FORM_ON_ACTIVE_ALERT_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleNotifyWhen.onActiveAlert.display',
+  {
+    defaultMessage: 'Per rule run',
+  }
+);
+
+export const FORM_CUSTOM_FREQUENCY_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleNotifyWhen.onThrottleInterval.display',
+  {
+    defaultMessage: 'Custom frequency',
+  }
+);
