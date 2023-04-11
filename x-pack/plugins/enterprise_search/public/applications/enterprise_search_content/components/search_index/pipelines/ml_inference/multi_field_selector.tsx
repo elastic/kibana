@@ -75,7 +75,12 @@ export const MultiFieldMapping: React.FC = () => {
                 defaultMessage: 'Source field',
               }
             )}
-            helpText="Select an existing field or type in a field name."
+            helpText={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.helpText',
+              {
+                defaultMessage: 'Select an existing field or type in a field name.',
+              }
+            )}
           >
             <EuiComboBox
               fullWidth
@@ -106,13 +111,23 @@ export const MultiFieldMapping: React.FC = () => {
                 defaultMessage: 'Target field',
               }
             )}
-            helpText="This name is automatically created based on your source field."
+            helpText={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
+              {
+                defaultMessage: 'This name is automatically created based on your source field.',
+              }
+            )}
             fullWidth
           >
             <EuiFieldText
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
               disabled
-              value="This is automatically created"
+              value={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue',
+                {
+                  defaultMessage: 'This is automatically created',
+                }
+              )}
               fullWidth
             />
           </EuiFormRow>
@@ -149,7 +164,12 @@ export const SelectedFieldMappings: React.FC = () => {
     {
       'data-test-subj': 'sourceFieldCell',
       field: 'sourceField',
-      name: 'Source fields',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.sourceFieldHeader',
+        {
+          defaultMessage: 'Source fields',
+        }
+      ),
     },
     {
       name: '',
@@ -158,7 +178,12 @@ export const SelectedFieldMappings: React.FC = () => {
     },
     {
       field: 'targetField',
-      name: 'Target fields',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.targetFieldHeader',
+        {
+          defaultMessage: 'Target fields',
+        }
+      ),
     },
     {
       actions: [
