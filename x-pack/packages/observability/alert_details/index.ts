@@ -6,4 +6,5 @@
  */
 
 export { AlertAnnotation } from './src/components/alert_annotation';
-export { getAlertTimeRange } from './src/helpers/get_alert_time_range';
+export { AlertActiveTimeRangeAnnotation } from './src/components/alert_active_time_range_annotation';
+export { getPaddedAlertTimeRange } from './src/helpers/get_padded_alert_time_range';
