@@ -234,36 +234,78 @@ describe('GroupedAlertsTable', () => {
     expect(level1.getByTestId('alerts-table')).toBeInTheDocument();
   });
 
-  it('resets pagination when selected group changes', async () => {
+  it('resets all levels pagination when selected group changes', async () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+
     const { getByTestId, getAllByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+
     fireEvent.click(getByTestId('pagination-button-1'));
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual(null);
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    fireEvent.click(within(level0).getByTestId('pagination-button-1'));
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+
+    const level1 = getAllByTestId('grouping-accordion-content')[1];
+    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+      getByTestId('grouping-level-2-pagination'),
+    ].forEach((pagination) => {
+      expect(
+        within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+      ).toEqual(null);
+      expect(
+        within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+      ).toEqual('true');
+    });
+
     fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
     fireEvent.click(getAllByTestId('panel-user.name')[0]);
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+      // level 2 has been removed with the group selection change
+    ].forEach((pagination) => {
+      expect(
+        within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+      ).toEqual('true');
+      expect(
+        within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+      ).toEqual(null);
+    });
   });
 
-  it('resets grouping pagination when global query updates', async () => {
+  it('resets all levels pagination when global query updates', async () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+
     const { getByTestId, getAllByTestId, rerender } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+
     fireEvent.click(getByTestId('pagination-button-1'));
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual(null);
-    fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
-    fireEvent.click(getAllByTestId('panel-user.name')[0]);
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    fireEvent.click(within(level0).getByTestId('pagination-button-1'));
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+
+    const level1 = getAllByTestId('grouping-accordion-content')[1];
+    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+
     rerender(
       <TestProviders store={store}>
         <GroupedAlertsTable
@@ -271,7 +313,64 @@ describe('GroupedAlertsTable', () => {
         />
       </TestProviders>
     );
-    expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
-    expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
+
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+      getByTestId('grouping-level-2-pagination'),
+    ].forEach((pagination) => {
+      expect(
+        within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+      ).toEqual('true');
+      expect(
+        within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+      ).toEqual(null);
+    });
+  });
+
+  it('resets most inner group pagination when its parent groups open/close', async () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('pagination-button-1'));
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    fireEvent.click(within(level0).getByTestId('pagination-button-1'));
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+
+    const level1 = getAllByTestId('grouping-accordion-content')[1];
+    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[28]);
+    [
+      getByTestId('grouping-level-0-pagination'),
+      getByTestId('grouping-level-1-pagination'),
+    ].forEach((pagination) => {
+      expect(
+        within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
+      ).toEqual(null);
+      expect(
+        within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
+      ).toEqual('true');
+    });
+
+    expect(
+      within(getByTestId('grouping-level-2-pagination'))
+        .getByTestId('pagination-button-0')
+        .getAttribute('aria-current')
+    ).toEqual('true');
+    expect(
+      within(getByTestId('grouping-level-2-pagination'))
+        .getByTestId('pagination-button-1')
+        .getAttribute('aria-current')
+    ).toEqual(null);
   });
 });

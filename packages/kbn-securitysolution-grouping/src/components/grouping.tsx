@@ -213,7 +213,7 @@ const GroupingComponent = <T,>({
                 <EuiSpacer size="m" />
                 <EuiTablePagination
                   activePage={activePage}
-                  data-test-subj="grouping-table-pagination"
+                  data-test-subj={`grouping-level-${groupingLevel}-pagination`}
                   itemsPerPage={itemsPerPage}
                   itemsPerPageOptions={[10, 25, 50, 100]}
                   onChangeItemsPerPage={(pageSize: number) => {
