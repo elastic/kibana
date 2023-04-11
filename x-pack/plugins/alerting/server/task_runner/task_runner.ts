@@ -317,9 +317,11 @@ export class TaskRunner<
     const flappingSettings = await rulesSettingsClient.flapping().get();
     const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
     const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
-      interval: rule.schedule.interval
+      interval: rule.schedule.interval,
     });
-    const maintenanceWindowIds = activeMaintenanceWindows.map((maintenanceWindow) => maintenanceWindow.id);
+    const maintenanceWindowIds = activeMaintenanceWindows.map(
+      (maintenanceWindow) => maintenanceWindow.id
+    );
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -477,7 +479,9 @@ export class TaskRunner<
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
       } else if (maintenanceWindowIds.length) {
-        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`);
+        this.logger.debug(
+          `no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`
+        );
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`

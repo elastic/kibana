@@ -68,6 +68,7 @@ const alert = {
     duration: '2343252346',
   },
   flapping: false,
+  maintenanceWindowIds: ['window-id1', 'window-id2'],
 };
 
 const action = {

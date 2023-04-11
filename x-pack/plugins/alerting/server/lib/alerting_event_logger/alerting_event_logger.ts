@@ -163,8 +163,7 @@ export class AlertingEventLogger {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
-    const event = createAlertRecord(this.ruleContext, alert)
-    console.log('@@@ LOG ALERT', event.kibana?.alert?.maintenance_window_ids);
+    const event = createAlertRecord(this.ruleContext, alert);
     this.eventLogger.logEvent(event);
   }
 

@@ -503,7 +503,7 @@ export class AlertingPlugin {
 
     const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
       return maintenanceWindowClientFactory!.create(request);
-    }
+    };
 
     taskRunnerFactory.initialize({
       logger,

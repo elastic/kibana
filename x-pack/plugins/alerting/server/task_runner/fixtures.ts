@@ -255,6 +255,7 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    maintenanceWindowIds: [],
   };
 };
 

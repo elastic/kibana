@@ -118,7 +118,7 @@ export interface RuleExecutorOptions<
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
-  maintenanceWindowIds?: string[],
+  maintenanceWindowIds?: string[];
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

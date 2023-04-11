@@ -301,10 +301,10 @@ export const createLifecycleExecutor =
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
-          ...(maintenanceWindowIds?.length ? { [ALERT_MAINTENANCE_WINDOW_IDS] : maintenanceWindowIds } : {}),
+          ...(maintenanceWindowIds?.length
+            ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+            : {}),
         };
-
-        console.log('@@@@ create lifecycle', event['kibana.alert.rule.maintenance_window_ids']);
 
         return {
           indexName: alertData?.indexName,
