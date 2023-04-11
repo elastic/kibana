@@ -489,8 +489,11 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
         overrides
       )
     );
+
     const appliedPolicy = policyResponse.Endpoint.policy.applied;
     const actionMessage = 'Failed to connected to kernel minifilter component';
+
+    appliedPolicy.status = HostPolicyResponseActionStatus.failure;
 
     // Adjust connect_kernel action to represent a Macos system extension failure
     const connectKernelAction = appliedPolicy.actions.find(
