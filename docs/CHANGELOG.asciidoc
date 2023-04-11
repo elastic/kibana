@@ -117,7 +117,7 @@ To review the breaking changes in previous versions, refer to the following:
 [%collapsible]
 ====
 *Details* +
-Releases 8.7.0 has a bug which causes the Observability Overview page shows empty User Experience panel, even when there is RUM data (fixed in {kibana-pull}154419[#154419]).
+Release 8.7.0 has a bug causing the Observability Overview page to show an empty User Experience panel, even when there is RUM data (fixed in {kibana-pull}154419[#154419]).
 
 *Impact* +
 Whilst the User Experience panel is empty on the Observability Overview page, if you have RUM data it will still be available from the User Experience Dashboard.
