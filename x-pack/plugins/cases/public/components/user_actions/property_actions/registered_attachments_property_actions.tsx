@@ -6,7 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
+
 import type { AttachmentAction } from '../../../client/attachment_framework/types';
+
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { UserActionPropertyActions } from './property_actions';
@@ -36,6 +39,8 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
       ...(showTrashIcon
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
+              disabled: false,
               iconType: 'trash',
               color: 'danger' as const,
               label: i18n.DELETE_ATTACHMENT,

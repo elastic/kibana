@@ -20,6 +20,8 @@ import type {
   AttachmentType,
   AttachmentViewObject,
 } from '../../../client/attachment_framework/types';
+
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { CommentResponse } from '../../../../common/api';
@@ -136,25 +138,31 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
           <UserActionContentToolbar id={comment.id}>
-            {visiblePrimaryActions.map((action) => (
-              <EuiFlexItem
-                grow={false}
-                data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
-              >
-                <EuiButtonIcon
-                  aria-label={action.label}
-                  iconType={action.iconType}
-                  color={action.color ?? 'text'}
-                  onClick={action.onClick}
-                  data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
-                />
-              </EuiFlexItem>
-            ))}
-            <RegisteredAttachmentsPropertyActions
-              isLoading={isLoading}
-              onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
-              registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
-            />
+            {visiblePrimaryActions.map(
+              (action) =>
+                (action.type === AttachmentActionType.BUTTON && (
+                  <EuiFlexItem
+                    grow={false}
+                    data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
+                  >
+                    <EuiButtonIcon
+                      aria-label={action.label}
+                      iconType={action.iconType}
+                      color={action.color ?? 'text'}
+                      onClick={action.onClick}
+                      data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                    />
+                  </EuiFlexItem>
+                )) ||
+                (action.type === AttachmentActionType.CUSTOM && action.render())
+            )}
+            {!attachmentViewObject.hideDefaultActions && (
+              <RegisteredAttachmentsPropertyActions
+                isLoading={isLoading}
+                onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
+                registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
+              />
+            )}
           </UserActionContentToolbar>
         ),
         children: renderer(props),

@@ -36,6 +36,7 @@ import { useCaseViewNavigation, useCaseViewParams } from '../../../common/naviga
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -849,9 +850,27 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -893,9 +912,27 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -939,11 +976,39 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My button', iconType: 'trash', onClick },
-          { label: 'My button 2', iconType: 'download', onClick },
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'trash',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button 2',
+            iconType: 'download',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -990,7 +1055,13 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
