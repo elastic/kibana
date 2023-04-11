@@ -362,7 +362,16 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       {(initialSchedule || showDelete) && (
         <>
           {!inPopover && <EuiSpacer size="s" />}
-          <EuiPopoverFooter>
+          <EuiPopoverFooter
+            paddingSize="m"
+            style={
+              /* FIXME https://github.com/elastic/eui/issues/6695 */
+              {
+                marginBlock: '16px -16px',
+                marginInline: '-16px',
+              }
+            }
+          >
             {!inPopover && <EuiSpacer size="s" />}
             <EuiFlexGroup>
               <EuiFlexItem grow>
