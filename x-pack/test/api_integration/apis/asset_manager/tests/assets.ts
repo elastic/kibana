@@ -9,6 +9,7 @@ import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/ty
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
+import { pick } from 'lodash';
 
 const ASSETS_ENDPOINT = '/api/asset-manager/assets';
 const DIFF_ENDPOINT = `${ASSETS_ENDPOINT}/diff`;
@@ -419,6 +420,34 @@ export default function ({ getService }: FtrProviderContext) {
           } = getResponse;
           expect(results).to.have.property('descendants');
           expect(results.descendants).to.have.length(0);
+        });
+
+        it('breaks circular dependency', async () => {
+          await createSampleAssets(supertest);
+
+          // pods reference a node that references the pods
+          const sampleNode = sampleAssetDocs.find((asset) => asset['asset.id'] === 'pod-203ugg5');
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              relation: 'references',
+              size: sampleAssetDocs.length,
+              from: 'now-1d',
+              ean: sampleNode!['asset.ean'],
+              maxDistance: 5,
+            })
+            .expect(200);
+
+          const {
+            body: { results },
+          } = getResponse;
+          expect(
+            results.references.map((asset: Asset) => pick(asset, ['asset.ean', 'distance']))
+          ).to.eql([
+            { 'asset.ean': 'k8s.node:node-203', distance: 1 },
+            { 'asset.ean': 'k8s.pod:pod-203ugg9', distance: 2 },
+          ]);
         });
       });
 
