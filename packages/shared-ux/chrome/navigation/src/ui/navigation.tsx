@@ -74,7 +74,6 @@ export const Navigation = (props: NavigationProps) => {
           <EuiHeaderLogo
             iconType="logoElastic"
             href={props.homeHref}
-            onClick={(e) => e.preventDefault()}
             aria-label="Go to home page"
           />
           {navIsOpen ? <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} /> : null}
