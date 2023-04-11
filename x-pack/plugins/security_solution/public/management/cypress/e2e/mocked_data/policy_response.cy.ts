@@ -5,58 +5,55 @@
  * 2.0.
  */
 
+import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { navigateToEndpointPolicyResponse } from '../../screens/endpoints';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
 import type { IndexedEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { IndexedHostsResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { navigateToFleetAgentDetails } from '../../screens/fleet';
 import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 
 describe('Endpoint Policy Response', () => {
-  let loadedEndpoint: IndexedHostsResponse;
+  let loadedEndpoint: CyIndexEndpointHosts;
   let endpointMetadata: HostMetadata;
   let loadedPolicyResponse: IndexedEndpointPolicyResponse;
 
   before(() => {
     const policyResponseGenerator = new EndpointPolicyResponseGenerator();
 
-    cy.task('indexEndpointHosts', { count: 1, os: 'macOS' }, { timeout: 120000 }).then(
-      (indexEndpoints) => {
-        loadedEndpoint = indexEndpoints;
-        endpointMetadata = loadedEndpoint.hosts[0];
+    indexEndpointHosts({ count: 1, os: 'macOS' }).then((indexEndpoints) => {
+      loadedEndpoint = indexEndpoints;
+      endpointMetadata = loadedEndpoint.data.hosts[0];
 
-        const policyResponseDoc = policyResponseGenerator.generateConnectKernelFailure({
-          agent: endpointMetadata.agent,
-          elastic: endpointMetadata.elastic,
-          Endpoint: {
-            policy: {
-              applied: {
-                id: endpointMetadata.Endpoint.policy.applied.id,
-                version: endpointMetadata.Endpoint.policy.applied.version,
-                name: endpointMetadata.Endpoint.policy.applied.name,
-              },
+      const policyResponseDoc = policyResponseGenerator.generateConnectKernelFailure({
+        agent: endpointMetadata.agent,
+        elastic: endpointMetadata.elastic,
+        Endpoint: {
+          policy: {
+            applied: {
+              id: endpointMetadata.Endpoint.policy.applied.id,
+              version: endpointMetadata.Endpoint.policy.applied.version,
+              name: endpointMetadata.Endpoint.policy.applied.name,
             },
           },
-        });
+        },
+      });
 
-        cy.task('indexEndpointPolicyResponse', policyResponseDoc).then((indexedPolicyResponse) => {
-          loadedPolicyResponse = indexedPolicyResponse;
-        });
-      }
-    );
+      cy.task('indexEndpointPolicyResponse', policyResponseDoc).then((indexedPolicyResponse) => {
+        loadedPolicyResponse = indexedPolicyResponse;
+      });
+    });
   });
 
   after(() => {
     if (loadedEndpoint) {
-      // FIXME:PT uncomment prior to merge
-      // cy.task('deleteIndexedEndpointHosts', loadedEndpoint);
+      loadedEndpoint.cleanup();
     }
 
     if (loadedPolicyResponse) {
-      // FIXME:PT uncomment prior to merge
-      // cy.task('deleteIndexedEndpointPolicyResponse', loadedPolicyResponse);
+      cy.task('deleteIndexedEndpointPolicyResponse', loadedPolicyResponse);
     }
   });
 
