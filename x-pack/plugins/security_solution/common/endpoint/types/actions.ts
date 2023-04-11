@@ -132,6 +132,10 @@ export interface LogsEndpointAction {
   user: {
     id: string;
   };
+  rule?: {
+    id: string;
+    name: string;
+  };
 }
 
 /**
@@ -188,6 +192,7 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  alert_id?: string[];
 }
 
 export interface FleetActionResponseData {
@@ -375,6 +380,9 @@ export interface ActionDetails<
   comment?: string;
   /** parameters submitted with action */
   parameters?: TParameters;
+  alertIds?: string[];
+  ruleId?: string;
+  ruleName?: string;
 }
 
 export interface ActionDetailsApiResponse<

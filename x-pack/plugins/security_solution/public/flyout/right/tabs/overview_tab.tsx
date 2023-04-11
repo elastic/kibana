@@ -7,9 +7,10 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { InvestigationSection } from '../components/investigation_section';
 import { DescriptionSection } from '../components/description_section';
-import { HighlightedFields } from '../components/highlighted_fields';
+import { InsightsSection } from '../components/insights_section';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -19,9 +20,9 @@ export const OverviewTab: FC = memo(() => {
     <>
       <DescriptionSection />
       <EuiHorizontalRule margin="l" />
-      <EuiPanel hasBorder hasShadow={false}>
-        <HighlightedFields />
-      </EuiPanel>
+      <InvestigationSection />
+      <EuiHorizontalRule margin="l" />
+      <InsightsSection />
     </>
   );
 });
