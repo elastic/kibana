@@ -907,6 +907,49 @@ describe('createCommentUserActionBuilder', () => {
       expect(onClick).toHaveBeenCalledTimes(2);
     });
 
+    it('shows correctly a custom action', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            label: 'Test button',
+            render: () => (
+              <button type="button" onClick={onClick} data-test-subj="my-custom-button" />
+            ),
+          },
+        ],
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      const customButton = await screen.findByTestId('my-custom-button');
+
+      expect(customButton).toBeInTheDocument();
+
+      userEvent.click(customButton);
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
     it('shows correctly the non visible primary actions', async () => {
       const onClick = jest.fn();
 

@@ -35,7 +35,6 @@ interface ButtonAttachmentAction extends BaseAttachmentAction {
 interface CustomAttachmentAction extends BaseAttachmentAction {
   type: AttachmentActionType.CUSTOM;
   render: () => JSX.Element;
-  isPrimary?: boolean;
 }
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;

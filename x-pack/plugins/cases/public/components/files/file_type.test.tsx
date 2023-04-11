@@ -11,6 +11,7 @@ import { screen } from '@testing-library/react';
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../common/mock';
 
+import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
@@ -26,6 +27,7 @@ describe('getFileType', () => {
       icon: 'document',
       displayName: 'File Attachment Type',
       getAttachmentViewObject: expect.any(Function),
+      hideDefaultActions: true,
     });
   });
 
@@ -57,8 +59,23 @@ describe('getFileType', () => {
     it('actions renders a download button', async () => {
       appMockRender = createAppMockRenderer();
 
+      const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
+
+      expect(attachmentViewObject).not.toBeUndefined();
+
       // @ts-ignore
-      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
+      const actions = attachmentViewObject.getActions();
+
+      expect(actions.length).toBe(2);
+      expect(actions[0]).toStrictEqual({
+        type: AttachmentActionType.CUSTOM,
+        isPrimary: true,
+        label: 'Download File',
+        render: expect.any(Function),
+      });
+
+      // @ts-ignore
+      appMockRender.render(actions[0].render());
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
     });
@@ -66,8 +83,23 @@ describe('getFileType', () => {
     it('actions renders a delete button', async () => {
       appMockRender = createAppMockRenderer();
 
+      const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
+
+      expect(attachmentViewObject).not.toBeUndefined();
+
       // @ts-ignore
-      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
+      const actions = attachmentViewObject.getActions();
+
+      expect(actions.length).toBe(2);
+      expect(actions[1]).toStrictEqual({
+        type: AttachmentActionType.CUSTOM,
+        isPrimary: true,
+        label: 'Delete File',
+        render: expect.any(Function),
+      });
+
+      // @ts-ignore
+      appMockRender.render(actions[1].render());
 
       expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
     });
@@ -75,8 +107,23 @@ describe('getFileType', () => {
     it('clicking the delete button in actions opens deletion modal', async () => {
       appMockRender = createAppMockRenderer();
 
+      const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
+
+      expect(attachmentViewObject).not.toBeUndefined();
+
       // @ts-ignore
-      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
+      const actions = attachmentViewObject.getActions();
+
+      expect(actions.length).toBe(2);
+      expect(actions[1]).toStrictEqual({
+        type: AttachmentActionType.CUSTOM,
+        isPrimary: true,
+        label: 'Delete File',
+        render: expect.any(Function),
+      });
+
+      // @ts-ignore
+      appMockRender.render(actions[1].render());
 
       const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
