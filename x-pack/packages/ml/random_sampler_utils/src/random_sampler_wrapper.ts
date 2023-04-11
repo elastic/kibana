@@ -54,13 +54,9 @@ export type RandomSamplerWrapper = ReturnType<typeof createRandomSamplerWrapper>
  * @returns {RandomSamplerWrapper} random sampler wrapper utility
  */
 export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
-  let probability: number = 1;
-
-  if (isRandomSamplerOptionProbability(options)) {
-    probability = options.probability;
-  } else {
-    probability = getSampleProbability(options.totalNumDocs);
-  }
+  const probability = isRandomSamplerOptionProbability(options)
+    ? options.probability
+    : getSampleProbability(options.totalNumDocs);
 
   const aggName = options.aggName ?? DEFAULT_AGG_NAME;
 
