@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  describe('POST /internal/aiops/explain_log_rate_spikes', () => {
+  describe('POST /internal/aiops/explain_log_rate_spikes - full analysis', () => {
     explainLogRateSpikesTestData.forEach((testData) => {
       describe(`with ${testData.testName}`, () => {
         before(async () => {
@@ -60,29 +60,16 @@ export default ({ getService }: FtrProviderContext) => {
           );
           expect(addSignificantTermsActions.length).to.greaterThan(0);
 
-          const significantTerms = addSignificantTermsActions
-            .flatMap((d) => d.payload)
-            .sort(function (a, b) {
-              if (a.fieldName === b.fieldName) {
-                return b.fieldValue - a.fieldValue;
-              }
-              return a.fieldName > b.fieldName ? 1 : -1;
-            });
-
-          expect(significantTerms.length).to.eql(
-            testData.expected.significantTerms.length,
-            `Expected 'significantTerms.length' to be ${testData.expected.significantTerms.length}, got ${significantTerms.length}.`
+          const significantTerms = orderBy(
+            addSignificantTermsActions.flatMap((d) => d.payload),
+            ['doc_count'],
+            ['desc']
           );
-          significantTerms.forEach((cp, index) => {
-            const ecp = testData.expected.significantTerms[index];
-            expect(cp.fieldName).to.eql(ecp.fieldName);
-            expect(cp.fieldValue).to.eql(ecp.fieldValue);
-            expect(cp.doc_count).to.eql(
-              ecp.doc_count,
-              `Expected doc_count for '${cp.fieldName}:${cp.fieldValue}' to be ${ecp.doc_count}, got ${cp.doc_count}`
-            );
-            expect(cp.bg_count).to.eql(ecp.bg_count);
-          });
+
+          expect(significantTerms).to.eql(
+            testData.expected.significantTerms,
+            'Significant terms do not match expected values.'
+          );
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           const histograms = histogramActions.flatMap((d) => d.payload);
@@ -96,8 +83,8 @@ export default ({ getService }: FtrProviderContext) => {
           const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
           const groups = groupActions.flatMap((d) => d.payload);
 
-          expect(sortBy(groups, 'id')).to.eql(
-            sortBy(testData.expected.groups, 'id'),
+          expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
+            orderBy(testData.expected.groups, ['docCount'], ['desc']),
             'Grouping result does not match expected values.'
           );
 
@@ -229,46 +216,6 @@ export default ({ getService }: FtrProviderContext) => {
             compressResponse: false,
             flushFix: false,
           });
-        });
-
-        it('should return an error for non existing index without streaming', async () => {
-          const resp = await supertest
-            .post(`/internal/aiops/explain_log_rate_spikes`)
-            .set('kbn-xsrf', 'kibana')
-            .send({
-              ...testData.requestBody,
-              index: 'does_not_exist',
-            })
-            .expect(200);
-
-          const chunks: string[] = resp.body.toString().split('\n');
-
-          expect(chunks.length).to.eql(
-            testData.expected.noIndexChunksLength,
-            `Expected 'noIndexChunksLength' to be ${testData.expected.noIndexChunksLength}, got ${chunks.length}.`
-          );
-
-          const lastChunk = chunks.pop();
-          expect(lastChunk).to.be('');
-
-          let data: any[] = [];
-
-          expect(() => {
-            data = chunks.map((c) => JSON.parse(c));
-          }).not.to.throwError();
-
-          expect(data.length).to.eql(
-            testData.expected.noIndexActionsLength,
-            `Expected 'noIndexActionsLength' to be ${testData.expected.noIndexActionsLength}, got ${data.length}.`
-          );
-          data.forEach((d) => {
-            expect(typeof d.type).to.be('string');
-          });
-
-          const errorActions = data.filter((d) => d.type === testData.expected.errorFilter);
-          expect(errorActions.length).to.be(1);
-
-          expect(errorActions[0].payload).to.be('Failed to fetch index information.');
         });
       });
     });
