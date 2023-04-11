@@ -165,8 +165,6 @@ function getScriptType(
   isInlineScript: boolean
 ): MonitorUpdateEvent['scriptType'] | undefined {
   switch (true) {
-    case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
-      return 'zip';
     case Boolean(
       isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
     ):
