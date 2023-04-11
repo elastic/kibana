@@ -19,7 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/migrate_legacy_actions.mock';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {

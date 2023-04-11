@@ -24,7 +24,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 import { NormalizedAlertAction } from '../types';
 import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
 import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/migrate_legacy_actions.mock';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {

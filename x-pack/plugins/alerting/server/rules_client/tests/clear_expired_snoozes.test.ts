@@ -23,7 +23,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock'
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RuleSnooze } from '../../types';
 import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/migrate_legacy_actions.mock';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
