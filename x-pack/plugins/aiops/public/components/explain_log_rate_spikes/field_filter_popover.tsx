@@ -54,6 +54,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
     [euiThemeContext]
   );
 
+  const [isTouched, setIsTouched] = useState(false);
   const [fieldSearchText, setFieldSearchText] = useState('');
   const [skippedFields, setSkippedFields] = useState<string[]>([]);
   const setFieldsFilter = (fieldNames: string[], checked: boolean) => {
@@ -64,6 +65,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
       updatedSkippedFields = skippedFields.filter((d) => !fieldNames.includes(d));
     }
     setSkippedFields(updatedSkippedFields);
+    setIsTouched(true);
   };
 
   const [isFieldSelectionPopoverOpen, setIsFieldSelectionPopoverOpen] = useState(false);
@@ -160,6 +162,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                 size="xs"
                 flush="left"
                 onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
+                disabled={fieldSearchText.length > 0 && filteredUniqueFieldNames.length === 0}
                 data-test-subj="aiopsFieldSelectorSelectAllFieldsButton"
               >
                 {fieldSearchText.length > 0 ? (
@@ -180,6 +183,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                 size="xs"
                 flush="right"
                 onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
+                disabled={fieldSearchText.length > 0 && filteredUniqueFieldNames.length === 0}
                 data-test-subj="aiopsFieldSelectorDeselectAllFieldsButton"
               >
                 {fieldSearchText.length > 0 ? (
@@ -204,7 +208,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                 setIsFieldSelectionPopoverOpen(false);
                 closePopover();
               }}
-              disabled={disabledApplyButton || selectedFieldCount < 2}
+              disabled={disabledApplyButton || selectedFieldCount < 2 || !isTouched}
               tooltipContent={
                 selectedFieldCount < 2
                   ? i18n.translate('xpack.aiops.analysis.fieldSelectorNotEnoughFieldsSelected', {
