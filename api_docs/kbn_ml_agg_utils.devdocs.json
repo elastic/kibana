@@ -516,6 +516,114 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isCounterTimeSeriesMetric",
+        "type": "Function",
+        "tags": [],
+        "label": "isCounterTimeSeriesMetric",
+        "description": [
+          "\nCheck if DataViewField is a 'counter' time series metric field"
+        ],
+        "signature": [
+          "(field?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isCounterTimeSeriesMetric.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "optional DataViewField"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "a boolean"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isGaugeTimeSeriesMetric",
+        "type": "Function",
+        "tags": [],
+        "label": "isGaugeTimeSeriesMetric",
+        "description": [
+          "\nCheck if DataViewField is a 'gauge' time series metric field"
+        ],
+        "signature": [
+          "(field?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isGaugeTimeSeriesMetric.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "optional DataViewField"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "a boolean"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.numberValidator",
         "type": "Function",
         "tags": [],
@@ -1430,7 +1538,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.TIME_SERIES_METRIC_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "TIME_SERIES_METRIC_TYPES",
+        "description": [
+          "\nAll available types for time series metric fields"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",

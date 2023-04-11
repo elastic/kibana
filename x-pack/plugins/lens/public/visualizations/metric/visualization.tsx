@@ -61,6 +61,7 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 

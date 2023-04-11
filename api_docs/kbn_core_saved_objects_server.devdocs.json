@@ -7534,6 +7534,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsImportOptions.compatibilityMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compatibilityMode",
+            "description": [
+              "\nIf true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between\ndifferent Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8692,6 +8708,22 @@
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsResolveImportErrorsOptions.compatibilityMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compatibilityMode",
+            "description": [
+              "\nIf true, Kibana will apply various adjustments to the data that's being retried to import to maintain compatibility between\ndifferent Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9701,27 +9733,27 @@
             "references": [
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/utils.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
                 "plugin": "actions",

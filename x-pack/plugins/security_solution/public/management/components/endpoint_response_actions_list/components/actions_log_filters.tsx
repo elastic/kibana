@@ -10,6 +10,8 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ActionsLogWithRuleToggle } from './actions_log_with_rule_toggle';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -50,6 +52,9 @@ export const ActionsLogFilters = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
+      'endpointResponseActionsEnabled'
+    );
     const filters = useMemo(() => {
       return (
         <>
@@ -73,6 +78,9 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
+          {responseActionsEnabled && (
+            <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} isFlyout={isFlyout} />
+          )}
         </>
       );
     }, [
@@ -81,6 +89,7 @@ export const ActionsLogFilters = memo(
       onChangeCommandsFilter,
       onChangeHostsFilter,
       onChangeStatusesFilter,
+      responseActionsEnabled,
       showHostsFilter,
     ]);
 

@@ -282,35 +282,6 @@ describe('EngineOverviewLogic', () => {
       it('counts the fields from the field capabilities', () => {
         const fieldCapabilities = {
           created: '2023-02-07T19:16:43Z',
-          field_capabilities: {
-            fields: {
-              age: {
-                integer: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'integer',
-                },
-              },
-              color: {
-                keyword: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'keyword',
-                },
-              },
-              name: {
-                text: {
-                  aggregatable: false,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'text',
-                },
-              },
-            },
-            indices: ['index-001', 'index-002'],
-          },
           fields: [
             {
               indices: [
@@ -364,77 +335,9 @@ describe('EngineOverviewLogic', () => {
       it('excludes metadata fields from the count', () => {
         const fieldCapabilities = {
           created: '2023-02-07T19:16:43Z',
-          field_capabilities: {
-            fields: {
-              _doc_count: {
-                integer: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: false,
-                  type: 'integer',
-                },
-              },
-              _id: {
-                _id: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: true,
-                  type: '_id',
-                },
-              },
-              _index: {
-                _index: {
-                  aggregatable: true,
-                  metadata_field: true,
-                  searchable: true,
-                  type: '_index',
-                },
-              },
-              _source: {
-                _source: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: false,
-                  type: '_source',
-                },
-              },
-              _version: {
-                _version: {
-                  aggregatable: true,
-                  metadata_field: true,
-                  searchable: false,
-                  type: '_version',
-                },
-              },
-              age: {
-                integer: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'integer',
-                },
-              },
-              color: {
-                keyword: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'keyword',
-                },
-              },
-              name: {
-                text: {
-                  aggregatable: false,
-                  metadata_field: false,
-                  searchable: true,
-                  type: 'text',
-                },
-              },
-            },
-            indices: ['index-001', 'index-002'],
-          },
           fields: [
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -445,10 +348,13 @@ describe('EngineOverviewLogic', () => {
                   type: 'integer',
                 },
               ],
+              metadata_field: true,
               name: '_doc_count',
+              searchable: true,
               type: 'integer',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -459,10 +365,13 @@ describe('EngineOverviewLogic', () => {
                   type: '_id',
                 },
               ],
+              metadata_field: true,
               name: '_id',
+              searchable: true,
               type: '_id',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -473,10 +382,13 @@ describe('EngineOverviewLogic', () => {
                   type: '_index',
                 },
               ],
+              metadata_field: true,
               name: '_index',
+              searchable: true,
               type: '_index',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -487,10 +399,13 @@ describe('EngineOverviewLogic', () => {
                   type: '_source',
                 },
               ],
+              metadata_field: true,
               name: '_source',
+              searchable: true,
               type: '_source',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -501,10 +416,13 @@ describe('EngineOverviewLogic', () => {
                   type: '_version',
                 },
               ],
+              metadata_field: true,
               name: '_version',
+              searchable: true,
               type: '_version',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -515,10 +433,13 @@ describe('EngineOverviewLogic', () => {
                   type: 'integer',
                 },
               ],
+              metadata_field: false,
               name: 'age',
+              searchable: true,
               type: 'integer',
             },
             {
+              aggregatable: true,
               indices: [
                 {
                   name: 'index-001',
@@ -529,10 +450,13 @@ describe('EngineOverviewLogic', () => {
                   type: 'keyword',
                 },
               ],
+              metadata_field: false,
               name: 'color',
+              searchable: true,
               type: 'keyword',
             },
             {
+              aggregatable: false,
               indices: [
                 {
                   name: 'index-001',
@@ -543,7 +467,9 @@ describe('EngineOverviewLogic', () => {
                   type: 'text',
                 },
               ],
+              metadata_field: false,
               name: 'name',
+              searchable: true,
               type: 'text',
             },
           ] as SchemaField[],

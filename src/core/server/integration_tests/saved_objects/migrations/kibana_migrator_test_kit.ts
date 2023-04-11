@@ -43,6 +43,7 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
+import { delay } from './test_utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -121,6 +122,7 @@ export const getKibanaMigratorTestKit = async ({
   types = [],
   logFilePath = defaultLogFilePath,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
+  let hasRun = false;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -147,9 +149,13 @@ export const getKibanaMigratorTestKit = async ({
     kibanaBranch
   );
 
-  const runMigrations = async (rerun?: boolean) => {
+  const runMigrations = async () => {
+    if (hasRun) {
+      throw new Error('The test kit migrator can only be run once. Please instantiate it again.');
+    }
+    hasRun = true;
     migrator.prepareMigrations();
-    const migrationResults = await migrator.runMigrations({ rerun });
+    const migrationResults = await migrator.runMigrations();
     await loggingSystem.stop();
     return migrationResults;
   };
@@ -385,6 +391,7 @@ export const getIncompatibleMappingsMigrator = async ({
 };
 
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  await delay(0.1);
   return await fs.readFile(logFilePath, 'utf-8');
 };
 

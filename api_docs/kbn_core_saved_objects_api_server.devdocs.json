@@ -2066,6 +2066,40 @@
             "returnComment": [
               "- the point-in-time finder {@link ISavedObjectsPointInTimeFinder }"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.ISavedObjectsRepository.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\nIf the spaces extension is enabled, it's used to get the current namespace (and optionally throws an error if a\nconsumer attempted to specify the namespace explicitly).\n\nIf the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that\n`'default'` can be used interchangeably with `undefined` i.e. the method always returns `undefined` for the default\nnamespace."
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server",
+                "id": "def-common.ISavedObjectsRepository.getCurrentNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4019,7 +4053,7 @@
         "tags": [],
         "label": "SavedObjectsClientContract",
         "description": [
-          "\nSaved Objects is Kibana's data persisentence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing plugin state.\n\n## SavedObjectsClient errors\n\nSince the SavedObjectsClient has its hands in everything we\nare a little paranoid about the way we present errors back to\nto application code. Ideally, all errors will be either:\n\n  1. Caused by bad implementation (ie. undefined is not a function) and\n     as such unpredictable\n  2. An error that has been classified and decorated appropriately\n     by the decorators in {@link SavedObjectsErrorHelpers}\n\nType 1 errors are inevitable, but since all expected/handle-able errors\nshould be Type 2 the `isXYZError()` helpers exposed at\n`SavedObjectsErrorHelpers` should be used to understand and manage error\nresponses from the `SavedObjectsClient`.\n\nType 2 errors are decorated versions of the source error, so if\nthe elasticsearch client threw an error it will be decorated based\non its type. That means that rather than looking for `error.body.error.type` or\ndoing substring checks on `error.body.error.reason`, just use the helpers to\nunderstand the meaning of the error:\n\n  ```js\n  if (SavedObjectsErrorHelpers.isNotFoundError(error)) {\n     // handle 404\n  }\n\n  if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {\n     // 401 handling should be automatic, but in case you wanted to know\n  }\n\n  // always rethrow the error unless you handle it\n  throw error;\n  ```\n\n### 404s from missing index\n\nFrom the perspective of application code and APIs the SavedObjectsClient is\na black box that persists objects. One of the internal details that users have\nno control over is that we use an elasticsearch index for persistence and that\nindex might be missing.\n\nAt the time of writing we are in the process of transitioning away from the\noperating assumption that the SavedObjects index is always available. Part of\nthis transition is handling errors resulting from an index missing. These used\nto trigger a 500 error in most cases, and in others cause 404s with different\nerror messages.\n\nFrom my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The\nobject the request/call was targeting could not be found. This is why #14141\ntakes special care to ensure that 404 errors are generic and don't distinguish\nbetween index missing or document missing.\n\nSee {@link SavedObjectsClient}\nSee {@link SavedObjectsErrorHelpers}\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
         "deprecated": false,
@@ -5198,7 +5232,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references opertion"
+                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
                 ],
                 "signature": [
                   {
@@ -5446,7 +5480,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT fimder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT finder operation"
                 ],
                 "signature": [
                   {
@@ -5687,6 +5721,24 @@
             "returnComment": [
               "the {@link SavedObjectsUpdateObjectsSpacesResponse }"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsClientContract.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\nReturns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`."
+            ],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
