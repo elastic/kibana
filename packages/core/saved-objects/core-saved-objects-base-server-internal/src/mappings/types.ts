@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -51,12 +52,18 @@ export interface SavedObjectsTypeMappingDefinitions {
 /** @internal */
 export interface IndexMapping {
   dynamic?: boolean | 'strict';
+  dynamic_templates?: estypes.MappingTypeMapping['dynamic_templates'];
   properties: SavedObjectsMappingProperties;
   _meta?: IndexMappingMeta;
 }
 
 /** @internal */
 export interface IndexMappingMeta {
+  /**
+   * The md5 hash of the dynamic templates used to create the index.
+   */
+  dynamicTemplatesHash?: string;
+
   /**
    * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
    * with each key being a root-level mapping property, and each value being

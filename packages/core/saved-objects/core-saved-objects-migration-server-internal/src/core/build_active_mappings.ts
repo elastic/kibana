@@ -35,6 +35,7 @@ export function buildActiveMappings(
     ...mapping,
     properties: mergedProperties,
     _meta: {
+      dynamicTemplatesHash: md5Object(mapping.dynamic_templates),
       migrationMappingPropertyHashes: md5Values(mergedProperties),
     },
   });
@@ -51,8 +52,12 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
     return { changedProp: 'dynamic' };
   }
 
-  if (!actual._meta?.migrationMappingPropertyHashes) {
+  if (!actual._meta?.migrationMappingPropertyHashes || !actual._meta.dynamicTemplatesHash) {
     return { changedProp: '_meta' };
+  }
+
+  if (actual._meta.dynamicTemplatesHash !== expected._meta?.dynamicTemplatesHash) {
+    return { changedProp: 'dynamic_templates' };
   }
 
   const changedProp = findChangedProp(
@@ -117,6 +122,7 @@ function findChangedProp(actual: any, expected: any) {
 export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
+    dynamic_templates: [],
     properties: {
       type: {
         type: 'keyword',
