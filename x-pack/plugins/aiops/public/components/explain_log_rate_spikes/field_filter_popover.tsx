@@ -114,7 +114,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
         <EuiText size="xs" color="subdued" style={{ maxWidth: '400px' }}>
           <FormattedMessage
             id="xpack.aiops.explainLogRateSpikesPage.fieldFilterHelpText"
-            defaultMessage="To remove non-relevant fields from groups, deselect them below and click the Apply button to rerun the grouping. The search bar can be used to filter the list of fields and is useful to select/deselect in bulk with the actions below the list."
+            defaultMessage="Deselect non-relevant fields to remove them from groups and click the Apply button to rerun the grouping.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below."
           />
         </EuiText>
         <EuiSpacer size="s" />
