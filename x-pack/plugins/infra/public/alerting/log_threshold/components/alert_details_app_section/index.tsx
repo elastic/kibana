@@ -99,7 +99,11 @@ const AlertDetailsAppSection = ({
         {rule.params.criteria.map((criteria, idx) => {
           const chartCriterion = criteria as PartialCriterion;
           return (
-            <EuiPanel hasBorder={true} data-test-subj="logsHistoryChartAlertDetails">
+            <EuiPanel
+              key={`${chartCriterion.field}${idx}`}
+              hasBorder={true}
+              data-test-subj="logsHistoryChartAlertDetails"
+            >
               <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
@@ -116,7 +120,7 @@ const AlertDetailsAppSection = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
-              <EuiFlexGroup key={`${chartCriterion.field}${idx}`}>
+              <EuiFlexGroup>
                 <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
                   <EuiSpacer size="s" />
                   {chartCriterion.comparator && (
