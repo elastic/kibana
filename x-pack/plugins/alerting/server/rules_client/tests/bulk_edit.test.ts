@@ -703,7 +703,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
         uuid: '222',
-        alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] }, timeframe: null },
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
