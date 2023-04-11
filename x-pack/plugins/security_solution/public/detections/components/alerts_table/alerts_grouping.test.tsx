@@ -328,7 +328,7 @@ describe('GroupedAlertsTable', () => {
     });
   });
 
-  it('resets most inner group pagination when its parent groups open/close', async () => {
+  it('resets only most inner group pagination when its parent groups open/close', async () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
