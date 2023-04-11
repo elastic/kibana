@@ -35,10 +35,10 @@ export interface NavigationKibanaDependencies {
   };
   core: {
     chrome: {
-      getProjectNavIsOpen$: () => Observable<boolean>;
       recentlyAccessed: {
         get$: () => Observable<RecentItem[]>;
       };
+      getProjectNavIsOpen$: () => Observable<boolean>;
       getActiveNavItemId$: () => Observable<string | undefined>;
       registerNavItemClick: (id: string) => void;
     };
@@ -50,11 +50,18 @@ export interface NavigationKibanaDependencies {
  * @public
  */
 export type NavItemProps<T = unknown> = Pick<EuiSideNavItemType<T>, 'id' | 'name'> & {
+  /**
+   * Nav Items that could contain locators
+   */
   items?: Array<NavItemProps<T>>;
   /**
    * ID of a registered LocatorDefinition
    */
   locator?: ILocatorDefinition;
+  /**
+   * Href for a link destination (for links within a project)
+   */
+  href?: string;
 };
 
 /**

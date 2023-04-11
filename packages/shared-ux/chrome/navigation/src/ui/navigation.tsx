@@ -28,9 +28,7 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
-  const { recentItems, navIsOpen, activeNavItemId, getLocator, registerNavItemClick } =
-    useNavigation();
-
+  const { recentItems, ...services } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
   let euiSideNavRecentItems: Array<EuiSideNavItemType<unknown>> | undefined;
@@ -52,9 +50,9 @@ export const Navigation = (props: NavigationProps) => {
   }
 
   const nav = new NavigationModel(
-    getLocator,
-    registerNavItemClick,
-    activeNavItemId,
+    services.getLocator,
+    services.registerNavItemClick,
+    services.activeNavItemId ?? props.activeNavItemId,
     euiSideNavRecentItems,
     props.platformConfig,
     props.solutions
@@ -76,7 +74,9 @@ export const Navigation = (props: NavigationProps) => {
             href={props.homeHref}
             aria-label="Go to home page"
           />
-          {navIsOpen ? <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} /> : null}
+          {services.navIsOpen ? (
+            <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+          ) : null}
         </EuiCollapsibleNavGroup>
 
         {euiSideNavRecentItems ? <NavigationBucket {...recent} /> : null}

@@ -36,7 +36,7 @@ const createSideNavDataFactory = (
     platformSectionConfig?: PlatformSectionConfig
   ): Array<EuiSideNavItemType<unknown>> =>
     navItems.reduce<MyEuiSideNavItem[]>((accum, item) => {
-      const { id, name, items: subNav, locator: locatorDefinition } = item;
+      const { id, name, items: subNav, locator: locatorDefinition, href } = item;
       const config = platformSectionConfig?.properties?.[id];
       if (config?.enabled === false) {
         // return accumulated set without the item that is not enabled
@@ -63,6 +63,10 @@ const createSideNavDataFactory = (
           outerLocator.navigateSync(locatorParams ?? {});
           registerNavItemClick(fullId);
         };
+      } else if (href) {
+        onClick = () => {
+          registerNavItemClick(fullId);
+        };
       }
 
       let filteredSubNav: MyEuiSideNavItem[] | undefined;
@@ -83,6 +87,7 @@ const createSideNavDataFactory = (
         name,
         isSelected,
         onClick,
+        href,
         items: filteredSubNav,
         ['data-test-subj']: `nav-item-${fullId}`,
       };

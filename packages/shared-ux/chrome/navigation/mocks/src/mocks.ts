@@ -23,39 +23,38 @@ export const mocks: SolutionProperties & { locatorId: string } = {
         {
           id: 'get_started',
           name: 'Get started',
-          locator: { id: MOCK_LOCATOR_ID, params: { view: '/app/observability/overview' } },
+          href: '/app/example_project/get_started',
         },
         {
           id: 'alerts',
           name: 'Alerts',
-          locator: { id: MOCK_LOCATOR_ID, params: { view: '/app/observability/alerts' } },
+          href: '/app/example_project/alerts',
         },
         {
           id: 'cases',
           name: 'Cases',
-          locator: { id: MOCK_LOCATOR_ID, params: { view: '/app/observability/cases' } },
+          href: '/app/example_project/cases',
         },
       ],
     },
     {
-      id: 'signals',
-      name: 'Signals',
+      id: 'example_settings',
+      name: 'Settings',
       items: [
         {
           id: 'logs',
           name: 'Logs',
-          locator: {
-            id: MOCK_LOCATOR_ID,
-            params: { view: '/app/management/ingest/ingest_pipelines' },
-          },
+          href: '/app/management/logs',
+        },
+        {
+          id: 'signals',
+          name: 'Signals',
+          href: '/app/management/signals',
         },
         {
           id: 'tracing',
           name: 'Tracing',
-          locator: {
-            id: MOCK_LOCATOR_ID,
-            params: { view: '/app/management/ingest/ingest_pipelines' },
-          },
+          href: '/app/management/tracing',
         },
       ],
     },
