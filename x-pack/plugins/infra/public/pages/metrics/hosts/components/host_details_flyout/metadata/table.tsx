@@ -55,10 +55,10 @@ export const Table = (props: Props) => {
 
   const debouncedSearchOnChange = useMemo(
     () =>
-      debounce<(queryText: string) => void>(
-        (queryText) => setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' }),
-        500
-      ),
+      debounce<(queryText: string, query: Query) => void>((queryText, query) => {
+        setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' });
+        setSearchBarState(query);
+      }, 500),
     [setHostFlyoutOpen]
   );
 
@@ -68,11 +68,10 @@ export const Table = (props: Props) => {
         setSearchError(error);
       } else {
         setSearchError(undefined);
-        setSearchBarState(query);
-        debouncedSearchOnChange(queryText);
+        debouncedSearchOnChange(queryText, query);
       }
     },
-    [setSearchBarState, debouncedSearchOnChange]
+    [debouncedSearchOnChange]
   );
 
   const search: EuiSearchBarProps = {
