@@ -83,11 +83,14 @@ export const counterRateOperation: OperationDefinition<
   toExpression: (layer, columnId, indexPattern) => {
     const metric =
       layer.columns[(layer.columns[columnId] as ReferenceBasedIndexPatternColumn).references[0]];
+
+    const timeScale = layer.columns[columnId].timeScale || metric.timeScale;
     if (
       metric &&
       isColumnOfType('max', metric) &&
       'sourceField' in metric &&
-      indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
+      indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter' &&
+      timeScale !== undefined
     ) {
       return dateBasedOperationToExpression(layer, columnId, 'lens_identity');
     }

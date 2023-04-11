@@ -403,17 +403,18 @@ function getExpressionForLayer(
 
         if (isColumnOfType('formula', col)) {
           // we need to check if formula is doing counter_rate(max(counter field))
-          if (isCounterRateFormula(col, indexPattern)) {
+          if (col.timeScale !== undefined && isCounterRateFormula(col, indexPattern)) {
             return [formatCall];
           }
         }
         if (isColumnOfType<CounterRateIndexPatternColumn>('counter_rate', col)) {
           const metric = layer.columns[col.references[0]];
+          const timeScale = col.timeScale || metric.timeScale;
           if (
             metric &&
             'sourceField' in metric &&
-            indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
-            // should it check for supported metric type here as well?
+            indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter' &&
+            timeScale !== undefined
           ) {
             return [formatCall];
           }

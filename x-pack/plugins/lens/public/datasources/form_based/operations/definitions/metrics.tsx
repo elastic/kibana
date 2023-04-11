@@ -230,7 +230,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       const counterField =
         _indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
 
-      if (counterRateColumn && counterField) {
+      const doTimeScale =
+        counterRateColumn &&
+        (layer.columns[counterRateColumn].timeScale || column.timeScale) !== undefined;
+
+      if (counterRateColumn && counterField && doTimeScale) {
         return buildExpressionFunction<AggFunctionsMapping['aggBucketSum']>('aggBucketSum', {
           id: columnId,
           enabled: true,
