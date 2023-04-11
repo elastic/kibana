@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, {
   ComponentType,
   ReactNode,
@@ -62,7 +69,7 @@ export function createWizardContext<
     transitionDuration?: number;
   }) {
     const [step, setStep] = useState<StepKey>(initialStep);
-    const pathRef = useRef<Array<StepKey>>([initialStep]);
+    const pathRef = useRef<StepKey[]>([initialStep]);
     const usageRef = useRef<ReturnType<WizardContext<T, StepKey>['getUsage']>>({
       timeSinceStart: 0,
       navEvents: [

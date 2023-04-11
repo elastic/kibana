@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { PropsWithChildren, useState } from 'react';
 import {
   EuiTitle,
@@ -90,7 +97,7 @@ export function InstallElasticAgent() {
                 title="Filebeat"
                 iconType="document"
                 onClick={createAlternativeShipperToggle('filebeat')}
-                isSelected={alternativeShippers['filebeat']}
+                isSelected={alternativeShippers.filebeat}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -98,7 +105,7 @@ export function InstallElasticAgent() {
                 title="fluentbit"
                 iconType="package"
                 onClick={createAlternativeShipperToggle('fluentbit')}
-                isSelected={alternativeShippers['fluentbit']}
+                isSelected={alternativeShippers.fluentbit}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -109,7 +116,7 @@ export function InstallElasticAgent() {
                 title="Logstash"
                 iconType="logstashIf"
                 onClick={createAlternativeShipperToggle('logstash')}
-                isSelected={alternativeShippers['logstash']}
+                isSelected={alternativeShippers.logstash}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -117,7 +124,7 @@ export function InstallElasticAgent() {
                 title="Fluentd"
                 iconType="package"
                 onClick={createAlternativeShipperToggle('fluentd')}
-                isSelected={alternativeShippers['fluentd']}
+                isSelected={alternativeShippers.fluentd}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -132,7 +139,7 @@ export function InstallElasticAgent() {
             Continue
           </EuiButton>,
         ]}
-      ></StepPanelFooter>
+      />
     </StepPanel>
   );
 }
