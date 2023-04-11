@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
+import { ExpandWildcard, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { AlwaysShowPattern } from '../../../../common/types/indices';
+import { fetchConnectorIndexNames } from '../../connectors/fetch_connector_index_names';
 
 import { TotalIndexData } from '../fetch_indices';
 
 import { mapIndexStats } from './map_index_stats';
 
-export const getIndexData = async (
+export const getSearchIndexData = async (
   client: IScopedClusterClient,
   indexPattern: string,
   expandWildcards: ExpandWildcard[],
@@ -63,7 +64,7 @@ export const getIndexData = async (
     ? Object.keys(totalIndices)
     : Object.keys(totalIndices).filter(
         (indexName) =>
-          !(totalIndices[indexName]?.settings?.index?.hidden === 'true') ||
+          !isHidden(totalIndices[indexName]) ||
           (alwaysShowPattern?.index_pattern &&
             indexName.startsWith(alwaysShowPattern.index_pattern))
       );
@@ -83,4 +84,59 @@ export const getIndexDataMapper = (totalIndexData: TotalIndexData) => {
       totalIndexData.indicesStats[indexName],
       indexName
     );
+};
+
+function isHidden(index: IndicesIndexState): boolean {
+  return Boolean(index.settings?.index?.hidden) || index.settings?.index?.hidden === 'true';
+}
+
+export const getIndexData = async (
+  client: IScopedClusterClient,
+  onlyShowSearchOptimizedIndices: boolean,
+  returnHiddenIndices: boolean,
+  searchQuery?: string
+) => {
+  const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
+  if (onlyShowSearchOptimizedIndices) {
+    const names = await fetchConnectorIndexNames(client);
+    const allIndexNames = searchQuery
+      ? names.filter((indexName) => indexName.toLowerCase().includes(searchQuery.toLowerCase()))
+      : names;
+    const allIndexMatches = await client.asCurrentUser.indices.get({
+      // only get specified index properties from ES to keep the response under 536MB
+      // node.js string length limit: https://github.com/nodejs/node/issues/33960
+      filter_path: ['*.aliases', '*.settings.index.hidden'],
+      ignore_unavailable: true,
+      index: allIndexNames,
+    });
+    return {
+      indexData: allIndexMatches,
+      indexNames: allIndexNames.filter((name) =>
+        returnHiddenIndices
+          ? Boolean(allIndexMatches[name])
+          : Boolean(allIndexMatches[name]) && !isHidden(allIndexMatches[name])
+      ),
+    };
+  }
+  const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
+  const allIndexMatches = await client.asCurrentUser.indices.get({
+    expand_wildcards: expandWildcards,
+    // for better performance only compute aliases and settings of indices but not mappings
+    features: ['aliases', 'settings'],
+    // only get specified index properties from ES to keep the response under 536MB
+    // node.js string length limit: https://github.com/nodejs/node/issues/33960
+    filter_path: ['*.aliases', '*.settings.index.hidden'],
+    index: indexPattern,
+  });
+
+  const indexNames = returnHiddenIndices
+    ? Object.keys(allIndexMatches)
+    : Object.keys(allIndexMatches).filter(
+        (indexName) => allIndexMatches[indexName] && !isHidden(allIndexMatches[indexName])
+      );
+
+  return {
+    indexData: allIndexMatches,
+    indexNames,
+  };
 };

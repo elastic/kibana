@@ -7,12 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Meta } from '../../../../../common/types';
-import { HttpError, Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { Status } from '../../../../../common/types/api';
+import { Meta } from '../../../../../common/types/pagination';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import { DEFAULT_META } from '../../../shared/constants';
-import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import {
   CancelSyncsActions,
   CancelSyncsApiLogic,
@@ -27,31 +24,16 @@ import {
   FetchIndexApiLogic,
   FetchIndexApiResponse,
 } from '../../api/index/fetch_index_api_logic';
-import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
+import {
+  FetchIndicesApiActions,
+  FetchIndicesAPILogic,
+} from '../../api/index/fetch_indices_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {
-  apiError(error: HttpError): HttpError;
-  apiSuccess({
-    indices,
-    isInitialRequest,
-    meta,
-    returnHiddenIndices,
-    searchQuery,
-  }: {
-    indices: ElasticsearchIndexWithIngestion[];
-    isInitialRequest: boolean;
-    meta: Meta;
-    returnHiddenIndices: boolean;
-    searchQuery?: string;
-  }): {
-    indices: ElasticsearchIndexWithIngestion[];
-    isInitialRequest: boolean;
-    meta: Meta;
-    returnHiddenIndices: boolean;
-    searchQuery?: string;
-  };
+  apiError: FetchIndicesApiActions['apiError'];
+  apiSuccess: FetchIndicesApiActions['apiSuccess'];
   cancelSuccess: CancelSyncsActions['apiSuccess'];
   closeDeleteModal(): void;
   deleteError: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['apiError'];
@@ -59,15 +41,26 @@ export interface IndicesActions {
   deleteSuccess: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['apiSuccess'];
   fetchIndexDetails: FetchIndexActions['makeRequest'];
   fetchIndices({
-    meta,
+    from,
+    onlyShowSearchOptimizedIndices,
     returnHiddenIndices,
     searchQuery,
+    size,
   }: {
-    meta: Meta;
+    from: number;
+    onlyShowSearchOptimizedIndices: boolean;
     returnHiddenIndices: boolean;
     searchQuery?: string;
-  }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
-  makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
+    size: number;
+  }): {
+    from: number;
+    meta: Meta;
+    onlyShowSearchOptimizedIndices: boolean;
+    returnHiddenIndices: boolean;
+    searchQuery?: string;
+    size: number;
+  };
+  makeRequest: FetchIndicesApiActions['makeRequest'];
   onPaginate(newPageIndex: number): { newPageIndex: number };
   openDeleteModal(indexName: string): { indexName: string };
   setIsFirstRequest(): void;
@@ -89,17 +82,31 @@ export interface IndicesValues {
   isFirstRequest: boolean;
   isLoading: boolean;
   meta: Meta;
-  searchParams: { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
+  searchParams: {
+    from: number;
+    onlyShowSearchOptimizedIndices: boolean;
+    returnHiddenIndices: boolean;
+    searchQuery?: string;
+    size: number;
+  };
   status: typeof FetchIndicesAPILogic.values.status;
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   actions: {
     closeDeleteModal: true,
-    fetchIndices: ({ meta, returnHiddenIndices, searchQuery }) => ({
-      meta,
+    fetchIndices: ({
+      from,
+      onlyShowSearchOptimizedIndices,
       returnHiddenIndices,
       searchQuery,
+      size,
+    }) => ({
+      from,
+      onlyShowSearchOptimizedIndices,
+      returnHiddenIndices,
+      searchQuery,
+      size,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     openDeleteModal: (indexName) => ({ indexName }),
@@ -166,16 +173,26 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       },
     ],
     searchParams: [
-      { meta: DEFAULT_META, returnHiddenIndices: false },
       {
-        apiSuccess: (_, { meta, returnHiddenIndices, searchQuery }) => ({
-          meta,
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
+        returnHiddenIndices: false,
+        size: 20,
+      },
+      {
+        apiSuccess: (
+          _,
+          { meta, onlyShowSearchOptimizedIndices, returnHiddenIndices, searchQuery }
+        ) => ({
+          from: meta.page.from,
+          onlyShowSearchOptimizedIndices,
           returnHiddenIndices,
           searchQuery,
+          size: meta.page.size,
         }),
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
-          meta: updateMetaPageIndex(state.meta, newPageIndex),
+          from: (newPageIndex - 1) * state.size,
         }),
       },
     ],
@@ -218,6 +235,9 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       () => [selectors.status, selectors.isFirstRequest],
       (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
-    meta: [() => [selectors.searchParams], (searchParams) => searchParams.meta],
+    meta: [
+      () => [selectors.data],
+      (data) => data?.meta ?? { page: { from: 0, size: 20, total: 0 } },
+    ],
   }),
 });

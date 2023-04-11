@@ -49,8 +49,9 @@ export const baseBreadcrumbs = [
 
 export const SearchIndices: React.FC = () => {
   const { fetchIndices, onPaginate, openDeleteModal, setIsFirstRequest } = useActions(IndicesLogic);
-  const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
+  const { meta, indices, hasNoIndices, isLoading, searchParams } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
+  const [onlyShowSearchOptimizedIndices, setOnlyShowSearchOptimizedIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
@@ -66,11 +67,19 @@ export const SearchIndices: React.FC = () => {
 
   useEffect(() => {
     fetchIndices({
-      meta,
+      from: searchParams.from,
+      onlyShowSearchOptimizedIndices,
       returnHiddenIndices: showHiddenIndices,
       searchQuery,
+      size: searchParams.size,
     });
-  }, [searchQuery, meta.page.current, showHiddenIndices]);
+  }, [
+    searchQuery,
+    searchParams.from,
+    searchParams.size,
+    onlyShowSearchOptimizedIndices,
+    showHiddenIndices,
+  ]);
 
   const pageTitle = isLoading
     ? ''
@@ -178,6 +187,20 @@ export const SearchIndices: React.FC = () => {
                           }
                         )}
                         onChange={(event) => setShowHiddenIndices(event.target.checked)}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        checked={onlyShowSearchOptimizedIndices}
+                        label={i18n.translate(
+                          'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.label',
+                          {
+                            defaultMessage: 'Only show search optimized indices',
+                          }
+                        )}
+                        onChange={(event) =>
+                          setOnlyShowSearchOptimizedIndices(event.target.checked)
+                        }
                       />
                     </EuiFlexItem>
                     <EuiFlexItem className="entSearchIndicesSearchBar">

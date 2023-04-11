@@ -21,13 +21,12 @@ import { i18n } from '@kbn/i18n';
 
 import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../../../common/connectors/native_connectors';
 
-import { Meta } from '../../../../../common/types';
+import { Meta } from '../../../../../common/types/pagination';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
-import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex } from '../../types';
 import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
@@ -211,7 +210,12 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       items={indices}
       columns={columns}
       onChange={onChange}
-      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      pagination={{
+        pageIndex: meta.page.from / (meta.page.size || 1),
+        pageSize: meta.page.size,
+        showPerPageOptions: false,
+        totalItemCount: meta.page.total,
+      }}
       tableLayout="fixed"
       loading={isLoading}
     />
