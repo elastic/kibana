@@ -200,7 +200,7 @@ export function useLogStream({
 
   const fetchNextEntries = useCallback<FetchPageCallback>(
     (params) => {
-      if (state.bottomCursor === null) {
+      if (state.bottomCursor === null && state.hasMoreAfter) {
         throw new Error(
           'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
@@ -210,10 +210,12 @@ export function useLogStream({
         return;
       }
 
-      fetchLogEntriesAfter(state.bottomCursor, {
-        size: LOG_ENTRIES_CHUNK_SIZE,
-        extendTo: params?.extendTo,
-      });
+      if (state.bottomCursor !== null) {
+        fetchLogEntriesAfter(state.bottomCursor, {
+          size: LOG_ENTRIES_CHUNK_SIZE,
+          extendTo: params?.extendTo,
+        });
+      }
     },
     [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]
   );
