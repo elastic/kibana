@@ -149,7 +149,6 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
-        refreshedMonitorIds={[]}
       />
     );
     expect(await findByText(NO_DATA_MESSAGE)).toBeInTheDocument();
@@ -164,7 +163,6 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
-        refreshedMonitorIds={[]}
       />
     );
 
@@ -185,7 +183,6 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
-        refreshedMonitorIds={[]}
       />
     );
 
@@ -222,7 +219,6 @@ describe('MonitorList component', () => {
           }}
           pageSize={10}
           setPageSize={jest.fn()}
-          refreshedMonitorIds={[]}
         />
       );
 
@@ -251,7 +247,6 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
-            refreshedMonitorIds={[]}
           />
         );
 
@@ -281,7 +276,6 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
-            refreshedMonitorIds={[]}
           />
         );
 

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
+import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
@@ -99,6 +100,7 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
+      <DisabledCallout total={absoluteTotal} />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />

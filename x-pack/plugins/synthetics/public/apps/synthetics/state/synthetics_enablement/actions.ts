@@ -24,7 +24,9 @@ export const disableSyntheticsFailure = createAction<IHttpSerializedFetchError>(
 );
 
 export const enableSynthetics = createAction('[SYNTHETICS_ENABLEMENT] ENABLE');
-export const enableSyntheticsSuccess = createAction<{}>('[SYNTHETICS_ENABLEMENT] ENABLE SUCCESS');
+export const enableSyntheticsSuccess = createAction<MonitorManagementEnablementResult>(
+  '[SYNTHETICS_ENABLEMENT] ENABLE SUCCESS'
+);
 export const enableSyntheticsFailure = createAction<IHttpSerializedFetchError>(
   '[SYNTHETICS_ENABLEMENT] ENABLE FAILURE'
 );

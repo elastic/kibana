@@ -48,7 +48,7 @@ journey('MonitorPingRedirects', async ({ page, params }: { page: Page; params: a
     await delay(5000);
   });
 
-  step('go to monitor-management', async () => {
+  step('go to overview page', async () => {
     await monitorDetails.navigateToOverviewPage({
       dateRangeEnd: testMonitor.end,
       dateRangeStart: testMonitor.start,

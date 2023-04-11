@@ -29,6 +29,7 @@ export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
 export const CertMonitorType = t.partial({
   name: t.string,
   id: t.string,
+  configId: t.string,
   url: t.string,
 });
 
