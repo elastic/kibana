@@ -28,7 +28,7 @@ export interface LogAlertsParams<
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
-  maintenanceWindowIds: string[];
+  maintenanceWindowIds?: string[];
 }
 
 export function logAlerts<

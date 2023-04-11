@@ -41,7 +41,7 @@ const ALERT_FLAPPING = `${ALERT_NAMESPACE}.flapping` as const;
 const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
-const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_RULE_NAMESPACE}.maintenance_window_ids` as const;
+const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;

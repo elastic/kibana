@@ -125,7 +125,7 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore: RuleRunMetricsStore;
     flappingSettings: RulesSettingsFlappingProperties;
     notifyWhen: RuleNotifyWhenType | null;
-    maintenanceWindowIds: string[];
+    maintenanceWindowIds?: string[];
   }) {
     const {
       newAlerts: processedAlertsNew,

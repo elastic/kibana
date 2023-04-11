@@ -47,6 +47,7 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
+  MaintenanceWindow,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -316,9 +317,18 @@ export class TaskRunner<
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
     const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
-    const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
-      interval: rule.schedule.interval,
-    });
+
+    let activeMaintenanceWindows: MaintenanceWindow[] = [];
+    try {
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
+        interval: rule.schedule.interval,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
+      );
+    }
+
     const maintenanceWindowIds = activeMaintenanceWindows.map(
       (maintenanceWindow) => maintenanceWindow.id
     );
@@ -404,7 +414,7 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              maintenanceWindowIds,
+              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
             })
           );
 

@@ -50,7 +50,7 @@ interface AlertOpts {
   group?: string;
   state?: AlertInstanceState;
   flapping: boolean;
-  maintenanceWindowIds: string[];
+  maintenanceWindowIds?: string[];
 }
 
 interface ActionOpts {

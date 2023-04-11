@@ -44,7 +44,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(1);
@@ -70,7 +69,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -103,7 +101,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(logger.debug).toHaveBeenCalledTimes(2);
@@ -128,7 +125,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(logger.debug).not.toHaveBeenCalled();
@@ -158,7 +154,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
@@ -174,7 +169,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-7',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'recovered-instance',
@@ -183,7 +177,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-8',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
@@ -192,7 +185,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-9',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
@@ -201,7 +193,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-10',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
@@ -210,7 +201,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
@@ -219,7 +209,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-1',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
@@ -228,7 +217,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: 'uuid-2',
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
@@ -237,7 +225,6 @@ describe('logAlerts', () => {
       state: {},
       flapping: false,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     // check the two calls for alert 4 used the same UUID
@@ -269,7 +256,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: false,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(0);
@@ -301,7 +287,6 @@ describe('logAlerts', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
@@ -312,7 +297,6 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'recovered-instance',
@@ -322,7 +306,6 @@ describe('logAlerts', () => {
       flapping: true,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
@@ -332,7 +315,6 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
@@ -342,7 +324,6 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
@@ -352,7 +333,6 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
@@ -362,7 +342,6 @@ describe('logAlerts', () => {
       flapping: true,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
@@ -372,7 +351,6 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
@@ -382,7 +360,89 @@ describe('logAlerts', () => {
       flapping: false,
       group: undefined,
       uuid: expect.any(String),
-      maintenanceWindowIds: ['window-id1', 'window-id2'],
+    });
+  });
+
+  test('should correctly set maintenance window in ruleRunMetricsStore and call alertingEventLogger.logAlert', () => {
+    jest.clearAllMocks();
+    const MAINTENANCE_WINDOW_IDS = ['window-id-1', 'window-id-2'];
+
+    logAlerts({
+      logger,
+      alertingEventLogger,
+      newAlerts: {
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      activeAlerts: {
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      recoveredAlerts: {
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
+      },
+      ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: false,
+      shouldPersistAlerts: true,
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+    });
+
+    expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
+    expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(2);
+    expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(2);
+
+    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(5);
+
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
+      action: 'recovered-instance',
+      id: '7',
+      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+      action: 'recovered-instance',
+      id: '8',
+      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+      action: 'new-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+      action: 'active-instance',
+      id: '1',
+      message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
+      action: 'active-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
     });
   });
 });
