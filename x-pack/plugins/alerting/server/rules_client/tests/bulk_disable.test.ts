@@ -73,6 +73,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   eventLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
