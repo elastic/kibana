@@ -308,8 +308,6 @@ describe('when on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        jest.setTimeout(100000);
-        renderResult.debug(undefined, 3000000);
         await waitFor(
           async () => {
             expect(
@@ -318,8 +316,6 @@ describe('when on the package policy create page', () => {
           },
           { timeout: 10000 }
         );
-
-        renderResult.debug(undefined, 3000000);
 
         await act(async () => {
           fireEvent.click(
