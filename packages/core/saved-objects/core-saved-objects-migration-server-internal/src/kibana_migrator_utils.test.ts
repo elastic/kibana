@@ -14,7 +14,7 @@ import { DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
 import {
   calculateTypeStatuses,
   createMultiPromiseDefer,
-  getIndicesInvoledInRelocation,
+  getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
 import { INDEX_MAP_BEFORE_SPLIT } from './kibana_migrator_utils.fixtures';
@@ -41,8 +41,8 @@ describe('createMultiPromiseDefer', () => {
   });
 });
 
-describe('getIndicesInvoledInRelocation', () => {
-  const getIndicesInvoledInRelocationParams = () => {
+describe('getIndicesInvolvedInRelocation', () => {
+  const getIndicesInvolvedInRelocationParams = () => {
     const client = elasticsearchClientMock.createElasticsearchClient();
     (client as any).child = jest.fn().mockImplementation(() => client);
 
@@ -56,9 +56,9 @@ describe('getIndicesInvoledInRelocation', () => {
   };
 
   it('tries to get the indexTypesMap from the mainIndex', async () => {
-    const params = getIndicesInvoledInRelocationParams();
+    const params = getIndicesInvolvedInRelocationParams();
     try {
-      await getIndicesInvoledInRelocation(params);
+      await getIndicesInvolvedInRelocation(params);
     } catch (err) {
       // ignore
     }
@@ -70,7 +70,7 @@ describe('getIndicesInvoledInRelocation', () => {
   });
 
   it('fails if the query to get indexTypesMap fails with critical error', async () => {
-    const params = getIndicesInvoledInRelocationParams();
+    const params = getIndicesInvolvedInRelocationParams();
     params.client.indices.getMapping.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
         new errors.ResponseError({
@@ -87,13 +87,13 @@ describe('getIndicesInvoledInRelocation', () => {
         })
       )
     );
-    expect(getIndicesInvoledInRelocation(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(getIndicesInvolvedInRelocation(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error_type"`
     );
   });
 
   it('assumes fresh deployment if the mainIndex does not exist, returns an empty list of moving types', async () => {
-    const params = getIndicesInvoledInRelocationParams();
+    const params = getIndicesInvolvedInRelocationParams();
     params.client.indices.getMapping.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
         new errors.ResponseError({
@@ -110,13 +110,13 @@ describe('getIndicesInvoledInRelocation', () => {
         })
       )
     );
-    expect(getIndicesInvoledInRelocation(params)).resolves.toEqual([]);
+    expect(getIndicesInvolvedInRelocation(params)).resolves.toEqual([]);
   });
 
   describe('if mainIndex exists', () => {
     describe('but it does not have an indexTypeMap stored', () => {
       it('uses the defaultIndexTypeMap and finds out which indices are involved in a relocation', async () => {
-        const params = getIndicesInvoledInRelocationParams();
+        const params = getIndicesInvolvedInRelocationParams();
         params.client.indices.getMapping.mockReturnValue(
           Promise.resolve({
             '.kibana_8.7.0_001': {
@@ -145,13 +145,13 @@ describe('getIndicesInvoledInRelocation', () => {
           '.indexC': ['type2', 'type3'],
         };
 
-        expect(getIndicesInvoledInRelocation(params)).resolves.toEqual(['.indexA', '.indexC']);
+        expect(getIndicesInvolvedInRelocation(params)).resolves.toEqual(['.indexA', '.indexC']);
       });
     });
 
     describe('and it has an indexTypeMap stored', () => {
       it('compares stored indexTypeMap against desired one, and finds out which indices are involved in a relocation', async () => {
-        const params = getIndicesInvoledInRelocationParams();
+        const params = getIndicesInvolvedInRelocationParams();
         params.client.indices.getMapping.mockReturnValue(
           Promise.resolve({
             '.kibana_8.8.0_001': {
@@ -189,7 +189,7 @@ describe('getIndicesInvoledInRelocation', () => {
           '.indexD': ['type5', 'type6'],
         };
 
-        expect(getIndicesInvoledInRelocation(params)).resolves.toEqual(['.indexB', '.indexD']);
+        expect(getIndicesInvolvedInRelocation(params)).resolves.toEqual(['.indexB', '.indexD']);
       });
     });
   });

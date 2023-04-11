@@ -277,7 +277,7 @@ describe('split .kibana index into multiple system indices', () => {
         expect(logs).toMatch(`[${newIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`);
       });
 
-      // the .kibana migrator is involed in a relocation, it must also reindex
+      // the .kibana migrator is involved in a relocation, it must also reindex
       expect(logs).toMatch('[.kibana] INIT -> WAIT_FOR_YELLOW_SOURCE.');
       expect(logs).toMatch('[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS.');
       expect(logs).toMatch('[.kibana] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.');

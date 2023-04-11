@@ -32,7 +32,7 @@ import {
   type MigrationResult,
   type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { getIndicesInvoledInRelocation } from './kibana_migrator_utils';
+import { getIndicesInvolvedInRelocation } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
 import { createIndexMap } from './core/build_index_map';
@@ -189,7 +189,7 @@ export class KibanaMigrator implements IKibanaMigrator {
 
     // compare indexTypesMap with the one present (or not) in the .kibana index meta
     // and check if some SO types have been moved to different indices
-    const indicesWithMovingTypes = await getIndicesInvoledInRelocation({
+    const indicesWithMovingTypes = await getIndicesInvolvedInRelocation({
       mainIndex: MAIN_SAVED_OBJECT_INDEX,
       client: this.client,
       indexTypesMap,

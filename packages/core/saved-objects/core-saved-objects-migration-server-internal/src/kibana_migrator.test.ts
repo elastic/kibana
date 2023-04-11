@@ -134,7 +134,8 @@ describe('KibanaMigrator', () => {
       );
     });
 
-    it('only runs migrations once if called multiple times', async () => {
+    // eslint-disable-next-line jest/no-focused-tests
+    fit('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       options.client.indices.get.mockResponse({}, { statusCode: 200 });
       options.client.indices.getMapping.mockResponse(mappingsResponseWithoutIndexTypesMap, {
@@ -234,8 +235,7 @@ describe('KibanaMigrator', () => {
 
     describe('for V2 migrations', () => {
       describe('where some SO types must be relocated', () => {
-        // eslint-disable-next-line jest/no-focused-tests
-        fit('runs successfully', async () => {
+        it('runs successfully', async () => {
           const options = mockV2MigrationOptions();
           options.client.indices.getMapping.mockResponse(mappingsResponseWithoutIndexTypesMap, {
             statusCode: 200,
