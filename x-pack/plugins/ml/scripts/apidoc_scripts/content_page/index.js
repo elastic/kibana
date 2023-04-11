@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// For the technical preview of Explain Log Rate Spikes we use a hard coded seed.
-// In future versions we might use a user specific seed or let the user costumise it.
-export const RANDOM_SAMPLER_SEED = 3867412;
+require('../../../../../../src/setup_node_env');
+require('./content_page').generateContentPage();

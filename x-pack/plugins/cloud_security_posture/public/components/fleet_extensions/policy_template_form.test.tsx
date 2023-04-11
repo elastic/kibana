@@ -13,8 +13,23 @@ import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-pl
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
+import { useParams } from 'react-router-dom';
+
+// mock useParams
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({
+    integration: undefined,
+  }),
+}));
 
 describe('<CspPolicyTemplateForm />', () => {
+  beforeEach(() => {
+    (useParams as jest.Mock).mockReturnValue({
+      integration: undefined,
+    });
+  });
+
   const onChange = jest.fn();
 
   const WrappedComponent = ({
@@ -183,13 +198,30 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
 
     render(<WrappedComponent newPolicy={policy} />);
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
-      updatedPolicy: getMockPolicyK8s(),
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens to set integration name
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        name: 'kspm-1',
+      },
     });
   });
 
@@ -200,13 +232,30 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'cspm',
+    });
 
     render(<WrappedComponent newPolicy={policy} />);
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
-      updatedPolicy: getMockPolicyAWS(),
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens to set integration name
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        name: 'cspm-1',
+      },
     });
   });
 
