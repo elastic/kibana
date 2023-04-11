@@ -340,7 +340,7 @@ export class TestSubjects extends FtrService {
 
   public async waitForDeleted(
     selectorOrElement: string | WebElementWrapper,
-    timeout?: number
+    timeout: number = this.TRY_TIME
   ): Promise<void> {
     if (typeof selectorOrElement === 'string') {
       await this.findService.waitForDeletedByCssSelector(
@@ -360,17 +360,21 @@ export class TestSubjects extends FtrService {
     await this.findService.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
   }
 
-  public async waitForHidden(selector: string, timeout?: number): Promise<voisd> {
+  public async waitForHidden(selector: string, timeout?: number): Promise<void> {
     this.log.debug(`TestSubjects.waitForHidden(${selector})`);
     const element = await this.find(selector);
     await this.findService.waitForElementHidden(element, timeout);
   }
 
   public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<void> {
-    await this.retry.tryForTime(timeout, async () => {
+    this.log.debug(`TestSubjects.waitForEnabled(${selector}) with timeout=${timeout}`);
+    const success = await this.retry.tryForTime(timeout, async () => {
       const element = await this.find(selector);
       return (await element.isDisplayed()) && (await element.isEnabled());
     });
+    if (!success) {
+      throw new Error(`The element ${selector} was not enabled within the ${timeout}ms timeout.`);
+    }
   }
 
   public getCssSelector(selector: string): string {
