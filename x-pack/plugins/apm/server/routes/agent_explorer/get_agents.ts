@@ -33,7 +33,6 @@ export interface AgentExplorerAgentsResponse {
     instances: number;
     latestVersion?: string;
   }>;
-  latestVersionError?: { message: string; type?: string; statusCode?: string };
 }
 
 export async function getAgents({

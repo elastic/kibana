@@ -250,7 +250,7 @@ export function AgentExplorer() {
           items={agentItems}
           noItemsMessage={noItemsMessage}
           isLatestVersionsLoading={isLatestAgentVersionsLoading}
-          latestVersionsFailed={!!agents.data?.latestVersionError}
+          latestVersionsFailed={!!latestAgentVersions?.error}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

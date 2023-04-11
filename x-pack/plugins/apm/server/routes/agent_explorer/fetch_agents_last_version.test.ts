@@ -6,25 +6,26 @@
  */
 
 jest.mock('node-fetch');
+import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { fetchAgentsLatestVersion } from './fetch_agents_latest_version';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
+const logger = loggerMock.create();
 
 describe('ApmFetchAgentslatestsVersion', () => {
-  const logger = loggerMock.create();
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('when url is empty should not fetch latest versions', async () => {
-    const { data, error } = await fetchAgentsLatestVersion(logger, '');
+    const boom = Boom.notImplemented(
+      'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.'
+    );
 
+    await expect(fetchAgentsLatestVersion(logger, '')).rejects.toThrow(boom);
     expect(fetchMock).toBeCalledTimes(0);
-    expect(data).toEqual({});
-    expect(error).toBeFalsy();
   });
 
   describe('when url is defined', () => {
