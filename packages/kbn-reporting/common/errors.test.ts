@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as errors from '.';
+import * as errors from './errors';
 
 const { ReportingError: _, ...nonAbstractErrors } = errors;
 
