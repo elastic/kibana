@@ -147,14 +147,7 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 
 const validateBrowser: ValidationLibrary = {
   ...validateCommon,
-  [ConfigKey.SOURCE_ZIP_URL]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
-  [ConfigKey.SOURCE_INLINE]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
+  [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
   [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
     validateThrottleValue(downloadSpeed),
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
