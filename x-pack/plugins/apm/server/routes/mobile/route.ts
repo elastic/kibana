@@ -30,7 +30,10 @@ import {
   getMobileMainStatisticsByField,
   MobileMainStatisticsResponse,
 } from './get_mobile_main_statistics_by_field';
-import { getMobileDetailedStatisticsByFieldPeriods } from './get_mobile_detailed_statistics_by_field';
+import {
+  getMobileDetailedStatisticsByFieldPeriods,
+  MobileDetailedStatisticsResponse,
+} from './get_mobile_detailed_statistics_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -328,26 +331,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
-      fieldName: string;
-      latency: Array<import('./../../../typings/timeseries').Coordinate>;
-      throughput: Array<import('./../../../typings/timeseries').Coordinate>;
-    }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
-      latency: Array<{
-        x: number;
-        y: import('./../../../typings/common').Maybe<number>;
-      }>;
-      throughput: Array<{
-        x: number;
-        y: import('./../../../typings/common').Maybe<number>;
-      }>;
-      fieldName: string;
-    }>;
-  }> => {
+  handler: async (resources): Promise<MobileDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;

@@ -23,6 +23,18 @@ import {
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../typings/timeseries';
+
+interface MobileDetailedStatistics {
+  fieldName: string;
+  latency: Coordinate[];
+  throughput: Coordinate[];
+}
+
+export interface MobileDetailedStatisticsResponse {
+  currentPeriod: Record<string, MobileDetailedStatistics>;
+  previousPeriod: Record<string, MobileDetailedStatistics>;
+}
 
 interface Props {
   kuery: string;
@@ -145,7 +157,7 @@ export async function getMobileDetailedStatisticsByFieldPeriods({
   start,
   end,
   offset,
-}: Props) {
+}: Props): Promise<MobileDetailedStatisticsResponse> {
   const commonProps = {
     environment,
     kuery,
