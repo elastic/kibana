@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,16 +103,32 @@ export const ChangePointDetectionPage: FC = () => {
                 {requestParams.interval}
               </EuiText>
             </EuiFlexItem>
-            {hasSelectedChangePoints ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={() => setFlyoutVisible(!isFlyoutVisible)} size={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={
+                  hasSelectedChangePoints ? (
+                    ''
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.aiops.changePointDetection.viewSelectedChartsToltip"
+                      defaultMessage="Select change points to view them in detail."
+                    />
+                  )
+                }
+              >
+                <EuiButtonEmpty
+                  onClick={() => setFlyoutVisible(!isFlyoutVisible)}
+                  size={'s'}
+                  disabled={!hasSelectedChangePoints}
+                >
                   <FormattedMessage
                     id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
                     defaultMessage="View selected"
                   />
                 </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
