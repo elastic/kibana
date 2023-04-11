@@ -209,13 +209,14 @@ export function DiscoverMainRoute(props: Props) {
   }, [loadSavedSearch, id]);
 
   /**
-   * Stop syncing when navigating away from Discover main
+   * Cleanups when navigating away from Discover main
    */
   useEffect(() => {
     return () => {
       stateContainer.actions.stopSync();
+      data.search.session.clear();
     };
-  }, [stateContainer]);
+  }, [data, stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset the 'new' state
   useUrl({ history, savedSearchId: id, onNewUrl: () => loadSavedSearch() });
