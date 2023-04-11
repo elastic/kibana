@@ -66,7 +66,7 @@ const getSteps = ({
           // Used for testing and to track FS usage
           data-test-subj="onboarding--observTourSkipButton"
         >
-          {i18n.translate('xpack.observability.tour.skipButtonLabel', {
+          {i18n.translate('xpack.observabilityShared.tour.skipButtonLabel', {
             defaultMessage: 'Skip tour',
           })}
         </EuiButtonEmpty>
@@ -79,7 +79,7 @@ const getSteps = ({
           // Used for testing and to track FS usage
           data-test-subj="onboarding--observTourNextStepButton"
         >
-          {i18n.translate('xpack.observability.tour.nextButtonLabel', {
+          {i18n.translate('xpack.observabilityShared.tour.nextButtonLabel', {
             defaultMessage: 'Next',
           })}
         </EuiButton>
@@ -95,7 +95,7 @@ const getSteps = ({
       onClick={() => endTour()}
       data-test-subj="onboarding--observTourEndButton"
     >
-      {i18n.translate('xpack.observability.tour.endButtonLabel', {
+      {i18n.translate('xpack.observabilityShared.tour.endButtonLabel', {
         defaultMessage: 'End tour',
       })}
     </EuiButtonEmpty>

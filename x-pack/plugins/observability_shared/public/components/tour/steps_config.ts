@@ -23,22 +23,25 @@ interface TourStep {
 
 export const tourStepsConfig: TourStep[] = [
   {
-    title: i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.observabilityOverviewStep.tourTitle', {
       defaultMessage: 'Welcome to Elastic Observability',
     }),
-    content: i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourContent', {
-      defaultMessage:
-        'Take a quick tour to learn the benefits of having all of your observability data in one stack.',
-    }),
+    content: i18n.translate(
+      'xpack.observabilityShared.tour.observabilityOverviewStep.tourContent',
+      {
+        defaultMessage:
+          'Take a quick tour to learn the benefits of having all of your observability data in one stack.',
+      }
+    ),
     anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
   },
   {
-    title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.streamStep.tourTitle', {
       defaultMessage: 'Tail your logs in real time',
     }),
-    content: i18n.translate('xpack.observability.tour.streamStep.tourContent', {
+    content: i18n.translate('xpack.observabilityShared.tour.streamStep.tourContent', {
       defaultMessage:
         'Monitor, filter, and inspect log events flowing in from your applications, servers, virtual machines, and containers.',
     }),
@@ -47,16 +50,16 @@ export const tourStepsConfig: TourStep[] = [
     dataTestSubj: 'streamStep',
     imageConfig: {
       name: 'onboarding_tour_step_logs.gif',
-      altText: i18n.translate('xpack.observability.tour.streamStep.imageAltText', {
+      altText: i18n.translate('xpack.observabilityShared.tour.streamStep.imageAltText', {
         defaultMessage: 'Logs stream demonstration',
       }),
     },
   },
   {
-    title: i18n.translate('xpack.observability.tour.metricsExplorerStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.metricsExplorerStep.tourTitle', {
       defaultMessage: 'Monitor your infrastructure health',
     }),
-    content: i18n.translate('xpack.observability.tour.metricsExplorerStep.tourContent', {
+    content: i18n.translate('xpack.observabilityShared.tour.metricsExplorerStep.tourContent', {
       defaultMessage:
         'Stream, group, and visualize metrics from your systems, cloud, network, and other infrastructure sources.',
     }),
@@ -65,16 +68,16 @@ export const tourStepsConfig: TourStep[] = [
     dataTestSubj: 'metricsExplorerStep',
     imageConfig: {
       name: 'onboarding_tour_step_metrics.gif',
-      altText: i18n.translate('xpack.observability.tour.metricsExplorerStep.imageAltText', {
+      altText: i18n.translate('xpack.observabilityShared.tour.metricsExplorerStep.imageAltText', {
         defaultMessage: 'Metrics explorer demonstration',
       }),
     },
   },
   {
-    title: i18n.translate('xpack.observability.tour.servicesStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourTitle', {
       defaultMessage: 'Identify and resolve application issues',
     }),
-    content: i18n.translate('xpack.observability.tour.servicesStep.tourContent', {
+    content: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourContent', {
       defaultMessage:
         'Find and fix performance problems quickly by collecting detailed information about your services.',
     }),
@@ -83,16 +86,16 @@ export const tourStepsConfig: TourStep[] = [
     dataTestSubj: 'servicesStep',
     imageConfig: {
       name: 'onboarding_tour_step_services.gif',
-      altText: i18n.translate('xpack.observability.tour.servicesStep.imageAltText', {
+      altText: i18n.translate('xpack.observabilityShared.tour.servicesStep.imageAltText', {
         defaultMessage: 'Services demonstration',
       }),
     },
   },
   {
-    title: i18n.translate('xpack.observability.tour.alertsStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.alertsStep.tourTitle', {
       defaultMessage: 'Get notified when something changes',
     }),
-    content: i18n.translate('xpack.observability.tour.alertsStep.tourContent', {
+    content: i18n.translate('xpack.observabilityShared.tour.alertsStep.tourContent', {
       defaultMessage:
         'Define and detect conditions that trigger alerts with third-party platform integrations like email, PagerDuty, and Slack.',
     }),
@@ -101,16 +104,16 @@ export const tourStepsConfig: TourStep[] = [
     dataTestSubj: 'alertStep',
     imageConfig: {
       name: 'onboarding_tour_step_alerts.gif',
-      altText: i18n.translate('xpack.observability.tour.alertsStep.imageAltText', {
+      altText: i18n.translate('xpack.observabilityShared.tour.alertsStep.imageAltText', {
         defaultMessage: 'Alerts demonstration',
       }),
     },
   },
   {
-    title: i18n.translate('xpack.observability.tour.guidedSetupStep.tourTitle', {
+    title: i18n.translate('xpack.observabilityShared.tour.guidedSetupStep.tourTitle', {
       defaultMessage: 'Do more with Elastic Observability',
     }),
-    content: i18n.translate('xpack.observability.tour.guidedSetupStep.tourContent', {
+    content: i18n.translate('xpack.observabilityShared.tour.guidedSetupStep.tourContent', {
       defaultMessage:
         'The easiest way to continue with Elastic Observability is to follow recommended next steps in the data assistant.',
     }),
