@@ -257,7 +257,6 @@ export async function _installPackage({
         logger,
         esReferences,
         authorizationHeader
-        // apiKeyWithCurrentUserPermission
       )
     ));
 

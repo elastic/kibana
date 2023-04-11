@@ -177,7 +177,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   try {
     const body: CreateAgentPolicyResponse = {

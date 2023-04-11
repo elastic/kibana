@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { sortBy, uniqBy } from 'lodash';
+
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/install';
 import type { Installation } from '../../../../../common';
@@ -16,17 +18,30 @@ import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../
 
 import { retryTransientEsErrors } from '../retry';
 
+interface FleetTransformMetadata {
+  fleet_transform_version?: string;
+  order?: number;
+  package?: { name: string };
+  managed?: boolean;
+  managed_by?: string;
+  installed_by?: string;
+  last_authorized_by?: string;
+  transformId: string;
+}
+
 async function reauthorizeAndStartTransform({
   esClient,
   logger,
   transformId,
   secondaryAuth,
+  meta,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   transformId: string;
   secondaryAuth?: SecondaryAuthorizationHeader;
   shouldInstallSequentially?: boolean;
+  meta?: object;
 }): Promise<{ transformId: string; success: boolean; error: null | any }> {
   try {
     await retryTransientEsErrors(
@@ -34,7 +49,7 @@ async function reauthorizeAndStartTransform({
         esClient.transform.updateTransform(
           {
             transform_id: transformId,
-            body: {},
+            body: { _meta: meta },
           },
           { ...(secondaryAuth ? secondaryAuth : {}) }
         ),
@@ -67,7 +82,7 @@ export async function handleTransformReauthorizeAndStart({
   pkgVersion,
   transforms,
   secondaryAuth,
-  shouldInstallSequentially = true,
+  username,
 }: {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
@@ -76,34 +91,65 @@ export async function handleTransformReauthorizeAndStart({
   pkgName: string;
   pkgVersion?: string;
   secondaryAuth?: SecondaryAuthorizationHeader;
-  shouldInstallSequentially?: boolean;
+  username?: string;
 }) {
   if (!secondaryAuth) {
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms.'
     );
   }
+
+  const transformInfos = await Promise.all(
+    transforms.map(({ transformId }) =>
+      retryTransientEsErrors(
+        () =>
+          esClient.transform.getTransform(
+            {
+              transform_id: transformId,
+            },
+            { ...(secondaryAuth ? secondaryAuth : {}) }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      )
+    )
+  );
+  const transformsMetadata: FleetTransformMetadata[] = transformInfos.flat().map((t) => {
+    const transform = t.transforms?.[0];
+    return { ...transform._meta, transformId: transform?.id };
+  });
+
+  const shouldInstallSequentially =
+    uniqBy(transformsMetadata, 'order').length === transforms.length;
+
   let authorizedTransforms = [];
-  // @TODO:  implement this in UI
+
   if (shouldInstallSequentially) {
-    for (const transform of transforms) {
+    const sortedTransformsMetadata = sortBy(transformsMetadata, [
+      (t) => t.package?.name,
+      (t) => t.fleet_transform_version,
+      (t) => t.order,
+    ]);
+
+    for (const { transformId, ...meta } of sortedTransformsMetadata) {
       const authorizedTransform = await reauthorizeAndStartTransform({
         esClient,
         logger,
-        transformId: transform.transformId,
+        transformId,
         secondaryAuth,
+        meta: { ...meta, last_authorized_by: username },
       });
 
       authorizedTransforms.push(authorizedTransform);
     }
   } else {
     // Else, create & start all the transforms at once for speed
-    const transformsPromises = transforms.map(async (transform) => {
+    const transformsPromises = transformsMetadata.map(async ({ transformId, ...meta }) => {
       return await reauthorizeAndStartTransform({
         esClient,
         logger,
-        transformId: transform.transformId,
+        transformId,
         secondaryAuth,
+        meta: { ...meta, last_authorized_by: username },
       });
     });
 

@@ -288,9 +288,11 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+
   const { pkgName, pkgVersion } = request.params;
 
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
@@ -379,7 +381,9 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const res = await installPackage({
     installSource: 'upload',
@@ -459,11 +463,23 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   const { pkgName, pkgVersion } = request.params;
   const { transforms } = request.body;
 
+  let username;
+  try {
+    const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+    if (user) {
+      username = user.username;
+    }
+  } catch (e) {
+    // User might not have permission to get username, and that's okay.
+  }
   const logger = appContextService.getLogger();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
   const secondaryAuth = await generateTransformSecondaryAuthHeaders({
     authorizationHeader,
     logger,
+    username,
+    pkgName,
+    pkgVersion,
   });
 
   const resp = await handleTransformReauthorizeAndStart({
@@ -474,6 +490,7 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
     pkgVersion,
     transforms,
     secondaryAuth,
+    username,
   });
 
   return response.ok({ body: resp });

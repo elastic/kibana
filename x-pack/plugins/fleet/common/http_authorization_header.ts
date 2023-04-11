@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-// Duplicate of x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts
+// Extended version of x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts
 // to prevent bundle being required in security_solution
 // FIXME: Put this in a package
 export class HTTPAuthorizationHeader {
@@ -22,16 +22,22 @@ export class HTTPAuthorizationHeader {
    */
   readonly credentials: string;
 
-  constructor(scheme: string, credentials: string) {
+  /**
+   * The authentication credentials for the scheme.
+   */
+  readonly username: string | undefined;
+
+  constructor(scheme: string, credentials: string, username?: string) {
     this.scheme = scheme;
     this.credentials = credentials;
+    this.username = username;
   }
 
   /**
    * Parses request's `Authorization` HTTP header if present.
    * @param request Request instance to extract the authorization header from.
    */
-  static parseFromRequest(request: KibanaRequest) {
+  static parseFromRequest(request: KibanaRequest, username?: string) {
     const authorizationHeaderValue = request.headers.authorization;
     if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
       return null;
@@ -40,10 +46,14 @@ export class HTTPAuthorizationHeader {
     const [scheme] = authorizationHeaderValue.split(/\s+/);
     const credentials = authorizationHeaderValue.substring(scheme.length + 1);
 
-    return new HTTPAuthorizationHeader(scheme, credentials);
+    return new HTTPAuthorizationHeader(scheme, credentials, username);
   }
 
   toString() {
     return `${this.scheme} ${this.credentials}`;
+  }
+
+  getUsername() {
+    return this.username;
   }
 }

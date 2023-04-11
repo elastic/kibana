@@ -53,22 +53,40 @@ export async function generateTransformSecondaryAuthHeaders({
   authorizationHeader,
   createParams,
   logger,
+  username,
+  pkgName,
+  pkgVersion,
 }: {
   authorizationHeader: HTTPAuthorizationHeader | null | undefined;
-  createParams?: CreateAPIKeyParams;
   logger: Logger;
+  createParams?: CreateAPIKeyParams;
+  username?: string;
+  pkgName?: string;
+  pkgVersion?: string;
 }): Promise<SecondaryAuthorizationHeader | undefined> {
   if (!authorizationHeader) {
     return;
   }
 
   const fakeKibanaRequest = createKibanaRequestFromAuth(authorizationHeader);
+
+  const user = username ?? authorizationHeader.getUsername();
+
+  const name = pkgName
+    ? `${pkgName}${pkgVersion ? '-' + pkgVersion : ''}-transform${user ? '-by-' + user : ''}`
+    : `fleet-transform-api-key`;
+
   const apiKeyWithCurrentUserPermission = await appContextService
     .getSecurity()
     .authc.apiKeys.grantAsInternalUser(
       fakeKibanaRequest,
       createParams ?? {
-        name: `auto-generated-transform-api-key`,
+        name,
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'transform',
+        },
         role_descriptors: {},
       }
     );

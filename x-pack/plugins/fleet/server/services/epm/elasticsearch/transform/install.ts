@@ -11,7 +11,7 @@ import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 
-import type { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 
@@ -143,7 +143,8 @@ const processTransformAssetsPerModule = (
   installablePackage: InstallablePackage,
   installNameSuffix: string,
   transformPaths: string[],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  username?: string
 ) => {
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
@@ -230,6 +231,7 @@ const processTransformAssetsPerModule = (
       content._meta = {
         ...(content._meta ?? {}),
         ...getESAssetMetadata({ packageName: installablePackage.name }),
+        ...(username ? { installed_by: username } : {}),
       };
 
       const installationName = getTransformAssetNameForInstallation(
@@ -381,6 +383,8 @@ const installTransformsAssets = async (
   authorizationHeader?: HTTPAuthorizationHeader | null
 ) => {
   let installedTransforms: EsAssetReference[] = [];
+  const username = authorizationHeader?.getUsername();
+
   if (transformPaths.length > 0) {
     const {
       indicesToAddRefs,
@@ -397,12 +401,15 @@ const installTransformsAssets = async (
       installablePackage,
       installNameSuffix,
       transformPaths,
-      previousInstalledTransformEsAssets
+      previousInstalledTransformEsAssets,
+      username
     );
-
     const secondaryAuth = await generateTransformSecondaryAuthHeaders({
       authorizationHeader,
       logger,
+      pkgName: installablePackage.name,
+      pkgVersion: installablePackage.version,
+      username,
     });
 
     // ensure the .latest alias points to only the latest
@@ -794,7 +801,7 @@ async function handleTransformInstall({
     // If isUnauthorizedAPIKey: true (due to insufficient user permission at transform creation)
     // that means the transform is created but not started.
     // Note in saved object this is a deferred installation so user can later reauthorize
-    deferred: isUnauthorizedAPIKey,
+    deferred: true, // @TODO: renable isUnauthorizedAPIKey,
     version: transform.transformVersion,
   };
 }
