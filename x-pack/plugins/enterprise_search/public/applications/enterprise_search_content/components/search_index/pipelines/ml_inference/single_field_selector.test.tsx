@@ -11,8 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SingleFieldMapping } from './single_field_selector';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
+
+import { SingleFieldMapping } from './single_field_selector';
 
 const DEFAULT_VALUES = {
   addInferencePipelineModal: {
