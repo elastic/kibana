@@ -49,7 +49,7 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
         // notify of saving error
         props.notifications.toasts.addWarning({
           title: i18n.translate('unifiedSearch.search.unableToGetSavedQueryToastTitle', {
-            defaultMessage: 'Unable to load saved query {savedQueryId}',
+            defaultMessage: 'Unable to load query {savedQueryId}',
             values: { savedQueryId },
           }),
           text: `${error.message}`,
