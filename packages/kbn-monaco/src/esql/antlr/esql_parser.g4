@@ -30,6 +30,7 @@ processingCommand
     | limitCommand
     | projectCommand
     | dissectCommand
+    | grokCommand
     | sortCommand
     | statsCommand
     | whereCommand
@@ -171,6 +172,10 @@ projectCommand
 
 dissectCommand
     : DISSECT qualifiedNames string commandOptions?
+    ;
+
+grokCommand
+    : GROK qualifiedNames string
     ;
 
 commandOptions

@@ -127,4 +127,19 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     },
     sortText: 'B',
   },
+  {
+    label: 'grok',
+    insertText: 'grok',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.grokDoc', {
+      defaultMessage:
+        'Extracts multiple string values from a single string input, based on a pattern',
+    }),
+    documentation: {
+      value: buildDocumentation('grok <inputExpression> <pattern-string>', [
+        '… | grok a "%{b} %{c}";',
+      ]),
+    },
+    sortText: 'B',
+  },
 ];

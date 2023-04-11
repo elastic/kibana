@@ -45,6 +45,7 @@ import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { ProjectCommandContext } from "./esql_parser";
 import { DissectCommandContext } from "./esql_parser";
+import { GrokCommandContext } from "./esql_parser";
 import { CommandOptionsContext } from "./esql_parser";
 import { CommandOptionContext } from "./esql_parser";
 import { BooleanValueContext } from "./esql_parser";
@@ -526,6 +527,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitDissectCommand?: (ctx: DissectCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.grokCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterGrokCommand?: (ctx: GrokCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.grokCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitGrokCommand?: (ctx: GrokCommandContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.commandOptions`.
