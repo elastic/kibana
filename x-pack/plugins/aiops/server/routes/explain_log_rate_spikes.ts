@@ -24,6 +24,7 @@ import type {
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -93,6 +94,7 @@ export const defineExplainLogRateSpikesRoute = (
         logDebugMessage('Starting analysis.');
 
         const groupingEnabled = !!request.body.grouping;
+        const sampleProbability = request.body.sampleProbability ?? 1;
 
         const controller = new AbortController();
         const abortSignal = controller.signal;
@@ -189,7 +191,6 @@ export const defineExplainLogRateSpikesRoute = (
               [];
             let fieldCandidatesCount = fieldCandidates.length;
 
-            let sampleProbability = 1;
             let totalDocCount = 0;
 
             if (!request.body.overrides?.remainingFieldCandidates) {
@@ -211,7 +212,6 @@ export const defineExplainLogRateSpikesRoute = (
                 const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
                 fieldCandidates.push(...indexInfo.fieldCandidates);
                 fieldCandidatesCount = fieldCandidates.length;
-                sampleProbability = indexInfo.sampleProbability;
                 totalDocCount = indexInfo.totalDocCount;
               } catch (e) {
                 if (!isRequestAbortedError(e)) {
@@ -382,7 +382,8 @@ export const defineExplainLogRateSpikesRoute = (
                   -1,
                   undefined,
                   abortSignal,
-                  sampleProbability
+                  sampleProbability,
+                  RANDOM_SAMPLER_SEED
                 )) as [NumericChartData]
               )[0];
             } catch (e) {
@@ -511,7 +512,8 @@ export const defineExplainLogRateSpikesRoute = (
                             -1,
                             undefined,
                             abortSignal,
-                            sampleProbability
+                            sampleProbability,
+                            RANDOM_SAMPLER_SEED
                           )) as [NumericChartData]
                         )[0];
                       } catch (e) {
@@ -607,7 +609,8 @@ export const defineExplainLogRateSpikesRoute = (
                         -1,
                         undefined,
                         abortSignal,
-                        sampleProbability
+                        sampleProbability,
+                        RANDOM_SAMPLER_SEED
                       )) as [NumericChartData]
                     )[0];
                   } catch (e) {

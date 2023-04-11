@@ -43,11 +43,14 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./resolver'));
-    loadTestFile(require.resolve('./metadata'));
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154740
+    // loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./package'));
-    loadTestFile(require.resolve('./endpoint_authz'));
-    loadTestFile(require.resolve('./endpoint_response_actions/execute'));
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154740
+    // loadTestFile(require.resolve('./endpoint_authz'));
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154740
+    // loadTestFile(require.resolve('./endpoint_response_actions/execute'));
     loadTestFile(require.resolve('./file_upload_index'));
     loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
     loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
