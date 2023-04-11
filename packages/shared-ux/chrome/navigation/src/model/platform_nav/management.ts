@@ -50,7 +50,7 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Logstash pipelines',
             id: 'logstash_pipelines',
-            ...locators.management({ sectionId: 'logstash', appId: 'pipelines' }),
+            ...locators.management({ sectionId: 'ingest', appId: 'pipelines' }),
           },
         ],
       },
@@ -167,12 +167,12 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Data view',
             id: 'data_views',
-            ...locators.management({ sectionId: 'kibana', appId: 'data_views' }),
+            ...locators.management({ sectionId: 'kibana', appId: 'dataViews' }),
           },
           {
             name: 'Saved objects',
             id: 'saved_objects',
-            ...locators.management({ sectionId: 'kibana', appId: 'saved_objects' }),
+            ...locators.management({ sectionId: 'kibana', appId: 'objects' }),
           },
           {
             name: 'Tags',
@@ -199,7 +199,7 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Upgrade assistant',
         id: 'upgrade_assistant',
-        ...locators.management({ sectionId: 'kibana', appId: 'stack/upgrade_assistant' }),
+        ...locators.management({ sectionId: 'stack', appId: 'upgrade_assistant' }),
       },
     ],
   },
