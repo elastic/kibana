@@ -72,7 +72,7 @@ export interface KibanaMigratorTestKitParams {
 export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
-  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  runMigrations: () => Promise<MigrationResult[]>;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
