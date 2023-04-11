@@ -9,7 +9,6 @@
 import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import {
   readLog,
   startElasticsearch,
@@ -19,6 +18,7 @@ import {
   clearLog,
   getAggregatedTypesCount,
   currentVersion,
+  type KibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 
@@ -32,8 +32,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
-  let runMigrations: (rerun?: boolean | undefined) => Promise<MigrationResult[]>;
   let typeRegistry: ISavedObjectTypeRegistry;
+  let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
 
   beforeAll(async () => {
     typeRegistry = await getCurrentVersionTypeRegistry({ oss: false });
@@ -59,11 +59,13 @@ describe('split .kibana index into multiple system indices', () => {
         }
       );
 
-      const { client, runMigrations: runner } = await getKibanaMigratorTestKit({
-        types: updatedTypeRegistry.getAllTypes(),
-        kibanaIndex: '.kibana',
-      });
-      runMigrations = runner;
+      migratorTestKitFactory = () =>
+        getKibanaMigratorTestKit({
+          types: updatedTypeRegistry.getAllTypes(),
+          kibanaIndex: '.kibana',
+        });
+
+      const { runMigrations, client } = await migratorTestKitFactory();
 
       // count of types in the legacy index
       expect(await getAggregatedTypesCount(client, '.kibana_1')).toEqual({
@@ -82,7 +84,9 @@ describe('split .kibana index into multiple system indices', () => {
 
       await runMigrations();
 
-      await client.indices.refresh({ index: ['.kibana', '.kibana_so_search', '.kibana_so_ui'] });
+      await client.indices.refresh({
+        index: ['.kibana', '.kibana_so_search', '.kibana_so_ui'],
+      });
 
       expect(await getAggregatedTypesCount(client, '.kibana')).toEqual({
         'index-pattern': 3,
@@ -359,8 +363,9 @@ describe('split .kibana index into multiple system indices', () => {
 
   afterEach(async () => {
     // we run the migrator again to ensure that the next time state is loaded everything still works as expected
+    const { runMigrations } = await migratorTestKitFactory();
     await clearLog();
-    await runMigrations(true);
+    await runMigrations();
 
     const logs = await readLog();
     expect(logs).not.toMatch('REINDEX');

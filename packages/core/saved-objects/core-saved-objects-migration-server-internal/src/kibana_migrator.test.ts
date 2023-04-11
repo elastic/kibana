@@ -20,17 +20,13 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
 import { runResilientMigrator } from './run_resilient_migrator';
 
-jest.mock('./run_resilient_migrator', () => ({
-  runResilientMigrator: jest.fn((options) => {
-    return {
-      status: 'migrated',
-      // TODO check the actual value of the MigrationResult for these fields
-      destIndex: `${options.indexPrefix}_8.2.3_001`,
-      sourceIndex: `${options.indexPrefix}_8.2.2_001`,
-      elapsedMs: 28,
-    };
-  }),
-}));
+jest.mock('./run_resilient_migrator', () => {
+  const actual = jest.requireActual('./run_resilient_migrator');
+
+  return {
+    runResilientMigrator: jest.fn(actual.runResilientMigrator),
+  };
+});
 
 jest.mock('./document_migrator', () => {
   return {
@@ -89,7 +85,7 @@ describe('KibanaMigrator', () => {
         },
         {
           name: 'bmap',
-          indexPattern: 'other-index',
+          indexPattern: '.other-index',
           mappings: {
             properties: { field: { type: 'text' } },
           },
@@ -134,8 +130,22 @@ describe('KibanaMigrator', () => {
       );
     });
 
-    // eslint-disable-next-line jest/no-focused-tests
-    fit('only runs migrations once if called multiple times', async () => {
+    it('only runs migrations once if called multiple times', async () => {
+      const successfulRun: typeof runResilientMigrator = ({ indexPrefix }) =>
+        Promise.resolve({
+          sourceIndex: indexPrefix,
+          destIndex: indexPrefix,
+          elapsedMs: 28,
+          status: 'migrated',
+        });
+      const mockRunResilientMigrator = runResilientMigrator as jest.MockedFunction<
+        typeof runResilientMigrator
+      >;
+
+      mockRunResilientMigrator.mockImplementationOnce(successfulRun);
+      mockRunResilientMigrator.mockImplementationOnce(successfulRun);
+      mockRunResilientMigrator.mockImplementationOnce(successfulRun);
+      mockRunResilientMigrator.mockImplementationOnce(successfulRun);
       const options = mockOptions();
       options.client.indices.get.mockResponse({}, { statusCode: 200 });
       options.client.indices.getMapping.mockResponse(mappingsResponseWithoutIndexTypesMap, {
@@ -157,7 +167,35 @@ describe('KibanaMigrator', () => {
       await migrator.runMigrations();
 
       // indices.get is called twice during a single migration
-      expect(options.client.indices.get).toHaveBeenCalledTimes(2);
+      expect(runResilientMigrator).toHaveBeenCalledTimes(4);
+      expect(runResilientMigrator).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          indexPrefix: '.my-index',
+          mustRelocateDocuments: true,
+        })
+      );
+      expect(runResilientMigrator).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          indexPrefix: '.other-index',
+          mustRelocateDocuments: true,
+        })
+      );
+      expect(runResilientMigrator).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          indexPrefix: '.my-task-index',
+          mustRelocateDocuments: false,
+        })
+      );
+      expect(runResilientMigrator).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({
+          indexPrefix: '.my-complementary-index',
+          mustRelocateDocuments: true,
+        })
+      );
     });
 
     it('emits results on getMigratorResult$()', async () => {
@@ -179,12 +217,12 @@ describe('KibanaMigrator', () => {
         status: 'migrated',
       });
       expect(result![1]).toMatchObject({
-        destIndex: 'other-index_8.2.3_001',
+        destIndex: '.other-index_8.2.3_001',
         elapsedMs: expect.any(Number),
         status: 'patched',
       });
     });
-    it('rejects when the migration state machine terminates in a FATAL state', () => {
+    it('rejects when the migration state machine terminates in a FATAL state', async () => {
       const options = mockV2MigrationOptions();
       options.client.indices.get.mockResponse(
         {
@@ -244,34 +282,37 @@ describe('KibanaMigrator', () => {
           const migrator = new KibanaMigrator(options);
           migrator.prepareMigrations();
           const results = await migrator.runMigrations();
-          expect(results).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "destIndex": ".my-index_8.2.3_001",
-                "elapsedMs": 28,
-                "sourceIndex": ".my-index_8.2.2_001",
-                "status": "migrated",
-              },
-              Object {
-                "destIndex": ".other-index_8.2.3_001",
-                "elapsedMs": 28,
-                "sourceIndex": ".other-index_8.2.2_001",
-                "status": "migrated",
-              },
-              Object {
-                "destIndex": ".my-task-index_8.2.3_001",
-                "elapsedMs": 28,
-                "sourceIndex": ".my-task-index_8.2.2_001",
-                "status": "migrated",
-              },
-              Object {
-                "destIndex": ".my-complementary-index_8.2.3_001",
-                "elapsedMs": 28,
-                "sourceIndex": ".my-complementary-index_8.2.2_001",
-                "status": "migrated",
-              },
-            ]
-          `);
+
+          expect(results.length).toEqual(4);
+          expect(results[0]).toEqual(
+            expect.objectContaining({
+              sourceIndex: '.my-index_pre8.2.3_001',
+              destIndex: '.my-index_8.2.3_001',
+              elapsedMs: expect.any(Number),
+              status: 'migrated',
+            })
+          );
+          expect(results[1]).toEqual(
+            expect.objectContaining({
+              destIndex: '.other-index_8.2.3_001',
+              elapsedMs: expect.any(Number),
+              status: 'patched',
+            })
+          );
+          expect(results[2]).toEqual(
+            expect.objectContaining({
+              destIndex: '.my-task-index_8.2.3_001',
+              elapsedMs: expect.any(Number),
+              status: 'patched',
+            })
+          );
+          expect(results[3]).toEqual(
+            expect.objectContaining({
+              destIndex: '.my-complementary-index_8.2.3_001',
+              elapsedMs: expect.any(Number),
+              status: 'patched',
+            })
+          );
 
           expect(runResilientMigrator).toHaveBeenCalledTimes(4);
           expect(runResilientMigrator).toHaveBeenNthCalledWith(
@@ -472,7 +513,7 @@ const mockOptions = () => {
         name: 'testtype2',
         hidden: false,
         namespaceType: 'single',
-        // We are moving 'testtype2' from '.my-index' to '.my-other-index'
+        // We are moving 'testtype2' from '.my-index' to '.other-index'
         indexPattern: '.other-index',
         mappings: {
           properties: {

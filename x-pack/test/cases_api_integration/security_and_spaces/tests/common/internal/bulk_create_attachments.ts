@@ -38,6 +38,8 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createAndUploadFile,
+  deleteAllFiles,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -64,6 +66,7 @@ import {
   getAlertById,
 } from '../../../../common/lib/alerts';
 import { User } from '../../../../common/lib/authentication/types';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -173,30 +176,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
 
-        it('should create a single file attachment with multiple file objects within it', async () => {
-          const postedCase = await createCase(supertest, getPostCaseRequest());
-
-          const files = [fileMetadata(), fileMetadata()];
-
-          const caseWithAttachments = await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {
-                  files,
-                },
-              }),
-            ],
-          });
-
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
-        });
-
         it('should bulk create 100 file attachments', async () => {
           const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
 
@@ -235,11 +214,108 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [postExternalReferenceSOReq, ...fileRequests],
           });
         });
+
+        it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
+
+          const fileRequests = [...Array(99).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 200,
+          });
+        });
       });
     });
 
     describe('errors', () => {
       describe('files', () => {
+        afterEach(async () => {
+          await deleteAllFiles({
+            supertest,
+          });
+        });
+
+        it('should return a 400 when attempting to create 100 file attachments when a file associated to the case exists', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
+
+          const fileRequests = [...Array(100).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  files,
+                },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
         it('400s when attaching a file with metadata that is missing the file field', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
@@ -277,41 +353,6 @@ export default ({ getService }: FtrProviderContext): void => {
         it('400s when attempting to add more than 100 files to a case', async () => {
           const fileRequests = [...Array(101).keys()].map(() => getFilesAttachmentReq());
           const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when attempting to add a file to a case that already has 100 files', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [getFilesAttachmentReq()],
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when the case already has files and the sum of existing and new files exceed 100', async () => {
-          const fileRequests = [...Array(51).keys()].map(() => getFilesAttachmentReq());
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
