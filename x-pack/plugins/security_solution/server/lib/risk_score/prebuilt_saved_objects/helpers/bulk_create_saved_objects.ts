@@ -38,9 +38,10 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
     spaceId,
   });
 
-  const tagResult = tagResponse?.hostRiskScoreDashboards ?? tagResponse?.userRiskScoreDashboards;
+  const riskScoreTagResult =
+    tagResponse?.hostRiskScoreDashboards ?? tagResponse?.userRiskScoreDashboards;
 
-  if (!tagResult?.success) {
+  if (!riskScoreTagResult?.success) {
     return tagResponse;
   }
 
@@ -79,7 +80,11 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
       id: idReplaceMappings[so.id] ?? so.id,
       references: [
         ...references,
-        { id: tagResult?.body?.id, name: tagResult?.body?.name, type: tagResult?.body?.type },
+        {
+          id: riskScoreTagResult?.body?.id,
+          name: riskScoreTagResult?.body?.name,
+          type: riskScoreTagResult?.body?.type,
+        },
       ],
     };
   });

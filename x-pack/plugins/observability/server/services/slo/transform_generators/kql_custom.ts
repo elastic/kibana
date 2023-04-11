@@ -29,9 +29,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo, this.getTimestampFieldOrDefault(slo.indicator.params.timestampField)),
+      this.buildGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
-      this.buildSettings(slo, this.getTimestampFieldOrDefault(slo.indicator.params.timestampField))
+      this.buildSettings(slo, slo.indicator.params.timestampField)
     );
   }
 
@@ -78,9 +78,5 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
         },
       }),
     };
-  }
-
-  private getTimestampFieldOrDefault(timestampField: string | undefined): string {
-    return !!timestampField && timestampField.length > 0 ? timestampField : '@timestamp';
   }
 }
