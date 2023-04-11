@@ -62,52 +62,50 @@ export const generateMlInferencePipelineBody = ({
     version: 1,
   };
 
-  // Add remove and inference processors
-  fieldMappings.forEach(({ sourceField, targetField }) => {
-    const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
-    const inference = getInferenceProcessor(
-      sourceField,
-      targetField,
-      inferenceConfig,
-      model,
-      pipelineName
-    );
+  pipelineDefinition.processors = [
+    // Add remove and inference processors
+    ...fieldMappings.flatMap(({ sourceField, targetField }) => {
+      const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
+      const inference = getInferenceProcessor(
+        sourceField,
+        targetField,
+        inferenceConfig,
+        model,
+        pipelineName
+      );
 
-    pipelineDefinition.processors?.push({
-      remove: {
-        field: getMlInferencePrefixedFieldName(targetField),
-        ignore_missing: true,
-      },
-    });
-    if (remove) {
-      pipelineDefinition.processors?.push({ remove });
-    }
-    pipelineDefinition.processors?.push({ inference });
-  });
-
-  // Add single append processor
-  pipelineDefinition.processors?.push({
-    append: {
-      field: '_source._ingest.processors',
-      value: [
+      return [
         {
-          model_version: model.version,
-          pipeline: pipelineName,
-          processed_timestamp: '{{{ _ingest.timestamp }}}',
-          types: getMlModelTypesForModelConfig(model),
+          remove: {
+            field: getMlInferencePrefixedFieldName(targetField),
+            ignore_missing: true,
+          },
         },
-      ],
+        ...(remove ? [{ remove }] : []),
+        { inference },
+      ];
+    }),
+    // Add single append processor  
+    {
+      append: {
+        field: '_source._ingest.processors',
+        value: [
+          {
+            model_version: model.version,
+            pipeline: pipelineName,
+            processed_timestamp: '{{{ _ingest.timestamp }}}',
+            types: getMlModelTypesForModelConfig(model),
+          },
+        ],
+      }
     },
-  });
-
-  // Add set processors
-  fieldMappings.forEach(({ targetField }) => {
-    const set = getSetProcessorForInferenceType(targetField, inferenceType);
-
-    if (set) {
-      pipelineDefinition.processors?.push({ set });
-    }
-  });
+    // Add set processors
+    ...fieldMappings.flatMap(({ targetField }) => {
+      const set = getSetProcessorForInferenceType(targetField, inferenceType);
+  
+      return set ? [{ set }] : [];
+    }),
+  ];
 
   return pipelineDefinition;
 };

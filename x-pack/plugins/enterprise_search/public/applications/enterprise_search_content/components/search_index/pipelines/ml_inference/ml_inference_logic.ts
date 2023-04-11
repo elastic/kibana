@@ -184,6 +184,24 @@ export interface MLInferenceProcessorsValues {
   supportedMLModels: TrainedModel[];
 }
 
+const getDisabledReason = (
+  sourceFields: string[] | undefined,
+  sourceField: string,
+  indexProcessorNames: string[],
+  pipelineName: string,
+  modelType: string
+): string | undefined => {
+  if (!(sourceFields?.includes(sourceField) ?? false)) {
+    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
+  } else if (indexProcessorNames.includes(pipelineName)) {
+    return EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
+  } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
+    return EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
+  }
+
+  return undefined;
+};
+
 export const MLInferenceLogic = kea<
   MakeLogicType<MLInferenceProcessorsValues, MLInferenceProcessorsActions>
 >({
@@ -520,24 +538,19 @@ export const MLInferenceLogic = kea<
               source_field: sourceField,
             } = pipelineParams;
 
-            let disabled: boolean = false;
-            let disabledReason: string | undefined;
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
-            if (!(sourceFields?.includes(sourceField) ?? false)) {
-              disabled = true;
-              disabledReason = EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
-            } else if (indexProcessorNames.includes(pipelineName)) {
-              disabled = true;
-              disabledReason = EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
-            } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
-              disabled = true;
-              disabledReason = EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
-            }
+            const disabledReason = getDisabledReason(
+              sourceFields,
+              sourceField,
+              indexProcessorNames,
+              pipelineName,
+              modelType
+            );
 
             return {
               destinationField: destinationField ?? '',
-              disabled,
+              disabled: disabledReason !== undefined,
               disabledReason,
               modelId,
               modelType,
