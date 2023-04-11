@@ -248,7 +248,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
  * */
 export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes }) => {
   const getSetupStatus = useCspSetupStatusApi({
-    options: { refetchInterval: REFETCH_INTERVAL_MS },
+    refetchInterval: REFETCH_INTERVAL_MS,
   });
   const statusKspm = getSetupStatus.data?.kspm?.status;
   const statusCspm = getSetupStatus.data?.cspm?.status;
