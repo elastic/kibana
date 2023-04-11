@@ -309,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.t2_analyst, 'changeme')
+              .auth(ROLE.artifact_read_role, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(403, {
@@ -322,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const blocklistApiCall of needsReadPrivilege) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.t2_analyst, 'changeme')
+              .auth(ROLE.artifact_read_role, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody())
               .expect(200);

@@ -23,7 +23,6 @@ pageLoadAssetSize:
   controls: 40000
   core: 435325
   crossClusterReplication: 65408
-  customBranding: 16693
   customIntegrations: 22034
   dashboard: 82025
   dashboardEnhanced: 65646
@@ -41,6 +40,7 @@ pageLoadAssetSize:
   enterpriseSearch: 35741
   esUiShared: 326654
   eventAnnotation: 20500
+  exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505

@@ -19,6 +19,11 @@ import {
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import {
+  INDICATOR_APM_AVAILABILITY,
+  INDICATOR_APM_LATENCY,
+  INDICATOR_CUSTOM_KQL,
+} from '../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
@@ -27,7 +32,7 @@ export interface SloListSearchFilterSortBarProps {
   onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
 }
 
-export type SortType = 'name' | 'indicatorType';
+export type SortType = 'creationTime' | 'indicatorType';
 export type FilterType =
   | 'sli.apm.transactionDuration'
   | 'sli.apm.transactionErrorRate'
@@ -41,14 +46,14 @@ export type Item<T> = EuiSelectableOption & {
 
 const SORT_OPTIONS: Array<Item<SortType>> = [
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.name', {
-      defaultMessage: 'Name',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.creationTime', {
+      defaultMessage: 'Creation time',
     }),
-    type: 'name',
+    type: 'creationTime',
     checked: 'on',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.indicatorType', {
+    label: i18n.translate('xpack.observability.slo.list.sortBy.indicatorType', {
       defaultMessage: 'Indicator type',
     }),
     type: 'indicatorType',
@@ -57,21 +62,15 @@ const SORT_OPTIONS: Array<Item<SortType>> = [
 
 const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmLatency', {
-      defaultMessage: 'APM latency',
-    }),
+    label: INDICATOR_APM_LATENCY,
     type: 'sli.apm.transactionDuration',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmAvailability', {
-      defaultMessage: 'APM availability',
-    }),
+    label: INDICATOR_APM_AVAILABILITY,
     type: 'sli.apm.transactionErrorRate',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.customKql', {
-      defaultMessage: 'Custom KQL',
-    }),
+    label: INDICATOR_CUSTOM_KQL,
     type: 'sli.kql.custom',
   },
 ];
@@ -109,7 +108,7 @@ export function SloListSearchFilterSortBar({
   };
 
   useEffect(() => {
-    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicatorType') {
+    if (selectedSort?.type === 'creationTime' || selectedSort?.type === 'indicatorType') {
       onChangeSort(selectedSort.type);
     }
   }, [onChangeSort, selectedSort]);
@@ -118,10 +117,11 @@ export function SloListSearchFilterSortBar({
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFieldSearch
+          data-test-subj="o11ySloListSearchFilterSortBarFieldSearch"
           fullWidth
           isLoading={loading}
           onChange={onChangeQuery}
-          placeholder={i18n.translate('xpack.observability.slos.list.search', {
+          placeholder={i18n.translate('xpack.observability.slo.list.search', {
             defaultMessage: 'Search',
           })}
         />
@@ -137,7 +137,7 @@ export function SloListSearchFilterSortBar({
                 isSelected={isFilterPopoverOpen}
                 numFilters={selectedIndicatorTypeFilter.length}
               >
-                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
                   defaultMessage: 'Indicator type',
                 })}
               </EuiFilterButton>
@@ -149,7 +149,7 @@ export function SloListSearchFilterSortBar({
           >
             <div style={{ width: 300 }}>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
                   defaultMessage: 'Indicator type',
                 })}
               </EuiPopoverTitle>
@@ -173,7 +173,7 @@ export function SloListSearchFilterSortBar({
                 onClick={handleToggleSortButton}
                 isSelected={isSortPopoverOpen}
               >
-                {i18n.translate('xpack.observability.slos.list.sortByType', {
+                {i18n.translate('xpack.observability.slo.list.sortByType', {
                   defaultMessage: 'Sort by {type}',
                   values: { type: selectedSort?.label.toLowerCase() || '' },
                 })}
@@ -186,7 +186,7 @@ export function SloListSearchFilterSortBar({
           >
             <div style={{ width: 300 }}>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slos.list.sortBy', {
+                {i18n.translate('xpack.observability.slo.list.sortBy', {
                   defaultMessage: 'Sort by',
                 })}
               </EuiPopoverTitle>

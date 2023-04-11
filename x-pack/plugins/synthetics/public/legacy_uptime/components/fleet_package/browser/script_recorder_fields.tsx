@@ -44,9 +44,13 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiLink href="https://github.com/elastic/synthetics-recorder/releases/" target="_blank">
+      <EuiLink
+        data-test-subj="syntheticsScriptRecorderFieldsDownloadTheElasticSyntheticsRecorderLink"
+        href="https://github.com/elastic/synthetics-recorder/releases/"
+        target="_blank"
+      >
         <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorderLink"
           defaultMessage="Download the Elastic Synthetics Recorder"
         />
       </EuiLink>
@@ -66,12 +70,13 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="syntheticsScriptRecorderFieldsShowScriptButton"
                 onClick={() => setShowScript(true)}
                 iconType="editorCodeBlock"
                 iconSide="right"
               >
                 <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.showScriptLabel"
                   defaultMessage="Show script"
                 />
               </EuiButton>
@@ -79,13 +84,14 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
             <EuiFlexItem grow={false}>
               {isEditable && (
                 <EuiButton
+                  data-test-subj="syntheticsScriptRecorderFieldsRemoveScriptButton"
                   onClick={() => onChange({ scriptText: '', fileName: '' })}
                   iconType="trash"
                   iconSide="right"
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.removeScriptLabel"
                     defaultMessage="Remove script"
                   />
                 </EuiButton>
@@ -99,7 +105,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
           ownFocus
           onClose={() => setShowScript(false)}
           aria-labelledby="syntheticsBrowserScriptBlockHeader"
-          closeButtonAriaLabel={CLOSE_BUTTON_LABEL}
+          closeButtonProps={{ 'aria-label': CLOSE_BUTTON_LABEL }}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

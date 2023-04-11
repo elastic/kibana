@@ -10,8 +10,6 @@ import { SavedObjectsPublicPlugin } from './plugin';
 
 export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
 export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
-export type { SavedObjectFinderUiProps, SavedObjectMetaData, FinderAttributes } from './finder';
-export { getSavedObjectFinder, SavedObjectFinderUi } from './finder';
 export type {
   SavedObjectDecorator,
   SavedObjectDecoratorFactory,
@@ -19,7 +17,6 @@ export type {
 } from './saved_object';
 export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from './saved_object';
 export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
-export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 export type { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

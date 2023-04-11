@@ -1,0 +1,46 @@
+// from variables:
+
+$domDragDropZLevel0: 0;
+$domDragDropZLevel1: 1;
+$domDragDropZLevel2: 2;
+$domDragDropZLevel3: 3;
+
+// from mixins
+
+// sass-lint:disable-block indentation, no-color-keywords
+
+// Static styles for a draggable item
+@mixin mixinDomDraggable {
+  @include euiSlightShadow;
+  background: $euiColorEmptyShade;
+  border: $euiBorderWidthThin dashed transparent;
+  cursor: grab;
+}
+
+// Static styles for a drop area
+@mixin mixinDomDroppable {
+  border: $euiBorderWidthThin dashed $euiBorderColor !important;
+}
+
+// Hovering state for drag item and drop area
+@mixin mixinDomDragDropHover {
+  &:hover {
+    border: $euiBorderWidthThin dashed $euiColorMediumShade !important;
+  }
+}
+
+// Style for drop area when there's an item being dragged
+@mixin mixinDomDroppableActive {
+  background-color: transparentize($euiColorVis0, .9) !important;
+}
+
+// Style for drop area while hovering with item
+@mixin mixinDomDroppableActiveHover {
+  background-color: transparentize($euiColorVis0, .75) !important;
+  border: $euiBorderWidthThin dashed $euiColorVis0 !important;
+}
+
+// Style for drop area that is not allowed for current item
+@mixin mixinDomDroppableNotAllowed {
+  opacity: .5;
+}

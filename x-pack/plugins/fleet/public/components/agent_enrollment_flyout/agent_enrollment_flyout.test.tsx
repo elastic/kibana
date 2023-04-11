@@ -27,6 +27,7 @@ import {
   useAgentEnrollmentFlyoutData,
   KibanaVersionContext,
   useFleetStatus,
+  useFleetServerStandalone,
 } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
@@ -92,6 +93,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         ],
       },
     });
+    jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
     (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
     (useFleetServerUnhealthy as jest.Mock).mockReturnValue({

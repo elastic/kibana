@@ -23,7 +23,7 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export const createCopyToClipboardAction = ({ order }: { order?: number }) => {
+export const createCopyToClipboardLensAction = ({ order }: { order?: number }) => {
   const { application: applicationService } = KibanaServices.get();
   let currentAppId: string | undefined;
   applicationService.currentAppId$.subscribe((appId) => {

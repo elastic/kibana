@@ -21,5 +21,9 @@ export function DependencyOperationDetailLink(query: Query) {
     query,
   });
 
-  return <EuiLink href={link}>{spanName}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="apmDependencyOperationDetailLink" href={link}>
+      {spanName}
+    </EuiLink>
+  );
 }

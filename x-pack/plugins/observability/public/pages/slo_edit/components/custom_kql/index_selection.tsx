@@ -23,7 +23,7 @@ interface Option {
 }
 
 export function IndexSelection({ control }: Props) {
-  const { loading, indices = [] } = useFetchIndices();
+  const { isLoading, indices = [] } = useFetchIndices();
   const [indexOptions, setIndexOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function IndexSelection({ control }: Props) {
     const searchWithStarSuffix = search.endsWith('*') ? search : `${search}*`;
     options.push({
       label: i18n.translate(
-        'xpack.observability.slos.sloEdit.customKql.indexSelection.indexPatternLabel',
+        'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternLabel',
         { defaultMessage: 'Use an index pattern' }
       ),
       options: [{ value: searchWithStarSuffix, label: searchWithStarSuffix }],
@@ -60,17 +60,19 @@ export function IndexSelection({ control }: Props) {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.observability.slos.sloEdit.customKql.indexSelection.label', {
+      label={i18n.translate('xpack.observability.slo.sloEdit.customKql.indexSelection.label', {
         defaultMessage: 'Index',
       })}
       helpText={i18n.translate(
-        'xpack.observability.slos.sloEdit.customKql.indexSelection.helpText',
+        'xpack.observability.slo.sloEdit.customKql.indexSelection.helpText',
         {
           defaultMessage: 'Use * to broaden your query.',
         }
       )}
     >
       <Controller
+        shouldUnregister={true}
+        defaultValue=""
         name="indicator.params.index"
         control={control}
         rules={{ required: true }}
@@ -78,7 +80,7 @@ export function IndexSelection({ control }: Props) {
           <EuiComboBox
             {...field}
             aria-label={i18n.translate(
-              'xpack.observability.slos.sloEdit.customKql.indexSelection.placeholder',
+              'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
               {
                 defaultMessage: 'Select an index or index pattern',
               }
@@ -87,7 +89,7 @@ export function IndexSelection({ control }: Props) {
             data-test-subj="indexSelection"
             isClearable={true}
             isInvalid={!!fieldState.error}
-            isLoading={loading}
+            isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
                 return field.onChange(selected[0].value);
@@ -98,7 +100,7 @@ export function IndexSelection({ control }: Props) {
             onSearchChange={onSearchChange}
             options={indexOptions}
             placeholder={i18n.translate(
-              'xpack.observability.slos.sloEdit.customKql.indexSelection.placeholder',
+              'xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder',
               {
                 defaultMessage: 'Select an index or index pattern',
               }
@@ -125,7 +127,7 @@ export function IndexSelection({ control }: Props) {
 function createIndexOptions(indices: Index[]): Option {
   return {
     label: i18n.translate(
-      'xpack.observability.slos.sloEdit.customKql.indexSelection.indexOptionsLabel',
+      'xpack.observability.slo.sloEdit.customKql.indexSelection.indexOptionsLabel',
       { defaultMessage: 'Select an existing index' }
     ),
     options: indices

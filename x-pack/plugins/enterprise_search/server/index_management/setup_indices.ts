@@ -119,6 +119,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
+  last_sync_scheduled_at: { type: 'date' },
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
   name: { type: 'keyword' },

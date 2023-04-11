@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
-import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
-import { Ping } from '../../../../../../common/runtime_types';
 import {
-  formatTestDuration,
-  formatTestRunAt,
-} from '../../../utils/monitor_test_result/test_time_formats';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+  getTestRunDetailRelativeLink,
+  TestDetailsLink,
+} from '../../common/links/test_details_link';
+import { Ping } from '../../../../../../common/runtime_types';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const FailedTestsList = ({
   failedTests,
@@ -33,26 +33,21 @@ export const FailedTestsList = ({
 
   const items = failedTests.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
-  const { basePath } = useSyntheticsSettingsContext();
-
   const history = useHistory();
-
-  const format = useKibanaDateFormat();
+  const selectedLocation = useSelectedLocation();
 
   const columns = [
     {
       field: '@timestamp',
       name: TIMESTAMP_LABEL,
       sortable: true,
-      render: (value: string, item: Ping) => {
-        return (
-          <EuiLink
-            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
-          >
-            {formatTestRunAt(value, format)}
-          </EuiLink>
-        );
-      },
+      render: (value: string, item: Ping) => (
+        <TestDetailsLink
+          isBrowserMonitor={item.monitor.type === 'browser'}
+          timestamp={value}
+          ping={item}
+        />
+      ),
     },
     {
       field: 'monitor.duration.us',
@@ -75,7 +70,13 @@ export const FailedTestsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         },
       };
     }

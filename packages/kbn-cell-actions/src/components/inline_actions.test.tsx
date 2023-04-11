@@ -21,7 +21,7 @@ describe('InlineActions', () => {
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -48,7 +48,7 @@ describe('InlineActions', () => {
     const { queryAllByRole } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}

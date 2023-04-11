@@ -22,12 +22,11 @@ import {
 import { importTimelineResultSchema } from '../../../../../../common/types/timeline';
 
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import { getLatestPrebuiltRules } from '../../logic/get_latest_prebuilt_rules';
-import { createPrebuiltRules } from '../../logic/create_prebuilt_rules';
-import { updatePrebuiltRules } from '../../logic/update_prebuilt_rules';
+import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
+import { updatePrebuiltRules } from '../../logic/rule_objects/update_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
-import { ruleAssetsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
+import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { rulesToMap } from '../../logic/utils';
 
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
@@ -91,7 +90,7 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
-  const ruleAssetsClient = ruleAssetsClientFactory(savedObjectsClient);
+  const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
   const { maxTimelineImportExportSize } = config;
 
@@ -104,17 +103,18 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  let latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
-  if (latestPrepackagedRulesMap.size === 0) {
+  let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  if (latestPrebuiltRules.length === 0) {
     // Seems no packages with prepackaged rules were installed, try to install the default rules package
     await installPrebuiltRulesPackage(config, context);
 
     // Try to get the prepackaged rules again
-    latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+    latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   }
-  const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
-  const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
+
+  const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
+  const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
   await createPrebuiltRules(rulesClient, rulesToInstall);
 
@@ -128,14 +128,9 @@ export const createPrepackagedRules = async (
     importTimelineResultSchema
   );
 
-  await updatePrebuiltRules(
-    rulesClient,
-    savedObjectsClient,
-    rulesToUpdate,
-    context.getRuleExecutionLog()
-  );
+  await updatePrebuiltRules(rulesClient, savedObjectsClient, rulesToUpdate);
 
-  const prepackagedRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
+  const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,
     rules_updated: rulesToUpdate.length,
     timelines_installed: prepackagedTimelinesResult?.timelines_installed ?? 0,
@@ -143,7 +138,7 @@ export const createPrepackagedRules = async (
   };
 
   const [validated, genericErrors] = validate(
-    prepackagedRulesOutput,
+    prebuiltRulesOutput,
     InstallPrebuiltRulesAndTimelinesResponse
   );
 

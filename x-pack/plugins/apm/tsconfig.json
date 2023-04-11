@@ -78,6 +78,11 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/exploratory-view-plugin",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",

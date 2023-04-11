@@ -145,6 +145,9 @@ export function createSearchBar({
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
+    useEffect(() => {
+      onQuerySubmitRef.current = props.onQuerySubmit;
+    }, [props.onQuerySubmit]);
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
@@ -232,6 +235,8 @@ export function createSearchBar({
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
+            dataTestSubj={props.dataTestSubj}
+            filtersForSuggestions={props.filtersForSuggestions}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

@@ -217,7 +217,10 @@ export function getPreviewTransformRequestBody(
     },
   };
 
-  const query = hasValidTimeField ? queryWithBaseFilterCriteria : transformConfigQuery;
+  const query =
+    hasValidTimeField && baseFilterCriteria.length > 0
+      ? queryWithBaseFilterCriteria
+      : transformConfigQuery;
 
   return {
     source: {

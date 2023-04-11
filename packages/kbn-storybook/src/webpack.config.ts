@@ -75,6 +75,10 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     externals,
     module: {
+      // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary dependencies
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
@@ -128,6 +132,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
     },
     stats,

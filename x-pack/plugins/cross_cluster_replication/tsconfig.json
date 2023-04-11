@@ -28,6 +28,7 @@
     "@kbn/analytics",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

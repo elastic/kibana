@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
       require.resolve('./search'),
+      require.resolve('./content_management'),
     ],
     services: {
       ...functionalConfig.get('services'),

@@ -13,11 +13,11 @@ import type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from '@kbn/core-saved-objects-common';
-import { SavedObject } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
   collectSavedObjects,
@@ -55,6 +55,11 @@ export interface ResolveSavedObjectsImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * If true, Kibana will apply various adjustments to the data that's being retried to import to maintain compatibility between
+   * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
+   */
+  compatibilityMode?: boolean;
 }
 
 /**
@@ -72,6 +77,7 @@ export async function resolveSavedObjectsImportErrors({
   importHooks,
   namespace,
   createNewCopies,
+  compatibilityMode,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -205,6 +211,7 @@ export async function resolveSavedObjectsImportErrors({
       importStateMap,
       namespace,
       overwrite,
+      compatibilityMode,
     };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams

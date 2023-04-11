@@ -54,25 +54,6 @@ export type {
   OnExpressionInputEditorDidMount,
 } from './components/types';
 
-/** @deprecated QuickButtonProps - use `IconButtonGroupProps` from `@kbn/shared-ux-button-toolbar` */
-export type { QuickButtonProps } from './components/solution_toolbar';
-
-export {
-  /** @deprecated AddFromLibraryButton  - use `AddFromLibraryButton` from `@kbn/shared-ux-button-toolbar` */
-  AddFromLibraryButton,
-  /** @deprecated PrimaryActionButton  - use `PrimaryButton` from `@kbn/shared-ux-button-toolbar` */
-  PrimaryActionButton,
-  /** @deprecated SolutionToolbarPopover  - use `ToolbarPopover` from `@kbn/shared-ux-button-toolbar` */
-  PrimaryActionPopover,
-  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-button-toolbar` */
-  QuickButtonGroup,
-  SolutionToolbar,
-  /** @deprecated SolutionToolbarButton  - use `PrimaryButton` from `@kbn/shared-ux-button-toolbar` */
-  SolutionToolbarButton,
-  /** @deprecated SolutionToolbarPopover  - use `ToolbarPopover` from `@kbn/shared-ux-button-toolbar` */
-  SolutionToolbarPopover,
-} from './components/solution_toolbar';
-
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
  * the Monaco Editor to understand the functions and their arguments.

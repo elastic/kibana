@@ -15,7 +15,7 @@ import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
 import { MonitorFailedTests } from './failed_tests';
 import { ErrorsList } from './errors_list';
-import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
+import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 export const ErrorsTabContent = ({
@@ -25,25 +25,28 @@ export const ErrorsTabContent = ({
   errorStates: PingState[];
   loading: boolean;
 }) => {
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
-
-  const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
+  const time = useRefreshedRangeFromUrl();
 
   const monitorId = useMonitorQueryId();
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={1}>
-          <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign>
-            <EuiFlexGroup>
+          <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign css={{ minWidth: 260 }}>
+            <EuiFlexGroup wrap={true} responsive={false}>
               <EuiFlexItem>
                 {monitorId && (
-                  <MonitorErrorsCount from={time.from} to={time.to} monitorId={[monitorId]} />
+                  <MonitorErrorsCount
+                    from={time.from}
+                    to={time.to}
+                    monitorId={[monitorId]}
+                    id="monitorsErrorsCountErrors"
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem>
-                <FailedTestsCount from={time.from} to={time.to} />
+                <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </PanelWithTitle>
@@ -55,8 +58,8 @@ export const ErrorsTabContent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+      <EuiFlexGroup gutterSize="m" wrap={true}>
+        <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
           <PanelWithTitle title={ERRORS_LABEL}>
             <ErrorsList errorStates={errorStates} loading={loading} />
           </PanelWithTitle>

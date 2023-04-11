@@ -2165,14 +2165,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/url_state.ts"
           },

@@ -27,6 +27,7 @@ import {
   EuiBetaBadge,
   EuiSplitPanel,
   useEuiTheme,
+  EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
@@ -52,6 +53,7 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
+import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -114,6 +116,7 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
+    http: { basePath },
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -137,6 +140,8 @@ export const ActionTypeForm = ({
     -1,
     's',
   ];
+  const [warning, setWarning] = useState<string | null>(null);
+
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
   const isSummaryAction = actionItem.frequency?.summary;
 
@@ -253,8 +258,10 @@ export const ActionTypeForm = ({
       )}
       onThrottleChange={useCallback(
         (throttle: number | null, throttleUnit: string) => {
-          setActionThrottle(throttle);
-          setActionThrottleUnit(throttleUnit);
+          if (throttle) {
+            setActionThrottle(throttle);
+            setActionThrottleUnit(throttleUnit);
+          }
           setActionFrequencyProperty(
             'throttle',
             throttle ? `${throttle}${throttleUnit}` : null,
@@ -382,7 +389,16 @@ export const ActionTypeForm = ({
                 actionParams={actionItem.params as any}
                 index={index}
                 errors={actionParamsErrors.errors}
-                editAction={setActionParamsProperty}
+                editAction={(key: string, value: RuleActionParam, i: number) => {
+                  setWarning(
+                    validateParamsForWarnings(
+                      value,
+                      basePath.publicBaseUrl,
+                      availableActionVariables
+                    )
+                  );
+                  setActionParamsProperty(key, value, i);
+                }}
                 messageVariables={availableActionVariables}
                 defaultMessage={
                   // if action is a summary action, show the default summary message
@@ -394,6 +410,12 @@ export const ActionTypeForm = ({
                 actionConnector={actionConnector}
                 executionMode={ActionConnectorMode.ActionForm}
               />
+              {warning ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut size="s" color="warning" title={warning} />
+                </>
+              ) : null}
             </Suspense>
           </EuiErrorBoundary>
         ) : null}
@@ -427,7 +449,7 @@ export const ActionTypeForm = ({
                   >
                     <EuiIcon
                       data-test-subj="action-group-error-icon"
-                      type="alert"
+                      type="warning"
                       color="danger"
                       size="m"
                     />
@@ -475,11 +497,27 @@ export const ActionTypeForm = ({
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
+                      {warning && !isOpen && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            data-test-subj="warning-badge"
+                            iconType="warning"
+                            color="warning"
+                          >
+                            {i18n.translate(
+                              'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
+                              {
+                                defaultMessage: '1 warning',
+                              }
+                            )}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
                         {checkEnabledResult.isEnabled === false && (
                           <>
                             <EuiIconTip
-                              type="alert"
+                              type="warning"
                               color="danger"
                               content={i18n.translate(
                                 'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',

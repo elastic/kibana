@@ -21,7 +21,6 @@ import {
 import { FillStyles } from '../../../common/constants';
 import {
   GroupsConfiguration,
-  LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
@@ -29,7 +28,7 @@ import {
   getOriginalAxisPosition,
   AxesMap,
 } from '../../helpers';
-import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
+import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
 // if there's just one axis, put it on the other one
 // otherwise use the same axis
@@ -84,10 +83,10 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
 
 export const getLineAnnotationProps = (
   config: ReferenceLineAnnotationConfig,
-  labels: { markerLabel?: string; markerBodyLabel?: string },
+  label: string | undefined,
   axesMap: AxesMap,
-  paddingMap: Partial<Record<Position, number>>,
-  isHorizontal: boolean
+  isHorizontal: boolean,
+  isTextOnlyMarker: boolean
 ) => {
   // get the position for vertical chart
   const markerPositionVertical = getBaseIconPlacement(
@@ -96,27 +95,27 @@ export const getLineAnnotationProps = (
     getOriginalAxisPosition(config.axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
 
-  // the padding map is built for vertical chart
-  const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-
   const markerPosition = isHorizontal
     ? mapVerticalToHorizontalPlacement(markerPositionVertical)
     : markerPositionVertical;
+
+  const isMarkerLabelHorizontal =
+    markerPosition === Position.Bottom || markerPosition === Position.Top;
 
   return {
     groupId: config.axisGroup?.groupId || 'bottom',
     marker: (
       <Marker
         config={config}
-        label={labels.markerLabel}
-        isHorizontal={isHorizontal}
-        hasReducedPadding={hasReducedPadding}
+        label={label}
+        isHorizontal={isMarkerLabelHorizontal}
+        hasReducedPadding={isTextOnlyMarker}
       />
     ),
     markerBody: (
       <MarkerBody
-        label={labels.markerBodyLabel}
-        isHorizontal={markerPosition === Position.Bottom || markerPosition === Position.Top}
+        label={config.textVisibility && !isTextOnlyMarker ? label : undefined}
+        isHorizontal={isMarkerLabelHorizontal}
       />
     ),
     // rotate the position if required

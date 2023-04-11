@@ -9,6 +9,7 @@ import { Readable } from 'stream';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
+import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
 import {
   checkIfActionsHaveMissingConnectors,
@@ -17,6 +18,7 @@ import {
   handleActionsHaveNoConnectors,
   mapSOErrorToRuleError,
   returnErroredImportResult,
+  updateRuleActionsWithMigratedResults,
 } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 
@@ -71,12 +73,21 @@ export const importRuleActionConnectors = async ({
         overwrite,
         createNewCopies: false,
       });
+    /*
+      // When a connector is exported from one namespace and imported to another, it does not result in an error, but instead a new object is created with
+      // new destination id and id will have the old  origin id, so in order to be able to use the newly generated Connectors id, this util is used to swap the old id with the
+      // new destination Id
+      */
+    let rulesWithMigratedActions: Array<RuleToImport | Error> | undefined;
+    if (successResults?.some((res) => res.destinationId))
+      rulesWithMigratedActions = updateRuleActionsWithMigratedResults(rules, successResults);
+
     return {
       success,
       successCount,
-      successResults,
       errors: errors ? mapSOErrorToRuleError(errors) : [],
       warnings: (warnings as WarningSchema[]) || [],
+      rulesWithMigratedActions,
     };
   } catch (error) {
     return returnErroredImportResult(error);

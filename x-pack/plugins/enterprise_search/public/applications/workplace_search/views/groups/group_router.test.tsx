@@ -11,9 +11,11 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { GroupOverview } from './components/group_overview';
 import { GroupSourcePrioritization } from './components/group_source_prioritization';

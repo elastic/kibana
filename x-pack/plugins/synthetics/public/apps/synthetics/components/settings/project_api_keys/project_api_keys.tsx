@@ -59,7 +59,12 @@ export const ProjectAPIKeys = () => {
               <EuiText>
                 {GET_API_KEY_LABEL_DESCRIPTION}{' '}
                 {!canSaveIntegrations ? `${API_KEY_DISCLAIMER} ` : ''}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>
@@ -68,7 +73,12 @@ export const ProjectAPIKeys = () => {
             <>
               <EuiText>
                 {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>

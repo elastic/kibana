@@ -26,9 +26,10 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  useDataGridColumnsCellActions,
-  type UseDataGridColumnsCellActionsProps,
-} from '@kbn/cell-actions';
+  useDataGridColumnsSecurityCellActions,
+  SecurityCellActionsTrigger,
+  type UseDataGridColumnsSecurityCellActionsProps,
+} from '../cell_actions';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -49,7 +50,6 @@ import { getPageRowIndex } from './pagination';
 import { UnitCount } from '../toolbar/unit';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { tableDefaults } from '../../store/data_table/defaults';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
@@ -303,8 +303,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo((): UseDataGridColumnsCellActionsProps => {
-      const fields: UseDataGridColumnsCellActionsProps['fields'] = disableCellActions
+    const columnsCellActionsProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
+      const fields = disableCellActions
         ? []
         : columnHeaders.map((column) => ({
             name: column.id,
@@ -317,7 +317,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
           }));
 
       return {
-        triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
+        triggerId: SecurityCellActionsTrigger.DEFAULT,
         fields,
         metadata: {
           scopeId: id,
@@ -326,7 +326,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       };
     }, [disableCellActions, columnHeaders, data, id]);
 
-    const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+    const columnsCellActions = useDataGridColumnsSecurityCellActions(columnsCellActionsProps);
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>

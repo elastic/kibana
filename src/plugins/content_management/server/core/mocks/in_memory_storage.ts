@@ -8,15 +8,15 @@
 
 import type { ContentStorage, StorageContext } from '../types';
 
-export interface MockContent {
+export interface FooContent {
   id: string;
   title: string;
 }
 
 let idx = 0;
 
-class InMemoryStorage implements ContentStorage {
-  private db: Map<string, MockContent> = new Map();
+class InMemoryStorage implements ContentStorage<any> {
+  private db: Map<string, FooContent> = new Map();
 
   async get(
     ctx: StorageContext,
@@ -31,26 +31,41 @@ class InMemoryStorage implements ContentStorage {
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
-        ...(await this.db.get(id)),
-        options: forwardInResponse,
+        item: {
+          ...(await this.db.get(id)),
+          options: forwardInResponse,
+        },
       };
     }
-    return this.db.get(id);
+    return {
+      item: this.db.get(id),
+    };
   }
 
   async bulkGet(
     ctx: StorageContext,
     ids: string[],
-    { forwardInResponse }: { forwardInResponse?: object } = {}
+    { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
-    return ids.map((id) => this.db.get(id));
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
+    return {
+      hits: ids.map((id) =>
+        forwardInResponse
+          ? { item: { ...this.db.get(id), options: forwardInResponse } }
+          : { item: this.db.get(id) }
+      ),
+    };
   }
 
   async create(
     ctx: StorageContext,
-    data: Omit<MockContent, 'id'>,
+    data: Omit<FooContent, 'id'>,
     { id: _id, errorToThrow }: { id?: string; errorToThrow?: string } = {}
-  ): Promise<MockContent> {
+  ) {
     // This allows us to test that proper error events are thrown when the storage layer op fails
     if (errorToThrow) {
       throw new Error(errorToThrow);
@@ -59,20 +74,22 @@ class InMemoryStorage implements ContentStorage {
     const nextId = idx++;
     const id = _id ?? nextId.toString();
 
-    const content: MockContent = {
+    const content: FooContent = {
       ...data,
       id,
     };
 
     this.db.set(id, content);
 
-    return content;
+    return {
+      item: content,
+    };
   }
 
   async update(
     ctx: StorageContext,
     id: string,
-    data: Partial<Omit<MockContent, 'id'>>,
+    data: Partial<Omit<FooContent, 'id'>>,
     { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
     // This allows us to test that proper error events are thrown when the storage layer op fails
@@ -95,12 +112,16 @@ class InMemoryStorage implements ContentStorage {
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
-        ...updatedContent,
-        options: forwardInResponse,
+        item: {
+          ...updatedContent,
+          options: forwardInResponse,
+        },
       };
     }
 
-    return updatedContent;
+    return {
+      item: updatedContent,
+    };
   }
 
   async delete(
@@ -115,7 +136,7 @@ class InMemoryStorage implements ContentStorage {
 
     if (!this.db.has(id)) {
       return {
-        status: 'error',
+        success: false,
         error: `Content do delete not found [${id}].`,
       };
     }
@@ -125,13 +146,46 @@ class InMemoryStorage implements ContentStorage {
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
-        status: 'success',
+        success: true,
         options: forwardInResponse,
       };
     }
 
     return {
-      status: 'success',
+      success: true,
+    };
+  }
+
+  async search(
+    ctx: StorageContext,
+    query: { text: string },
+    { errorToThrow }: { errorToThrow?: string } = {}
+  ) {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
+    if (query.text.length < 2) {
+      return {
+        hits: [],
+        pagination: {
+          total: 0,
+          cursor: '',
+        },
+      };
+    }
+
+    const rgx = new RegExp(query.text);
+    const hits = [...this.db.values()].filter(({ title }) => {
+      return title.match(rgx);
+    });
+    return {
+      hits,
+      pagination: {
+        total: hits.length,
+        cursor: '',
+      },
     };
   }
 }
@@ -139,3 +193,12 @@ class InMemoryStorage implements ContentStorage {
 export const createMemoryStorage = () => {
   return new InMemoryStorage();
 };
+
+export const createMockedStorage = (): jest.Mocked<ContentStorage> => ({
+  get: jest.fn(),
+  bulkGet: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  search: jest.fn(),
+});

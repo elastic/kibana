@@ -27,8 +27,8 @@ describe('useHostTable hook', () => {
             avg: 0.94525,
           },
           {
-            name: 'cpuCores',
-            value: 10,
+            name: 'cpu',
+            value: 0.6353277777777777,
           },
           {
             name: 'memoryTotal',
@@ -53,8 +53,8 @@ describe('useHostTable hook', () => {
             avg: 0.5400000214576721,
           },
           {
-            name: 'cpuCores',
-            value: 8,
+            name: 'cpu',
+            value: 0.8647805555555556,
           },
           {
             name: 'memoryTotal',
@@ -73,6 +73,8 @@ describe('useHostTable hook', () => {
       {
         name: 'host-0',
         os: '-',
+        ip: '',
+        id: 'host-0-0',
         title: {
           cloudProvider: 'aws',
           name: 'host-0',
@@ -89,9 +91,9 @@ describe('useHostTable hook', () => {
           name: 'memory',
           avg: 0.94525,
         },
-        cpuCores: {
-          name: 'cpuCores',
-          value: 10,
+        cpu: {
+          name: 'cpu',
+          value: 0.6353277777777777,
         },
         memoryTotal: {
           name: 'memoryTotal',
@@ -102,6 +104,8 @@ describe('useHostTable hook', () => {
       {
         name: 'host-1',
         os: 'macOS',
+        ip: '243.86.94.22',
+        id: 'host-1-1',
         title: {
           cloudProvider: null,
           name: 'host-1',
@@ -118,9 +122,9 @@ describe('useHostTable hook', () => {
           name: 'memory',
           avg: 0.5400000214576721,
         },
-        cpuCores: {
-          name: 'cpuCores',
-          value: 8,
+        cpu: {
+          name: 'cpu',
+          value: 0.8647805555555556,
         },
         memoryTotal: {
           name: 'memoryTotal',

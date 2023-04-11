@@ -6,7 +6,11 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectsClientContract,
+  type ElasticsearchClient,
+} from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import pMap from 'p-map';
 
@@ -16,15 +20,51 @@ import {
   deleteFleetProxy,
   getFleetProxy,
   updateFleetProxy,
+  getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
 import { defaultFleetErrorHandler } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
   PutFleetProxyRequestSchema,
+  FleetServerHost,
+  Output,
 } from '../../types';
-import { listFleetServerHostsForProxyId } from '../../services/fleet_server_host';
-import { agentPolicyService, outputService } from '../../services';
+import { agentPolicyService } from '../../services';
+
+async function bumpRelatedPolicies(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  fleetServerHosts: FleetServerHost[],
+  outputs: Output[]
+) {
+  if (
+    fleetServerHosts.some((host) => host.is_default) ||
+    outputs.some((output) => output.is_default || output.is_default_monitoring)
+  ) {
+    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+  } else {
+    await pMap(
+      outputs,
+      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+      {
+        concurrency: 20,
+      }
+    );
+    await pMap(
+      fleetServerHosts,
+      (fleetServerHost) =>
+        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
+          soClient,
+          esClient,
+          fleetServerHost.id
+        ),
+      {
+        concurrency: 20,
+      }
+    );
+  }
+}
 
 export const postFleetProxyHandler: RequestHandler<
   undefined,
@@ -64,36 +104,8 @@ export const putFleetProxyHandler: RequestHandler<
     };
 
     // Bump all the agent policy that use that proxy
-    const [{ items: fleetServerHosts }, { items: outputs }] = await Promise.all([
-      listFleetServerHostsForProxyId(soClient, proxyId),
-      outputService.listAllForProxyId(soClient, proxyId),
-    ]);
-    if (
-      fleetServerHosts.some((host) => host.is_default) ||
-      outputs.some((output) => output.is_default || output.is_default_monitoring)
-    ) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
-    } else {
-      await pMap(
-        outputs,
-        (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
-        {
-          concurrency: 20,
-        }
-      );
-      await pMap(
-        fleetServerHosts,
-        (fleetServerHost) =>
-          agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-            soClient,
-            esClient,
-            fleetServerHost.id
-          ),
-        {
-          concurrency: 20,
-        }
-      );
-    }
+    const { fleetServerHosts, outputs } = await getFleetProxyRelatedSavedObjects(soClient, proxyId);
+    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs);
 
     return response.ok({ body });
   } catch (error) {
@@ -109,6 +121,7 @@ export const putFleetProxyHandler: RequestHandler<
 
 export const getAllFleetProxyHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
+
   try {
     const res = await listFleetProxies(soClient);
     const body = {
@@ -128,9 +141,17 @@ export const deleteFleetProxyHandler: RequestHandler<
   TypeOf<typeof GetOneFleetProxyRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    const proxyId = request.params.itemId;
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
-    await deleteFleetProxy(soClient, request.params.itemId);
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+    const { fleetServerHosts, outputs } = await getFleetProxyRelatedSavedObjects(soClient, proxyId);
+
+    await deleteFleetProxy(soClient, esClient, request.params.itemId);
+
+    await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs);
+
     const body = {
       id: request.params.itemId,
     };

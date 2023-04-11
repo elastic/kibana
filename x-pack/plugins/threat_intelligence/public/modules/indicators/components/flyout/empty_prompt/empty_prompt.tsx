@@ -13,7 +13,7 @@ export const EMPTY_PROMPT_TEST_ID = 'indicatorEmptyPrompt';
 
 export const IndicatorEmptyPrompt: VFC = () => (
   <EuiEmptyPrompt
-    iconType="alert"
+    iconType="warning"
     color="danger"
     title={
       <h2>

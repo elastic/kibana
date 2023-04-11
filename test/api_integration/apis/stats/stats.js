@@ -91,6 +91,7 @@ export default function ({ getService }) {
           .then(({ body }) => {
             expect(body.cluster_uuid).to.be.a('string');
             expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+            expect(body.usage).to.eql({});
             assertStatsAndMetrics(body);
           });
       });
@@ -103,6 +104,7 @@ export default function ({ getService }) {
           .then(({ body }) => {
             expect(body.cluster_uuid).to.be.a('string');
             expect(body.usage).to.be.an('object');
+            expect(body.usage).to.eql({});
             assertStatsAndMetrics(body);
           });
       });
@@ -116,6 +118,7 @@ export default function ({ getService }) {
             .then(({ body }) => {
               expect(body.clusterUuid).to.be.a('string');
               expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+              expect(body.usage).to.eql({});
               assertStatsAndMetrics(body, true);
             });
         });

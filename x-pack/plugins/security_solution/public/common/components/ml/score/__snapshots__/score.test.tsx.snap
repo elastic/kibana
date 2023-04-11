@@ -11,7 +11,7 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
     }
   }
   mode="hover"
-  triggerId="security-solution-default-cellActions"
+  triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
   17
@@ -29,7 +29,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
     }
   }
   mode="hover"
-  triggerId="security-solution-default-cellActions"
+  triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
   17

@@ -27,7 +27,7 @@ export const getTimeFieldOptions = (
   const options: TimeFieldOptions[] = [];
 
   fields.forEach((field: { type: string; name: string }) => {
-    if (field.type === 'date') {
+    if (field.type === 'date' || field.type === 'date_nanos') {
       options.push({
         text: field.name,
         value: field.name,

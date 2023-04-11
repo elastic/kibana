@@ -100,6 +100,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
@@ -405,6 +406,7 @@ export const QueryBarTopRow = React.memo(
             onRefreshChange={props.onRefreshChange}
             showUpdateButton={false}
             recentlyUsedRanges={recentlyUsedRanges}
+            locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
@@ -500,6 +502,7 @@ export const QueryBarTopRow = React.memo(
               indexPatterns={props.indexPatterns}
               filters={props.filters}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
               isDisabled={props.isDisabled}
@@ -544,6 +547,7 @@ export const QueryBarTopRow = React.memo(
                 iconType={props.iconType}
                 nonKqlMode={props.nonKqlMode}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}

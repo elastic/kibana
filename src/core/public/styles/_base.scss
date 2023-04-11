@@ -34,3 +34,12 @@
 .euiPageHeader--bottomBorder:not(.euiPageHeader--tabsAtBottom):not([class*='euiPageHeader--padding']) {
   padding-bottom: $euiSizeL;
 }
+
+// Kibana's body ignores the `margin-right !important` set by react-remove-scroll-bar
+// (used by EUI's focus trap component & prevents page width jumps on full-screen overlays)
+// due to the 100% width/min-width CSS set by Kibana in other places. To work around this, we
+// grab the `--removed-body-scroll-bar-size` var added by the library & manually set `padding`
+// TODO: Use `gapMode` instead once https://github.com/theKashey/react-focus-on/issues/65 is fixed
+.kbnBody {
+  padding-right: var(--removed-body-scroll-bar-size, 0);
+}

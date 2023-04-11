@@ -51,7 +51,7 @@ Object {
           "href": "securitySolutionUI/cloud_security_posture-dashboard",
           "id": "cloud_security_posture-dashboard",
           "isSelected": false,
-          "name": "Cloud Posture",
+          "name": "Cloud Security Posture",
           "onClick": [Function],
         },
         Object {
@@ -277,7 +277,7 @@ Object {
           "href": "securitySolutionUI/cloud_security_posture-benchmarks",
           "id": "cloud_security_posture-benchmarks",
           "isSelected": false,
-          "name": "CSP Benchmarks",
+          "name": "Cloud Posture Benchmarks",
           "onClick": [Function],
         },
       ],

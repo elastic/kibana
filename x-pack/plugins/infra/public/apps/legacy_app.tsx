@@ -10,7 +10,8 @@ import { createBrowserHistory, History } from 'history';
 import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, RouteProps, Router, Switch } from 'react-router-dom';
+import { RouteProps, Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.

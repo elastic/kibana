@@ -37,10 +37,12 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
@@ -58,12 +60,10 @@ import {
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import type { SupportedFieldType } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
@@ -71,7 +71,11 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import { RANDOM_SAMPLER_OPTION } from '../../constants/random_sampler';
+import {
+  MIN_SAMPLER_PROBABILITY,
+  RANDOM_SAMPLER_OPTION,
+  RandomSamplerOption,
+} from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -143,6 +147,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
   >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
 
+  const [savedRandomSamplerProbability, saveRandomSamplerProbability] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
+  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
+
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
     DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
@@ -156,6 +165,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () =>
       getDefaultDataVisualizerListState({
         rndSamplerPref: savedRandomSamplerPreference,
+        probability: savedRandomSamplerProbability,
       }),
     // We just need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -203,10 +213,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
-    const indexedFieldTypes: SupportedFieldType[] = [];
+    const indexedFieldTypes: string[] = [];
     dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType: SupportedFieldType | undefined = kbnTypeToJobType(field);
+        const dataVisualizerType = kbnTypeToSupportedType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }
@@ -316,9 +326,38 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  const setSamplingProbability = (value: number | null) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
-  };
+  const setSamplingProbability = useCallback(
+    (value: number | null) => {
+      if (savedRandomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL && value !== null) {
+        saveRandomSamplerProbability(value);
+      }
+      setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+    },
+    [
+      dataVisualizerListState,
+      saveRandomSamplerProbability,
+      savedRandomSamplerPreference,
+      setDataVisualizerListState,
+    ]
+  );
+
+  const setRandomSamplerPreference = useCallback(
+    (nextPref: RandomSamplerOption) => {
+      if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
+        // By default, when switching to manual, restore previously chosen probability
+        // else, default to 0.001%
+        setSamplingProbability(
+          savedRandomSamplerProbability &&
+            savedRandomSamplerProbability > 0 &&
+            savedRandomSamplerProbability <= 0.5
+            ? savedRandomSamplerProbability
+            : MIN_SAMPLER_PROBABILITY
+        );
+      }
+      saveRandomSamplerPreference(nextPref);
+    },
+    [savedRandomSamplerProbability, setSamplingProbability, saveRandomSamplerPreference]
+  );
 
   useEffect(
     function clearFiltersOnLeave() {
@@ -565,7 +604,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       }
                       loading={overallStatsProgress.loaded < 100}
                       randomSamplerPreference={savedRandomSamplerPreference}
-                      setRandomSamplerPreference={saveRandomSamplerPreference}
+                      setRandomSamplerPreference={setRandomSamplerPreference}
                     />
                   </EuiFlexGroup>
                 </>

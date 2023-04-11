@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { partition, uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,10 +30,10 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -55,6 +55,7 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   type CellValueContext,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -73,7 +74,8 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -96,9 +98,16 @@ import {
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
+  UserMessagesDisplayLocationId,
 } from '../types';
 
-import { getEditPath, DOC_TYPE } from '../../common';
+import type {
+  AllowedPartitionOverrides,
+  AllowedSettingsOverrides,
+  AllowedGaugeOverrides,
+  AllowedXYOverrides,
+} from '../../common/types';
+import { getEditPath, DOC_TYPE } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -116,6 +125,7 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -128,6 +138,12 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+interface PreventableEvent {
+  preventDefault(): void;
+}
+
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
@@ -138,14 +154,30 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
+  onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
+  onFilter?: (
+    data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
+  ) => void;
+  onTableRowClick?: (
+    data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
+  ) => void;
 }
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
+  /**
+   * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
+   * Each visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)
+   *
+   * While it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite
+   * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
+   */
+  overrides?:
+    | AllowedSettingsOverrides
+    | AllowedXYOverrides
+    | AllowedPartitionOverrides
+    | AllowedGaugeOverrides;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -192,6 +224,52 @@ export interface ViewUnderlyingDataArgs {
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
   columns: string[];
+}
+
+function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; canEdit: boolean }) {
+  const showMore = errors.length > 1;
+  const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
+  return (
+    <div className="lnsEmbeddedError">
+      <EuiEmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        data-test-subj="embeddable-lens-failure"
+        body={
+          <>
+            {errors.length ? (
+              <>
+                <p>{errors[0].longMessage}</p>
+                {showMore && !canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
+                    />
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.embeddable.failure"
+                  defaultMessage="Visualization couldn't be displayed"
+                />
+              </p>
+            )}
+          </>
+        }
+      />
+    </div>
+  );
 }
 
 const getExpressionFromDocument = async (
@@ -279,13 +357,15 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <MessageList
       messages={messages}
-      useSmallIconsOnButton={true}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
-        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
         font-size: ${xsFontSize};
         padding: 0 ${euiTheme.size.xs};
         & > * {
@@ -295,6 +375,27 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
     />
   );
 };
+
+const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
+  'visualization',
+  'visualizationOnEmbeddable',
+];
+
+const MessagesBadge = ({ onMount }: { onMount: (el: HTMLDivElement) => void }) => (
+  <div
+    css={css({
+      position: 'absolute',
+      zIndex: 2,
+      left: 0,
+      bottom: 0,
+    })}
+    ref={(el) => {
+      if (el) {
+        onMount(el);
+      }
+    }}
+  />
+);
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
@@ -311,12 +412,9 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private badgeDomNode: HTMLElement | Element | undefined;
-  private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
-  private embeddableTitle?: string;
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
@@ -325,13 +423,6 @@ export class Embeddable
       this.getExecutionContext()
     );
   }
-
-  private externalSearchContext: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-    searchSessionId?: string;
-  } = {};
 
   private activeData?: TableInspectorAdapter;
 
@@ -354,25 +445,14 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
       .then(() => {
         this.loadUserMessages();
-        if (!containerStateChangedCalledAlready) {
-          this.onContainerStateChanged(initialInput);
-        } else {
-          this.reload();
-        }
+        this.reload();
       })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() => {
-      containerStateChangedCalledAlready = true;
-      this.onContainerStateChanged(this.input);
-    });
-
     const input$ = this.getInput$();
-    this.embeddableTitle = this.getTitle();
 
     this.inputReloadSubscriptions = [];
 
@@ -411,40 +491,51 @@ export class Embeddable
         })
     );
 
-    // Re-initialize the visualization if either the attributes or the saved object id changes
+    // Use a trigger to distinguish between observables in the subscription
+    const withTrigger = (trigger: 'attributesOrSavedObjectId' | 'searchContext') =>
+      map((input: LensEmbeddableInput) => ({ trigger, input }));
 
-    this.inputReloadSubscriptions.push(
-      input$
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-            )
-          ),
-          skip(1)
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    const attributesOrSavedObjectId$ = input$.pipe(
+      distinctUntilChanged((a, b) =>
+        fastIsEqual(
+          [
+            'attributes' in a && a.attributes,
+            'savedObjectId' in a && a.savedObjectId,
+            'overrides' in a && a.overrides,
+            'disableTriggers' in a && a.disableTriggers,
+          ],
+          [
+            'attributes' in b && b.attributes,
+            'savedObjectId' in b && b.savedObjectId,
+            'overrides' in b && b.overrides,
+            'disableTriggers' in b && b.disableTriggers,
+          ]
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
-        })
+      ),
+      skip(1),
+      withTrigger('attributesOrSavedObjectId')
     );
 
     // Update search context and reload on changes related to search
+    const searchContext$ = shouldFetch$<LensEmbeddableInput>(input$, () => this.getInput()).pipe(
+      withTrigger('searchContext')
+    );
+
+    // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
-      this.getUpdated$()
-        .pipe(map(() => this.getInput()))
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              [a.filters, a.query, a.timeRange, a.searchSessionId],
-              [b.filters, b.query, b.timeRange, b.searchSessionId]
-            )
-          ),
-          skip(1)
-        )
-        .subscribe(async (input) => {
-          this.onContainerStateChanged(input);
+      merge(searchContext$, attributesOrSavedObjectId$)
+        .pipe(debounceTime(0))
+        .subscribe(async ({ trigger, input }) => {
+          if (trigger === 'attributesOrSavedObjectId') {
+            await this.initializeSavedVis(input);
+          }
+
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
+
+          this.reload();
         })
     );
   }
@@ -469,11 +560,11 @@ export class Embeddable
 
   private get activeVisualizationState() {
     if (!this.activeVisualization) return;
-    return (
-      this.activeVisualization.fromPersistableState?.(
-        this.savedVis?.state.visualization,
-        this.savedVis?.references
-      ) || this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
+    return this.activeVisualization.initialize(
+      () => '',
+      this.savedVis?.state.visualization,
+      undefined,
+      this.savedVis?.references
     );
   }
 
@@ -503,10 +594,6 @@ export class Embeddable
     );
   };
 
-  private get hasAnyErrors() {
-    return this.getUserMessages(undefined, { severity: 'error' }).length > 0;
-  }
-
   private _userMessages: UserMessage[] = [];
 
   // loads all available user messages
@@ -531,11 +618,10 @@ export class Embeddable
       })
     );
 
-    const mergedSearchContext = this.getMergedSearchContext();
-
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -556,6 +642,9 @@ export class Embeddable
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
+        visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
+          this.activeVisualizationState
+        ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
         frame: frameDatasourceAPI,
@@ -583,17 +672,13 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
-      this.renderBadgeMessages();
+      this.renderUserMessages();
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 
@@ -671,45 +756,6 @@ export class Embeddable
     this.setInitializationFinished();
 
     this.isInitialized = true;
-  }
-
-  onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) {
-      this.reload();
-    }
-  }
-
-  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
-    let isDirty = false;
-    const cleanedFilters = containerState.filters
-      ? containerState.filters.filter((filter) => !filter.meta.disabled)
-      : undefined;
-    const nextTimeRange =
-      containerState.timeslice !== undefined
-        ? {
-            from: new Date(containerState.timeslice[0]).toISOString(),
-            to: new Date(containerState.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : containerState.timeRange;
-    if (
-      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
-      this.embeddableTitle !== this.getTitle()
-    ) {
-      this.externalSearchContext = {
-        timeRange: nextTimeRange,
-        query: containerState.query,
-        filters: cleanedFilters,
-        searchSessionId: containerState.searchSessionId,
-      };
-      this.embeddableTitle = this.getTitle();
-      isDirty = true;
-    }
-
-    return isDirty;
   }
 
   private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
@@ -837,22 +883,22 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
       severity: 'error',
     });
 
     this.updateOutput({
       loading: true,
-      error: errors.length
+      error: blockingErrors.length
         ? new Error(
-            typeof errors[0].longMessage === 'string'
-              ? errors[0].longMessage
-              : errors[0].shortMessage
+            typeof blockingErrors[0].longMessage === 'string'
+              ? blockingErrors[0].longMessage
+              : blockingErrors[0].shortMessage
           )
         : undefined,
     });
 
-    if (errors.length) {
+    if (blockingErrors.length) {
       this.renderComplete.dispatchError();
     } else {
       this.renderComplete.dispatchInProgress();
@@ -860,70 +906,111 @@ export class Embeddable
 
     const input = this.getInput();
 
-    render(
-      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-        <ExpressionWrapper
-          ExpressionRenderer={this.expressionRenderer}
-          expression={this.expression || null}
-          errors={errors}
-          lensInspector={this.lensInspector}
-          searchContext={this.getMergedSearchContext()}
-          variables={{
-            embeddableTitle: this.getTitle(),
-            ...(input.palette ? { theme: { palette: input.palette } } : {}),
-          }}
-          searchSessionId={this.externalSearchContext.searchSessionId}
-          handleEvent={this.handleEvent}
-          onData$={this.updateActiveData}
-          onRender$={this.onRender}
-          interactive={!input.disableTriggers}
-          renderMode={input.renderMode}
-          syncColors={input.syncColors}
-          syncTooltips={input.syncTooltips}
-          syncCursor={input.syncCursor}
-          hasCompatibleActions={this.hasCompatibleActions}
-          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
-          className={input.className}
-          style={input.style}
-          executionContext={this.getExecutionContext()}
-          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={(message) => {
-            this.updateOutput({ error: new Error(message) });
-            this.logError('runtime');
-          }}
-          noPadding={this.visDisplayOptions.noPadding}
-        />
-        <div
-          css={css({
-            position: 'absolute',
-            zIndex: 2,
-            left: 0,
-            bottom: 0,
-          })}
-          ref={(el) => {
-            if (el) {
+    if (this.expression && !blockingErrors.length) {
+      render(
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <ExpressionWrapper
+              ExpressionRenderer={this.expressionRenderer}
+              expression={this.expression || null}
+              lensInspector={this.lensInspector}
+              searchContext={this.getMergedSearchContext()}
+              variables={{
+                embeddableTitle: this.getTitle(),
+                ...(input.palette ? { theme: { palette: input.palette } } : {}),
+                ...('overrides' in input ? { overrides: input.overrides } : {}),
+              }}
+              searchSessionId={this.getInput().searchSessionId}
+              handleEvent={this.handleEvent}
+              onData$={this.updateActiveData}
+              onRender$={this.onRender}
+              interactive={!input.disableTriggers}
+              renderMode={input.renderMode}
+              syncColors={input.syncColors}
+              syncTooltips={input.syncTooltips}
+              syncCursor={input.syncCursor}
+              hasCompatibleActions={this.hasCompatibleActions}
+              getCompatibleCellValueActions={this.getCompatibleCellValueActions}
+              className={input.className}
+              style={input.style}
+              executionContext={this.getExecutionContext()}
+              addUserMessages={(messages) => this.addUserMessages(messages)}
+              onRuntimeError={(message) => {
+                this.updateOutput({ error: new Error(message) });
+                this.logError('runtime');
+              }}
+              noPadding={this.visDisplayOptions.noPadding}
+            />
+          </KibanaThemeProvider>
+          <MessagesBadge
+            onMount={(el) => {
               this.badgeDomNode = el;
               this.renderBadgeMessages();
-            }
-          }}
-        />
-      </KibanaThemeProvider>,
-      domNode
-    );
+            }}
+          />
+        </>,
+        domNode
+      );
+    }
+
+    this.renderUserMessages();
   }
 
-  private renderBadgeMessages() {
-    const messages = this.getUserMessages('embeddableBadge');
+  private renderUserMessages() {
+    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+      severity: 'error',
+    });
 
-    if (messages.length && this.badgeDomNode) {
+    if (errors.length && this.domNode) {
+      render(
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <I18nProvider>
+              <VisualizationErrorPanel
+                errors={errors}
+                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+              />
+            </I18nProvider>
+          </KibanaThemeProvider>
+          <MessagesBadge
+            onMount={(el) => {
+              this.badgeDomNode = el;
+              this.renderBadgeMessages();
+            }}
+          />
+        </>,
+        this.domNode
+      );
+    }
+
+    this.renderBadgeMessages();
+  }
+
+  badgeDomNode?: HTMLDivElement;
+
+  /**
+   * This method is called on every render, and also whenever the badges dom node is created
+   * That happens after either the expression renderer or the visualization error panel is rendered.
+   *
+   * You should not call this method on its own. Use renderUserMessages instead.
+   */
+  private renderBadgeMessages = () => {
+    const messages = this.getUserMessages('embeddableBadge');
+    const [warningOrErrorMessages, infoMessages] = partition(
+      messages,
+      ({ severity }) => severity !== 'info'
+    );
+
+    if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <EmbeddableMessagesPopover messages={messages} />
+          <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
+          <EmbeddableFeatureBadge messages={infoMessages} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );
     }
-  }
+  };
 
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
@@ -978,8 +1065,16 @@ export class Embeddable
       throw new Error('savedVis is required for getMergedSearchContext');
     }
 
+    const input = this.getInput();
     const context: ExecutionContextSearch = {
-      timeRange: this.externalSearchContext.timeRange,
+      timeRange:
+        input.timeslice !== undefined
+          ? {
+              from: new Date(input.timeslice[0]).toISOString(),
+              to: new Date(input.timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : input.timeRange,
       query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
@@ -988,12 +1083,15 @@ export class Embeddable
       disableShardWarnings: true,
     };
 
-    if (this.externalSearchContext.query) {
-      context.query = [this.externalSearchContext.query, ...(context.query as Query[])];
+    if (input.query) {
+      context.query = [input.query, ...(context.query as Query[])];
     }
 
-    if (this.externalSearchContext.filters?.length) {
-      context.filters = [...this.externalSearchContext.filters, ...(context.filters as Filter[])];
+    if (input.filters?.length) {
+      context.filters = [
+        ...input.filters.filter((filter) => !filter.meta.disabled),
+        ...(context.filters as Filter[]),
+      ];
     }
 
     return context;
@@ -1014,45 +1112,68 @@ export class Embeddable
       return;
     }
     if (isLensBrushEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
-
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
+        this.input.onBrushEnd({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
       }
     }
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onFilter) {
-        this.input.onFilter(event.data);
+        this.input.onFilter({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
       }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
-        {
-          data: event.data,
-          embeddable: this,
-        },
-        true
-      );
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+          {
+            data: event.data,
+            embeddable: this,
+          },
+          true
+        );
       }
     }
 
@@ -1082,7 +1203,7 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    this.handleContainerStateChanged(this.input);
+
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -1186,7 +1307,10 @@ export class Embeddable
       ]);
     }
 
-    if (this.hasAnyErrors) {
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
+    if (blockingErrors.length) {
       this.logError('validation');
     }
 
@@ -1264,9 +1388,6 @@ export class Embeddable
     }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
     }
   }
 

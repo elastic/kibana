@@ -80,6 +80,7 @@ export const buildSortedEventsQuery = ({
         {
           [sortField]: {
             order: sortOrder ?? 'asc',
+            format: 'strict_date_optional_time||epoch_millis',
           },
         },
       ],

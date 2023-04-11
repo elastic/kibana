@@ -281,12 +281,16 @@ const mockOptions = () => {
     ]),
     kibanaIndex: '.my-index',
     soMigrationsConfig: {
+      algorithm: 'v2',
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       retryAttempts: 20,
+      zdt: {
+        metaPickupSyncDelaySec: 120,
+      },
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),

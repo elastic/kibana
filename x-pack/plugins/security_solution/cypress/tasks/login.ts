@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
@@ -323,24 +324,38 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (
-  url: string,
-  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
-  role?: ROLES
-) => {
-  cy.visit(
-    `${
-      role ? getUrlWithRoute(role, url) : url
-    }?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
-    {
-      onBeforeLoad(win) {
-        if (onBeforeLoadCallback) {
-          onBeforeLoadCallback(win);
-        }
-        disableNewFeaturesTours(win);
-      },
-    }
-  );
+export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+  const timerangeConfig = {
+    from: 1547914976217,
+    fromStr: '2019-01-19T16:22:56.217Z',
+    kind: 'relative',
+    to: 1579537385745,
+    toStr: 'now',
+  };
+
+  const timerange = encode({
+    global: {
+      linkTo: ['timeline'],
+      timerange: timerangeConfig,
+    },
+    timeline: {
+      linkTo: ['global'],
+      timerange: timerangeConfig,
+    },
+  });
+
+  return cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    ...options,
+    qs: {
+      ...options.qs,
+      timerange,
+    },
+    onBeforeLoad: (win) => {
+      options.onBeforeLoad?.(win);
+
+      disableNewFeaturesTours(win);
+    },
+  });
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {

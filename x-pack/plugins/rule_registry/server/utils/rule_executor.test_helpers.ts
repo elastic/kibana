@@ -54,7 +54,7 @@ export const createDefaultAlertExecutorOptions = <
   rule: {
     id: alertId,
     updatedBy: null,
-    tags: [],
+    tags: ['rule-tag1', 'rule-tag2'],
     name: ruleName,
     createdBy: 'CREATED_BY',
     actions: [],
@@ -66,6 +66,7 @@ export const createDefaultAlertExecutorOptions = <
     createdAt,
     updatedAt,
     notifyWhen: null,
+    revision: 0,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
     muteAll: false,

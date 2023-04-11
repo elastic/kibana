@@ -26,7 +26,7 @@ describe('HoverActionsPopover', () => {
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           children={null}
           visibleCellActions={4}
           actionContext={actionContext}
@@ -45,7 +45,7 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={4}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -71,7 +71,7 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={4}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -102,7 +102,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={1}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -128,7 +128,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, getByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={1}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -163,7 +163,7 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, queryByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          disabledActions={[]}
+          disabledActionTypes={[]}
           visibleCellActions={2}
           actionContext={actionContext}
           showActionTooltips={false}

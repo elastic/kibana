@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -16,12 +16,13 @@ interface MonitorErrorsCountProps {
   from: string;
   to: string;
   monitorId: string[];
+  id: string;
 }
 
-export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCountProps) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const selectedLocation = useSelectedLocation();
 
@@ -33,6 +34,7 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

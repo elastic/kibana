@@ -62,7 +62,10 @@ export function TestResultHeader({
         {isCompleted ? (
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color={summaryDoc?.summary?.down! > 0 ? 'danger' : 'success'}>
+              <EuiBadge
+                color={summaryDoc?.summary?.down! > 0 ? 'danger' : 'success'}
+                css={{ maxWidth: 'max-content' }}
+              >
                 {summaryDoc?.summary?.down! > 0 ? FAILED_LABEL : COMPLETED_LABEL}
               </EuiBadge>
             </EuiFlexItem>
@@ -91,6 +94,7 @@ export function TestResultHeader({
       {checkGroupId && configId && isCompleted && (
         <EuiFlexItem grow={false}>
           <EuiLink
+            data-test-subj="syntheticsTestResultHeaderLink"
             href={getTestRunDetailLink({
               basePath,
               monitorId: configId,

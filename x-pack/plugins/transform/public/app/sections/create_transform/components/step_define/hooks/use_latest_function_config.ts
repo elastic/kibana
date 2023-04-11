@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
+import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 import { StepDefineFormProps } from '../step_define_form';
 import { StepDefineExposedState } from '../common';
@@ -62,7 +63,7 @@ function getOptions(
     : [];
 
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredDataViewFields
-    .filter((v) => !ignoreFieldNames.has(v.name))
+    .filter((v) => !ignoreFieldNames.has(v.name) && !isCounterTimeSeriesMetric(v))
     .map((v) => ({
       label: v.displayName,
       value: v.name,

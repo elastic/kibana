@@ -14,6 +14,7 @@ import {
   AttributesTypeUser,
   AttributesTypeAlerts,
   CaseStatuses,
+  CommentRequestExternalReferenceSOType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -22,6 +23,9 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
+  fileMetadata,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -39,7 +43,7 @@ import {
 import {
   createSignalsIndex,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
   globalRead,
@@ -158,9 +162,75 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         });
       });
+
+      describe('files', () => {
+        it('should create a file attachment', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const caseWithAttachments = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+          });
+
+          const fileAttachment =
+            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+          expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+      });
     });
 
     describe('unhappy path', () => {
+      describe('files', () => {
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with metadata that is missing the file field', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                // intentionally structuring the data in a way that is invalid (using foo instead of files)
+                foo: fileAttachmentMetadata.files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with an empty metadata', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {},
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
       it('400s when attempting to create a comment with a different owner than the case', async () => {
         const postedCase = await createCase(
           supertest,
@@ -363,7 +433,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
@@ -699,7 +769,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const caseIds = cases.map((theCase) => theCase.id);
 
-          expect(alert['kibana.alert.case_ids']).eql(caseIds);
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
 
           return { alert, cases };
         };
@@ -738,7 +808,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          expect(alert['kibana.alert.case_ids']).eql([postedCase.id]);
+          expect(alert[ALERT_CASE_IDS]).eql([postedCase.id]);
         });
 
         it('should not add more than 10 cases to an alert', async () => {

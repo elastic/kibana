@@ -12,6 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +23,7 @@ import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
+import type { IndexDetails, PostureTypes } from '../../common/types';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -60,8 +61,7 @@ const NotDeployed = () => {
         <p>
           <FormattedMessage
             id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription"
-            defaultMessage="To see findings, please finish the setup process by installing an elastic agent on your
-          Kubernetes cluster."
+            defaultMessage="In order to begin detecting security misconfigurations, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
           />
         </p>
       }
@@ -118,7 +118,17 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, check back again soon"
+          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          values={{
+            docs: (
+              <EuiLink href="https://ela.st/findings" target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDocLink"
+                  defaultMessage="docs"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </p>
     }
@@ -166,19 +176,20 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
  * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
-export const NoFindingsStates = () => {
+export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes }) => {
   const getSetupStatus = useCspSetupStatusApi({
     options: { refetchInterval: REFETCH_INTERVAL_MS },
   });
-  const status = getSetupStatus.data?.status;
+  const statusKspm = getSetupStatus.data?.kspm?.status;
+  const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
+  const status = posturetype === 'cspm' ? statusCspm : statusKspm;
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus
       .filter((idxDetails) => idxDetails.status === 'unprivileged')
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
-
   const render = () => {
     if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
     if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation

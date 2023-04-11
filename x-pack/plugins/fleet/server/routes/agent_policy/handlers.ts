@@ -267,11 +267,15 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
       esClient,
-      request.body.agentPolicyId
+      request.body.agentPolicyId,
+      {
+        user: user || undefined,
+      }
     );
     return response.ok({
       body,
@@ -358,7 +362,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
         };
         return response.ok({
           body,
@@ -438,7 +442,7 @@ export const downloadK8sManifest: FleetRequestHandler<
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
       };
       return response.ok({
         body,

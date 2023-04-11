@@ -18,6 +18,7 @@ import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -27,6 +28,7 @@ import {
   isPending,
   useFetcher,
 } from '../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
@@ -129,10 +131,18 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    numBuckets: 20,
+    type: ApmDocumentType.TransactionMetric,
+  });
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !latencyAggregationType || !transactionType) {
-        return;
+      if (!latencyAggregationType || !transactionType || !preferred) {
+        return Promise.resolve(undefined);
       }
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -147,6 +157,8 @@ export function TransactionsTable({
               transactionType,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
             },
           },
         }
@@ -189,6 +201,7 @@ export function TransactionsTable({
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
+      preferred,
     ]
   );
 
@@ -260,10 +273,6 @@ export function TransactionsTable({
     transactionOverflowCount,
   });
 
-  const isLoading = status === FETCH_STATUS.LOADING;
-  const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
-  const hasFailed = status === FETCH_STATUS.FAILURE;
-
   const pagination = useMemo(
     () => ({
       pageIndex: index,
@@ -322,7 +331,7 @@ export function TransactionsTable({
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               <FormattedMessage
@@ -338,13 +347,14 @@ export function TransactionsTable({
           <OverviewTableContainer
             fixedHeight={fixedHeight}
             isEmptyAndNotInitiated={
-              transactionGroupsTotalItems === 0 && isNotInitiated
+              transactionGroupsTotalItems === 0 &&
+              status === FETCH_STATUS.NOT_INITIATED
             }
           >
             <EuiBasicTable
-              loading={isLoading}
+              loading={status === FETCH_STATUS.LOADING}
               noItemsMessage={
-                isLoading
+                status === FETCH_STATUS.LOADING
                   ? i18n.translate('xpack.apm.transactionsTable.loading', {
                       defaultMessage: 'Loading...',
                     })
@@ -353,7 +363,7 @@ export function TransactionsTable({
                     })
               }
               error={
-                hasFailed
+                status === FETCH_STATUS.FAILURE
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

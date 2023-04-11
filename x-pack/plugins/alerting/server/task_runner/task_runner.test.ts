@@ -77,6 +77,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -128,6 +129,7 @@ describe('Task Runner', () => {
   const dataViewsMock = {
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
   } as DataViewsServerPluginStart;
+  const alertsService = alertsServiceMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -152,6 +154,7 @@ describe('Task Runner', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry,
+    alertsService,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
@@ -306,6 +309,35 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
+  });
+
+  test('checks alertsService context initialized if rule type has registered alerts with framework', async () => {
+    const ruleTypeWithAlerts = {
+      ...ruleType,
+      alerts: { context: 'test', mappings: { fieldMap: {} } },
+    };
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
+    const taskRunner = new TaskRunner(
+      ruleTypeWithAlerts,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
+
+    expect(ruleType.executor).toHaveBeenCalledTimes(1);
+    expect(alertsService.getContextInitializationPromise).toHaveBeenCalledWith('test', 'default');
   });
 
   test.each(ephemeralTestParams)(
@@ -1284,6 +1316,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
           {
             group: recoveryActionGroup.id,
@@ -1292,6 +1325,7 @@ describe('Task Runner', () => {
             params: {
               isResolved: true,
             },
+            uuid: '222-222',
           },
         ],
       });
@@ -1388,6 +1422,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
         ],
       });
@@ -1464,6 +1499,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
         ],
       });
@@ -1482,7 +1518,7 @@ describe('Task Runner', () => {
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
       );
       expect(result.state.summaryActions).toEqual({
-        'slack:default:1h': { date: new Date(DATE_1970) },
+        '111-111': { date: new Date(DATE_1970) },
       });
     }
   );
@@ -2618,6 +2654,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2784,6 +2821,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2799,6 +2837,7 @@ describe('Task Runner', () => {
           },
           '2': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',

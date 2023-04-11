@@ -153,7 +153,7 @@ function getMissingIndexPatternsErrors(
                   href={core.application.getUrlForApp('management', {
                     path: '/kibana/indexPatterns/create',
                   })}
-                  style={{ display: 'block' }}
+                  style={{ width: '100%', textAlign: 'center' }}
                   data-test-subj="configuration-failure-reconfigure-indexpatterns"
                 >
                   {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
@@ -198,11 +198,7 @@ export const filterAndSortUserMessages = (
           return false;
         }
 
-        if (location.id === 'dimensionButton' && location.dimensionId !== dimensionId) {
-          return false;
-        }
-
-        return true;
+        return !(location.id === 'dimensionButton' && location.dimensionId !== dimensionId);
       });
 
       if (!hasMatch) {
@@ -221,11 +217,17 @@ export const filterAndSortUserMessages = (
 };
 
 function bySeverity(a: UserMessage, b: UserMessage) {
-  if (a.severity === 'warning' && b.severity === 'error') {
-    return 1;
-  } else if (a.severity === 'error' && b.severity === 'warning') {
-    return -1;
-  } else {
+  if (a.severity === b.severity) {
     return 0;
   }
+  if (a.severity === 'error') {
+    return -1;
+  }
+  if (b.severity === 'error') {
+    return 1;
+  }
+  if (a.severity === 'warning') {
+    return -1;
+  }
+  return 1;
 }

@@ -171,6 +171,7 @@ export function TransactionDurationRuleType(props: Props) {
       })}
     >
       <EuiSelect
+        data-test-subj="apmTransactionDurationRuleTypeSelect"
         value={params.aggregationType}
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
           return {

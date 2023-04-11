@@ -29,9 +29,9 @@ import {
   RawRequest,
   FakeRawRequest,
 } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
-import { RouteValidator } from './validator';
 
 const requestSymbol = Symbol('request');
 
@@ -201,6 +201,7 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       timeout: {
         payload: payloadTimeout,
@@ -221,6 +222,13 @@ export class CoreKibanaRequest<
       method,
       options,
     };
+  }
+  /** infer route access from path if not declared */
+  private getAccess(request: RawRequest): 'internal' | 'public' {
+    return (
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ??
+      (request.path.startsWith('/internal') ? 'internal' : 'public')
+    );
   }
 
   private getAuthRequired(request: RawRequest): boolean | 'optional' {

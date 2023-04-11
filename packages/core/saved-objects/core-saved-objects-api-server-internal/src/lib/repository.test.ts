@@ -23,7 +23,6 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -52,11 +51,12 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectUnsanitizedDoc,
+  SavedObject,
+  SavedObjectReference,
+  BulkResolveError,
 } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -69,7 +69,6 @@ import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { InternalBulkResolveError } from './internal_bulk_resolve';
 
 import {
   CUSTOM_INDEX_TYPE,
@@ -935,6 +934,8 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[0].create._source,
             namespaces: response.items[0].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
@@ -943,6 +944,8 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[1].create._source,
             namespaces: response.items[1].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
         });
 
@@ -2947,7 +2950,8 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
         });
       });
     });
@@ -3534,6 +3538,7 @@ describe('SavedObjectsRepository', () => {
                 'references',
                 'migrationVersion',
                 'coreMigrationVersion',
+                'typeMigrationVersion',
                 'updated_at',
                 'created_at',
                 'originId',
@@ -4069,7 +4074,7 @@ describe('SavedObjectsRepository', () => {
 
     it('throws when internalBulkResolve result is an error', async () => {
       const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('Oh no!'));
-      const expectedResult: InternalBulkResolveError = { type: 'obj-type', id: 'obj-id', error };
+      const expectedResult: BulkResolveError = { type: 'obj-type', id: 'obj-id', error };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
       await expect(repository.resolve('foo', '2')).rejects.toEqual(error);
@@ -5221,6 +5226,26 @@ describe('SavedObjectsRepository', () => {
       mockUpdateObjectsSpaces.mockRejectedValue(expectedResult);
 
       await expect(repository.updateObjectsSpaces([], [], [])).rejects.toEqual(expectedResult);
+    });
+  });
+
+  describe('#getCurrentNamespace', () => {
+    it('returns `undefined` for `undefined` namespace argument', async () => {
+      expect(repository.getCurrentNamespace()).toBeUndefined();
+    });
+
+    it('throws if `*` namespace argument is provided', async () => {
+      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
+        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      );
+    });
+
+    it('properly handles `default` namespace', async () => {
+      expect(repository.getCurrentNamespace('default')).toBeUndefined();
+    });
+
+    it('properly handles non-`default` namespace', async () => {
+      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
     });
   });
 });

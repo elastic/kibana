@@ -7,16 +7,20 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -32,19 +36,20 @@ export const getHostRiskScoreColumns = ({
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
         return (
-          <CellActions
+          <SecurityCellActions
             mode={CellActionsMode.HOVER}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
             field={{
               name: 'host.name',
               value: hostName,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
-          </CellActions>
+          </SecurityCellActions>
         );
       }
       return getEmptyTagValue();
@@ -72,7 +77,8 @@ export const getHostRiskScoreColumns = ({
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>
-          {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

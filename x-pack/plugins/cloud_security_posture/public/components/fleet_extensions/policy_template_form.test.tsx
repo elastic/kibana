@@ -49,6 +49,23 @@ describe('<CspPolicyTemplateForm />', () => {
     onChange.mockClear();
   });
 
+  it('updates package policy namespace to default when it changes', () => {
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+
+    // Listen to the onChange triggered by the test (re-render with new policy namespace)
+    // It should ensure the initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        namespace: 'default',
+      },
+    });
+  });
+
   it('renders and updates name field', () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
@@ -84,8 +101,8 @@ describe('<CspPolicyTemplateForm />', () => {
   it('renders KSPM input selector', () => {
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
 
-    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
-    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option1 = getByLabelText('Self-Managed');
+    const option2 = getByLabelText('EKS');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
@@ -99,7 +116,7 @@ describe('<CspPolicyTemplateForm />', () => {
     const eksPolicy = getMockPolicyEKS();
 
     const { getByLabelText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
-    const option = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option = getByLabelText('EKS');
     userEvent.click(option);
 
     // Listen to the 2nd triggered by the test.
@@ -131,8 +148,8 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />
     );
 
-    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
-    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option1 = getByLabelText('Self-Managed');
+    const option2 = getByLabelText('EKS');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();

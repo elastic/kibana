@@ -19,6 +19,11 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 const ERROR_SAMPLES_SIZE = 10000;
 
+export interface ErrorGroupSampleIdsResponse {
+  errorSampleIds: string[];
+  occurrencesCount: number;
+}
+
 export async function getErrorGroupSampleIds({
   environment,
   kuery,
@@ -35,7 +40,7 @@ export async function getErrorGroupSampleIds({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<ErrorGroupSampleIdsResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.error as const],
@@ -55,7 +60,7 @@ export async function getErrorGroupSampleIds({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
-      _source: [ERROR_ID],
+      _source: [ERROR_ID, 'transaction'],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error

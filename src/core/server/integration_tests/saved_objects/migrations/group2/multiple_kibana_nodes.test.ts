@@ -112,7 +112,7 @@ describe('migration v2', () => {
   let rootB: Root;
   let rootC: Root;
 
-  const migratedIndex = `.kibana_${pkg.version}_001`;
+  const migratedIndexAlias = `.kibana_${pkg.version}`;
   const fooType: SavedObjectsType = {
     name: 'foo',
     hidden: false,
@@ -189,14 +189,14 @@ describe('migration v2', () => {
     await startWithDelay([rootA, rootB, rootC], 0);
 
     const esClient = esServer.es.getClient();
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(5000);
 
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -208,14 +208,14 @@ describe('migration v2', () => {
     await startWithDelay([rootA, rootB, rootC], 1);
 
     const esClient = esServer.es.getClient();
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(5000);
 
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -227,14 +227,14 @@ describe('migration v2', () => {
     await startWithDelay([rootA, rootB, rootC], 5);
 
     const esClient = esServer.es.getClient();
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(5000);
 
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -246,14 +246,14 @@ describe('migration v2', () => {
     await startWithDelay([rootA, rootB, rootC], 20);
 
     const esClient = esServer.es.getClient();
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(5000);
 
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 });

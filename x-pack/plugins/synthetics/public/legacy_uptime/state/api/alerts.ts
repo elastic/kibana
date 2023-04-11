@@ -63,6 +63,7 @@ type NewMonitorStatusAlert = Omit<
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'executionStatus'
+  | 'revision'
   | 'ruleTypeId'
   | 'notifyWhen'
   | 'actions'
@@ -87,6 +88,7 @@ export const createAlert = async ({
       defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
       defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
     },
+    isLegacy: true,
   });
 
   const data: NewMonitorStatusAlert = {

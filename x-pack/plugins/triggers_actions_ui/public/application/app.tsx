@@ -6,7 +6,8 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { Switch, Redirect, Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  Sort,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { orderBy } from 'lodash';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -19,8 +20,17 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
+import { withApmSpan } from '../../../utils/with_apm_span';
 const TRACE_SAMPLES_SIZE = 500;
+
+export interface TransactionTraceSamplesResponse {
+  traceSamples: Array<{
+    score: number | null | undefined;
+    timestamp: string;
+    transactionId: string;
+    traceId: string;
+  }>;
+}
 
 export async function getTraceSamples({
   environment,
@@ -48,7 +58,7 @@ export async function getTraceSamples({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<TransactionTraceSamplesResponse> {
   return withApmSpan('get_trace_samples', async () => {
     const commonFilters = [
       { term: { [SERVICE_NAME]: serviceName } },
@@ -90,19 +100,27 @@ export async function getTraceSamples({
           },
         },
         size: TRACE_SAMPLES_SIZE,
+        sort: [
+          {
+            _score: {
+              order: 'desc',
+            },
+          },
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ] as Sort,
       },
     });
 
-    const traceSamples = orderBy(
-      response.hits.hits.map((hit) => ({
-        score: hit._score,
-        timestamp: hit._source['@timestamp'],
-        transactionId: hit._source.transaction.id,
-        traceId: hit._source.trace.id,
-      })),
-      ['score', 'timestamp'],
-      ['desc', 'desc']
-    );
+    const traceSamples = response.hits.hits.map((hit) => ({
+      score: hit._score,
+      timestamp: hit._source['@timestamp'],
+      transactionId: hit._source.transaction.id,
+      traceId: hit._source.trace.id,
+    }));
 
     return { traceSamples };
   });

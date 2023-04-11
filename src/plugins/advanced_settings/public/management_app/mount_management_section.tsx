@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Router, Switch, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -62,10 +63,12 @@ export async function mountManagementSection(
   params.setBreadcrumbs(crumb);
   const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
 
-  const canSave = application.capabilities.advancedSettings.save as boolean;
+  const { advancedSettings, globalSettings } = application.capabilities;
+  const canSaveAdvancedSettings = advancedSettings.save as boolean;
+  const canSaveGlobalSettings = globalSettings.save as boolean;
+  const canShowGlobalSettings = globalSettings.show as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
-
-  if (!canSave) {
+  if (!canSaveAdvancedSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
     chrome.setBadge(readOnlyBadge);
   }
 
@@ -81,7 +84,8 @@ export async function mountManagementSection(
             <Route path="/">
               <Settings
                 history={params.history}
-                enableSaving={canSave}
+                enableSaving={{ namespace: canSaveAdvancedSettings, global: canSaveGlobalSettings }}
+                enableShowing={{ namespace: true, global: canShowGlobalSettings }}
                 toasts={notifications.toasts}
                 docLinks={docLinks.links}
                 settingsService={settings}

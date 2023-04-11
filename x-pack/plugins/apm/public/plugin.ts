@@ -23,6 +23,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -72,6 +73,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
@@ -177,6 +179,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     matchPath(currentPath: string) {
                       return [
                         '/service-groups',
+                        '/mobile-services',
                         '/services',
                         '/service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
@@ -259,6 +262,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     plugins.observability.dashboard.register({
+      appName: 'apm',
+      hasData: async () => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.getHasData();
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.fetchObservabilityOverviewPageData(params);
+      },
+    });
+
+    plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
         const dataHelper = await getApmDataHelper();

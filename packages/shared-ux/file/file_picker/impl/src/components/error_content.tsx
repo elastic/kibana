@@ -23,7 +23,7 @@ export const ErrorContent: FunctionComponent<Props> = ({ error }) => {
   return (
     <EuiEmptyPrompt
       data-test-subj="errorPrompt"
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       titleSize="xs"
       title={<h3>{i18nTexts.loadingFilesErrorTitle}</h3>}

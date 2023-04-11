@@ -72,7 +72,9 @@ node x-pack/plugins/apm/scripts/test/api --runner --basic --updateSnapshots
 
 The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e).
 
-Test runs are recorded to the [Cypress Dashboard](https://dashboard.cypress.io). Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
+When PR is labeled with `apm:cypress-record`, test runs are recorded to the [Cypress Dashboard](https://dashboard.cypress.io).
+
+Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
 
 ```yml
     ...
