@@ -11,6 +11,7 @@ import { ContentManagementPlugin } from './plugin';
 import { IRouter } from '@kbn/core/server';
 import type { ProcedureName } from '../common';
 import { procedureNames } from '../common/rpc';
+import { MSearchService } from './core/msearch';
 
 jest.mock('./core', () => ({
   ...jest.requireActual('./core'),
@@ -36,6 +37,7 @@ const mockCreate = jest.fn().mockResolvedValue('createMocked');
 const mockUpdate = jest.fn().mockResolvedValue('updateMocked');
 const mockDelete = jest.fn().mockResolvedValue('deleteMocked');
 const mockSearch = jest.fn().mockResolvedValue('searchMocked');
+const mockMSearch = jest.fn().mockResolvedValue('mSearchMocked');
 
 jest.mock('./rpc/procedures/all_procedures', () => {
   const mockedProcedure = (spyGetter: () => jest.Mock) => ({
@@ -54,6 +56,7 @@ jest.mock('./rpc/procedures/all_procedures', () => {
     update: mockedProcedure(() => mockUpdate),
     delete: mockedProcedure(() => mockDelete),
     search: mockedProcedure(() => mockSearch),
+    mSearch: mockedProcedure(() => mockMSearch),
   };
 
   return {
@@ -137,12 +140,14 @@ describe('ContentManagementPlugin', () => {
           requestHandlerContext: mockedRequestHandlerContext,
           contentRegistry: 'mockedContentRegistry',
           getTransformsFactory: expect.any(Function),
+          mSearchService: expect.any(MSearchService),
         };
         expect(mockGet).toHaveBeenCalledWith(context, input);
         expect(mockCreate).toHaveBeenCalledWith(context, input);
         expect(mockUpdate).toHaveBeenCalledWith(context, input);
         expect(mockDelete).toHaveBeenCalledWith(context, input);
         expect(mockSearch).toHaveBeenCalledWith(context, input);
+        expect(mockMSearch).toHaveBeenCalledWith(context, input);
       });
 
       test('should return error in custom error format', async () => {

@@ -81,6 +81,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       isFlyoutView || isHostIsolationPanelOpen ? (
         <FlyoutHeader
           eventId={expandedEvent.eventId}
+          eventIndex={eventIndex}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           isAlert={isAlert}
           isolateAction={isolateAction}
@@ -92,14 +93,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       ) : (
         <ExpandableEventTitle
           eventId={expandedEvent.eventId}
+          eventIndex={eventIndex}
           isAlert={isAlert}
           loading={loading}
           ruleName={ruleName}
+          timestamp={timestamp}
           handleOnEventClosed={handleOnEventClosed}
         />
       ),
     [
       expandedEvent.eventId,
+      eventIndex,
       handleOnEventClosed,
       isAlert,
       isFlyoutView,
