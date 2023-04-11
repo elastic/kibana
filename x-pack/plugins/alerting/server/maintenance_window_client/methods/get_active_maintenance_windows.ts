@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import moment from 'moment';
 import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
+import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindow,
+  MaintenanceWindowSOAttributes,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   parseDuration,
   MaintenanceWindowClientContext,
@@ -29,10 +32,10 @@ export interface ActiveParams {
   interval: string;
 }
 
-export async function active(
+export async function getActiveMaintenanceWindows(
   context: MaintenanceWindowClientContext,
   params: ActiveParams
-): Promise<boolean> {
+): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
   const { start, interval } = params;
 
@@ -52,40 +55,20 @@ export async function active(
   ]);
 
   try {
-    const { aggregations } = await savedObjectsClient.find<
-      MaintenanceWindow,
-      MaintenanceWindowAggregationResult
-    >({
+    const result = await savedObjectsClient.find<MaintenanceWindowSOAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      aggs: {
-        maintenanceWindow: {
-          date_histogram: {
-            field: 'maintenance-window.attributes.events',
-            fixed_interval: interval,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: startDateISO,
-              max: endDateISO,
-            },
-            hard_bounds: {
-              min: startDateISO,
-              max: endDateISO,
-            },
-          },
-        },
-      },
       filter,
     });
 
-    if (!aggregations) {
-      return false;
-    }
-    return aggregations.maintenanceWindow.buckets.some((bucket) => {
-      return bucket.doc_count > 0;
-    });
+    return result.saved_objects.map((so) =>
+      getMaintenanceWindowFromRaw({
+        attributes: so.attributes,
+        id: so.id,
+      })
+    );
   } catch (e) {
     const errorMessage = `Failed to find active maintenance window by interval: ${interval} with start date: ${startDate.toISOString()}, Error: ${e}`;
     logger.error(errorMessage);
+    throw Boom.boomify(e, { message: errorMessage });
   }
-  return false;
 }

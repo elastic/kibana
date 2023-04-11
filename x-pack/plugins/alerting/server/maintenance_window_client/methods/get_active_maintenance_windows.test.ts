@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { active } from './active';
+import { getActiveMaintenanceWindows } from './get_active_maintenance_windows';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
@@ -14,6 +13,7 @@ import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../common';
+import { getMockMaintenanceWindow } from './test_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -23,7 +23,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   savedObjectsClient,
 };
 
-describe('MaintenanceWindowClient - active', () => {
+describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -32,37 +32,25 @@ describe('MaintenanceWindowClient - active', () => {
     jest.useRealTimers();
   });
 
-  it('should return true if there are active maintenance windows', async () => {
+  it('should return active maintenance windows', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockResolvedValueOnce({
-      aggregations: {
-        maintenanceWindow: {
-          buckets: [
-            {
-              key_as_string: 1679959537,
-              key: 1679959537,
-              doc_count: 1,
-            },
-            {
-              key_as_string: 1679959537,
-              key: 1679959537,
-              doc_count: 2,
-            },
-            {
-              key_as_string: 1679959537,
-              key: 1679959537,
-              doc_count: 3,
-            },
-          ],
+      saved_objects: [
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-1',
         },
-      },
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-2',
+        },
+      ],
     } as unknown as SavedObjectsFindResponse);
 
     const startDate = new Date().toISOString();
-    const endDate = moment.utc(startDate).add(1, 'h').toISOString();
 
-    const result = await active(mockContext, {
+    const result = await getActiveMaintenanceWindows(mockContext, {
       start: startDate,
       interval: '1h',
     });
@@ -70,20 +58,6 @@ describe('MaintenanceWindowClient - active', () => {
     const findCallParams = savedObjectsClient.find.mock.calls[0][0];
 
     expect(findCallParams.type).toEqual(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE);
-    expect(findCallParams.aggs?.maintenanceWindow.date_histogram).toEqual(
-      expect.objectContaining({
-        field: 'maintenance-window.attributes.events',
-        fixed_interval: '1h',
-        extended_bounds: {
-          min: startDate,
-          max: endDate,
-        },
-        hard_bounds: {
-          min: startDate,
-          max: endDate,
-        },
-      })
-    );
 
     expect(toElasticsearchQuery(findCallParams.filter)).toMatchInlineSnapshot(`
       Object {
@@ -140,35 +114,27 @@ describe('MaintenanceWindowClient - active', () => {
         },
       }
     `);
-    expect(result).toEqual(true);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'test-1',
+      }),
+      expect.objectContaining({
+        id: 'test-2',
+      }),
+    ]);
   });
 
-  it('should return false if there are no active maintenance windows', async () => {
+  it('should return empty array if there are no active maintenance windows', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockResolvedValueOnce({
-      aggregations: {
-        maintenanceWindow: {
-          buckets: [
-            {
-              key_as_string: 1679959537,
-              key: 1679959537,
-              doc_count: 0,
-            },
-            {
-              key_as_string: 1679959537,
-              key: 1679959537,
-              doc_count: 0,
-            },
-          ],
-        },
-      },
+      saved_objects: [],
     } as unknown as SavedObjectsFindResponse);
 
     const startDate = new Date().toISOString();
-    const endDate = moment.utc(startDate).add(4, 'd').toISOString();
 
-    const result = await active(mockContext, {
+    const result = await getActiveMaintenanceWindows(mockContext, {
       start: startDate,
       interval: '4d',
     });
@@ -176,20 +142,6 @@ describe('MaintenanceWindowClient - active', () => {
     const findCallParams = savedObjectsClient.find.mock.calls[0][0];
 
     expect(findCallParams.type).toEqual(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE);
-    expect(findCallParams.aggs?.maintenanceWindow.date_histogram).toEqual(
-      expect.objectContaining({
-        field: 'maintenance-window.attributes.events',
-        fixed_interval: '4d',
-        extended_bounds: {
-          min: startDate,
-          max: endDate,
-        },
-        hard_bounds: {
-          min: startDate,
-          max: endDate,
-        },
-      })
-    );
     expect(toElasticsearchQuery(findCallParams.filter)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
@@ -245,24 +197,25 @@ describe('MaintenanceWindowClient - active', () => {
         },
       }
     `);
-    expect(result).toEqual(false);
+    expect(result).toEqual([]);
   });
 
-  it('should log and return false is an error is thrown', async () => {
+  it('should log and throw if an error is thrown', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockRejectedValueOnce('something went wrong');
 
     const startDate = new Date().toISOString();
 
-    const result = await active(mockContext, {
-      start: startDate,
-      interval: '4d',
-    });
+    await expect(async () => {
+      await getActiveMaintenanceWindows(mockContext, {
+        start: startDate,
+        interval: '4d',
+      });
+    }).rejects.toThrowError();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to find active maintenance window by interval: 4d with start date: 2023-02-26T00:00:00.000Z, Error: something went wrong'
     );
-    expect(result).toEqual(false);
   });
 });
