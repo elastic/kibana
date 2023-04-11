@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
@@ -205,7 +206,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               left: {
                 prepend: (
                   <EuiButtonEmpty size="xs" color="text">
-                    {data?.total} Vulnerabilities
+                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                      defaultMessage:
+                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                      values: { total: data?.total },
+                    })}
                   </EuiButtonEmpty>
                 ),
               },
