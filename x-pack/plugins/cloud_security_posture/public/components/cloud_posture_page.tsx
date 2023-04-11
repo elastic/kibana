@@ -14,9 +14,7 @@ import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
-import { getCpmStatus } from '../common/utils/get_cpm_status';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -176,9 +174,6 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const { data: getSetupStatus, isLoading, isError, error } = useCspSetupStatusApi();
-
-  const { hasFindings } = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -191,18 +186,6 @@ export const CloudPosturePage = <TData, TError>({
 
     if (!subscriptionStatus.data) {
       return subscriptionNotAllowedRenderer();
-    }
-
-    if (isError) {
-      return defaultErrorRenderer(error);
-    }
-
-    if (isLoading) {
-      return defaultLoadingRenderer();
-    }
-
-    if (!hasFindings) {
-      return children;
     }
 
     if (!query) {

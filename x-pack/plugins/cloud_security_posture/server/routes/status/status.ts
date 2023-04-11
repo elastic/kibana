@@ -306,8 +306,6 @@ export const getCspStatus = async ({
     isPluginInitialized: isPluginInitialized(),
   });
 
-  if ((statusCspm && statusKspm && statusVulnMgmt) === 'not-installed') return statusResponseInfo;
-
   const response: CspSetupStatus = {
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
