@@ -8,7 +8,7 @@
 
 import { cloneDeep, defaults, forOwn, assign } from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { isSavedObjectNotFoundError, SavedObjectNotFound } from '../../../../kibana_utils/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,
@@ -73,10 +73,7 @@ export async function applyESResp(
         savedObject.searchSourceFields = searchSourceValues;
       }
     } catch (error) {
-      if (
-        error.constructor.name === 'SavedObjectNotFound' &&
-        error.savedObjectType === 'index-pattern'
-      ) {
+      if (isSavedObjectNotFoundError(error) && error.savedObjectType === 'index-pattern') {
         // if parsing the search source fails because the index pattern wasn't found,
         // remember the reference - this is required for error handling on legacy imports
         savedObject.unresolvedIndexPatternReference = {

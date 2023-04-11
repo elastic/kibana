@@ -151,6 +151,9 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
   filters.reduce((acc, filterString) => {
     try {
       const objFilter: Filter = JSON.parse(filterString);
+      if (objFilter.meta === undefined) {
+        objFilter.meta = {};
+      }
       return [...acc, objFilter];
     } catch (e) {
       return acc;

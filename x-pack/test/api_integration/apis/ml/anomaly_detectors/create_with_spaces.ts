@@ -37,15 +37,15 @@ export default ({ getService }: FtrProviderContext) => {
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobIdSpace1);
 
       await ml.testExecution.logTestStep('should create job');
-      await supertest
+      const { body, status } = await supertest
         .put(`/s/${idSpace1}/api/ml/anomaly_detectors/${jobIdSpace1}`)
         .auth(
           USER.ML_POWERUSER_ALL_SPACES,
           ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send(jobConfig)
-        .expect(200);
+        .send(jobConfig);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       await ml.testExecution.logTestStep(`job should be in space '${idSpace1}' only`);
       await ml.api.assertJobSpaces(jobIdSpace1, 'anomaly-detector', [idSpace1]);

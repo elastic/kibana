@@ -24,7 +24,7 @@ export const LoadingPage = ({ staticLoadingState }: { staticLoadingState?: boole
   if (staticLoadingState) {
     return (
       <PageTemplate title={title}>
-        <PageLoading />;
+        <PageLoading />
       </PageTemplate>
     );
   }

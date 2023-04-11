@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common';
+import { isSavedObjectNotFoundError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useUiTracker } from '../../../../../observability/public';
 import {
   LogIndexNameReference,
@@ -48,8 +48,8 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
 
           const indexPatternErrors = await indexPatternService
             .get(logIndices.indexPatternId)
-            .then(validateIndexPattern, (error): FormValidationError[] => {
-              if (error instanceof SavedObjectNotFound) {
+            .then(validateIndexPattern, (error: Error): FormValidationError[] => {
+              if (isSavedObjectNotFoundError(error)) {
                 return [
                   {
                     type: 'missing_index_pattern' as const,

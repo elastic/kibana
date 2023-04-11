@@ -59,7 +59,7 @@ describe('filter manager utilities', () => {
       expect(after.meta).toHaveProperty('negate', false);
     });
 
-    test('should finish with a catch', async (done) => {
+    test('should finish with a catch', (done) => {
       const before: any = { meta: { index: 'logstash-*' } };
 
       try {

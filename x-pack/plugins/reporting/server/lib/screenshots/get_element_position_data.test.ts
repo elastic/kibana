@@ -58,8 +58,8 @@ describe('getElementPositionAndAttributes', () => {
           getBoundingClientRect: () => ({
             width: parseFloat(element.style.width),
             height: parseFloat(element.style.height),
-            top: parseFloat(element.style.top),
-            left: parseFloat(element.style.left),
+            y: parseFloat(element.style.top),
+            x: parseFloat(element.style.left),
           }),
         })
       );

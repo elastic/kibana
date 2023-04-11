@@ -83,25 +83,27 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
           />
         }
       >
-        <FormattedMessage
-          id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
-          defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
-          values={{
-            settingsLink: (
-              <EuiLink
-                href={getHref('policy_details', {
-                  policyId: agentPolicy.id,
-                  tabId: 'settings',
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentLogs.settingsLink"
-                  defaultMessage="settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        {agentPolicy.is_managed ? null : (
+          <FormattedMessage
+            id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
+            defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
+            values={{
+              settingsLink: (
+                <EuiLink
+                  href={getHref('policy_details', {
+                    policyId: agentPolicy.id,
+                    tabId: 'settings',
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.settingsLink"
+                    defaultMessage="settings"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        )}
       </EuiCallOut>
     </EuiFlexItem>
   );
@@ -277,9 +279,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     return (
       <WrapperFlexGroup direction="column" gutterSize="m">
-        {agentPolicy &&
-          !agentPolicy.monitoring_enabled?.includes('logs') &&
-          !agentPolicy.is_managed && <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />}
+        {agentPolicy && !agentPolicy.monitoring_enabled?.includes('logs') && (
+          <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>

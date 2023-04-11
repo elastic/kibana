@@ -6,6 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';
@@ -18,10 +19,14 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-export const setup = registerTestBed<RepositoryEditTestSubjects>(
-  WithAppDependencies(RepositoryEdit),
-  testBedConfig
-);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<RepositoryEditTestSubjects>(
+    WithAppDependencies(RepositoryEdit, httpSetup),
+    testBedConfig
+  );
+
+  return await initTestBed();
+};
 
 export type RepositoryEditTestSubjects = TestSubjects | ThreeLevelDepth | NonVisibleTestSubjects;
 

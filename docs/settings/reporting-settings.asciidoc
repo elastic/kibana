@@ -61,25 +61,37 @@ xpack.reporting.encryptionKey: "something_secret"
 ==== Reporting index setting
 
 `xpack.reporting.index`::
-deprecated:[7.11.0,This setting will be removed in 8.0.0.] Multitenancy by changing `kibana.index` is unsupported starting in 8.0.0. For more details, refer to https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]. When you divide workspaces in an Elastic cluster using multiple {kib} instances with a different `kibana.index` setting per instance, you must set a unique `xpack.reporting.index` setting per `kibana.index`. Otherwise, report generation periodically fails if a report is queued through an instance with one `kibana.index` setting, and an instance with a different `kibana.index` attempts to claim the job. Reporting uses a weekly index in {es} to store the reporting job and the report content. The index is automatically created if it does not already exist. Configure a unique value for `xpack.reporting.index`, beginning with `.reporting-`, for every {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
+deprecated:[7.11.0,This setting will be removed in 8.0.0.] Reporting uses a weekly index in {es} to store the
+reporting job and the report content. The index is automatically created if it does not already exist.
++
+When you divide workspaces in an Elastic cluster using multiple {kib} instances with a different `kibana.index`
+setting per instance, it is considered a multitenant configuration. When using {kib} multitenancy, Reporting
+needs additional index settings to be customized in each {kib} instance.
++
+- `kibana.index`: Configure a unique <<kibana-index, {kib} index>> to separate saved objects from other {kib} instances.
+- `xpack.task_manager.index`: Configure a unique index in <<task-manager-settings>>, beginning with `.kibana_task_manager`, to separate asynchronous tasks from other {kib} instances. Defaults to `.kibana_task_manager`.
+- `xpack.reporting.index`: Configure a unique reporting index beginning with `.reporting-`, to separate report metadata from other {kib} instances. Defaults to `.reporting-`.
 
-{kib} instance A:
+[float]
+[[reporting-multitenant-example]]
+==== Reporting multitenant example
+{kib} instance A `kibana.yml` settings:
 [source,yaml]
 --------------------------------------------------------------------------------
 kibana.index: ".kibana-a"
+xpack.task_manager.index: ".kibana_task_manager-a"
 xpack.reporting.index: ".reporting-a"
-xpack.reporting.encryptionKey: "something_secret"
 --------------------------------------------------------------------------------
-
-{kib} instance B:
+{kib} instance B `kibana.yml` settings:
 [source,yaml]
 --------------------------------------------------------------------------------
 kibana.index: ".kibana-b"
+xpack.task_manager.index: ".kibana_task_manager-b"
 xpack.reporting.index: ".reporting-b"
-xpack.reporting.encryptionKey: "something_secret"
 --------------------------------------------------------------------------------
 
-NOTE: If security is enabled, the `xpack.reporting.index` setting should begin with `.reporting-` for the `kibana_system` role to have the necessary privileges over the index.
+NOTE: Configuring multitenancy by changing `kibana.index` is unsupported starting in 8.0.0. For more details,
+refer to https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]. 
 
 [float]
 [[reporting-job-queue-settings]]

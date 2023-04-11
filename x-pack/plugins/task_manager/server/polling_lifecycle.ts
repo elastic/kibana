@@ -87,6 +87,8 @@ export class TaskPollingLifecycle {
 
   private middleware: Middleware;
 
+  private config: TaskManagerConfig;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -109,6 +111,7 @@ export class TaskPollingLifecycle {
     this.definitions = definitions;
     this.store = taskStore;
     this.executionContext = executionContext;
+    this.config = config;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -230,6 +233,7 @@ export class TaskPollingLifecycle {
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
     });
   };
 

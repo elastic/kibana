@@ -272,6 +272,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     defineRoutes(
       core.http.createRouter<ActionsRequestHandlerContext>(),
       this.licenseState,
+      actionsConfigUtils,
       this.usageCounter
     );
 

@@ -69,7 +69,7 @@ const SourceArrow = React.memo<{
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <ArrowBody height={sourceArrowHeight} />
+        <ArrowBody height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       {sourceBytes != null && !isNaN(Number(sourceBytes)) ? (
@@ -95,7 +95,7 @@ const SourceArrow = React.memo<{
       ) : null}
 
       <EuiFlexItem grow={false}>
-        <ArrowBody data-test-subj="source-arrow" height={sourceArrowHeight} />
+        <ArrowBody data-test-subj="source-arrow" height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       {sourcePackets != null && !isNaN(Number(sourcePackets)) ? (
@@ -114,7 +114,7 @@ const SourceArrow = React.memo<{
       ) : null}
 
       <EuiFlexItem grow={false}>
-        <ArrowBody height={sourceArrowHeight} />
+        <ArrowBody height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -158,7 +158,7 @@ const DestinationArrow = React.memo<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
 
         {destinationBytes != null && !isNaN(Number(destinationBytes)) ? (
@@ -184,7 +184,7 @@ const DestinationArrow = React.memo<{
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
 
         {destinationPackets != null && !isNaN(Number(destinationPackets)) ? (
@@ -205,7 +205,7 @@ const DestinationArrow = React.memo<{
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

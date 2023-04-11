@@ -1,0 +1,39 @@
+on:
+  pull_request_target:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  on-merge:
+    name: 'Label and Backport'
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == true
+      && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
+      && (
+        (
+          github.event.action == 'labeled' && (
+            github.event.label.name == 'backport:prev-minor'
+            || github.event.label.name == 'backport:prev-major'
+            || github.event.label.name == 'backport:all-open'
+            || github.event.label.name == 'backport:auto-version'
+          )
+        )
+        || (github.event.action == 'closed')
+      )
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+        with:
+          repository: 'elastic/kibana-github-actions'
+          ref: main
+          path: ./actions
+
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
+
+      - name: Run On-Merge
+        uses: ./actions/on-merge
+        with:
+          github_token: ${{secrets.KIBANAMACHINE_TOKEN}}

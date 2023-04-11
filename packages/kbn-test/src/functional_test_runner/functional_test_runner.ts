@@ -54,7 +54,7 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run() {
+  async run(abortSignal?: AbortSignal) {
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
@@ -98,6 +98,10 @@ export class FunctionalTestRunner {
         reporter,
         reporterOptions
       );
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
 
       // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
       // until we can update to a mocha version where this is fixed, we won't actually
@@ -109,9 +113,14 @@ export class FunctionalTestRunner {
       }
 
       await this.lifecycle.beforeTests.trigger(mocha.suite);
-      this.log.info('Starting tests');
 
-      return await runTests(this.lifecycle, mocha);
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
+
+      this.log.info('Starting tests');
+      return await runTests(this.lifecycle, mocha, abortSignal);
     });
   }
 

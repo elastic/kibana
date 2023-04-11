@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.selectIndexPattern('filebeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
       await retry.try(async () => {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = await PageObjects.discover.getHitCountInt();
         expect(hitCount).to.be.greaterThan(0);
       });
     });

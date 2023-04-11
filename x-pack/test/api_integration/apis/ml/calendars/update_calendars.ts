@@ -50,12 +50,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should update calendar by id with new settings', async () => {
-      await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequestBody)
-        .expect(200);
+        .send(updateCalendarRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       await ml.api.waitForCalendarToExist(calendarId);
 
@@ -75,30 +75,30 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not allow to update calendar for user without required permission', async () => {
-      await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequestBody)
-        .expect(403);
+        .send(updateCalendarRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
     });
 
     it('should not allow to update calendar for unauthorized user', async () => {
-      await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequestBody)
-        .expect(403);
+        .send(updateCalendarRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
     });
 
     it('should return error if invalid calendarId', async () => {
-      await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequestBody)
-        .expect(404);
+        .send(updateCalendarRequestBody);
+      ml.api.assertResponseStatusCode(404, status, body);
     });
   });
 };

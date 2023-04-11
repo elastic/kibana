@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('core', () => {
     loadTestFile(require.resolve('./compression'));
     loadTestFile(require.resolve('./translations'));
+    loadTestFile(require.resolve('./capabilities'));
   });
 }

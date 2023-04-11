@@ -9,7 +9,5 @@ List of configuration properties that will be available on the client-side plugi
 <b>Signature:</b>
 
 ```typescript
-exposeToBrowser?: {
-        [P in keyof T]?: boolean;
-    };
+exposeToBrowser?: ExposedToBrowserDescriptor<T>;
 ```

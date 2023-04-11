@@ -5,117 +5,119 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from '../../../common';
 
+type HttpMethod = 'GET' | 'PUT' | 'POST';
 type HttpResponse = Record<string, any> | any[];
 
-const mockResponse = (defaultResponse: HttpResponse, response?: HttpResponse) => [
-  200,
-  { 'Content-Type': 'application/json' },
-  JSON.stringify({ ...defaultResponse, ...response }),
-];
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+}
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadRepositoriesResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { repositories: [] };
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-    server.respondWith(
-      'GET',
-      `${API_BASE_PATH}repositories`,
-      mockResponse(defaultResponse, response)
-    );
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadRepositoryTypesResponse = (response: HttpResponse = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}repository_types`, JSON.stringify(response));
-  };
+  const setLoadRepositoriesResponse = (
+    response: HttpResponse = { repositories: [] },
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}repositories`, response, error);
 
-  const setGetRepositoryResponse = (response?: HttpResponse, delay = 0) => {
-    const defaultResponse = {};
+  const setLoadRepositoryTypesResponse = (response: HttpResponse = [], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}repository_types`, response, error);
 
-    server.respondWith(
-      'GET',
-      /api\/snapshot_restore\/repositories\/.+/,
-      mockResponse(defaultResponse, response)
-    );
-  };
+  const setGetRepositoryResponse = (
+    repositoryName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}repositories/${repositoryName}`, response, error);
 
-  const setSaveRepositoryResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+  const setSaveRepositoryResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${API_BASE_PATH}repositories`, response, error);
 
-    server.respondWith('PUT', `${API_BASE_PATH}repositories`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setLoadSnapshotsResponse = (response: HttpResponse = {}) => {
+  const setLoadSnapshotsResponse = (response?: HttpResponse, error?: ResponseError) => {
     const defaultResponse = { errors: {}, snapshots: [], repositories: [], total: 0 };
-
-    server.respondWith('GET', `${API_BASE_PATH}snapshots`, mockResponse(defaultResponse, response));
+    return mockResponse('GET', `${API_BASE_PATH}snapshots`, response ?? defaultResponse, error);
   };
 
-  const setGetSnapshotResponse = (response?: HttpResponse) => {
-    const defaultResponse = {};
-
-    server.respondWith(
+  const setGetSnapshotResponse = (
+    repositoryName: string,
+    snapshotName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
       'GET',
-      /\/api\/snapshot_restore\/snapshots\/.+/,
-      mockResponse(defaultResponse, response)
+      `${API_BASE_PATH}snapshots/${repositoryName}/${snapshotName}`,
+      response,
+      error
     );
-  };
 
-  const setLoadIndicesResponse = (response: HttpResponse = {}) => {
-    const defaultResponse = { indices: [] };
+  const setLoadIndicesResponse = (
+    response: HttpResponse = { indices: [] },
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}policies/indices`, response, error);
 
-    server.respondWith(
-      'GET',
-      `${API_BASE_PATH}policies/indices`,
-      mockResponse(defaultResponse, response)
+  const setAddPolicyResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}policies`, response, error);
+
+  const setCleanupRepositoryResponse = (
+    repositoryName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse('POST', `${API_BASE_PATH}repositories/${repositoryName}/cleanup`, response, error);
+
+  const setGetPolicyResponse = (
+    policyName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}policy/${policyName}`, response, error);
+
+  const setRestoreSnapshotResponse = (
+    repositoryName: string,
+    snapshotId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'POST',
+      `${API_BASE_PATH}restore/${repositoryName}/${snapshotId}`,
+      response,
+      error
     );
-  };
-
-  const setAddPolicyResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
-
-    server.respondWith('POST', `${API_BASE_PATH}policies`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setCleanupRepositoryResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 503 : 200;
-    const body = error ? JSON.stringify(error) : JSON.stringify(response);
-
-    server.respondWith('POST', `${API_BASE_PATH}repositories/:name/cleanup`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
-
-  const setGetPolicyResponse = (response?: HttpResponse) => {
-    server.respondWith('GET', `${API_BASE_PATH}policy/:name`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setRestoreSnapshotResponse = (response?: HttpResponse) => {
-    server.respondWith('POST', `${API_BASE_PATH}restore/:repository/:snapshot`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
 
   return {
     setLoadRepositoriesResponse,
@@ -133,18 +135,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

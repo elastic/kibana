@@ -173,6 +173,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  kqlQueryLanguage,
   onEventClosed,
   renderCellValue,
   rowRenderers,
@@ -214,8 +215,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: string;
     language: KueryFilterQueryKind;
   } = useMemo(
-    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
-    [kqlQueryExpression]
+    () => ({ query: kqlQueryExpression.trim(), language: kqlQueryLanguage }),
+    [kqlQueryExpression, kqlQueryLanguage]
   );
 
   const combinedQueries = combineQueries({
@@ -261,9 +262,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, sortDirection }) => ({
+  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
     direction: sortDirection as Direction,
+    esTypes: esTypes ?? [],
     type: columnType,
   }));
 
@@ -484,6 +486,11 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline?.expression ?? '';
 
+    const kqlQueryLanguage =
+      isEmpty(dataProviders) && timelineType === 'template'
+        ? 'kuery'
+        : kqlQueryTimeline?.kind ?? 'kuery';
+
     return {
       activeTab,
       columns,
@@ -498,6 +505,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      kqlQueryLanguage,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
       showExpandedDetails:

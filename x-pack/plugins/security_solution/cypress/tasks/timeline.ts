@@ -70,6 +70,9 @@ import {
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   PINNED_TAB_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
+  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
+  KQLORLUCENELANGUAGE_TOGGLE,
+  TIMELINE_QUERY,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -174,6 +177,11 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
   return cy.get(SAVE_FILTER_BTN).click();
 };
 
+export const changeTimelineQueryLanguage = () => {
+  cy.get(TIMELINE_SWITCHQUERYLANGUAGE_BUTTON).click();
+  cy.get(KQLORLUCENELANGUAGE_TOGGLE).click({ force: true });
+};
+
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
@@ -252,6 +260,10 @@ export const createNewTimelineTemplate = () => {
 
 export const executeTimelineKQL = (query: string) => {
   cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+};
+
+export const executeTimelineSearch = (query: string) => {
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
 };
 
 export const expandFirstTimelineEventDetails = () => {

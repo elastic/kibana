@@ -30,15 +30,15 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     datafeedIds: string[]
   ): Promise<Record<string, { stopped: boolean; error?: string }>> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/jobs/stop_datafeeds`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS)
-      .send({ datafeedIds })
-      .expect(expectedStatusCode);
+      .send({ datafeedIds });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

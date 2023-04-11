@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-
 import { docLinksServiceMock } from '../../../../../../../src/core/public/mocks';
-import { setHttpClient } from '../../../app/services/api';
 import { init as initDocumentation } from '../../../app/services/documentation_links';
 import { init as initHttpRequests } from './http_requests';
+import { setHttpClient } from '../../../app/services/api';
 
 export const setupEnvironment = () => {
-  // axios has a similar interface to HttpSetup, but we
-  // flatten out the response.
-  const client = axios.create({ adapter: axiosXhrAdapter });
-  client.interceptors.response.use(({ data }) => data);
-  setHttpClient(client);
+  const httpRequests = initHttpRequests();
+
+  setHttpClient(httpRequests.httpSetup);
   initDocumentation(docLinksServiceMock.createStartContract());
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
+  return httpRequests;
 };

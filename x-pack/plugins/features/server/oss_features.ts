@@ -497,7 +497,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
@@ -533,7 +533,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],

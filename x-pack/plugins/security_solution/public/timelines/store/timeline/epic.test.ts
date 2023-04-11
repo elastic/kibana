@@ -160,7 +160,14 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -301,7 +308,8 @@ describe('Epic Timeline', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],

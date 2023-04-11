@@ -13,7 +13,9 @@ import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/cons
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Node disk space', () => {
+  describe('Node disk space', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/node_disk_space', () => {
       it('returns an array of nodes', async () => {
         const { body: apiRequestResponse } = await supertest

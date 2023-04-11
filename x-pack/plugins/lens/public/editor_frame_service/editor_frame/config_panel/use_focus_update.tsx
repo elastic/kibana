@@ -22,14 +22,12 @@ const getFirstFocusable = (el: HTMLElement | null) => {
   return firstFocusable as unknown as { focus: () => void };
 };
 
-type RefsById = Record<string, HTMLElement | null>;
-
 export function useFocusUpdate(ids: string[]) {
   const [nextFocusedId, setNextFocusedId] = useState<string | null>(null);
-  const [refsById, setRefsById] = useState<RefsById>({});
+  const [refsById, setRefsById] = useState<Map<string, HTMLElement | null>>(new Map());
 
   useEffect(() => {
-    const element = nextFocusedId && refsById[nextFocusedId];
+    const element = nextFocusedId && refsById.get(nextFocusedId);
     if (element) {
       const focusable = getFirstFocusable(element);
       focusable?.focus();
@@ -39,10 +37,9 @@ export function useFocusUpdate(ids: string[]) {
 
   const registerNewRef = useCallback((id, el) => {
     if (el) {
-      setRefsById((r) => ({
-        ...r,
-        [id]: el,
-      }));
+      setRefsById((refs) => {
+        return new Map(refs.set(id, el));
+      });
     }
   }, []);
 
@@ -55,9 +52,8 @@ export function useFocusUpdate(ids: string[]) {
       const removedIndex = ids.findIndex((l) => l === id);
 
       setRefsById((refs) => {
-        const newRefsById = { ...refs };
-        delete newRefsById[id];
-        return newRefsById;
+        refs.delete(id);
+        return new Map(refs);
       });
       const next = removedIndex === 0 ? ids[1] : ids[removedIndex - 1];
       return setNextFocusedId(next);

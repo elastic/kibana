@@ -25,21 +25,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
+  const from = 'Sep 20, 2015 @ 08:00:00.000';
+  const to = 'Sep 21, 2015 @ 08:00:00.000';
+
   const setUpQueriesWithFilters = async () => {
+    await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
-    const from = 'Sep 20, 2015 @ 08:00:00.000';
-    const to = 'Sep 21, 2015 @ 08:00:00.000';
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
+    await PageObjects.discover.selectIndexPattern('logstash-*');
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('4,731');
+    });
+
     await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('3,029');
+    });
+
     await queryBar.setQuery('response:200');
+    await queryBar.submitQuery();
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('2,792');
+    });
   };
 
   describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await kibanaServer.importExport.load(
@@ -51,12 +69,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.common.unsetTime();
@@ -89,6 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('');
 
         await PageObjects.discover.selectIndexPattern('logstash-*');
+        await retry.try(async function tryingForTime() {
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(hitCount).to.be('4,731');
+        });
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
@@ -98,8 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124986
-    describe.skip('saved query management component functionality', function () {
+    describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
@@ -117,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           true,
           true
         );
+
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
         await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
@@ -127,20 +150,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(timePickerValues.start).to.eql(from);
+        expect(timePickerValues.end).to.eql(to);
       });
 
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        await retry.waitFor(
-          'the right hit count',
-          async () => (await PageObjects.discover.getHitCount()) === '2,792'
-        );
+        expect(timePickerValues.start).to.eql(from);
+        expect(timePickerValues.end).to.eql(to);
+        await retry.waitForWithTimeout('the right hit count', 65000, async () => {
+          const hitCount = await PageObjects.discover.getHitCount();
+          log.debug(`Found hit count is ${hitCount}. Looking for 2,792.`);
+          return hitCount === '2,792';
+        });
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
@@ -171,17 +195,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
-        // this check allows this test to run stand alone, also should fix occacional flakiness
-        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
-        if (!savedQueryExists) {
-          await savedQueryManagementComponent.saveNewQuery(
-            'OkResponse',
-            '200 responses for .jpg over 24 hours',
-            true,
-            true
-          );
-          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 

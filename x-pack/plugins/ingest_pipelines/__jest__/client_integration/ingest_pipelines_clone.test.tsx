@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
+import { API_BASE_PATH } from '../../common/constants';
 import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
 
 const { setup } = pageHelpers.pipelinesClone;
@@ -33,17 +34,13 @@ jest.mock('@elastic/eui', () => {
 describe('<PipelinesClone />', () => {
   let testBed: PipelinesCloneTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
-  httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE.name, PIPELINE_TO_CLONE);
+
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
@@ -67,14 +64,15 @@ describe('<PipelinesClone />', () => {
 
       await actions.clickSubmitButton();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
-      const expected = {
-        ...PIPELINE_TO_CLONE,
-        name: `${PIPELINE_TO_CLONE.name}-copy`,
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        API_BASE_PATH,
+        expect.objectContaining({
+          body: JSON.stringify({
+            ...PIPELINE_TO_CLONE,
+            name: `${PIPELINE_TO_CLONE.name}-copy`,
+          }),
+        })
+      );
     });
   });
 });

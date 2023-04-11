@@ -120,18 +120,29 @@ export const importRulesRoute = (
         const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
           getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
 
-        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
-          parsedObjectsWithoutDuplicateErrors,
-          actionsClient
+        let parsedRules;
+        let actionErrors: BulkError[] = [];
+        const actualRules = parsedObjects.filter(
+          (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
         );
 
-        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+        if (actualRules.some((rule) => rule.actions.length > 0)) {
+          const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+            parsedObjectsWithoutDuplicateErrors,
+            actionsClient
+          );
+          parsedRules = uniqueParsedObjects;
+          actionErrors = nonExistentActionErrors;
+        } else {
+          parsedRules = parsedObjectsWithoutDuplicateErrors;
+        }
+        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
         let importRuleResponse: ImportRuleResponse[] = [];
 
         // If we had 100% errors and no successful rule could be imported we still have to output an error.
         // otherwise we would output we are success importing 0 rules.
         if (chunkParseObjects.length === 0) {
-          importRuleResponse = [...nonExistentActionErrors, ...duplicateIdErrors];
+          importRuleResponse = [...actionErrors, ...duplicateIdErrors];
         }
 
         while (chunkParseObjects.length) {
@@ -370,7 +381,7 @@ export const importRulesRoute = (
             }, [])
           );
           importRuleResponse = [
-            ...nonExistentActionErrors,
+            ...actionErrors,
             ...duplicateIdErrors,
             ...importRuleResponse,
             ...newImportRuleResponse,

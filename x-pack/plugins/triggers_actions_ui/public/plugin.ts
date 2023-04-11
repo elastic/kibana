@@ -26,6 +26,7 @@ import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import { ActionsPublicPluginSetup } from '../../actions/public';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
@@ -67,6 +68,7 @@ interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
+  actions: ActionsPublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -164,6 +166,9 @@ export class Plugin
 
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
+      services: {
+        validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      },
     });
 
     return {

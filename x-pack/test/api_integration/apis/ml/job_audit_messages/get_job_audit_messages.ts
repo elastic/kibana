@@ -34,11 +34,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all audit messages', async () => {
       await retry.tryForTime(5000, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/job_audit_messages/messages`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
           2,
@@ -68,11 +68,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch audit messages for specified job', async () => {
       await retry.tryForTime(5000, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
           1,
@@ -90,11 +90,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch audit messages for user with ML read permissions', async () => {
       await retry.tryForTime(5000, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.messages.length).to.eql(
           1,
@@ -111,11 +111,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not allow to fetch audit messages for unauthorized user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

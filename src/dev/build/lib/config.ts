@@ -17,6 +17,8 @@ interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   versionQualifier?: string;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
 }
 
 interface Package {
@@ -29,7 +31,13 @@ interface Package {
 }
 
 export class Config {
-  static async create({ isRelease, targetAllPlatforms, versionQualifier }: Options) {
+  static async create({
+    isRelease,
+    targetAllPlatforms,
+    versionQualifier,
+    dockerContextUseLocalArtifact,
+    dockerCrossCompile,
+  }: Options) {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
@@ -43,6 +51,8 @@ export class Config {
         versionQualifier,
         pkg,
       }),
+      dockerContextUseLocalArtifact,
+      dockerCrossCompile,
       isRelease
     );
   }
@@ -53,6 +63,8 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
+    private readonly dockerContextUseLocalArtifact: boolean | null,
+    private readonly dockerCrossCompile: boolean,
     public readonly isRelease: boolean
   ) {}
 
@@ -68,6 +80,20 @@ export class Config {
    */
   getNodeVersion() {
     return this.nodeVersion;
+  }
+
+  /**
+   * Use a local Kibana distribution when producing a docker context
+   */
+  getDockerContextUseLocalArtifact() {
+    return this.dockerContextUseLocalArtifact;
+  }
+
+  /**
+   * Get docker cross compile
+   */
+  getDockerCrossCompile() {
+    return this.dockerCrossCompile;
   }
 
   /**

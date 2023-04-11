@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, findTestSubject } from '@kbn/test/jest';
 
+import { WithAppDependencies } from '../helpers';
 import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { registerRouter } from '../../../public/application/services/routing';
@@ -20,10 +21,15 @@ const testBedConfig = {
   },
 };
 
-const initTestBed = registerTestBed(RemoteClusterList, testBedConfig);
+export const setup = async (httpSetup, overrides) => {
+  const initTestBed = registerTestBed(
+    // ESlint cannot figure out that the hoc should start with a capital leter.
+    // eslint-disable-next-line
+    WithAppDependencies(RemoteClusterList, httpSetup, overrides),
+    testBedConfig
+  );
+  const testBed = await initTestBed();
 
-export const setup = (props) => {
-  const testBed = initTestBed(props);
   const EUI_TABLE = 'remoteClusterListTable';
 
   // User actions

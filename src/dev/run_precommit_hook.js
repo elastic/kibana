@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import SimpleGit from 'simple-git/promise';
+import SimpleGit from 'simple-git';
 
 import { run, combineErrors, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
 import * as Eslint from './eslint';

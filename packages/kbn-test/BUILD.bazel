@@ -38,6 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+    "//packages/kbn-babel-register",
     "//packages/kbn-dev-utils",
     "//packages/kbn-i18n",
     "//packages/kbn-std",
@@ -76,6 +77,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-babel-register",
   "//packages/kbn-dev-utils",
   "//packages/kbn-i18n",
   "//packages/kbn-utils",
@@ -86,18 +88,20 @@ TYPES_DEPS = [
   "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//form-data",
+  "@npm//globby",
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
   "@npm//xmlbuilder",
+  "@npm//@types/archiver",
   "@npm//@types/chance",
   "@npm//@types/enzyme",
   "@npm//@types/he",
   "@npm//@types/history",
   "@npm//@types/jest",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/mustache",
   "@npm//@types/node",
@@ -107,6 +111,7 @@ TYPES_DEPS = [
   "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
+  "@npm//@types/uuid",
   "@npm//@types/xml2js",
 ]
 

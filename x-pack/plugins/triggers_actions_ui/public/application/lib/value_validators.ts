@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { constant, get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { constant, get } from 'lodash';
 import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {

@@ -358,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        destinationDataViewTimeField: 'order_date',
         discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
@@ -532,6 +533,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the create index pattern switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+
+          if (testData.destinationDataViewTimeField) {
+            await transform.testExecution.logTestStep('sets the data view time field');
+            await transform.wizard.assertDataViewTimeFieldInputExists();
+            await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
+          }
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

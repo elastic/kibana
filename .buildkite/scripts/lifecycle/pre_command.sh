@@ -9,24 +9,19 @@ export BUILDKITE_TOKEN
 
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
-
-# If this yarn install is terminated early, e.g. if the build is cancelled in buildkite,
-# A node module could end up in a bad state that can cause all future builds to fail
-# So, let's cache clean and try again to make sure that's not what caused the error
-install_deps() {
-  yarn install --production --pure-lockfile
-  EXIT=$?
-  if [[ "$EXIT" != "0" ]]; then
-    yarn cache clean
-  fi
-  return $EXIT
-}
-
-retry 5 15 install_deps
-
+retry 5 15 npm ci
 cd ..
 
+echo '--- Agent Debug/SSH Info'
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
+
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  echo ""
+  echo "To SSH into this agent, run:"
+  echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
+  echo ""
+fi
+
 
 echo '--- Job Environment Setup'
 
@@ -53,6 +48,15 @@ echo '--- Job Environment Setup'
   ES_SNAPSHOT_MANIFEST="$ES_SNAPSHOT_MANIFEST" node scripts/functional_tests_server.js
   \`\`\`
 EOF
+  fi
+}
+
+# If a custom manifest isn't specified, then use the default one that we resolve earlier in the build
+{
+  if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
+    ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}
+    export ES_SNAPSHOT_MANIFEST
+    echo "Using default ES Snapshot Manifest: $ES_SNAPSHOT_MANIFEST"
   fi
 }
 
@@ -83,8 +87,19 @@ EOF
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
+
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
+
+
+BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
+export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
@@ -97,9 +112,6 @@ export KIBANA_CI_REPORTER_KEY
   TEST_FAILURES_ES_PASSWORD=$(retry 5 5 vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
   export TEST_FAILURES_ES_PASSWORD
 }
-
-KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
-export KIBANA_BUILDBUDDY_CI_API_KEY
 
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster

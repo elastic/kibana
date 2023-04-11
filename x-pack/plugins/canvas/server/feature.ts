@@ -65,7 +65,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingSetup }): Kiban
                       }),
                       includeIn: 'all',
                       management: { insightsAndAlerting: ['reporting'] },
-                      minimumLicense: 'platinum',
+                      minimumLicense: 'gold',
                       savedObject: { all: [], read: [] },
                       api: ['generateReport'],
                       ui: ['generatePdf'],

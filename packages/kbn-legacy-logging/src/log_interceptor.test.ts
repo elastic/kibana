@@ -150,4 +150,20 @@ describe('server logging LogInterceptor', () => {
       expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
   });
+
+  describe('#downgradeIfCertUntrusted', () => {
+    it('transforms https requests when serving untrusted https errors', () => {
+      const message =
+        '4584650176:error:1408F09C:SSL routines:ssl3_read_bytes:sslv3 alert certificate unknown:../deps/openssl/openssl/ssl/record/ssl3_record.c:322:\n';
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent({ message });
+      assertDowngraded(interceptor.downgradeIfCertUntrusted(event)!);
+    });
+
+    it('ignores non events', () => {
+      const interceptor = new LogInterceptor();
+      const event = stubClientErrorEvent({ message: 'Not error' });
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
+    });
+  });
 });

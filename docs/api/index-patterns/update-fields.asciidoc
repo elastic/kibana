@@ -44,7 +44,7 @@ Set popularity `count` for field `foo`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {
@@ -59,7 +59,7 @@ Update multiple metadata fields in one request:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {
@@ -77,7 +77,7 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
 Use `null` value to delete metadata:
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {

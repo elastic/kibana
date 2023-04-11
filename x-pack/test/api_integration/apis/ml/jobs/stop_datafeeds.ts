@@ -24,12 +24,12 @@ export default ({ getService }: FtrProviderContext) => {
     requestBody: object,
     expectedResponsecode: number
   ): Promise<Record<string, { stopped: boolean; error?: string }>> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post('/api/ml/jobs/stop_datafeeds')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedResponsecode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
     return body;
   }

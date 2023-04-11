@@ -128,6 +128,8 @@ This option can be used to create default rules in this kibana space. This is
 useful for scenarios when you didn't choose to create these default rules initially 
 or anytime later if the rules were accidentally deleted.
 
+Make sure to set <<kibana-monitoring-clusterAlerts-allowedSpaces, `monitoring.cluster_alerts.allowedSpaces`>> for the rules to be created in any non-default space. 
+
 NOTE: Some action types are subscription features, while others are free.
 For a comparison of the Elastic subscription levels, see the alerting section of
 the {subscriptions}[Subscriptions page].

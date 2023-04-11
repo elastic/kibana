@@ -19,9 +19,11 @@ interface RunElasticsearchOptions {
 export async function runElasticsearch({
   config,
   options,
+  onEarlyExit,
 }: {
   config: Config;
   options: RunElasticsearchOptions;
+  onEarlyExit?: (msg: string) => void;
 }) {
   const { log, esFrom } = options;
   const ssl = config.get('esTestCluster.ssl');
@@ -41,6 +43,7 @@ export async function runElasticsearch({
     esArgs,
     esJavaOpts,
     ssl,
+    onEarlyExit,
   });
 
   await cluster.start();

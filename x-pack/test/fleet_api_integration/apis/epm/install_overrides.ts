@@ -113,6 +113,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       }));
 
+      // omit routings
+      delete body.template.settings.index.routing;
+
       expect(body).to.eql({
         template: {
           settings: {

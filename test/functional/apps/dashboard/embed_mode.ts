@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
@@ -28,7 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -81,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Then get rid of the timestamp so the rest of the tests work with state and app switching.
       useTimeStamp = false;
       await browser.get(newUrl.toString(), useTimeStamp);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }

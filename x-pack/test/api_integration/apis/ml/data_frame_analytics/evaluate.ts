@@ -126,12 +126,12 @@ export default ({ getService }: FtrProviderContext) => {
     testJobConfigs.forEach((testConfig) => {
       describe(`EvaluateDataFrameAnalytics ${testConfig.jobType}`, async () => {
         it(`should evaluate ${testConfig.jobType} analytics job`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/_evaluate`)
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.eval)
-            .expect(200);
+            .send(testConfig.eval);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           if (testConfig.jobType === 'classification') {
             const { classification } = body;
@@ -149,12 +149,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it(`should evaluate ${testConfig.jobType} job for the user with only view permission`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/_evaluate`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.eval)
-            .expect(200);
+            .send(testConfig.eval);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           if (testConfig.jobType === 'classification') {
             const { classification } = body;
@@ -172,12 +172,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it(`should not allow unauthorized user to evaluate ${testConfig.jobType} job`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/_evaluate`)
             .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.eval)
-            .expect(403);
+            .send(testConfig.eval);
+          ml.api.assertResponseStatusCode(403, status, body);
 
           expect(body.error).to.eql('Forbidden');
           expect(body.message).to.eql('Forbidden');

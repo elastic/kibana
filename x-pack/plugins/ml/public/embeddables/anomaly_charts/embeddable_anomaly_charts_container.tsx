@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -38,6 +39,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
@@ -48,6 +52,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   refresh,
   onInputChange,
   onOutputChange,
+  onRenderComplete,
+  onError,
+  onLoading,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
@@ -73,6 +80,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     });
   }, []);
 
+  const input = useObservable(embeddableInput);
+
   useEffect(() => {
     onInputChange({
       severityThreshold: severity.val,
@@ -93,7 +102,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     refresh,
     services,
     chartWidth,
-    severity.val
+    severity.val,
+    { onRenderComplete, onError, onLoading }
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -183,6 +193,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
+              timeRange={input?.timeRange}
             />
           )}
         </div>

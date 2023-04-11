@@ -38,6 +38,7 @@ interface Manifest {
   };
   // TODO: make required.
   description?: string;
+  enabledOnAnonymousPages?: boolean;
   serviceFolders: readonly string[];
   requiredPlugins: readonly string[];
   optionalPlugins: readonly string[];
@@ -83,6 +84,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
       serviceFolders: manifest.serviceFolders || [],
       owner: manifest.owner,
       description: manifest.description,
+      enabledOnAnonymousPages: Boolean(manifest.enabledOnAnonymousPages),
       requiredPlugins: isValidDepsDeclaration(manifest.requiredPlugins, 'requiredPlugins'),
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),

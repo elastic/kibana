@@ -30,6 +30,7 @@ Object {
     "barTarget": undefined,
     "maxBars": undefined,
   },
+  "timeRange": undefined,
   "timefilter": Object {
     "calculateBounds": [MockFunction],
     "createFilter": [MockFunction],

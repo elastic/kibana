@@ -33,12 +33,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     user: USER
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedStatusCode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

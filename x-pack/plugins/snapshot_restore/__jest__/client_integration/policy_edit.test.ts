@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { API_BASE_PATH } from '../../common';
 import { PolicyForm } from '../../public/application/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
@@ -22,15 +23,11 @@ const EXPIRE_AFTER_UNIT = TIME_UNITS.MINUTE;
 describe('<PolicyEdit />', () => {
   let testBed: PolicyFormTestBed;
   let testBedPolicyAdd: PolicyFormTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
+      httpRequestsMockHelpers.setGetPolicyResponse(POLICY_EDIT.name, { policy: POLICY_EDIT });
       httpRequestsMockHelpers.setLoadIndicesResponse({
         indices: ['my_index'],
         dataStreams: ['my_data_stream'],
@@ -39,7 +36,7 @@ describe('<PolicyEdit />', () => {
         repositories: [{ name: POLICY_EDIT.repository }],
       });
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
 
       await act(async () => {
         await nextTick();
@@ -55,7 +52,7 @@ describe('<PolicyEdit />', () => {
 
     describe('policy with pre-existing repository that was deleted', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
+        httpRequestsMockHelpers.setGetPolicyResponse(POLICY_EDIT.name, { policy: POLICY_EDIT });
         httpRequestsMockHelpers.setLoadIndicesResponse({
           indices: ['my_index'],
           dataStreams: ['my_data_stream'],
@@ -64,7 +61,7 @@ describe('<PolicyEdit />', () => {
           repositories: [{ name: 'this-is-a-new-repository' }],
         });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           await nextTick();
@@ -97,7 +94,7 @@ describe('<PolicyEdit />', () => {
      * the same form component is indeed shared between the 2 app sections.
      */
     test('should use the same Form component as the "<PolicyAdd />" section', async () => {
-      testBedPolicyAdd = await setupPolicyAdd();
+      testBedPolicyAdd = await setupPolicyAdd(httpSetup);
 
       await act(async () => {
         await nextTick();
@@ -143,27 +140,28 @@ describe('<PolicyEdit />', () => {
           await nextTick();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
         const { name, isManagedPolicy, schedule, repository, retention } = POLICY_EDIT;
 
-        const expected = {
-          name,
-          isManagedPolicy,
-          schedule,
-          repository,
-          config: {
-            ignoreUnavailable: true,
-          },
-          retention: {
-            ...retention,
-            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            expireAfterUnit: EXPIRE_AFTER_UNIT,
-          },
-          snapshotName: editedSnapshotName,
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}policies/${name}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              snapshotName: editedSnapshotName,
+              schedule,
+              repository,
+              config: {
+                ignoreUnavailable: true,
+              },
+              retention: {
+                ...retention,
+                expireAfterUnit: EXPIRE_AFTER_UNIT,
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+              },
+              isManagedPolicy,
+            }),
+          })
+        );
       });
 
       it('should provide a default time unit value for retention', async () => {
@@ -184,25 +182,27 @@ describe('<PolicyEdit />', () => {
           await nextTick();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
         const { name, isManagedPolicy, schedule, repository, retention, config, snapshotName } =
           POLICY_EDIT;
 
-        const expected = {
-          name,
-          isManagedPolicy,
-          schedule,
-          repository,
-          config,
-          snapshotName,
-          retention: {
-            ...retention,
-            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            expireAfterUnit: TIME_UNITS.DAY, // default value
-          },
-        };
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}policies/${name}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name,
+              snapshotName,
+              schedule,
+              repository,
+              config,
+              retention: {
+                ...retention,
+                expireAfterUnit: TIME_UNITS.DAY, // default value
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+              },
+              isManagedPolicy,
+            }),
+          })
+        );
       });
     });
   });

@@ -34,7 +34,7 @@ const getBaseUrl = once(async (kibanaHostname: string) => {
     await axios.request({ url: kibanaHostname, maxRedirects: 0 });
   } catch (e) {
     if (isAxiosError(e)) {
-      const location = e.response?.headers?.location;
+      const location = e.response?.headers?.location ?? '';
       const hasBasePath = RegExp(/^\/\w{3}$/).test(location);
       const basePath = hasBasePath ? location : '';
       return `${kibanaHostname}${basePath}`;

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState } from '../lib';
+import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
@@ -16,10 +16,14 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const bodySchema = schema.object({
-  name: schema.string(),
-  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+export const bodySchema = schema.object({
+  name: schema.string({ validate: validateEmptyStrings }),
+  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
+  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
+    defaultValue: {},
+  }),
 });
 
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({

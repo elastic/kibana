@@ -29,7 +29,7 @@ import { isValidLabel } from '../../../util/custom_url_utils';
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 
 function getLinkToOptions() {
   return [
@@ -59,7 +59,7 @@ interface CustomUrlEditorProps {
   setEditCustomUrl: (url: any) => void;
   savedCustomUrls: UrlConfig[];
   dashboards: any[];
-  indexPatterns: DataView[];
+  indexPatterns: DataViewListItem[];
   queryEntityFieldNames: string[];
 }
 

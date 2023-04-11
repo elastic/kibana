@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
 import { of } from 'rxjs';
-import { ComponentType } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
 
 import {
@@ -17,7 +15,6 @@ import {
   httpServiceMock,
   scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
-import { AppContextProvider } from '../../../public/application/app_context';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
 
@@ -51,12 +48,4 @@ export const mockContextValue: AppDeps = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
-};
-
-export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
-  return (
-    <AppContextProvider value={mockContextValue}>
-      <Component {...props} />
-    </AppContextProvider>
-  );
 };

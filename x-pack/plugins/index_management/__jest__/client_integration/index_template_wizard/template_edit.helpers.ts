@@ -6,6 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { TemplateEdit } from '../../../public/application/sections/template_edit';
 import { WithAppDependencies } from '../helpers';
 
@@ -20,6 +21,11 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateEdit), testBedConfig);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateEdit, httpSetup),
+    testBedConfig
+  );
 
-export const setup: any = formSetup.bind(null, initTestBed);
+  return formSetup(initTestBed);
+};

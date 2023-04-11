@@ -1,0 +1,187 @@
+{
+  "attributes": {
+    "description": "Space 1",
+    "title": "This is the second test space"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "my_dashboard",
+  "migrationVersion": {
+    "dashboard": "7.17.3"
+  },
+  "references": [],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzcyLDFd"
+}
+
+{
+  "attributes": {
+    "title": "Copy to Space index pattern 1 from space_1 space"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "cts_ip_1",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzgzLDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 1 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "cts_vis_1_space_1",
+  "migrationVersion": {
+    "visualization": "7.17.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "Wzc5LDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 2 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "cts_vis_2_space_1",
+  "migrationVersion": {
+    "visualization": "7.17.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzgwLDFd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 3 from space_1 space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "cts_vis_3",
+  "migrationVersion": {
+    "visualization": "7.17.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzgxLDFd"
+}
+
+{
+  "attributes": {
+    "description": "Copy to Space Dashboard from space_1 space",
+    "title": "This is the space_1 test space CTS dashboard"
+  },
+  "coreMigrationVersion": "7.17.7",
+  "id": "cts_dashboard",
+  "migrationVersion": {
+    "dashboard": "7.17.3"
+  },
+  "references": [
+    {
+      "id": "cts_vis_1_space_1",
+      "name": "CTS Vis 1",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_2_space_1",
+      "name": "CTS Vis 2",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_3",
+      "name": "CTS Vis 3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "Wzc4LDFd"
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_2_space_1",
+  "originId": "conflict_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUxMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_1_space_1",
+  "originId": "conflict_1",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzYyLDFd"
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "space_1_only",
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "sharedtype"
+    }
+  ],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OSwxXQ=="
+}

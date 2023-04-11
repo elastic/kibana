@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { isSavedObjectNotFoundError } from '../../../kibana_utils/common';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
@@ -303,7 +304,7 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
-      if (error.constructor.name === 'SavedObjectNotFound') {
+      if (isSavedObjectNotFoundError(error)) {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
         } else {
@@ -324,8 +325,7 @@ export async function resolveSavedObjects(
       }
     } catch (error) {
       const isIndexPatternNotFound =
-        error.constructor.name === 'SavedObjectNotFound' &&
-        error.savedObjectType === 'index-pattern';
+        isSavedObjectNotFoundError(error) && error.savedObjectType === 'index-pattern';
       if (isIndexPatternNotFound && obj.savedSearchId) {
         conflictedSavedObjectsLinkedToSavedSearches.push(obj);
       } else if (isIndexPatternNotFound) {

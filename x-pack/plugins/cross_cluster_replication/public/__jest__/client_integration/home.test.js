@@ -11,18 +11,13 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 const { setup } = pageHelpers.home;
 
 describe('<CrossClusterReplicationHome />', () => {
-  let server;
   let httpRequestsMockHelpers;
   let find;
   let exists;
   let component;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {

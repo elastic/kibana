@@ -5,65 +5,74 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
-import {
-  ComponentTemplateListItem,
-  ComponentTemplateDeserialized,
-  ComponentTemplateSerialized,
-} from '../../../shared_imports';
+import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from './constants';
 
-// Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadComponentTemplatesResponse = (
-    response?: ComponentTemplateListItem[],
-    error?: any
-  ) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+type HttpResponse = Record<string, any> | any[];
+type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 
-    server.respondWith('GET', `${API_BASE_PATH}/component_templates`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: Record<string, any>;
+}
+
+// Register helpers to mock HTTP Requests
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'DELETE', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
+
+  const mockMethodImplementation = (method: HttpMethod, path: string) => {
+    return mockResponses.get(method)?.get(path) ?? Promise.resolve({});
   };
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
+  };
+
+  const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
   const setLoadComponentTemplateResponse = (
-    response?: ComponentTemplateDeserialized,
-    error?: any
-  ) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
 
-    server.respondWith('GET', `${API_BASE_PATH}/component_templates/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setDeleteComponentTemplateResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse('DELETE', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
 
-  const setDeleteComponentTemplateResponse = (response?: object) => {
-    server.respondWith('DELETE', `${API_BASE_PATH}/component_templates/:name`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
-
-  const setCreateComponentTemplateResponse = (
-    response?: ComponentTemplateSerialized,
-    error?: any
-  ) => {
-    const status = error ? error.body.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
-
-    server.respondWith('POST', `${API_BASE_PATH}/component_templates`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
+  const setCreateComponentTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/component_templates`, response, error);
 
   return {
     setLoadComponentTemplatesResponse,
@@ -74,18 +83,11 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultMockedResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

@@ -15,5 +15,5 @@ export interface IRenderOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [includeUserSettings?](./kibana-plugin-core-server.irenderoptions.includeusersettings.md) | boolean | <i>(Optional)</i> Set whether to output user settings in the page metadata. <code>true</code> by default. |
+|  [isAnonymousPage?](./kibana-plugin-core-server.irenderoptions.isanonymouspage.md) | boolean | <i>(Optional)</i> Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata. <code>false</code> by default. |
 

@@ -9,6 +9,11 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
+import Uuid from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client } from '@elastic/elasticsearch';
@@ -53,6 +58,7 @@ export interface ICluster {
   cleanup: () => Promise<void>;
   getClient: () => KibanaClient;
   getHostUrls: () => string[];
+  captureDebugFiles: () => Promise<void>;
 }
 
 export type EsTestCluster<Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions> =
@@ -142,6 +148,11 @@ export interface CreateTestEsClusterOptions {
    */
   port?: number;
   ssl?: boolean;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -161,6 +172,7 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -254,6 +266,7 @@ export function createTestEsCluster<
             // right away, or ES will complain as the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
           });
         });
       }
@@ -275,6 +288,51 @@ export function createTestEsCluster<
       await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
 
       log.info('[es] stopped');
+
+      await this.captureDebugFiles();
+    }
+
+    async captureDebugFiles() {
+      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+        cwd: config.installPath,
+        absolute: true,
+      });
+
+      if (!debugFiles.length) {
+        log.info('[es] no debug files found, assuming es did not write any');
+        return;
+      }
+
+      const uuid = Uuid.v4();
+      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      log.error(`[es] debug files found, archiving install to ${debugPath}`);
+      const archiver = createArchiver('tar', { gzip: true });
+      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+
+      const archiveDirname = `es_debug_${uuid}`;
+      for (const name of Fs.readdirSync(config.installPath)) {
+        if (name === 'modules' || name === 'jdk') {
+          // drop these large and unnecessary directories
+          continue;
+        }
+
+        const src = Path.resolve(config.installPath, name);
+        const dest = Path.join(archiveDirname, name);
+        const stat = Fs.statSync(src);
+        if (stat.isDirectory()) {
+          archiver.directory(src, dest);
+        } else {
+          archiver.file(src, { name: dest });
+        }
+      }
+
+      archiver.finalize();
+      await promise;
+
+      // cleanup the captured debug files
+      for (const path of debugFiles) {
+        Fs.rmSync(path, { force: true });
+      }
     }
 
     async cleanup() {

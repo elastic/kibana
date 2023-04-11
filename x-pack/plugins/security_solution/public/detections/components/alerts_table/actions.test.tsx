@@ -106,7 +106,8 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
-                type: 'number',
+                type: 'date',
+                esTypes: ['date'],
                 initialWidth: 190,
               },
               {

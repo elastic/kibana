@@ -168,5 +168,8 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     outcome$,
     outcomePromise,
     stop,
+    stopWasCalled() {
+      return stopCalled;
+    },
   };
 }

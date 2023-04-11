@@ -373,7 +373,7 @@ export async function installTemplate({
   const defaultSettings = buildDefaultSettings({
     templateName,
     packageName,
-    fields,
+    fields: validFields,
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
   });

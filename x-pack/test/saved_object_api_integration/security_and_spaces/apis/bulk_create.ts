@@ -96,12 +96,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
+export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    bulkCreateTestSuiteFactory(esArchiver, supertest);
+    bulkCreateTestSuiteFactory(context, false);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,

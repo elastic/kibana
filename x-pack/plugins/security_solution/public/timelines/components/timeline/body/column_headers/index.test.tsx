@@ -46,16 +46,16 @@ describe('ColumnHeaders', () => {
     ...x,
     headerCellRender: HeaderActions,
   }));
+  const sort: Sort[] = [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: Direction.desc,
+    },
+  ];
 
   describe('rendering', () => {
-    const sort: Sort[] = [
-      {
-        columnId: '@timestamp',
-        columnType: 'number',
-        sortDirection: Direction.desc,
-      },
-    ];
-
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
@@ -131,12 +131,14 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
-        columnType: 'number',
+        columnType: 'date',
+        esTypes: ['date'],
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
-        columnType: 'text',
+        columnType: 'string',
+        esTypes: [],
         sortDirection: Direction.asc,
       },
     ];
@@ -151,12 +153,14 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
-          columnType: 'number',
+          columnType: 'date',
+          esTypes: ['date'],
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
-          columnType: 'text',
+          columnType: 'string',
+          esTypes: [],
           sortDirection: Direction.asc,
         },
       ];
@@ -186,21 +190,29 @@ describe('ColumnHeaders', () => {
         .find('[data-test-subj="header-event.category"] [data-test-subj="header-sort-button"]')
         .first()
         .simulate('click');
+
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.updateSort({
           id: timelineId,
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
-              columnType: 'text',
+              columnType: 'string',
+              esTypes: [],
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'event.category',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );
@@ -236,10 +248,16 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
+            {
+              columnId: 'host.name',
+              columnType: 'string',
+              esTypes: [],
+              sortDirection: Direction.asc,
+            },
           ],
         })
       );
@@ -269,16 +287,23 @@ describe('ColumnHeaders', () => {
         .find('[data-test-subj="header-host.name"] [data-test-subj="header-sort-button"]')
         .first()
         .simulate('click');
+
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.updateSort({
           id: timelineId,
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'host.name',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );

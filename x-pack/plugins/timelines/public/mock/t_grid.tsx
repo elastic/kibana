@@ -120,6 +120,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
     {
       columnId: '@timestamp',
       columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],

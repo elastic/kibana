@@ -40,9 +40,14 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
   useEffect(() => {
-    filterCheck(() =>
-      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }))
-    );
+    if (monitorId) {
+      // we don't need filter check on monitor details page, where we have monitorId defined
+      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
+    } else {
+      filterCheck(() =>
+        dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }))
+      );
+    }
   }, [filterCheck, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
   return (
     <PingHistogramComponent
