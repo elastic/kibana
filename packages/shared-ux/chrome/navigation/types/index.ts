@@ -7,17 +7,17 @@
  */
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { GetLocatorFn, ILocatorDefinition, LocatorNavigationFn, RecentItem } from './internal';
+import { Observable } from 'rxjs';
+import { GetLocatorFn, ILocatorDefinition, ILocatorPublic, RecentItem } from './internal';
 
 /**
  * A list of services that are consumed by this component.
  * @public
  */
 export interface NavigationServices {
-  locatorNavigation: LocatorNavigationFn;
-  activeNavItemId$: BehaviorSubject<string>;
+  getLocator: (id: string) => ILocatorPublic | undefined;
   navIsOpen: boolean;
+  activeNavItemId: string | undefined;
   recentItems: RecentItem[];
 }
 
@@ -35,6 +35,7 @@ export interface NavigationKibanaDependencies {
   core: {
     chrome: {
       getProjectNavIsOpen$: () => Observable<boolean>;
+      getActiveNavItemId$: () => Observable<string | undefined>;
       recentlyAccessed: {
         get$: () => Observable<RecentItem[]>;
       };

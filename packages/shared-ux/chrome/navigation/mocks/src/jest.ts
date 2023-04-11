@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { getLocatorNavigation } from '../../src/services';
 import { NavigationServices } from '../../types';
 
 export const getServicesMock = (): NavigationServices => {
-  const locatorNavigation = getLocatorNavigation(jest.fn(), jest.fn());
+  const getLocator = jest.fn();
   const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
 
   return {
-    locatorNavigation,
-    activeNavItemId$: new BehaviorSubject('test.hello.lamp'),
+    getLocator,
+    activeNavItemId: 'test.hello.lamp',
     navIsOpen: true,
     recentItems,
   };

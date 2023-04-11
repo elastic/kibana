@@ -16,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { NavigationProps } from '../../types';
 import { NavigationModel } from '../model';
 import { useNavigation } from '../services';
@@ -29,8 +28,7 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
-  const { locatorNavigation, recentItems, navIsOpen, activeNavItemId$ } = useNavigation();
-  const activeNavItemId = useObservable(activeNavItemId$, props.activeNavItemId);
+  const { recentItems, navIsOpen, activeNavItemId, getLocator } = useNavigation();
 
   const { euiTheme } = useEuiTheme();
 
@@ -53,8 +51,8 @@ export const Navigation = (props: NavigationProps) => {
   }
 
   const nav = new NavigationModel(
-    locatorNavigation,
-    activeNavItemId ?? '',
+    getLocator,
+    activeNavItemId,
     euiSideNavRecentItems,
     props.platformConfig,
     props.solutions

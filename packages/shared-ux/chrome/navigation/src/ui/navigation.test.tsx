@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { BehaviorSubject } from 'rxjs';
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
@@ -16,7 +15,7 @@ import { Navigation } from './navigation';
 describe('<Navigation />', () => {
   test('renders with minimal props', () => {
     const div = document.createElement('div');
-    const { locatorNavigation } = getServicesMock();
+    const { getLocator } = getServicesMock();
 
     const homeHref = '#';
     const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
@@ -28,14 +27,14 @@ describe('<Navigation />', () => {
         icon: 'gear',
       },
     ];
-    const activeNavItemId$ = new BehaviorSubject<string>('hello');
+    const activeNavItemId = 'hello.test.1';
 
     render(
       <NavigationProvider
-        activeNavItemId$={activeNavItemId$}
+        getLocator={getLocator}
+        activeNavItemId={activeNavItemId}
         navIsOpen={true}
         recentItems={recentItems}
-        locatorNavigation={locatorNavigation}
       >
         <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
       </NavigationProvider>,
