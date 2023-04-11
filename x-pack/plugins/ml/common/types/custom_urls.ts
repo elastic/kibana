@@ -33,9 +33,7 @@ export interface CustomUrlAnomalyRecordDoc extends AnomalyRecordDoc {
 
 export function isKibanaUrlConfigWithTimeRange(arg: unknown): arg is KibanaUrlConfigWithTimeRange {
   return (
-    isPopulatedObject(arg) &&
-    arg.url_name !== undefined &&
-    arg.url_value !== undefined &&
+    isPopulatedObject(arg, ['url_name', 'url_value', 'time_range']) &&
     typeof arg.time_range === 'string'
   );
 }

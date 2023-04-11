@@ -67,6 +67,33 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error={Array []}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="auto"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
         hasChildLabel={true}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -194,6 +221,33 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
+        error={Array []}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="1h"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
         hasChildLabel={true}
         hasEmptyLabelSpace={true}
         labelType="label"
@@ -312,6 +366,33 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           onFocus={[Function]}
           readOnly={true}
           value="http://airlinecodes.info/airline-code-$airline$"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        error={Array []}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          isInvalid={false}
+          onChange={[Function]}
+          placeholder="auto"
+          value="auto"
         />
       </EuiFormRow>
     </EuiFlexItem>

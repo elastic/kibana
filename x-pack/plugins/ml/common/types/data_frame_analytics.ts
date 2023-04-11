@@ -76,12 +76,7 @@ export interface UpdateDataFrameAnalyticsConfig {
 }
 
 export function isDataFrameAnalyticsConfigs(arg: unknown): arg is DataFrameAnalyticsConfig {
-  return (
-    isPopulatedObject(arg) &&
-    arg.dest !== undefined &&
-    arg.analysis !== undefined &&
-    typeof arg.id === 'string'
-  );
+  return isPopulatedObject(arg, ['dest', 'analysis', 'id']) && typeof arg.id === 'string';
 }
 
 export type DataFrameAnalysisConfigType =
