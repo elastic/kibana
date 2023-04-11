@@ -87,6 +87,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
+  const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
   const [overrides, setOverrides] = useState<
     ApiExplainLogRateSpikes['body']['overrides'] | undefined
   >(undefined);
@@ -134,8 +135,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   );
 
   const { significantTerms } = data;
-  const uniqueFieldNames = useMemo(
-    () => uniq(significantTerms.map((d) => d.fieldName)).sort(),
+  useEffect(
+    () => setUniqueFieldNames(uniq(significantTerms.map((d) => d.fieldName)).sort()),
     [significantTerms]
   );
 
@@ -163,6 +164,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
+      setUniqueFieldNames([]);
     }
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
