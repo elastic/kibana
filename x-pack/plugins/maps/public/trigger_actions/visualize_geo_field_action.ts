@@ -15,10 +15,7 @@ import {
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';
 
-import {
-  getVisualizeCapabilities,
-  getCore,
-} from '../kibana_services';
+import { getVisualizeCapabilities, getCore } from '../kibana_services';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,

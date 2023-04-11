@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import {
-  getIndexPatternService,
-  getData,
-  getShareService,
-} from '../kibana_services';
+import { getIndexPatternService, getData, getShareService } from '../kibana_services';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
