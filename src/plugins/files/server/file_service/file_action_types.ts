@@ -105,5 +105,5 @@ export interface FindFileArgs extends Pagination {
   /**
    * File metadata values. These values are governed by the consumer.
    */
-  meta?: Record<string, string>;
+  meta?: Record<string, string | string[]>;
 }
