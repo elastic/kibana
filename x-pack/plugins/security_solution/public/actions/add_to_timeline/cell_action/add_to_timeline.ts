@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { addFilterIn, createCellActionFactory } from '@kbn/cell-actions';
+import { createCellActionFactory } from '@kbn/cell-actions';
 import type { CellActionTemplate } from '@kbn/cell-actions';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import type { CellActionField } from '@kbn/cell-actions/src/types';
+import { timelineActions } from '../../../timelines/store/timeline';
+import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+import { getDataProviders } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import type { SecurityAppStore } from '../../../common/store';
@@ -24,6 +27,45 @@ import { createDataProviders, isValidDataProviderField } from '../data_provider'
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+
+const handleTimelineFilters = (
+  filters: Filter[],
+  field: CellActionField,
+  store: SecurityAppStore
+) => {
+  const severityValue = null;
+  const dataProviders = getDataProviders([
+    [{ value: field.value ?? '*', field: field.name }, ...filters],
+  ]);
+
+  // clear timeline to accurately get count
+  store.dispatch(
+    timelineActions.createTimeline({
+      ...timelineDefaults,
+      id: TimelineId.active,
+    })
+  );
+
+  let messageValue;
+  if (
+    field.value != null &&
+    (severityValue === 'critical' ||
+      severityValue === 'medium' ||
+      severityValue === 'low' ||
+      severityValue === 'high' ||
+      severityValue === '*')
+  ) {
+    messageValue = SEVERITY_ALERTS(
+      Array.isArray(field.value) ? field.value.join(', ') : field.value,
+      severityValue
+    );
+  }
+  return {
+    messageValue,
+    dataProviders,
+  };
+};
 
 export const createAddToTimelineCellActionFactory = createCellActionFactory(
   ({
@@ -43,64 +85,29 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       isCompatible: async ({ field }) =>
         fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
       execute: async ({ field, metadata }) => {
-        const dataProviders =
-          createDataProviders({
-            contextId: TimelineId.active,
-            fieldType: field.type,
-            values: field.value,
-            field: field.name,
-            negate: metadata?.negateFilters === true,
-          }) ?? [];
+        let messageValue = '';
+        let dataProviders = [];
+        if (metadata && metadata.timelineFilter != null) {
+          // @ts-expect-error
+          const filters = handleTimelineFilters(metadata.timelineFilter, field, store);
+          messageValue = filters.messageValue;
+          dataProviders = filters.dataProviders;
+        } else {
+          dataProviders =
+            createDataProviders({
+              contextId: TimelineId.active,
+              fieldType: field.type,
+              values: field.value,
+              field: field.name,
+              negate: metadata?.negateFilters === true,
+            }) ?? [];
+          if (field.value != null) {
+            messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+          }
+        }
 
         if (dataProviders.length > 0) {
-          let messageValue = '';
-          if (metadata && metadata.timelineFilter != null) {
-            // @ts-expect-error
-            const fieldName: string = metadata?.timelineFilter?.name;
-            // @ts-expect-error
-            const value: string[] | string | null | undefined = metadata?.timelineFilter?.value;
-            const severityDataProviders =
-              createDataProviders({
-                contextId: TimelineId.active,
-                fieldType: 'keyword',
-                values: value,
-                field: fieldName,
-                sourceParamType: 'severity',
-              }) ?? [];
-            severityDataProviders.forEach((p) => dataProviders.push(p));
-            store.dispatch(
-              addProvider({ id: TimelineId.active, providers: severityDataProviders })
-            );
-            const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-            const timelineFilterManager = getTimelineById(
-              store.getState(),
-              TimelineId.active
-            )?.filterManager;
-            addFilterIn({
-              filterManager: timelineFilterManager,
-              value: field.value,
-              fieldName: field.name,
-            });
-            if (
-              field.value != null &&
-              (value === 'critical' ||
-                value === 'medium' ||
-                value === 'low' ||
-                value === 'high' ||
-                value === '*')
-            ) {
-              messageValue = SEVERITY_ALERTS(
-                Array.isArray(field.value) ? field.value.join(', ') : field.value,
-                value
-              );
-            }
-          } else {
-            store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
-            if (field.value != null) {
-              messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
-            }
-          }
-
+          store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
           });

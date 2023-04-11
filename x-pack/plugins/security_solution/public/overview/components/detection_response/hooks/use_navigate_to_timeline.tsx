@@ -109,3 +109,29 @@ export const useNavigateToTimeline = () => {
     openTimelineWithFilters,
   };
 };
+
+export const getDataProviders = (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+  const dataProviders = [];
+
+  for (const orFilterGroup of filters) {
+    const mainFilter = orFilterGroup[0];
+
+    if (mainFilter) {
+      const dataProvider = getDataProvider(
+        mainFilter.field,
+        uuidv4(),
+        mainFilter.value,
+        mainFilter.operator
+      );
+
+      for (const filter of orFilterGroup.slice(1)) {
+        dataProvider.and.push(
+          getDataProviderAnd(filter.field, uuidv4(), filter.value, filter.operator)
+        );
+      }
+      dataProviders.push(dataProvider);
+    }
+  }
+
+  return dataProviders;
+};

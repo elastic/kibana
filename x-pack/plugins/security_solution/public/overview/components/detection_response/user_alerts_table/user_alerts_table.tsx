@@ -11,6 +11,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
   EuiLink,
   EuiPanel,
@@ -21,6 +23,7 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { css } from '@emotion/react';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -145,27 +148,50 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
-      <SecurityCellActions
-        field={{
-          name: 'user.name',
-          value: userName,
-          type: 'keyword',
-          aggregatable: true,
-        }}
-        mode={CellActionsMode.HOVER}
-        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-        metadata={{
-          timelineFilter: { name: 'kibana.alert.severity', value: '*' },
-        }}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xs"
+        alignItems="center"
+        css={css`
+          .inlineActions {
+            opacity: 0;
+          }
+
+          .inlineActions-popoverOpen {
+            opacity: 1;
+          }
+
+          &:hover {
+            .inlineActions {
+              opacity: 1;
+            }
+          }
+        `}
       >
-        <EuiLink
-          data-test-subj="userSeverityAlertsTable-totalAlertsLink"
-          disabled={totalAlerts === 0}
-          onClick={() => handleClick({ userName })}
-        >
-          <FormattedCount count={totalAlerts} />
-        </EuiLink>
-      </SecurityCellActions>
+        <EuiFlexItem grow={false}>
+          <SecurityCellActions
+            field={{
+              name: 'user.name',
+              value: userName,
+              type: 'keyword',
+              aggregatable: true,
+            }}
+            mode={CellActionsMode.INLINE}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              timelineFilter: [{ field: 'kibana.alert.severity', value: '*' }],
+            }}
+          >
+            <EuiLink
+              data-test-subj="userSeverityAlertsTable-totalAlertsLink"
+              disabled={totalAlerts === 0}
+              onClick={() => handleClick({ userName })}
+            >
+              <FormattedCount count={totalAlerts} />
+            </EuiLink>
+          </SecurityCellActions>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
   },
   {
@@ -173,27 +199,50 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <SecurityCellActions
-          field={{
-            name: 'user.name',
-            value: userName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            timelineFilter: { name: 'kibana.alert.severity', value: 'critical' },
-          }}
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="xs"
+          alignItems="center"
+          css={css`
+            .inlineActions {
+              opacity: 0;
+            }
+
+            .inlineActions-popoverOpen {
+              opacity: 1;
+            }
+
+            &:hover {
+              .inlineActions {
+                opacity: 1;
+              }
+            }
+          `}
         >
-          <EuiLink
-            data-test-subj="userSeverityAlertsTable-criticalLink"
-            disabled={count === 0}
-            onClick={() => handleClick({ userName, severity: 'critical' })}
-          >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+          <EuiFlexItem grow={false}>
+            <SecurityCellActions
+              field={{
+                name: 'user.name',
+                value: userName,
+                type: 'keyword',
+                aggregatable: true,
+              }}
+              mode={CellActionsMode.INLINE}
+              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+              metadata={{
+                timelineFilter: [{ name: 'kibana.alert.severity', value: 'critical' }],
+              }}
+            >
+              <EuiLink
+                data-test-subj="userSeverityAlertsTable-criticalLink"
+                disabled={count === 0}
+                onClick={() => handleClick({ userName, severity: 'critical' })}
+              >
+                <FormattedCount count={count} />
+              </EuiLink>
+            </SecurityCellActions>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHealth>
     ),
   },
@@ -202,26 +251,49 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <SecurityCellActions
-          field={{
-            name: 'user.name',
-            value: userName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            timelineFilter: { name: 'kibana.alert.severity', value: 'high' },
-          }}
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="xs"
+          alignItems="center"
+          css={css`
+            .inlineActions {
+              opacity: 0;
+            }
+
+            .inlineActions-popoverOpen {
+              opacity: 1;
+            }
+
+            &:hover {
+              .inlineActions {
+                opacity: 1;
+              }
+            }
+          `}
         >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ userName, severity: 'high' })}
-          >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+          <EuiFlexItem grow={false}>
+            <SecurityCellActions
+              field={{
+                name: 'user.name',
+                value: userName,
+                type: 'keyword',
+                aggregatable: true,
+              }}
+              mode={CellActionsMode.INLINE}
+              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+              metadata={{
+                timelineFilter: [{ name: 'kibana.alert.severity', value: 'high' }],
+              }}
+            >
+              <EuiLink
+                disabled={count === 0}
+                onClick={() => handleClick({ userName, severity: 'high' })}
+              >
+                <FormattedCount count={count} />
+              </EuiLink>
+            </SecurityCellActions>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHealth>
     ),
   },
@@ -230,26 +302,49 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <SecurityCellActions
-          field={{
-            name: 'user.name',
-            value: userName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            timelineFilter: { name: 'kibana.alert.severity', value: 'medium' },
-          }}
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="xs"
+          alignItems="center"
+          css={css`
+            .inlineActions {
+              opacity: 0;
+            }
+
+            .inlineActions-popoverOpen {
+              opacity: 1;
+            }
+
+            &:hover {
+              .inlineActions {
+                opacity: 1;
+              }
+            }
+          `}
         >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ userName, severity: 'medium' })}
-          >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+          <EuiFlexItem grow={false}>
+            <SecurityCellActions
+              field={{
+                name: 'user.name',
+                value: userName,
+                type: 'keyword',
+                aggregatable: true,
+              }}
+              mode={CellActionsMode.INLINE}
+              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+              metadata={{
+                timelineFilter: [{ name: 'kibana.alert.severity', value: 'medium' }],
+              }}
+            >
+              <EuiLink
+                disabled={count === 0}
+                onClick={() => handleClick({ userName, severity: 'medium' })}
+              >
+                <FormattedCount count={count} />
+              </EuiLink>
+            </SecurityCellActions>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHealth>
     ),
   },
@@ -258,26 +353,49 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <SecurityCellActions
-          field={{
-            name: 'user.name',
-            value: userName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            timelineFilter: { name: 'kibana.alert.severity', value: 'low' },
-          }}
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="xs"
+          alignItems="center"
+          css={css`
+            .inlineActions {
+              opacity: 0;
+            }
+
+            .inlineActions-popoverOpen {
+              opacity: 1;
+            }
+
+            &:hover {
+              .inlineActions {
+                opacity: 1;
+              }
+            }
+          `}
         >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ userName, severity: 'low' })}
-          >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+          <EuiFlexItem grow={false}>
+            <SecurityCellActions
+              field={{
+                name: 'user.name',
+                value: userName,
+                type: 'keyword',
+                aggregatable: true,
+              }}
+              mode={CellActionsMode.INLINE}
+              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+              metadata={{
+                timelineFilter: [{ name: 'kibana.alert.severity', value: 'low' }],
+              }}
+            >
+              <EuiLink
+                disabled={count === 0}
+                onClick={() => handleClick({ userName, severity: 'low' })}
+              >
+                <FormattedCount count={count} />
+              </EuiLink>
+            </SecurityCellActions>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHealth>
     ),
   },
