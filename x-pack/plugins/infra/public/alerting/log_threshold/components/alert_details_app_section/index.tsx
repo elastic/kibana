@@ -26,12 +26,6 @@ import { Threshold } from '../../../common/components/threshold';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 
-const LOG_FOR = i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
-  defaultMessage: 'Logs for ',
-});
-const LAST = i18n.translate('xpack.infra.logs.alertDetails.chart.last', {
-  defaultMessage: 'Last ',
-});
 const AlertDetailsAppSection = ({
   rule,
   alert,
@@ -108,14 +102,25 @@ const AlertDetailsAppSection = ({
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h2>
-                      {LOG_FOR} {chartCriterion.field} {chartCriterion.comparator}{' '}
-                      {chartCriterion.value}
+                      {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
+                        defaultMessage: 'Logs for {field} {comparator} {value}',
+                        values: {
+                          field: chartCriterion.field,
+                          comparator: chartCriterion.comparator,
+                          value: chartCriterion.value,
+                        },
+                      })}
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="subdued">
-                    {LAST} {moment(rangeFrom).locale(i18n.getLocale()).fromNow(true)}
+                    {i18n.translate('xpack.infra.logs.alertDetails.chart.last', {
+                      defaultMessage: 'Last {time}',
+                      values: {
+                        time: moment(rangeFrom).locale(i18n.getLocale()).fromNow(true),
+                      },
+                    })}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
