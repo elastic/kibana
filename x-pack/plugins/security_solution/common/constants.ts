@@ -494,6 +494,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
     hideActionBar: true,
+    persist: true,
   },
   {
     title: 'User',

@@ -236,11 +236,11 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     if (overridingControls && !urlDataApplied.current) {
       if (localInitialControls.length > 0) {
         localInitialControls.forEach((persistControl) => {
-          const doesPersistControlAlreadyExist = overridingControls?.findIndex(
+          const doesPersistControlAlreadyExist = overridingControls?.some(
             (control) => control.fieldName === persistControl.fieldName
           );
 
-          if (doesPersistControlAlreadyExist === -1) {
+          if (!doesPersistControlAlreadyExist) {
             resultControls.push(persistControl);
           }
         });
@@ -327,20 +327,25 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const upsertPersistableControls = useCallback(() => {
     const persistableControls = initialControls.filter((control) => control.persist === true);
     if (persistableControls.length > 0) {
-      const currentPanels = controlGroup?.getInput().panels;
-      const orderedPanels = (
-        Object.values(currentPanels ?? []) as Array<ControlPanelState<OptionsListEmbeddableInput>>
-      ).sort((a, b) => a.order - b.order);
+      const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
+        ControlPanelState<OptionsListEmbeddableInput>
+      >;
+      const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
+      let filterControlsDeleted = false;
       persistableControls.forEach((control) => {
-        const controlExists = (
-          Object.values(currentPanels ?? []) as Array<ControlPanelState<OptionsListEmbeddableInput>>
-        ).findIndex((currControl) => control.fieldName === currControl.explicitInput.fieldName);
-        if (controlExists === -1) {
+        const controlExists = currentPanels.some(
+          (currControl) => control.fieldName === currControl.explicitInput.fieldName
+        );
+        if (!controlExists) {
           // delete current controls
-          controlGroup?.updateInput({ panels: {} });
+          if (!filterControlsDeleted) {
+            controlGroup?.updateInput({ panels: {} });
+            filterControlsDeleted = true;
+          }
 
+          // add persitable controls
           controlGroup?.addOptionsListControl({
-            title: initialControls[0].title,
+            title: control.title,
             hideExclude: true,
             hideSort: true,
             hidePanelTitles: true,
@@ -348,20 +353,20 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             // option List controls will handle an invalid dataview
             // & display an appropriate message
             dataViewId: dataViewId ?? '',
-            selectedOptions: initialControls[0].selectedOptions,
-            ...initialControls[0],
-          });
-
-          orderedPanels.forEach((panel) => {
-            if (panel.explicitInput.fieldName)
-              controlGroup?.addOptionsListControl({
-                selectedOptions: [],
-                fieldName: panel.explicitInput.fieldName,
-                dataViewId: dataViewId ?? '',
-                ...panel.explicitInput,
-              });
+            selectedOptions: control.selectedOptions,
+            ...control,
           });
         }
+      });
+
+      orderedPanels.forEach((panel) => {
+        if (panel.explicitInput.fieldName)
+          controlGroup?.addOptionsListControl({
+            selectedOptions: [],
+            fieldName: panel.explicitInput.fieldName,
+            dataViewId: dataViewId ?? '',
+            ...panel.explicitInput,
+          });
       });
     }
   }, [controlGroup, dataViewId, initialControls]);
