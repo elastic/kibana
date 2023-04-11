@@ -83,11 +83,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
+  }, [chrome, docLinks]);
+  
+  useEffect(() => {
     return () => {
       // clear session when navigating away from discover main
       data.search.session.clear();
     };
-  }, [data.search.session, chrome, docLinks]);
+  }, [data.search.session]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
