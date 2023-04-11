@@ -20,51 +20,46 @@ export interface VulnerabilityRecord {
     sequence: number;
     outcome: string;
   };
-  finding?: {
-    target: string;
-    type: string;
-    class: string;
-    vulnerability: {
-      score: {
-        version: string;
-        impact: number;
-        base: number;
+  vulnerability: {
+    score: {
+      version: string;
+      impact: number;
+      base: number;
+    };
+    cwe: string[];
+    id: string;
+    title: string;
+    reference: string;
+    severity: string;
+    cvss: {
+      nvd: {
+        V3Vector: string;
+        V3Score: number;
       };
-      cwe: string[];
-      id: string;
-      title: string;
-      reference: string;
-      severity: string;
-      cvss: {
-        nvd: {
-          V3Vector: string;
-          V3Score: number;
-        };
-        redhat?: {
-          V3Vector: string;
-          V3Score: number;
-        };
-        ghsa?: {
-          V3Vector: string;
-          V3Score: number;
-        };
+      redhat?: {
+        V3Vector: string;
+        V3Score: number;
       };
-      data_source: {
-        ID: string;
-        Name: string;
-        URL: string;
+      ghsa?: {
+        V3Vector: string;
+        V3Score: number;
       };
-      enumeration: string;
-      description: string;
-      classification: string;
-      scanner: {
-        vendor: string;
-      };
-      package: {
-        version: string;
-        name: string;
-        fixed_version: string;
-      };
+    };
+    data_source: {
+      ID: string;
+      Name: string;
+      URL: string;
+    };
+    enumeration: string;
+    description: string;
+    classification: string;
+    scanner: {
+      vendor: string;
+    };
+    package: {
+      version: string;
+      name: string;
+      fixed_version: string;
     };
   };
   ecs: {

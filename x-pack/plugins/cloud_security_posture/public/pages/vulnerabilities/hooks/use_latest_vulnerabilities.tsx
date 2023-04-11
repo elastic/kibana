@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<any, FindingsAggs>>;
 
@@ -19,10 +20,10 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query, sort }: any) => ({
+export const getFindingsQuery = ({ query }: any) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
   query,
-  size: 500,
+  size: MAX_FINDINGS_TO_LOAD,
 });
 
 export const useLatestVulnerabilities = (options: any) => {

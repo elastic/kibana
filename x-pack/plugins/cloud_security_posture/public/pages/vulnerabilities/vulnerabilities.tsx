@@ -8,6 +8,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDataGrid,
+  EuiDataGridCellValueElementProps,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -21,7 +22,7 @@ import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
 import { VulnerabilityRecord } from './types';
-import { getVulnerabilitiesColumns } from './utils';
+import { getVulnerabilitiesColumnsGrid, vulnerabilitiesColumns } from './utils';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
@@ -31,7 +32,7 @@ import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerabili
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
   filters,
-  sort: [{ id: 'cvss', direction: 'desc' }],
+  sort: [{ id: vulnerabilitiesColumns.cvss, direction: 'desc' }],
   pageIndex: 0,
 });
 
@@ -73,72 +74,67 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
 
   const renderCellValue = useMemo(() => {
-    return ({
-      rowIndex,
-      columnId,
-    }: {
-      rowIndex: number;
-      columnId: typeof columns[number]['id'];
-    }) => {
-      const vulnerability = data?.page[rowIndex] as VulnerabilityRecord;
+    return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+      const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
 
-      if (!vulnerability) return null;
+      if (!vulnerabilityRow) return null;
+      if (!vulnerabilityRow.vulnerability?.id) return null;
 
-      if (columnId === 'actions') {
+      if (columnId === vulnerabilitiesColumns.actions) {
         return (
           <EuiButtonIcon
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              alert(`Flyout id ${vulnerability.finding?.vulnerability?.id}`);
+              alert(`Flyout id ${vulnerabilityRow.vulnerability.id}`);
             }}
           />
         );
       }
-      if (columnId === 'vulnerability') {
-        return vulnerability.finding?.vulnerability?.id || null;
+      if (columnId === vulnerabilitiesColumns.vulnerability) {
+        return vulnerabilityRow.vulnerability.id || null;
       }
-      if (columnId === 'cvss') {
-        if (!vulnerability.finding?.vulnerability.score.base) {
+      if (columnId === vulnerabilitiesColumns.cvss) {
+        if (!vulnerabilityRow.vulnerability.score?.base) {
           return null;
         }
         return (
           <CVSScoreBadge
-            score={vulnerability.finding.vulnerability.score.base}
-            version={vulnerability.finding?.vulnerability.score.version}
+            score={vulnerabilityRow.vulnerability.score.base}
+            version={vulnerabilityRow.vulnerability.score.version}
           />
         );
       }
-      if (columnId === 'resource') {
-        return vulnerability.resource?.name || null;
+      if (columnId === vulnerabilitiesColumns.resource) {
+        return vulnerabilityRow.resource?.name || null;
       }
-      if (columnId === 'severity') {
+      if (columnId === vulnerabilitiesColumns.severity) {
         if (
-          !vulnerability.finding?.vulnerability.score.base ||
-          !vulnerability?.finding.vulnerability.severity
+          !vulnerabilityRow.vulnerability.score?.base ||
+          !vulnerabilityRow.vulnerability.severity
         ) {
           return null;
         }
         return (
           <SeverityStatusBadge
-            score={vulnerability.finding.vulnerability.score.base}
-            status={vulnerability.finding.vulnerability.severity}
+            score={vulnerabilityRow.vulnerability.score.base}
+            status={vulnerabilityRow.vulnerability.severity}
           />
         );
       }
-      if (columnId === 'package-version') {
+      if (columnId === vulnerabilitiesColumns.package_version) {
         return (
           <>
-            {vulnerability.finding?.vulnerability.package.name}{' '}
-            {vulnerability.finding?.vulnerability.package.version}
+            {vulnerabilityRow.vulnerability?.package?.name}{' '}
+            {vulnerabilityRow.vulnerability?.package?.version}
           </>
         );
       }
-      if (columnId === 'fix-version') {
+      if (columnId === vulnerabilitiesColumns.fix_version) {
         return (
           <>
-            {vulnerability.finding?.vulnerability.package.name}{' '}
-            {vulnerability.finding?.vulnerability.package.fixed_version}
+            {vulnerabilityRow.vulnerability.package?.name}{' '}
+            {vulnerabilityRow.vulnerability.package?.fixed_version}
           </>
         );
       }
@@ -150,11 +146,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   if (error) {
     return <ErrorCallout error={error as Error} />;
   }
-  if (isLoading || !data) {
+  if (isLoading || !data?.page) {
     return <EuiLoadingSpinner />;
   }
 
-  const columns = getVulnerabilitiesColumns();
+  const columns = getVulnerabilitiesColumnsGrid();
 
   return (
     <>
