@@ -52,7 +52,7 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
           'xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout',
           {
             defaultMessage:
-              'This package has {numOfDeferredInstallations, plural, one {one deferred installation} other {# deferred installations}} which might require additional permissions to install and operate correctly.',
+              'This package has {numOfDeferredInstallations, plural, one {one deferred installation which requires} other {# deferred installations which require}} additional permissions to install and operate correctly.',
             values: { numOfDeferredInstallations: deferredInstallations.length },
           }
         )}

@@ -51,7 +51,7 @@ export const getDeferredAssetDescription = (assetType: string, assetCount: numbe
         'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsDescription',
         {
           defaultMessage:
-            '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Reauthorize from a user with transform_admin built-in role or manage_transform cluster privileges to start operations.',
+            '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. You must have the transform_admin built-in role or manage_transform cluster privileges to start operations.',
           values: { assetCount: assetCount ?? 1 },
         }
       );

@@ -19,7 +19,7 @@ export const DEFERRED_ASSETS_WARNING_MSG = i18n.translate(
   'xpack.fleet.epm.packageDetails.assets.deferredInstallationsMsg',
   {
     defaultMessage:
-      'This package has at least one deferred installation which might require additional permissions to install and operate correctly.',
+      'This package has at least one deferred installation which requires additional permissions to install and operate correctly.',
   }
 );
 
@@ -32,7 +32,7 @@ export const DeferredAssetsWarning = ({
     numOfDeferredInstallations !== undefined
       ? i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsWarning', {
           defaultMessage:
-            'This package has {numOfDeferredInstallations, plural, one {one deferred installation} other {# deferred installations}} which might require additional permissions to install and operate correctly.',
+            'This package has {numOfDeferredInstallations, plural, one {one deferred installation which requires} other {# deferred installations which require}} additional permissions to install and operate correctly.',
           values: { numOfDeferredInstallations },
         })
       : DEFERRED_ASSETS_WARNING_MSG;
