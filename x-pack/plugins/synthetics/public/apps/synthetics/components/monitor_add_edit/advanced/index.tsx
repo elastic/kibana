@@ -41,8 +41,8 @@ export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
               title={<h4>{configGroup.title}</h4>}
               fullWidth
               key={configGroup.title}
-              descriptionFlexItemProps={{ style: { minWidth: 200 } }}
-              fieldFlexItemProps={{ style: { minWidth: 500 } }}
+              descriptionFlexItemProps={{ style: { minWidth: 208 } }}
+              fieldFlexItemProps={{ style: { minWidth: 208 } }}
               style={{ flexWrap: 'wrap' }}
             >
               {configGroup.components.map((field) => {

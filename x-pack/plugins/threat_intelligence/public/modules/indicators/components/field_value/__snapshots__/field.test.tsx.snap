@@ -4,7 +4,7 @@ exports[`<IndicatorField /> should render tlp marking badge 1`] = `
 <DocumentFragment>
   <span
     class="euiBadge emotion-euiBadge"
-    style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
+    style="background-color: rgb(189, 39, 30); color: rgb(255, 255, 255);"
     title="Red"
   >
     <span

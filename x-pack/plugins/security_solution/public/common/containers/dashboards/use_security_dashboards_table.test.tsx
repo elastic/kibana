@@ -12,7 +12,6 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock/test_providers';
-import type { DashboardTableItem } from './use_security_dashboards_table';
 import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
@@ -20,6 +19,7 @@ import {
 import * as telemetry from '../../lib/telemetry';
 import { SecurityPageName } from '../../../../common/constants';
 import * as linkTo from '../../components/link_to';
+import type { DashboardTableItem } from './types';
 
 jest.mock('../../lib/kibana');
 

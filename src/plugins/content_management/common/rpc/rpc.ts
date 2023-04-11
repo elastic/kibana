@@ -14,6 +14,7 @@ import { createSchemas } from './create';
 import { updateSchemas } from './update';
 import { deleteSchemas } from './delete';
 import { searchSchemas } from './search';
+import { mSearchSchemas } from './msearch';
 
 export const schemas: {
   [key in ProcedureName]: ProcedureSchemas;
@@ -24,4 +25,5 @@ export const schemas: {
   update: updateSchemas,
   delete: deleteSchemas,
   search: searchSchemas,
+  mSearch: mSearchSchemas,
 };

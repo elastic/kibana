@@ -94,7 +94,7 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
-  osquery?: OsqueryPluginStart;
+  osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
