@@ -22,6 +22,7 @@ import React, {
   Suspense,
 } from 'react';
 import {
+  EuiButton,
   EuiSpacer,
   EuiPageTemplate,
   EuiTableSortingType,
@@ -66,7 +67,7 @@ import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
 import { cloneRule } from '../../../lib/rule_api/clone';
 
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { DEFAULT_SEARCH_PAGE_SIZE, INTERNAL_BASE_ALERTING_API_PATH } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
@@ -105,6 +106,11 @@ import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
+interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
@@ -112,15 +118,11 @@ export interface RulesListProps {
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => void;
+  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => void;
+  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
-  typeFilter?: string[];
-  onTypeFilterChange?: (type: string[]) => void;
-  searchFilter?: string;
-  onSearchFilterChange?: (search: string) => void;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -151,10 +153,6 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
-  searchFilter = '',
-  onSearchFilterChange,
-  typeFilter,
-  onTypeFilterChange,
   setHeaderActions,
   refresh,
   rulesListKey,
@@ -172,11 +170,11 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
+  const [inputText, setInputText] = useState<string>('');
 
   const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: searchFilter || '',
-    types: typeFilter || [],
+    searchText: '',
+    types: [],
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
@@ -357,12 +355,6 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
-        case 'searchText':
-          onSearchFilterChange?.(value as string);
-          break;
-        case 'types':
-          onTypeFilterChange?.(value as string[]);
-          break;
         default:
           break;
       }
@@ -371,8 +363,6 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
-      onSearchFilterChange,
-      onTypeFilterChange,
       onClearSelection,
     ]
   );
@@ -408,18 +398,6 @@ export const RulesList = ({
   }, [lastRunOutcomeFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
-      updateFilters({ filter: 'searchText', value: searchFilter });
-    }
-  }, [searchFilter]);
-
-  useEffect(() => {
-    if (typeFilter) {
-      updateFilters({ filter: 'types', value: typeFilter });
-    }
-  }, [typeFilter]);
-
-  useEffect(() => {
     if (cloneRuleId.current) {
       const ruleItem = tableItems.find((ti) => ti.id === cloneRuleId.current);
       cloneRuleId.current = null;
@@ -429,6 +407,34 @@ export const RulesList = ({
       }
     }
   }, [tableItems]);
+
+  const makeRequest = () => {
+    http.post(
+      `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
+      {
+        body: JSON.stringify({
+          title: 'test',
+          duration: 5 * 60 * 60 * 1000,
+          r_rule: {
+            dtstart: '2023-04-11T16:35:29.166Z',
+            count: 1,
+            tzid: 'America/Vancouver',
+          },
+        })
+      }
+    );
+
+    // http.get(
+    //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/0347baf0-c843-11ed-9d9b-1fe3368f7361`,
+    // );
+
+    // http.post(
+    //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`,
+    //   {
+    //     body: JSON.stringify({})
+    //   }
+    // );
+  }
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -698,7 +704,6 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
-
   return (
     <>
       <RulesListPrompts
@@ -708,6 +713,9 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openFlyout}
       />
+      <EuiButton onClick={makeRequest}>
+        Make Request
+      </EuiButton>
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation

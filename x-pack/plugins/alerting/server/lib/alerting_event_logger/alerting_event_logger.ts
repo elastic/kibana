@@ -50,6 +50,7 @@ interface AlertOpts {
   group?: string;
   state?: AlertInstanceState;
   flapping: boolean;
+  maintenanceWindowIds: string[];
 }
 
 interface ActionOpts {
@@ -162,8 +163,9 @@ export class AlertingEventLogger {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
-
-    this.eventLogger.logEvent(createAlertRecord(this.ruleContext, alert));
+    const event = createAlertRecord(this.ruleContext, alert)
+    console.log('@@@ LOG ALERT', event.kibana?.alert?.maintenance_window_ids);
+    this.eventLogger.logEvent(event);
   }
 
   public logAction(action: ActionOpts) {
@@ -256,6 +258,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     ],
     ruleName: context.ruleName,
     flapping: alert.flapping,
+    maintenanceWindowIds: alert.maintenanceWindowIds,
   });
 }
 

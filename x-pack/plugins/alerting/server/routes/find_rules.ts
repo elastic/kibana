@@ -148,6 +148,12 @@ const buildFindRulesRoute = ({
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
 
+          const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
+
+          await maintenanceWindowClient.getActiveMaintenanceWindows({
+            interval: '1m',
+          });
+
           trackLegacyTerminology(
             [req.body.search, req.body.search_fields, req.body.sort_field].filter(
               Boolean
