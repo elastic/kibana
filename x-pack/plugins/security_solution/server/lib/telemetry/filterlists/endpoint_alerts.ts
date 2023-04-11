@@ -22,6 +22,7 @@ const baseAllowlistFields: AllowlistFields = {
   uptime: true,
   Ext: {
     ancestry: true,
+    api: true,
     architecture: true,
     code_signature: true,
     dll: true,
@@ -94,9 +95,6 @@ const allowlistBaseEventFields: AllowlistFields = {
   process: {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,
-    Ext: {
-      api: true,
-    },
   },
   network: {
     direction: true,
