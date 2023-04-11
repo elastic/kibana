@@ -732,9 +732,9 @@
           },
           "[]; selectedDataViewId?: string | undefined; trigger: ",
           "DataViewTriggerProps",
-          "; onChangeDataViewId: (newId: string) => void; selectableProps?: ",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
+          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, }: { dataViews: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -744,9 +744,9 @@
           },
           "[]; selectedDataViewId?: string | undefined; trigger: ",
           "DataViewTriggerProps",
-          "; onChangeDataViewId: (newId: string) => void; selectableProps?: ",
+          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}> | undefined; }) => JSX.Element; }"
+          "<{}>> | undefined; }) => JSX.Element; }"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -830,7 +830,7 @@
         "signature": [
           "React.ExoticComponent<",
           "FieldPickerProps",
-          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, }: ",
+          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, }: ",
           "FieldPickerProps",
           ") => JSX.Element; }"
         ],

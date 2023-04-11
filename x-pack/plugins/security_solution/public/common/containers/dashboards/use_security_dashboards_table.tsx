@@ -8,26 +8,18 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SavedObject } from '@kbn/core/public';
 import { getSecurityDashboards } from './utils';
 import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-
-export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
-  title?: string;
-  description?: string;
-}
+import type { DashboardTableItem } from './types';
 
 const EMPTY_DESCRIPTION = '-' as const;
 
 export const useSecurityDashboardsTableItems = () => {
-  const {
-    savedObjects: { client: savedObjectsClient },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.SECURITY_DASHBOARDS,
@@ -35,10 +27,10 @@ export const useSecurityDashboardsTableItems = () => {
   );
 
   useEffect(() => {
-    if (savedObjectsClient) {
-      fetch(savedObjectsClient);
+    if (http) {
+      fetch(http);
     }
-  }, [fetch, savedObjectsClient]);
+  }, [fetch, http]);
 
   const items = useMemo(() => {
     if (!data) {

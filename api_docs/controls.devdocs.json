@@ -2190,9 +2190,15 @@
             "label": "isFieldCompatible",
             "description": [],
             "signature": [
-              "(dataControlField: ",
-              "DataControlField",
-              ") => void"
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ") => boolean"
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
@@ -2203,10 +2209,16 @@
                 "id": "def-public.OptionsListEmbeddableFactory.isFieldCompatible.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "dataControlField",
+                "label": "field",
                 "description": [],
                 "signature": [
-                  "DataControlField"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  }
                 ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
                 "deprecated": false,
@@ -3164,9 +3176,15 @@
             "label": "isFieldCompatible",
             "description": [],
             "signature": [
-              "(dataControlField: ",
-              "DataControlField",
-              ") => void"
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ") => boolean"
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
@@ -3177,10 +3195,16 @@
                 "id": "def-public.RangeSliderEmbeddableFactory.isFieldCompatible.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "dataControlField",
+                "label": "field",
                 "description": [],
                 "signature": [
-                  "DataControlField"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  }
                 ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
                 "deprecated": false,
@@ -4110,7 +4134,55 @@
             "section": "def-public.IEditableControlFactory",
             "text": "IEditableControlFactory"
           },
-          "<T>"
+          "<T> extends Pick<",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableFactory",
+            "text": "EmbeddableFactory"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, unknown>, \"type\">"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,
@@ -4249,9 +4321,15 @@
             "label": "isFieldCompatible",
             "description": [],
             "signature": [
-              "((dataControlField: ",
-              "DataControlField",
-              ") => void) | undefined"
+              "((field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ") => boolean) | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
@@ -4262,10 +4340,16 @@
                 "id": "def-public.IEditableControlFactory.isFieldCompatible.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "dataControlField",
+                "label": "field",
                 "description": [],
                 "signature": [
-                  "DataControlField"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  }
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
