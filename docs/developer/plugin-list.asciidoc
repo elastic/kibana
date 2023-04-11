@@ -641,6 +641,10 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_shared/README.md[observabilityShared]
+|A plugin that contains components and utilities shared by all Observability plugins.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
