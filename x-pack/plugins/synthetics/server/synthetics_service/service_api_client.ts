@@ -168,10 +168,17 @@ export class ServiceAPIClient {
       // we don't want to call service while local integration tests are running
       return;
     }
-    const { license } = await this.getLicense();
+    const { license } = (await this.getLicense()) || {};
 
-    if (license.status === 'expired') {
+    if (license?.status === 'expired') {
       this.logger.error('Cannot sync monitors with the Synthetics service. License is expired.');
+      return;
+    }
+
+    if (!license?.type) {
+      this.logger.error(
+        'Cannot sync monitors with the Synthetics service. Unable to determine license level.'
+      );
       return;
     }
 
@@ -187,7 +194,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(
             this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, runOnce, output },
+              { monitors: locMonitors, isEdit, runOnce, output, license_level: license.type },
               method,
               url
             )
@@ -227,7 +234,7 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, runOnce, isEdit }: ServiceData,
+    { monitors, output, runOnce, isEdit }: ServiceData & { license_level: string },
     method: 'POST' | 'PUT' | 'DELETE',
     url: string
   ) {
