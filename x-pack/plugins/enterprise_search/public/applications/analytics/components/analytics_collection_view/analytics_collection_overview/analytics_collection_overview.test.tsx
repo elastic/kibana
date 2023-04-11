@@ -33,11 +33,13 @@ const mockValues = {
     from: 'now-90d',
     to: 'now',
   },
+  hasEvents: true,
 };
 
 const mockActions = {
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
+  analyticsEventsExist: jest.fn(),
   setTimeRange: jest.fn(),
 };
 
@@ -47,6 +49,9 @@ describe('AnalyticsOverView', () => {
   });
 
   it('renders with Data', async () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
+
     const wrapper = shallow(
       <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
     );
@@ -120,5 +125,27 @@ describe('AnalyticsOverView', () => {
     expect(wrapper.find(AnalyticsCollectionChartWithLens).props().selectedChart).toEqual(
       FilterBy.NoResults
     );
+  });
+
+  it('renders no events Callout when the collection has no events', () => {
+    setMockValues({ ...mockValues, hasEvents: false });
+    setMockActions(mockActions);
+
+    const wrapper = shallow(
+      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
+    );
+
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+  });
+
+  it('does not render events Callout when the collection has events', () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
+
+    const wrapper = shallow(
+      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
+    );
+
+    expect(wrapper.find('EuiCallOut')).toHaveLength(0);
   });
 });
