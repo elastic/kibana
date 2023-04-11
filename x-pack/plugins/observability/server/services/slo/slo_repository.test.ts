@@ -121,12 +121,12 @@ describe('KibanaSavedObjectsSLORepository', () => {
   describe('find', () => {
     const DEFAULT_PAGINATION: Pagination = { page: 1, perPage: 25 };
     const DEFAULT_SORTING: Sort = {
-      field: SortField.Name,
+      field: SortField.CreationTime,
       direction: SortDirection.Asc,
     };
 
-    describe('Name filter', () => {
-      it('includes the filter on name with wildcard when provided', async () => {
+    describe('Name search', () => {
+      it('includes the search on name with wildcard when provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
         soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
@@ -146,13 +146,15 @@ describe('KibanaSavedObjectsSLORepository', () => {
           type: SO_SLO_TYPE,
           page: 1,
           perPage: 25,
-          filter: `(slo.attributes.name: *availability*)`,
-          sortField: 'name',
+          filter: undefined,
+          search: '*availability*',
+          searchFields: ['name'],
+          sortField: 'created_at',
           sortOrder: 'asc',
         });
       });
 
-      it('includes the filter on name with added wildcard when not provided', async () => {
+      it('includes the search on name with added wildcard when not provided', async () => {
         const repository = new KibanaSavedObjectsSLORepository(soClientMock);
         soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
@@ -172,8 +174,10 @@ describe('KibanaSavedObjectsSLORepository', () => {
           type: SO_SLO_TYPE,
           page: 1,
           perPage: 25,
-          filter: `(slo.attributes.name: *availa*)`,
-          sortField: 'name',
+          filter: undefined,
+          search: '*availa*',
+          searchFields: ['name'],
+          sortField: 'created_at',
           sortOrder: 'asc',
         });
       });
@@ -201,7 +205,9 @@ describe('KibanaSavedObjectsSLORepository', () => {
           page: 1,
           perPage: 25,
           filter: `(slo.attributes.indicator.type: sli.kql.custom)`,
-          sortField: 'name',
+          search: undefined,
+          searchFields: undefined,
+          sortField: 'created_at',
           sortOrder: 'asc',
         });
       });
@@ -227,13 +233,15 @@ describe('KibanaSavedObjectsSLORepository', () => {
           page: 1,
           perPage: 25,
           filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
-          sortField: 'name',
+          search: undefined,
+          searchFields: undefined,
+          sortField: 'created_at',
           sortOrder: 'asc',
         });
       });
     });
 
-    it('includes filter on name and indicator types', async () => {
+    it('includes search on name and filter on indicator types', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
@@ -253,13 +261,15 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `(slo.attributes.name: *latency*) and (slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
-        sortField: 'name',
+        filter: `(slo.attributes.indicator.type: sli.kql.custom or slo.attributes.indicator.type: sli.apm.transactionDuration)`,
+        search: '*latency*',
+        searchFields: ['name'],
+        sortField: 'created_at',
         sortOrder: 'asc',
       });
     });
 
-    it('does not include the filter when no criteria provided', async () => {
+    it('does not include the search or filter when no criteria provided', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
@@ -275,12 +285,14 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        sortField: 'name',
+        search: undefined,
+        searchFields: undefined,
+        sortField: 'created_at',
         sortOrder: 'asc',
       });
     });
 
-    it('sorts by name ascending', async () => {
+    it('sorts by creation time ascending', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
@@ -290,18 +302,20 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        sortField: 'name',
+        search: undefined,
+        searchFields: undefined,
+        sortField: 'created_at',
         sortOrder: 'asc',
       });
     });
 
-    it('sorts by name descending', async () => {
+    it('sorts by creation time descending', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(createFindResponse([SOME_SLO]));
 
       await repository.find(
         {},
-        { field: SortField.Name, direction: SortDirection.Desc },
+        { field: SortField.CreationTime, direction: SortDirection.Desc },
         DEFAULT_PAGINATION
       );
 
@@ -309,7 +323,9 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        sortField: 'name',
+        search: undefined,
+        searchFields: undefined,
+        sortField: 'created_at',
         sortOrder: 'desc',
       });
     });
@@ -328,6 +344,8 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
+        search: undefined,
+        searchFields: undefined,
         sortField: 'indicator.type',
         sortOrder: 'asc',
       });
