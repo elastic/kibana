@@ -285,27 +285,27 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         )}
 
         {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-        entityOptions.length > 0 ? (
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
-                defaultMessage="Query entities"
+          entityOptions.length > 0 && (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+                  defaultMessage="Query entities"
+                />
+              }
+            >
+              <EuiComboBox
+                placeholder={i18n.translate('xpack.ml.customUrlsEditor.selectEntitiesPlaceholder', {
+                  defaultMessage: 'Select entities',
+                })}
+                options={entityOptions}
+                selectedOptions={selectedEntityOptions}
+                onChange={onQueryEntitiesChange}
+                isClearable={true}
+                data-test-subj="mlJobCustomUrlQueryEntitiesInput"
               />
-            }
-          >
-            <EuiComboBox
-              placeholder={i18n.translate('xpack.ml.customUrlsEditor.selectEntitiesPlaceholder', {
-                defaultMessage: 'Select entities',
-              })}
-              options={entityOptions}
-              selectedOptions={selectedEntityOptions}
-              onChange={onQueryEntitiesChange}
-              isClearable={true}
-              data-test-subj="mlJobCustomUrlQueryEntitiesInput"
-            />
-          </EuiFormRow>
-        ) : null}
+            </EuiFormRow>
+          )}
 
         {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
           showTimeRangeSelector && (
