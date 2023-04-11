@@ -4844,8 +4844,12 @@
                           "type": "array",
                           "items": {
                             "properties": {
-                              "name": "keyword",
-                              "count": "long"
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
                             }
                           }
                         }
@@ -5000,8 +5004,12 @@
                           "type": "array",
                           "items": {
                             "properties": {
-                              "name": "keyword",
-                              "count": "long"
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
                             }
                           }
                         }
@@ -5096,8 +5104,12 @@
                           "type": "array",
                           "items": {
                             "properties": {
-                              "name": "keyword",
-                              "count": "long"
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
                             }
                           }
                         }
@@ -5192,8 +5204,12 @@
                           "type": "array",
                           "items": {
                             "properties": {
-                              "name": "keyword",
-                              "count": "long"
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
                             }
                           }
                         }
