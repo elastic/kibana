@@ -15,6 +15,21 @@ import { mSearch } from './msearch';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { MSearchService } from '../../core/msearch';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { Version } from '@kbn/object-versioning';
+
+const storageContextGetTransforms = jest.fn();
+const spy = () => storageContextGetTransforms;
+
+jest.mock('@kbn/object-versioning', () => {
+  const original = jest.requireActual('@kbn/object-versioning');
+  return {
+    ...original,
+    getContentManagmentServicesTransforms: (...args: any[]) => {
+      spy()(...args);
+      return original.getContentManagmentServicesTransforms(...args);
+    },
+  };
+});
 
 const { fn, schemas } = mSearch;
 
@@ -131,7 +146,8 @@ describe('RPC -> mSearch()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: getServiceObjectTransformFactory,
+        getTransformsFactory: (contentTypeId: string, version: Version) =>
+          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
         mSearchService,
       };
 
@@ -191,6 +207,39 @@ describe('RPC -> mSearch()', () => {
         ],
         { text: 'Hello' }
       );
+    });
+
+    test('should implicitly set the requestVersion in storageContext -> utils -> getTransforms()', async () => {
+      const { ctx, savedObjectsClient, mSearchSpy } = setup();
+
+      const requestVersion = 1;
+
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+      });
+
+      await fn(ctx, {
+        contentTypes: [{ contentTypeId: 'foo', version: 1 }],
+        query: { text: 'Hello' },
+      });
+
+      const [{ ctx: storageContext }] = mSearchSpy.mock.calls?.[0][0];
+
+      storageContext.utils.getTransforms({ 1: {} });
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith(
+        { 1: {} },
+        requestVersion,
+        expect.any(Object)
+      );
+
+      // We can still pass custom version
+      storageContext.utils.getTransforms({ 1: {} }, 1234);
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith({ 1: {} }, 1234, expect.any(Object));
     });
 
     describe('validation', () => {
