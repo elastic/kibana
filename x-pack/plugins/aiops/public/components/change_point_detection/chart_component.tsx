@@ -33,35 +33,38 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { bucketInterval, resultQuery } = useChangePointDetectionContext();
+  const { bucketInterval, resultQuery, resultFilters } = useChangePointDetectionContext();
 
   const filters = useMemo(() => {
-    return annotation.group
-      ? [
-          {
-            meta: {
-              index: dataView.id!,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: annotation.group.name,
-              params: {
-                query: annotation.group.value,
+    return [
+      ...resultFilters,
+      ...(annotation.group
+        ? [
+            {
+              meta: {
+                index: dataView.id!,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: annotation.group.name,
+                params: {
+                  query: annotation.group.value,
+                },
+              },
+              query: {
+                match_phrase: {
+                  [annotation.group.name]: annotation.group.value,
+                },
+              },
+              $state: {
+                store: FilterStateStore.APP_STATE,
               },
             },
-            query: {
-              match_phrase: {
-                [annotation.group.name]: annotation.group.value,
-              },
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-          },
-        ]
-      : [];
-  }, [dataView.id, annotation.group]);
+          ]
+        : []),
+    ];
+  }, [dataView.id, annotation.group, resultFilters]);
 
   // @ts-ignore incorrect types for attributes
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
@@ -216,8 +219,9 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
       id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
       style={{ height: 350 }}
       timeRange={timeRange}
-      attributes={attributes}
       query={resultQuery}
+      filters={filters}
+      attributes={attributes}
       renderMode={'view'}
       executionContext={{
         type: 'aiops_change_point_detection_chart',
