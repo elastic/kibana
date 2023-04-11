@@ -94,6 +94,9 @@ const allowlistBaseEventFields: AllowlistFields = {
   process: {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,
+    Ext: {
+      api: true,
+    },
   },
   network: {
     direction: true,
