@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ESSearchRequest } from '@kbn/es-types';
-import { InfraSource } from '../../../../common/source_configuration/source_configuration';
+import { InfraStaticSourceConfiguration } from '../../../lib/sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { GetHostsRequestBodyPayload, HostMetricType } from '../../../../common/http_api/hosts';
 import {
@@ -23,10 +23,10 @@ import { createFilters, runQuery } from './helpers/query';
 import { hasSortByMetric } from './utils';
 
 export const getTopHosts = async (
-  { searchClient, source, params }: GetHostsArgs,
+  { searchClient, sourceConfig, params }: GetHostsArgs,
   hostNamesShortList: string[] = []
 ) => {
-  const query = createQuery(params, source, hostNamesShortList);
+  const query = createQuery(params, sourceConfig, hostNamesShortList);
   return lastValueFrom(
     runQuery(searchClient, query, decodeOrThrow(HostsMetricsSearchAggregationResponseRT))
   );
@@ -34,7 +34,7 @@ export const getTopHosts = async (
 
 const createQuery = (
   params: GetHostsRequestBodyPayload,
-  source: InfraSource,
+  sourceConfig: InfraStaticSourceConfiguration,
   hostNamesShortList: string[]
 ): ESSearchRequest => {
   const { runtimeFields, metricAggregations } = createQueryFormulas(
@@ -46,7 +46,7 @@ const createQuery = (
   return {
     allow_no_indices: true,
     ignore_unavailable: true,
-    index: source.configuration.metricAlias,
+    index: sourceConfig.metricAlias,
     body: {
       size: 0,
       query: {

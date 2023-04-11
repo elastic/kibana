@@ -47,7 +47,7 @@ export const GetHostsRequestBodyPayloadRT = rt.intersection([
     query: rt.UnknownRecord,
   }),
   rt.type({
-    limit: rt.union([inRangeRT(1, 10), createLiteralValueFromUndefinedRT(10)]),
+    limit: rt.union([inRangeRT(1, 100), createLiteralValueFromUndefinedRT(10)]),
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
     sourceId: rt.string,
     timeRange: TimerangeRT,

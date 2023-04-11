@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
-import { InfraSource } from '../../../../common/source_configuration/source_configuration';
+import { InfraStaticSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
@@ -70,7 +70,7 @@ export interface HostsMetricsAggregationQueryConfig {
 
 export interface GetHostsArgs {
   searchClient: ISearchClient;
-  source: InfraSource;
+  sourceConfig: InfraStaticSourceConfiguration;
   params: GetHostsRequestBodyPayload;
 }
 

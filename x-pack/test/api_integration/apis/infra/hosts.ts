@@ -325,6 +325,16 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it('should pass when limit is 1', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 1 };
+        await makeRequest({ body, expectedHTTPCode: 200 });
+      });
+
+      it('should pass when limit is 100', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 100 };
+        await makeRequest({ body, expectedHTTPCode: 200 });
+      });
+
       it('should fail when metric is invalid', async () => {
         const invalidBody = { ...basePayload, metrics: [{ type: 'any' }] };
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });

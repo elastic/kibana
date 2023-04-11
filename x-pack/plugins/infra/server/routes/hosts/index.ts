@@ -38,7 +38,7 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
         const soClient = savedObjects.getScopedClient(request);
         const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
-        const hosts = await getHosts({ searchClient, source, params });
+        const hosts = await getHosts({ searchClient, sourceConfig: source.configuration, params });
         return response.ok({
           body: GetHostsResponsePayloadRT.encode(hosts),
         });

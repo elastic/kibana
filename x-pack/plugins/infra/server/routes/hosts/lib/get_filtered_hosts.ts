@@ -8,29 +8,32 @@
 import { ESSearchRequest } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
+import { InfraStaticSourceConfiguration } from '../../../lib/sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import { FilteredHostsSearchAggregationResponseRT, GetHostsArgs } from './types';
 import { BUCKET_KEY } from './constants';
 import { assertQueryStructure } from './utils';
 import { createFilters, runQuery } from './helpers/query';
 
-export const getFilteredHosts = async ({ searchClient, source, params }: GetHostsArgs) => {
-  const queryRequest = createQuery(params, source);
+export const getFilteredHosts = async ({ searchClient, sourceConfig, params }: GetHostsArgs) => {
+  const queryRequest = createQuery(params, sourceConfig);
 
   return lastValueFrom(
     runQuery(searchClient, queryRequest, decodeOrThrow(FilteredHostsSearchAggregationResponseRT))
   );
 };
 
-const createQuery = (params: GetHostsRequestBodyPayload, source: InfraSource): ESSearchRequest => {
+const createQuery = (
+  params: GetHostsRequestBodyPayload,
+  sourceConfig: InfraStaticSourceConfiguration
+): ESSearchRequest => {
   assertQueryStructure(params.query);
 
   return {
     allow_no_indices: true,
     ignore_unavailable: true,
-    index: source.configuration.metricAlias,
+    index: sourceConfig.metricAlias,
     body: {
       size: 0,
       query: {
