@@ -124,6 +124,7 @@ export function DiscoverMainRoute(props: Props) {
         return;
       }
       try {
+        await stateContainer.actions.stopSync();
         await stateContainer.actions.loadDataViewList();
         // reset appState in case a saved search with id is loaded and the url is empty
         // so the saved search is loaded in a clean state
@@ -135,6 +136,8 @@ export function DiscoverMainRoute(props: Props) {
           dataViewSpec: historyLocationState?.dataViewSpec,
           useAppState,
         });
+        await stateContainer.actions.startSync();
+        stateContainer.actions.fetchData(true);
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -204,6 +207,15 @@ export function DiscoverMainRoute(props: Props) {
   useEffect(() => {
     loadSavedSearch();
   }, [loadSavedSearch, id]);
+
+  /**
+   * Stop syncing when navigating away from Discover main
+   */
+  useEffect(() => {
+    return () => {
+      stateContainer.actions.stopSync();
+    };
+  }, [stateContainer]);
 
   // secondary fetch: in case URL is set to `/`, used to reset the 'new' state
   useUrl({ history, savedSearchId: id, onNewUrl: () => loadSavedSearch() });

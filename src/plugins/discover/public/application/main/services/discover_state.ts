@@ -125,11 +125,12 @@ export interface DiscoverStateContainer {
      */
     fetchData: (initial?: boolean) => void;
     /**
-     * Initialize state with filters and query, start state syncing
+     * Initialize state with filters and query, start state syncing with URL
+     * subscribe to state changes and trigger fetching of data
      */
     startSync: () => Promise<() => void>;
     /**
-     * stop state syncing
+     * stop all state syncing and subscriptions
      */
     stopSync: () => void;
     /**

@@ -63,19 +63,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     dataViews: services.dataViews,
     stateContainer,
   });
-  /**
-   * Start state syncing and fetch data if necessary
-   */
-  useEffect(() => {
-    const initAndFetch = async () => {
-      await stateContainer.actions.startSync();
-      stateContainer.actions.fetchData(true);
-    };
-    initAndFetch();
-    return () => {
-      stateContainer.actions.stopSync();
-    };
-  }, [stateContainer]);
 
   /**
    * SavedSearch dependend initializing
@@ -88,10 +75,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
-    return () => {
-      // clear session when navigating away from discover main
-      data.search.session.clear();
-    };
   }, [data.search.session, chrome, docLinks]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
