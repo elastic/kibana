@@ -338,17 +338,11 @@ export class TestSubjects extends FtrService {
     });
   }
 
-  public async waitForDeleted(
-    selectorOrElement: string | WebElementWrapper,
-    timeout: number = this.TRY_TIME
-  ): Promise<void> {
+  public async waitForDeleted(selectorOrElement: string | WebElementWrapper): Promise<void> {
     if (typeof selectorOrElement === 'string') {
-      await this.findService.waitForDeletedByCssSelector(
-        testSubjSelector(selectorOrElement),
-        timeout
-      );
+      await this.findService.waitForDeletedByCssSelector(testSubjSelector(selectorOrElement));
     } else {
-      await this.findService.waitForElementStale(selectorOrElement, timeout);
+      await this.findService.waitForElementStale(selectorOrElement);
     }
   }
 
