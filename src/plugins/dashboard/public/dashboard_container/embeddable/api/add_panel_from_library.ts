@@ -42,8 +42,8 @@ export function addFromLibrary(this: DashboardContainer) {
       overlays,
       theme,
       onAddPanel: (id: string) => {
-        this.scrollToPanel(id, { behavior: 'smooth' });
-        this.highlightPanel(id);
+        this.setScrollToPanelId(id);
+        this.setHighlightPanelId(id);
       },
     })
   );

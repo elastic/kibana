@@ -66,7 +66,7 @@ export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
     (embeddable.parent as DashboardContainer).setExpandedPanelId(newValue);
 
     if (!newValue) {
-      (embeddable.parent as DashboardContainer).scrollToPanel(embeddable.id);
+      (embeddable.parent as DashboardContainer).setScrollToPanelId(embeddable.id);
     }
   }
 }

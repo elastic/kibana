@@ -305,7 +305,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
 
         if (panelId) {
-          this.scrollToPanel(panelId);
+          this.setScrollToPanelId(panelId);
+          this.setHighlightPanelId(panelId);
         }
       });
     }
@@ -639,38 +640,45 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return titles;
   }
 
-  public scrollToPanel = (id: string, options: ScrollIntoViewOptions = {}) => {
-    const panelToScrollTo = document.getElementById(`panel-${id}`);
+  public setScrollToPanelId = (id: string | undefined) => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    const {
+      actions: { setScrollToPanelId },
+      dispatch,
+    } = this.reduxEmbeddableTools;
+    dispatch(setScrollToPanelId(id));
+  };
 
-    console.log({ panelToScrollTo });
-
-    if (panelToScrollTo) {
-      panelToScrollTo.scrollIntoView({ block: 'center', behavior: 'auto', ...options });
-    } else {
-      setTimeout(() => this.scrollToPanel(id, options), 100);
+  public scrollToPanel = (panelRef: HTMLDivElement | null) => {
+    if (!panelRef) {
+      return;
     }
-    // setTimeout(() => {
-    //   document
-    //     .getElementById(`panel-${id}`)
-    //     ?.scrollIntoView({ block: 'center', behavior: 'auto', ...options });
-    // }, 1000);
+
+    panelRef.scrollIntoView({ block: 'center' });
+    this.setScrollToPanelId(undefined);
   };
 
   public scrollToTop = () => {
-    setTimeout(() => {
-      document
-        .getElementsByClassName(`dashboardViewport`)[0]
-        ?.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 0);
+    document
+      .getElementsByClassName(`controlGroup`)[0]
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  public highlightPanel = async (id: string) => {
-    const panelToHighlight = document.getElementById(`panel-${id}`);
+  public setHighlightPanelId = (id: string | undefined) => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    const {
+      actions: { setHighlightPanelId },
+      dispatch,
+    } = this.reduxEmbeddableTools;
+    dispatch(setHighlightPanelId(id));
+  };
 
-    if (panelToHighlight) {
-      panelToHighlight.classList.add('dshDashboardGrid__item--highlighted');
+  public highlightPanel = async (panelRef: HTMLDivElement) => {
+    this.setHighlightPanelId(undefined);
+    if (panelRef) {
+      panelRef.classList.add('dshDashboardGrid__item--highlighted');
       setTimeout(() => {
-        panelToHighlight.classList.remove('dshDashboardGrid__item--highlighted');
+        panelRef.classList.remove('dshDashboardGrid__item--highlighted');
       }, 5000);
     }
   };
