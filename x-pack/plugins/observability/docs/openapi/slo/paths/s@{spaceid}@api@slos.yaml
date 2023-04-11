@@ -81,7 +81,7 @@ get:
       description: Sort by field
       schema:
         type: string
-        enum: [name, indicatorType]
+        enum: [creationTime, indicatorType]
         default: name
       example: name
     - name: sortDirection

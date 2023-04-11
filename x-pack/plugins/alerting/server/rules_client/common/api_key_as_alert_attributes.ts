@@ -10,15 +10,18 @@ import { CreateAPIKeyResult } from '../types';
 
 export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
-  username: string | null
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner'> {
+  username: string | null,
+  createdByUser: boolean
+): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'> {
   return apiKey && apiKey.apiKeysEnabled
     ? {
         apiKeyOwner: username,
         apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+        apiKeyCreatedByUser: createdByUser,
       }
     : {
         apiKeyOwner: null,
         apiKey: null,
+        apiKeyCreatedByUser: null,
       };
 }
