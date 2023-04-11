@@ -63,6 +63,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // The index_management_user has been given permissions to advanced settings for Stack Management Tests.
         // https://github.com/elastic/kibana/pull/113078/
+
+        // There should be 3 sections - "Data", "Kibana", and "Alerts and Insights" (the last one contains Watcher as
+        // it no longer requires read access to the .watches index - see https://github.com/elastic/kibana/pull/154143).
         expect(sections).to.have.length(3);
         expect(sections[0]).to.eql({
           sectionId: 'data',
