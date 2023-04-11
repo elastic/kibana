@@ -39,7 +39,7 @@ export function getTimeBounds(timeRange: TimeRange, timeZone?: string, getForceN
     // the `defaultZone` property is injected by moment.timezone.
     // If is not available is it fine to keep undefined because calling setDefault() will automatically reset to default
     // https://github.com/moment/moment-timezone/blob/2448cdcbe15875bc22ddfbc184794d0a6b568b90/moment-timezone.js#L603
-    // @ts-ignore because is not part of the exposed types unfortunately
+    // @ts-expect-error because is not part of the exposed types unfortunately
     const currentDefaultTimeZone = moment.defaultZone?.name;
     safelySetTimeZone(timeZone);
     const timeBounds = calculateBounds(timeRange, { forceNow: getForceNow?.() });
