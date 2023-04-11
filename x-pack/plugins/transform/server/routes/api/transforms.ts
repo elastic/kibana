@@ -19,6 +19,7 @@ import { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { generateTransformSecondaryAuthHeaders } from '../../../common/utils/transform_api_key';
 import {
+  reauthorizeTransformsRequestSchema,
   ReauthorizeTransformsRequestSchema,
   ReauthorizeTransformsResponseSchema,
 } from '../../../common/api_schemas/reauthorize_transforms';
@@ -86,7 +87,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, coreStart, dataViews, security } = routeDependencies;
+  const { router, license, coreStart, dataViews, security: securityStart } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -304,18 +305,18 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
   /**
    * @apiGroup Reauthorize transforms with API key generated from currently logged in suer
-   *
    * @api {post} /api/transform/reauthorize_transforms Post delete transforms
-   * @apiName DeleteTransforms
-   * @apiDescription Deletes transforms
-   *
-   * @apiSchema (body) deleteTransformsRequestSchema
+   * @apiName Reauthorize Transforms
+   * @apiDescription Reauthorize transforms by generating an API Key for current user
+   * and update transform's es-secondary-authorization headers with the generated key,
+   * then start the transform.
+   * @apiSchema (body) reauthorizeTransformsRequestSchema
    */
   router.post<undefined, undefined, StartTransformsRequestSchema>(
     {
       path: addBasePath('reauthorize_transforms'),
       validate: {
-        body: startTransformsRequestSchema,
+        body: reauthorizeTransformsRequestSchema,
       },
     },
     license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
@@ -325,16 +326,24 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const { elasticsearch } = coreStart;
           const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
-          if (!security) {
-            throw Error('Security not enabled');
+          let apiKeyWithCurrentUserPermission;
+          if (securityStart) {
+            apiKeyWithCurrentUserPermission = await securityStart.authc.apiKeys.grantAsInternalUser(
+              req,
+              {
+                name: `auto-generated-transform-api-key`,
+                role_descriptors: {},
+              }
+            );
+          } else {
+            // If security is not enabled or available, user should be able to generate API key
+            apiKeyWithCurrentUserPermission = await elasticsearch.client
+              .asScoped(req)
+              .asInternalUser.security.createApiKey({
+                name: 'auto-generated-transform-api-key',
+                role_descriptors: {},
+              });
           }
-          const apiKeyWithCurrentUserPermission = await security.authc.apiKeys.grantAsInternalUser(
-            req,
-            {
-              name: `auto-generated-transform-api-key`,
-              role_descriptors: {},
-            }
-          );
           const secondaryAuth = generateTransformSecondaryAuthHeaders(
             apiKeyWithCurrentUserPermission
           );
@@ -930,7 +939,7 @@ async function reauthorizeAndStartTransforms(
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      const updatedTransform = await esClient.transform.updateTransform(
+      await esClient.transform.updateTransform(
         {
           body: {},
           transform_id: transformId,
@@ -938,7 +947,7 @@ async function reauthorizeAndStartTransforms(
         options ?? {}
       );
 
-      const startedTransform = await esClient.transform.startTransform(
+      await esClient.transform.startTransform(
         {
           transform_id: transformId,
         },

@@ -6,6 +6,7 @@
  */
 
 import type { GrantAPIKeyResult } from '@kbn/security-plugin/server';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export interface TransformAPIKey extends GrantAPIKeyResult {
   /**
@@ -28,7 +29,11 @@ export function isTransformApiKey(arg: any): arg is TransformAPIKey {
 }
 
 export function generateTransformSecondaryAuthHeaders(
-  apiKeyWithCurrentUserPermission: GrantAPIKeyResult | null | undefined
+  apiKeyWithCurrentUserPermission:
+    | GrantAPIKeyResult
+    | null
+    | undefined
+    | SecurityCreateApiKeyResponse
 ): SecondaryAuthorizationHeader | undefined {
   return isTransformApiKey(apiKeyWithCurrentUserPermission)
     ? {

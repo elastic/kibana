@@ -32,17 +32,23 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
       title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
       onCancel={closeModal}
       onConfirm={reauthorizeAndCloseModal}
-      cancelButtonText={i18n.translate('xpack.transform.transformList.startModalCancelButton', {
-        defaultMessage: 'Cancel',
-      })}
-      confirmButtonText={i18n.translate('xpack.transform.transformList.startModalStartButton', {
-        defaultMessage: 'Reauthorize',
-      })}
+      cancelButtonText={i18n.translate(
+        'xpack.transform.transformList.reauthorizeModalCancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.transform.transformList.reauthorizeModalConfirmButton',
+        {
+          defaultMessage: 'Reauthorize',
+        }
+      )}
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       buttonColor="primary"
     >
       <p>
-        {i18n.translate('xpack.transform.transformList.startModalBody', {
+        {i18n.translate('xpack.transform.transformList.reauthorizeModalBody', {
           defaultMessage:
             'Reauthorize will update the permissions to the current user and start the transform. Starting a transform increases search and indexing load in your cluster. If excessive load is experienced, stop the transform.',
         })}

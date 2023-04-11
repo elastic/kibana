@@ -156,10 +156,13 @@ export const useColumns = (
         const needsReauthTooltipIcon = needsReauth ? (
           <>
             <EuiToolTip
-              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
-                defaultMessage:
-                  'This transform was created with insufficient permissions. Reauthorize from a user with transforms_admin privilege to start and run the transform.',
-              })}
+              content={i18n.translate(
+                'xpack.transform.transformList.needsReauthorizationBadgeTooltip',
+                {
+                  defaultMessage:
+                    'This transform was created with insufficient permissions. Reauthorize from a user with manage_transform cluster privilege or transform_admin Kibana role to start and run the transform.',
+                }
+              )}
             >
               <EuiIcon size="s" color="warning" type={'alert'} />
             </EuiToolTip>

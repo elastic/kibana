@@ -33,9 +33,9 @@ export const useReauthorizeTransforms = () => {
     if (!isStartTransformsResponseSchema(results)) {
       toastNotifications.addDanger({
         title: i18n.translate(
-          'xpack.transform.stepCreateForm.startTransformResponseSchemaErrorMessage',
+          'xpack.transform.stepCreateForm.reauthorizeTransformResponseSchemaErrorMessage',
           {
-            defaultMessage: 'An error occurred calling the start transforms request.',
+            defaultMessage: 'An error occurred calling the reauthorize transforms request.',
           }
         ),
         text: toMountPoint(
@@ -56,17 +56,20 @@ export const useReauthorizeTransforms = () => {
         const result = results[transformId];
         if (result.success === true) {
           toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.transformList.startTransformSuccessMessage', {
-              defaultMessage: 'Request to re-authorize transform {transformId} acknowledged.',
+            i18n.translate('xpack.transform.transformList.reauthorizeTransformSuccessMessage', {
+              defaultMessage: 'Request to reauthorize transform {transformId} acknowledged.',
               values: { transformId },
             })
           );
         } else {
           toastNotifications.addError(new Error(JSON.stringify(result.error!.caused_by, null, 2)), {
-            title: i18n.translate('xpack.transform.transformList.startTransformErrorMessage', {
-              defaultMessage: 'An error occurred re-authorizing the transform {transformId}',
-              values: { transformId },
-            }),
+            title: i18n.translate(
+              'xpack.transform.transformList.reauthorizeTransformErrorMessage',
+              {
+                defaultMessage: 'An error occurred reauthorizing the transform {transformId}',
+                values: { transformId },
+              }
+            ),
             toastMessage: result.error!.reason,
           });
         }

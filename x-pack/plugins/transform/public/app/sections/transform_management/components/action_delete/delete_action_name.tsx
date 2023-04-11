@@ -22,8 +22,12 @@ export const deleteActionNameText = i18n.translate(
 const transformCanNotBeDeleted = (i: TransformListRow) =>
   !([TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED] as TransformState[]).includes(i.stats.state);
 
-export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
-  const disabled = items.some(transformCanNotBeDeleted);
+export const isDeleteActionDisabled = (
+  items: TransformListRow[],
+  canResetTransform: boolean,
+  forceDisable: boolean
+) => {
+  const disabled = !canResetTransform || items.some(transformCanNotBeDeleted);
   return forceDisable === true || disabled;
 };
 
@@ -51,20 +55,19 @@ export const DeleteActionName: FC<DeleteActionNameProps> = ({
     }
   );
 
-  if (disabled || !canDeleteTransform) {
-    let content;
+  let content;
+  if (!canDeleteTransform) {
+    content = createCapabilityFailureMessage('canDeleteTransform');
+  } else {
     if (disabled) {
       content = isBulkAction ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
-    } else {
-      content = createCapabilityFailureMessage('canDeleteTransform');
     }
-
-    return (
-      <EuiToolTip position="top" content={content}>
-        <>{deleteActionNameText}</>
-      </EuiToolTip>
-    );
   }
-
-  return <>{deleteActionNameText}</>;
+  return content ? (
+    <EuiToolTip position="top" content={content}>
+      <>{deleteActionNameText}</>
+    </EuiToolTip>
+  ) : (
+    <>{deleteActionNameText}</>
+  );
 };
