@@ -79,7 +79,9 @@ export const generateMlInferencePipelineBody = ({
         ignore_missing: true,
       },
     });
-    remove && pipelineDefinition.processors?.push({ remove });
+    if (remove) {
+      pipelineDefinition.processors?.push({ remove });
+    }
     pipelineDefinition.processors?.push({ inference });
   });
 
@@ -99,10 +101,12 @@ export const generateMlInferencePipelineBody = ({
   });
 
   // Add set processors
-  fieldMappings.forEach(({ sourceField, targetField }) => {
+  fieldMappings.forEach(({ targetField }) => {
     const set = getSetProcessorForInferenceType(targetField, inferenceType);
 
-    set && pipelineDefinition.processors?.push({ set });
+    if (set) {
+      pipelineDefinition.processors?.push({ set });
+    }
   });
 
   return pipelineDefinition;
