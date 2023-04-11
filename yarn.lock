@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@76.4.0":
-  version "76.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.4.0.tgz#be7d8afadd3848cf1513c095e68a9e4db8fcbac7"
-  integrity sha512-0b3w6CloIZZ8B+URDSYLQsyTtc/GadkbNcoDg+20SeRuB8q339S+n6tbq+sVX+uk/RtRu1T/068mAd6nZZmqIg==
+"@elastic/eui@77.0.0":
+  version "77.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-77.0.0.tgz#931bb7f8a109b571dedefe481ccf41a9229a6286"
+  integrity sha512-4RV6GxSFFWGEZtUkLpZWQrwTdEVMq/hmicSZiCpvJUnilLmhfnNEGqCn5Qu8g/OOb5AL3XayfytWMiiaJ9Yw+g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -6168,6 +6168,11 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.1.0.tgz#563539048255bbe1a5f4f586a4a10a1bb737f44a"
   integrity sha512-hf+3bwuBwtXsugA2ULBc95qxrOqP2pOekLz34BJhcAKawt94vfeNyUKpYc0lZQ/3sCP6LqRa7UAdHA7i5UODzQ==
+
+"@opentelemetry/api@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.4.1.tgz#ff22eb2e5d476fbc2450a196e40dd243cc20c28f"
+  integrity sha512-O2yRJce1GOc6PAy3QxFM4NzFiWzvScDC1/5ihYBL6BUEVdq0XMWN01sppE+H6bBXbaFYipjwFLEWLg5PaSOThA==
 
 "@opentelemetry/core@1.4.0":
   version "1.4.0"
@@ -14183,6 +14188,21 @@ elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
+elastic-apm-http-client@11.3.1:
+  version "11.3.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.3.1.tgz#cf2c73f973e0400812c443812a0d5a8a08e5a4b2"
+  integrity sha512-AicMDPJYmO4tGTRcZQZFS7nhyGAQ6f4hUTKQVxiM/6mHo6F895JsJoPVwOE2yCathKDnD9LVS9zWdT2wvG8gxA==
+  dependencies:
+    agentkeepalive "^4.2.1"
+    breadth-filter "^2.0.0"
+    end-of-stream "^1.4.4"
+    fast-safe-stringify "^2.0.7"
+    fast-stream-to-buffer "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    readable-stream "^3.4.0"
+    semver "^6.3.0"
+    stream-chopper "^3.0.1"
+
 elastic-apm-node@^3.38.0:
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
@@ -14223,13 +14243,13 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.43.0:
-  version "3.43.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.43.0.tgz#3d644cdb403c8230f5db7b6a3796d19e38faa2b7"
-  integrity sha512-iFuP8pXkfQst1LOFq6F86EjHhkvUL+pigpmbw2KL8rs+9i7Fn5pkxf8RP1G3oqwqydwUSdvw5+DPhO0lDO+LtA==
+elastic-apm-node@^3.44.0:
+  version "3.44.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.44.1.tgz#8a6e88fa9f3401455dddb87f9d5559f6d894964d"
+  integrity sha512-hSf+S6GtQ+Ff5ueyQ1n2BAgAdiDOZ+XmHKFurzpB5/rvRFz6JbXLq+pcI11HMlK3ImiMVG9LQxHWMN6gqkqzYQ==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
-    "@opentelemetry/api" "^1.1.0"
+    "@opentelemetry/api" "^1.4.1"
     after-all-results "^2.0.0"
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
@@ -14237,7 +14257,7 @@ elastic-apm-node@^3.43.0:
     cookie "^0.5.0"
     core-util-is "^1.0.2"
     debug "^4.1.1"
-    elastic-apm-http-client "11.2.0"
+    elastic-apm-http-client "11.3.1"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
