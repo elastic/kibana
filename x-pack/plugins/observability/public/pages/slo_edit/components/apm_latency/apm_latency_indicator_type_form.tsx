@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
@@ -16,7 +16,7 @@ import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -89,32 +89,35 @@ export function ApmLatencyIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.apmLatency.threshold.placeholder', {
-              defaultMessage: 'Threshold (ms)',
-            })}
-          </EuiFormLabel>
-          <Controller
-            shouldUnregister={true}
-            name="indicator.params.threshold"
-            control={control}
-            defaultValue={250}
-            rules={{
-              required: true,
-              min: 0,
-            }}
-            render={({ field: { ref, ...field }, fieldState }) => (
-              <EuiFieldNumber
-                {...field}
-                required
-                isInvalid={fieldState.invalid}
-                value={String(field.value)}
-                data-test-subj="apmLatencyThresholdInput"
-                min={0}
-                onChange={(event) => field.onChange(Number(event.target.value))}
-              />
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability.slo.sloEdit.apmLatency.threshold.placeholder',
+              { defaultMessage: 'Threshold (ms)' }
             )}
-          />
+            isInvalid={getFieldState('indicator.params.threshold').invalid}
+          >
+            <Controller
+              shouldUnregister={true}
+              name="indicator.params.threshold"
+              control={control}
+              defaultValue={250}
+              rules={{
+                required: true,
+                min: 0,
+              }}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <EuiFieldNumber
+                  {...field}
+                  required
+                  isInvalid={fieldState.invalid}
+                  value={String(field.value)}
+                  data-test-subj="apmLatencyThresholdInput"
+                  min={0}
+                  onChange={(event) => field.onChange(Number(event.target.value))}
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBuilder

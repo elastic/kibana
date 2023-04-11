@@ -11,7 +11,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
+  EuiFormRow,
 } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -98,47 +98,52 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
-              defaultMessage: 'Good status codes',
-            })}
-          </EuiFormLabel>
-          <Controller
-            shouldUnregister={true}
-            name="indicator.params.goodStatusCodes"
-            control={control}
-            defaultValue={['2xx', '3xx', '4xx']}
-            rules={{ required: true }}
-            render={({ field: { ref, ...field }, fieldState }) => (
-              <EuiComboBox
-                {...field}
-                aria-label={i18n.translate(
-                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                  {
-                    defaultMessage: 'Select the good status codes',
-                  }
-                )}
-                placeholder={i18n.translate(
-                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                  {
-                    defaultMessage: 'Select the good status codes',
-                  }
-                )}
-                isInvalid={!!fieldState.error}
-                options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
-                selectedOptions={generateStatusCodeOptions(field.value)}
-                onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  if (selected.length) {
-                    return field.onChange(selected.map((opts) => opts.value));
-                  }
-
-                  field.onChange([]);
-                }}
-                isClearable={true}
-                data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
-              />
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes',
+              {
+                defaultMessage: 'Good status codes',
+              }
             )}
-          />
+            isInvalid={getFieldState('indicator.params.goodStatusCodes').invalid}
+          >
+            <Controller
+              shouldUnregister={true}
+              name="indicator.params.goodStatusCodes"
+              control={control}
+              defaultValue={['2xx', '3xx', '4xx']}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <EuiComboBox
+                  {...field}
+                  aria-label={i18n.translate(
+                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                    {
+                      defaultMessage: 'Select the good status codes',
+                    }
+                  )}
+                  placeholder={i18n.translate(
+                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                    {
+                      defaultMessage: 'Select the good status codes',
+                    }
+                  )}
+                  isInvalid={fieldState.invalid}
+                  options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
+                  selectedOptions={generateStatusCodeOptions(field.value)}
+                  onChange={(selected: EuiComboBoxOptionOption[]) => {
+                    if (selected.length) {
+                      return field.onChange(selected.map((opts) => opts.value));
+                    }
+
+                    field.onChange([]);
+                  }}
+                  isClearable={true}
+                  data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBuilder

@@ -30,7 +30,7 @@ interface Option {
 }
 
 export function CustomKqlIndicatorTypeForm() {
-  const { control, watch } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
 
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(
     watch('indicator.params.index')
@@ -41,7 +41,7 @@ export function CustomKqlIndicatorTypeForm() {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <IndexSelection control={control} />
+          <IndexSelection />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
@@ -49,6 +49,7 @@ export function CustomKqlIndicatorTypeForm() {
               'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
               { defaultMessage: 'Timestamp field' }
             )}
+            isInvalid={getFieldState('indicator.params.timestampField').invalid}
           >
             <Controller
               name="indicator.params.timestampField"
@@ -71,7 +72,7 @@ export function CustomKqlIndicatorTypeForm() {
                   data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
                   isClearable={true}
                   isDisabled={!watch('indicator.params.index')}
-                  isInvalid={!!fieldState.error}
+                  isInvalid={fieldState.invalid}
                   isLoading={!!watch('indicator.params.index') && isLoading}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {
