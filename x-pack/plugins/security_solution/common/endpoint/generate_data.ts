@@ -1921,7 +1921,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
                   status: status(),
                 },
               },
-            },
+              // TODO:PT refactor to use EndpointPolicyResponse Generator
+            } as HostPolicyResponse['Endpoint']['policy']['applied']['response'],
             artifacts: {
               global: {
                 version: '1.4.0',
