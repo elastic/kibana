@@ -4621,6 +4621,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""
