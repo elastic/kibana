@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import { MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from '../constants';
 import { WaterfallChartSidebarWrapper, WaterfallChartTimeTicksContainer } from '../styles';
@@ -46,29 +46,39 @@ export const WaterfallTickAxis = ({
             {shouldRenderSidebar && (
               <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
                 {highlightedNetworkRequests < fetchedNetworkRequests ? (
-                  <EuiSwitch
-                    data-test-subj="syntheticsWaterfallHideNonMatching"
-                    css={{
-                      marginTop: euiTheme.size.s,
-                      marginLeft: euiTheme.size.m,
-                      whiteSpace: 'nowrap',
-                    }}
-                    compressed={true}
-                    title={FILTER_COLLAPSE_REQUESTS_LABEL}
-                    aria-label={FILTER_COLLAPSE_REQUESTS_LABEL}
-                    label={
+                  <>
+                    <EuiFlexGroup
+                      role="button"
+                      gutterSize="s"
+                      alignItems="center"
+                      data-test-subj="syntheticsWaterfallHideNonMatching"
+                      aria-pressed={showOnlyHighlightedNetworkRequests}
+                      title={FILTER_COLLAPSE_REQUESTS_LABEL}
+                      aria-label={FILTER_COLLAPSE_REQUESTS_LABEL}
+                      css={{
+                        marginTop: euiTheme.size.s,
+                        marginLeft: euiTheme.size.m,
+                        marginBottom: euiTheme.size.s,
+                        whiteSpace: 'nowrap',
+                        cursor: 'pointer',
+                        color: euiTheme.colors.primaryText,
+                      }}
+                      onClick={() => {
+                        setOnlyHighlighted(!showOnlyHighlightedNetworkRequests);
+                      }}
+                    >
+                      <EuiIcon
+                        type={showOnlyHighlightedNetworkRequests ? 'eyeClosed' : 'eye'}
+                        size="s"
+                      />
                       <EuiText size="xs">
                         <FormattedMessage
-                          id="xpack.synthetics.waterfall.networkRequests.hideNonMatching"
-                          defaultMessage="Hide nonmatching"
+                          id="xpack.synthetics.waterfall.networkRequests.filteredOut"
+                          defaultMessage="Filtered out"
                         />
                       </EuiText>
-                    }
-                    checked={showOnlyHighlightedNetworkRequests}
-                    onChange={(e) => {
-                      setOnlyHighlighted(e.target.checked);
-                    }}
-                  />
+                    </EuiFlexGroup>
+                  </>
                 ) : null}
               </WaterfallChartSidebarWrapper>
             )}
