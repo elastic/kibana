@@ -52,7 +52,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         title={
           <FormattedMessage
             id="xpack.synthetics.alerting.noConnectorsCallout.header"
-            defaultMessage="Alert connectors missing"
+            defaultMessage="Alerts are not being sent"
           />
         }
         color="warning"
@@ -61,7 +61,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         <p>
           <FormattedMessage
             id="xpack.synthetics.alerting.noConnectorsCallout.content"
-            defaultMessage="You have at least 1 monitor configured with alerting but have no default connectors configured, meaning you will not receive any alerts. Configure your default connector {here}."
+            defaultMessage="You have monitors with alerting enabled, but there is no default connector configured to send those alerts. Configure your default connector {here}."
             values={{
               here: (
                 <EuiLink data-test-subj="syntheticsAlertingCalloutHeresALinkLink" href={url}>
