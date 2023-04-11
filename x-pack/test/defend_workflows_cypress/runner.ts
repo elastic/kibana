@@ -22,7 +22,7 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
-  const kbnClient = getService('kibanaServer');
+  // const kbnClient = getService('kibanaServer');
 
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
   const kibanaUrl = Url.format(config.get('servers.kibana'));
