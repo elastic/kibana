@@ -31,7 +31,9 @@ interface Props {
   loading: boolean;
 }
 
-type SearchErrorType = undefined | { message: string };
+interface SearchErrorType {
+  message: string;
+}
 
 /**
  * Columns translations
@@ -67,7 +69,7 @@ const LOADING = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.lo
 
 export const Table = (props: Props) => {
   const { rows, loading } = props;
-  const [searchError, setSearchError] = useState<SearchErrorType>(undefined);
+  const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     hostFlyoutOpen.metadataSearch ? Query.parse(hostFlyoutOpen.metadataSearch) : Query.MATCH_ALL
@@ -79,7 +81,7 @@ export const Table = (props: Props) => {
         setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' });
         setSearchBarState(query);
       }, 500),
-    [setHostFlyoutOpen]
+    [setHostFlyoutOpen, setSearchBarState]
   );
 
   const searchBarOnChange = useCallback(
@@ -87,7 +89,7 @@ export const Table = (props: Props) => {
       if (error) {
         setSearchError(error);
       } else {
-        setSearchError(undefined);
+        setSearchError(null);
         debouncedSearchOnChange(queryText, query);
       }
     },
@@ -134,7 +136,7 @@ export const Table = (props: Props) => {
       items={rows}
       search={search}
       loading={loading}
-      error={searchError ? `Invalid search: ${searchError.message}` : ''}
+      error={searchError ? `${searchError.message}` : ''}
       message={
         loading ? (
           <div>{LOADING}</div>
