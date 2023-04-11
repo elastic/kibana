@@ -35,7 +35,7 @@ async function withFleetAgent(
     kibanaUrl,
     username,
     password,
-    version: getLatestAvailableAgentVersion(kbnClient),
+    version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
   const fleetManager = new FleetManager(log);
