@@ -61,6 +61,7 @@ interface Props {
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
   filterSeriesByGroupName?: string[];
+  showExplanatoryTimeText?: boolean;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -71,6 +72,7 @@ export const CriterionPreview: React.FC<Props> = ({
   executionTimeRange,
   annotations,
   filterSeriesByGroupName,
+  showExplanatoryTimeText = true,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -117,6 +119,7 @@ export const CriterionPreview: React.FC<Props> = ({
       executionTimeRange={executionTimeRange}
       annotations={annotations}
       filterSeriesByGroupName={filterSeriesByGroupName}
+      showExplanatoryTimeText={showExplanatoryTimeText}
     />
   );
 };
@@ -130,6 +133,7 @@ interface ChartProps {
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
   filterSeriesByGroupName?: string[];
+  showExplanatoryTimeText?: boolean;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -141,6 +145,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   executionTimeRange,
   annotations,
   filterSeriesByGroupName,
+  showExplanatoryTimeText = true,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -334,31 +339,33 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {groupByLabel != null ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
-              values={{
-                groupByLabel,
-                timeLabel,
-                lookback,
-                displayedGroups: filteredSeries.length,
-                totalGroups: series.length,
-              }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel} of data"
-              values={{ timeLabel, lookback }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {showExplanatoryTimeText && (
+        <div style={{ textAlign: 'center' }}>
+          {groupByLabel != null ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
+                values={{
+                  groupByLabel,
+                  timeLabel,
+                  lookback,
+                  displayedGroups: filteredSeries.length,
+                  totalGroups: series.length,
+                }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel} of data"
+                values={{ timeLabel, lookback }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

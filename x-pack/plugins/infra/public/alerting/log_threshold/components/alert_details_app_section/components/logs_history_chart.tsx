@@ -151,6 +151,7 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
         chartCriterion={criteria as PartialCriterion}
         showThreshold={true}
         executionTimeRange={executionTimeRange}
+        showExplanatoryTimeText={false}
       />
     </EuiPanel>
   );

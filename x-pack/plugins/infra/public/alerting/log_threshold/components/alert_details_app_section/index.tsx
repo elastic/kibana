@@ -148,6 +148,7 @@ const AlertDetailsAppSection = ({
                       />,
                     ]}
                     filterSeriesByGroupName={[selectedSeries]}
+                    showExplanatoryTimeText={false}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
