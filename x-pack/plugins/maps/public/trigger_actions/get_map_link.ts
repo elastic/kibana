@@ -12,11 +12,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
 import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
-import {
-  getData,
-  getIndexPatternService,
-  getShareService,
-} from '../kibana_services';
+import { getData, getIndexPatternService, getShareService } from '../kibana_services';
 
 export const getMapsLink = async (context: VisualizeFieldContext) => {
   const dataView = await getIndexPatternService().get(context.dataViewSpec.id!);

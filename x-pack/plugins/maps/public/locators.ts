@@ -77,7 +77,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     const rison = await import('@kbn/rison');
     const { isFilterPinned } = await import('@kbn/es-query');
     const { setStateToKbnUrl } = await import('@kbn/kibana-utils-plugin/public');
-    
+
     const { mapId, filters, query, refreshInterval, timeRange, initialLayers, hash } = params;
     const useHash = hash ?? this.deps.useHash;
     const appState: {
@@ -157,7 +157,9 @@ export class MapsAppTileMapLocatorDefinition
       timeRange,
       hash = true,
     } = params;
-    const { createTileMapLayerDescriptor } = await import('./classes/layers/create_tile_map_layer_descriptor');
+    const { createTileMapLayerDescriptor } = await import(
+      './classes/layers/create_tile_map_layer_descriptor'
+    );
     const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const tileMapLayerDescriptor = createTileMapLayerDescriptor({
       label,
@@ -230,7 +232,9 @@ export class MapsAppRegionMapLocatorDefinition
       timeRange,
       hash = true,
     } = params;
-    const { createRegionMapLayerDescriptor } = await import('./classes/layers/create_region_map_layer_descriptor');
+    const { createRegionMapLayerDescriptor } = await import(
+      './classes/layers/create_region_map_layer_descriptor'
+    );
     const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
     const regionMapLayerDescriptor = createRegionMapLayerDescriptor({
       label,

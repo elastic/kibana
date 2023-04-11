@@ -13,11 +13,7 @@ import {
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import { APP_ID } from '../../common/constants/page_load_constants';
-import {
-  getVisualizeCapabilities,
-  getCore,
-  getUsageCollection,
-} from '../kibana_services';
+import { getVisualizeCapabilities, getCore, getUsageCollection } from '../kibana_services';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,

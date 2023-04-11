@@ -15,12 +15,7 @@ import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
-import {
-  LAYER_TYPE,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  SOURCE_DATA_REQUEST_ID,
-} from '../../../common/constants';
+import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM, SOURCE_DATA_REQUEST_ID } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,

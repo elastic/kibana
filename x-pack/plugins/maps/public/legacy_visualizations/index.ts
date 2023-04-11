@@ -6,4 +6,10 @@
  */
 
 export { createRegionMapFn, regionMapRenderer, regionMapVisType } from './region_map';
-export { createTileMapFn, GEOHASH_GRID, getGeoHashBucketAgg, tileMapRenderer, tileMapVisType } from './tile_map';
+export {
+  createTileMapFn,
+  GEOHASH_GRID,
+  getGeoHashBucketAgg,
+  tileMapRenderer,
+  tileMapVisType,
+} from './tile_map';

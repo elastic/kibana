@@ -17,7 +17,10 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   return new MapsPlugin(initContext);
 };
 
-export { GEOJSON_FEATURE_ID_PROPERTY_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants/page_load_constants';
+export {
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../common/constants/page_load_constants';
 export { MAPS_APP_LOCATOR } from './locators';
 export type { PreIndexedShape } from '../common/elasticsearch_util';
 

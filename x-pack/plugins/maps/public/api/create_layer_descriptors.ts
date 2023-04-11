@@ -13,11 +13,15 @@ export const createLayerDescriptors = {
     indexPatternId: string,
     indexPatternTitle: string
   ): Promise<LayerDescriptor[]> {
-    const { createSecurityLayerDescriptors } = await import('../classes/layers/wizards/solution_layers/security');
+    const { createSecurityLayerDescriptors } = await import(
+      '../classes/layers/wizards/solution_layers/security'
+    );
     return createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
   },
   async createBasemapLayerDescriptor(): Promise<LayerDescriptor | null> {
-    const { createBasemapLayerDescriptor } = await import('../classes/layers/create_basemap_layer_descriptor');
+    const { createBasemapLayerDescriptor } = await import(
+      '../classes/layers/create_basemap_layer_descriptor'
+    );
     return createBasemapLayerDescriptor();
   },
   async createESSearchSourceLayerDescriptor(

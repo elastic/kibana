@@ -9,7 +9,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants/page_load_constants';
-//import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
+// import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
@@ -34,7 +34,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    //return getMapEmbeddableDisplayName();
+    // return getMapEmbeddableDisplayName();
     return 'map';
   }
 
