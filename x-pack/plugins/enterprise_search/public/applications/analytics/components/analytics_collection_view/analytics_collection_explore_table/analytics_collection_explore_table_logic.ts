@@ -308,7 +308,15 @@ export const AnalyticsCollectionExplorerTablesLogic = kea<
   path: ['enterprise_search', 'analytics', 'collections', 'explore', 'tables'],
   reducers: () => ({
     dataView: [null, { setDataView: (_, { dataView }) => dataView }],
-    isLoading: [false, { setItems: () => false, setSelectedTable: () => true }],
+    isLoading: [
+      false,
+      {
+        setItems: () => false,
+        setSelectedTable: () => true,
+        [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => true,
+        [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => true,
+      },
+    ],
     items: [[], { setItems: (_, { items }) => items }],
     selectedTable: [null, { setSelectedTable: (_, { id }) => id }],
     sorting: [
