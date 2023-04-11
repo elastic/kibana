@@ -9,9 +9,9 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import type { Tag } from './utils';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
 import type { BulkCreateSavedObjectsResult } from '../types';
+import { createTag, findTagsByName } from '../../../dashboards/saved_objects/tags';
 
 export const findRiskScoreTag = async ({
   savedObjectsClient,
@@ -20,17 +20,9 @@ export const findRiskScoreTag = async ({
   savedObjectsClient: SavedObjectsClientContract;
   search: string;
 }) => {
-  const tagResponse = await savedObjectsClient.find<Tag>({
-    type: 'tag',
-    search,
-    searchFields: ['name'],
-    sortField: 'updated_at',
-    sortOrder: 'desc',
-  });
+  const { response: tagResponse } = await findTagsByName({ savedObjectsClient, search });
 
-  const existingRiskScoreTag = tagResponse.saved_objects.find(
-    ({ attributes }) => attributes.name === search
-  );
+  const existingRiskScoreTag = tagResponse?.find(({ attributes }) => attributes.name === search);
 
   return existingRiskScoreTag
     ? {
@@ -85,23 +77,26 @@ export const findOrCreateRiskScoreTag = async ({
       },
     };
   } else {
-    try {
-      const { id: tagId } = await savedObjectsClient.create('tag', {
-        name: tagName,
-        description: RISK_SCORE_TAG_DESCRIPTION,
-        color: '#6edb7f',
-      });
+    const { error, response: createTagResponse } = await createTag({
+      savedObjectsClient,
+      tagName,
+      description: RISK_SCORE_TAG_DESCRIPTION,
+      color: '#6edb7f',
+    });
 
+    if (!error && createTagResponse?.id) {
       return {
         [savedObjectTemplate]: {
           success: true,
           error: null,
-          body: { ...tag, id: tagId },
+          body: { ...tag, id: createTagResponse?.id },
         },
       };
-    } catch (e) {
+    } else {
       logger.error(
-        `${savedObjectTemplate} cannot be installed as failed to create the tag: ${tagName}`
+        `${savedObjectTemplate} cannot be installed as failed to create the tag: ${tagName} - ${JSON.stringify(
+          error?.message
+        )}`
       );
       return {
         [savedObjectTemplate]: {
