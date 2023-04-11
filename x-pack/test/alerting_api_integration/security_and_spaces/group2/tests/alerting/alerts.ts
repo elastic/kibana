@@ -47,7 +47,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.indices.delete({ index: alertAsDataIndex });
+      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
     });
 
     for (const scenario of UserAtSpaceScenarios) {

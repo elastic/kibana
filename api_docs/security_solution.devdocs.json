@@ -2023,20 +2023,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getQueryRuleAdditionalOptions",
-            "type": "Object",
-            "tags": [],
-            "label": "getQueryRuleAdditionalOptions",
-            "description": [],
-            "signature": [
-              "CreateQueryRuleAdditionalOptions"
-            ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

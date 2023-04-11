@@ -57,6 +57,7 @@
     "@kbn/ml-is-defined",
     "@kbn/ml-query-utils",
     "@kbn/saved-search-plugin",
+    "@kbn/unified-field-list-plugin",
   ],
   "exclude": [
     "target/**/*",

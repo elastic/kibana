@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
 import { createMemoryStorage } from './mocks';
@@ -31,6 +32,8 @@ import type {
   SearchItemError,
 } from './event_types';
 import { ContentTypeDefinition, StorageContext } from './types';
+import { until } from '../event_stream/tests/util';
+import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -48,8 +51,13 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
     },
   };
 
-  const core = new Core({ logger });
+  const eventStream = setupEventStreamService().service;
+  const core = new Core({
+    logger,
+    eventStream,
+  });
   const coreSetup = core.setup();
+
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
@@ -76,6 +84,7 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
     fooContentCrud,
     cleanUp,
     eventBus: coreSetup.api.eventBus,
+    eventStream,
   };
 };
 
@@ -836,6 +845,41 @@ describe('Content Core', () => {
 
             sub.unsubscribe();
             cleanUp();
+          });
+        });
+      });
+
+      describe('eventStream', () => {
+        test('stores "delete" events', async () => {
+          const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
+          await fooContentCrud!.delete(ctx, '1234');
+
+          const findEvent = async () => {
+            const tail = await eventStream.tail();
+
+            for (const event of tail) {
+              if (
+                event.predicate[0] === 'delete' &&
+                event.object &&
+                event.object[0] === 'foo' &&
+                event.object[1] === '1234'
+              ) {
+                return event;
+              }
+            }
+
+            return null;
+          };
+
+          await until(async () => !!(await findEvent()), 100);
+
+          const event = await findEvent();
+
+          expect(event).toMatchObject({
+            predicate: ['delete'],
+            object: ['foo', '1234'],
           });
         });
       });

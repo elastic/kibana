@@ -71,6 +71,7 @@ export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParam
   'alertTypeId',
   'apiKey',
   'apiKeyOwner',
+  'apiKeyCreatedByUser',
   'consumer',
   'createdAt',
   'createdBy',

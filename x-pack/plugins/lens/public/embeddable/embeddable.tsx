@@ -138,6 +138,12 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+interface PreventableEvent {
+  preventDefault(): void;
+}
+
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
@@ -148,10 +154,14 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
+  onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
+  onFilter?: (
+    data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
+  ) => void;
+  onTableRowClick?: (
+    data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
+  ) => void;
 }
 
 export type LensByValueInput = {
@@ -1102,45 +1112,68 @@ export class Embeddable
       return;
     }
     if (isLensBrushEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
-
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
+        this.input.onBrushEnd({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
       }
     }
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onFilter) {
-        this.input.onFilter(event.data);
+        this.input.onFilter({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
       }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
-        {
-          data: event.data,
-          embeddable: this,
-        },
-        true
-      );
+      let shouldExecuteDefaultTriggers = true;
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick({
+          ...event.data,
+          preventDefault: () => {
+            shouldExecuteDefaultTriggers = false;
+          },
+        });
+      }
+      if (shouldExecuteDefaultTriggers) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+          {
+            data: event.data,
+            embeddable: this,
+          },
+          true
+        );
       }
     }
 

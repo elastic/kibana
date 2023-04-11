@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { lazy } from 'react';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
-
-const AttachmentActions: React.FC = () => {
-  return (
-    <EuiButtonIcon
-      data-test-subj="test-attachment-action"
-      onClick={() => {}}
-      iconType="arrowRight"
-      aria-label="See attachment"
-    />
-  );
-};
 
 export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttachmentType => ({
   id: '.test',
@@ -29,7 +17,9 @@ export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttach
   getAttachmentViewObject: () => ({
     event: 'added a chart',
     timelineAvatar: 'casesApp',
-    actions: <AttachmentActions />,
+    getActions: () => [
+      { label: 'See attachment', onClick: () => {}, isPrimary: true, iconType: 'arrowRight' },
+    ],
     children: AttachmentContentLazy,
   }),
 });
