@@ -15,7 +15,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-import { getLatestAvailableAgentVersion } from '../defend_workflows_cypress/utils';
+// import { getLatestAvailableAgentVersion } from '../defend_workflows_cypress/utils';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
@@ -36,7 +36,7 @@ async function withFleetAgent(
     kibanaUrl,
     username,
     password,
-    version: await getLatestAvailableAgentVersion(kbnClient),
+    version: '8.7.1-SNAPSHOT',
   });
 
   const fleetManager = new FleetManager(kbnClient, log);
