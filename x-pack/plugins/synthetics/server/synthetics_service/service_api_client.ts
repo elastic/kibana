@@ -10,7 +10,7 @@ import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
-import { Logger } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
@@ -34,6 +34,7 @@ export class ServiceAPIClient {
   private readonly authorization: string;
   public locations: PublicLocations;
   private logger: Logger;
+  private esClient?: ElasticsearchClient;
   private readonly config?: ServiceConfig;
   private readonly stackVersion: string;
   private readonly server: UptimeServerSetup;
@@ -53,6 +54,25 @@ export class ServiceAPIClient {
     this.logger = logger;
     this.locations = [];
     this.server = server;
+  }
+
+  private async getLicense() {
+    this.esClient = this.getESClient();
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
+    }
+    try {
+      return await this.esClient.license.get();
+    } catch (e) {
+      this.logger.debug(`Error fetching license information: ${e}`);
+    }
+  }
+
+  private getESClient() {
+    if (!this.server.coreStart) {
+      return;
+    }
+    return this.server.coreStart?.elasticsearch.client.asInternalUser;
   }
 
   getHttpsAgent(targetUrl: string) {
@@ -111,7 +131,7 @@ export class ServiceAPIClient {
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
       /* url is required for service locations, but omitted for private locations.
-      /* this.locations is only service locations */
+  /* this.locations is only service locations */
       const httpsAgent = this.getHttpsAgent(url);
 
       if (httpsAgent) {
@@ -139,10 +159,16 @@ export class ServiceAPIClient {
     method: 'POST' | 'PUT' | 'DELETE',
     { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
   ) {
+    if (!this.server.coreStart) {
+      // must wait for core start to be available in order
+      // to send license information
+      return;
+    }
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
       return;
     }
+    const { license } = await this.getLicense();
 
     const pushErrors: ServiceLocationErrors = [];
 
