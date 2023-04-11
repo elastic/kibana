@@ -33,42 +33,9 @@ describe('EditDashboardButton', () => {
   it('should render', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <EditDashboardButton
-          dashboardExists={true}
-          savedObjectId="mockSavedObjectId"
-          showWriteControls={true}
-          timeRange={timeRange}
-        />
+        <EditDashboardButton savedObjectId="mockSavedObjectId" timeRange={timeRange} />
       </TestProviders>
     );
     expect(queryByTestId('dashboardEditButton')).toBeInTheDocument();
-  });
-
-  it('should not render when showWriteControls equals false', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <EditDashboardButton
-          dashboardExists={true}
-          savedObjectId="mockSavedObjectId"
-          showWriteControls={false}
-          timeRange={timeRange}
-        />
-      </TestProviders>
-    );
-    expect(queryByTestId('dashboardEditButton')).not.toBeInTheDocument();
-  });
-
-  it('should not render when dashboardExists equals false', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <EditDashboardButton
-          dashboardExists={false}
-          savedObjectId="mockSavedObjectId"
-          showWriteControls={true}
-          timeRange={timeRange}
-        />
-      </TestProviders>
-    );
-    expect(queryByTestId('dashboardEditButton')).not.toBeInTheDocument();
   });
 });

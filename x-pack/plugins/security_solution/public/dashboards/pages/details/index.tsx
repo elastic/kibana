@@ -57,6 +57,7 @@ const DashboardViewComponent: React.FC = () => {
     setDashboardDetails({ dashboardTitle });
   }, []);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
+  const dashboardExists = !isEmpty(dashboardDetails?.dashboardTitle);
 
   useEffect(() => {
     if (!indicesExist) {
@@ -73,14 +74,14 @@ const DashboardViewComponent: React.FC = () => {
       )}
       <SecuritySolutionPageWrapper>
         <HeaderPage border title={DASHBOARD_PAGE_TITLE}>
-          <EditDashboardButton
-            filters={filters}
-            query={query}
-            savedObjectId={savedObjectId}
-            showWriteControls={showWriteControls}
-            timeRange={timeRange}
-            dashboardExists={!isEmpty(dashboardDetails?.dashboardTitle)}
-          />
+          {showWriteControls && dashboardExists && (
+            <EditDashboardButton
+              filters={filters}
+              query={query}
+              savedObjectId={savedObjectId}
+              timeRange={timeRange}
+            />
+          )}
         </HeaderPage>
 
         {indicesExist && (

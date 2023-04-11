@@ -13,11 +13,9 @@ import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
 import { useKibana } from '../../common/lib/kibana';
 
 export interface EditDashboardButtonComponentProps {
-  dashboardExists: boolean;
   filters?: Filter[];
   query?: Query;
   savedObjectId: string | undefined;
-  showWriteControls: boolean;
   timeRange: {
     from: string;
     to: string;
@@ -27,11 +25,9 @@ export interface EditDashboardButtonComponentProps {
 }
 
 const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> = ({
-  dashboardExists,
   filters,
   query,
   savedObjectId,
-  showWriteControls,
   timeRange,
 }) => {
   const {
@@ -46,7 +42,7 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
     savedObjectId,
   });
 
-  return showWriteControls && dashboardExists ? (
+  return (
     <EuiButton
       color="primary"
       fill
@@ -56,7 +52,7 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
     >
       {EDIT_DASHBOARD_BUTTON_TITLE}
     </EuiButton>
-  ) : null;
+  );
 };
 
 EditDashboardButtonComponent.displayName = 'EditDashboardComponent';
