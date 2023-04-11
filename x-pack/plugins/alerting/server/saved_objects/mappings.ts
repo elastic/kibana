@@ -114,12 +114,12 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     // apiKeyOwner: {
     //   type: 'keyword',
     // },
-    // throttle: {
-    //   type: 'keyword',
-    // },
-    // notifyWhen: {
-    //   type: 'keyword',
-    // },
+    throttle: {
+      type: 'keyword',
+    },
+    notifyWhen: {
+      type: 'keyword',
+    },
     muteAll: {
       type: 'boolean',
     },
