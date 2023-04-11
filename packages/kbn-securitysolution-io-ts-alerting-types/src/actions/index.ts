@@ -35,6 +35,15 @@ export const RuleActionAlertsFilter = t.strict({
     t.intersection([
       t.strict({
         kql: t.string,
+        filters: t.intersection([
+          t.type({
+            meta: t.record(t.string, t.unknown),
+          }),
+          t.partial({
+            $state: t.string,
+            query: t.record(t.string, t.string),
+          }),
+        ]),
       }),
       t.partial({ dsl: t.string }),
     ]),
