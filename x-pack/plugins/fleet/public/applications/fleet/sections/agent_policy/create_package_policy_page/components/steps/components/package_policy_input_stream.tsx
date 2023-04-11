@@ -271,21 +271,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       </EuiFlexItem>
                       {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            size="xs"
-                            iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                            onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                            flush="left"
-                            data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
-                              defaultMessage="Advanced options"
-                            />
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
-                        <EuiFlexItem grow={false}>
                           <EuiText color="danger" size="s">
                             <FormattedMessage
                               id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
@@ -318,7 +303,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                       value: newValue,
                                     },
                                   },
-                                },
                               });
                             }}
                             errors={inputStreamValidationResults?.vars![varName]}
