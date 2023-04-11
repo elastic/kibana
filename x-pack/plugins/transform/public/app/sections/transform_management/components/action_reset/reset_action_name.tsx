@@ -22,12 +22,8 @@ export const resetActionNameText = i18n.translate(
 const transformCanNotBeReseted = (i: TransformListRow) =>
   !([TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED] as TransformState[]).includes(i.stats.state);
 
-export const isResetActionDisabled = (
-  items: TransformListRow[],
-  canResetTransform: boolean,
-  forceDisable: boolean
-) => {
-  const disabled = !canResetTransform || items.some(transformCanNotBeReseted);
+export const isResetActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
+  const disabled = items.some(transformCanNotBeReseted);
   return forceDisable === true || disabled;
 };
 
@@ -55,19 +51,20 @@ export const ResetActionName: FC<ResetActionNameProps> = ({
     }
   );
 
-  let content;
-  if (!canResetTransform) {
-    content = createCapabilityFailureMessage('canResetTransform');
-  } else {
+  if (disabled || !canResetTransform) {
+    let content;
     if (disabled) {
       content = isBulkAction ? bulkResetButtonDisabledText : resetButtonDisabledText;
+    } else {
+      content = createCapabilityFailureMessage('canResetTransform');
     }
+
+    return (
+      <EuiToolTip position="top" content={content}>
+        <>{resetActionNameText}</>
+      </EuiToolTip>
+    );
   }
-  return content ? (
-    <EuiToolTip position="top" content={content}>
-      <>{resetActionNameText}</>
-    </EuiToolTip>
-  ) : (
-    <>{resetActionNameText}</>
-  );
+
+  return <>{resetActionNameText}</>;
 };
