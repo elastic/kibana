@@ -32,8 +32,6 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = () => {
   const { productAccess, productFeatures } = useValues(KibanaLogic);
 
-  const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
-
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
       id: 'es_overview',
@@ -80,6 +78,44 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
+      id: 'enginesSearch',
+      items: [
+        {
+          id: 'elasticsearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+            defaultMessage: 'Elasticsearch',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'enterpriseSearchEngines',
+          name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
+            defaultMessage: 'Engines',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+          }),
+        },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
+        defaultMessage: 'Search',
+      }),
+    },
+    {
       id: 'enterpriseSearchAnalytics',
       items: [
         {
@@ -97,149 +133,47 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Behavioral Analytics',
       }),
     },
-    {
-      id: 'search',
-      items: [
-        {
-          id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Elasticsearch',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ELASTICSEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
-          }),
-        },
-        ...(productAccess.hasAppSearchAccess
-          ? [
-              {
-                id: 'app_search',
-                name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
-                  defaultMessage: 'App Search',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  to: APP_SEARCH_PLUGIN.URL,
-                }),
-              },
-            ]
-          : []),
-        ...(productAccess.hasWorkplaceSearchAccess
-          ? [
-              {
-                id: 'workplace_search',
-                name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
-                  defaultMessage: 'Workplace Search',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  to: WORKPLACE_SEARCH_PLUGIN.URL,
-                }),
-              },
-            ]
-          : []),
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
-        defaultMessage: 'Search',
-      }),
-    },
+    ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
+      ? [
+          {
+            id: 'standaloneExperiences',
+            items: [
+              ...(productAccess.hasAppSearchAccess
+                ? [
+                    {
+                      id: 'app_search',
+                      name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
+                        defaultMessage: 'App Search',
+                      }),
+                      ...generateNavLink({
+                        shouldNotCreateHref: true,
+                        to: APP_SEARCH_PLUGIN.URL,
+                      }),
+                    },
+                  ]
+                : []),
+              ...(productAccess.hasWorkplaceSearchAccess
+                ? [
+                    {
+                      id: 'workplace_search',
+                      name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
+                        defaultMessage: 'Workplace Search',
+                      }),
+                      ...generateNavLink({
+                        shouldNotCreateHref: true,
+                        to: WORKPLACE_SEARCH_PLUGIN.URL,
+                      }),
+                    },
+                  ]
+                : []),
+            ],
+            name: i18n.translate('xpack.enterpriseSearch.nav.standaloneExperiencesTitle', {
+              defaultMessage: 'Standalone Experiences',
+            }),
+          },
+        ]
+      : []),
   ];
-
-  if (enginesSectionEnabled) {
-    return [
-      navItems[0], // Overview
-      navItems[1], // Content
-      {
-        id: 'enginesSearch', // TODO: just search? or wait for that
-        items: [
-          {
-            id: 'elasticsearch',
-            name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-              defaultMessage: 'Elasticsearch',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: ELASTICSEARCH_PLUGIN.URL,
-            }),
-          },
-          {
-            id: 'enterpriseSearchEngines',
-            name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
-              defaultMessage: 'Engines',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
-            }),
-          },
-          {
-            id: 'searchExperiences',
-            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-              defaultMessage: 'Search Experiences',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: SEARCH_EXPERIENCES_PLUGIN.URL,
-            }),
-          },
-        ],
-        name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
-          defaultMessage: 'Search',
-        }),
-      },
-      navItems[2], // Behavioural Analytics
-      ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
-        ? [
-            {
-              id: 'standaloneExperiences',
-              items: [
-                ...(productAccess.hasAppSearchAccess
-                  ? [
-                      {
-                        id: 'app_search',
-                        name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
-                          defaultMessage: 'App Search',
-                        }),
-                        ...generateNavLink({
-                          shouldNotCreateHref: true,
-                          to: APP_SEARCH_PLUGIN.URL,
-                        }),
-                      },
-                    ]
-                  : []),
-                ...(productAccess.hasWorkplaceSearchAccess
-                  ? [
-                      {
-                        id: 'workplace_search',
-                        name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
-                          defaultMessage: 'Workplace Search',
-                        }),
-                        ...generateNavLink({
-                          shouldNotCreateHref: true,
-                          to: WORKPLACE_SEARCH_PLUGIN.URL,
-                        }),
-                      },
-                    ]
-                  : []),
-              ],
-              name: i18n.translate('xpack.enterpriseSearch.nav.standaloneExperiencesTitle', {
-                defaultMessage: 'Standalone Experiences',
-              }),
-            },
-          ]
-        : []),
-    ];
-  }
 
   return navItems;
 };
