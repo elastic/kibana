@@ -82,6 +82,7 @@ describe('ExceptionListHeader', () => {
 
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem3')).toBeDisabled();
     expect(wrapper.queryByTestId('EditTitleIcon')).not.toBeInTheDocument();
   });
   it('should render the List Header with name, default description and  actions', () => {

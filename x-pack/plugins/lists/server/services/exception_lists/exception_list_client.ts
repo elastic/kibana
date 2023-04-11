@@ -317,7 +317,7 @@ export class ExceptionListClient {
 
   /**
    * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
-   * @param options.listId the "list_id" of the exception list
+   * @param options.list the "list" to be duplicated
    * @param options.namespaceType saved object namespace (single | agnostic)
    * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns The exception list schema or null if it does not exist

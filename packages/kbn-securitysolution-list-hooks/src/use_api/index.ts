@@ -50,7 +50,7 @@ export interface ExceptionsApi {
   exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
 }
 
-export const useApi = (http: HttpStart) => {
+export const useApi = (http: HttpStart): ExceptionsApi => {
   return useMemo(
     () => ({
       async addExceptionListItem({

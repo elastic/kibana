@@ -35,36 +35,18 @@ describe('duplicateExceptionListAndItems', () => {
     jest.restoreAllMocks();
   });
 
-  test('should throw if exception list is not found', async () => {
-    (getExceptionList as jest.Mock).mockResolvedValue(null);
-
-    await expect(() =>
-      duplicateExceptionListAndItems({
-        includeExpiredExceptions: true,
-        listId: 'non-existent',
-        namespaceType: 'single',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        user: 'test-user',
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Exception list to duplicate of list_id:non-existent not found."`
-    );
-  });
-
-  test('should throw if exception list is not of type "detection" or "rule_default"', async () => {
+  test('should return null exception list is not of type "detection" or "rule_default"', async () => {
     (getExceptionList as jest.Mock).mockResolvedValue(getTrustedAppsListSchemaMock());
 
-    await expect(() =>
-      duplicateExceptionListAndItems({
-        includeExpiredExceptions: true,
-        listId: 'endpoint',
-        namespaceType: 'single',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        user: 'test-user',
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Exception list of type:endpoint cannot be duplicated."`
-    );
+    const result = await duplicateExceptionListAndItems({
+      includeExpiredExceptions: true,
+      list: getTrustedAppsListSchemaMock(),
+      namespaceType: 'single',
+      savedObjectsClient: savedObjectsClientMock.create(),
+      user: 'test-user',
+    });
+
+    expect(result).toBeNull();
   });
 
   test('should duplicate a list with expired exceptions', async () => {
@@ -82,7 +64,7 @@ describe('duplicateExceptionListAndItems', () => {
 
     await duplicateExceptionListAndItems({
       includeExpiredExceptions: true,
-      listId: 'exception_list_id',
+      list: getDetectionsExceptionListSchemaMock(),
       namespaceType: 'single',
       savedObjectsClient: savedObjectsClientMock.create(),
       user: 'test-user',
@@ -116,7 +98,7 @@ describe('duplicateExceptionListAndItems', () => {
 
     await duplicateExceptionListAndItems({
       includeExpiredExceptions: false,
-      listId: 'exception_list_id',
+      list: getDetectionsExceptionListSchemaMock(),
       namespaceType: 'single',
       savedObjectsClient: savedObjectsClientMock.create(),
       user: 'test-user',

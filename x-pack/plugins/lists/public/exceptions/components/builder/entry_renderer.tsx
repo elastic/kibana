@@ -192,7 +192,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         listTypeSpecificIndexPatternFilter,
         osTypes
       );
-      console.log({ filteredIndexPatterns });
       const comboBox = (
         <FieldComponent
           placeholder={
