@@ -505,7 +505,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should the toggle default output when creating a new one', async function () {
+      it('should toggle the default output when creating a new one', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
