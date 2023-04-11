@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { navigateToEndpointPolicyResponse } from '../../screens/endpoints';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
 import type { IndexedEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type { IndexedHostsResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_hosts';
@@ -65,7 +66,7 @@ describe('Endpoint Policy Response', () => {
 
   describe('from Fleet Agent Details page', () => {
     it('should display policy response with errors', () => {
-      navigateToFleetAgentDetails(loadedEndpoint.hosts[0].agent.id);
+      navigateToFleetAgentDetails(endpointMetadata.agent.id);
 
       cy.getByTestSubj('endpoint-0-accordion').then(($accordion) => {
         cy.wrap($accordion)
@@ -82,9 +83,15 @@ describe('Endpoint Policy Response', () => {
     });
   });
 
-  // describe('from Endpoint List page', () => {
-  //   it('should display policy response with errors', () => {
-  //     navigateToEndpointList();
-  //   });
-  // });
+  describe('from Endpoint List page', () => {
+    it('should display policy response with errors', () => {
+      navigateToEndpointPolicyResponse(endpointMetadata.agent.id);
+
+      cy.getByTestSubj('endpointDetailsPolicyResponseFlyoutBody')
+        .findByTestSubj('endpointPolicyResponseErrorCallOut')
+        .should('be.visible')
+        .findByTestSubj('endpointPolicyResponseMessage')
+        .should('include.text', descriptions.get('macos_system_ext'));
+    });
+  });
 });
