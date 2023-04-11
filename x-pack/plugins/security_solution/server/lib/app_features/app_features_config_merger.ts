@@ -9,7 +9,12 @@ import { cloneDeep, mergeWith, isArray, uniq } from 'lodash';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppFeatureKibanaConfig, SubFeaturesPrivileges } from './types';
 
-export function mergeAppFeatureConfigs(
+/**
+ * @param kibanaFeatureConfig the base kibana feature config
+ * @param appFeaturesConfigs the app features configs to merge
+ * @returns a new KibanaFeatureConfig with the appFeaturesConfigs merged into it.
+ */
+export function getMergedAppFeatureConfigs(
   kibanaFeatureConfig: KibanaFeatureConfig,
   appFeaturesConfigs: AppFeatureKibanaConfig[]
 ): KibanaFeatureConfig {
@@ -19,12 +24,12 @@ export function mergeAppFeatureConfigs(
   appFeaturesConfigs.forEach((appFeatureConfig) => {
     const { subFeaturesPrivileges, ...appFeatureConfigToMerge } = cloneDeep(appFeatureConfig);
     if (subFeaturesPrivileges) {
-      subFeaturesPrivilegesToMerge.concat(subFeaturesPrivileges);
+      subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
     }
     mergeFeatureConfig(mergedKibanaFeatureConfig, appFeatureConfigToMerge);
   });
 
-  // add subFeaturePrivileges at the end to make sure all allowed subFeatures are merged
+  // add subFeaturePrivileges at the end to make sure all enabled subFeatures are merged
   subFeaturesPrivilegesToMerge.forEach((subFeaturesPrivileges) => {
     mergeSubFeaturesPrivileges(mergedKibanaFeatureConfig.subFeatures, subFeaturesPrivileges);
   });
@@ -32,6 +37,13 @@ export function mergeAppFeatureConfigs(
   return mergedKibanaFeatureConfig;
 }
 
+/**
+ * Merges `appFeatureConfig` into `kibanaFeatureConfig`.
+ * It uses array concatenation for merging.
+ * @param kibanaFeatureConfig the base kibana feature config to merge into
+ * @param appFeatureConfig the app feature config to merge
+ * @returns void
+ */
 function mergeFeatureConfig(
   kibanaFeatureConfig: KibanaFeatureConfig,
   appFeatureConfig: AppFeatureKibanaConfig
@@ -39,6 +51,13 @@ function mergeFeatureConfig(
   mergeWith(kibanaFeatureConfig, appFeatureConfig, featureConfigMerger);
 }
 
+/**
+ * Merges `subFeaturesPrivileges` into `kibanaFeatureConfig.subFeatures` by finding the privilege id.
+ * It uses array concatenation for merging.
+ * @param subFeatures the subFeatures to merge into
+ * @param subFeaturesPrivileges the subFeaturesPrivileges to merge
+ * @returns void
+ * */
 function mergeSubFeaturesPrivileges(
   subFeatures: KibanaFeatureConfig['subFeatures'],
   subFeaturesPrivileges: SubFeaturesPrivileges

@@ -11,14 +11,12 @@
  * 2.0.
  */
 
-import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
 import type {
   KibanaFeatureConfig,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type { AppFeatureKey, AppFeatureKeys, ExperimentalFeatures } from '../../../common';
-import { DEFAULT_APP_FEATURES } from './default_app_features';
-import type { AppFeatureKibanaConfig, AppFeaturesConfig, SubFeaturesPrivileges } from './types';
+import type { AppFeatureKibanaConfig, AppFeaturesConfig } from './types';
 import {
   getSecurityAppFeaturesConfig,
   getSecurityBaseKibanaFeature,
@@ -27,6 +25,7 @@ import {
   getCasesBaseKibanaFeature,
   getCasesAppFeaturesConfig,
 } from './security_cases_kibana_features';
+import { getMergedAppFeatureConfigs } from './app_features_config_merger';
 
 type AppFeaturesMap = Map<AppFeatureKey, boolean>;
 
@@ -37,110 +36,70 @@ export class AppFeatures {
 
   constructor(experimentalFeatures: ExperimentalFeatures) {
     this.experimentalFeatures = experimentalFeatures;
-    this.appFeatures = this.getAppFeaturesMapFromObject(DEFAULT_APP_FEATURES);
+    // Set all feature keys to true by default
+    this.appFeatures = new Map(
+      Object.keys({
+        ...getSecurityAppFeaturesConfig(this.experimentalFeatures),
+        ...getCasesAppFeaturesConfig(),
+      }).map((appFeatureKey) => [appFeatureKey as AppFeatureKey, true])
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
-    this.registerKibanaFeatures();
+    this.registerEnabledKibanaFeatures();
   }
 
   public set(appFeatureKeys: AppFeatureKeys) {
-    this.appFeatures = this.getAppFeaturesMapFromObject(appFeatureKeys);
-    this.registerKibanaFeatures();
+    this.appFeatures = new Map(Object.entries(appFeatureKeys) as Array<[AppFeatureKey, boolean]>);
+    this.registerEnabledKibanaFeatures();
   }
 
   public isEnabled(appFeatureKey: AppFeatureKey): boolean {
     return this.appFeatures.get(appFeatureKey) ?? false;
   }
 
-  private getAppFeaturesMapFromObject(appFeatureKeys: AppFeatureKeys): AppFeaturesMap {
-    return new Map(Object.entries(appFeatureKeys) as Array<[AppFeatureKey, boolean]>);
+  private registerEnabledKibanaFeatures() {
+    // register main security Kibana features
+    const securityBaseKibanaFeature = getSecurityBaseKibanaFeature(this.experimentalFeatures);
+    const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
+      getSecurityAppFeaturesConfig(this.experimentalFeatures)
+    );
+    this.registerKibanaFeatures(
+      getMergedAppFeatureConfigs(securityBaseKibanaFeature, enabledSecurityAppFeaturesConfigs)
+    );
+
+    // register security cases Kibana features
+    const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
+    const enabledCasesAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
+      getCasesAppFeaturesConfig()
+    );
+    this.registerKibanaFeatures(
+      getMergedAppFeatureConfigs(securityCasesBaseKibanaFeature, enabledCasesAppFeaturesConfigs)
+    );
   }
 
-  private registerKibanaFeatures() {
+  private getEnabledAppFeaturesConfigs(
+    appFeaturesConfigs: AppFeaturesConfig
+  ): AppFeatureKibanaConfig[] {
+    return Object.entries(appFeaturesConfigs).reduce<AppFeatureKibanaConfig[]>(
+      (acc, [appFeatureKey, appFeatureConfig]) => {
+        if (this.isEnabled(appFeatureKey as AppFeatureKey)) {
+          acc.push(appFeatureConfig);
+        }
+        return acc;
+      },
+      []
+    );
+  }
+
+  private registerKibanaFeatures(kibanaFeatureConfig: KibanaFeatureConfig) {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
       );
     }
-    // register main security Kibana features
-    const securityBaseKibanaFeature = getSecurityBaseKibanaFeature(this.experimentalFeatures);
-    this.featuresSetup.unregisterKibanaFeature(securityBaseKibanaFeature.id);
-    this.featuresSetup.registerKibanaFeature(
-      this.getMergedAppFeaturesConfigs(
-        securityBaseKibanaFeature,
-        getSecurityAppFeaturesConfig(this.experimentalFeatures)
-      )
-    );
-
-    // register security cases Kibana features
-    const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
-    this.featuresSetup.unregisterKibanaFeature(securityCasesBaseKibanaFeature.id);
-    this.featuresSetup.registerKibanaFeature(
-      this.getMergedAppFeaturesConfigs(securityCasesBaseKibanaFeature, getCasesAppFeaturesConfig())
-    );
+    this.featuresSetup.unregisterKibanaFeature(kibanaFeatureConfig.id);
+    this.featuresSetup.registerKibanaFeature(kibanaFeatureConfig);
   }
-
-  private getMergedAppFeaturesConfigs(
-    kibanaFeatureConfig: KibanaFeatureConfig,
-    appFeaturesConfigs: AppFeaturesConfig
-  ): KibanaFeatureConfig {
-    const mergedKibanaConfig = cloneDeep(kibanaFeatureConfig);
-    for (const [appFeatureKey, appFeatureConfig] of Object.entries(appFeaturesConfigs)) {
-      if (this.isEnabled(appFeatureKey as AppFeatureKey)) {
-        mergeFeatureConfig(mergedKibanaConfig, appFeatureConfig);
-      }
-    }
-    return mergedKibanaConfig;
-  }
-}
-
-/**
- * Merges the `source` appFeature config into the kibana feature config `dest` object.
- * This function is not pure, it mutates the destination object.
- * Consider a deep clone of the `dest` object before calling this function.
- * */
-function mergeFeatureConfig(dest: KibanaFeatureConfig, source: AppFeatureKibanaConfig): void {
-  const { subFeaturesPrivileges, ...appFeatureConfig } = cloneDeep(source);
-  mergeWith(dest, appFeatureConfig, featureConfigMerger);
-  if (subFeaturesPrivileges) {
-    mergeSubFeaturesPrivileges(dest.subFeatures, subFeaturesPrivileges);
-  }
-}
-
-function featureConfigMerger(objValue: unknown, srcValue: unknown) {
-  if (isArray(srcValue)) {
-    if (isArray(objValue)) {
-      return uniq(objValue.concat(srcValue));
-    }
-    return srcValue;
-  }
-}
-
-function mergeSubFeaturesPrivileges(
-  subFeatures: KibanaFeatureConfig['subFeatures'],
-  subFeaturesPrivileges: SubFeaturesPrivileges
-) {
-  if (!subFeatures) {
-    // TODO: log "trying to merge subFeaturesPrivileges but no subFeatures found"
-    return;
-  }
-  subFeaturesPrivileges.forEach((subFeaturePrivilege) => {
-    const merged = subFeatures.find(({ privilegeGroups }) =>
-      privilegeGroups.some(({ privileges }) => {
-        const subFeaturePrivilegeToUpdate = privileges.find(
-          ({ id }) => id === subFeaturePrivilege.id
-        );
-        if (subFeaturePrivilegeToUpdate) {
-          mergeWith(subFeaturePrivilegeToUpdate, subFeaturePrivilege, featureConfigMerger);
-          return true;
-        }
-        return false;
-      })
-    );
-    if (!merged) {
-      // TODO: log a "trying to merge subFeaturesPrivileges but the subFeature privilege was not found"
-    }
-  });
 }

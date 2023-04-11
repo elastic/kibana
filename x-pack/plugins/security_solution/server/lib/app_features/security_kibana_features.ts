@@ -139,6 +139,7 @@ export const getSecurityBaseKibanaFeature = (
 
 function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
   const subFeatures: SubFeatureConfig[] = [];
+
   if (experimentalFeatures.endpointRbacEnabled) {
     subFeatures.push(
       endpointListSubFeature,
@@ -156,7 +157,7 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
 export const getSecurityAppFeaturesConfig = (
   experimentalFeatures: ExperimentalFeatures
 ): AppFeaturesConfig => {
-  const rulesResponseActionsSubFeatures = [];
+  const rulesResponseActionsSubFeatures: SubFeatureConfig[] = [];
 
   if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
     rulesResponseActionsSubFeatures.push(
@@ -173,6 +174,7 @@ export const getSecurityAppFeaturesConfig = (
     rulesResponseActionsSubFeatures.push(executeActionSubFeature);
   }
 
+  // TODO: establish some naming convention for these ui and api privileges
   return {
     rules_load_prepackaged: {
       privileges: {
