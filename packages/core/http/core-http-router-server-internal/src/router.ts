@@ -27,17 +27,12 @@ import {
   UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
-import { performance } from 'perf_hooks';
 import { wrapErrors } from './error_wrapper';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
-
-const THRESHOLD_ELU = 0.15;
-const THRESHOLD_ELA = 250;
 
 export type ContextEnhancer<
   P,
@@ -126,47 +121,6 @@ function validOptions(
 }
 
 /**
- * Adds ELU timings for the executed function to the current's context transaction
- *
- * @param callback The callback to instrument
- * @param path The request path
- */
-async function addEluTimings<T>(callback: () => Promise<T>, path: string, log: Logger): Promise<T> {
-  const startUtilization = performance.eventLoopUtilization();
-  const start = performance.now();
-
-  const response = await callback();
-
-  const { active, utilization } = performance.eventLoopUtilization(startUtilization);
-
-  apm.currentTransaction?.addLabels({
-    event_loop_utilization: utilization,
-    event_loop_active: active,
-  });
-
-  const duration = performance.now() - start;
-
-  if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
-    log.warn(
-      `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
-        THRESHOLD_ELU * 100
-      }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
-        utilization * 100
-      )}%)`,
-      {
-        labels: {
-          request_path: path,
-          event_loop_active: active,
-          event_loop_utilization: utilization,
-        },
-      }
-    );
-  }
-
-  return response;
-}
-
-/**
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
@@ -202,7 +156,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
         this.routes.push({
           handler: async (req, responseToolkit) => {
-            return addEluTimings(() => internalHandler(req, responseToolkit), req.path, log);
+            return internalHandler(req, responseToolkit);
           },
           method,
           path: getRouteFullPath(this.routerPath, route.path),

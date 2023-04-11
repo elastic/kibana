@@ -43,6 +43,7 @@ import type {
   HttpAuth,
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
+import { performance } from 'perf_hooks';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -54,6 +55,51 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+
+const THRESHOLD_ELU = 0.15;
+const THRESHOLD_ELA = 250;
+
+/**
+ * Adds ELU timings for the executed function to the current's context transaction
+ *
+ * @param path The request path
+ * @param log  Logger
+ */
+function startEluMeasurement<T>(path: string, log: Logger): () => void {
+  const startUtilization = performance.eventLoopUtilization();
+  const start = performance.now();
+
+  return function stopEluMeasurement() {
+    const { active, utilization } = performance.eventLoopUtilization(startUtilization);
+
+    apm.currentTransaction?.addLabels(
+      {
+        event_loop_utilization: utilization,
+        event_loop_active: active,
+      },
+      false
+    );
+
+    const duration = performance.now() - start;
+
+    if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
+      log.warn(
+        `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
+          THRESHOLD_ELU * 100
+        }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
+          utilization * 100
+        )}%)`,
+        {
+          labels: {
+            request_path: path,
+            event_loop_active: active,
+            event_loop_utilization: utilization,
+          },
+        }
+      );
+    }
+  };
+}
 
 /** @internal */
 export interface HttpServerSetup {
@@ -351,6 +397,12 @@ export class HttpServer {
     executionContext?: InternalExecutionContextSetup
   ) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const stop = startEluMeasurement(request.path, this.log);
+
+      request.events.on('finish', () => {
+        stop();
+      });
+
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
