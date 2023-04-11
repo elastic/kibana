@@ -51,7 +51,7 @@ export const getStorageContext = ({
       latest: contentDefinition.version.latest,
     },
     utils: {
-      getTransforms: getTransformsFactory(contentTypeId),
+      getTransforms: getTransformsFactory(contentTypeId, version),
     },
   };
   return storageContext;
