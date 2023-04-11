@@ -67,6 +67,9 @@ export class MapComponent extends Component<Props> {
     if (this.props.isSharable !== undefined) {
       this._mapEmbeddable.setIsSharable(this.props.isSharable);
     }
+  }
+
+  componentDidMount() {
     if (this._embeddableRef.current) {
       this._mapEmbeddable.render(this._embeddableRef.current);
     }
