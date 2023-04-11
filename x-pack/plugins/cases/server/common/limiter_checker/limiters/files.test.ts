@@ -81,7 +81,9 @@ describe('FileLimiter', () => {
         Array [
           Object {
             "meta": Object {
-              "caseIds": "id",
+              "caseIds": Array [
+                "id",
+              ],
             },
             "perPage": 1,
           },

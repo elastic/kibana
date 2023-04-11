@@ -26,7 +26,7 @@ export class FileLimiter extends BaseLimiter {
     const files = await this.fileService.find({
       perPage: 1,
       meta: {
-        caseIds: caseId,
+        caseIds: [caseId],
       },
     });
 
