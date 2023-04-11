@@ -119,7 +119,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
           <EuiText>
             <FormattedHTMLMessage
               id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
-              defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently utilize context in natural language queries. Usage of this model provides better results than BM25 without further training on your data."
+              defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
               tagName="p"
             />
           </EuiText>
