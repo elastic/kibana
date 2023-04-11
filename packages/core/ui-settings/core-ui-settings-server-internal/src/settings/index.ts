@@ -16,6 +16,8 @@ import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
+export { TIMEZONE_OPTIONS } from './date_formats';
+
 interface GetCoreSettingsOptions {
   isDist?: boolean;
 }

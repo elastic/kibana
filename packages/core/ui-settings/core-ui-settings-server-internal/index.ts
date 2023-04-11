@@ -12,6 +12,7 @@ export {
   UiSettingsService,
   UiSettingsGlobalClient,
   CoreUiSettingsRouteHandlerContext,
+  TIMEZONE_OPTIONS,
 } from './src';
 export type {
   InternalUiSettingsServicePreboot,

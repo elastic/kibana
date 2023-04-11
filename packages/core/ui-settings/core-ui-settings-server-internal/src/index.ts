@@ -17,3 +17,4 @@ export type {
   UiSettingsServiceOptions,
 } from './types';
 export { CannotOverrideError, SettingNotRegisteredError } from './ui_settings_errors';
+export { TIMEZONE_OPTIONS } from './settings';
