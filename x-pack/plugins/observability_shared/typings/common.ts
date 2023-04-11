@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Request } from '@kbn/inspector-plugin/common';
-
 export type ObservabilityApp =
   | 'infra_metrics'
   | 'infra_logs'
@@ -18,7 +16,3 @@ export type ObservabilityApp =
   | 'stack_monitoring'
   | 'ux'
   | 'fleet';
-
-export type { Coordinates } from '../public/typings/fetch_overview_data';
-
-export type InspectResponse = Request[];

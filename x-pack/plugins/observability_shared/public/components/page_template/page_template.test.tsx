@@ -13,9 +13,9 @@ import { of } from 'rxjs';
 import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
-import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
+import { createNavigationRegistry } from './helpers/navigation_registry';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
