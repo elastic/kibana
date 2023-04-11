@@ -17,7 +17,7 @@ import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
-import { useProcessorEvent } from '../kuery_bar/use_processor_event';
+import { useProcessorEvent } from '../../../hooks/use_processor_event';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
 

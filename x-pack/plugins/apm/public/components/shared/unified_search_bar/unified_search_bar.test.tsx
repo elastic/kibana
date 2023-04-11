@@ -13,7 +13,7 @@ import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_ap
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useApmDataViewHook from '../../../hooks/use_apm_data_view';
 import * as useApmParamsHook from '../../../hooks/use_apm_params';
-import * as useProcessorEventHook from '../kuery_bar/use_processor_event';
+import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
 import { CoreStart } from '@kbn/core/public';
 import { UnifiedSearchBar } from '.';

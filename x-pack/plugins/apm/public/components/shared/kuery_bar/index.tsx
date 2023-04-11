@@ -20,7 +20,7 @@ import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 import { Typeahead } from './typeahead';
-import { useProcessorEvent } from './use_processor_event';
+import { useProcessorEvent } from '../../../hooks/use_processor_event';
 
 interface State {
   suggestions: QuerySuggestion[];
