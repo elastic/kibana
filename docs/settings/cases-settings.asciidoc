@@ -12,4 +12,4 @@ The MIME types that you can attach to a case, represented in an array of strings
 The default MIME types are specified in https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/cases/common/constants/mime_types.ts[mime_types.ts].
 
 `xpack.cases.files.maxSize`::
-The file size limit for files that you can attach to a case, represented as the number of bytes. Defaults to 10 MiB for images and 100 MiB for all other MIME types.
+The size limit for files that you can attach to a case, represented as the number of bytes. By default, the limit is 10 MiB for images and 100 MiB for all other MIME types. If you specify a value for this setting, it affects all file types.
