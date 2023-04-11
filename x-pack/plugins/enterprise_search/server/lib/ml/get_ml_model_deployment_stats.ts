@@ -13,7 +13,7 @@ export const getMlModelDeploymentStats = async (
   modelName: string,
   esClient: ElasticsearchClient
 ): Promise<MlGetTrainedModelsStatsResponse> => {
-  const modelRequest : MlGetTrainedModelsStatsRequest = {
+  const modelRequest: MlGetTrainedModelsStatsRequest = {
     model_id: modelName,
   };
   return await esClient.ml.getTrainedModelsStats(modelRequest);

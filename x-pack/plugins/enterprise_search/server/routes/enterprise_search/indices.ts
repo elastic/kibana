@@ -995,7 +995,7 @@ export function registerIndexRoutes({
       path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
       validate: {
         params: schema.object({
-          modelName: schema.string()
+          modelName: schema.string(),
         }),
       },
     },
@@ -1037,7 +1037,7 @@ export function registerIndexRoutes({
       path: '/internal/enterprise_search/ml/models/{modelName}',
       validate: {
         params: schema.object({
-          modelName: schema.string()
+          modelName: schema.string(),
         }),
       },
     },
@@ -1057,7 +1057,7 @@ export function registerIndexRoutes({
           headers: { 'content-type': 'application/json' },
         });
         */
-       return response.ok({});
+        return response.ok({});
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           // return specific message if model doesn't exist
