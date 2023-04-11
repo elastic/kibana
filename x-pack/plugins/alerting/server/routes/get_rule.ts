@@ -29,6 +29,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -78,6 +79,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });
 
 interface BuildGetRulesRouteParams {
