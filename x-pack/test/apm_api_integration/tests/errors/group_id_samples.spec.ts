@@ -10,6 +10,9 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { timerange } from '@kbn/apm-synthtrace-client';
+import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
+import { orderBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -136,6 +139,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal('Error 1');
         });
+      });
+    });
+
+    describe('with sampled and unsampled transactions', () => {
+      let errorGroupSamplesResponse: ErrorGroupSamples;
+
+      before(async () => {
+        const instance = service(serviceName, 'production', 'go').instance('a');
+
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('15m')
+            .rate(1)
+            .generator((timestamp) => {
+              return [
+                instance
+                  .transaction('GET /api/foo')
+                  .duration(100)
+                  .timestamp(timestamp)
+                  .sample(false)
+                  .errors(
+                    instance.error({ message: `Error 1` }).timestamp(timestamp),
+                    instance.error({ message: `Error 1` }).timestamp(timestamp + 1)
+                  ),
+                instance
+                  .transaction('GET /api/foo')
+                  .duration(100)
+                  .timestamp(timestamp)
+                  .sample(true)
+                  .errors(instance.error({ message: `Error 1` }).timestamp(timestamp)),
+              ];
+            }),
+        ]);
+
+        errorGroupSamplesResponse = (
+          await callErrorGroupSamplesApi({
+            path: { groupId: '0000000000000000000000000Error 1' },
+          })
+        ).body;
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      it('returns the errors in the correct order (sampled first, then unsampled)', () => {
+        const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) => parseInt(id, 10));
+
+        // this checks whether the order of indexing is different from the order that is returned
+        // if it is not, scoring/sorting is broken
+        expect(idsOfErrors).to.not.eql(orderBy(idsOfErrors));
       });
     });
   });

@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
+import { mockGlobals } from '../../utils/testing';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
 import * as observabilityPublic from '@kbn/observability-plugin/public';
+
+mockGlobals();
 
 jest.mock('@kbn/observability-plugin/public');
 

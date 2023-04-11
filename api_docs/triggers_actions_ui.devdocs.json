@@ -2680,7 +2680,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "string[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\")[]"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false,
@@ -5962,6 +5962,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ValidNormalizedTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidNormalizedTypes",
+        "description": [],
+        "signature": [
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\""
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -6086,7 +6101,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "\"number\"[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6152,7 +6167,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "\"number\"[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6218,7 +6233,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
@@ -6284,7 +6299,7 @@
                 "label": "validNormalizedTypes",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "(\"date\" | \"number\")[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,

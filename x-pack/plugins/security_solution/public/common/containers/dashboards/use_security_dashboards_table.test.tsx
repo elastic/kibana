@@ -12,12 +12,12 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock/test_providers';
-import type { DashboardTableItem } from './use_security_dashboards_table';
 import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
 import * as telemetry from '../../lib/telemetry';
+import type { DashboardTableItem } from './types';
 
 jest.mock('../../lib/kibana');
 const spyTrack = jest.spyOn(telemetry, 'track');
