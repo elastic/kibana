@@ -47,11 +47,11 @@ interface OwnProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
+  onGroupClose: () => void;
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  onGroupClose: () => void;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
@@ -74,11 +74,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
+  onGroupClose,
   pageIndex,
   pageSize,
   parentGroupingFilter,
   renderChildComponent,
-  onGroupClose,
   runtimeMappings,
   selectedGroup,
   setPageIndex,
@@ -140,7 +140,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const getQueryGroups = useMemo(() => {
+  const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
@@ -169,16 +169,17 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     response,
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, GroupingAggregation<AlertsGroupingAggregation>>({
-    query: getQueryGroups,
+    query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
     skip: isNoneGroup([selectedGroup]),
   });
 
   useEffect(() => {
-    const queryGroups = getQueryGroups;
-    setAlertsQuery(queryGroups);
-  }, [getQueryGroups, setAlertsQuery]);
+    if (!isNoneGroup([selectedGroup])) {
+      setAlertsQuery(queryGroups);
+    }
+  }, [queryGroups, selectedGroup, setAlertsQuery]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
   // create a unique, but stable (across re-renders) query id

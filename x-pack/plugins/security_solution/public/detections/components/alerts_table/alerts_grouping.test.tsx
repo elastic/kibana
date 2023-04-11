@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -19,7 +19,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import type { AlertsTableComponentProps } from './alerts_grouping';
-import { GroupedAlertsTableComponent } from './alerts_grouping';
+import { GroupedAlertsTable } from './alerts_grouping';
 import { TableId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
@@ -41,19 +41,21 @@ jest.mock('../../../common/containers/use_global_time', () => ({
   }),
 }));
 
-jest.mock('./grouping_settings', () => ({
-  getAlertsGroupingQuery: jest.fn(),
-  getDefaultGroupingOptions: () => [
-    { label: 'ruleName', key: 'kibana.alert.rule.name' },
-    { label: 'userName', key: 'user.name' },
-    { label: 'hostName', key: 'host.name' },
-    { label: 'sourceIP', key: 'source.ip' },
-  ],
-  getSelectedGroupBadgeMetrics: jest.fn(),
-  getSelectedGroupButtonContent: jest.fn(),
-  getSelectedGroupCustomMetrics: jest.fn(),
-  useGroupTakeActionsItems: jest.fn(),
-}));
+const mockOptions = [
+  { label: 'ruleName', key: 'kibana.alert.rule.name' },
+  { label: 'userName', key: 'user.name' },
+  { label: 'hostName', key: 'host.name' },
+  { label: 'sourceIP', key: 'source.ip' },
+];
+//
+jest.mock('./grouping_settings', () => {
+  const actual = jest.requireActual('./grouping_settings');
+
+  return {
+    ...actual,
+    getDefaultGroupingOptions: () => mockOptions,
+  };
+});
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -92,7 +94,6 @@ jest.mock('../../../common/lib/kibana', () => {
 jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
-
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -122,6 +123,22 @@ const testProps: AlertsTableComponentProps = {
 };
 
 const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
+const mockQueryResponse = {
+  loading: false,
+  data: {},
+  setQuery: () => {},
+  response: '',
+  request: '',
+  refetch: () => {},
+};
+
+const getMockStorageState = (groups: string[] = ['none']) =>
+  JSON.stringify({
+    [testProps.tableId]: {
+      activeGroups: groups,
+      options: mockOptions,
+    },
+  });
 
 describe('GroupedAlertsTable', () => {
   const { storage } = createSecuritySolutionStorageMock();
@@ -134,58 +151,30 @@ describe('GroupedAlertsTable', () => {
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
     });
-    mockUseQueryAlerts.mockReturnValue({
-      loading: false,
-      data: groupingSearchResponse,
-      setQuery: () => {},
-      response: '',
-      request: '',
-      refetch: () => {},
+    mockUseQueryAlerts.mockImplementation((i) => {
+      if (i.skip) {
+        return mockQueryResponse;
+      }
+      if (i.query.aggs.groupByFields.multi_terms != null) {
+        return {
+          ...mockQueryResponse,
+          data: groupingSearchResponse.ruleName,
+        };
+      }
+      return {
+        ...mockQueryResponse,
+        data: i.query.aggs.groupByFields.terms.field != null ? groupingSearchResponse.hostName : {},
+      };
     });
   });
-
-  const renderAsGroping = (theStore: ReturnType<typeof createStore>) => {
-    const { getByTestId, getAllByTestId, queryByTestId, rerender, unmount } = render(
-      <TestProviders store={theStore}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    const {
-      getByTestId: getByTestIdGroupSelector,
-      unmount: unmountGroupSelector,
-      getAllByTestId: getAllByTestIdGroupSelector,
-    } = render(mockDispatch.mock.calls[0][0].payload.groupSelector);
-
-    return {
-      getByTestId,
-      getAllByTestId,
-      queryByTestId,
-      rerender,
-      selectGroup: async (group: string) => {
-        await waitFor(() => {
-          fireEvent.click(getByTestIdGroupSelector('group-selector-dropdown'));
-          fireEvent.click(getByTestIdGroupSelector(group));
-        });
-      },
-      unmount: async () => {
-        await waitFor(() => {
-          fireEvent.click(getAllByTestIdGroupSelector('group-selector-dropdown')[0]);
-          // for some reason without physically setting state back to none,
-          // the tests do not reset state in each execution
-          fireEvent.click(getByTestIdGroupSelector('panel-none'));
-        });
-        unmount();
-        unmountGroupSelector();
-      },
-    };
-  };
 
   it('calls the proper initial dispatch actions for groups', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
+        <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
+
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
     expect(queryByTestId('group-selector-dropdown')).not.toBeInTheDocument();
     expect(getByTestId('alerts-table')).toBeInTheDocument();
@@ -196,41 +185,61 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders empty grouping table when group is selected without data', async () => {
-    mockUseQueryAlerts.mockReturnValue({
-      loading: false,
-      data: {},
-      setQuery: () => {},
-      response: '',
-      request: '',
-      refetch: () => {},
-    });
-    const { getByTestId, queryByTestId, selectGroup, unmount } = renderAsGroping(store);
-
-    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
-
-    await selectGroup('panel-host.name');
+    mockUseQueryAlerts.mockReturnValue(mockQueryResponse);
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
     expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
-
-    await unmount();
   });
-  it('renders grouping table when single group is selected', async () => {
-    const { getByTestId, queryByTestId, getAllByTestId, selectGroup, unmount } =
-      renderAsGroping(store);
-    expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
-    await selectGroup('panel-kibana.alert.rule.name');
-    expect(getByTestId('unit-count')).toHaveTextContent('6,048 alerts');
-    expect(getByTestId('group-count')).toHaveTextContent('32 groups');
-    expect(getAllByTestId('grouping-accordion').length).toEqual(25);
 
-    await unmount();
+  it('renders grouping table in first accordion level when single group is selected', async () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+
+    const { getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    expect(within(level0).getByTestId('alerts-table')).toBeInTheDocument();
+  });
+
+  it('renders grouping table in second accordion level when 2 groups are selected', async () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
+
+    const { getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getAllByTestId('group-panel-toggle')[0]);
+
+    const level0 = getAllByTestId('grouping-accordion-content')[0];
+    expect(within(level0).queryByTestId('alerts-table')).not.toBeInTheDocument();
+
+    fireEvent.click(within(level0).getAllByTestId('group-panel-toggle')[0]);
+    const level1 = within(getAllByTestId('grouping-accordion-content')[1]);
+    expect(level1.getByTestId('alerts-table')).toBeInTheDocument();
   });
 
   it('resets pagination when selected group changes', async () => {
-    const { getByTestId, getAllByTestId, selectGroup, unmount } = renderAsGroping(store);
-    await selectGroup('panel-kibana.alert.rule.name');
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
     fireEvent.click(getByTestId('pagination-button-1'));
@@ -240,12 +249,14 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getAllByTestId('panel-user.name')[0]);
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
-    await unmount();
   });
 
   it('resets grouping pagination when global query updates', async () => {
-    const { getByTestId, getAllByTestId, selectGroup, rerender, unmount } = renderAsGroping(store);
-    await selectGroup('panel-kibana.alert.rule.name');
+    const { getByTestId, getAllByTestId, rerender } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
     fireEvent.click(getByTestId('pagination-button-1'));
@@ -255,13 +266,12 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getAllByTestId('panel-user.name')[0]);
     rerender(
       <TestProviders store={store}>
-        <GroupedAlertsTableComponent
+        <GroupedAlertsTable
           {...{ ...testProps, globalQuery: { query: 'updated', language: 'language' } }}
         />
       </TestProviders>
     );
     expect(getByTestId('pagination-button-0').getAttribute('aria-current')).toEqual('true');
     expect(getByTestId('pagination-button-1').getAttribute('aria-current')).toEqual(null);
-    await unmount();
   });
 });

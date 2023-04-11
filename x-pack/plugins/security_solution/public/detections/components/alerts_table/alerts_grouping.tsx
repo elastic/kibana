@@ -63,7 +63,7 @@ const useStorage = (storage: Storage, tableId: string) =>
     [storage, tableId]
   );
 
-export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
+const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
   const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);

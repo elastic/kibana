@@ -20,13 +20,12 @@ interface GroupPanelProps<T> {
   forceState?: 'open' | 'closed';
   groupBucket: RawBucket<T>;
   groupPanelRenderer?: JSX.Element;
+  groupingLevel?: number;
   isLoading: boolean;
-  level?: number;
   onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
-  groupingLevel?: number;
 }
 
 const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
@@ -48,13 +47,12 @@ const GroupPanelComponent = <T,>({
   forceState,
   groupBucket,
   groupPanelRenderer,
+  groupingLevel = 0,
   isLoading,
-  level = 0,
   onGroupClose,
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
-  groupingLevel = 0,
 }: GroupPanelProps<T>) => {
   const lastForceState = useRef(forceState);
   useEffect(() => {
@@ -87,7 +85,7 @@ const GroupPanelComponent = <T,>({
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
-        <div className="groupingPanelRenderer">
+        <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
           {groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
         </div>
       }
@@ -97,11 +95,11 @@ const GroupPanelComponent = <T,>({
       extraAction={extraAction}
       forceState={forceState}
       isLoading={isLoading}
-      id={`group${level}-${groupFieldValue}`}
+      id={`group${groupingLevel}-${groupFieldValue}`}
       onToggle={onToggle}
       paddingSize="m"
     >
-      {renderChildComponent(groupFilters)}
+      <span data-test-subj="grouping-accordion-content">{renderChildComponent(groupFilters)}</span>
     </EuiAccordion>
   );
 };
