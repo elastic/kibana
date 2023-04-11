@@ -71,17 +71,13 @@ export const Table = (props: Props) => {
   const { rows, loading } = props;
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
-  const [searchBarState, setSearchBarState] = useState<Query>(() =>
-    hostFlyoutOpen.metadataSearch ? Query.parse(hostFlyoutOpen.metadataSearch) : Query.MATCH_ALL
-  );
 
   const debouncedSearchOnChange = useMemo(
     () =>
-      debounce<(queryText: string, query: Query) => void>((queryText, query) => {
+      debounce<(queryText: string) => void>((queryText) => {
         setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' });
-        setSearchBarState(query);
       }, 500),
-    [setHostFlyoutOpen, setSearchBarState]
+    [setHostFlyoutOpen]
   );
 
   const searchBarOnChange = useCallback(
@@ -90,7 +86,7 @@ export const Table = (props: Props) => {
         setSearchError(error);
       } else {
         setSearchError(null);
-        debouncedSearchOnChange(queryText, query);
+        debouncedSearchOnChange(queryText);
       }
     },
     [debouncedSearchOnChange]
@@ -104,7 +100,9 @@ export const Table = (props: Props) => {
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
     },
-    query: searchBarState,
+    query: hostFlyoutOpen.metadataSearch
+      ? Query.parse(hostFlyoutOpen.metadataSearch)
+      : Query.MATCH_ALL,
   };
 
   const columns = useMemo(
