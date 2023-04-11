@@ -5,7 +5,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare user names.",
+        "detector_description": "Detects rare usernames.",
         "function": "rare",
         "by_field_name": "user.name",
         "detector_index": 0

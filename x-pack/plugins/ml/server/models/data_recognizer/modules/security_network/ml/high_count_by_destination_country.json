@@ -5,7 +5,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detection high count by country.",
+        "detector_description": "Detects high count by country.",
         "function": "high_non_zero_count",
         "by_field_name": "destination.geo.country_name",
         "detector_index": 0
