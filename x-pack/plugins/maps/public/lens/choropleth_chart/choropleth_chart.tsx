@@ -13,14 +13,14 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
+  emsWorldLayerId,
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
-} from '../../../common';
-import { emsWorldLayerId } from '../../../common/constants';
+} from '../../../common/constants';
 import { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';

@@ -6,19 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
+import { APP_ID, getEditPath, MAP_PATH } from './page_load_constants';
 
-export const MAP_SAVED_OBJECT_TYPE = 'map';
-export const APP_ID = 'maps';
-export const APP_ICON = 'gisApp';
-export const APP_ICON_SOLUTION = 'logoKibana';
-export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
-  defaultMessage: 'Maps',
-});
-export const INITIAL_LAYERS_KEY = 'initialLayers';
-
-export const MAPS_APP_PATH = `app/${APP_ID}`;
-export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
@@ -32,19 +22,19 @@ export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
-// Identifies centroid feature.
-// Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
-export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
-
+const MAPS_APP_PATH = `app/${APP_ID}`;
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }
 export function getFullPath(id: string | undefined) {
   return `/${MAPS_APP_PATH}${getEditPath(id)}`;
 }
-export function getEditPath(id: string | undefined) {
-  return id ? `/${MAP_PATH}/${id}` : `/${MAP_PATH}`;
-}
+
+export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
+
+// Identifies centroid feature.
+// Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
 export enum LAYER_TYPE {
   RASTER_TILE = 'RASTER_TILE',
@@ -96,8 +86,6 @@ export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
 export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
-
-export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
 export enum ES_GEO_FIELD_TYPE {
   GEO_POINT = 'geo_point',
@@ -305,10 +293,6 @@ export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
-
-export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
-
-export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export const NO_EMS_LOCALE = 'none';
 export const AUTOSELECT_EMS_LOCALE = 'autoselect';

@@ -6,7 +6,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';

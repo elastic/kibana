@@ -7,16 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import rison from '@kbn/rison';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
-import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
-import { lazyLoadMapModules } from './lazy_load_bundle';
+import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants/page_load_constants';
 
 export interface MapsAppLocatorParams extends SerializableRecord {
   /**
@@ -77,6 +74,10 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
   constructor(protected readonly deps: MapsAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: MapsAppLocatorParams) => {
+    const rison = await import('@kbn/rison');
+    const { isFilterPinned } = await import('@kbn/es-query');
+    const { setStateToKbnUrl } = await import('@kbn/kibana-utils-plugin/public');
+    
     const { mapId, filters, query, refreshInterval, timeRange, initialLayers, hash } = params;
     const useHash = hash ?? this.deps.useHash;
     const appState: {
@@ -156,9 +157,9 @@ export class MapsAppTileMapLocatorDefinition
       timeRange,
       hash = true,
     } = params;
-    const mapModules = await lazyLoadMapModules();
+    const { createTileMapLayerDescriptor } = await import('./classes/layers/create_tile_map_layer_descriptor');
     const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
-    const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
+    const tileMapLayerDescriptor = createTileMapLayerDescriptor({
       label,
       mapType,
       colorSchema,
@@ -229,9 +230,9 @@ export class MapsAppRegionMapLocatorDefinition
       timeRange,
       hash = true,
     } = params;
-    const mapModules = await lazyLoadMapModules();
+    const { createRegionMapLayerDescriptor } = await import('./classes/layers/create_region_map_layer_descriptor');
     const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
-    const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
+    const regionMapLayerDescriptor = createRegionMapLayerDescriptor({
       label,
       emsLayerId,
       leftFieldName,

@@ -18,7 +18,6 @@ import { DataRequest } from '../util/data_request';
 import {
   LAYER_TYPE,
   MAX_ZOOM,
-  MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
@@ -186,7 +185,7 @@ export class AbstractLayer implements ILayer {
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
-    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
+    return `${this.getId()}_${layerNameSuffix}`;
   }
 
   isPreviewLayer(): boolean {

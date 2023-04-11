@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { PluginInitializerContext } from '@kbn/core/public';
-import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
-import { MapsXPackConfig } from '../config';
+import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { MapsPlugin, type MapsPluginSetup, type MapsPluginStart } from './plugin';
+import type { MapsXPackConfig } from '../config';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   initContext: PluginInitializerContext<MapsXPackConfig>
@@ -17,11 +17,9 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   return new MapsPlugin(initContext);
 };
 
-export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+export { GEOJSON_FEATURE_ID_PROPERTY_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants/page_load_constants';
 export { MAPS_APP_LOCATOR } from './locators';
 export type { PreIndexedShape } from '../common/elasticsearch_util';
-
-export { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids';
 
 export type {
   ITooltipProperty,

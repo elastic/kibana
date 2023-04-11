@@ -7,7 +7,7 @@
 
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { APP_ID } from '../common/constants';
+import { APP_ID } from '../common/constants/page_load_constants';
 
 export enum LICENSED_FEATURES {
   GEO_LINE_AGG = 'GEO_LINE_AGG',

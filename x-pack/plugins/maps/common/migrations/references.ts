@@ -8,9 +8,9 @@
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
-import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
   indexPatternId?: string;

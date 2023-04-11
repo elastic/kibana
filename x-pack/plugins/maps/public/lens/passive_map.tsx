@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../common';
+//import { INITIAL_LOCATION } from '../../common';
 import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 

@@ -7,4 +7,3 @@
 
 export * from './map_embeddable';
 export * from './types';
-export * from './map_embeddable_factory';

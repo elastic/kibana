@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
-import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 

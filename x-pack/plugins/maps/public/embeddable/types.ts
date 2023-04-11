@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
-import {
+import type {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
+import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
 export interface MapEmbeddableConfig {
   editable: boolean;

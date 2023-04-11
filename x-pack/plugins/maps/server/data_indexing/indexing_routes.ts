@@ -13,7 +13,6 @@ import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   INDEX_SOURCE_API_PATH,
-  MAX_DRAWING_SIZE_BYTES,
   GET_MATCHING_INDEXES_PATH,
   INDEX_FEATURE_PATH,
   CHECK_IS_DRAWING_INDEX,
@@ -22,6 +21,8 @@ import {
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { getMatchingIndexes } from './get_indexes_matching_pattern';
+
+const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export function initIndexingRoutes({
   router,

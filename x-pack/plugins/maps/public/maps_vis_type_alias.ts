@@ -16,7 +16,7 @@ import {
   getEditPath,
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
-} from '../common/constants';
+} from '../common/constants/page_load_constants';
 
 export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
   visualizations.hideTypes(['region_map', 'tile_map']);

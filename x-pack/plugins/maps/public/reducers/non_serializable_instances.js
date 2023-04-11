@@ -6,7 +6,8 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import { MapAdapter, VectorTileAdapter } from '../inspector';
+import { MapAdapter } from '../inspector/map_adapter/map_adapter';
+import { VectorTileAdapter } from '../inspector/vector_tile_adapter/vector_tile_adapter';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';

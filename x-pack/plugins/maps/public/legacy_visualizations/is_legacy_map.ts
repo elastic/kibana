@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Embeddable } from '@kbn/embeddable-plugin/public';
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
 
 export function isLegacyMap(embeddable: Embeddable) {
