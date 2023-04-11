@@ -160,17 +160,17 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                 size="xs"
                 flush="left"
                 onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
-                data-test-subj="aiopsFieldSelectorEnableAllSelectedButton"
+                data-test-subj="aiopsFieldSelectorSelectAllFieldsButton"
               >
                 {fieldSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.enableAllSearchedFields"
-                    defaultMessage="Enable filtered fields"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.selectAllSearchedFields"
+                    defaultMessage="Select filtered fields"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.enableAllFields"
-                    defaultMessage="Enable all fields"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.selectAllFields"
+                    defaultMessage="Select all fields"
                   />
                 )}
               </EuiButtonEmpty>
@@ -180,17 +180,17 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                 size="xs"
                 flush="right"
                 onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
-                data-test-subj="aiopsFieldSelectorDisableAllSelectedButton"
+                data-test-subj="aiopsFieldSelectorDeselectAllFieldsButton"
               >
                 {fieldSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.disableAllSearchFields"
-                    defaultMessage="Disable filtered fields"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.deselectAllSearchedFields"
+                    defaultMessage="Deselect filtered fields"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.disableAllFields"
-                    defaultMessage="Disable all fields"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.deselectAllFields"
+                    defaultMessage="Deselect all fields"
                   />
                 )}
               </EuiButtonEmpty>
