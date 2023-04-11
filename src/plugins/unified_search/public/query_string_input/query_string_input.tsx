@@ -286,6 +286,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           signal: this.abortController.signal,
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
           boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
+          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : 'terms_enum',
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
