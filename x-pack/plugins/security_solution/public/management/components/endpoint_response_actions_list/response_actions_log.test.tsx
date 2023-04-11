@@ -289,6 +289,7 @@ describe.skip('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -963,6 +964,7 @@ describe.skip('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -1164,6 +1166,7 @@ describe.skip('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );
