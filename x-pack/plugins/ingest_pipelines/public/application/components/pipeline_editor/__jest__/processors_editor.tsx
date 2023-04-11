@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -26,9 +25,6 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
-const license = licensingMock.createLicenseMock();
-license.type = 'enterprise';
-
 const appServices = {
   breadcrumbs: breadcrumbService,
   metric: uiMetricService,
@@ -36,7 +32,6 @@ const appServices = {
   api: apiService,
   notifications: notificationServiceMock.createSetupContract(),
   history,
-  license,
 };
 
 export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) => {
