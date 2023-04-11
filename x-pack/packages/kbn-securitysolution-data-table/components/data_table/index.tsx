@@ -16,6 +16,7 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridPaginationProps,
   EuiDataGridRowHeightsOptions,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
@@ -61,7 +62,24 @@ const DATA_TABLE_ARIA_LABEL = i18n.translate('securitySolutionDataTable.dataTabl
 
 type GetFieldBrowser = (props: FieldBrowserProps) => void;
 
-export interface DataTableProps {
+type NonCustomizableGridProps =
+  | 'id'
+  | 'data-test-subj'
+  | 'aria-label'
+  | 'aria-labelledby'
+  | 'columns'
+  | 'columnVisibility'
+  | 'gridStyle'
+  | 'leadingControlColumns'
+  | 'toolbarVisibility'
+  | 'rowCount'
+  | 'renderCellValue'
+  | 'sorting'
+  | 'onColumnResize'
+  | 'pagination'
+  | 'rowHeightsOptions';
+
+interface BaseDataTableProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
@@ -81,6 +99,8 @@ export interface DataTableProps {
   isEventRenderedView?: boolean;
   getFieldBrowser: GetFieldBrowser;
 }
+
+export type DataTableProps = BaseDataTableProps & Omit<EuiDataGridProps, NonCustomizableGridProps>;
 
 const ES_LIMIT_COUNT = 9999;
 
@@ -136,6 +156,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     rowHeightsOptions,
     isEventRenderedView = false,
     getFieldBrowser,
+    ...otherProps
   }) => {
     const getDataTable = dataTableSelectors.getTableByIdSelector();
     const dataTable = useShallowEqualSelector<DataTableModel, DataTableState>(
@@ -424,6 +445,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       <>
         <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
           <EuiDataGrid
+            {...otherProps}
             id={'body-data-grid'}
             data-test-subj="body-data-grid"
             aria-label={DATA_TABLE_ARIA_LABEL}

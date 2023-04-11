@@ -103,6 +103,7 @@ const RowActionComponent = ({
           params: {
             id: eventId,
             indexName,
+            scopeId: tableId,
           },
         },
       });

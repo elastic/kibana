@@ -169,6 +169,8 @@ describe('Create Default Policy tests ', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
       const defaultPolicy = policyFactory();
+      // update defaultPolicy w/ platinum license
+      defaultPolicy.meta.license = 'platinum';
       expect(policy).toMatchObject(defaultPolicy);
     });
   });

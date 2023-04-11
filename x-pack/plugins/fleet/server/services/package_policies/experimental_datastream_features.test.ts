@@ -7,8 +7,10 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
+import { appContextService } from '../app_context';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstallation } from '../epm/packages';
 
@@ -33,6 +35,11 @@ jest.mock('../epm/packages', () => {
 });
 
 jest.mock('../app_context');
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 jest.mock('../epm/elasticsearch/template/template');
 
 const mockGetInstallation = getInstallation as jest.Mock;
