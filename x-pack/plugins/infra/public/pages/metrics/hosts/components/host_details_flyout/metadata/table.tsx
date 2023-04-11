@@ -77,7 +77,7 @@ export const Table = (props: Props) => {
   const search: EuiSearchBarProps = {
     onChange: searchBarOnChange,
     box: {
-      'data-test-subj': 'infraMetadataSearchBarInput',
+      'data-test-subj': 'infraHostMetadataSearchBarInput',
       incremental: true,
       schema: true,
       placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForMetadata', {

@@ -110,15 +110,15 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ metadata: [] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
   });
 
-  it('should show the metadata table if the metadata is returned', async () => {
+  it('should show the metadata table if metadata is returned', async () => {
     mockUseMetadata({ metadata: [{ name: 'host.os.name', value: 'Ubuntu' }] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
   });
 
@@ -126,7 +126,7 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
   });
 });
