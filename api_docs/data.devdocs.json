@@ -9326,7 +9326,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
