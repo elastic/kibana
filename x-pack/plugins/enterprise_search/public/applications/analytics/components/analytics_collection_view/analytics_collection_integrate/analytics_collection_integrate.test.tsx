@@ -6,6 +6,7 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
+import '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { EuiSpacer, EuiSteps, EuiTab, EuiTabs } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSteps,
+  EuiTab,
+  EuiTabs,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { docLinks } from '../../../../shared/doc_links';
 
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
 import { javascriptClientEmbedSteps } from './analytics_collection_integrate_javascript_client_embed';
 import { javascriptEmbedSteps } from './analytics_collection_integrate_javascript_embed';
 import { searchUIEmbedSteps } from './analytics_collection_integrate_searchui';
+import { GenerateAnalyticsApiKeyModal } from './generate_analytics_api_key_modal/generate_analytics_api_key_modal';
+import { GenerateApiKeyModalLogic } from './generate_analytics_api_key_modal/generate_analytics_api_key_modal.logic';
 
 interface AnalyticsCollectionIntegrateProps {
   analyticsCollection: AnalyticsCollection;
@@ -35,13 +51,93 @@ export interface AnalyticsConfig {
   endpoint: string;
 }
 
+const apiKeyStep = (
+  openApiKeyModal: () => void,
+  navigateToUrl: typeof KibanaLogic.values.navigateToUrl
+): EuiContainedStepProps => ({
+  title: i18n.translate(
+    'xpack.enterpriseSearch.analytics.collections.collectionsView.apiKey.title',
+    {
+      defaultMessage: 'Create an API Key',
+    }
+  ),
+  children: (
+    <>
+      <EuiText>
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.apiKeyWarning',
+            {
+              defaultMessage:
+                "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
+            }
+          )}{' '}
+          <EuiLink
+            href={docLinks.apiKeys}
+            data-telemetry-id="entSearchContent-analytics-apiKey-learnMoreLink"
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.learnMoreLink',
+              {
+                defaultMessage: 'Learn more about API keys.',
+              }
+            )}
+          </EuiLink>
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconSide="left"
+            iconType="plusInCircleFilled"
+            onClick={openApiKeyModal}
+            data-telemetry-id="entSearchContent-analytics-apiKey-createApiKeyButton"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.createAPIKeyButton',
+              {
+                defaultMessage: 'Create API Key',
+              }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconSide="left"
+            iconType="popout"
+            data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"
+            onClick={() =>
+              navigateToUrl('/app/management/security/api_keys', {
+                shouldNotCreateHref: true,
+              })
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.apiKeyStep.viewKeysButton',
+              {
+                defaultMessage: 'View Keys',
+              }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ),
+});
+
 export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionIntegrateProps> = ({
   analyticsCollection,
 }) => {
-  const [selectedTab, setSelectedTab] = React.useState<TabKey>('javascriptEmbed');
+  const [selectedTab, setSelectedTab] = useState<TabKey>('javascriptEmbed');
+  const [apiKeyModelOpen, setApiKeyModalOpen] = useState<boolean>(false);
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const { apiKey } = useValues(GenerateApiKeyModalLogic);
 
   const analyticsConfig: AnalyticsConfig = {
-    apiKey: '########',
+    apiKey: apiKey || '########',
     collectionName: analyticsCollection?.name,
     endpoint: getEnterpriseSearchUrl(),
   };
@@ -80,9 +176,11 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
     },
   ];
 
+  const apiKeyStepGuide = apiKeyStep(() => setApiKeyModalOpen(true), navigateToUrl);
+
   const steps: Record<TabKey, EuiContainedStepProps[]> = {
-    javascriptClientEmbed: javascriptClientEmbedSteps(analyticsConfig),
-    javascriptEmbed: javascriptEmbedSteps(webClientSrc, analyticsConfig),
+    javascriptClientEmbed: [apiKeyStepGuide, ...javascriptClientEmbedSteps(analyticsConfig)],
+    javascriptEmbed: [apiKeyStepGuide, ...javascriptEmbedSteps(webClientSrc, analyticsConfig)],
     searchuiEmbed: searchUIEmbedSteps(setSelectedTab),
   };
 
@@ -111,6 +209,14 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
       }}
     >
       <>
+        {apiKeyModelOpen ? (
+          <GenerateAnalyticsApiKeyModal
+            collectionName={analyticsCollection.name}
+            onClose={() => {
+              setApiKeyModalOpen(false);
+            }}
+          />
+        ) : null}
         <EuiTabs>
           {tabs.map((tab) => (
             <EuiTab
