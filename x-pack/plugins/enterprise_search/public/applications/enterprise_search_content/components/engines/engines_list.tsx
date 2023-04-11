@@ -52,6 +52,7 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
       closePopover={() => setShowPopover(false)}
       button={
         <div
+          data-test-subj="create-engine-button-hover-target"
           onMouseEnter={() => setShowPopover(true)}
           onFocus={() => setShowPopover(true)}
           tabIndex={0}
@@ -77,7 +78,7 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
           defaultMessage="Platinum only feature"
         />
       </EuiPopoverTitle>
-      <div style={{ width: '300px' }}>
+      <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
             <FormattedMessage
