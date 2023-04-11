@@ -122,6 +122,7 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly elser: string;
     readonly engines: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
