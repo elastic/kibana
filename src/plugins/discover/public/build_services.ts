@@ -47,6 +47,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -83,6 +84,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
@@ -137,6 +139,7 @@ export const buildServices = memoize(function (
     toastNotifications: core.notifications.toasts,
     notifications: core.notifications,
     uiSettings: core.uiSettings,
+    settings: core.settings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     dataViewFieldEditor: plugins.dataViewFieldEditor,

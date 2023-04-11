@@ -24,6 +24,7 @@ import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -129,6 +130,14 @@ export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsSta
       ...defaultCore.uiSettings,
       get: getSetting,
       get$: setSetting$,
+    },
+    settings: {
+      ...settingsServiceMock.createStartContract(),
+      client: {
+        ...settingsServiceMock.createStartContract().client,
+        get: getSetting,
+        get$: setSetting$,
+      },
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),

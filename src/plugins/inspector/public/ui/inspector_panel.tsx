@@ -24,6 +24,7 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -46,6 +47,7 @@ interface InspectorPanelProps {
     http: HttpStart;
     uiSettings: IUiSettingsClient;
     share: SharePluginStart;
+    settings: SettingsStart;
   };
 }
 
