@@ -26,7 +26,7 @@ export class Defer<T> {
 export const defer = () => new Defer<void>();
 
 export function createMultiPromiseDefer(indices: string[]): Record<string, Defer<void>> {
-  const defers: Array<Defer<void>> = new Array(indices.length).fill(true).map(defer);
+  const defers: Array<Defer<void>> = indices.map(defer);
   const all = Promise.all(defers.map(({ promise }) => promise));
   return indices.reduce<Record<string, Defer<any>>>((acc, indexName, i) => {
     const { resolve, reject } = defers[i];
@@ -95,13 +95,12 @@ export async function getIndicesInvolvedInRelocation({
 
   const typeIndexDistribution = calculateTypeStatuses(currentIndexTypesMap, indexTypesMap);
 
-  const relocated = Object.entries(typeIndexDistribution).filter(
-    ([, { status }]) => status === TypeStatus.Moved
-  );
-  relocated.forEach(([, { currentIndex, targetIndex }]) => {
-    indicesWithMovingTypesSet.add(currentIndex!);
-    indicesWithMovingTypesSet.add(targetIndex!);
-  });
+  Object.values(typeIndexDistribution)
+    .filter(({ status }) => status === TypeStatus.Moved)
+    .forEach(({ currentIndex, targetIndex }) => {
+      indicesWithMovingTypesSet.add(currentIndex!);
+      indicesWithMovingTypesSet.add(targetIndex!);
+    });
 
   return Array.from(indicesWithMovingTypesSet);
 }

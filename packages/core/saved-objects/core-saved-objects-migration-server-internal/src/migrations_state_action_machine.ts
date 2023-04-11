@@ -113,7 +113,7 @@ export async function migrationStateActionMachine({
       try {
         await abort(finalState);
       } catch (e) {
-        logger.warn('Failed to correctly abort migrations:', e.message);
+        logger.warn('Failed to cleanup after migrations:', e.message);
       }
 
       const errorMessage =
@@ -134,7 +134,7 @@ export async function migrationStateActionMachine({
     try {
       await abort(lastState);
     } catch (err) {
-      logger.warn('Failed to correctly abort migrations:', err.message);
+      logger.warn('Failed to cleanup after migrations:', err.message);
     }
     if (e instanceof EsErrors.ResponseError) {
       // Log the failed request. This is very similar to the
