@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
+import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 export const isValidPipelineName = (input: string): boolean => {
