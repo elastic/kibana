@@ -24,7 +24,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
-import { operationDefinitionMap } from './operations';
+import { CounterRateIndexPatternColumn, operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
@@ -407,7 +407,7 @@ function getExpressionForLayer(
             return [formatCall];
           }
         }
-        if (ifColumnOfType<CounterRateIndexPatternColumn>('counter_rate', col)) {
+        if (isColumnOfType<CounterRateIndexPatternColumn>('counter_rate', col)) {
           const metric = layer.columns[col.references[0]];
           if (
             metric &&
