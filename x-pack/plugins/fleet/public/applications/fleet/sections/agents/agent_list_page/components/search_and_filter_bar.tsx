@@ -23,9 +23,11 @@ import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX } from '../../../../constants';
+import { AGENTS_INDEX, LOCATORS_IDS, DASHBOARD_LOCATORS_IDS } from '../../../../constants';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
+
+import { useLocator } from '../../../../hooks';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -95,6 +97,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
+  const dashboardLocator = useLocator(LOCATORS_IDS.DASHBOARD_APP);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -116,12 +119,24 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
+  const onClickOverviewButton = () => {
+    dashboardLocator?.navigateSync({ dashboardId: DASHBOARD_LOCATORS_IDS.OVERVIEW });
+  };
+
   return (
     <>
       {/* Search and filter bar */}
       <EuiFlexGroup direction="column">
         <FlexEndEuiFlexItem>
           <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiButton onClick={onClickOverviewButton} data-test-subj="ingestOverviewLinkButton">
+                <FormattedMessage
+                  id="xpack.fleet.agentList.ingestOverviewButton"
+                  defaultMessage="Ingest Overview"
+                />
+              </EuiButton>
+            </EuiFlexItem>
             <EuiFlexItem>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
