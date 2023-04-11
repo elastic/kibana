@@ -39,7 +39,7 @@ export class LoadListAndRender extends Component<Props> {
 
   async _loadMapsList() {
     try {
-      const results = await mapsClient.search();
+      const results = await mapsClient.search({ limit: 1 });
       if (this._isMounted) {
         this.setState({ mapsLoaded: true, hasSavedMaps: !!results.hits.length });
       }
