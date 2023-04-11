@@ -171,14 +171,62 @@ describe('utils', () => {
     const filesRes: FileAttachmentAggregationResults = {
       securitySolution: {
         averageSize: 500,
+        topMimeTypes: {
+          buckets: [
+            {
+              doc_count: 5,
+              key: 'image/png',
+            },
+            {
+              doc_count: 1,
+              key: 'application/json',
+            },
+          ],
+        },
       },
       observability: {
         averageSize: 500,
+        topMimeTypes: {
+          buckets: [
+            {
+              doc_count: 5,
+              key: 'image/png',
+            },
+            {
+              doc_count: 1,
+              key: 'application/json',
+            },
+          ],
+        },
       },
       cases: {
         averageSize: 500,
+        topMimeTypes: {
+          buckets: [
+            {
+              doc_count: 5,
+              key: 'image/png',
+            },
+            {
+              doc_count: 1,
+              key: 'application/json',
+            },
+          ],
+        },
       },
       averageSize: 500,
+      topMimeTypes: {
+        buckets: [
+          {
+            doc_count: 5,
+            key: 'image/png',
+          },
+          {
+            doc_count: 1,
+            key: 'application/json',
+          },
+        ],
+      },
     };
 
     it('constructs the solution values correctly', () => {
@@ -215,6 +263,16 @@ describe('utils', () => {
               "average": 1,
               "averageSize": 500,
               "maxOnACase": 10,
+              "topMimeTypes": Array [
+                Object {
+                  "count": 5,
+                  "name": "image/png",
+                },
+                Object {
+                  "count": 1,
+                  "name": "application/json",
+                },
+              ],
               "total": 5,
             },
             "persistableAttachments": Array [
@@ -271,6 +329,16 @@ describe('utils', () => {
               "average": 5,
               "averageSize": 500,
               "maxOnACase": 10,
+              "topMimeTypes": Array [
+                Object {
+                  "count": 5,
+                  "name": "image/png",
+                },
+                Object {
+                  "count": 1,
+                  "name": "application/json",
+                },
+              ],
               "total": 5,
             },
             "persistableAttachments": Array [
@@ -327,6 +395,16 @@ describe('utils', () => {
               "average": 5,
               "averageSize": 500,
               "maxOnACase": 10,
+              "topMimeTypes": Array [
+                Object {
+                  "count": 5,
+                  "name": "image/png",
+                },
+                Object {
+                  "count": 1,
+                  "name": "application/json",
+                },
+              ],
               "total": 5,
             },
             "persistableAttachments": Array [
@@ -363,6 +441,7 @@ describe('utils', () => {
               "average": 0,
               "averageSize": 0,
               "maxOnACase": 0,
+              "topMimeTypes": Array [],
               "total": 0,
             },
             "persistableAttachments": Array [],
@@ -486,7 +565,7 @@ describe('utils', () => {
     });
 
     describe('files', () => {
-      it('sets the files stats to empty when it cannot find a files entry', () => {
+      it('sets the files stats to empty when the file aggregation results is the empty version', () => {
         const attachmentFramework: AttachmentFrameworkAggsResult = {
           externalReferenceTypes: {
             buckets: [
@@ -512,19 +591,25 @@ describe('utils', () => {
           getAttachmentsFrameworkStats({
             attachmentAggregations: attachmentFramework,
             totalCasesForOwner: 5,
-            filesAggregations: { averageSize: 500 },
+            filesAggregations: {
+              averageSize: 0,
+              topMimeTypes: {
+                buckets: [],
+              },
+            },
           }).attachmentFramework.files
         ).toMatchInlineSnapshot(`
           Object {
             "average": 0,
             "averageSize": 0,
             "maxOnACase": 0,
+            "topMimeTypes": Array [],
             "total": 0,
           }
         `);
       });
 
-      it('sets the files stats when it finds a files entry', () => {
+      it('sets the files stats using the file aggregation result', () => {
         const attachmentFramework: AttachmentFrameworkAggsResult = {
           externalReferenceTypes: {
             buckets: [
@@ -549,7 +634,21 @@ describe('utils', () => {
         expect(
           getAttachmentsFrameworkStats({
             attachmentAggregations: attachmentFramework,
-            filesAggregations: { averageSize: 500 },
+            filesAggregations: {
+              averageSize: 500,
+              topMimeTypes: {
+                buckets: [
+                  {
+                    doc_count: 5,
+                    key: 'image/png',
+                  },
+                  {
+                    doc_count: 1,
+                    key: 'application/json',
+                  },
+                ],
+              },
+            },
             totalCasesForOwner: 5,
           }).attachmentFramework.files
         ).toMatchInlineSnapshot(`
@@ -557,7 +656,67 @@ describe('utils', () => {
             "average": 1,
             "averageSize": 500,
             "maxOnACase": 10,
+            "topMimeTypes": Array [
+              Object {
+                "count": 5,
+                "name": "image/png",
+              },
+              Object {
+                "count": 1,
+                "name": "application/json",
+              },
+            ],
             "total": 5,
+          }
+        `);
+      });
+
+      it('sets the top mime types when a file entry is not found', () => {
+        const attachmentFramework: AttachmentFrameworkAggsResult = {
+          externalReferenceTypes: {
+            buckets: [],
+          },
+          persistableReferenceTypes: {
+            buckets: [],
+          },
+        };
+
+        expect(
+          getAttachmentsFrameworkStats({
+            attachmentAggregations: attachmentFramework,
+            filesAggregations: {
+              averageSize: 0,
+              topMimeTypes: {
+                buckets: [
+                  {
+                    doc_count: 5,
+                    key: 'image/png',
+                  },
+                  {
+                    doc_count: 1,
+                    key: 'application/json',
+                  },
+                ],
+              },
+            },
+            totalCasesForOwner: 5,
+          }).attachmentFramework.files
+        ).toMatchInlineSnapshot(`
+          Object {
+            "average": 0,
+            "averageSize": 0,
+            "maxOnACase": 0,
+            "topMimeTypes": Array [
+              Object {
+                "count": 5,
+                "name": "image/png",
+              },
+              Object {
+                "count": 1,
+                "name": "application/json",
+              },
+            ],
+            "total": 0,
           }
         `);
       });
