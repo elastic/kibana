@@ -47,7 +47,6 @@ export enum ReadOperations {
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
-  GetUserActionStats = 'getUserActionStats',
   GetUserActionUsers = 'getUserActionUsers',
 }
 

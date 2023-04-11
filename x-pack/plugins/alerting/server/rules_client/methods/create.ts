@@ -40,6 +40,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'updatedAt'
     | 'apiKey'
     | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
@@ -91,11 +92,20 @@ export async function create<Params extends RuleTypeParams = never>(
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = data.enabled
-      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-        )
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await withSpan(
+            {
+              name: 'createAPIKey',
+              type: 'rules',
+            },
+            () => context.createAPIKey(name)
+          )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
@@ -144,7 +154,7 @@ export async function create<Params extends RuleTypeParams = never>(
 
   const rawRule: RawRule = {
     ...data,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     legacyId,
     actions,
     createdBy: username,

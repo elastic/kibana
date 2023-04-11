@@ -122,6 +122,8 @@ test('creates a rules client with proper constructor arguments when security is 
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
     minimumScheduleInterval: { value: '1m', enforce: false },
+    isAuthenticationTypeAPIKey: expect.any(Function),
+    getAuthenticationAPIKey: expect.any(Function),
   });
 });
 
@@ -160,6 +162,8 @@ test('creates a rules client with proper constructor arguments', async () => {
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
     minimumScheduleInterval: { value: '1m', enforce: false },
+    isAuthenticationTypeAPIKey: expect.any(Function),
+    getAuthenticationAPIKey: expect.any(Function),
   });
 });
 
