@@ -34,6 +34,7 @@ import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -197,6 +198,37 @@ describe('<Vulnerabilities />', () => {
       notToBe: [
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed' },
+          cspm: { status: 'not-deployed' },
+          [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-installed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+            { index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderVulnerabilitiesPage();
+
+    expectIdsInDoc({
+      be: [VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      notToBe: [
+        VULNERABILITIES_CONTAINER_TEST_SUBJ,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });

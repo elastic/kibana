@@ -6,15 +6,31 @@
  */
 
 import React from 'react';
-import { EuiLoadingLogo, EuiEmptyPrompt, EuiIcon, EuiMarkdownFormat, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiLoadingLogo,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiMarkdownFormat,
+  EuiLink,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+} from '@elastic/eui';
+import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { CloudPosturePage } from './cloud_posture_page';
+import {
+  CloudPosturePage,
+  VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+} from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types';
 import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -41,6 +57,60 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
     }
   />
 );
+
+const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
+  vulnMgmtIntegrationLink,
+}: {
+  vulnMgmtIntegrationLink?: string;
+}) => {
+  return (
+    <EuiEmptyPrompt
+      data-test-subj={VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      title={
+        <h2>
+          <FormattedHTMLMessage
+            tagName="h2"
+            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
+            defaultMessage="Detect vulnerabilities <br/> in your cloud assets!"
+          />
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptDescription"
+            defaultMessage="Add the Elastic Vulnerability Management Integration to begin. {learnMore}."
+            values={{
+              learnMore: (
+                <EuiLink href={''} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreTitle"
+                    defaultMessage="Learn more about Elastic Vulnerability Management(VM) for Cloud"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      }
+      actions={
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
+                defaultMessage="Install Elastic Vulnerability Management for Cloud"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  );
+};
 
 const IndexTimeout = () => (
   <EuiEmptyPrompt
@@ -124,6 +194,8 @@ export const NoVulnerabilitiesStates = () => {
   const getSetupStatus = useCspSetupStatusApi({
     options: { refetchInterval: REFETCH_INTERVAL_MS },
   });
+  const vulnMgmtIntegrationLink = useCspIntegrationLink(VULN_MGMT_POLICY_TEMPLATE);
+
   const status = getSetupStatus.data?.vuln_mgmt?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
   const unprivilegedIndices =
@@ -137,6 +209,12 @@ export const NoVulnerabilitiesStates = () => {
     if (status === 'not-deployed' || status === 'indexing')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
+    if (status === 'not-installed')
+      return (
+        <VulnerabilitiesFindingsInstalledEmptyPrompt
+          vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}
+        />
+      );
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };

@@ -222,4 +222,33 @@ describe('<Findings />', () => {
       ],
     });
   });
+
+  it('renders integrations installation prompt if integration is not installed', async () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-installed' },
+          cspm: { status: 'not-installed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    renderFindingsPage();
+
+    expectIdsInDoc({
+      be: [],
+      notToBe: [
+        TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
 });
