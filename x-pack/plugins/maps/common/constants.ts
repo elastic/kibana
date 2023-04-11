@@ -36,6 +36,8 @@ export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }

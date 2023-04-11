@@ -77,7 +77,8 @@ import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/cons
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
-import { MapInspectorView, VectorTileInspectorView } from './inspector';
+import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
+import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
 
