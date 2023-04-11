@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
@@ -18,9 +18,20 @@ export function SloEditFormObjectiveSectionTimeslices() {
       <EuiFlexItem>
         <EuiFormRow
           isInvalid={getFieldState('objective.timesliceTarget').invalid}
-          label={i18n.translate('xpack.observability.slo.sloEdit.timeSliceTarget.label', {
-            defaultMessage: 'Timeslice target (%)',
-          })}
+          label={
+            <span>
+              {i18n.translate('xpack.observability.slo.sloEdit.timeSliceTarget.label', {
+                defaultMessage: 'Timeslice target (%)',
+              })}{' '}
+              <EuiIconTip
+                content={i18n.translate('xpack.observability.slo.sloEdit.timeSliceTarget.tooltip', {
+                  defaultMessage:
+                    'The individual time slices target used to determine whether the slice is good or bad.',
+                })}
+                position="top"
+              />
+            </span>
+          }
         >
           <Controller
             shouldUnregister={true}
@@ -52,9 +63,19 @@ export function SloEditFormObjectiveSectionTimeslices() {
       <EuiFlexItem>
         <EuiFormRow
           isInvalid={getFieldState('objective.timesliceWindow').invalid}
-          label={i18n.translate('xpack.observability.slo.sloEdit.timesliceWindow.label', {
-            defaultMessage: 'Timeslice window (in minutes)',
-          })}
+          label={
+            <span>
+              {i18n.translate('xpack.observability.slo.sloEdit.timesliceWindow.label', {
+                defaultMessage: 'Timeslice window (in minutes)',
+              })}{' '}
+              <EuiIconTip
+                content={i18n.translate('xpack.observability.slo.sloEdit.timesliceWindow.tooltip', {
+                  defaultMessage: 'The time slice window size used to evaluate the data from.',
+                })}
+                position="top"
+              />
+            </span>
+          }
         >
           <Controller
             shouldUnregister={true}

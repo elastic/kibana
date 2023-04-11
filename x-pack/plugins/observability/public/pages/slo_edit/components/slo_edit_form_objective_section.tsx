@@ -11,6 +11,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -40,9 +41,23 @@ export function SloEditFormObjectiveSection() {
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
-              defaultMessage: 'Budgeting method',
-            })}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
+                  defaultMessage: 'Budgeting method',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.budgetingMethod.tooltip',
+                    {
+                      defaultMessage:
+                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
           >
             <Controller
               name="budgetingMethod"
@@ -63,9 +78,20 @@ export function SloEditFormObjectiveSection() {
 
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
-              defaultMessage: 'Time window',
-            })}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
+                  defaultMessage: 'Time window',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.tooltip', {
+                    defaultMessage:
+                      'The rolling time window duration used to compute the SLO over.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
           >
             <Controller
               name="timeWindow.duration"
@@ -88,9 +114,19 @@ export function SloEditFormObjectiveSection() {
         <EuiFlexItem>
           <EuiFormRow
             isInvalid={getFieldState('objective.target').invalid}
-            label={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
-              defaultMessage: 'Target / SLO (%)',
-            })}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
+                  defaultMessage: 'Target / SLO (%)',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {
+                    defaultMessage: 'The target objective in percentage for the SLO.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
           >
             <Controller
               name="objective.target"
