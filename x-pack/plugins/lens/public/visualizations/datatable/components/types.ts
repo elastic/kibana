@@ -21,7 +21,7 @@ import {
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
 } from './constants';
-import type { FormatFactory } from '../../../../common';
+import type { FormatFactory } from '../../../../common/types';
 import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';
 
 export interface LensSortActionData {
@@ -50,7 +50,7 @@ export type LensPagesizeAction = LensEditEvent<typeof LENS_EDIT_PAGESIZE_ACTION>
 export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   dispatchEvent: ILensInterpreterRenderHandlers['event'];
-  getType: (name: string) => IAggType;
+  getType: (name: string) => IAggType | undefined;
   renderMode: RenderMode;
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;

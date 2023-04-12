@@ -52,6 +52,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const button = (
     <EuiButtonCompressed {...buttonArgs} isLoading={isLoading} color="primary">
       <FormattedMessage
+        data-test-subj="agentDetails.viewMoreMetricsButton"
         id="xpack.fleet.agentDetails.viewDashboardButtonLabel"
         defaultMessage="View more agent metrics"
       />
@@ -69,9 +70,11 @@ export const AgentDashboardLink: React.FunctionComponent<{
         }
       >
         <EuiButtonCompressed
+          data-test-subj="agentDetails.enableLogsAndMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
+          disabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
             id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"

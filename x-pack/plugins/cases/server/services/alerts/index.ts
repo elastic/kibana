@@ -18,7 +18,11 @@ import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
-import type { UpdateAlertCasesRequest, UpdateAlertStatusRequest } from '../../client/alerts/types';
+import type {
+  RemoveAlertsFromCaseRequest,
+  UpdateAlertCasesRequest,
+  UpdateAlertStatusRequest,
+} from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
@@ -224,6 +228,30 @@ export class AlertService {
     } catch (error) {
       throw createCaseError({
         message: `Failed to add case info to alerts for caseIds ${caseIds}: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  public async removeCaseIdFromAlerts({
+    alerts,
+    caseId,
+  }: RemoveAlertsFromCaseRequest): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      await this.alertsClient.removeCaseIdFromAlerts({
+        alerts: nonEmptyAlerts,
+        caseId,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to remove case ${caseId} from alerts: ${error}`,
         error,
         logger: this.logger,
       });

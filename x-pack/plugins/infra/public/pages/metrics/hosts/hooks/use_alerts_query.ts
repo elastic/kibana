@@ -7,7 +7,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -77,7 +77,7 @@ const createAlertsEsQuery = ({
 };
 
 const createDateFilter = (date: HostsState['dateRange']) =>
-  getTime(undefined, date, { fieldName: TIMESTAMP });
+  getTime(undefined, date, { fieldName: ALERT_TIME_RANGE });
 
 const createAlertStatusFilter = (status: AlertStatus = 'all'): Filter | null =>
   ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], meta: {} } : null;

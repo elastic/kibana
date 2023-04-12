@@ -6,13 +6,13 @@
  */
 
 import { getPieVisualization } from './visualization';
+import { PieVisualizationState } from '../../../common/types';
 import {
-  PieVisualizationState,
-  PieChartTypes,
   CategoryDisplay,
-  NumberDisplay,
   LegendDisplay,
-} from '../../../common';
+  NumberDisplay,
+  PieChartTypes,
+} from '../../../common/constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';

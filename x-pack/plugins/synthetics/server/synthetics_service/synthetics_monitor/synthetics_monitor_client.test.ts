@@ -44,7 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -181,6 +181,9 @@ describe('SyntheticsMonitorClient', () => {
       {
         monitor,
         configId: id,
+        params: {
+          username: 'elastic',
+        },
       },
     ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);

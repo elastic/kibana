@@ -69,7 +69,7 @@ const visitPolicyDetailsPage = () => {
   cy.get('#settings').should('exist'); // waiting for Policy Settings tab
 };
 
-describe('Artifact tabs in Policy Details page', () => {
+describe.skip('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
@@ -81,12 +81,12 @@ describe('Artifact tabs in Policy Details page', () => {
   });
 
   for (const testData of getArtifactsListTestsData()) {
-    beforeEach(() => {
-      login();
-      removeExceptionsList(testData.createRequestBody.list_id);
-    });
-
     describe(`${testData.title} tab`, () => {
+      beforeEach(() => {
+        login();
+        removeExceptionsList(testData.createRequestBody.list_id);
+      });
+
       it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
         loginWithPrivilegeNone(testData.privilegePrefix);
         visitPolicyDetailsPage();

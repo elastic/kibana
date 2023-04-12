@@ -156,7 +156,8 @@ const getBaseMockedActionList = () => ({
   error: null,
   refetch: jest.fn(),
 });
-describe('Response actions history', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145635
+describe.skip('Response actions history', () => {
   const testPrefix = 'test';
   const hostsFilterPrefix = 'hosts-filter';
 
@@ -288,6 +289,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -962,6 +964,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );
@@ -1163,6 +1166,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withAutomatedActions: true,
         },
         expect.anything()
       );

@@ -22,9 +22,9 @@ export const MonitorFailedTests = ({
   time: { to: string; from: string };
   allowBrushing?: boolean;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
 
