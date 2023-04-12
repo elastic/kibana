@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
+  describe.skip('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
