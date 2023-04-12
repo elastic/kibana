@@ -1399,9 +1399,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB',
     }),
     controlled: true,
-    error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
-      defaultMessage: 'Header key must be a valid HTTP token.',
-    }),
     props: ({ field, setValue }): KeyValuePairsFieldProps => ({
       readOnly,
       keyLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.key.label', {
