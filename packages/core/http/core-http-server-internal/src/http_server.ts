@@ -44,7 +44,7 @@ import type {
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
-import { Boom, isBoom } from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
