@@ -1382,7 +1382,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       validate: (headers) => !validateHeaders(headers),
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
-      defaultMessage: 'Header key must be a valid HTTP token.',
+      defaultMessage: 'The header key must be a valid HTTP token.',
     }),
     props: (): HeaderFieldProps => ({
       readOnly,
