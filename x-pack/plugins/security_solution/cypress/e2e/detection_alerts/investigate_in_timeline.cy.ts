@@ -8,6 +8,7 @@
 import { closeTimeline } from '../../tasks/timeline';
 import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
+import { FILTER_BADGE } from '../../screens/alerts';
 
 import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
@@ -64,17 +65,21 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
 
     it('should open a new timeline from a prevalence field', () => {
       cy.get(SUMMARY_VIEW_PREVALENCE_CELL)
-        .first()
+        .last()
         .invoke('text')
         .then((alertCount) => {
-          // Click on the first button that lets us investigate in timeline
-          cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).first().click();
+          // Click on the last button that lets us investigate in timeline.
+          // We expect this to be the `process.args` row.
+          cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).last().click();
 
           // Make sure a new timeline is created and opened
           cy.get(TIMELINE_TITLE).should('contain.text', 'Untitled timeline');
 
           // The alert count in this timeline should match the count shown on the alert flyout
           cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
+
+          // The correct filter is applied to the timeline query
+          cy.get(FILTER_BADGE).should('contain.text', ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}');
         });
     });
 
