@@ -20,7 +20,10 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
+import type {
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+} from '@kbn/exploratory-view-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -77,6 +80,7 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

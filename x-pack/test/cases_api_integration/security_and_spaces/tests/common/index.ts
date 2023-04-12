@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
     loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
+    loadTestFile(require.resolve('./comments/delete_comments'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/get_all_comments'));

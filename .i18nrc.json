@@ -18,6 +18,7 @@
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",
     "ecsDataQualityDashboard": "x-pack/packages/kbn-ecs-data-quality-dashboard",
+    "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
     "dataViews": "src/plugins/data_views",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",
