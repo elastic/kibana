@@ -120,7 +120,7 @@ describe('Disk space API', () => {
       ).mockResolvedValue({
         body: {
           defaults: {},
-          transient: { 'cluster.routing.allocation.disk.watermark.low': '80%' },
+          transient: { 'cluster.routing.allocation.disk.watermark.low': '79%' },
           persistent: { 'cluster.routing.allocation.disk.watermark.low': '85%' },
         },
       });
@@ -136,7 +136,7 @@ describe('Disk space API', () => {
           nodeName: 'node_name',
           nodeId: '1YOaoS9lTNOiTxR1uzSgRA',
           available: '20%',
-          lowDiskWatermarkSetting: '80%',
+          lowDiskWatermarkSetting: '79%',
         },
       ]);
     });
@@ -199,7 +199,7 @@ describe('Disk space API', () => {
       ).mockResolvedValue({
         body: {
           defaults: {
-            'cluster.routing.allocation.disk.watermark.low': '10%',
+            'cluster.routing.allocation.disk.watermark.low': '85%',
           },
           transient: {},
           persistent: {},
