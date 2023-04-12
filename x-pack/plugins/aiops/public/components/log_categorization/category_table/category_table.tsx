@@ -19,6 +19,7 @@ import {
   EuiCode,
   EuiText,
   EuiTableSelectionType,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -240,6 +241,7 @@ export const CategoryTable: FC<Props> = ({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer />
         </>
       ) : null}
       <EuiInMemoryTable<Category>

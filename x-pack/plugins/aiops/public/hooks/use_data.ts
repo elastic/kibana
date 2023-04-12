@@ -191,5 +191,6 @@ export const useData = (
     searchQueryLanguage,
     searchString,
     searchQuery,
+    forceRefresh: () => setLastRefresh(Date.now()),
   };
 };

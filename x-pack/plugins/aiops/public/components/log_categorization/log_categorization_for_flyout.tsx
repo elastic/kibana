@@ -8,7 +8,16 @@ import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyoutBody, EuiSkeletonText, EuiButton } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiSkeletonText,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
@@ -19,7 +28,7 @@ import { CategoryTable } from './category_table';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { InformationText } from './information_text';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
-
+import { SamplingMenu } from './sampling_menu';
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
@@ -46,7 +55,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   } = useAiopsAppContext();
 
   const mounted = useRef(false);
-  const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
+  const { runCategorizeRequest, cancelRequest, sampling } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -79,6 +88,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     searchString,
     searchQuery,
     intervalMs,
+    forceRefresh,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
@@ -144,19 +154,20 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       setLoading(false);
     }
   }, [
-    selectedField,
     dataView,
-    searchQuery,
+    selectedField,
+    cancelRequest,
+    runCategorizeRequest,
     earliest,
     latest,
-    runCategorizeRequest,
-    cancelRequest,
+    searchQuery,
     intervalMs,
     toasts,
   ]);
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
+      sampling.setDocCount(documentStats.totalCount);
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
@@ -174,24 +185,33 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     searchString,
     searchQuery,
     loadCategories,
+    sampling,
   ]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="flyoutTitle">
-            {i18n.translate('xpack.aiops.categorizeFlyout.title', {
-              defaultMessage: 'Categorize {name}',
-              values: { name: selectedField.name },
-            })}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2 id="flyoutTitle">
+                {i18n.translate('xpack.aiops.categorizeFlyout.title', {
+                  defaultMessage: 'Categorize {name}',
+                  values: { name: selectedField.name },
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SamplingMenu sampling={sampling} reload={() => forceRefresh()} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
         {loading === true ? (
           <>
             <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
+            <EuiSpacer />
             <EuiSkeletonText lines={10} />
           </>
         ) : null}

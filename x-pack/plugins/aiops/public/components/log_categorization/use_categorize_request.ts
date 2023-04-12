@@ -6,18 +6,21 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { buildRandomSamplerAggregation } from '@kbn/ml-agg-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { estypes } from '@elastic/elasticsearch';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { Sampling } from './sampling_menu';
+// import { RANDOM_SAMPLER_OPTION } from './sampling_menu/random_sampler';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
-const USE_RANDOM_SAMPLING = true;
-const randomSamplerProbability = 0.1;
+// const USE_RANDOM_SAMPLING = true;
+// const randomSamplerProbability = 0.4;
 
 interface CategoriesAgg {
   categories: {
@@ -32,23 +35,25 @@ interface CategoriesAgg {
   };
 }
 
-interface CatSampleResponse {
-  rawResponse: {
-    aggregations: {
-      sample: CategoriesAgg;
-    };
-  };
+// interface CatSampleResponse {
+//   rawResponse: {
+//     aggregations: {
+//       sample: CategoriesAgg;
+//     };
+//   };
+// }
+
+interface CategoriesSampleAgg {
+  sample: CategoriesAgg;
 }
 
 interface CatResponse {
-  rawResponse: {
-    aggregations: CategoriesAgg;
-  };
+  rawResponse: estypes.SearchResponseBody<unknown, CategoriesAgg | CategoriesSampleAgg>;
 }
 
-export function isSampleCatResponse(resp: any): resp is CatSampleResponse {
-  return resp.rawResponse.aggregations.sample !== undefined;
-}
+// export function isSampleCatResponse(resp: any): resp is CatSampleResponse {
+//   return resp.rawResponse.aggregations.sample !== undefined;
+// }
 
 export interface Category {
   key: string;
@@ -69,6 +74,10 @@ export function useCategorizeRequest() {
 
   const abortController = useRef(new AbortController());
 
+  const sampling = useMemo(() => new Sampling(), []);
+  // const samplingMenu = useSamplingMenu();
+  // const { probability, mode } = samplingMenu;
+
   const runCategorizeRequest = useCallback(
     (
       index: string,
@@ -79,16 +88,18 @@ export function useCategorizeRequest() {
       query: QueryDslQueryContainer,
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      const { wrap, unwrap } = sampling.createRandomSamplerWrapper();
+
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, query, intervalMs),
+            createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
             next: (result) => {
               if (isCompleteResponse(result)) {
-                resolve(processCategoryResults(result, field));
+                resolve(processCategoryResults(result, field, unwrap));
               } else if (isErrorResponse(result)) {
                 reject(result);
               } else {
@@ -106,7 +117,7 @@ export function useCategorizeRequest() {
           });
       });
     },
-    [data.search]
+    [data.search, sampling]
   );
 
   const cancelRequest = useCallback(() => {
@@ -114,7 +125,7 @@ export function useCategorizeRequest() {
     abortController.current = new AbortController();
   }, []);
 
-  return { runCategorizeRequest, cancelRequest };
+  return { runCategorizeRequest, cancelRequest, sampling };
 }
 
 function createCategoryRequest(
@@ -124,6 +135,7 @@ function createCategoryRequest(
   from: number | undefined,
   to: number | undefined,
   queryIn: QueryDslQueryContainer,
+  wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number
 ) {
   const query = cloneDeep(queryIn);
@@ -189,24 +201,27 @@ function createCategoryRequest(
       size: 0,
       body: {
         query,
-        aggs: USE_RANDOM_SAMPLING
-          ? buildRandomSamplerAggregation(aggs, randomSamplerProbability)
-          : aggs,
+        aggs: wrap(aggs),
       },
     },
   };
 }
 
-function processCategoryResults(result: CatResponse | CatSampleResponse, field: string) {
+function processCategoryResults(
+  result: CatResponse,
+  field: string,
+  unwrap: ReturnType<typeof createRandomSamplerWrapper>['unwrap']
+) {
   const sparkLinesPerCategory: SparkLinesPerCategory = {};
-
-  if (result.rawResponse.aggregations === undefined) {
+  const { aggregations } = result.rawResponse;
+  if (aggregations === undefined) {
     throw new Error('processCategoryResults failed, did not return aggregations.');
   }
-
-  const buckets = isSampleCatResponse(result)
-    ? result.rawResponse.aggregations.sample.categories.buckets
-    : result.rawResponse.aggregations.categories.buckets;
+  const {
+    categories: { buckets },
+  } = unwrap(
+    aggregations as unknown as Record<string, estypes.AggregationsAggregate>
+  ) as CategoriesAgg;
 
   const categories: Category[] = buckets.map((b) => {
     sparkLinesPerCategory[b.key] =

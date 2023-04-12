@@ -32,7 +32,10 @@ export const FieldCategorizeButtonInner: React.FC<FieldVisualizeButtonInnerProps
         iconSide="left"
         iconType="machineLearningApp"
       >
-        <FormattedMessage id="discover.fieldCategorizeButton.label" defaultMessage="Categorize" />
+        <FormattedMessage
+          id="discover.fieldCategorizeButton.label"
+          defaultMessage="Run pattern analysis"
+        />
       </EuiButton>
     </>
   );
