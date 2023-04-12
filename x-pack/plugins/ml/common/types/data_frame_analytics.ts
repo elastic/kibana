@@ -11,6 +11,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import type { UrlConfig } from './custom_urls';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -57,8 +58,8 @@ export interface ClassificationAnalysis {
 }
 
 export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
-interface DataFrameAnalyticsMeta {
-  custom_urls: any[];
+export interface DataFrameAnalyticsMeta {
+  custom_urls?: UrlConfig[];
   [key: string]: any;
 }
 export interface DataFrameAnalyticsConfig
@@ -72,7 +73,7 @@ export interface UpdateDataFrameAnalyticsConfig {
   description?: string;
   model_memory_limit?: string;
   max_num_threads?: number;
-  _meta?: Record<string, unknown>;
+  _meta?: DataFrameAnalyticsMeta;
 }
 
 export function isDataFrameAnalyticsConfigs(arg: unknown): arg is DataFrameAnalyticsConfig {

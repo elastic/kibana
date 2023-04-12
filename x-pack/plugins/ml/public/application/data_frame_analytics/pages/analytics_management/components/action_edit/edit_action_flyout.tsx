@@ -37,7 +37,10 @@ import {
 } from '../../../../../../../common/util/validators';
 import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import { UpdateDataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+import {
+  UpdateDataFrameAnalyticsConfig,
+  type DataFrameAnalyticsConfig,
+} from '../../../../../../../common/types/data_frame_analytics';
 import type { UrlConfig } from '../../../../../../../common/types/custom_urls';
 
 import { EditAction } from './use_edit_action';
@@ -60,7 +63,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
   const [activeTabId, setActiveTabId] = useState<string>('job-details');
   const [customUrls, setCustomUrls] = useState<UrlConfig[]>([]);
-  const [analyticsJob, setAnalyticsJob] = useState<any>();
+  const [analyticsJob, setAnalyticsJob] = useState<DataFrameAnalyticsConfig | undefined>();
 
   const {
     services: { notifications },
@@ -157,7 +160,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       );
       await updateDataFrameAnalytics(updateConfig);
     } else if (activeTabId === 'custom-urls') {
-      const meta = analyticsJob._meta ?? {};
+      const meta = analyticsJob?._meta ?? {};
       delete meta.custom_urls;
       // Only update custom urls and leave anything else in _meta untouched
       const updateConfig: UpdateDataFrameAnalyticsConfig = {
@@ -312,7 +315,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       }),
       content: (
         <CustomUrlsWrapper
-          job={analyticsJob}
+          job={analyticsJob as DataFrameAnalyticsConfig}
           jobCustomUrls={customUrls}
           setCustomUrls={setCustomUrls}
         />

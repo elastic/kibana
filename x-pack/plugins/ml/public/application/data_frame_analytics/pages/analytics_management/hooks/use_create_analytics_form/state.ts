@@ -6,6 +6,7 @@
  */
 
 import { RuntimeMappings } from '../../../../../../../common/types/fields';
+import { DataFrameAnalyticsMeta } from '../../../../../../../common/types/data_frame_analytics';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
@@ -87,7 +88,7 @@ export interface State {
     maxNumThreads: undefined | number;
     maxOptimizationRoundsPerHyperparameter: undefined | number;
     maxTrees: undefined | number;
-    _meta: undefined | Record<string, any>;
+    _meta: undefined | DataFrameAnalyticsMeta;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
