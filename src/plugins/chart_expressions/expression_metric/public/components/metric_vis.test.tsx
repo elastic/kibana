@@ -232,6 +232,7 @@ describe('MetricVisComponent', function () {
       metric: {
         progressDirection: 'vertical',
         maxCols: 5,
+        icon: 'empty',
       },
       dimensions: {
         metric: basePriceColumnId,
@@ -252,6 +253,7 @@ describe('MetricVisComponent', function () {
         Object {
           "color": "#f5f7fa",
           "extra": <span />,
+          "icon": [Function],
           "subtitle": undefined,
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -314,6 +316,7 @@ describe('MetricVisComponent', function () {
             secondary prefix
              13.63
           </span>,
+          "icon": [Function],
           "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -360,6 +363,7 @@ describe('MetricVisComponent', function () {
           "color": "#f5f7fa",
           "domainMax": 28.984375,
           "extra": <span />,
+          "icon": [Function],
           "progressBarDirection": "vertical",
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -435,6 +439,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Friday",
             "value": 28.984375,
@@ -443,6 +448,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Wednesday",
             "value": 28.984375,
@@ -451,6 +457,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Saturday",
             "value": 25.984375,
@@ -459,6 +466,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Sunday",
             "value": 25.784375,
@@ -467,6 +475,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Thursday",
             "value": 25.348011363636363,
@@ -595,6 +604,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Friday",
               "value": 28.984375,
@@ -603,6 +613,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
               "value": 28.984375,
@@ -611,6 +622,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Saturday",
               "value": 25.984375,
@@ -619,6 +631,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Sunday",
               "value": 25.784375,
@@ -627,6 +640,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Thursday",
               "value": 25.348011363636363,
@@ -637,6 +651,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Other",
               "value": 24.984375,
@@ -678,6 +693,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Friday",
@@ -688,6 +704,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
@@ -698,6 +715,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Saturday",
@@ -708,6 +726,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.784375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Sunday",
@@ -718,6 +737,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.348011363636363,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Thursday",
@@ -730,6 +750,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 24.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Other",
@@ -1469,6 +1490,31 @@ describe('MetricVisComponent', function () {
       });
       expect(primary).toBe('23.94%');
       expect(secondary).toBe('1.12K%');
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

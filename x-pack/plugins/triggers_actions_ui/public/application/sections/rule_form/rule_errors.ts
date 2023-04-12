@@ -60,7 +60,8 @@ export function validateBaseProperties(
   }
 
   const invalidThrottleActions = ruleObject.actions.filter((a) => {
-    const throttleDuration = a.frequency?.throttle ? parseDuration(a.frequency.throttle) : 0;
+    if (!a.frequency?.throttle) return false;
+    const throttleDuration = parseDuration(a.frequency.throttle);
     const intervalDuration =
       ruleObject.schedule.interval && ruleObject.schedule.interval.length > 1
         ? parseDuration(ruleObject.schedule.interval)

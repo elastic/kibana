@@ -60,6 +60,7 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/discover-plugin",
+    "@kbn/observability-alert-details",
     "@kbn/actions-plugin",
     "@kbn/ui-theme"
   ],
