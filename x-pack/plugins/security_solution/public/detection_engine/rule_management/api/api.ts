@@ -9,7 +9,7 @@ import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -21,7 +21,6 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  INTERNAL_ALERTING_FIND_RULES,
 } from '../../../../common/constants';
 
 import {
@@ -199,15 +198,18 @@ export const fetchRulesSnoozeSettings = async ({
   ids,
   signal,
 }: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsResponse> =>
-  KibanaServices.get().http.fetch<RulesSnoozeSettingsResponse>(INTERNAL_ALERTING_FIND_RULES, {
-    method: 'GET',
-    query: {
-      filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
-      fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
-      per_page: ids.length,
-    },
-    signal,
-  });
+  KibanaServices.get().http.fetch<RulesSnoozeSettingsResponse>(
+    INTERNAL_ALERTING_API_FIND_RULES_PATH,
+    {
+      method: 'GET',
+      query: {
+        filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
+        fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
+        per_page: ids.length,
+      },
+      signal,
+    }
+  );
 
 export interface BulkActionSummary {
   failed: number;
