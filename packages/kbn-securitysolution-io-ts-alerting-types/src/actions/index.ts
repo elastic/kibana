@@ -72,7 +72,11 @@ export const RuleAction = t.exact(
       action_type_id: RuleActionTypeId,
       params: RuleActionParams,
     }),
-    t.partial({ uuid: RuleActionUuid, alerts_filter: RuleActionAlertsFilter, frequency: RuleActionFrequency }),
+    t.partial({
+      uuid: RuleActionUuid,
+      alerts_filter: RuleActionAlertsFilter,
+      frequency: RuleActionFrequency,
+    }),
   ])
 );
 
@@ -88,7 +92,11 @@ export const RuleActionCamel = t.exact(
       actionTypeId: RuleActionTypeId,
       params: RuleActionParams,
     }),
-    t.partial({ uuid: RuleActionUuid, alertsFilter: RuleActionAlertsFilter, frequency: RuleActionFrequency }),
+    t.partial({
+      uuid: RuleActionUuid,
+      alertsFilter: RuleActionAlertsFilter,
+      frequency: RuleActionFrequency,
+    }),
   ])
 );
 
