@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   EuiButton,
   EuiCheckbox,
@@ -52,14 +52,13 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const history = useHistory();
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
 
   const isEditMode = slo !== undefined;
 
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
-  const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(false);
+  const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
   if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
     setIsAddRuleFlyoutOpen(true);
@@ -161,12 +160,7 @@ export function SloEditForm({ slo }: Props) {
     setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
   };
 
-  const handleCloseRuleFlyout = () => {
-    history.replace({ search: '' });
-    setIsAddRuleFlyoutOpen(false);
-  };
-
-  const handleSaveRule = async () => {
+  const handleCloseRuleFlyout = async () => {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   };
 
@@ -270,7 +264,7 @@ export function SloEditForm({ slo }: Props) {
           ruleTypeId={SLO_BURN_RATE_RULE_ID}
           canChangeTrigger={false}
           onClose={handleCloseRuleFlyout}
-          onSave={handleSaveRule}
+          onSave={handleCloseRuleFlyout}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
         />
       ) : null}
