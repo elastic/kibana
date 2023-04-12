@@ -166,14 +166,6 @@ export const useDashboardMenuItems = ({
         },
       } as TopNavMenuData,
 
-      reset: {
-        id: 'test',
-        label: 'Reset',
-        description: 'Reset your changes',
-        disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
-        run: () => resetChanges(),
-      } as TopNavMenuData,
-
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -194,6 +186,13 @@ export const useDashboardMenuItems = ({
         iconType: Boolean(lastSavedId) ? undefined : 'save',
         label: Boolean(lastSavedId) ? topNavStrings.saveAs.label : topNavStrings.quickSave.label,
         run: () => saveDashboardAs(),
+      } as TopNavMenuData,
+
+      resetChanges: {
+        ...topNavStrings.resetChanges,
+        id: 'reset',
+        disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
+        run: () => resetChanges(),
       } as TopNavMenuData,
 
       switchToViewMode: {
@@ -262,9 +261,10 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
     if (lastSavedId) {
       editModeItems.push(
+        'divider',
         menuItems.saveAs,
         menuItems.switchToViewMode,
-        menuItems.reset,
+        menuItems.resetChanges,
         menuItems.quickSave
       );
     } else {

@@ -312,6 +312,14 @@ export const topNavStrings = {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
+  resetChanges: {
+    label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
+      defaultMessage: 'Reset changes',
+    }),
+    description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
+      defaultMessage: 'Reset your dashboard to the last saved state',
+    }),
+  },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'Switch to view mode',

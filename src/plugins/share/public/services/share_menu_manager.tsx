@@ -104,6 +104,7 @@ export class ShareMenuManager {
             closePopover={onClose}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            repositionOnScroll={true}
           >
             <ShareContextMenu
               allowEmbed={allowEmbed}

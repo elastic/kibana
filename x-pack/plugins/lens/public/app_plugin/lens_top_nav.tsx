@@ -143,20 +143,22 @@ function getLensTopNavConfig(options: {
       });
 
   if (contextOriginatingApp && !actions.cancel.visible) {
-    topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.goBackLabel', {
-        defaultMessage: `Go back to {contextOriginatingApp}`,
-        values: { contextOriginatingApp },
-      }),
-      run: actions.goBack.execute,
-      className: 'lnsNavItem__withDivider',
-      testId: 'lnsApp_goBackToAppButton',
-      description: i18n.translate('xpack.lens.app.goBackLabel', {
-        defaultMessage: `Go back to {contextOriginatingApp}`,
-        values: { contextOriginatingApp },
-      }),
-      disableButton: !actions.goBack.enabled,
-    });
+    topNavMenu.push(
+      {
+        label: i18n.translate('xpack.lens.app.goBackLabel', {
+          defaultMessage: `Go back to {contextOriginatingApp}`,
+          values: { contextOriginatingApp },
+        }),
+        run: actions.goBack.execute,
+        testId: 'lnsApp_goBackToAppButton',
+        description: i18n.translate('xpack.lens.app.goBackLabel', {
+          defaultMessage: `Go back to {contextOriginatingApp}`,
+          values: { contextOriginatingApp },
+        }),
+        disableButton: !actions.goBack.enabled,
+      },
+      'divider'
+    );
   }
 
   if (actions.getUnderlyingDataUrl.visible) {
@@ -164,17 +166,19 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Explore data in Discover',
     });
 
-    topNavMenu.push({
-      label: exploreDataInDiscoverLabel,
-      run: actions.getUnderlyingDataUrl.execute,
-      testId: 'lnsApp_openInDiscover',
-      className: 'lnsNavItem__withDivider',
-      description: exploreDataInDiscoverLabel,
-      disableButton: !actions.getUnderlyingDataUrl.enabled,
-      tooltip: actions.getUnderlyingDataUrl.tooltip,
-      target: '_blank',
-      href: actions.getUnderlyingDataUrl.getLink?.(),
-    });
+    topNavMenu.push(
+      {
+        label: exploreDataInDiscoverLabel,
+        run: actions.getUnderlyingDataUrl.execute,
+        testId: 'lnsApp_openInDiscover',
+        description: exploreDataInDiscoverLabel,
+        disableButton: !actions.getUnderlyingDataUrl.enabled,
+        tooltip: actions.getUnderlyingDataUrl.tooltip,
+        target: '_blank',
+        href: actions.getUnderlyingDataUrl.getLink?.(),
+      },
+      'divider'
+    );
   }
 
   topNavMenu.push({
@@ -204,17 +208,19 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  topNavMenu.push({
-    label: i18n.translate('xpack.lens.app.settings', {
-      defaultMessage: 'Settings',
-    }),
-    run: actions.openSettings.execute,
-    className: 'lnsNavItem__withDivider',
-    testId: 'lnsApp_settingsButton',
-    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
-      defaultMessage: 'Open the Lens settings menu',
-    }),
-  });
+  topNavMenu.push(
+    {
+      label: i18n.translate('xpack.lens.app.settings', {
+        defaultMessage: 'Settings',
+      }),
+      run: actions.openSettings.execute,
+      testId: 'lnsApp_settingsButton',
+      description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+        defaultMessage: 'Open the Lens settings menu',
+      }),
+    },
+    'divider'
+  );
 
   if (actions.cancel.visible) {
     topNavMenu.push({

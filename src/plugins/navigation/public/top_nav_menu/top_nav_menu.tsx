@@ -110,7 +110,11 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   function renderItems(): ReactElement[] | null {
     if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
-      return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
+      return menuItem === 'divider' ? (
+        <div className="kbnTopNavMenuItem__divider" />
+      ) : (
+        <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />
+      );
     });
   }
 

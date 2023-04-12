@@ -31,3 +31,16 @@
     cursor: pointer;
   }
 }
+
+.kbnTopNavMenuItem__divider {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    border-right: $euiBorderThin;
+    height: 100%;
+    margin: 0 $euiSizeXS;
+    padding: $euiSizeM 0;
+
+    display: block;
+    pointer-events: none;
+    caret-color: transparent;
+  }
+}
