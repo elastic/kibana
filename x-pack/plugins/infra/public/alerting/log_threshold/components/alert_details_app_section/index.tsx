@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import {
+  ComparatorToi18nMap,
   ComparatorToi18nSymbolsMap,
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
@@ -82,10 +83,11 @@ const AlertDetailsAppSection = ({
       ? Number(moment(alert.start).subtract(TWENTY_TIMES_RULE_WINDOW_MS, 'millisecond').format('x'))
       : Number(moment(alert.start).subtract(ruleWindowSizeMS, 'millisecond').format('x'));
 
+  const rangeFromDuration = moment(rangeFrom).locale(i18n.getLocale()).fromNow(true);
+
   const rangeTo = alert.active
     ? Date.now()
     : Number(moment(alert.fields[ALERT_END]).add(ruleWindowSizeMS, 'millisecond').format('x'));
-
   return (
     // Create a chart per-criteria
     !!rule.params.criteria ? (
@@ -99,26 +101,28 @@ const AlertDetailsAppSection = ({
               data-test-subj="logsHistoryChartAlertDetails"
             >
               <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
-                        defaultMessage: 'Logs for {field} {comparator} {value}',
-                        values: {
-                          field: chartCriterion.field,
-                          comparator: chartCriterion.comparator,
-                          value: chartCriterion.value,
-                        },
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
+                {chartCriterion.comparator && (
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h2>
+                        {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
+                          defaultMessage: 'Logs for {field} {comparator} {value}',
+                          values: {
+                            field: chartCriterion.field,
+                            comparator: ComparatorToi18nMap[chartCriterion.comparator],
+                            value: chartCriterion.value,
+                          },
+                        })}
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="subdued">
                     {i18n.translate('xpack.infra.logs.alertDetails.chart.last', {
-                      defaultMessage: 'Last {time}',
+                      defaultMessage: 'Last {time} ',
                       values: {
-                        time: moment(rangeFrom).locale(i18n.getLocale()).fromNow(true),
+                        time: rangeFromDuration,
                       },
                     })}
                   </EuiText>
