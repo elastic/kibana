@@ -33,12 +33,10 @@ import { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/len
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { KibanaLogic } from '../../../shared/kibana';
+import { KibanaLogic } from '../../../../shared/kibana';
 
-import { withLensData, WithLensDataInputProps } from '../../hoc/with_lens_data';
-import { FilterBy as ChartIds, getFormulaByFilter } from '../../utils/get_formula_by_filter';
-
-import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
+import { withLensData, WithLensDataInputProps } from '../../../hoc/with_lens_data';
+import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 const DEFAULT_STROKE_WIDTH = 1;
 const HOVER_STROKE_WIDTH = 3;
@@ -46,33 +44,33 @@ const CHART_HEIGHT = 490;
 
 interface AnalyticsCollectionChartProps extends WithLensDataInputProps {
   dataViewQuery: string;
+  selectedChart: FilterBy | null;
+  setSelectedChart(chart: FilterBy): void;
 }
 
 interface AnalyticsCollectionChartLensProps {
   data: {
-    [key in ChartIds]?: Array<[number, number]>;
+    [key in FilterBy]?: Array<[number, number]>;
   };
   isLoading: boolean;
 }
 
 export const AnalyticsCollectionChart: React.FC<
   AnalyticsCollectionChartProps & AnalyticsCollectionChartLensProps
-> = ({ id: lensId, data, timeRange, dataViewQuery, isLoading, searchSessionId }) => {
+> = ({ data, timeRange, isLoading, selectedChart, setSelectedChart }) => {
   const [currentData, setCurrentData] = useState(data);
-  const [hoverChart, setHoverChart] = useState<ChartIds | null>(null);
-  const [selectedChart, setSelectedChart] = useState<ChartIds>(ChartIds.Searches);
+  const [hoverChart, setHoverChart] = useState<FilterBy | null>(null);
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
   const fromDateParsed = DateMath.parse(timeRange.from);
   const toDataParsed = DateMath.parse(timeRange.to);
   const chartTheme = chartSettings.theme.useChartsTheme();
   const baseChartTheme = chartSettings.theme.useChartsBaseTheme();
-
   const charts = useMemo(
     () => [
       {
         chartColor: euiThemeVars.euiColorVis0,
-        data: currentData[ChartIds.Searches] || [],
-        id: ChartIds.Searches,
+        data: currentData[FilterBy.Searches] || [],
+        id: FilterBy.Searches,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.searches',
           {
@@ -82,8 +80,8 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis2,
-        data: currentData[ChartIds.NoResults] || [],
-        id: ChartIds.NoResults,
+        data: currentData[FilterBy.NoResults] || [],
+        id: FilterBy.NoResults,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.noResults',
           {
@@ -93,8 +91,8 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis3,
-        data: currentData[ChartIds.Clicks] || [],
-        id: ChartIds.Clicks,
+        data: currentData[FilterBy.Clicks] || [],
+        id: FilterBy.Clicks,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.clicks',
           {
@@ -104,8 +102,8 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis5,
-        data: currentData[ChartIds.Sessions] || [],
-        id: ChartIds.Sessions,
+        data: currentData[FilterBy.Sessions] || [],
+        id: FilterBy.Sessions,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.sessions',
           {
@@ -123,111 +121,82 @@ export const AnalyticsCollectionChart: React.FC<
     }
   }, [data]);
 
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexGroup gutterSize="m">
-        {charts.map(({ name, id }) => (
-          <AnalyticsCollectionViewMetricWithLens
-            key={id}
-            id={`${lensId}-metric-${id}`}
-            isSelected={selectedChart === id}
-            name={name}
-            onClick={(event) => {
-              event.currentTarget?.blur();
-
-              setSelectedChart(id);
-            }}
-            searchSessionId={searchSessionId}
-            timeRange={timeRange}
-            dataViewQuery={dataViewQuery}
-            getFormula={getFormulaByFilter.bind(null, id)}
-          />
-        ))}
-      </EuiFlexGroup>
-
-      {isLoading && Object.keys(currentData).length === 0 ? (
-        <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: CHART_HEIGHT }}>
-          <EuiLoadingChart size="l" />
-        </EuiFlexGroup>
-      ) : (
-        <Chart size={['100%', CHART_HEIGHT]}>
-          <Settings
-            theme={chartTheme}
-            baseTheme={baseChartTheme}
-            showLegend={false}
-            onElementClick={(elements) => {
-              const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
-
-              if (chartId) {
-                setSelectedChart(chartId as ChartIds);
-              }
-            }}
-            onElementOver={(elements) => {
-              const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
-
-              if (chartId) {
-                setHoverChart(chartId as ChartIds);
-              }
-            }}
-            onElementOut={() => setHoverChart(null)}
-          />
-
-          {charts.map(({ data: chartData, id, name, chartColor }) => (
-            <AreaSeries
-              id={id}
-              key={id}
-              name={name}
-              data={chartData}
-              color={chartColor}
-              xAccessor={0}
-              yAccessors={[1]}
-              areaSeriesStyle={{
-                area: {
-                  opacity: 0.2,
-                  visible: selectedChart === id,
-                },
-                line: {
-                  opacity: selectedChart === id ? 1 : 0.5,
-                  strokeWidth: [hoverChart, selectedChart].includes(id)
-                    ? HOVER_STROKE_WIDTH
-                    : DEFAULT_STROKE_WIDTH,
-                },
-              }}
-              yNice
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Sqrt}
-              curve={CurveType.CURVE_MONOTONE_X}
-            />
-          ))}
-
-          <Axis
-            id="bottom-axis"
-            position={Position.Bottom}
-            tickFormat={
-              fromDateParsed && toDataParsed
-                ? niceTimeFormatter([fromDateParsed.valueOf(), toDataParsed.valueOf()])
-                : undefined
-            }
-            gridLine={{ visible: true }}
-          />
-
-          <Axis
-            gridLine={{ dash: [], visible: true }}
-            hide
-            id="left-axis"
-            position={Position.Left}
-          />
-
-          <Tooltip
-            headerFormatter={(tooltipData) =>
-              moment(tooltipData.value).format(uiSettings.get('dateFormat'))
-            }
-            maxTooltipItems={1}
-            type={TooltipType.VerticalCursor}
-          />
-        </Chart>
-      )}
+  return isLoading && Object.keys(currentData).length === 0 ? (
+    <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: CHART_HEIGHT }}>
+      <EuiLoadingChart size="l" />
     </EuiFlexGroup>
+  ) : (
+    <Chart size={['100%', CHART_HEIGHT]}>
+      <Settings
+        theme={chartTheme}
+        baseTheme={baseChartTheme}
+        showLegend={false}
+        onElementClick={(elements) => {
+          const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
+
+          if (chartId) {
+            setSelectedChart(chartId as FilterBy);
+          }
+        }}
+        onElementOver={(elements) => {
+          const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
+
+          if (chartId) {
+            setHoverChart(chartId as FilterBy);
+          }
+        }}
+        onElementOut={() => setHoverChart(null)}
+      />
+
+      {charts.map(({ data: chartData, id, name, chartColor }) => (
+        <AreaSeries
+          id={id}
+          key={id}
+          name={name}
+          data={chartData}
+          color={chartColor}
+          xAccessor={0}
+          yAccessors={[1]}
+          areaSeriesStyle={{
+            area: {
+              opacity: 0.2,
+              visible: selectedChart === id,
+            },
+            line: {
+              opacity: selectedChart === id ? 1 : 0.5,
+              strokeWidth: [hoverChart, selectedChart].includes(id)
+                ? HOVER_STROKE_WIDTH
+                : DEFAULT_STROKE_WIDTH,
+            },
+          }}
+          yNice
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Sqrt}
+          curve={CurveType.CURVE_MONOTONE_X}
+        />
+      ))}
+
+      <Axis
+        id="bottom-axis"
+        position={Position.Bottom}
+        tickFormat={
+          fromDateParsed && toDataParsed
+            ? niceTimeFormatter([fromDateParsed.valueOf(), toDataParsed.valueOf()])
+            : undefined
+        }
+        gridLine={{ visible: true }}
+      />
+
+      <Axis gridLine={{ dash: [], visible: true }} hide id="left-axis" position={Position.Left} />
+
+      <Tooltip
+        headerFormatter={(tooltipData) =>
+          moment(tooltipData.value).format(uiSettings.get('dateFormat'))
+        }
+        maxTooltipItems={1}
+        type={TooltipType.VerticalCursor}
+      />
+    </Chart>
   );
 };
 
@@ -235,8 +204,8 @@ const initialValues: AnalyticsCollectionChartLensProps = {
   data: {},
   isLoading: true,
 };
-const LENS_LAYERS: Array<{ formula: string; id: ChartIds; x: string; y: string }> = Object.values(
-  ChartIds
+const LENS_LAYERS: Array<{ formula: string; id: FilterBy; x: string; y: string }> = Object.values(
+  FilterBy
 ).map((id) => ({ formula: getFormulaByFilter(id), id, x: 'timeline', y: 'values' }));
 
 export const AnalyticsCollectionChartWithLens = withLensData<
