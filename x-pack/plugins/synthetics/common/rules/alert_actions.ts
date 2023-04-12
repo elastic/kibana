@@ -107,6 +107,7 @@ export function populateAlertActions({
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, defaultEmail);
         }
         break;
       default:
