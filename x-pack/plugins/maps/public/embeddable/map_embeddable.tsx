@@ -110,9 +110,7 @@ import {
   MapEmbeddableOutput,
 } from './types';
 
-async function getChartsPaletteServiceGetColor(): Promise<
-  ((value: string) => string) | null
-> {
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
   const chartsService = getCharts();
   const paletteRegistry: PaletteRegistry | null = chartsService
     ? await chartsService.palettes.getPalettes()
