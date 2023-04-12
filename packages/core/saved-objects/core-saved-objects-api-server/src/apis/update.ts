@@ -41,7 +41,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
 export interface SavedObjectsUpdateResponse<T = unknown>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   /** partial attributes of the saved object */
-  attributes: Partial<T>;
+  attributes: T;
   /** optionally included references to other saved objects */
   references: SavedObjectReference[] | undefined;
 }
