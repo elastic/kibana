@@ -274,11 +274,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       annotations: true,
       verb: true,
       user: {
-        username: true,
         groups: true,
       },
       impersonatedUser: {
-        username: true,
         groups: true,
       },
       objectRef: {
