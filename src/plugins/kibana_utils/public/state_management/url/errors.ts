@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { memoize, throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
 
@@ -23,6 +24,18 @@ export const saveStateInUrlErrorTitle = i18n.translate(
   }
 );
 
+// Prevent toast storms by throttling. See https://github.com/elastic/kibana/issues/153073
+const throttledOnRestoreError = throttle((toasts: NotificationsStart['toasts'], e: Error) => {
+  toasts.addError(e, {
+    title: restoreUrlErrorTitle,
+  });
+}, 10000);
+const throttledOnSaveError = throttle((toasts: NotificationsStart['toasts'], e: Error) => {
+  toasts.addError(e, {
+    title: saveStateInUrlErrorTitle,
+  });
+}, 10000);
+
 /**
  * Helper for configuring {@link IKbnUrlStateStorage} to notify about inner errors
  *
@@ -35,17 +48,9 @@ export const saveStateInUrlErrorTitle = i18n.translate(
  * ```
  * @param toast - toastApi from core.notifications.toasts
  */
-export const withNotifyOnErrors = (toasts: NotificationsStart['toasts']) => {
+export const withNotifyOnErrors = memoize((toasts: NotificationsStart['toasts']) => {
   return {
-    onGetError: (error: Error) => {
-      toasts.addError(error, {
-        title: restoreUrlErrorTitle,
-      });
-    },
-    onSetError: (error: Error) => {
-      toasts.addError(error, {
-        title: saveStateInUrlErrorTitle,
-      });
-    },
+    onGetError: (e: Error) => throttledOnRestoreError(toasts, e),
+    onSetError: (e: Error) => throttledOnSaveError(toasts, e),
   };
-};
+});
