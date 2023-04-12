@@ -18,12 +18,14 @@ import type {
   AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
+  IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 
 import { validate } from './validate';
 import { isValidRouteVersion } from './is_valid_route_version';
+import { injectResponseHeaders } from './inject_response_headers';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
@@ -96,7 +98,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     ctx: RequestHandlerContextBase,
     req: KibanaRequest,
     res: KibanaResponseFactory
-  ) => {
+  ): Promise<IKibanaResponse> => {
     const version = req.headers?.[ELASTIC_HTTP_VERSION_HEADER] as undefined | ApiVersion;
     if (!version) {
       return res.badRequest({
@@ -166,7 +168,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    return result;
+    return injectResponseHeaders(
+      {
+        [ELASTIC_HTTP_VERSION_HEADER]: version,
+      },
+      result
+    );
   };
 
   private validateVersion(version: string) {

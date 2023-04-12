@@ -149,4 +149,22 @@ describe('Routing versioned requests', () => {
       })
     );
   });
+
+  it('returns the version in response headers', async () => {
+    router.versioned
+      .get({ path: '/my-path', access: 'public' })
+      .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: '2020-02-02' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2020-02-02')
+        .expect(200)
+        .then(({ header }) => header)
+    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2020-02-02' }));
+  });
 });
