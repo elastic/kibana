@@ -7,6 +7,8 @@
 
 import {
   AppMountParameters,
+  AppNavLinkStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -77,8 +79,7 @@ export class ProfilingPlugin implements Plugin {
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
-
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
     coreSetup.application.register({
       id: 'profiling',
       title: 'Universal Profiling',
@@ -86,6 +87,7 @@ export class ProfilingPlugin implements Plugin {
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
+      updater$: appUpdater$,
       async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
@@ -124,6 +126,19 @@ export class ProfilingPlugin implements Plugin {
           kuerySubject.next('');
         };
       },
+    });
+
+    pluginsSetup.licensing.license$.subscribe((license) => {
+      const { state } = license.check('profiling', 'enterprise');
+      const hasRequiredLicense = state === 'valid';
+
+      appUpdater$.next(() => ({
+        navLinkStatus: hasRequiredLicense ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+      }));
+
+      if (hasRequiredLicense) {
+        pluginsSetup.observability.navigation.registerSections(section$);
+      }
     });
   }
 
