@@ -15,11 +15,12 @@ import type { PackageInfo } from '../../common';
 export const getNumTransformAssets = (assets?: PackageInfo['assets']) => {
   if (
     !assets ||
-    !(Array.isArray(assets.elasticsearch.transform) && assets.elasticsearch.transform.length > 0)
-  )
+    !(Array.isArray(assets.elasticsearch?.transform) && assets.elasticsearch?.transform?.length > 0)
+  ) {
     return 0;
+  }
 
-  return uniqBy(assets.elasticsearch.transform, 'file').length;
+  return uniqBy(assets.elasticsearch?.transform, 'file').length;
 };
 export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionComponent<{
   count: number;

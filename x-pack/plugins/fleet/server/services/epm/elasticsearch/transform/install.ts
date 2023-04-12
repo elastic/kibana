@@ -785,6 +785,8 @@ async function handleTransformInstall({
       const isResponseError = err instanceof errors.ResponseError;
       isUnauthorizedAPIKey =
         isResponseError &&
+        // if transform was created with insufficient permission,
+        // _start will yield an error
         err?.body?.error?.type === 'security_exception' &&
         err?.body?.error?.reason?.includes('lacks the required permissions');
 
@@ -792,6 +794,36 @@ async function handleTransformInstall({
       if (!isUnauthorizedAPIKey) {
         throw err;
       }
+    }
+  } else {
+    // if transform was not set to start automatically in yml config,
+    // we need to check using _stats if the transform had insufficient permissions
+    try {
+      const transformStats = await retryTransientEsErrors(
+        () =>
+          esClient.transform.getTransformStats(
+            { transform_id: transform.installationName },
+            { ignore: [409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+      if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
+        // @ts-expect-error TransformGetTransformStatsTransformStats should have 'health'
+        const transformHealth = transformStats.transforms[0].health;
+        if (
+          transformHealth.status === 'red' &&
+          Array.isArray(transformHealth.issues) &&
+          transformHealth.issues.find(
+            (i: { issue: string }) => i.issue === 'Privileges check failed'
+          )
+        ) {
+          isUnauthorizedAPIKey = true;
+        }
+      }
+    } catch (err) {
+      logger.debug(
+        `Error getting transform stats for transform: ${transform.installationName} cause ${err}`
+      );
     }
   }
 
