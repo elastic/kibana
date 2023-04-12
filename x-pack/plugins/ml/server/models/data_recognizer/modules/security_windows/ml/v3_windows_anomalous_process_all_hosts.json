@@ -7,7 +7,7 @@
       {
         "detector_description": "Detects rare process executable values.",
         "function": "rare",
-        "by_field_name": "process.executable",
+        "by_field_name": "process.name",
         "detector_index": 0
       }
     ],
