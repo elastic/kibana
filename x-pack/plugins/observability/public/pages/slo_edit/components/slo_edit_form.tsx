@@ -114,7 +114,7 @@ export function SloEditForm({ slo }: Props) {
         if (isCreateRuleCheckboxChecked) {
           navigateToUrl(
             basePath.prepend(
-              `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}}=true`
+              `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}=true`
             )
           );
         } else {
