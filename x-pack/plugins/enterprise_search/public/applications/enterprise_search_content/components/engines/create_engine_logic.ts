@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import {
   CreateEngineApiLogic,
@@ -27,8 +26,8 @@ export interface CreateEngineLogicActions {
   engineCreated: CreateEngineApiLogicActions['apiSuccess'];
   fetchEngines: () => void;
   setEngineName: (engineName: string) => { engineName: string };
-  setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => {
-    indices: ElasticsearchIndexWithIngestion[];
+  setSelectedIndices: (indices: string[]) => {
+    indices: string[];
   };
 }
 
@@ -40,7 +39,7 @@ export interface CreateEngineLogicValues {
   engineNameStatus: 'complete' | 'incomplete' | 'warning';
   formDisabled: boolean;
   indicesStatus: 'complete' | 'incomplete';
-  selectedIndices: ElasticsearchIndexWithIngestion[];
+  selectedIndices: string[];
 }
 
 export const CreateEngineLogic = kea<
@@ -49,7 +48,7 @@ export const CreateEngineLogic = kea<
   actions: {
     createEngine: true,
     setEngineName: (engineName: string) => ({ engineName }),
-    setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => ({ indices }),
+    setSelectedIndices: (indices: string[]) => ({ indices }),
   },
   connect: {
     actions: [
@@ -68,11 +67,12 @@ export const CreateEngineLogic = kea<
     createEngine: () => {
       actions.createEngineRequest({
         engineName: values.engineName,
-        indices: values.selectedIndices.map((index) => index.name),
+        indices: values.selectedIndices,
       });
     },
     engineCreated: () => {
       actions.fetchEngines();
+      console.log("engineCreated")
       actions.closeEngineCreate();
     },
   }),

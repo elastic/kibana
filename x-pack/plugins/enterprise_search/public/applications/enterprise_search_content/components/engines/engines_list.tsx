@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import {
-  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +29,9 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../workplace_search/constants';
+import { ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
@@ -46,6 +47,7 @@ import { EnginesListLogic } from './engines_list_logic';
 export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const { openEngineCreate } = useActions(EnginesListLogic);
+
   return (
     <EuiPopover
       isOpen={disabled && showPopover}
@@ -57,18 +59,19 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
           onFocus={() => setShowPopover(true)}
           tabIndex={0}
         >
-          <EuiButton
+          <EuiButtonTo
             fill
             iconType="plusInCircle"
             data-test-subj="enterprise-search-content-engines-creation-button"
             data-telemetry-id="entSearchContent-engines-list-createEngine"
-            disabled={disabled}
+            isDisabled={disabled}
             onClick={openEngineCreate}
+            to={ENGINE_CREATION_PATH}
           >
             {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
               defaultMessage: 'Create Search Application',
             })}
-          </EuiButton>
+          </EuiButtonTo>
         </div>
       }
     >
@@ -94,8 +97,11 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
     </EuiPopover>
   );
 };
+interface ListProps {
+  isCreateEngineFlyoutOpen?: boolean;
+}
 
-export const EnginesList: React.FC = () => {
+export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) => {
   const {
     closeDeleteEngineModal,
     closeEngineCreate,
@@ -105,7 +111,7 @@ export const EnginesList: React.FC = () => {
     setSearchQuery,
     setIsFirstRequest,
   } = useActions(EnginesListLogic);
-
+  const { openEngineCreate } = useActions(EnginesListLogic);
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
 
   const { isCloud } = useValues(KibanaLogic);
@@ -138,6 +144,9 @@ export const EnginesList: React.FC = () => {
     // flag to set if the call to backend is first request.
     if (!isGated) {
       setIsFirstRequest();
+    }
+    if (!!isCreateEngineFlyoutOpen) {
+      openEngineCreate();
     }
   }, []);
 

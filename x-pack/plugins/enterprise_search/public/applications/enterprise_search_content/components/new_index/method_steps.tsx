@@ -14,12 +14,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  APP_SEARCH_URL,
-  ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-} from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_ELASTICSEARCH_URL } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { ENGINES_PATH } from '../../routes';
 
 export const CREATE_ELASTICSEARCH_INDEX_STEP: EuiContainedStepProps = {
   children: (
@@ -56,16 +55,8 @@ export const BUILD_SEARCH_EXPERIENCE_STEP: EuiContainedStepProps = {
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content"
-          defaultMessage="After building your connector, your content is ready. Build your first search experience with {elasticsearchLink}, or explore the search experience tools provided by {appSearchLink}. We recommend that you create a {searchEngineLink} for the best balance of flexible power and turnkey simplicity."
+          defaultMessage="After building your connector, your content is ready to create a {searchApplicationLink} with {elasticsearchLink}."
           values={{
-            appSearchLink: (
-              <EuiLinkTo to={APP_SEARCH_URL} shouldNotCreateHref>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.appSearchLink',
-                  { defaultMessage: 'App Search' }
-                )}
-              </EuiLinkTo>
-            ),
             elasticsearchLink: (
               <EuiLinkTo to={ENTERPRISE_SEARCH_ELASTICSEARCH_URL} shouldNotCreateHref>
                 {i18n.translate(
@@ -74,13 +65,13 @@ export const BUILD_SEARCH_EXPERIENCE_STEP: EuiContainedStepProps = {
                 )}
               </EuiLinkTo>
             ),
-            searchEngineLink: (
-              <EuiLinkTo to={`${APP_SEARCH_URL}/engines/new`} shouldNotCreateHref>
+            searchApplicationLink: (
+              <EuiLink onClick={() => KibanaLogic.values.navigateToUrl(ENGINES_PATH)}>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.searchEngineLink',
-                  { defaultMessage: 'search engine' }
+                  'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.appSearchLink',
+                  { defaultMessage: 'Search Application' }
                 )}
-              </EuiLinkTo>
+              </EuiLink>
             ),
           }}
         />
