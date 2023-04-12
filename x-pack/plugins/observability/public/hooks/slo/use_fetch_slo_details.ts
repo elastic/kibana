@@ -15,7 +15,9 @@ import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 
 export interface UseFetchSloDetailsResponse {
+  isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   slo: SLOWithSummaryResponse | undefined;
@@ -42,6 +44,7 @@ export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
           // ignore error for retrieving slos
         }
       },
+      keepPreviousData: true,
       enabled: Boolean(sloId),
       refetchOnWindowFocus: false,
     }
@@ -49,7 +52,9 @@ export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
 
   return {
     slo: data,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading,
+    isInitialLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,
