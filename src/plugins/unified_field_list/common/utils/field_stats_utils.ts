@@ -145,7 +145,8 @@ function canProvideAggregatedStatsForField(field: DataViewField): boolean {
     field.type === 'geo_point' ||
     field.type === 'geo_shape' ||
     field.type === 'murmur3' ||
-    field.type === 'attachment'
+    field.type === 'attachment' ||
+    field.timeSeriesMetric === 'counter'
   );
 }
 

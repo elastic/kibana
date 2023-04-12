@@ -23,8 +23,9 @@ const metadataProps: TabProps = {
     to: 1679585836087,
     interval: '1m',
   },
+  nodeType: 'host',
   node: {
-    uuid: 'b9c06da0-b9b0-4c7e-830c-05128cb34396',
+    id: 'host-1-0',
     name: 'host-1',
     os: 'iOS',
     title: {

@@ -112,6 +112,7 @@ const defaultExecutionParams = {
   apiKey,
   ruleConsumer: 'rule-consumer',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  alertUuid: 'uuid-1',
   ruleLabel: 'rule-label',
   request: {} as KibanaRequest,
   alertingEventLogger,

@@ -306,6 +306,111 @@
       },
       {
         "parentPluginId": "exploratoryView",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.FilterValueLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterValueLabel",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterValueLabelProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FilterValueLabel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterValueLabelProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
         "id": "def-public.formatAlertEvaluationValue",
         "type": "Function",
         "tags": [],
@@ -444,6 +549,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.getCoreVitalsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "getCoreVitalsComponent",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "CoreVitalProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.getCoreVitalsComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "CoreVitalProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -761,6 +901,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.SelectableUrlList",
+        "type": "Function",
+        "tags": [],
+        "label": "SelectableUrlList",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "SelectableUrlListProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.SelectableUrlList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "SelectableUrlListProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

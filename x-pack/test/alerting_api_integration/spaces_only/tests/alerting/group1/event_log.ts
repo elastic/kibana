@@ -19,6 +19,12 @@ import {
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+const InstanceActions = new Set<string | undefined>([
+  'new-instance',
+  'active-instance',
+  'recovered-instance',
+]);
+
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -1096,6 +1102,84 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .map((event) => event?.kibana?.alert?.flapping);
           expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
         });
+
+        it('should generate expected uuids for events for flapping alerts that go active while flapping and eventually recover', async () => {
+          await supertest
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+            .set('kbn-xsrf', 'foo')
+            .auth('superuser', 'superuser')
+            .send({
+              enabled: true,
+              look_back_window: 6,
+              status_change_threshold: 4,
+            })
+            .expect(200);
+
+          // flap and then recover, then active again
+          const instance = [true, false, true, false, true].concat(
+            ...new Array(6).fill(false),
+            true
+          );
+          const pattern = { instance };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: { pattern },
+                actions: [],
+                notify_when: RuleNotifyWhen.CHANGE,
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                ['execute', { gte: 10 }],
+                ['new-instance', { gte: 4 }],
+                ['active-instance', { gte: 3 }],
+                ['recovered-instance', { gte: 3 }],
+              ]),
+            });
+          });
+
+          let currentUuid: string | undefined;
+          const seenUuids = new Set<string>();
+          for (const event of events) {
+            const action = event?.event?.action;
+            const uuid = event?.kibana?.alert?.uuid;
+
+            if (!InstanceActions.has(action)) continue;
+
+            expect(uuid).to.be.ok();
+
+            if (action === 'new-instance') {
+              expect(currentUuid).to.be(undefined);
+              expect(seenUuids.has(uuid!)).to.be(false);
+              currentUuid = uuid;
+              seenUuids.add(uuid!);
+            } else if (action === 'active-instance') {
+              expect(uuid).to.be(currentUuid);
+            } else if (action === 'recovered-instance') {
+              expect(uuid).to.be(currentUuid);
+              currentUuid = undefined;
+            }
+          }
+        });
       });
     }
   });
@@ -1179,6 +1263,12 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (instanceId) {
     expect(event?.kibana?.alerting?.instance_id).to.be(instanceId);
+  }
+
+  if (InstanceActions.has(event?.event?.action)) {
+    expect(typeof event?.kibana?.alert?.uuid).to.be('string');
+  } else {
+    expect(event?.kibana?.alert?.uuid).to.be(undefined);
   }
 
   if (reason) {

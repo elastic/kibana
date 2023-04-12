@@ -74,6 +74,7 @@ describe('dimension editor', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    icon: 'tag',
     showBar: true,
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
