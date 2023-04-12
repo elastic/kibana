@@ -7,7 +7,11 @@
  */
 
 import { NavItemProps } from '../../../types';
-import { locators } from './_locators';
+import { locatorIds } from './_locators';
+
+const managementLocator = (params: { sectionId: string; appId?: string }) => ({
+  locator: { id: locatorIds.management, params },
+});
 
 export const managementItemSet: NavItemProps[] = [
   {
@@ -17,7 +21,7 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Stack monitoring',
         id: 'stack_monitoring',
-        ...locators.unknown({ id: 'stack_monitoring' }),
+        locator: { id: 'STACK_MONITORING_APP_LOCATOR' },
       },
     ],
   },
@@ -28,10 +32,18 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Integrations',
         id: 'integrations',
-        ...locators.unknown({ sectionId: 'integrations' }),
+        locator: { id: locatorIds.integrations },
       },
-      { name: 'Fleet', id: 'fleet', ...locators.unknown({ sectionId: 'fleet' }) },
-      { name: 'Osquery', id: 'osquery', ...locators.unknown({ sectionId: 'osquery' }) },
+      {
+        name: 'Fleet',
+        id: 'fleet',
+        locator: { id: locatorIds.fleet },
+      },
+      {
+        name: 'Osquery',
+        id: 'osquery',
+        locator: { id: locatorIds.osquery },
+      },
     ],
   },
   {
@@ -45,12 +57,12 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Ingest pipelines',
             id: 'ingest_pipelines',
-            ...locators.management({ sectionId: 'ingest', appId: 'ingest_pipelines' }),
+            locator: { id: locatorIds.ingestPipelines },
           },
           {
             name: 'Logstash pipelines',
             id: 'logstash_pipelines',
-            ...locators.management({ sectionId: 'ingest', appId: 'pipelines' }),
+            locator: { id: locatorIds.logstashPipelines },
           },
         ],
       },
@@ -61,37 +73,37 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Index management',
             id: 'index_management',
-            ...locators.management({ sectionId: 'data', appId: 'index_management' }),
+            locator: { id: locatorIds.indexManagement },
           },
           {
             name: 'Index lifecycle policies',
             id: 'index_lifecycle_policies',
-            ...locators.management({ sectionId: 'data', appId: 'index_lifecycle_management' }),
+            locator: { id: locatorIds.ilm },
           },
           {
             name: 'Snapshot and restore',
             id: 'snapshot_and_restore',
-            ...locators.management({ sectionId: 'data', appId: 'snapshot_restore' }),
+            locator: { id: locatorIds.snapshotRestore },
           },
           {
             name: 'Rollup jobs',
             id: 'rollup_jobs',
-            ...locators.management({ sectionId: 'data', appId: 'rollup_jobs' }),
+            locator: { id: locatorIds.rollup },
           },
           {
             name: 'Transforms',
             id: 'transforms',
-            ...locators.management({ sectionId: 'data', appId: 'transform' }),
+            locator: { id: locatorIds.transform },
           },
           {
             name: 'Cross-cluster replication',
             id: 'cross_cluster_replication',
-            ...locators.management({ sectionId: 'data', appId: 'cross_cluster_replication' }),
+            locator: { id: locatorIds.crossClusterReplication },
           },
           {
             name: 'Remote clusters',
             id: 'remote_clusters',
-            ...locators.management({ sectionId: 'data', appId: 'remote_clusters' }),
+            locator: { id: locatorIds.remoteClusters },
           },
         ],
       },
@@ -102,35 +114,32 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Rules',
             id: 'rules',
-            ...locators.management({ sectionId: 'insightsAndAlerting', appId: 'triggersActions' }),
+            locator: { id: locatorIds.alertingManagement, params: { appId: 'triggersActions' } },
           },
           {
             name: 'Cases',
             id: 'cases',
-            ...locators.management({ sectionId: 'insightsAndAlerting', appId: 'cases' }),
+            locator: { id: locatorIds.alertingManagement, params: { appId: 'cases' } },
           },
           {
             name: 'Connectors',
             id: 'connectors',
-            ...locators.management({
-              sectionId: 'insightsAndAlerting',
-              appId: 'triggersActionsConnectors',
-            }),
+            locator: { id: locatorIds.alertingManagement, params: { appId: 'triggersActionsConnectors' } },
           },
           {
             name: 'Reporting',
             id: 'reporting',
-            ...locators.management({ sectionId: 'insightsAndAlerting', appId: 'reporting' }),
+            locator: { id: locatorIds.reporting },
           },
           {
             name: 'Machine learning',
             id: 'machine_learning',
-            ...locators.management({ sectionId: 'insightsAndAlerting', appId: 'jobsListLink' }),
+            locator: { id: locatorIds.mlJobsManagement },
           },
           {
             name: 'Watcher',
             id: 'watcher',
-            ...locators.management({ sectionId: 'insightsAndAlerting', appId: 'watcher' }),
+            locator: { id: locatorIds.watcher },
           },
         ],
       },
@@ -141,22 +150,22 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Users',
             id: 'users',
-            ...locators.management({ sectionId: 'security', appId: 'users' }),
+            locator: { id: locatorIds.securityManagement, params: { appId: 'users' } },
           },
           {
             name: 'Roles',
             id: 'roles',
-            ...locators.management({ sectionId: 'security', appId: 'roles' }),
+            locator: { id: locatorIds.securityManagement, params: { appId: 'roles' } },
           },
           {
             name: 'Role mappings',
             id: 'role_mappings',
-            ...locators.management({ sectionId: 'security', appId: 'role_mappings' }),
+            locator: { id: locatorIds.securityManagement, params: { appId: 'role_mappings' } },
           },
           {
             name: 'API keys',
             id: 'api_keys',
-            ...locators.management({ sectionId: 'security', appId: 'api_keys' }),
+            locator: { id: locatorIds.securityManagement, params: { appId: 'api_keys' } },
           },
         ],
       },
@@ -167,39 +176,39 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Data view',
             id: 'data_views',
-            ...locators.management({ sectionId: 'kibana', appId: 'dataViews' }),
+            ...managementLocator({ sectionId: 'kibana', appId: 'dataViews' }),
           },
           {
             name: 'Saved objects',
             id: 'saved_objects',
-            ...locators.management({ sectionId: 'kibana', appId: 'objects' }),
+            ...managementLocator({ sectionId: 'kibana', appId: 'objects' }),
           },
           {
             name: 'Tags',
             id: 'tags',
-            ...locators.management({ sectionId: 'kibana', appId: 'tags' }),
+            ...managementLocator({ sectionId: 'kibana', appId: 'tags' }),
           },
           {
             name: 'Search sessions',
             id: 'search_sessions',
-            ...locators.management({ sectionId: 'kibana', appId: 'search_sessions' }),
+            ...managementLocator({ sectionId: 'kibana', appId: 'search_sessions' }),
           },
           {
             name: 'Spaces',
             id: 'spaces',
-            ...locators.management({ sectionId: 'kibana', appId: 'spaces' }),
+            locator: { id: 'SPACES_MANAGEMENT_APP_LOCATOR' },
           },
           {
             name: 'Advanced settings',
             id: 'advanced_settings',
-            ...locators.management({ sectionId: 'kibana', appId: 'settings' }),
+            ...managementLocator({ sectionId: 'kibana', appId: 'settings' }),
           },
         ],
       },
       {
         name: 'Upgrade assistant',
         id: 'upgrade_assistant',
-        ...locators.management({ sectionId: 'stack', appId: 'upgrade_assistant' }),
+        locator: { id: locatorIds.upgradeAssistant },
       },
     ],
   },

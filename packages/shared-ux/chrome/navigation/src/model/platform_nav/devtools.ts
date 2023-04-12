@@ -7,7 +7,7 @@
  */
 
 import { NavItemProps } from '../../../types';
-import { locators } from './_locators';
+import { locatorIds } from './_locators';
 
 export const devtoolsItemSet: NavItemProps[] = [
   {
@@ -17,22 +17,22 @@ export const devtoolsItemSet: NavItemProps[] = [
       {
         name: 'Console',
         id: 'console',
-        locator: { id: 'CONSOLE_APP_LOCATOR' },
+        locator: { id: locatorIds.console },
       },
       {
         name: 'Search profiler',
         id: 'search_profiler',
-        ...locators.devTools({ sectionId: 'searchprofiler' }),
+        locator: { id: locatorIds.searchprofiler },
       },
       {
         name: 'Grok debugger',
         id: 'grok_debugger',
-        ...locators.devTools({ view: 'grokdebugger' }),
+        locator: { id: locatorIds.grokDebugger },
       },
       {
         name: 'Painless lab',
         id: 'painless_lab',
-        ...locators.devTools({ view: 'painless_lab' }),
+        locator: { id: locatorIds.painlessLab },
       },
     ],
   },

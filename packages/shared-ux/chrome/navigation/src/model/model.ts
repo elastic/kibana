@@ -50,14 +50,18 @@ const createSideNavDataFactory = (
       }
 
       if (locatorId && !locator) {
-        // console.warn(`Invalid locator ID provided: ${locatorId}`);
-        return accum;
+        // FIXME: in production, we should skip this link in this scenario. We're allowing this broken link in POC for testing.
+        // return accum;
+        console.warn(
+          `Invalid locator provided: ` +
+            JSON.stringify({ locatorId, ...(locatorParams ? { locatorParams } : {}) })
+        );
       }
 
       const fullId = [parentIds, id].filter(Boolean).join('.');
 
       let onClick: OnClickFn | undefined;
-      if (locator && locatorParams) {
+      if (locator) {
         const outerLocator = locator;
         onClick = () => {
           outerLocator.navigateSync(locatorParams ?? {});

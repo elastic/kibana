@@ -7,6 +7,7 @@
  */
 
 import { NavItemProps } from '../../../types';
+import { locatorIds } from './_locators';
 
 export const analyticsItemSet: NavItemProps[] = [
   {
@@ -16,17 +17,17 @@ export const analyticsItemSet: NavItemProps[] = [
       {
         name: 'Discover',
         id: 'discover',
-        locator: { id: 'DISCOVER_APP_LOCATOR', params: {} },
+        locator: { id: locatorIds.discover },
       },
       {
         name: 'Dashboard',
         id: 'dashboard',
-        locator: { id: 'DASHBOARD_APP_LOCATOR', params: {} },
+        locator: { id: locatorIds.dashboard },
       },
       {
         name: 'Visualize Library',
         id: 'visualize_library',
-        locator: { id: 'VISUALIZE_APP_LOCATOR', params: {} },
+        locator: { id: locatorIds.visualizeLibrary },
       },
     ],
   },
