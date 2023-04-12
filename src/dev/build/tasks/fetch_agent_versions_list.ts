@@ -27,7 +27,13 @@ const getAvailableVersions = async (log: ToolingLog) => {
     log.info('Fetching Elastic Agent versions list');
     const results = await fetch(url, options);
 
-    const jsonBody = await results.json();
+    const rawBody = await results.text();
+
+    if (results.status >= 400) {
+      throw new Error(`Status code ${results.status} received from versions API: ${rawBody}`);
+    }
+
+    const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
