@@ -156,8 +156,8 @@ const getBaseMockedActionList = () => ({
   error: null,
   refetch: jest.fn(),
 });
-// FLAKY: https://github.com/elastic/kibana/issues/145635
-describe.skip('Response actions history', () => {
+
+describe('Response actions history', () => {
   const testPrefix = 'test';
   const hostsFilterPrefix = 'hosts-filter';
 
@@ -642,14 +642,14 @@ describe.skip('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadExecuteLink = getByTestId(`${testPrefix}-getExecuteLink`);
+        const downloadExecuteLink = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
         expect(downloadExecuteLink).toBeTruthy();
         expect(downloadExecuteLink.textContent).toEqual(
           'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
       });
 
-      it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
+      it('should contain expected output accordions for `execute` action WITH execute operation privilege', async () => {
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
@@ -691,11 +691,17 @@ describe.skip('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
-        expect(executeAccordions).toBeTruthy();
-        const accordionButtons = Array.from(executeAccordions.querySelectorAll('.euiAccordion'));
-        expect(accordionButtons[0]).toHaveTextContent('Execution output (truncated)');
-        expect(accordionButtons[1]).toHaveTextContent('Execution error (truncated)');
+        const accordionTitles = Array.from(
+          getByTestId(`${testPrefix}-executeDetails`).querySelectorAll(
+            '.euiAccordion__triggerWrapper'
+          )
+        ).map((el) => el.textContent);
+
+        expect(accordionTitles).toEqual([
+          'Execution context',
+          'Execution error (truncated)',
+          'Execution output (truncated)',
+        ]);
       });
 
       it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
@@ -715,7 +721,9 @@ describe.skip('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        const executeAccordions = getByTestId(
+          `${testPrefix}-actionsLogTray-executeResponseOutput-output`
+        );
         expect(executeAccordions).toBeTruthy();
       });
 
@@ -737,7 +745,7 @@ describe.skip('Response actions history', () => {
 
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
-        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
+        expect(queryByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`)).toBeNull();
 
         const output = getByTestId(`${testPrefix}-details-tray-output`);
         expect(output).toBeTruthy();
@@ -775,7 +783,7 @@ describe.skip('Response actions history', () => {
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
           userEvent.click(expandButton);
 
-          const output = getByTestId(`${testPrefix}-getExecuteLink`);
+          const output = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
           expect(output).toBeTruthy();
           expect(output.textContent).toEqual(
             'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
