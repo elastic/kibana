@@ -98,16 +98,18 @@ export const useActionCellDataProvider = ({
 
     // For fields with multiple values we need add an extra filter that makes sure
     // that only fields that match ALL the values are queried later on.
-    let filters: Filter[] = []
+    let filters: Filter[] = [];
     if (arrayValues.length > 1) {
-      filters = [{
-        meta: {},
-        query: {
-          bool: {
-            must: arrayValues.map((value) => ({ term: { [field]: value } }))
-          }
-        }
-      }];
+      filters = [
+        {
+          meta: {},
+          query: {
+            bool: {
+              must: arrayValues.map((value) => ({ term: { [field]: value } })),
+            },
+          },
+        },
+      ];
     }
 
     return arrayValues.reduce<ActionCellValuesAndDataProvider>(
