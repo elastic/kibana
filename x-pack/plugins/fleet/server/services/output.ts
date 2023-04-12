@@ -165,7 +165,8 @@ async function validateTypeChanges(
   id: string,
   data: Partial<Output>,
   originalOutput: Output,
-  defaultDataOutputId: string | null
+  defaultDataOutputId: string | null,
+  fromPreconfiguration: boolean
 ) {
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
   const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
@@ -178,18 +179,42 @@ async function validateTypeChanges(
     // Validate no policy with fleet server use that policy
     validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
   }
-  // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-  if (data?.type === outputType.Logstash && mergedIsDefault) {
+  await updateFleetServerPoliciesDataOutputId(
+    soClient,
+    esClient,
+    data,
+    mergedIsDefault,
+    defaultDataOutputId,
+    fleetServerPolicies,
+    fromPreconfiguration
+  );
+}
+
+async function updateFleetServerPoliciesDataOutputId(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  data: Partial<Output>,
+  isDefault: boolean,
+  defaultDataOutputId: string | null,
+  fleetServerPolicies: AgentPolicy[],
+  fromPreconfiguration: boolean
+) {
+  // if a logstash output is updated to become default
+  // if fleet server policies are don't have data_output_id or if they are using the new output
+  // update them to use the default output
+  if (data?.type === outputType.Logstash && isDefault) {
     for (const policy of fleetServerPolicies) {
-      await agentPolicyService.update(
-        soClient,
-        esClient,
-        policy.id,
-        { data_output_id: defaultDataOutputId },
-        {
-          force: true,
-        }
-      );
+      if (!policy.data_output_id || policy.data_output_id === data?.id) {
+        await agentPolicyService.update(
+          soClient,
+          esClient,
+          policy.id,
+          {
+            data_output_id: defaultDataOutputId,
+          },
+          { force: fromPreconfiguration }
+        );
+      }
     }
   }
 }
@@ -302,6 +327,7 @@ class OutputService {
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...omit(output, 'ssl') };
+    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
@@ -311,34 +337,24 @@ class OutputService {
         );
       }
     }
-
-    if (data.type === outputType.Logstash) {
-      const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
-      const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
-      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-      if (data.is_default) {
-        for (const policy of fleetServerPolicies) {
-          await agentPolicyService.update(
-            soClient,
-            esClient,
-            policy.id,
-            { data_output_id: defaultDataOutputId },
-            {
-              force: true,
-            }
-          );
-        }
-      }
-    }
+    const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
+    await updateFleetServerPoliciesDataOutputId(
+      soClient,
+      esClient,
+      data,
+      data.is_default,
+      defaultDataOutputId,
+      fleetServerPolicies,
+      options?.fromPreconfiguration ?? false
+    );
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
-      if (defaultDataOuputId) {
+      if (defaultDataOutputId) {
         await this.update(
           soClient,
           esClient,
-          defaultDataOuputId,
+          defaultDataOutputId,
           { is_default: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
         );
@@ -549,7 +565,15 @@ class OutputService {
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    await validateTypeChanges(soClient, esClient, id, data, originalOutput, defaultDataOutputId);
+    await validateTypeChanges(
+      soClient,
+      esClient,
+      id,
+      data,
+      originalOutput,
+      defaultDataOutputId,
+      fromPreconfiguration
+    );
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
