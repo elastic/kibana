@@ -90,7 +90,7 @@ export const getIndexDataMapper = (totalIndexData: TotalIndexData) => {
 };
 
 function isHidden(index: IndicesIndexState): boolean {
-  return Boolean(index.settings?.index?.hidden) || index.settings?.index?.hidden === 'true';
+  return index.settings?.index?.hidden === true || index.settings?.index?.hidden === 'true';
 }
 
 export const getIndexData = async (
