@@ -28,6 +28,8 @@ import { FindingsSearchBar } from '../configurations/layout/findings_search_bar'
 import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 import { EmptyState } from '../../components/empty_state';
+import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -38,6 +40,9 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
 
 export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const getSetupStatus = useCspSetupStatusApi();
+
+  if (getSetupStatus?.data?.vuln_mgmt.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
