@@ -50,17 +50,13 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      index: t.string,
-      filter: t.string,
-      good: t.string,
-      total: t.string,
-    }),
-    t.partial({
-      timestampField: t.string,
-    }),
-  ]),
+  params: t.type({
+    index: t.string,
+    filter: t.string,
+    good: t.string,
+    total: t.string,
+    timestampField: t.string,
+  }),
 });
 
 const indicatorDataSchema = t.type({

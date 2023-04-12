@@ -21,25 +21,34 @@ const getAvailableVersions = async (log: ToolingLog) => {
   // See https://github.com/elastic/website-development/issues/9331
   const url = 'https://www.elastic.co/content/product_versions';
   log.info('Fetching Elastic Agent versions list');
-  const results = await fetch(url, options);
-  const rawBody = await results.text();
 
   try {
+    const results = await fetch(url, options);
+    const rawBody = await results.text();
+
+    if (results.status >= 400) {
+      throw new Error(`Status code ${results.status} received from versions API: ${rawBody}`);
+    }
+
     const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
       .map((item: any) => item?.version_number);
 
-    log.info(`Retrieved available Elastic Agent versions`);
+    log.info(`Retrieved available versions`);
     return versions;
   } catch (error) {
-    log.warning(`Failed to fetch Elastic Agent versions list`);
-    log.info(`Status: ${results.status}`);
-    log.info(rawBody);
+    const errorMessage = 'Failed to fetch Elastic Agent versions list';
+
     if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+      // For PR jobs, just log the error as a warning and continue
+      log.warning(errorMessage);
       log.warning(error);
     } else {
+      // For non-PR jobs like nightly builds, log the error to stderror and throw
+      // to ensure the build fails
+      log.error(errorMessage);
       throw new Error(error);
     }
   }
@@ -51,11 +60,16 @@ export const FetchAgentVersionsList: Task = {
   description: 'Build list of available Elastic Agent versions for Fleet UI',
 
   async run(config, log, build) {
+    // Agent version list task is skipped for PR's, so as not to overwhelm the versions API
+    if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+      return;
+    }
+
     const versionsList = await getAvailableVersions(log);
     const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
 
-    if (versionsList.length !== 0) {
-      log.info(`Writing Elastic Agent versions list to ${AGENT_VERSION_BUILD_FILE}`);
+    if (versionsList !== []) {
+      log.info(`Writing versions list to ${AGENT_VERSION_BUILD_FILE}`);
       await write(
         build.resolvePath(AGENT_VERSION_BUILD_FILE),
         JSON.stringify(versionsList, null, '  ')
