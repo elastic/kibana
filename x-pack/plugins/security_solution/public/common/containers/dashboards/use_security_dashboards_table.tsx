@@ -8,26 +8,21 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SavedObject } from '@kbn/core/public';
 import { getSecurityDashboards } from './utils';
 import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
+import { SecurityPageName } from '../../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../components/link_to';
 
-export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
-  title?: string;
-  description?: string;
-}
+import type { DashboardTableItem } from './types';
 
 const EMPTY_DESCRIPTION = '-' as const;
 
 export const useSecurityDashboardsTableItems = () => {
-  const {
-    savedObjects: { client: savedObjectsClient },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.SECURITY_DASHBOARDS,
@@ -35,10 +30,10 @@ export const useSecurityDashboardsTableItems = () => {
   );
 
   useEffect(() => {
-    if (savedObjectsClient) {
-      fetch(savedObjectsClient);
+    if (http) {
+      fetch(http);
     }
-  }, [fetch, savedObjectsClient]);
+  }, [fetch, http]);
 
   const items = useMemo(() => {
     if (!data) {
@@ -57,8 +52,9 @@ export const useSecurityDashboardsTableItems = () => {
 export const useSecurityDashboardsTableColumns = (): Array<
   EuiBasicTableColumn<DashboardTableItem>
 > => {
-  const { savedObjectsTagging, dashboard } = useKibana().services;
+  const { savedObjectsTagging } = useKibana().services;
   const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const getNavigationHandler = useCallback(
     (href: string): MouseEventHandler =>
@@ -77,7 +73,10 @@ export const useSecurityDashboardsTableColumns = (): Array<
         name: i18n.DASHBOARD_TITLE,
         sortable: true,
         render: (title: string, { id }) => {
-          const href = dashboard?.locator?.getRedirectUrl({ dashboardId: id });
+          const href = `${getSecuritySolutionUrl({
+            deepLinkId: SecurityPageName.dashboards,
+            path: id,
+          })}`;
           return href ? (
             <LinkAnchor href={href} onClick={getNavigationHandler(href)}>
               {title}
@@ -98,7 +97,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
       // adds the tags table column based on the saved object items
       ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
     ],
-    [getNavigationHandler, dashboard, savedObjectsTagging]
+    [savedObjectsTagging, getSecuritySolutionUrl, getNavigationHandler]
   );
 
   return columns;
