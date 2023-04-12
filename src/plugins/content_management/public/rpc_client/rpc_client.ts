@@ -16,6 +16,9 @@ import type {
   DeleteIn,
   SearchIn,
   ProcedureName,
+  MSearchIn,
+  MSearchOut,
+  MSearchResult,
 } from '../../common';
 import type { CrudClient } from '../crud_client/crud_client';
 import type {
@@ -52,6 +55,10 @@ export class RpcClient implements CrudClient {
 
   public search<I extends SearchIn = SearchIn, O = unknown>(input: I) {
     return this.sendMessage<SearchResponse<O>>('search', input).then((r) => r.result);
+  }
+
+  public mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult<T>> {
+    return this.sendMessage<MSearchOut<T>>('mSearch', input).then((r) => r.result);
   }
 
   private sendMessage = async <O = unknown>(name: ProcedureName, input: any): Promise<O> => {
