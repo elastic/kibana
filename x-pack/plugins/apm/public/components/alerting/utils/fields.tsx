@@ -126,7 +126,7 @@ export function TransactionNameField({
         fieldName={TRANSACTION_NAME}
         onChange={onChange}
         placeholder={i18n.translate(
-          'xpack.apm.transactionTypesSelectPlaceholder',
+          'xpack.apm.transactionNamesSelectPlaceholder',
           {
             defaultMessage: 'Select transaction name',
           }
