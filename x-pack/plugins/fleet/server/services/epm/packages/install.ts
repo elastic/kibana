@@ -23,6 +23,8 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
@@ -390,6 +392,12 @@ async function installPackageFromRegistry({
   }
 }
 
+function getElasticSubscription(packageInfo: ArchivePackage) {
+  const subscription = packageInfo.conditions?.elastic?.subscription as LicenseType | undefined;
+  // Keep packageInfo.license for backward compatibility
+  return subscription || packageInfo.license || 'basic';
+}
+
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
@@ -464,9 +472,9 @@ async function installPackageCommon(options: {
         };
       }
     }
-
-    if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
-      const err = new Error(`Requires ${packageInfo.license} license`);
+    const elasticSubscription = getElasticSubscription(packageInfo);
+    if (!licenseService.hasAtLeast(elasticSubscription)) {
+      const err = new Error(`Requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
