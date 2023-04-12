@@ -458,9 +458,9 @@ async function installPackageCommon(options: {
         };
       }
     }
-
-    if (!licenseService.hasAtLeast(getElasticSubscription(packageInfo))) {
-      const err = new Error(`Requires ${packageInfo.license} license`);
+    const elasticSubscription = getElasticSubscription(packageInfo);
+    if (!licenseService.hasAtLeast(elasticSubscription)) {
+      const err = new Error(`Requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
