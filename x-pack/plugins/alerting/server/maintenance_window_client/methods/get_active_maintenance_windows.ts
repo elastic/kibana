@@ -47,7 +47,7 @@ export async function getActiveMaintenanceWindows(
   const endDateISO = endDate.toISOString();
 
   const filter = nodeBuilder.and([
-    nodeBuilder.or([
+    nodeBuilder.and([
       fromKueryExpression(`maintenance-window.attributes.events >= "${startDateISO}"`),
       fromKueryExpression(`maintenance-window.attributes.events <= "${endDateISO}"`),
     ]),
