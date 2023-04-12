@@ -6,13 +6,21 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Query, TimeRange } from '@kbn/es-query';
+import {
+  Filter,
+  fromKueryExpression,
+  Query,
+  TimeRange,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import qs from 'query-string';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -20,18 +28,26 @@ import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { useProcessorEvent } from '../../../hooks/use_processor_event';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { getBoolFilter } from '../get_bool_filter';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 
-function useKueryParams(defaultKuery?: string) {
-  const { query } = useApmParams('/*');
+function useSearchBarParams(defaultKuery?: string) {
+  const { path, query } = useApmParams('/*');
   const kuery = 'kuery' in query ? query.kuery : undefined;
-
-  if (!kuery) {
-    return;
-  }
+  const serviceName = 'serviceName' in path ? path.serviceName : undefined;
+  const groupId = 'groupId' in path ? path.groupId : undefined;
+  const environment = 'environment' in query ? query.environment : undefined;
 
   return {
-    query: defaultKuery || kuery,
-    language: 'kuery',
+    urlQuery: kuery
+      ? {
+          query: defaultKuery || kuery,
+          language: 'kuery',
+        }
+      : undefined,
+    serviceName,
+    groupId,
+    environment,
   };
 }
 
@@ -50,8 +66,10 @@ function useUrlTimeRange(defaultTimeRange: TimeRange) {
   return defaultTimeRange;
 }
 
-function useSearchBarPlaceholder(searchbarPlaceholder?: string) {
-  const processorEvent = useProcessorEvent();
+function getSearchBarPlaceholder(
+  searchbarPlaceholder?: string,
+  processorEvent?: UIProcessorEvent
+) {
   const examples = {
     transaction: 'transaction.duration.us > 300000',
     error: 'http.response.status_code >= 400',
@@ -78,18 +96,25 @@ function useSearchBarPlaceholder(searchbarPlaceholder?: string) {
   );
 }
 
+function convertKueryToEsQuery(kuery: string, dataView: DataView) {
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, dataView);
+}
+
 export function UnifiedSearchBar({
   placeholder,
   value,
   showDatePicker = true,
   showSubmitButton = true,
   isClearable = true,
+  boolFilter,
 }: {
   placeholder?: string;
   value?: string;
   showDatePicker?: boolean;
   showSubmitButton?: boolean;
   isClearable?: boolean;
+  boolFilter?: QueryDslQueryContainer[];
 }) {
   const {
     unifiedSearch: {
@@ -98,14 +123,14 @@ export function UnifiedSearchBar({
     core,
   } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps>();
-
   const {
     data: {
       query: { queryString: queryStringService, timefilter: timeFilterService },
     },
   } = services;
 
-  const urlQuery = useKueryParams(value);
+  const { urlQuery, serviceName, environment, groupId } =
+    useSearchBarParams(value);
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
@@ -132,25 +157,65 @@ export function UnifiedSearchBar({
   const location = useLocation();
   const history = useHistory();
   const { dataView } = useApmDataView();
-  const searchbarPlaceholder = useSearchBarPlaceholder(placeholder);
+  const { urlParams } = useLegacyUrlParams();
+  const processorEvent = useProcessorEvent();
+  const searchbarPlaceholder = getSearchBarPlaceholder(
+    placeholder,
+    processorEvent
+  );
 
   useEffect(() => {
     if (dataView) setDisplaySearchBar(true);
   }, [dataView]);
+
+  const customFilters =
+    boolFilter ??
+    getBoolFilter({
+      groupId,
+      processorEvent,
+      serviceName,
+      environment,
+      urlParams,
+    });
+
+  const filtersForSearchBarSuggestions = customFilters.map((filter) => {
+    return {
+      query: filter,
+    } as Filter;
+  });
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
+    if (dataView == null) {
+      return;
+    }
+
     const { dateRange, query } = payload;
     const { from: rangeFrom, to: rangeTo } = dateRange;
-    const toQueryId = toQuery(location.search);
-    const updatedQueryWithTime = { ...toQueryId, rangeFrom, rangeTo };
-    const fromQueryId = fromQuery({
-      ...updatedQueryWithTime,
-      kuery: query?.query,
-    });
-    const queryToPush = {
-      ...location,
-      search: fromQueryId,
-    };
-    history.push(queryToPush);
+
+    try {
+      const res = convertKueryToEsQuery(
+        query?.query as string,
+        dataView as DataView
+      );
+      if (!res) {
+        return;
+      }
+
+      const existingQueryParams = toQuery(location.search);
+      const updatedQueryWithTime = {
+        ...existingQueryParams,
+        rangeFrom,
+        rangeTo,
+      };
+      history.push({
+        ...location,
+        search: fromQuery({
+          ...updatedQueryWithTime,
+          kuery: query?.query,
+        }),
+      });
+    } catch (e) {
+      console.log('Invalid kuery syntax'); // eslint-disable-line no-console
+    }
   };
 
   return (
@@ -176,6 +241,7 @@ export function UnifiedSearchBar({
         onQuerySubmit={handleSubmit}
         isClearable={isClearable}
         dataTestSubj="apmUnifiedSearchBar"
+        filtersForSuggestions={filtersForSearchBarSuggestions}
       />
     </EuiSkeletonRectangle>
   );

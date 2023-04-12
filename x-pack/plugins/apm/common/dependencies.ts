@@ -20,9 +20,7 @@ export const unifiedSearchBarPlaceholder = i18n.translate(
   }
 );
 
-// TODO: This function must be deleted in favour of Unified Search.
-//  Since we are keeping the KueryBar code for now, will delete this once we get rid of that as well
-export const getKueryBarBoolFilter = ({
+export const getSearchBarBoolFilter = ({
   dependencyName,
   environment,
 }: {

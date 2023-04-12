@@ -7,16 +7,27 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
+import {
+  unifiedSearchBarPlaceholder,
+  getSearchBarBoolFilter,
+} from '../../../../common/dependencies';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { DependenciesInventoryTable } from './dependencies_inventory_table';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function DependenciesInventory() {
+  const {
+    query: { environment },
+  } = useApmParams('/dependencies/inventory');
+  const searchBarBoolFilter = getSearchBarBoolFilter({
+    environment,
+  });
   return (
     <>
       <SearchBar
         showTimeComparison
         searchBarPlaceholder={unifiedSearchBarPlaceholder}
+        searchBarBoolFilter={searchBarBoolFilter}
       />
       <EuiSpacer size="s" />
       <DependenciesInventoryTable />
