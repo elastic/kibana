@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createInventoryViewsClientMock } from './log_views_client.mock';
+import { createInventoryViewsClientMock } from './inventory_views_client.mock';
 import { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './types';
 
-export const createInventoryViewsServiceSetupMock = (): jest.Mocked<InventoryViewsServiceSetup> => ({
-  defineInternalInventoryView: jest.fn(),
-});
+export const createInventoryViewsServiceSetupMock =
+  (): jest.Mocked<InventoryViewsServiceSetup> => {};
 
-export const createInventoryViewsServiceStartMock = (): jest.Mocked<InventoryViewsServiceStart> => ({
-  getClient: jest.fn((_savedObjectsClient: any, _elasticsearchClient: any) =>
-    createInventoryViewsClientMock()
-  ),
-  getScopedClient: jest.fn((_request: any) => createInventoryViewsClientMock()),
-});
+export const createInventoryViewsServiceStartMock =
+  (): jest.Mocked<InventoryViewsServiceStart> => ({
+    getClient: jest.fn((_savedObjectsClient: any, _elasticsearchClient: any) =>
+      createInventoryViewsClientMock()
+    ),
+    getScopedClient: jest.fn((_request: any) => createInventoryViewsClientMock()),
+  });

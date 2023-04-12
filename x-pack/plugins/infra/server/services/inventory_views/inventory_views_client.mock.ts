@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InventoryViewReference } from '../../../common/log_views';
-import { createResolvedInventoryViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { InventoryViewReference } from '../../../common/inventory_views';
+import { createResolvedInventoryViewMock } from '../../../common/inventory_views/resolved_Inventory_view.mock';
 import { IInventoryViewsClient } from './types';
 
 export const createInventoryViewsClientMock = (): jest.Mocked<IInventoryViewsClient> => ({

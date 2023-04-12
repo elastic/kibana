@@ -19,7 +19,7 @@ import {
   InventoryViewReference,
   InventoryViewsStaticConfig,
   ResolvedInventoryView,
-} from '../../../common/log_views';
+} from '../../../common/inventory_views';
 import { InfraSources } from '../../lib/sources';
 
 export interface InventoryViewsServiceStartDeps {
@@ -48,5 +48,5 @@ export interface IInventoryViewsClient {
     inventoryViewId: string,
     inventoryViewAttributes: Partial<InventoryViewAttributes>
   ): Promise<InventoryView>;
-  deleteInventoryView(inventoryViewId: string): Promise<InventoryView>;
+  deleteInventoryView(inventoryViewId: string): Promise<void>;
 }

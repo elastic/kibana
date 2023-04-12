@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
+import { LoggerMock } from '@kbn/logging-mocks';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
@@ -15,44 +15,44 @@ import {
   InventoryView,
   InventoryViewAttributes,
   InventoryViewsStaticConfig,
-} from '../../../common/log_views';
-import { createInventoryViewMock } from '../../../common/log_views/log_view.mock';
+} from '../../../common/inventory_views';
+import { createInventoryViewMock } from '../../../common/inventory_views/inventory_view.mock';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   extractInventoryViewSavedObjectReferences,
   inventoryViewSavedObjectName,
-} from '../../saved_objects/log_view';
+} from '../../saved_objects/inventory_view';
 import {
   getAttributesFromSourceConfiguration,
   InventoryViewsClient,
 } from './inventory_views_client';
 
 describe('getAttributesFromSourceConfiguration function', () => {
-  it('converts the index_pattern log indices type to data_view', () => {
+  it('converts the index_pattern Inventory indices type to data_view', () => {
     const inventoryViewAttributes = getAttributesFromSourceConfiguration(
       basicTestSourceConfiguration
     );
 
-    expect(inventoryViewAttributes.logIndices).toEqual({
+    expect(inventoryViewAttributes.InventoryIndices).toEqual({
       type: 'data_view',
       dataViewId: 'INDEX_PATTERN_ID',
     });
   });
 
-  it('preserves the index_name log indices type', () => {
+  it('preserves the index_name Inventory indices type', () => {
     const inventoryViewAttributes = getAttributesFromSourceConfiguration({
       ...basicTestSourceConfiguration,
       configuration: {
         ...basicTestSourceConfiguration.configuration,
-        logIndices: {
+        InventoryIndices: {
           type: 'index_name',
           indexName: 'INDEX_NAME',
         },
       },
     });
 
-    expect(inventoryViewAttributes.logIndices).toEqual({
+    expect(inventoryViewAttributes.InventoryIndices).toEqual({
       type: 'index_name',
       indexName: 'INDEX_NAME',
     });
@@ -244,7 +244,7 @@ describe('InventoryViewsClient class', () => {
       createStubDataView({
         spec: {
           id: 'LOG_DATA_VIEW',
-          title: 'log-indices-*',
+          title: 'Inventory-indices-*',
           timeFieldName: '@timestamp',
           runtimeFieldMap: {
             runtime_field: {
@@ -258,26 +258,29 @@ describe('InventoryViewsClient class', () => {
       })
     );
 
-    const resolvedInventoryView = await inventoryViewsClient.resolveInventoryView('log-view-id', {
-      name: 'LOG VIEW',
-      description: 'LOG VIEW DESCRIPTION',
-      logIndices: {
-        type: 'data_view',
-        dataViewId: 'LOG_DATA_VIEW',
-      },
-      logColumns: [
-        { timestampColumn: { id: 'TIMESTAMP_COLUMN_ID' } },
-        {
-          fieldColumn: {
-            id: 'DATASET_COLUMN_ID',
-            field: 'event.dataset',
+    const resolvedInventoryView = await inventoryViewsClient.resolveInventoryView(
+      'Inventory-view-id',
+      {
+        name: 'LOG VIEW',
+        description: 'LOG VIEW DESCRIPTION',
+        InventoryIndices: {
+          type: 'data_view',
+          dataViewId: 'LOG_DATA_VIEW',
+        },
+        InventoryColumns: [
+          { timestampColumn: { id: 'TIMESTAMP_COLUMN_ID' } },
+          {
+            fieldColumn: {
+              id: 'DATASET_COLUMN_ID',
+              field: 'event.dataset',
+            },
           },
-        },
-        {
-          messageColumn: { id: 'MESSAGE_COLUMN_ID' },
-        },
-      ],
-    });
+          {
+            messageColumn: { id: 'MESSAGE_COLUMN_ID' },
+          },
+        ],
+      }
+    );
 
     expect(resolvedInventoryView).toMatchInlineSnapshot(`
       Object {
@@ -352,14 +355,14 @@ describe('InventoryViewsClient class', () => {
           "shortDotsEnable": false,
           "sourceFilters": Array [],
           "timeFieldName": "@timestamp",
-          "title": "log-indices-*",
+          "title": "Inventory-indices-*",
           "type": undefined,
           "typeMeta": undefined,
           "version": "1",
         },
         "description": "LOG VIEW DESCRIPTION",
         "fields": FldList [],
-        "indices": "log-indices-*",
+        "indices": "Inventory-indices-*",
         "messageField": Array [
           "message",
         ],
@@ -380,7 +383,7 @@ describe('InventoryViewsClient class', () => {
 });
 
 const createInventoryViewsClient = () => {
-  const logger = loggerMock.create();
+  const Inventoryger = LoggerMock.create();
   const dataViews = dataViewsServiceMock;
   const savedObjectsClient = savedObjectsClientMock.create();
   const infraSources = createInfraSourcesMock();
@@ -390,7 +393,7 @@ const createInventoryViewsClient = () => {
   };
 
   const inventoryViewsClient = new InventoryViewsClient(
-    logger,
+    Inventoryger,
     Promise.resolve(dataViews),
     savedObjectsClient,
     infraSources,
@@ -414,11 +417,11 @@ const basicTestSourceConfiguration: InfraSource = {
   configuration: {
     name: 'NAME',
     description: 'DESCRIPTION',
-    logIndices: {
+    InventoryIndices: {
       type: 'index_pattern',
       indexPatternId: 'INDEX_PATTERN_ID',
     },
-    logColumns: [],
+    InventoryColumns: [],
     fields: {
       message: [],
     },

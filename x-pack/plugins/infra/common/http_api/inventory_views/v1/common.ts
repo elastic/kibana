@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const INVENTORY_VIEW_URL_PREFIX = '/api/infra/log_views';
+export const INVENTORY_VIEW_URL_PREFIX = '/api/infra/inventory_views';
 export const INVENTORY_VIEW_URL = `${INVENTORY_VIEW_URL_PREFIX}/{inventoryViewId}`;
 export const getInventoryViewUrl = (inventoryViewId: string) =>
   `${INVENTORY_VIEW_URL_PREFIX}/${inventoryViewId}`;

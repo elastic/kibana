@@ -24,7 +24,7 @@ import {
   persistedInventoryViewReferenceRT,
   ResolvedInventoryView,
   resolveInventoryView,
-} from '../../../common/log_views';
+} from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../../common/source_configuration/source_configuration';
 import type { IInfraSources, InfraSource } from '../../lib/sources';
@@ -32,8 +32,8 @@ import {
   extractInventoryViewSavedObjectReferences,
   inventoryViewSavedObjectName,
   resolveInventoryViewSavedObjectReferences,
-} from '../../saved_objects/log_view';
-import { inventoryViewSavedObjectRT } from '../../saved_objects/log_view/types';
+} from '../../saved_objects/inventory_view';
+import { inventoryViewSavedObjectRT } from '../../saved_objects/inventory_view/types';
 import { NotFoundError } from './errors';
 import { IInventoryViewsClient } from './types';
 
@@ -49,11 +49,10 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     private readonly dataViews: DataViewsService,
     private readonly savedObjectsClient: SavedObjectsClientContract,
     private readonly infraSources: IInfraSources,
-    private readonly internalInventoryViews: Map<string, InventoryView>,
     private readonly config: InventoryViewsStaticConfig
   ) {}
 
-  public async getInventoryView(inventoryViewId: string): Promise<InventoryView> {
+  public async get(inventoryViewId: string): Promise<InventoryView> {
     return await this.getSavedInventoryView(inventoryViewId)
       .catch((err) =>
         SavedObjectsErrorHelpers.isNotFoundError(err) || err instanceof NotFoundError
@@ -67,8 +66,14 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       );
   }
 
-  findInventoryView() {}
-  deleteInventoryView(inventoryViewId: string) {}
+  public async find() {
+    const savedObject = await this.savedObjectsClient.find({
+      type: inventoryViewSavedObjectName,
+      perPage: 1000, // Fetch 1 page by default with a max of 1000 results
+    });
+  }
+
+  public async deleteInventoryView(inventoryViewId: string) {}
 
   public async getResolvedInventoryView(
     inventoryViewReference: InventoryViewReference
@@ -129,13 +134,13 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   }
 
   private async getSavedInventoryView(inventoryViewId: string): Promise<InventoryView> {
-    this.logger.debug(`Trying to load stored log view "${inventoryViewId}"...`);
+    this.logger.debug(`Trying to load stored Inventory view "${inventoryViewId}"...`);
 
     const resolvedInventoryViewId = await this.resolveInventoryViewId(inventoryViewId);
 
     if (!resolvedInventoryViewId) {
       throw new NotFoundError(
-        `Failed to load saved log view: the log view id "${inventoryViewId}" could not be resolved.`
+        `Failed to load saved Inventory view: the Inventory view id "${inventoryViewId}" could not be resolved.`
       );
     }
 
@@ -148,13 +153,13 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   }
 
   private async getInternalInventoryView(inventoryViewId: string): Promise<InventoryView> {
-    this.logger.debug(`Trying to load internal log view "${inventoryViewId}"...`);
+    this.logger.debug(`Trying to load internal Inventory view "${inventoryViewId}"...`);
 
     const internalInventoryView = this.internalInventoryViews.get(inventoryViewId);
 
     if (!internalInventoryView) {
       throw new NotFoundError(
-        `Failed to load internal log view: no view with id "${inventoryViewId}" found.`
+        `Failed to load internal Inventory view: no view with id "${inventoryViewId}" found.`
       );
     }
 
@@ -164,7 +169,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   private async getInventoryViewFromInfraSourceConfiguration(
     sourceId: string
   ): Promise<InventoryView> {
-    this.logger.debug(`Trying to load log view from source configuration "${sourceId}"...`);
+    this.logger.debug(`Trying to load Inventory view from source configuration "${sourceId}"...`);
 
     const sourceConfiguration = await this.infraSources.getSourceConfiguration(
       this.savedObjectsClient,
@@ -220,20 +225,20 @@ const getInventoryViewFromSavedObject = (savedObject: SavedObject<unknown>): Inv
 };
 
 export const getAttributesFromSourceConfiguration = ({
-  configuration: { name, description, logIndices, logColumns },
+  configuration: { name, description, InventoryIndices, InventoryColumns },
 }: InfraSource): InventoryViewAttributes => ({
   name,
   description,
-  logIndices: getLogIndicesFromSourceConfigurationLogIndices(logIndices),
-  logColumns,
+  InventoryIndices: getLogIndicesFromSourceConfigurationLogIndices(InventoryIndices),
+  InventoryColumns,
 });
 
 const getLogIndicesFromSourceConfigurationLogIndices = (
-  logIndices: SourceConfigurationLogIndexReference
+  InventoryIndices: SourceConfigurationLogIndexReference
 ): LogIndexReference =>
-  logIndices.type === 'index_pattern'
+  InventoryIndices.type === 'index_pattern'
     ? {
         type: 'data_view',
-        dataViewId: logIndices.indexPatternId,
+        dataViewId: InventoryIndices.indexPatternId,
       }
-    : logIndices;
+    : InventoryIndices;

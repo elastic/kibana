@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { InventoryViewsService } from './log_views_service';
+export { InventoryViewsService } from './inventory_views_service';
 export { InventoryViewsClient } from './inventory_views_client';
 export type {
   InventoryViewsServiceSetup,

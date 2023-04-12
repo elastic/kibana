@@ -15,7 +15,7 @@ import {
   defaultInventoryViewAttributes,
   InventoryView,
   InventoryViewAttributes,
-} from '../../../common/log_views';
+} from '../../../common/inventory_views';
 import { InventoryViewsClient } from './inventory_views_client';
 import {
   InventoryViewsServiceSetup,
@@ -24,8 +24,6 @@ import {
 } from './types';
 
 export class InventoryViewsService {
-  private internalInventoryViews: Map<string, InventoryView> = new Map();
-
   constructor(private readonly logger: Logger) {}
 
   public setup(): InventoryViewsServiceSetup {}
@@ -37,7 +35,7 @@ export class InventoryViewsService {
     infraSources,
     savedObjects,
   }: InventoryViewsServiceStartDeps): InventoryViewsServiceStart {
-    const { internalInventoryViews, logger } = this;
+    const { logger } = this;
 
     return {
       getClient(
@@ -50,10 +48,10 @@ export class InventoryViewsService {
           dataViews.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient, request),
           savedObjectsClient,
           infraSources,
-          internalInventoryViews,
           config
         );
       },
+
       getScopedClient(request: KibanaRequest) {
         const savedObjectsClient = savedObjects.getScopedClient(request);
         const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;

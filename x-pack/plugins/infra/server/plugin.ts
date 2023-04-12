@@ -20,8 +20,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
-import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
-import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
@@ -43,7 +41,11 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { logViewSavedObjectType } from './saved_objects';
+import {
+  inventoryViewSavedObjectType,
+  logViewSavedObjectType,
+  metricsExplorerViewSavedObjectType,
+} from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
 import { RulesService } from './services/rules';
