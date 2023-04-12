@@ -288,7 +288,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`./symbtool push-symbols executable —-url <symb service IP> –-api-key {} --help`}
+              {`./symbtool push-symbols executable --url <symb service IP> --api-key {} --help`}
             </EuiCodeBlock>
           ),
         },
