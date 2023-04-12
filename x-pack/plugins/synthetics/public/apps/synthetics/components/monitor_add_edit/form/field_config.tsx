@@ -1438,7 +1438,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           if (value.some((check) => !check.expression || !check.description)) {
             return i18n.translate('xpack.synthetics.monitorConfig.responseJSON.error', {
               defaultMessage:
-                'Invalid JSON expression. Please ensure both the label and expression are defined.',
+                'This JSON expression isn't valid. Make sure that both the label and expression are defined.',
             });
           }
         },
