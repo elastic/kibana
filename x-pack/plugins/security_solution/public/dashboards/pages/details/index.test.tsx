@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { DashboardView } from '.';
-import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/components/search_bar', () => ({
