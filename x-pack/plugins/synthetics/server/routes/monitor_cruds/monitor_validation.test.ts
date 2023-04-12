@@ -175,11 +175,12 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_MATCH]: 'false',
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
-      [ConfigKey.IS_THROTTLING_ENABLED]: true,
-      [ConfigKey.DOWNLOAD_SPEED]: '5',
-      [ConfigKey.UPLOAD_SPEED]: '3',
-      [ConfigKey.LATENCY]: '20',
-      [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
+      [ConfigKey.THROTTLING_CONFIG]: {
+        download: 5,
+        upload: 3,
+        latency: 20,
+        label: 'test',
+      },
     };
 
     testBrowserFields = {

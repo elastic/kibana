@@ -190,11 +190,15 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            'throttling.config': '5d/3u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '3',
+            throttling: {
+              value: {
+                download: 5,
+                latency: 20,
+                upload: 3,
+              },
+              isCustom: false,
+              label: 'default',
+            },
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -253,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql(false);
         }
       } finally {
         await Promise.all([

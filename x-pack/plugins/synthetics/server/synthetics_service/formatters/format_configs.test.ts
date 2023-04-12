@@ -73,11 +73,15 @@ const testBrowserConfig: Partial<MonitorFields> = {
   'filter_journeys.match': '',
   'filter_journeys.tags': ['dev'],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: {
+    value: {
+      download: 5,
+      latency: 20,
+      upload: 3,
+    },
+    isCustom: false,
+    label: 'default',
+  },
   project_id: 'test-project',
 };
 
@@ -203,12 +207,16 @@ describe('browser fields', () => {
   });
 
   it('excludes UI fields', () => {
-    testBrowserConfig['throttling.is_enabled'] = false;
-    testBrowserConfig['throttling.upload_speed'] = '3';
-
     const formattedConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig,
+      {
+        ...testBrowserConfig,
+        throttling: {
+          value: { download: 0, upload: 0, latency: 0 },
+          label: 'no-throttling',
+          isCustom: false,
+        },
+      },
       logger,
       { proxyUrl: 'https://www.google.com' }
     );
@@ -216,8 +224,6 @@ describe('browser fields', () => {
     const expected = {
       ...formattedConfig,
       throttling: false,
-      'throttling.is_enabled': undefined,
-      'throttling.upload_speed': undefined,
     };
 
     expect(formattedConfig).toEqual(expected);

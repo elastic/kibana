@@ -11,6 +11,7 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
+  ThrottlingConfig,
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
@@ -39,6 +40,11 @@ export const getMonitorAPI = async ({
   id: string;
 }): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+};
+
+export const getMonitorProfileAPI = async (): Promise<ThrottlingConfig[]> => {
+  const response = await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROFILES);
+  return (response as { profiles: ThrottlingConfig[] }).profiles;
 };
 
 export const fetchServiceAPIKey = async (): Promise<{

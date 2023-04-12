@@ -30,6 +30,17 @@ import { ConfigKey } from './monitor_management';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 
+export enum CONNECTION_PROFILE_VALUES {
+  DEFAULT = 'default',
+  CABLE = 'cable',
+  DSL = 'dsl',
+  THREE_G = '3g',
+  FOUR_G = '4g',
+  LTE = 'lte',
+  FIBRE = 'fibre',
+  NO_THROTTLING = 'no-throttling',
+}
+
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',
   '3',
@@ -71,11 +82,15 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
   [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
-  [ConfigKey.IS_THROTTLING_ENABLED]: true,
-  [ConfigKey.DOWNLOAD_SPEED]: '5',
-  [ConfigKey.UPLOAD_SPEED]: '3',
-  [ConfigKey.LATENCY]: '20',
-  [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
+  [ConfigKey.THROTTLING_CONFIG]: {
+    value: {
+      download: 5,
+      upload: 3,
+      latency: 20,
+    },
+    label: CONNECTION_PROFILE_VALUES.DEFAULT,
+    isCustom: false,
+  },
 };
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {

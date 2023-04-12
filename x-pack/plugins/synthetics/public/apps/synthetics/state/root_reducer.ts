@@ -7,6 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { monitorManagementReducer, MonitorManagementState } from './monitor_management';
 import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
 import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
@@ -46,6 +47,7 @@ export interface SyntheticsAppState {
   serviceLocations: ServiceLocationsState;
   overviewStatus: OverviewStatusStateReducer;
   syntheticsEnablement: SyntheticsEnablementState;
+  monitorManagementState: MonitorManagementState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -65,4 +67,5 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   dynamicSettings: dynamicSettingsReducer,
   serviceLocations: serviceLocationsReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
+  monitorManagementState: monitorManagementReducer,
 });

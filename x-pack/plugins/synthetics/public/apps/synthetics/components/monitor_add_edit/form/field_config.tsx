@@ -14,8 +14,6 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperSelect,
-  EuiText,
   EuiLink,
   EuiTextArea,
   EuiSelectProps,
@@ -27,10 +25,14 @@ import {
   EuiCheckboxProps,
   EuiTextAreaProps,
   EuiButtonGroupProps,
-  EuiSuperSelectProps,
   EuiHighlight,
   EuiBadge,
 } from '@elastic/eui';
+import {
+  CONNECTION_PROFILE_OPTIONS,
+  ThrottlingConfigField,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 import {
   FieldText,
   FieldNumber,
@@ -67,12 +69,9 @@ import {
   VerificationMode,
   FieldMap,
   FormLocation,
+  ThrottlingConfig,
 } from '../types';
-import {
-  AlertConfigKey,
-  DEFAULT_BROWSER_ADVANCED_FIELDS,
-  ALLOWED_SCHEDULES_IN_MINUTES,
-} from '../constants';
+import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -1103,41 +1102,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
-    component: EuiSuperSelect,
+    component: ThrottlingConfigField,
     label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
       defaultMessage: 'Connection profile',
     }),
     required: true,
     controlled: true,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {
-      defaultMessage:
-        'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
+      defaultMessage: 'Simulate network throttling (download, upload, latency).',
     }),
-    props: (): EuiSuperSelectProps<string> => ({
-      options: [
-        {
-          value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
-          inputDisplay: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {
-                    defaultMessage: 'Default',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {'(5 Mbps, 3 Mbps, 20 ms)'}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        },
-      ],
-      readOnly,
-      disabled: true, // currently disabled through 1.0 until we define connection profiles
-    }),
+    props: ({ field, setValue, locations, formState }): Partial<ThrottlingConfigFieldProps> => {
+      return {
+        options: CONNECTION_PROFILE_OPTIONS,
+        readOnly,
+        disabled: false,
+        initialValue: formState.defaultValues?.[ConfigKey.THROTTLING_CONFIG] as ThrottlingConfig,
+      };
+    },
     validation: () => ({
       required: true,
     }),

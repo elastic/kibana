@@ -7,14 +7,20 @@
 import { omit } from 'lodash';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { LegacyConfigKey } from '../../../../../../common/constants/monitor_management';
 import {
   ConfigKey,
   SyntheticsMonitorWithSecrets,
   MonitorFields,
   BrowserFields,
   ScheduleUnit,
+  ThrottlingConfig,
 } from '../../../../../../common/runtime_types';
-import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  CONNECTION_PROFILE_VALUES,
+  DEFAULT_BROWSER_ADVANCED_FIELDS,
+} from '../../../../../../common/constants/monitor_defaults';
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -62,6 +68,7 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
             ...migrated,
             attributes: omitZipUrlFields(normalizedMonitorAttributes as BrowserFields),
           };
+          migrated = updateThrottlingFields(migrated);
         } catch (e) {
           logger.log.warn(
             `Failed to remove ZIP URL fields from legacy Synthetics monitor: ${e.message}`
@@ -112,4 +119,66 @@ const omitZipUrlFields = (fields: BrowserFields) => {
   }
 
   return formatSecrets(validationResult.decodedMonitor);
+};
+
+const updateThrottlingFields = (
+  doc: SavedObjectUnsanitizedDoc<
+    SyntheticsMonitorWithSecrets &
+      Partial<{
+        [LegacyConfigKey.THROTTLING_CONFIG]: string;
+        [LegacyConfigKey.IS_THROTTLING_ENABLED]: boolean;
+        [LegacyConfigKey.DOWNLOAD_SPEED]: number;
+        [LegacyConfigKey.UPLOAD_SPEED]: number;
+        [LegacyConfigKey.LATENCY]: number;
+      }>
+  >
+) => {
+  const { attributes } = doc;
+  const isThrottlingEnabled = attributes[LegacyConfigKey.THROTTLING_CONFIG];
+  if (isThrottlingEnabled) {
+    const download = attributes[LegacyConfigKey.DOWNLOAD_SPEED]!;
+    const upload = attributes[LegacyConfigKey.UPLOAD_SPEED]!;
+    const latency = attributes[LegacyConfigKey.LATENCY]!;
+    const newThrottlingConfig: ThrottlingConfig = {
+      value: {
+        download,
+        upload,
+        latency,
+      },
+      isCustom: true,
+      label: isDefaultThrottlingConfig(download, upload, latency)
+        ? CONNECTION_PROFILE_VALUES.DEFAULT
+        : `Custom ${download}d/${upload}u/${latency}`,
+    };
+    const migrated = {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        [ConfigKey.THROTTLING_CONFIG]: newThrottlingConfig,
+        [ConfigKey.CONFIG_HASH]: '',
+      },
+    };
+    // filter out legacy throttling fields
+    return {
+      ...migrated,
+      attributes: omit(attributes, [
+        LegacyConfigKey.THROTTLING_CONFIG,
+        LegacyConfigKey.IS_THROTTLING_ENABLED,
+        LegacyConfigKey.DOWNLOAD_SPEED,
+        LegacyConfigKey.UPLOAD_SPEED,
+        LegacyConfigKey.LATENCY,
+      ]),
+    };
+  } else {
+    return doc;
+  }
+};
+
+const isDefaultThrottlingConfig = (download?: number, upload?: number, latency?: number) => {
+  const throttling = DEFAULT_BROWSER_ADVANCED_FIELDS.throttling.value;
+  return (
+    download === throttling.download &&
+    upload === throttling.upload &&
+    latency === throttling.latency
+  );
 };
