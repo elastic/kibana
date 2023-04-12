@@ -21,7 +21,9 @@ import { getCore } from '../../kibana_services';
 
 export function openModal() {
   const { openModal: reactOverlaysOpenModal } = createReactOverlays(getCore());
-  const modalSession = reactOverlaysOpenModal(<SynchronizeMovementModal onClose={() => modalSession.close()} />);
+  const modalSession = reactOverlaysOpenModal(
+    <SynchronizeMovementModal onClose={() => modalSession.close()} />
+  );
 }
 
 interface Props {
