@@ -29,7 +29,7 @@ export const ALERTS_COUNT = (entity: string, description: string) =>
         defaultMessage: '{description} alerts from {entity}',
       })
     : i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
-        values: { description, entity },
+        values: { entity },
         defaultMessage: '{entity} alerts',
       });
 
