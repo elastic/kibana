@@ -49,11 +49,33 @@ const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
 const mockedWrite = write as jest.MockedFunction<typeof write>;
 const mockedBuild = new Build(config);
 
+const processEnv = process.env;
+
 describe('FetchAgentVersionsList', () => {
   beforeEach(() => {
+    process.env = {
+      ...processEnv,
+      // Ensure these tests can run in PR builds
+      BUILDKITE_PULL_REQUEST: undefined,
+    };
+
     mockedFetch.mockReset();
     (mockedBuild.resolvePath as jest.Mock<any>).mockReset();
     mockedWrite.mockReset();
+  });
+
+  afterEach(() => {
+    process.env = processEnv;
+  });
+
+  describe('when BUILDKITE_PULL_REQUEST is set', () => {
+    it('does not run task', async () => {
+      process.env.BUILDKITE_PULL_REQUEST = '1234';
+
+      await FetchAgentVersionsList.run(config, new ToolingLog(), mockedBuild);
+
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('when valid JSON is returned from versions endpoint', () => {
