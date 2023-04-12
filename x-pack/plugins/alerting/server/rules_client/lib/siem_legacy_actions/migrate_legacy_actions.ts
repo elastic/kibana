@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import omit from 'lodash/omit';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -19,11 +21,12 @@ type MigrateLegacyActions = (
     ruleId: string;
     references?: SavedObjectReference[];
     actions?: RawRuleAction[];
-    attributes?: RawRule;
+    attributes: RawRule;
+    skipActionsValidation?: boolean;
   }
 ) => Promise<{
-  actions: RawRuleAction[];
-  references: SavedObjectReference[];
+  resultedActions: RawRuleAction[];
+  resultedReferences: SavedObjectReference[];
   hasLegacyActions: boolean;
 }>;
 
@@ -36,8 +39,16 @@ type MigrateLegacyActions = (
  */
 export const migrateLegacyActions: MigrateLegacyActions = async (
   context: RulesClientContext,
-  { ruleId, actions = [], references = [], attributes }
+  { ruleId, actions = [], references = [], attributes, skipActionsValidation }
 ) => {
+  if (attributes?.consumer === AlertConsumers.SIEM) {
+    return {
+      resultedActions: [],
+      hasLegacyActions: false,
+      resultedReferences: [],
+    };
+  }
+
   const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(context, {
     ruleId,
   });
@@ -50,7 +61,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
   );
 
   // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
-  if (attributes) {
+  if (skipActionsValidation) {
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
     await validateActions(context, ruleType, {
       ...attributes,
@@ -76,9 +87,22 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     });
   }
 
+  // put frequencies into existing actions
+  // the situation when both action in rule nad legacy exist should be rare one
+  // but if it happens, we put frequency in existing actions per-action level
+  const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
+    ...action,
+    frequency: {
+      summary: true,
+      notifyWhen:
+        attributes.notifyWhen ?? legacyActions[0].frequency?.notifyWhen ?? 'onThrottleInterval',
+      throttle: attributes.throttle ?? legacyActions[0].frequency?.throttle ?? null,
+    },
+  }));
+
   return {
-    actions: [...actions, ...legacyActions],
+    resultedActions: [...existingActionsWithFrequencies, ...legacyActions],
     hasLegacyActions: legacyActions.length > 0,
-    references: [...references, ...legacyActionsReferences],
+    resultedReferences: [...references, ...legacyActionsReferences],
   };
 };

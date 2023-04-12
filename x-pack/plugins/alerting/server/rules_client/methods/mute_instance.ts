@@ -91,14 +91,18 @@ async function muteInstanceWithOCC(
       alertId,
       updateMeta(context, {
         mutedInstanceIds,
-        ...(hasLegacyActions ? { actions: resultedActions } : {}),
+        ...(migratedActions.hasLegacyActions
+          ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+          : {}),
 
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
       }),
       {
         version,
-        ...(hasLegacyActions ? { references: resultedReferences } : {}),
+        ...(migratedActions.hasLegacyActions
+          ? { references: migratedActions.resultedReferences }
+          : {}),
       }
     );
   }

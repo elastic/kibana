@@ -178,7 +178,11 @@ const bulkDeleteWithOCC = async (
     rules,
     async (rule) => {
       if (rule.attributes.consumer === AlertConsumers.SIEM) {
-        await migrateLegacyActions(context, { ruleId: rule.id });
+        await migrateLegacyActions(context, {
+          ruleId: rule.id,
+          attributes: rule.attributes as RawRule,
+          skipActionsValidation: true,
+        });
       }
     },
     // max concurrency for bulk edit operations, that is limited by api key generations, should be sufficient for bulk migrations

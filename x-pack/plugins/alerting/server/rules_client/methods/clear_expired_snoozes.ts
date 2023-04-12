@@ -33,33 +33,24 @@ export async function clearExpiredSnoozes(
 
   if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
 
-  let resultedActions: RawRule['actions'] = [];
-  let resultedReferences: SavedObjectReference[] = [];
-  let hasLegacyActions = false;
-
-  // migrate legacy actions only for SIEM rules
-  if (attributes.consumer === AlertConsumers.SIEM) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
-
-    resultedActions = migratedActions.actions;
-    resultedReferences = migratedActions.references;
-    hasLegacyActions = migratedActions.hasLegacyActions;
-  }
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    actions: attributes.actions,
+    references,
+    attributes,
+  });
 
   const updateAttributes = updateMeta(context, {
     snoozeSchedule,
-    ...(hasLegacyActions ? { actions: resultedActions } : {}),
+    ...(migratedActions.hasLegacyActions
+      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+      : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
   const updateOptions = {
     version,
-    ...(hasLegacyActions ? { references: resultedReferences } : {}),
+    ...(migratedActions.hasLegacyActions ? { references: migratedActions.resultedReferences } : {}),
   };
 
   await partiallyUpdateAlert(

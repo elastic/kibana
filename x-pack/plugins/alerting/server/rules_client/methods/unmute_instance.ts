@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObjectReference } from '@kbn/core/server';
-
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
@@ -72,23 +69,12 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-    let resultedActions: RawRule['actions'] = [];
-    let resultedReferences: SavedObjectReference[] = [];
-    let hasLegacyActions = false;
-
-    // migrate legacy actions only for SIEM rules
-    if (attributes.consumer === AlertConsumers.SIEM) {
-      const migratedActions = await migrateLegacyActions(context, {
-        ruleId: alertId,
-        actions: attributes.actions,
-        references,
-        attributes,
-      });
-
-      resultedActions = migratedActions.actions;
-      resultedReferences = migratedActions.references;
-      hasLegacyActions = migratedActions.hasLegacyActions;
-    }
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: alertId,
+      actions: attributes.actions,
+      references,
+      attributes,
+    });
 
     await context.unsecuredSavedObjectsClient.update<RawRule>(
       'alert',
@@ -97,11 +83,15 @@ async function unmuteInstanceWithOCC(
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
         mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        ...(hasLegacyActions ? { actions: resultedActions } : {}),
+        ...(migratedActions.hasLegacyActions
+          ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+          : {}),
       }),
       {
         version,
-        ...(hasLegacyActions ? { references: resultedReferences } : {}),
+        ...(migratedActions.hasLegacyActions
+          ? { references: migratedActions.resultedReferences }
+          : {}),
       }
     );
   }

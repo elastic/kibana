@@ -68,7 +68,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {
-    await migrateLegacyActions(context, { ruleId: id });
+    await migrateLegacyActions(context, { ruleId: id, attributes, skipActionsValidation: true });
   }
 
   context.auditLogger?.log(

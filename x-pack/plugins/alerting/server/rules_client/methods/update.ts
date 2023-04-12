@@ -120,6 +120,8 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   if (alertSavedObject.attributes.consumer === AlertConsumers.SIEM) {
     await migrateLegacyActions(context, {
       ruleId: id,
+      attributes: alertSavedObject.attributes,
+      skipActionsValidation: true,
     });
   }
 
