@@ -46,7 +46,7 @@ const maintenanceWindow: MaintenanceWindow = {
 
 let appMockRenderer: AppMockRenderer;
 
-describe('useCreateMaintenanceWindow', () => {
+describe('useUpdateMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 

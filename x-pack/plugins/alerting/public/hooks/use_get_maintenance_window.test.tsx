@@ -8,7 +8,7 @@ import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/dom';
 
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
-import { useGetMaintenanceWindowsList } from './use_get_maintenance_windows_list';
+import { useGetMaintenanceWindow } from './use_get_maintenance_window';
 
 const mockAddDanger = jest.fn();
 
@@ -45,12 +45,10 @@ describe('useGetMaintenanceWindow', () => {
   it('should call onError if api fails', async () => {
     getMaintenanceWindow.mockRejectedValue('');
 
-    renderHook(() => useGetMaintenanceWindowsList(), {
+    renderHook(() => useGetMaintenanceWindow('testId'), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Unable to load maintenance windows.')
-    );
+    await waitFor(() => expect(mockAddDanger).toBeCalledWith('Unable to get maintenance window.'));
   });
 });
