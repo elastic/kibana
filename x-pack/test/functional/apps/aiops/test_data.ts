@@ -19,6 +19,24 @@ export const farequoteDataViewTestData: TestData = {
   fieldSelectorApplyAvailable: false,
   expected: {
     totalDocCountFormatted: '86,374',
+    sampleProbabilityFormatted: '0.5',
+    fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+  },
+};
+
+export const farequoteDataViewTestDataWithQuery: TestData = {
+  suiteTitle: 'farequote with spike',
+  dataGenerator: 'farequote_with_spike',
+  isSavedSearch: false,
+  sourceIndexOrSavedSearch: 'ft_farequote',
+  brushDeviationTargetTimestamp: 1455033600000,
+  brushIntervalFactor: 1,
+  chartClickCoordinates: [0, 0],
+  fieldSelectorSearch: 'airline',
+  fieldSelectorApplyAvailable: false,
+  query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
+  expected: {
+    totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
       {
         docCount: '297',
@@ -105,5 +123,6 @@ export const artificialLogDataViewTestData: TestData = {
 
 export const explainLogRateSpikesTestData: TestData[] = [
   farequoteDataViewTestData,
+  farequoteDataViewTestDataWithQuery,
   artificialLogDataViewTestData,
 ];
