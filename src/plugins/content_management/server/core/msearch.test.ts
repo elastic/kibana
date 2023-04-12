@@ -50,6 +50,10 @@ const setup = () => {
   const mSearchService = new MSearchService({
     getSavedObjectsClient: async () => savedObjectsClient,
     contentRegistry,
+    getConfig: {
+      listingLimit: async () => 100,
+      perPage: async () => 10,
+    },
   });
 
   return { mSearchService, savedObjectsClient, contentRegistry };
@@ -104,6 +108,10 @@ test('should cross-content search using saved objects api', async () => {
     ],
     {
       text: 'search text',
+      tags: {
+        excluded: ['excluded-tag'],
+        included: ['included-tag'],
+      },
     }
   );
 
@@ -112,6 +120,20 @@ test('should cross-content search using saved objects api', async () => {
     search: 'search text',
     searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
     type: ['foo-type', 'bar-type'],
+    page: 1,
+    perPage: 10,
+    hasNoReference: [
+      {
+        id: 'excluded-tag',
+        type: 'tag',
+      },
+    ],
+    hasReference: [
+      {
+        id: 'included-tag',
+        type: 'tag',
+      },
+    ],
   });
 
   expect(result).toEqual({
@@ -160,4 +182,99 @@ test('should error if content is registered, but no mSearch support', async () =
       }
     )
   ).rejects.toThrowErrorMatchingInlineSnapshot(`"Content type foo2 does not support mSearch"`);
+});
+
+test('should paginate using cursor', async () => {
+  const { savedObjectsClient, mSearchService } = setup();
+
+  const soResultFoo = {
+    id: 'fooid',
+    score: 0,
+    type: 'foo-type',
+    references: [],
+    attributes: {
+      title: 'foo',
+    },
+  };
+
+  savedObjectsClient.find.mockResolvedValueOnce({
+    saved_objects: Array(5).fill(soResultFoo),
+    total: 7,
+    page: 1,
+    per_page: 5,
+  });
+
+  const result1 = await mSearchService.search(
+    [
+      { contentTypeId: 'foo', ctx: mockStorageContext() },
+      { contentTypeId: 'bar', ctx: mockStorageContext() },
+    ],
+    {
+      text: 'search text',
+      limit: 5,
+    }
+  );
+
+  expect(savedObjectsClient.find).toHaveBeenCalledWith({
+    defaultSearchOperator: 'AND',
+    search: 'search text',
+    searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
+    type: ['foo-type', 'bar-type'],
+    page: 1,
+    perPage: 5,
+  });
+
+  expect(result1).toEqual({
+    hits: Array(5).fill({ itemFoo: soResultFoo }),
+    pagination: {
+      total: 7,
+      cursor: '2',
+    },
+  });
+
+  savedObjectsClient.find.mockResolvedValueOnce({
+    saved_objects: Array(2).fill(soResultFoo),
+    total: 7,
+    page: 2,
+    per_page: 5,
+  });
+
+  const result2 = await mSearchService.search(
+    [
+      { contentTypeId: 'foo', ctx: mockStorageContext() },
+      { contentTypeId: 'bar', ctx: mockStorageContext() },
+    ],
+    {
+      text: 'search text',
+      limit: 5,
+      cursor: result1.pagination.cursor,
+    }
+  );
+
+  expect(result2).toEqual({
+    hits: Array(2).fill({ itemFoo: soResultFoo }),
+    pagination: {
+      total: 7,
+    },
+  });
+});
+
+test('should error if outside of pagination limit', async () => {
+  const { mSearchService } = setup();
+  await expect(
+    mSearchService.search(
+      [
+        { contentTypeId: 'foo', ctx: mockStorageContext() },
+        { contentTypeId: 'bar', ctx: mockStorageContext() },
+      ],
+
+      {
+        text: 'search text',
+        cursor: '10',
+        limit: 10,
+      }
+    )
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Requested page 10 with 10 items per page exceeds the maximum allowed limit of 100 items"`
+  );
 });
