@@ -46,7 +46,6 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
   });
 
   await savedObjectsClient.bulkDelete(noteObjects);
-
 };
 
 export const deleteNote = async ({

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
@@ -157,6 +157,7 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
     }, [confirmingNoteId]);
 
     const { status, data, error, isFetching } = useDeleteNote(noteToDelete);
+    console.log({ status, data, error, isFetching });
 
     if (noteId == null) {
       return null;
