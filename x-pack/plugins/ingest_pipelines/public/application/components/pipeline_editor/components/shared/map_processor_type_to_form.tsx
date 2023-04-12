@@ -10,6 +10,8 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
+import { LicenseType } from '../../../../../types';
+
 import {
   Append,
   Bytes,
@@ -69,6 +71,10 @@ interface FieldDescriptor {
    * Default
    */
   getDefaultDescription: (processorOptions: Record<string, any>) => string | undefined;
+  /**
+   * Some processors are only available for certain license types
+   */
+  forLicenseAtLeast?: LicenseType;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -453,6 +459,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   inference: {
     FieldsComponent: Inference,
+    forLicenseAtLeast: 'platinum',
     docLinkPath: '/inference-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.inference', {
       defaultMessage: 'Inference',
@@ -580,6 +587,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   redact: {
     FieldsComponent: Redact,
+    forLicenseAtLeast: 'platinum',
     docLinkPath: '/redact-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.redact', {
       defaultMessage: 'Redact',
