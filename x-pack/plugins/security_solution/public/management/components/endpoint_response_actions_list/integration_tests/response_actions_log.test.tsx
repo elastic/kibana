@@ -13,27 +13,29 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
-} from '../../../common/mock/endpoint';
-import { ResponseActionsLog } from './response_actions_log';
+} from '../../../../common/mock/endpoint';
+import { ResponseActionsLog } from '../response_actions_log';
 import type {
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
-} from '../../../../common/endpoint/types';
-import { MANAGEMENT_PATH } from '../../../../common/constants';
-import { getActionListMock } from './mocks';
-import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
+} from '../../../../../common/endpoint/types';
+import { MANAGEMENT_PATH } from '../../../../../common/constants';
+import { getActionListMock } from '../mocks';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 import { v4 as uuidv4 } from 'uuid';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { useGetEndpointActionList as _useGetEndpointActionList } from '../../hooks/response_actions/use_get_endpoint_action_list';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
-jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: jest.fn(original.useGetEndpointActionList),
@@ -114,11 +116,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../hooks/endpoint/use_get_endpoints_list');
+jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 
-jest.mock('../../../common/experimental_features_service');
+jest.mock('../../../../common/experimental_features_service');
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 let mockUseGetFileInfo: {
@@ -126,8 +128,8 @@ let mockUseGetFileInfo: {
   error?: Partial<IHttpFetchError> | null;
   data?: ActionFileInfoApiResponse;
 };
-jest.mock('../../hooks/response_actions/use_get_file_info', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_file_info');
+jest.mock('../../../hooks/response_actions/use_get_file_info', () => {
+  const original = jest.requireActual('../../../hooks/response_actions/use_get_file_info');
   return {
     ...original,
     useGetFileInfo: () => mockUseGetFileInfo,
@@ -140,8 +142,8 @@ let mockUseGetActionDetails: {
   error?: Partial<IHttpFetchError> | null;
   data?: ActionDetailsApiResponse;
 };
-jest.mock('../../hooks/response_actions/use_get_action_details', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_action_details');
+jest.mock('../../../hooks/response_actions/use_get_action_details', () => {
+  const original = jest.requireActual('../../../hooks/response_actions/use_get_action_details');
   return {
     ...original,
     useGetActionDetails: () => mockUseGetActionDetails,
