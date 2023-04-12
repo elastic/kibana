@@ -120,7 +120,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
-      groupBy: 'transaction.name',
+      groupBy: ['transaction.name'],
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -142,7 +142,7 @@ describe('registerTransactionDurationRuleType', () => {
     });
   });
 
-  it('sends alert when rule is configured with no group by', async () => {
+  it('sends alert when rule is configured with undefined group by', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
