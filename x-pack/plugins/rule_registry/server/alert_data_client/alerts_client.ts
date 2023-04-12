@@ -897,18 +897,8 @@ export class AlertsClient {
 
   public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
     try {
-      const index = `${this.ruleDataService.getResourcePrefix()}*`;
-      const query = {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [ALERT_CASE_IDS]: caseIds,
-              },
-            },
-          ],
-        },
-      };
+      const index = `${this.ruleDataService.getResourcePrefix()}-*`;
+      const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
 
       const SCRIPT_PARAMS_ID = 'caseIds';
 
@@ -931,7 +921,7 @@ export class AlertsClient {
         throw Boom.forbidden('Unauthorized to remove caseIds from all alerts');
       }
 
-      const result = await this.esClient.updateByQuery({
+      await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
         refresh: true,
@@ -945,7 +935,6 @@ export class AlertsClient {
         },
         ignore_unavailable: true,
       });
-      return result;
     } catch (err) {
       this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
       throw err;

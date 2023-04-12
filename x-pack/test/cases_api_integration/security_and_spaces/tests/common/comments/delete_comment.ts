@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
+  Alerts,
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,
   getAlertById,
@@ -109,8 +110,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      type Alerts = Array<{ _id: string; _index: string }>;
-
       describe('security_solution', () => {
         let alerts: Alerts = [];
 
