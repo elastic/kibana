@@ -45,7 +45,7 @@ export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict
   const pagination = useMemo(() => {
     return {
       activePage,
-      pageCount: Math.round((changePoints.length ?? 0) / CHARTS_PER_PAGE),
+      pageCount: Math.ceil((changePoints.length ?? 0) / CHARTS_PER_PAGE),
       updatePagination: setActivePage,
     };
   }, [activePage, changePoints.length]);
