@@ -46,7 +46,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   const defaultSorting = {
     sort: {
       field: 'p_value',
-      // Lower p_value indicates a bigger change point, hence the acs sorting
+      // Lower p_value indicates a bigger change point, hence the asc sorting
       direction: 'asc' as const,
     },
   };

@@ -53,9 +53,12 @@ export const ChartsGrid: FC<ChartsGridProps> = ({ changePoints: changePointsDict
   return (
     <>
       <EuiFlexGrid columns={resultPerPage.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
-        {resultPerPage.map((v) => {
+        {resultPerPage.map((v, index) => {
+          const key = `${index}_${v.group?.value ?? 'single_metric'}_${v.fn}_${v.metricField}_${
+            v.timestamp
+          }_${v.p_value}`;
           return (
-            <EuiFlexItem key={v.group?.value ?? 'single_metric'}>
+            <EuiFlexItem key={key}>
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
                 <EuiFlexGroup
                   alignItems={'center'}
