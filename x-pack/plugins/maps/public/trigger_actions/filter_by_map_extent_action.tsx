@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { isLegacyMap } from '../legacy_visualizations';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getCore } from '../kibana_services';
 
@@ -59,6 +58,7 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
     return 'filter';
   },
   isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
+    const { isLegacyMap } = await import('../legacy_visualizations/is_legacy_map');
     return (
       (embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMap(embeddable)) &&
       !embeddable.getInput().disableTriggers

@@ -8,8 +8,7 @@
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
+import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
@@ -36,7 +35,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    return getMapEmbeddableDisplayName();
+    return MAP_EMBEDDABLE_NAME;
   }
 
   createFromSavedObject = async (

@@ -15,6 +15,10 @@ export const APP_ICON_SOLUTION = 'logoKibana';
 export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
   defaultMessage: 'Maps',
 });
+export const MAP_EMBEDDABLE_NAME = i18n.translate('xpack.maps.embeddableDisplayName', {
+  defaultMessage: 'map',
+});
+
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;

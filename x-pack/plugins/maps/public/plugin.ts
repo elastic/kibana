@@ -59,7 +59,7 @@ import {
 } from './locators';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { registerSource } from './classes/sources/source_registry';
-import { registerLayerWizardExternal } from './classes/layers';
+import { registerLayerWizardExternal } from './classes/layers/wizards/layer_wizard_registry';
 import {
   createLayerDescriptors,
   MapsSetupApi,
@@ -67,13 +67,12 @@ import {
   suggestEMSTermJoinConfig,
 } from './api';
 import { lazyLoadMapModules } from './lazy_load_bundle';
-import { getAppTitle } from '../common/i18n_getters';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement_action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
@@ -188,7 +187,7 @@ export class MapsPlugin
 
     core.application.register({
       id: APP_ID,
-      title: getAppTitle(),
+      title: APP_NAME,
       order: 4000,
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON_SOLUTION,

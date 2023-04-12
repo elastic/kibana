@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID, APP_NAME, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
@@ -23,7 +23,6 @@ import {
   getUiSettings,
   getUsageCollection,
 } from '../../kibana_services';
-import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
@@ -114,8 +113,8 @@ export function MapsListView(props: Props) {
   const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  getCoreChrome().docTitle.change(getAppTitle());
-  getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
+  getCoreChrome().docTitle.change(APP_NAME);
+  getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
 
   return (
     <TableListView<MapUserContent>
@@ -133,7 +132,7 @@ export function MapsListView(props: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableListTitle={getAppTitle()}
+      tableListTitle={APP_NAME}
       onClickTitle={({ id }) => props.history.push(getEditPath(id))}
     />
   );

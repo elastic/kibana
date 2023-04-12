@@ -29,9 +29,8 @@ import {
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -181,7 +180,7 @@ export function getTopNavConfig({
                   copyOnSave: props.newCopyOnSave,
                   lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
                   getEsType: () => MAP_SAVED_OBJECT_TYPE,
-                  getDisplayName: getMapEmbeddableDisplayName,
+                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
                 },
                 props.isTitleDuplicateConfirmed,
                 props.onTitleDuplicate,
