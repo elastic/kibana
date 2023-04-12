@@ -87,34 +87,24 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
     fetchK8sManifest();
   }, [notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
 
-  const downloadDescription = (
-    <FormattedMessage
-      id="xpack.fleet.agentEnrollment.downloadDescriptionForK8s"
-      defaultMessage="Copy or download the Kubernetes manifest."
-    />
-  );
-
   const downloadLink = core.http.basePath.prepend(
     `${agentPolicyRouteService.getK8sFullDownloadPath()}?fleetServer=${fleetServer}&enrolToken=${enrollmentAPIKey}`
   );
 
-  const k8sYaml = (
-    <EuiCodeBlock language="yaml" style={{ maxHeight: 300 }} fontSize="m">
-      {yaml}
-    </EuiCodeBlock>
-  );
-
   return (
     <>
-      <EuiText>{downloadDescription}</EuiText>
       <EuiSpacer size="m" />
       <EuiButton
+        color="primary"
         target="_blank"
         iconSide="right"
         iconType="popout"
         onClick={() => onDownloadButtonClick(downloadLink)}
       >
-        Run CloudFormation
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.cloudFormation.launchButton"
+          defaultMessage="Launch CloudFormation"
+        />
       </EuiButton>
     </>
   );
