@@ -64,7 +64,6 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
@@ -194,7 +193,7 @@ export class MapsPlugin
         const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-        const { renderApp } = await lazyLoadMapModules();
+        const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
     });
