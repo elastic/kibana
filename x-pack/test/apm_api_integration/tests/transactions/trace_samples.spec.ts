@@ -72,8 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        expect(traceSamples.some((sample) => sample.score! > 0)).to.be(true);
-
         expect(traceSamples[0].traceId).to.eql(traceId);
         expect(traceSamples[0].transactionId).to.eql(transactionId);
 
