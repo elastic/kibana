@@ -19,7 +19,7 @@ import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/co
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
 import type {
-  RemoveAlertsFromCaseRequest,
+  RemoveCaseIdFromAlertsRequest,
   UpdateAlertCasesRequest,
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
@@ -237,7 +237,7 @@ export class AlertService {
   public async removeCaseIdFromAlerts({
     alerts,
     caseId,
-  }: RemoveAlertsFromCaseRequest): Promise<void> {
+  }: RemoveCaseIdFromAlertsRequest): Promise<void> {
     try {
       const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
 
@@ -252,6 +252,24 @@ export class AlertService {
     } catch (error) {
       throw createCaseError({
         message: `Failed to remove case ${caseId} from alerts: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }): Promise<void> {
+    try {
+      if (caseIds.length <= 0) {
+        return;
+      }
+
+      await this.alertsClient.removeCaseIdsFromAllAlerts({
+        caseIds,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed removing case ${caseIds} for all alerts: ${error}`,
         error,
         logger: this.logger,
       });

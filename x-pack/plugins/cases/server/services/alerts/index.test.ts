@@ -424,4 +424,22 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.removeCaseIdFromAlerts).not.toHaveBeenCalled();
     });
   });
+
+  describe('removeCaseIdsFromAllAlerts', () => {
+    const caseIds = ['test-case'];
+
+    it('remove all case ids from alerts', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({ caseIds });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+    });
+
+    it('does not call the alerts client with no case ids', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({
+        caseIds: [],
+      });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).not.toHaveBeenCalled();
+    });
+  });
 });

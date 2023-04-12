@@ -105,7 +105,7 @@ export interface BulkUpdateCasesOptions {
   caseIds: string[];
 }
 
-export interface RemoveAlertsFromCaseOptions {
+export interface RemoveCaseIdFromAlertsOptions {
   alerts: MgetAndAuditAlert[];
   caseId: string;
 }
@@ -851,7 +851,7 @@ export class AlertsClient {
     });
   }
 
-  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
     try {
       if (alerts.length === 0) {
         return;
@@ -863,10 +863,9 @@ export class AlertsClient {
       });
 
       const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
-        for (int i=0; i < ctx._source['${ALERT_CASE_IDS}'].length; i++) {
-            if (ctx._source['${ALERT_CASE_IDS}'][i].equals('${caseId}')) {
-                ctx._source['${ALERT_CASE_IDS}'].remove(i);
-            }
+        if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
+          int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
+          ctx._source['${ALERT_CASE_IDS}'].remove(index);
         }
       }`;
 
@@ -893,6 +892,57 @@ export class AlertsClient {
     } catch (error) {
       this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
       throw error;
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    try {
+      const index = '.alerts-*';
+      const query = {
+        exists: {
+          field: ALERT_CASE_IDS,
+        },
+      };
+
+      const SCRIPT_PARAMS_ID = 'caseIds';
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
+        for (int i=0; i < params['${SCRIPT_PARAMS_ID}'].length; i++) {
+          if (ctx._source['${ALERT_CASE_IDS}'].contains(params['${SCRIPT_PARAMS_ID}'][i])) {
+            int index = ctx._source['${ALERT_CASE_IDS}'].indexOf(params['${SCRIPT_PARAMS_ID}'][i]);
+            ctx._source['${ALERT_CASE_IDS}'].remove(index);
+          }
+        }
+      }`;
+
+      const fetchAndAuditResponse = await this.queryAndAuditAllAlerts({
+        query,
+        index,
+        operation: ReadOperations.Get,
+      });
+
+      if (!fetchAndAuditResponse?.auditedAlerts) {
+        throw Boom.forbidden('Unauthorized to remove caseIds from all alerts');
+      }
+
+      const result = await this.esClient.updateByQuery({
+        index,
+        conflicts: 'proceed',
+        refresh: true,
+        body: {
+          script: {
+            source: painlessScript,
+            lang: 'painless',
+            params: { caseIds },
+          } as InlineScript,
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+        },
+        ignore_unavailable: true,
+      });
+      return result;
+    } catch (err) {
+      this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
+      throw err;
     }
   }
 
