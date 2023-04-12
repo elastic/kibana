@@ -1375,7 +1375,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Proxy headers',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.helpText', {
-      defaultMessage: 'Additional headers to send to proxies during CONNECT requests.',
+      defaultMessage: 'Additional headers to send to proxies for CONNECT requests.',
     }),
     controlled: true,
     validation: () => ({
