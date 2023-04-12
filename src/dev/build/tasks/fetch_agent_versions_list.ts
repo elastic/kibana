@@ -22,6 +22,8 @@ const getAvailableVersions = async (log: ToolingLog) => {
   const url = 'https://www.elastic.co/content/product_versions';
   log.info('Fetching Elastic Agent versions list');
 
+  log.info("process.env.BUILDKITE_PULL_REQUEST: " + process.env.BUILDKITE_PULL_REQUEST)
+
   try {
     const results = await fetch(url, options);
     const rawBody = await results.text();
@@ -41,7 +43,9 @@ const getAvailableVersions = async (log: ToolingLog) => {
   } catch (error) {
     const errorMessage = 'Failed to fetch Elastic Agent versions list';
 
-    if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+    const isPr =
+    !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+    if (isPr) {
       // For PR jobs, just log the error as a warning and continue
       log.warning(errorMessage);
       log.warning(error);
