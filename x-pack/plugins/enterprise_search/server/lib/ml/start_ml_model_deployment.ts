@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import { MlStartTrainedModelDeploymentResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
+
+import { MlModelDeploymentStatus } from '../../../common/types/ml';
+
+import { isResourceNotFoundException } from '../../utils/identify_exceptions';
+
+import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 
 export const startMlModelDeployment = async (
   modelName: string,
   esClient: ElasticsearchClient
-): Promise<MlStartTrainedModelDeploymentResponse> => {
-  // is the model already deployed and complete?
+): Promise<MlModelDeploymentStatus> => {
+  // try and get the deployment status of the model first
+  // and see if it's already deployed or deploying...
+  try {
+    const deploymentStatus = await getMlModelDeploymentStatus(modelName, esClient);
 
-  // are we in the process of deploying it?
+    if (deploymentStatus && deploymentStatus.deploymentState) {
+      return deploymentStatus;
+    }
+  } catch (error) {
+    if (!isResourceNotFoundException(error)) {
+      // if we could not find a deployment status, we can try and start
+      // else some other error occured and we should bubble that up
+      throw error;
+    }
+  }
 
   // not deployed yet - let's deploy it
   const startRequest: MlStartTrainedModelDeploymentRequest = {
@@ -23,5 +40,6 @@ export const startMlModelDeployment = async (
     wait_for: 'starting',
   };
 
-  return await esClient.ml.startTrainedModelDeployment(startRequest);
+  await esClient.ml.startTrainedModelDeployment(startRequest);
+  return await getMlModelDeploymentStatus(modelName, esClient);
 };

@@ -37,6 +37,8 @@ import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
+import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
@@ -1001,21 +1003,15 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        /*
-        const detachResult = await detachMlInferencePipeline(
-          indexName,
-          pipelineName,
-          client.asCurrentUser
-        );
+        const deployResult = await startMlModelDeployment(modelName, client.asCurrentUser);
 
         return response.ok({
-          body: detachResult,
+          body: deployResult,
           headers: { 'content-type': 'application/json' },
         });
-        */
-        return response.ok({});
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           // return specific message if model doesn't exist
@@ -1043,21 +1039,15 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        /*
-        const detachResult = await detachMlInferencePipeline(
-          indexName,
-          pipelineName,
-          client.asCurrentUser
-        );
+        const getStatusResult = await getMlModelDeploymentStatus(modelName, client.asCurrentUser);
 
         return response.ok({
-          body: detachResult,
+          body: getStatusResult,
           headers: { 'content-type': 'application/json' },
         });
-        */
-        return response.ok({});
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           // return specific message if model doesn't exist
