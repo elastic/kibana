@@ -23,6 +23,8 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -378,6 +380,12 @@ async function installPackageFromRegistry({
   }
 }
 
+function getElasticSubscription(packageInfo: ArchivePackage) {
+  const subscription = packageInfo.conditions?.elastic?.subscription as LicenseType | undefined;
+  // Keep packageInfo.license for backward compatibility
+  return subscription || packageInfo.license || 'basic';
+}
+
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
@@ -451,7 +459,7 @@ async function installPackageCommon(options: {
       }
     }
 
-    if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
+    if (!licenseService.hasAtLeast(getElasticSubscription(packageInfo))) {
       const err = new Error(`Requires ${packageInfo.license} license`);
       sendEvent({
         ...telemetryEvent,
