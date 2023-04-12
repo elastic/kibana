@@ -227,7 +227,7 @@ export function TransactionDurationRuleType(props: Props) {
           'xpack.apm.ruleFlyout.createAlertPerHelpText',
           {
             defaultMessage:
-              'Create an alert for every unique value. For example: "transaction.name".',
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
           }
         )}
         fullWidth
