@@ -117,19 +117,22 @@ export const useDashboardMenuItems = ({
   /**
    * Returns to view mode. If the dashboard has unsaved changes shows a warning and resets to last saved state.
    */
-  const returnToViewMode = useCallback(() => {
-    dashboardContainer.clearOverlays();
-    if (hasUnsavedChanges) {
-      confirmDiscardUnsavedChanges(() => {
-        batch(() => {
-          dashboardContainer.resetToLastSavedState();
-          dispatch(setViewMode(ViewMode.VIEW));
+  const resetChanges = useCallback(
+    (returnToViewMode: boolean = false) => {
+      dashboardContainer.clearOverlays();
+      if (hasUnsavedChanges) {
+        confirmDiscardUnsavedChanges(() => {
+          batch(() => {
+            dashboardContainer.resetToLastSavedState();
+            if (returnToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+          });
         });
-      });
-      return;
-    }
-    dispatch(setViewMode(ViewMode.VIEW));
-  }, [dashboardContainer, dispatch, hasUnsavedChanges, setViewMode]);
+        return;
+      }
+      dispatch(setViewMode(ViewMode.VIEW));
+    },
+    [dashboardContainer, dispatch, hasUnsavedChanges, setViewMode]
+  );
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
@@ -163,6 +166,14 @@ export const useDashboardMenuItems = ({
         },
       } as TopNavMenuData,
 
+      reset: {
+        id: 'test',
+        label: 'Reset',
+        description: 'Reset your changes',
+        disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
+        run: () => resetChanges(),
+      } as TopNavMenuData,
+
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -190,7 +201,7 @@ export const useDashboardMenuItems = ({
         id: 'cancel',
         disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
-        run: () => returnToViewMode(),
+        run: () => resetChanges(true),
       } as TopNavMenuData,
 
       share: {
@@ -224,7 +235,7 @@ export const useDashboardMenuItems = ({
     hasOverlays,
     setFullScreenMode,
     isSaveInProgress,
-    returnToViewMode,
+    resetChanges,
     saveDashboardAs,
     setIsLabsShown,
     lastSavedId,
@@ -250,7 +261,12 @@ export const useDashboardMenuItems = ({
     const shareMenuItem = share ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
     if (lastSavedId) {
-      editModeItems.push(menuItems.saveAs, menuItems.switchToViewMode, menuItems.quickSave);
+      editModeItems.push(
+        menuItems.saveAs,
+        menuItems.switchToViewMode,
+        menuItems.reset,
+        menuItems.quickSave
+      );
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
     }
