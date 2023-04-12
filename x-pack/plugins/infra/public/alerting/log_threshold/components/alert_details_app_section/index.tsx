@@ -8,12 +8,19 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_END, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_EVALUATION_VALUE, ALERT_START } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
+import {
+  AlertAnnotation,
+  getPaddedAlertTimeRange,
+  AlertActiveTimeRangeAnnotation,
+} from '@kbn/observability-alert-details';
+import { useEuiTheme } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import {
   ComparatorToi18nMap,
@@ -21,7 +28,6 @@ import {
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
-import { AlertAnnotation } from './components/alert_annotation';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 
@@ -33,28 +39,22 @@ const AlertDetailsAppSection = ({
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
   const [selectedSeries, setSelectedSeries] = useState<string>('');
+  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
   const theme = useTheme();
-  /* For now we show the history chart only if we have one criteria */
-  const [showHistoryChart, setShowHistoryChart] = useState<boolean>(false);
-  const ruleWindowSizeMS = moment
-    .duration(rule.params.timeSize, rule.params.timeUnit)
-    .asMilliseconds();
-  const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
-  const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
-
-  /**
-   * The `CriterionPreview` chart shows all the series/data stacked when there is a GroupBy in the rule parameters.
-   * e.g., `host.name`, the chart will show stacks of data by hostname.
-   * We only need the chart to show the series that is related to the selected alert.
-   * The chart series are built based on the GroupBy in the rule params
-   * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
-   * We filter down the series using this group name
-   */
-  useEffect(() => {
-    setShowHistoryChart(rule && rule.params.criteria.length === 1);
-  }, [rule, rule.params.criteria]);
+  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const formatValue = (threshold: number) => String(threshold);
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
 
   useEffect(() => {
+    /**
+     * The `CriterionPreview` chart shows all the series/data stacked when there is a GroupBy in the rule parameters.
+     * e.g., `host.name`, the chart will show stacks of data by hostname.
+     * We only need the chart to show the series that is related to the selected alert.
+     * The chart series are built based on the GroupBy in the rule params
+     * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
+     * We filter down the series using this group name
+     */
     const alertFieldsFromGroupBy =
       rule.params.groupBy?.reduce(
         (selectedFields: Record<string, any>, field) => ({
@@ -72,20 +72,6 @@ const AlertDetailsAppSection = ({
 
     setAlertSummaryFields(test);
   }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
-  const formatValue = (threshold: number) => String(threshold);
-  /**
-   * This is part or the requirements (RFC).
-   * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
-   * IE. The user set "FOR THE LAST 5 minutes" at a minimum we should show 100 minutes.
-   */
-  const rangeFrom =
-    alertDurationMS < TWENTY_TIMES_RULE_WINDOW_MS
-      ? Number(moment(alert.start).subtract(TWENTY_TIMES_RULE_WINDOW_MS, 'millisecond').format('x'))
-      : Number(moment(alert.start).subtract(ruleWindowSizeMS, 'millisecond').format('x'));
-
-  const rangeTo = alert.active
-    ? Date.now()
-    : Number(moment(alert.fields[ALERT_END]).add(ruleWindowSizeMS, 'millisecond').format('x'));
 
   return (
     // Create a chart per-criteria
@@ -116,11 +102,6 @@ const AlertDetailsAppSection = ({
                     </EuiTitle>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {moment(rangeFrom).locale(i18n.getLocale()).from(rangeTo)}
-                  </EuiText>
-                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
               <EuiFlexGroup>
@@ -147,11 +128,24 @@ const AlertDetailsAppSection = ({
                     }}
                     chartCriterion={chartCriterion}
                     showThreshold={true}
-                    executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+                    executionTimeRange={{
+                      gte: Number(moment(timeRange.from).format('x')),
+                      lte: Number(moment(timeRange.to).format('x')),
+                    }}
                     annotations={[
                       <AlertAnnotation
-                        key={`${alert.start}${chartCriterion.field}${idx}`}
-                        alertStarted={alert.start}
+                        key={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
+                        id={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
+                        alertStart={alert.start}
+                        color={euiTheme.colors.danger}
+                        dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
+                      />,
+                      <AlertActiveTimeRangeAnnotation
+                        key={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
+                        id={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
+                        alertStart={alert.start}
+                        alertEnd={alertEnd}
+                        color={euiTheme.colors.danger}
                       />,
                     ]}
                     filterSeriesByGroupName={[selectedSeries]}
@@ -161,7 +155,7 @@ const AlertDetailsAppSection = ({
             </EuiPanel>
           );
         })}
-        {showHistoryChart && (
+        {rule && rule.params.criteria.length === 1 && (
           <EuiFlexItem>
             <LogsHistoryChart rule={rule} />
           </EuiFlexItem>
