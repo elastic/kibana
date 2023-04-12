@@ -259,10 +259,13 @@ export class CaseCommentModel {
   private async filterDuplicatedAlerts(
     attachments: CommentRequestWithId
   ): Promise<CommentRequestWithId> {
-    const filterByIndices = (items: string[], indices: number[]): string[] =>
-      items.filter((_, itemIndex) => !indices.some((index) => index === itemIndex));
+    /**
+     * This function removes the elements in items that exist at the passed in positions.
+     */
+    const removeItemsByPosition = (items: string[], positionsToRemove: number[]): string[] =>
+      items.filter((_, itemIndex) => !positionsToRemove.some((position) => position === itemIndex));
 
-    const filteredAlertAttachments: CommentRequestWithId = [];
+    const dedupedAlertAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
     const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
       {
@@ -272,37 +275,43 @@ export class CaseCommentModel {
 
     attachments.forEach((attachment) => {
       if (!isCommentRequestTypeAlert(attachment)) {
-        filteredAlertAttachments.push(attachment);
+        dedupedAlertAttachments.push(attachment);
         return;
       }
 
       const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-      const indicesOfIdsAttachedToCase: number[] = [];
+      const idPositionsThatAlreadyExistInCase: number[] = [];
 
       ids.forEach((id, index) => {
         if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
-          indicesOfIdsAttachedToCase.push(index);
+          idPositionsThatAlreadyExistInCase.push(index);
         }
 
         idsAlreadySeen.add(id);
       });
 
-      const alertIdsNonAttachedToCase = filterByIndices(ids, indicesOfIdsAttachedToCase);
-      const alertIndicesNonAttachedToCase = filterByIndices(indices, indicesOfIdsAttachedToCase);
+      const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
+        ids,
+        idPositionsThatAlreadyExistInCase
+      );
+      const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
+        indices,
+        idPositionsThatAlreadyExistInCase
+      );
 
       if (
-        alertIdsNonAttachedToCase.length > 0 &&
-        alertIdsNonAttachedToCase.length === alertIndicesNonAttachedToCase.length
+        alertIdsNotAlreadyAttachedToCase.length > 0 &&
+        alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
       ) {
-        filteredAlertAttachments.push({
+        dedupedAlertAttachments.push({
           ...attachment,
-          alertId: alertIdsNonAttachedToCase,
-          index: alertIndicesNonAttachedToCase,
+          alertId: alertIdsNotAlreadyAttachedToCase,
+          index: alertIndicesNotAlreadyAttachedToCase,
         });
       }
     });
 
-    return filteredAlertAttachments;
+    return dedupedAlertAttachments;
   }
 
   private getAlertAttachments(attachments: CommentRequest[]): CommentRequestAlertType[] {
