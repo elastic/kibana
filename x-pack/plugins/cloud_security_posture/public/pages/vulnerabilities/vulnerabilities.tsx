@@ -9,13 +9,11 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +27,7 @@ import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
 import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { EmptyState } from '../../components/empty_state';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -61,6 +60,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     onChangePage,
     onSort,
     setUrlQuery,
+    onResetFilters,
   } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
@@ -164,17 +164,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
       />
       <EuiSpacer size="l" />
       {!isLoading && data.page.length === 0 ? (
-        <EuiEmptyPrompt
-          iconType="logoKibana"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.csp.findings.resourceFindings.noFindingsTitle"
-                defaultMessage="There are no Findings"
-              />
-            </h2>
-          }
-        />
+        <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <EuiDataGrid
           css={css`
