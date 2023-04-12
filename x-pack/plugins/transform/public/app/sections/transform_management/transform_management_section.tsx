@@ -87,7 +87,8 @@ export const TransformManagement: FC = () => {
           color="warning"
           title={i18n.translate('xpack.transform.transformList.unauthorizedTransformsCallout', {
             defaultMessage:
-              'At least one transform was created with insufficient permissions. Reauthorize from a user with transforms_admin privilege to start and run the transform.',
+              '{unauthorizedCnt, plural, one {A transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. You must have the transform_admin built-in role or manage_transform cluster privileges to reauthorize and start operations.',
+            values: { unauthorizedCnt },
           })}
         />
         <EuiSpacer size="s" />
