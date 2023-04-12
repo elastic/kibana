@@ -8,7 +8,7 @@
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 export const mockEncryptedSO = (
-  data: any = [{ attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }]
+  data: any = { attributes: { key: 'username', value: 'elastic' }, namespaces: ['*'] }
 ) => ({
   getClient: jest.fn().mockReturnValue({
     getDecryptedAsInternalUser: jest.fn().mockResolvedValue(data),
