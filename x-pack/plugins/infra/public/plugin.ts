@@ -28,7 +28,6 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
-import { LogsAppService } from './services/logs_app';
 import { LogViewsService } from './services/log_views';
 import { TelemetryService } from './services/telemetry';
 import {
@@ -44,14 +43,12 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
-  private logsApp: LogsAppService;
   private logViews: LogViewsService;
   private telemetry: TelemetryService;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
-    this.logsApp = new LogsAppService(this.config);
     this.logViews = new LogViewsService({
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
@@ -182,6 +179,13 @@ export class Plugin implements InfraClientPluginClass {
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
+
+        if (this.config.logs.app_target === 'discover') {
+          const { renderApp } = await import('./apps/discover_app');
+
+          return renderApp(coreStart, pluginsStart, pluginStart);
+        }
+
         const { renderApp } = await import('./apps/logs_app');
 
         return renderApp(coreStart, pluginsStart, pluginStart, params);
@@ -268,10 +272,6 @@ export class Plugin implements InfraClientPluginClass {
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
     const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
 
-    const logsApp = this.logsApp.start({
-      discover: plugins.discover,
-    });
-
     const logViews = this.logViews.start({
       http: core.http,
       dataViews: plugins.dataViews,
@@ -281,7 +281,6 @@ export class Plugin implements InfraClientPluginClass {
     const telemetry = this.telemetry.start();
 
     const startContract: InfraClientStartExports = {
-      logsApp,
       logViews,
       telemetry,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
