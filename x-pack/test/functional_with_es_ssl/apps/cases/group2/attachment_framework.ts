@@ -75,7 +75,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const validateAttachment = async (type: string, attachmentId?: string) => {
     await testSubjects.existOrFail(`comment-${type}-.test`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
-    await testSubjects.existOrFail('test-attachment-action');
+    await testSubjects.existOrFail(`attachment-.test-${attachmentId}-arrowRight`);
   };
 
   /**

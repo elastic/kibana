@@ -132,7 +132,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    id: SecurityPageName.dashboardsLanding,
+    id: SecurityPageName.dashboards,
     title: DASHBOARDS,
     path: OVERVIEW_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
