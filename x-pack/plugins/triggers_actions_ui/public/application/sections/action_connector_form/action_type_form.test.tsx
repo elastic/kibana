@@ -60,6 +60,10 @@ jest.mock('../../lib/action_variables', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
 describe('action_type_form', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -510,6 +514,7 @@ function getActionTypeForm({
   onDeleteAction,
   onConnectorSelected,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
@@ -525,6 +530,7 @@ function getActionTypeForm({
   onDeleteAction?: () => void;
   onConnectorSelected?: (id: string) => void;
   setActionFrequencyProperty?: () => void;
+  setActionAlertsFilterProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
@@ -607,6 +613,7 @@ function getActionTypeForm({
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
       setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
+      setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}

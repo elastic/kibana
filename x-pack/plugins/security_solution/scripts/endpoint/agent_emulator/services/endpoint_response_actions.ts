@@ -282,6 +282,8 @@ type ResponseOutput<TOutputContent extends object = object> = Pick<
 >;
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+  const commentUppercase = (action?.comment ?? '').toUpperCase();
+
   switch (action.command) {
     case 'running-processes':
       return {
@@ -319,11 +321,24 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
+      const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
+        output_file_id: getFileDownloadId(action, action.agents[0]),
+      };
+
+      // Error?
+      if (commentUppercase.indexOf('EXECUTE:FAILURE') > -1) {
+        executeOutput.stdout = '';
+        executeOutput.stdout_truncated = false;
+        executeOutput.output_file_stdout_truncated = false;
+      } else {
+        executeOutput.stderr = '';
+        executeOutput.stderr_truncated = false;
+        executeOutput.output_file_stderr_truncated = false;
+      }
+
       return {
         output: endpointActionGenerator.generateExecuteActionResponseOutput({
-          content: {
-            output_file_id: getFileDownloadId(action, action.agents[0]),
-          },
+          content: executeOutput,
         }),
       } as ResponseOutput<ResponseActionExecuteOutputContent>;
 

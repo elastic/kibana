@@ -59,6 +59,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
@@ -88,6 +89,7 @@ function QueryBarMenuComponent({
   showSaveQuery,
   indexPatterns,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   buttonProps,
   isDisabled,
   onCloseFilterPopover,
@@ -186,6 +188,7 @@ function QueryBarMenuComponent({
                 indexPatterns={indexPatterns}
                 filters={filters!}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                filtersForSuggestions={filtersForSuggestions}
                 onFiltersUpdated={onFiltersUpdated}
                 onLocalFilterUpdate={onLocalFilterUpdate}
                 onLocalFilterCreate={onLocalFilterCreate}

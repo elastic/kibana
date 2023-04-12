@@ -19,7 +19,12 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { ActionGroup, RuleActionFrequency, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionGroup,
+  RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -57,6 +62,11 @@ export interface ActionAccordionFormProps {
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionAlertsFilterProperty: (
+    key: string,
+    value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -71,6 +81,7 @@ export interface ActionAccordionFormProps {
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
+  showActionAlertsFilter?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -86,6 +97,7 @@ export const ActionForm = ({
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   featureId,
   messageVariables,
   actionGroups,
@@ -102,6 +114,7 @@ export const ActionForm = ({
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
+  showActionAlertsFilter,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -378,6 +391,7 @@ export const ActionForm = ({
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
+              setActionAlertsFilterProperty={setActionAlertsFilterProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
@@ -409,6 +423,7 @@ export const ActionForm = ({
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
+              showActionAlertsFilter={showActionAlertsFilter}
             />
           );
         })}

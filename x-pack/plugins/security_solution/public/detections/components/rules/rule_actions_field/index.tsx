@@ -17,7 +17,11 @@ import type {
   NotifyWhenSelectOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldHook } from '../../../../shared_imports';
@@ -187,6 +191,23 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field, isInitializingAction]
   );
 
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          alertsFilter: {
+            ...(updatedActions[index].alertsFilter ?? { query: null, timeframe: null }),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
   const setActionFrequency = useCallback(
     // TODO: replace any with a concrete type
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -216,6 +237,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
         setActionFrequencyProperty: setActionFrequency,
+        setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
         defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
@@ -224,6 +246,8 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: DEFAULT_FREQUENCY,
+        hideNotifyWhen: true,
+        showActionAlertsFilter: true,
       }),
     [
       actions,
@@ -233,6 +257,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
+      setActionAlertsFilterProperty,
     ]
   );
 
