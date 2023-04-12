@@ -17,7 +17,7 @@ export const ADD_TO_TIMELINE = i18n.translate(
 );
 
 export const ALERTS_COUNT = (entity: string, description: string) =>
-  i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
+  i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
     values: { description, entity },
     defaultMessage: description !== '' ? `{description} alerts from {entity}` : `{entity} alerts`,
   });
