@@ -12,9 +12,9 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
@@ -22,11 +22,19 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
   openOverviewTab,
   toggleOverviewTabDescriptionSection,
+  toggleOverviewTabInvestigationSection,
+  toggleOverviewTabInsightsSection,
 } from '../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
@@ -90,11 +98,6 @@ describe.skip(
       });
 
       it('should display mitre attack', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS).should('be.visible');
-      });
-
-      it('should display mitre attack', () => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE)
           .should('be.visible')
           // @ts-ignore
@@ -112,45 +115,68 @@ describe.skip(
     describe('investigation section', () => {
       before(() => {
         toggleOverviewTabDescriptionSection();
+        toggleOverviewTabInvestigationSection();
+      });
+
+      it('should display description section header and content', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER)
+          .should('be.visible')
+          .and('have.text', 'Investigation');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT).should(
+          'be.visible'
+        );
       });
 
       it('should display highlighted fields', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS)
-          .scrollIntoView()
-          .within(() => {
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON)
-              .should('be.visible')
-              .click();
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE)
-              .should('be.visible')
-              .and('have.text', 'Highlighted fields');
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS).should(
-              'be.visible'
-            );
-
-            // close highlighted fields to reset the view for next test
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON)
-              .should('be.visible')
-              .click();
-          });
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE)
+          .should('be.visible')
+          .and('have.text', 'Highlighted fields');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS).should(
+          'be.visible'
+        );
       });
+
       it('should navigate to table tab when clicking on highlighted fields view button', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS)
-          .scrollIntoView()
-          .within(() => {
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON)
-              .should('be.visible')
-              .click();
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK)
-              .should('be.visible')
-              .click();
-          });
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK)
+          .should('be.visible')
+          .click();
 
         // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
         // this next line is a hack that scrolls to a specific element in the table
         // (in the middle of it vertically) to ensure Cypress finds it
         cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+
+        // go back to Overview tab to reset view for next test
+        openOverviewTab();
+      });
+    });
+
+    describe('insights section', () => {
+      before(() => {
+        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabInsightsSection();
+      });
+
+      it('should display entities section', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER)
+          .scrollIntoView()
+          .should('be.visible')
+          .and('have.text', 'Entities');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER).should(
+          'be.visible'
+        );
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT).should(
+          'be.visible'
+        );
+      });
+
+      it('should navigate to left panel, entities tab when view all entities is clicked', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON)
+          .should('be.visible')
+          .click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
       });
     });
   }

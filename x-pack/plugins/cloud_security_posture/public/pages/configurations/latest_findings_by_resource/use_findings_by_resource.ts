@@ -21,8 +21,8 @@ import {
 import { getBelongsToRuntimeMapping } from '../../../../common/runtime_mappings/get_belongs_to_runtime_mapping';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../latest_findings/use_latest_findings';
-import type { FindingsBaseEsQuery, Sort } from '../types';
+import { showErrorToast } from '../../../common/utils/show_error_toast';
+import type { FindingsBaseEsQuery, Sort } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 

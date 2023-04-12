@@ -30,8 +30,12 @@ export const ShowMoreButton = React.memo<ShowMoreButtonProps>(
         css={css`
           display: flex;
           justify-content: center;
-          margin-block: ${euiTheme.size.xl};
-          margin-inline-start: ${euiTheme.size.xxxl};
+          position: relative;
+          margin-block: ${euiTheme.size.base};
+          z-index: 1;
+          border-top: ${euiTheme.size.base} solid ${euiTheme.colors.emptyShade};
+          border-bottom: ${euiTheme.size.base} solid ${euiTheme.colors.emptyShade};
+          border-radius: 16px;
         `}
       >
         <EuiButton

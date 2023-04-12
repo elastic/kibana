@@ -12,18 +12,18 @@ import { identity } from 'fp-ts/lib/function';
 
 import pMap from 'p-map';
 import { partition } from 'lodash';
-import type { File } from '@kbn/files-plugin/common';
+import type { File, FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import { BulkDeleteFileAttachmentsRequestRt, excess, throwErrors } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
-import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkDeleteFileArgs } from './types';
-import { constructOwnerFromFileKind, CaseFileMetadataForDeletionRt } from '../../../common/files';
+import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
+import { createFileEntities, deleteFiles } from '../files';
 
 export const bulkDeleteFileAttachments = async (
   { caseId, fileIds }: BulkDeleteFileArgs,
@@ -67,9 +67,7 @@ export const bulkDeleteFileAttachments = async (
     });
 
     await Promise.all([
-      pMap(request.ids, async (fileId: string) => fileService.delete({ id: fileId }), {
-        concurrency: MAX_CONCURRENT_SEARCHES,
-      }),
+      deleteFiles(request.ids, fileService),
       attachmentService.bulkDelete({
         attachmentIds: fileAttachments.map((so) => so.id),
         refresh: false,
@@ -117,7 +115,7 @@ const getFiles = async (
   caseId: BulkDeleteFileArgs['caseId'],
   fileIds: BulkDeleteFileArgs['fileIds'],
   fileService: FileServiceStart
-) => {
+): Promise<FileJSON[]> => {
   // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
   // attachment request failed)
   const files = await pMap(fileIds, async (fileId: string) => fileService.getById({ id: fileId }), {
@@ -143,25 +141,5 @@ const getFiles = async (
     throw Boom.badRequest('Failed to find files to delete');
   }
 
-  return validFiles;
-};
-
-const createFileEntities = (files: File[]) => {
-  const fileEntities: OwnerEntity[] = [];
-
-  // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
-  // has the correct authorization for deleting these files
-  for (const fileInfo of files) {
-    const ownerFromFileKind = constructOwnerFromFileKind(fileInfo.data.fileKind);
-
-    if (ownerFromFileKind == null) {
-      throw Boom.badRequest(
-        `File id ${fileInfo.id} has invalid file kind ${fileInfo.data.fileKind}`
-      );
-    }
-
-    fileEntities.push({ id: fileInfo.id, owner: ownerFromFileKind });
-  }
-
-  return fileEntities;
+  return validFiles.map((fileInfo) => fileInfo.data);
 };
