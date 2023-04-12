@@ -8,9 +8,6 @@
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -21,7 +18,6 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 
 async function removeLogFile() {
