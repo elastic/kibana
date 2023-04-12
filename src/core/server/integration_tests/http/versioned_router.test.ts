@@ -75,7 +75,7 @@ describe('Routing versioned requests', () => {
     router.versioned.get({ path: '/my-path', access: 'internal' }); // do not actually register any versions
     await server.start();
 
-    await supertest.get('/my-path').set('Elastic-Api-Version', '2').expect(406);
+    await supertest.get('/my-path').set('Elastic-Api-Version', '2').expect(400);
   });
 
   it('handles missing version header', async () => {
@@ -97,7 +97,7 @@ describe('Routing versioned requests', () => {
     await expect(
       supertest
         .get('/my-path')
-        .expect(406)
+        .expect(400)
         .then(({ body }) => body)
     ).resolves.toEqual(
       expect.objectContaining({
