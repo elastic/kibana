@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -16,7 +16,7 @@ import moment from 'moment';
 import { AreaSeries, Chart } from '@elastic/charts';
 import { EuiLoadingChart } from '@elastic/eui';
 
-import { FilterBy } from '../../utils/get_formula_by_filter';
+import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionChart } from './analytics_collection_chart';
 
@@ -42,6 +42,8 @@ describe('AnalyticsCollectionChart', () => {
     dataViewQuery: mockedDataViewQuery,
     id: 'mockedId',
     isLoading: false,
+    selectedChart: FilterBy.Searches,
+    setSelectedChart: jest.fn(),
     timeRange: mockedTimeRange,
   };
 
