@@ -385,7 +385,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       migrationVersion,
       coreMigrationVersion,
       typeMigrationVersion,
-      managed,
+      managed: setManaged(managed),
       created_at: time,
       updated_at: time,
       ...(Array.isArray(references) && { references }),

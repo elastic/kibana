@@ -1006,7 +1006,7 @@ describe('SavedObjectsRepository', () => {
         expect(result.saved_objects[1].managed).toEqual(obj2.managed);
       });
 
-      it(`applies the default to managed if not already set`, async () => {
+      it(`sets managed=false if not already set`, async () => {
         const obj1WithoutManaged = {
           type: 'config',
           id: '6.0.0-alpha1',
@@ -1028,7 +1028,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`applies the default to managed only to documents without managed`, async () => {
+      it(`sets managed=false only on documents without managed already set`, async () => {
         const objWithoutManaged = {
           type: 'config',
           id: '6.0.0-alpha1',
@@ -1041,7 +1041,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`applies the given boolean to managed if not already set`, async () => {
+      it(`sets managed=true if provided as an override`, async () => {
         const obj1WithoutManaged = {
           type: 'config',
           id: '6.0.0-alpha1',
@@ -1065,6 +1065,30 @@ describe('SavedObjectsRepository', () => {
             { ...obj1WithoutManaged, managed: true },
             { ...obj2WithoutManaged, managed: true },
           ].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`sets managed=false if provided as an override`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(
+          client,
+          repository,
+          [obj1WithoutManaged, obj2WithoutManaged],
+          { managed: false }
+        );
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
         });
       });
     });
@@ -2484,6 +2508,8 @@ describe('SavedObjectsRepository', () => {
         id: '123',
       },
     ];
+    const managedFalse = false;
+    const managedTrue = true;
 
     const createSuccess = async <T>(
       type: string,
@@ -2494,14 +2520,38 @@ describe('SavedObjectsRepository', () => {
     };
 
     describe('client calls', () => {
-      it(`should use the ES index action if ID is not defined and overwrite=true`, async () => {
+      it(`should use the ES index action if ID is not defined`, async () => {
         await createSuccess(type, attributes, { overwrite: true });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
+      });
+
+      it(`should use the ES index action if ID is not defined and a doc has managed=true`, async () => {
+        await createSuccess(type, attributes, { overwrite: true, managed: managedTrue });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
+      });
+
+      it(`should use the ES index action if ID is not defined and a doc has managed=false`, async () => {
+        await createSuccess(type, attributes, { overwrite: true, managed: managedFalse });
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalled();
       });
 
       it(`should use the ES create action if ID is not defined and overwrite=false`, async () => {
         await createSuccess(type, attributes);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.create).toHaveBeenCalled();
+      });
+
+      it(`should use the ES create action if ID is not defined, overwrite=false and a doc has managed=true`, async () => {
+        await createSuccess(type, attributes, { managed: managedTrue });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.create).toHaveBeenCalled();
+      });
+
+      it(`should use the ES create action if ID is not defined, overwrite=false and a doc has managed=false`, async () => {
+        await createSuccess(type, attributes, { managed: managedFalse });
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.create).toHaveBeenCalled();
       });
@@ -2987,17 +3037,20 @@ describe('SavedObjectsRepository', () => {
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
+        const managed = managedFalse;
         await createSuccess(type, attributes, {
           id,
           references,
           migrationVersion,
           coreMigrationVersion,
+          managed,
         });
         const doc = {
           type,
           id,
           attributes,
           references,
+          managed,
           migrationVersion,
           coreMigrationVersion,
           ...mockTimestampFieldsWithCreated,
@@ -3006,6 +3059,68 @@ describe('SavedObjectsRepository', () => {
 
         const migratedDoc = migrator.migrateDocument(doc);
         expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
+      });
+
+      it(`migrates a document, adds managed=false and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          managed: undefined,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          managed: undefined,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFieldsWithCreated,
+        };
+        expectMigrationArgs({ ...doc, managed: managedFalse });
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(migratedDoc.managed).toBeDefined();
+        expect(migratedDoc.managed).toBe(false);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith({
+          ...migratedDoc,
+          managed: false,
+        });
+      });
+
+      it(`migrates a document, does not change managed=true to managed=false and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          managed: managedTrue,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          managed: managedTrue,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFieldsWithCreated,
+        };
+        expectMigrationArgs(doc);
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(migratedDoc.managed).toBeDefined();
+        expect(migratedDoc.managed).toBe(managedTrue);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith({
+          ...migratedDoc,
+          managed: managedTrue,
+        });
       });
 
       it(`adds namespace to body when providing namespace for single-namespace type`, async () => {
@@ -3064,7 +3179,7 @@ describe('SavedObjectsRepository', () => {
           namespaces: [namespace ?? 'default'],
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
-          managed: false,
+          managed: managedFalse,
         });
       });
       it(`allows setting 'managed' to true`, async () => {
@@ -3072,7 +3187,7 @@ describe('SavedObjectsRepository', () => {
           id,
           namespace,
           references,
-          managed: true,
+          managed: managedTrue,
         });
         expect(result).toEqual({
           type: MULTI_NAMESPACE_TYPE,
@@ -3084,7 +3199,7 @@ describe('SavedObjectsRepository', () => {
           namespaces: [namespace ?? 'default'],
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
-          managed: true,
+          managed: managedTrue,
         });
       });
     });

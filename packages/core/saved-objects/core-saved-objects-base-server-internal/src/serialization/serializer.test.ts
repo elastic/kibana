@@ -114,7 +114,7 @@ describe('#rawToSavedObject', () => {
     expect(actual).not.toHaveProperty('migrationVersion');
   });
 
-  test.only('it converts the id and type properties, and retains migrationVersion', () => {
+  test('it converts the id and type properties, and retains migrationVersion', () => {
     const now = String(new Date());
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'hello:world',
@@ -183,7 +183,7 @@ describe('#rawToSavedObject', () => {
     expect(actual).toHaveProperty('managed', false);
   });
 
-  test.only(`if _source.managed is unspecified it doesn't set managed`, () => {
+  test(`if _source.managed is unspecified it doesn't set managed`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
       _source: {
@@ -305,7 +305,7 @@ describe('#rawToSavedObject', () => {
     expect(actual).not.toHaveProperty('originId');
   });
 
-  test.only('it does not pass unknown properties through', () => {
+  test('it does not pass unknown properties through', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'hello:universe',
       _source: {
@@ -326,7 +326,7 @@ describe('#rawToSavedObject', () => {
     });
   });
 
-  test.only('it does not create attributes if [type] is missing', () => {
+  test('it does not create attributes if [type] is missing', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'hello:universe',
       _source: {
@@ -353,7 +353,7 @@ describe('#rawToSavedObject', () => {
     ).toThrow(`Raw document 'hello:universe' is missing _source.type field`);
   });
 
-  test.only('it is complimentary with savedObjectToRaw', () => {
+  test('it is complimentary with savedObjectToRaw', () => {
     const raw = {
       _id: 'foo-namespace:foo:bar',
       _primary_term: 24,
@@ -741,7 +741,7 @@ describe('#savedObjectToRaw', () => {
     expect(actual._source).toHaveProperty('managed', false);
   });
 
-  test.only(`if unspecified it doesn't add managed property to _source`, () => {
+  test(`if unspecified it doesn't add managed property to _source`, () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},

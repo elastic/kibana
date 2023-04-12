@@ -17,6 +17,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  setManaged,
 } from './internal_utils';
 
 describe('#getBulkOperationError', () => {
@@ -363,5 +364,28 @@ describe('#getCurrentTime', () => {
 
   it('returns the current time', () => {
     expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');
+  });
+});
+
+describe('#setManaged', () => {
+  it('returns false if no arguments are provided', () => {
+    expect(setManaged({}).managed).toEqual(false);
+  });
+
+  it('returns false if only one argument is provided as false', () => {
+    expect(setManaged({ optionsManaged: false }).managed).toEqual(false);
+    expect(setManaged({ objectManaged: false }).managed).toEqual(false);
+  });
+
+  it('returns true if only one argument is provided as true', () => {
+    expect(setManaged({ optionsManaged: true }).managed).toEqual(true);
+    expect(setManaged({ objectManaged: true }).managed).toEqual(true);
+  });
+
+  it('overrides objectManaged with optionsManaged', () => {
+    expect(setManaged({ optionsManaged: false, objectManaged: true })).toEqual({ managed: false });
+    expect(setManaged({ optionsManaged: true, objectManaged: false })).toEqual({ managed: true });
+    expect(setManaged({ optionsManaged: false, objectManaged: false })).toEqual({ managed: false });
+    expect(setManaged({ optionsManaged: true, objectManaged: true })).toEqual({ managed: true });
   });
 });

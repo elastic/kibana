@@ -257,23 +257,33 @@ export function getCurrentTime() {
 
 /**
  * Returns the managed boolean to apply to a document. For use by applications to modify behavior for managed saved objects.
+ * THe behavior is as follows:
+ * If `options.managed` is set, it will override any existing `managed` value in all the documents being created
+ * If `options.managed` is not provided, then the documents are created with whatever may be assigned to their `managed` property
+ * or default to `false`.
  *
  * @internal
  */
-// if managed is provided as an option, set object managed as that
-// if managed isn't provided, then:
-//  if the object has managed set, keep it as is
-// if the object doesn't have manages set, default it to false on create
-// managed: optionsManaged ? optionsManaged : objectManaged ?? false,
-export function setManaged(optionsManaged?: boolean, objectManaged?: boolean) {
-  let managedToReturn: boolean;
+// TINA TODO: parameterize this because both args are optional
+interface ManagedOption {
+  managed: boolean;
+}
+
+export function setManaged({
+  optionsManaged,
+  objectManaged,
+}: {
+  optionsManaged?: boolean;
+  objectManaged?: boolean;
+}): ManagedOption {
+  const managedToReturn = { managed: false };
   if (optionsManaged !== undefined) {
-    managedToReturn = optionsManaged;
+    managedToReturn.managed = optionsManaged;
   } else {
     if (objectManaged !== undefined) {
-      managedToReturn = objectManaged;
+      managedToReturn.managed = objectManaged;
     } else {
-      managedToReturn = false;
+      managedToReturn.managed = false;
     }
   }
   return managedToReturn;
