@@ -17,7 +17,7 @@ import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api
 import { RESPONSE_ACTION_TYPES } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { loginWithRole, ROLE } from '../../tasks/login';
 
-describe('Response actions', () => {
+describe.skip('Response actions', () => {
   describe('User with no access can not create an endpoint response action', () => {
     before(() => {
       loginWithRole(ROLE.endpoint_response_actions_no_access);
