@@ -194,7 +194,7 @@ describe('Versioned route', () => {
       expect.objectContaining({
         payload:
           'No version "999" available for [post] [/test/{id}]. Available versions are: <none>',
-        status: 406,
+        status: 400,
       })
     );
   });
@@ -213,7 +213,24 @@ describe('Versioned route', () => {
     ).resolves.toEqual({
       options: {},
       payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: [1]`,
-      status: 406,
+      status: 400,
+    });
+  });
+  it('returns the expected output for badly formatted versions', async () => {
+    let handler: RequestHandler;
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+
+    versionedRouter
+      .post({ access: 'internal', path: '/test/{id}' })
+      .addVersion({ validate: false, version: '1' }, handlerFn);
+
+    await expect(
+      handler!({} as any, createRequest({ version: 'abc' }), responseFactory)
+    ).resolves.toEqual({
+      options: {},
+      payload: expect.stringMatching(/Invalid version number/),
+      status: 400,
     });
   });
   it('returns the expected output for failed validation', async () => {
