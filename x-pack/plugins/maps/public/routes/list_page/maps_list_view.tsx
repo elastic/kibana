@@ -13,7 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import { APP_ID, APP_NAME, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  APP_ID,
+  APP_NAME,
+  getEditPath,
+  MAP_PATH,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,

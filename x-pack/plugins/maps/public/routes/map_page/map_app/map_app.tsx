@@ -47,7 +47,12 @@ import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { getEditPath, getFullPath, APP_ID, MAP_EMBEDDABLE_NAME } from '../../../../common/constants';
+import {
+  getEditPath,
+  getFullPath,
+  APP_ID,
+  MAP_EMBEDDABLE_NAME,
+} from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
