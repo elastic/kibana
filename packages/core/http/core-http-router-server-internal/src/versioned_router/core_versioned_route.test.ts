@@ -86,7 +86,7 @@ describe('Versioned route', () => {
     );
   });
 
-  it('only allows versions that are numbers greater than 0', () => {
+  it('only allows versions that are numbers greater than 0 for internal APIs', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
@@ -109,6 +109,35 @@ describe('Versioned route', () => {
     ).toThrowError(
       `Invalid version number. Received "1.1", expected any finite, whole number greater than 0.`
     );
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'internal' })
+        .addVersion({ version: '1', validate: false }, handlerFn)
+    ).not.toThrow();
+  });
+
+  it('only allows versions date strings for public APIs', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '1-1-2020' as ApiVersion, validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '', validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: 'abc', validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '2020-02-02', validate: false }, handlerFn)
+    ).not.toThrow();
   });
 
   it('runs request and response validations', async () => {
