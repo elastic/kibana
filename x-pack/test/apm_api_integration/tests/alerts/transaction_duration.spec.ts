@@ -8,7 +8,6 @@
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { i18n } from '@kbn/i18n';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
@@ -97,16 +96,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [
-                  {
-                    message: i18n.translate(
-                      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
-                      {
-                        defaultMessage: `Transaction Name: \\{\\{context.transaction.name\\}\\}`,
-                      }
-                    ),
-                  },
-                ],
+                documents: [{ message: 'Transaction Name: {{context.transaction.name}}' }],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
