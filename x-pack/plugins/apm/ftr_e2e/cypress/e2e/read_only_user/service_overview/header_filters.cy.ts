@@ -135,10 +135,10 @@ describe('Service overview - header filters', () => {
         'autocompleteSuggestion-field-transaction.name-'
       ).click();
       cy.getByTestSubj('apmUnifiedSearchBar').type(':');
-      cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 4);
+      cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 1);
       cy.getByTestSubj(
         Cypress.$.escapeSelector(
-          'autocompleteSuggestion-value-"GET-/api/product/:id"-'
+          'autocompleteSuggestion-value-"GET-/api/product"-'
         )
       ).click();
       cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
