@@ -10,7 +10,10 @@
  * A Kibana HTTP API version
  *
  * @note
- * Conforms to the Elastic API version specification for public APIs as a date string formatted as YYYY-MM-DD.
+ * For public APIs: conforms to the Elastic API version specification APIs as a date string formatted as YYYY-MM-DD.
+ *
+ * @note
+ * For internal APIs: follow the convention of monotonic increasing integers.
  *
  * @experimental
  */
