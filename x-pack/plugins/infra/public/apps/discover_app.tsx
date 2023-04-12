@@ -20,7 +20,7 @@ export const renderApp = (plugins: InfraClientStartDeps, pluginStart: InfraClien
     logViews: logViews.client,
   });
 
-  interpret(machine)
+  const service = interpret(machine)
     .onTransition((state) => {
       if (
         state.matches('checkingStatus') ||
@@ -38,7 +38,10 @@ export const renderApp = (plugins: InfraClientStartDeps, pluginStart: InfraClien
     })
     .start();
 
-  return () => null;
+  return () => {
+    // Stop machine interpreter after navigation
+    service.stop();
+  };
 };
 
 const redirectToDiscover = (discover: DiscoverStart, resolvedLogView?: ResolvedLogView) => {
