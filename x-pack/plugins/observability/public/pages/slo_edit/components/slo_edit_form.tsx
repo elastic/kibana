@@ -8,7 +8,14 @@
 import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
-import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSteps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
@@ -200,16 +207,24 @@ export function SloEditForm({ slo }: Props) {
               checked={isCreateRuleCheckboxChecked}
               data-test-subj="createNewRuleCheckbox"
               label={
-                <span>
-                  {i18n.translate('xpack.observability.slo.sloEdit.createAlert.title', {
-                    defaultMessage: 'Create Alert rule for',
-                  })}{' '}
-                  <strong>
-                    {i18n.translate('xpack.observability.slo.sloEdit.createAlert.ruleName', {
-                      defaultMessage: 'SLO burn rate',
-                    })}
-                  </strong>
-                </span>
+                <>
+                  <span>
+                    {i18n.translate('xpack.observability.slo.sloEdit.createAlert.title', {
+                      defaultMessage: 'Create an',
+                    })}{' '}
+                    <strong>
+                      {i18n.translate('xpack.observability.slo.sloEdit.createAlert.ruleName', {
+                        defaultMessage: 'SLO burn rate alert rule',
+                      })}
+                    </strong>
+                  </span>{' '}
+                  <EuiIconTip
+                    content={
+                      'Selecting this will allow you to create a new alert rule for this SLO upon saving.'
+                    }
+                    position="top"
+                  />
+                </>
               }
               onChange={handleChangeCheckbox}
             />
