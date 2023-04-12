@@ -7,13 +7,14 @@
 import React from 'react';
 import { ThrottlingConfigField } from './throttling_config_field';
 import { render } from '../../../../utils/testing';
+import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
 
 describe('ThrottlingConfigField', () => {
   it('renders', () => {
     const {} = render(
       <ThrottlingConfigField
         ariaLabel={'ariaLabel'}
-        defaultValue={{ label: 'label', value: 'value' }}
+        defaultValue={PROFILES_MAP.default}
         id={'id'}
         options={[]}
         onChange={() => {}}
