@@ -135,14 +135,14 @@ export const useCommonChartProps = ({
                 {
                   type: 'manual',
                   icon: 'triangle',
-                  textVisibility: true,
+                  textVisibility: gridAndLabelsVisibility,
                   label: annotation.label,
                   key: {
                     type: 'point_in_time',
                     timestamp: annotation.timestamp,
                   },
                   id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
-                  isHidden: !gridAndLabelsVisibility,
+                  isHidden: false,
                   color: '#F04E98',
                   lineStyle: 'solid',
                   lineWidth: 1,
