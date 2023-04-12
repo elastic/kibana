@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
@@ -55,6 +56,8 @@ export const ErrorsList = ({
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
 
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
+
   const columns = [
     {
       field: 'item.state.started_at',
@@ -77,17 +80,20 @@ export const ErrorsList = ({
         }
 
         return (
-          <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
             <EuiFlexItem grow={false} className="eui-textNoWrap">
               {link}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge iconType="clock" iconSide="right">
+              <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
                 {ACTIVE_LABEL}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
+      },
+      mobileOptions: {
+        header: false,
       },
     },
     ...(isBrowserType
@@ -169,6 +175,7 @@ export const ErrorsList = ({
     <div>
       <EuiSpacer />
       <EuiInMemoryTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}

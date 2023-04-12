@@ -14,6 +14,7 @@ import { create } from './create';
 import { update } from './update';
 import { deleteProc } from './delete';
 import { search } from './search';
+import { mSearch } from './msearch';
 
 export const procedures: { [key in ProcedureName]: ProcedureDefinition<Context, any, any> } = {
   get,
@@ -22,4 +23,5 @@ export const procedures: { [key in ProcedureName]: ProcedureDefinition<Context, 
   update,
   delete: deleteProc,
   search,
+  mSearch,
 };

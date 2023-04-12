@@ -8,9 +8,11 @@
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ContentManagementGetTransformsFn } from '@kbn/object-versioning';
 import type { ContentRegistry } from '../core';
+import type { MSearchService } from '../core/msearch';
 
 export interface Context {
   contentRegistry: ContentRegistry;
   requestHandlerContext: RequestHandlerContext;
   getTransformsFactory: (contentTypeId: string) => ContentManagementGetTransformsFn;
+  mSearchService: MSearchService;
 }

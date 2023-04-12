@@ -77,8 +77,9 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
-  days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  days: IsoWeekday[];
   timezone: string;
   hours: {
     start: string;
@@ -93,6 +94,8 @@ export interface AlertsFilter extends SavedObjectAttributes {
   };
   timeframe: null | AlertsFilterTimeframe;
 }
+
+export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
 export interface RuleAction {
   uuid?: string;
@@ -168,6 +171,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
