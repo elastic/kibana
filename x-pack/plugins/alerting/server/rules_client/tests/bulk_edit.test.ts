@@ -683,7 +683,7 @@ describe('bulkEdit()', () => {
         alertsFilter: {
           query: {
             kql: 'name:test',
-            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
             filters: [],
           },
           timeframe: {
@@ -780,7 +780,7 @@ describe('bulkEdit()', () => {
                   uuid: '222',
                   alertsFilter: {
                     query: {
-                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
                       kql: 'test:1',
                       filters: [],
                     },
