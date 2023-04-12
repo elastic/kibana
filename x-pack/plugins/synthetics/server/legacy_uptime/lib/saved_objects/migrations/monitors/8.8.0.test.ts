@@ -124,7 +124,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
               upload: 3,
             },
             label: 'default',
-            isCustom: false,
+            id: 'default',
           },
           timeout: null,
           type: 'browser',

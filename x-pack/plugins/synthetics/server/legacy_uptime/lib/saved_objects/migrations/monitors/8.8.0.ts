@@ -145,7 +145,7 @@ const updateThrottlingFields = (
         upload,
         latency,
       },
-      isCustom: true,
+      id: 'custom',
       label: isDefaultThrottlingConfig(download, upload, latency)
         ? CONNECTION_PROFILE_VALUES.DEFAULT
         : `Custom ${download}d/${upload}u/${latency}`,

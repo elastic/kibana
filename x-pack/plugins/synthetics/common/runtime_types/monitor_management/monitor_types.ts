@@ -227,7 +227,7 @@ export type ThrottlingConfigValue = t.TypeOf<typeof ThrottlingConfigValueCodec>;
 export const ThrottlingConfigCodec = t.interface({
   value: ThrottlingConfigValueCodec,
   label: t.string,
-  isCustom: t.boolean,
+  id: t.string,
 });
 
 export type ThrottlingConfig = t.TypeOf<typeof ThrottlingConfigCodec>;

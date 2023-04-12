@@ -79,7 +79,7 @@ const testBrowserConfig: Partial<MonitorFields> = {
       latency: 20,
       upload: 3,
     },
-    isCustom: false,
+    id: 'default',
     label: 'default',
   },
   project_id: 'test-project',
@@ -214,7 +214,7 @@ describe('browser fields', () => {
         throttling: {
           value: { download: 0, upload: 0, latency: 0 },
           label: 'no-throttling',
-          isCustom: false,
+          id: 'no-throttling',
         },
       },
       logger,

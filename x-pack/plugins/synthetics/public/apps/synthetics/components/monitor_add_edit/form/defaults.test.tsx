@@ -58,7 +58,7 @@ describe('defaults', () => {
         latency: 20,
         upload: 3,
       },
-      isCustom: false,
+      id: 'default',
       label: 'default',
     },
     timeout: '16',

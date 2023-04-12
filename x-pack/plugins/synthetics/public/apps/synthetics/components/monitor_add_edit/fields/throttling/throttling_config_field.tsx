@@ -12,7 +12,7 @@ import { selectMonitorProfiles } from '../../../../state/monitor_management/sele
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 import { ThrottlingFields } from './throttling_fields';
-import { CONNECTION_PROFILE_VALUES } from '../../constants';
+import { CONNECTION_PROFILE_VALUES, PROFILES_MAP } from '../../constants';
 
 export interface ThrottlingConfigFieldProps {
   ariaLabel: string;
@@ -34,8 +34,7 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
   const [options, setOptions] = useState<typeof CONNECTION_PROFILE_OPTIONS>([]);
 
   const isCustom =
-    PROFILE_VALUES[defaultValue?.label] === undefined &&
-    defaultValue?.label !== initialValue?.label;
+    PROFILES_MAP[defaultValue?.label] === undefined && defaultValue?.label !== initialValue?.label;
 
   const isThrottlingDisabled = defaultValue?.label === CONNECTION_PROFILE_VALUES.NO_THROTTLING;
 
@@ -50,7 +49,7 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
   }, [dispatch, loaded]);
 
   useEffect(() => {
-    if (initialValue && PROFILE_VALUES[initialValue.label] === undefined) {
+    if (initialValue && PROFILES_MAP[initialValue.label] === undefined) {
       const newOptions = [
         ...CONNECTION_PROFILE_OPTIONS,
         ...profiles.map((profile) => ({
@@ -91,8 +90,8 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
         options={options}
         onChange={(value) => {
           props.onChange({
-            ...PROFILE_VALUES[CONNECTION_PROFILE_VALUES.DEFAULT],
-            ...PROFILE_VALUES[value],
+            ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
+            ...PROFILES_MAP[value],
             label: value,
           });
         }}
@@ -120,41 +119,6 @@ export const ConnectionProfile = ({ label, value }: { label: string; value: stri
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-export const PROFILE_VALUES: Record<string, Omit<ThrottlingConfig, 'label'>> = {
-  [CONNECTION_PROFILE_VALUES.DEFAULT]: {
-    value: { download: 5, upload: 3, latency: 20 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.CABLE]: {
-    value: { download: 5, upload: 1, latency: 28 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.DSL]: {
-    value: { download: 1.5, upload: 0.384, latency: 50 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.THREE_G]: {
-    value: { download: 1.6, upload: 0.768, latency: 300 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.FOUR_G]: {
-    value: { download: 9, upload: 0.75, latency: 170 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.LTE]: {
-    value: { download: 12, upload: 0.75, latency: 70 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.FIBRE]: {
-    value: { download: 20, upload: 5, latency: 4 },
-    isCustom: false,
-  },
-  [CONNECTION_PROFILE_VALUES.NO_THROTTLING]: {
-    value: { download: 0, upload: 0, latency: 0 },
-    isCustom: false,
-  },
 };
 
 export const CONNECTION_PROFILE_OPTIONS = [

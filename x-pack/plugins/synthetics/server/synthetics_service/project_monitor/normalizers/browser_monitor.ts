@@ -11,7 +11,11 @@ import {
   DataStream,
   FormMonitorType,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  CONNECTION_PROFILE_VALUES,
+  DEFAULT_FIELDS,
+  PROFILES_MAP,
+} from '../../../../common/constants/monitor_defaults';
 import {
   NormalizedProjectProps,
   NormalizerResult,
@@ -38,13 +42,18 @@ export const getNormalizeBrowserFields = ({
     version,
   });
 
+  let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
+  if (typeof monitor.throttling === 'boolean' && !monitor.throttling) {
+    throttling = PROFILES_MAP[CONNECTION_PROFILE_VALUES.NO_THROTTLING];
+  }
+
   const normalizedFields = {
     ...commonFields,
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
-    [ConfigKey.THROTTLING_CONFIG]: monitor.throttling || defaultFields[ConfigKey.THROTTLING_CONFIG],
+    [ConfigKey.THROTTLING_CONFIG]: throttling,
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
     [ConfigKey.SCREENSHOTS]: monitor.screenshot || defaultFields[ConfigKey.SCREENSHOTS],

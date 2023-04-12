@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import {
   BrowserAdvancedFields,
   BrowserSimpleFields,
@@ -22,6 +23,7 @@ import {
   SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
+  ThrottlingConfig,
   TLSFields,
   TLSVersion,
   VerificationMode,
@@ -40,6 +42,70 @@ export enum CONNECTION_PROFILE_VALUES {
   FIBRE = 'fibre',
   NO_THROTTLING = 'no-throttling',
 }
+
+export const PROFILE_VALUES: ThrottlingConfig[] = [
+  {
+    value: { download: 5, upload: 3, latency: 20 },
+    id: CONNECTION_PROFILE_VALUES.DEFAULT,
+    label: i18n.translate('xpack.synthetics.connectionProfile.default', {
+      defaultMessage: 'Default',
+    }),
+  },
+  {
+    value: { download: 5, upload: 1, latency: 28 },
+    id: CONNECTION_PROFILE_VALUES.CABLE,
+    label: i18n.translate('xpack.synthetics.connectionProfile.cable', {
+      defaultMessage: 'Cable',
+    }),
+  },
+  {
+    value: { download: 1.5, upload: 0.384, latency: 50 },
+    id: CONNECTION_PROFILE_VALUES.DSL,
+    label: i18n.translate('xpack.synthetics.connectionProfile.dsl', {
+      defaultMessage: 'DSL',
+    }),
+  },
+  {
+    value: { download: 1.6, upload: 0.768, latency: 300 },
+    id: CONNECTION_PROFILE_VALUES.THREE_G,
+    label: i18n.translate('xpack.synthetics.connectionProfile.threeG', {
+      defaultMessage: '3G',
+    }),
+  },
+  {
+    value: { download: 9, upload: 0.75, latency: 170 },
+    id: CONNECTION_PROFILE_VALUES.FOUR_G,
+    label: i18n.translate('xpack.synthetics.connectionProfile.fourG', {
+      defaultMessage: '4G',
+    }),
+  },
+  {
+    value: { download: 12, upload: 0.75, latency: 70 },
+    id: CONNECTION_PROFILE_VALUES.LTE,
+    label: i18n.translate('xpack.synthetics.connectionProfile.lte', {
+      defaultMessage: 'LTE',
+    }),
+  },
+  {
+    value: { download: 20, upload: 5, latency: 4 },
+    id: CONNECTION_PROFILE_VALUES.FIBRE,
+    label: i18n.translate('xpack.synthetics.connectionProfile.fibre', {
+      defaultMessage: 'Fibre',
+    }),
+  },
+  {
+    value: { download: 0, upload: 0, latency: 0 },
+    id: CONNECTION_PROFILE_VALUES.NO_THROTTLING,
+    label: i18n.translate('xpack.synthetics.connectionProfile.noThrottling', {
+      defaultMessage: 'No throttling',
+    }),
+  },
+];
+
+export const PROFILES_MAP = PROFILE_VALUES.reduce((acc, profile) => {
+  acc[profile.id] = profile;
+  return acc;
+}, {} as { [key: string]: ThrottlingConfig });
 
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',
@@ -89,7 +155,7 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
       latency: 20,
     },
     label: CONNECTION_PROFILE_VALUES.DEFAULT,
-    isCustom: false,
+    id: 'default',
   },
 };
 

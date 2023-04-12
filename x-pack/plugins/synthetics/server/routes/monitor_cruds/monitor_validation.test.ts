@@ -176,9 +176,12 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
       [ConfigKey.THROTTLING_CONFIG]: {
-        download: 5,
-        upload: 3,
-        latency: 20,
+        value: {
+          download: 5,
+          upload: 3,
+          latency: 20,
+        },
+        id: 'test',
         label: 'test',
       },
     };

@@ -440,7 +440,7 @@ function getMonitorDetailsMockSlice() {
           latency: 20,
         },
         label: 'Regular 3G',
-        isCustom: false,
+        id: 'three_g',
       },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
