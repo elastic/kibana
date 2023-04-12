@@ -150,13 +150,13 @@ export class CoreVersionedRoute implements VersionedRoute {
       mutableCoreKibanaRequest.query = {};
     }
 
-    const result = await handler.fn(ctx, mutableCoreKibanaRequest, res);
+    const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.validateResponses && validation?.response?.[result.status]) {
-      const responseValidation = validation.response[result.status];
+    if (this.validateResponses && validation?.response?.[response.status]) {
+      const responseValidation = validation.response[response.status];
       try {
         validate(
-          { body: result.payload },
+          { body: response.payload },
           { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
           handler.options.version
         );
@@ -172,7 +172,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       {
         [ELASTIC_HTTP_VERSION_HEADER]: version,
       },
-      result
+      response
     );
   };
 
