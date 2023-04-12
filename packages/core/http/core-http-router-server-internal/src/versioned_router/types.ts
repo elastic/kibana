@@ -32,6 +32,10 @@ export interface VersionedRouterRoute {
 
 /**
  * Specifies resolution strategy to use if a request does not provide a version.
+ *
+ * This strategy assumes that a handler is represented by a version string [0-9\-]+ that is
+ * alphanumerically sortable.
+ *
  * @internal
  */
 export type HandlerResolutionStrategy =
