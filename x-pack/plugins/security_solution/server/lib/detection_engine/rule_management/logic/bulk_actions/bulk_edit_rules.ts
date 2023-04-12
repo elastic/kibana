@@ -67,52 +67,5 @@ export const bulkEditRules = async ({
     },
   });
 
-  // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
-  // this is a workaround to mitigate this,
-  // until https://github.com/elastic/kibana/issues/139084 is resolved
-  // if rule actions has been applied, we go through each rule, unmute it if necessary and refetch it
-  // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
-  const ruleActions = attributesActions.filter((rule): rule is BulkActionEditPayloadRuleActions =>
-    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(rule.type)
-  );
-
-  // bulk edit actions are applied in historical order.
-  // So, we need to find a rule action that will be applied the last, to be able to check if rule should be muted/unmuted
-  const rulesAction = ruleActions.pop();
-
-  if (rulesAction) {
-    const unmuteErrors: BulkOperationError[] = [];
-    const rulesToUnmute = await pMap(
-      result.rules,
-      async (rule) => {
-        try {
-          if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
-            await rulesClient.unmuteAll({ id: rule.id });
-            return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
-          }
-
-          return rule;
-        } catch (err) {
-          unmuteErrors.push({
-            message: err.message,
-            rule: {
-              id: rule.id,
-              name: rule.name,
-            },
-          });
-
-          return null;
-        }
-      },
-      { concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL }
-    );
-
-    return {
-      ...result,
-      rules: rulesToUnmute.filter((rule): rule is RuleAlertType => rule != null),
-      errors: [...result.errors, ...unmuteErrors],
-    };
-  }
-
   return result;
 };
