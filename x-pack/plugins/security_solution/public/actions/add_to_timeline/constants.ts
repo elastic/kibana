@@ -23,12 +23,15 @@ export const SEVERITY = (level: string) =>
   });
 
 export const ALERTS_COUNT = (entity: string, description: string) =>
-  i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
-    values: { description, entity },
-    ...(description !== ''
-      ? { defaultMessage: '{description} alerts from {entity}' }
-      : { defaultMessage: '{entity} alerts' }),
-  });
+  description !== ''
+    ? i18n.translate('xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage', {
+        values: { description, entity },
+        defaultMessage: '{description} alerts from {entity}',
+      })
+    : i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
+        values: { description, entity },
+        defaultMessage: '{entity} alerts',
+      });
 
 export const ADD_TO_TIMELINE_SUCCESS_TITLE = (value: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
