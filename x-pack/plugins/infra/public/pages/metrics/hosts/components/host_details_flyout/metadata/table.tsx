@@ -81,7 +81,7 @@ export const Table = (props: Props) => {
   );
 
   const searchBarOnChange = useCallback(
-    ({ query, queryText, error }) => {
+    ({ queryText, error }) => {
       if (error) {
         setSearchError(error);
       } else {
