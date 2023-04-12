@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * @internal
  */
-export interface ILocatorPublic {
+export interface Locator {
   navigateSync: <P extends SerializableRecord>(params: P) => void;
 }
 
 /**
  * @internal
  */
-export type GetLocatorFn = (locatorId: string) => ILocatorPublic | undefined;
+export type GetLocatorFn = (locatorId: string) => Locator | undefined;
 
 /**
  * @internal
@@ -53,3 +55,7 @@ export interface ILocatorDefinition<P = SerializableRecord> {
    */
   params?: P;
 }
+
+export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
+
+export type BasePathService = Pick<IBasePath, 'prepend'>;

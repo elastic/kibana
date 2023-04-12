@@ -52,6 +52,8 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
 
     return {
       ...params,
+      basePath: { prepend: () => '' },
+      navigateToUrl: () => Promise.resolve(),
       getLocator,
       navIsOpen,
       recentItems,

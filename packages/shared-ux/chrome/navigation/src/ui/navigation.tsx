@@ -28,16 +28,16 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
-  const { recentItems, ...services } = useNavigation();
+  const { recentItems: recentItemsFromService, ...services } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
-  let euiSideNavRecentItems: Array<EuiSideNavItemType<unknown>> | undefined;
-  if (recentItems) {
-    euiSideNavRecentItems = [
+  let recentItems: Array<EuiSideNavItemType<unknown>> | undefined;
+  if (recentItemsFromService) {
+    recentItems = [
       {
         name: '',
         id: 'recent_items_root',
-        items: recentItems.map((item) => ({
+        items: recentItemsFromService.map((item) => ({
           id: item.id,
           name: item.label,
           onClick: () => {
@@ -49,13 +49,14 @@ export const Navigation = (props: NavigationProps) => {
     ];
   }
 
+  const activeNav = services.activeNavItemId ?? props.activeNavItemId;
+
   const nav = new NavigationModel(
-    services.getLocator,
-    services.registerNavItemClick,
-    services.activeNavItemId ?? props.activeNavItemId,
-    euiSideNavRecentItems,
+    services,
+    recentItems,
     props.platformConfig,
-    props.solutions
+    props.solutions,
+    activeNav
   );
 
   const recent = nav.getRecent();
@@ -79,7 +80,7 @@ export const Navigation = (props: NavigationProps) => {
           ) : null}
         </EuiCollapsibleNavGroup>
 
-        {euiSideNavRecentItems ? <NavigationBucket {...recent} /> : null}
+        {recentItems ? <NavigationBucket {...recent} /> : null}
 
         {solutions.map((solutionBucket, idx) => {
           return <NavigationBucket {...solutionBucket} key={`solution${idx}`} />;

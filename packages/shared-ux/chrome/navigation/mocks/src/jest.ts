@@ -9,15 +9,19 @@
 import { NavigationServices } from '../../types';
 
 export const getServicesMock = (): NavigationServices => {
-  const getLocator = jest.fn();
   const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
+  const navigateToUrl = jest.fn().mockResolvedValue(undefined);
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const getLocator = jest.fn();
   const registerNavItemClick = jest.fn();
 
   return {
-    getLocator,
-    registerNavItemClick,
     activeNavItemId: 'test.hello.lamp',
+    basePath,
+    getLocator,
     navIsOpen: true,
+    navigateToUrl,
     recentItems,
+    registerNavItemClick,
   };
 };

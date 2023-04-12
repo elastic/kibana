@@ -15,10 +15,9 @@ import { Navigation } from './navigation';
 describe('<Navigation />', () => {
   test('renders with minimal props', () => {
     const div = document.createElement('div');
-    const { getLocator, registerNavItemClick } = getServicesMock();
+    const services = getServicesMock();
 
     const homeHref = '#';
-    const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
     const platformSections = {};
     const solutions = [
       {
@@ -27,16 +26,9 @@ describe('<Navigation />', () => {
         icon: 'gear',
       },
     ];
-    const activeNavItemId = 'hello.test.1';
 
     render(
-      <NavigationProvider
-        getLocator={getLocator}
-        registerNavItemClick={registerNavItemClick}
-        activeNavItemId={activeNavItemId}
-        navIsOpen={true}
-        recentItems={recentItems}
-      >
+      <NavigationProvider {...services} navIsOpen={true}>
         <Navigation platformConfig={platformSections} solutions={solutions} homeHref={homeHref} />
       </NavigationProvider>,
       div

@@ -8,17 +8,26 @@
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { GetLocatorFn, ILocatorDefinition, NavItemClickFn, RecentItem } from './internal';
+import {
+  BasePathService,
+  GetLocatorFn,
+  ILocatorDefinition,
+  NavigateToUrlFn,
+  NavItemClickFn,
+  RecentItem,
+} from './internal';
 
 /**
  * A list of services that are consumed by this component.
  * @public
  */
 export interface NavigationServices {
-  navIsOpen: boolean;
-  recentItems: RecentItem[];
   activeNavItemId: string | undefined;
+  basePath: BasePathService;
   getLocator: GetLocatorFn;
+  navIsOpen: boolean;
+  navigateToUrl: NavigateToUrlFn;
+  recentItems: RecentItem[];
   registerNavItemClick: NavItemClickFn;
 }
 
@@ -28,20 +37,16 @@ export interface NavigationServices {
  * @public
  */
 export interface NavigationKibanaDependencies {
-  share: {
-    url: {
-      locators: { get: GetLocatorFn };
-    };
-  };
+  share: { url: { locators: { get: GetLocatorFn } } };
   core: {
+    application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
-      recentlyAccessed: {
-        get$: () => Observable<RecentItem[]>;
-      };
-      getProjectNavIsOpen$: () => Observable<boolean>;
       getActiveNavItemId$: () => Observable<string | undefined>;
+      getProjectNavIsOpen$: () => Observable<boolean>;
+      recentlyAccessed: { get$: () => Observable<RecentItem[]> };
       registerNavItemClick: (id: string) => void;
     };
+    http: { basePath: BasePathService };
   };
 }
 

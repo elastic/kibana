@@ -26,22 +26,29 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
+  const { core } = dependencies;
+  const { chrome, http } = core;
+  const { basePath } = http;
+  const { navigateToUrl } = core.application;
+
   // FIXME
-  // const recentItems$ = dependencies.core.chrome.recentlyAccessed.get$();
+  // const recentItems$ = chrome.recentlyAccessed.get$();
   // const recentItems = useObservable(recentItems$, []);
   const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
 
-  const navIsOpen = useObservable(dependencies.core.chrome.getProjectNavIsOpen$(), true);
-  const activeNavItemId = useObservable(dependencies.core.chrome.getActiveNavItemId$());
+  const navIsOpen = useObservable(chrome.getProjectNavIsOpen$(), true);
+  const activeNavItemId = useObservable(chrome.getActiveNavItemId$());
 
   const getLocator = (id: string) => dependencies.share.url.locators.get(id);
-  const registerNavItemClick = dependencies.core.chrome.registerNavItemClick;
+  const registerNavItemClick = chrome.registerNavItemClick;
 
   const value: NavigationServices = {
-    navIsOpen,
-    recentItems,
     activeNavItemId,
+    basePath,
     getLocator,
+    navIsOpen,
+    navigateToUrl,
+    recentItems,
     registerNavItemClick,
   };
 

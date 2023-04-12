@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
+import type { NavigationModelDeps } from '.';
 import { navItemSet, Platform } from '.';
-import {
+import type {
   NavigationBucketProps,
   NavigationProps,
   NavItemProps,
@@ -16,90 +17,7 @@ import {
   PlatformSectionConfig,
   SolutionProperties,
 } from '../../types';
-import { GetLocatorFn, ILocatorPublic, NavItemClickFn } from '../../types/internal';
-
-type MyEuiSideNavItem = EuiSideNavItemType<unknown>;
-type OnClickFn = MyEuiSideNavItem['onClick'];
-
-/**
- * Factory function to return a function that processes modeled nav items into EuiSideNavItemType
- * The factory puts memoized function arguments in scope for iterations of the recursive item processing.
- */
-const createSideNavDataFactory = (
-  getLocator: GetLocatorFn,
-  registerNavItemClick: NavItemClickFn,
-  activeNav?: string | number
-) => {
-  const createSideNavData = (
-    parentIds: string | number = '',
-    navItems: NavItemProps[],
-    platformSectionConfig?: PlatformSectionConfig
-  ): Array<EuiSideNavItemType<unknown>> =>
-    navItems.reduce<MyEuiSideNavItem[]>((accum, item) => {
-      const { id, name, items: subNav, locator: locatorDefinition, href } = item;
-      const config = platformSectionConfig?.properties?.[id];
-      if (config?.enabled === false) {
-        // return accumulated set without the item that is not enabled
-        return accum;
-      }
-
-      const { id: locatorId, params: locatorParams } = locatorDefinition ?? {};
-      let locator: ILocatorPublic | undefined;
-      if (locatorId) {
-        locator = getLocator(locatorId);
-      }
-
-      if (locatorId && !locator) {
-        // FIXME: in production, we should skip this link in this scenario. We're allowing this broken link in POC for testing.
-        // return accum;
-        console.warn(
-          `Invalid locator provided: ` +
-            JSON.stringify({ locatorId, ...(locatorParams ? { locatorParams } : {}) })
-        );
-      }
-
-      const fullId = [parentIds, id].filter(Boolean).join('.');
-
-      let onClick: OnClickFn | undefined;
-      if (locator) {
-        const outerLocator = locator;
-        onClick = () => {
-          outerLocator.navigateSync(locatorParams ?? {});
-          registerNavItemClick(fullId);
-        };
-      } else if (href) {
-        onClick = () => {
-          registerNavItemClick(fullId);
-        };
-      }
-
-      let filteredSubNav: MyEuiSideNavItem[] | undefined;
-      if (subNav) {
-        // recursion
-        const nextConfig = platformSectionConfig?.properties?.[id];
-        filteredSubNav = createSideNavData(fullId, subNav, nextConfig);
-      }
-
-      let isSelected: boolean = false;
-      if (!subNav && fullId === activeNav) {
-        // if there are no subnav items and ID is current, mark the item as selected
-        isSelected = true;
-      }
-
-      const next: MyEuiSideNavItem = {
-        id: fullId,
-        name,
-        isSelected,
-        onClick,
-        href,
-        items: filteredSubNav,
-        ['data-test-subj']: `nav-item-${fullId}`,
-      };
-      return [...accum, next];
-    }, []);
-
-  return createSideNavData;
-};
+import { createSideNavDataFactory } from './create_side_nav';
 
 /**
  * @internal
@@ -112,18 +30,13 @@ export class NavigationModel {
   ) => Array<EuiSideNavItemType<unknown>>;
 
   constructor(
-    getLocator: GetLocatorFn,
-    registerNavItemClick: NavItemClickFn,
-    private activeNavItemId: string | undefined,
+    deps: NavigationModelDeps,
     private recentItems: Array<EuiSideNavItemType<unknown>> | undefined,
     private platformConfig: NavigationProps['platformConfig'] | undefined,
-    private solutions: SolutionProperties[]
+    private solutions: SolutionProperties[],
+    private activeNavItemId: string | undefined
   ) {
-    this.createSideNavData = createSideNavDataFactory(
-      getLocator,
-      registerNavItemClick,
-      activeNavItemId
-    );
+    this.createSideNavData = createSideNavDataFactory(deps, activeNavItemId);
   }
 
   public getRecent(): NavigationBucketProps {
