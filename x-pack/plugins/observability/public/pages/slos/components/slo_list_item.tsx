@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
@@ -35,6 +34,7 @@ import {
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 
 export interface SloListItemProps {
@@ -189,7 +189,7 @@ export function SloListItem({
                   data-test-subj="sloActionsCreateRule"
                 >
                   {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
-                    defaultMessage: 'Create rule',
+                    defaultMessage: 'Create Alert rule',
                   })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
@@ -226,15 +226,12 @@ export function SloListItem({
 
       {isAddRuleFlyoutOpen ? (
         <AddRuleFlyout
-          consumer={ALERTS_FEATURE_ID}
+          consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_ID}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
           onClose={() => {
             setIsAddRuleFlyoutOpen(false);
-          }}
-          onSave={() => {
-            return Promise.resolve();
           }}
         />
       ) : null}
