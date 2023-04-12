@@ -145,6 +145,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             <EuiContextMenuItem
               icon="link"
               size="s"
+              data-telemetry-id={'entSearch-analytics-overview-toolbar-integrate-tracker-link'}
               onClick={() =>
                 navigateToUrl(
                   generateEncodedPath(COLLECTION_INTEGRATE_PATH, {
@@ -160,14 +161,24 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             </EuiContextMenuItem>
 
             <RedirectAppLinks application={application}>
-              <EuiContextMenuItem icon="database" size="s" href={manageDatastreamUrl}>
+              <EuiContextMenuItem
+                icon="database"
+                size="s"
+                href={manageDatastreamUrl}
+                data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-datastream-link'}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.manageEventsDatastream"
                   defaultMessage="Manage events datastream"
                 />
               </EuiContextMenuItem>
 
-              <EuiContextMenuItem icon="visArea" href={discoverUrl} size="s">
+              <EuiContextMenuItem
+                icon="visArea"
+                href={discoverUrl}
+                size="s"
+                data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.openInDiscover"
                   defaultMessage="Create dashboards in Discover"
@@ -182,6 +193,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
                 fullWidth
                 isLoading={!isLoading}
                 disabled={!isLoading}
+                data-telemetry-id={'entSearch-analytics-overview-toolbar-delete-collection-button'}
                 size="s"
                 onClick={() => {
                   deleteAnalyticsCollection(analyticsCollection.name);
