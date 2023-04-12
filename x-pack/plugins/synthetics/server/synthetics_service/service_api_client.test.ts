@@ -167,6 +167,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
+      licenseLevel: 'trial',
     });
 
     expect(spy).toHaveBeenCalledTimes(3);
@@ -181,7 +182,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central')
         ),
         output,
-        license_level: 'platinum',
+        licenseLevel: 'trial',
       },
       'POST',
       devUrl
@@ -196,7 +197,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
         ),
         output,
-        license_level: 'platinum',
+        licenseLevel: 'trial',
       },
       'POST',
       'https://qa.service.elstc.co'
@@ -211,7 +212,7 @@ describe('callAPI', () => {
           monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
         ),
         output,
-        license_level: 'platinum',
+        licenseLevel: 'trial',
       },
       'POST',
       'https://qa.service.stg.co'
@@ -219,7 +220,13 @@ describe('callAPI', () => {
 
     expect(axiosSpy).toHaveBeenCalledTimes(3);
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -232,7 +239,13 @@ describe('callAPI', () => {
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(2, {
-      data: { monitors: request2, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request2,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -245,7 +258,13 @@ describe('callAPI', () => {
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(3, {
-      data: { monitors: request3, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request3,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
         'x-kibana-version': '8.7.0',
@@ -309,10 +328,17 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
+      licenseLevel: 'platinum',
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'platinum',
+      },
       headers: {
         'x-kibana-version': '8.7.0',
       },
@@ -328,63 +354,6 @@ describe('callAPI', () => {
       url: 'https://service.dev/monitors',
     });
   });
-
-  it.each([
-    [true, 'Cannot sync monitors with the Synthetics service. License is expired.'],
-    [false, 'Cannot sync monitors with the Synthetics service. Unable to determine license level.'],
-  ])(
-    'does not call api when license is expired or unavailable',
-    async (isExpired, errorMessage) => {
-      const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
-        status: 200,
-        statusText: 'ok',
-        headers: {},
-        config: {},
-        data: { allowed: true, signupUrl: 'http://localhost:666/example' },
-      });
-
-      mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
-        license: isExpired
-          ? {
-              status: 'expired',
-              uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
-              type: 'platinum',
-              issue_date: '2022-11-29T00:00:00.000Z',
-              issue_date_in_millis: 1669680000000,
-              expiry_date: '2022-12-31T23:59:59.999Z',
-              expiry_date_in_millis: 1735689599999,
-              max_nodes: 100,
-              max_resource_units: null,
-              issued_to: 'Elastic - INTERNAL (development environments)',
-              issuer: 'API',
-              start_date_in_millis: 1669680000000,
-            }
-          : undefined,
-      });
-
-      const apiClient = new ServiceAPIClient(logger, config, {
-        isDev: true,
-        stackVersion: '8.7.0',
-        coreStart: mockCoreStart,
-      } as UptimeServerSetup);
-
-      const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
-
-      apiClient.locations = testLocations;
-
-      const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
-
-      await apiClient.callAPI('POST', {
-        monitors: testMonitors,
-        output,
-      });
-
-      expect(axiosSpy).not.toHaveBeenCalled();
-      expect(spy).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(errorMessage);
-    }
-  );
 });
 
 const testLocations: PublicLocations = [
