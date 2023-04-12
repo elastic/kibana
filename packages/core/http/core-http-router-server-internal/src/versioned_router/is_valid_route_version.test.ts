@@ -9,11 +9,21 @@
 import { isValidRouteVersion } from './is_valid_route_version';
 
 describe('isValidRouteVersion', () => {
-  test('valid numbers return "true"', () => {
-    expect(isValidRouteVersion('1')).toBe(true);
+  describe('public', () => {
+    test('valid dates "true"', () => {
+      expect(isValidRouteVersion(true, '2010-02-01')).toBe(true);
+    });
+    test.each([['2020.02.01'], [''], ['abc']])('%p returns "false"', (value: string) => {
+      expect(isValidRouteVersion(true, value)).toBe(false);
+    });
   });
+  describe('internal', () => {
+    test('valid numbers return "true"', () => {
+      expect(isValidRouteVersion(false, '1')).toBe(true);
+    });
 
-  test.each([['1.1'], [''], ['abc']])('%p returns "false"', (value: string) => {
-    expect(isValidRouteVersion(value)).toBe(false);
+    test.each([['1.1'], [''], ['abc']])('%p returns "false"', (value: string) => {
+      expect(isValidRouteVersion(false, value)).toBe(false);
+    });
   });
 });
