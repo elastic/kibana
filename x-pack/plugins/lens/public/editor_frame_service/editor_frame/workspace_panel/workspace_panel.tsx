@@ -98,6 +98,7 @@ export interface WorkspacePanelProps {
 interface WorkspaceState {
   expandError: boolean;
   expressionToRender: string | null | undefined;
+  errors: UserMessage[];
 }
 
 const dropProps = {
@@ -165,6 +166,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expandError: false,
     expressionToRender: undefined,
+    errors: [],
   });
 
   const initialRenderComplete = useRef<boolean>();
@@ -278,11 +280,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
-    severity: 'error',
-  });
-
-  const [appliedErrors, setAppliedErrors] = useState<UserMessage[]>([]);
+  const workspaceErrors = useMemo(() => {
+    return getUserMessages(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
+  }, [getUserMessages]);
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
@@ -360,13 +362,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   useEffect(() => {
     if (shouldApplyExpression) {
-      setAppliedErrors(workspaceErrors);
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
+        errors: workspaceErrors,
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 
@@ -558,7 +560,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
-        errors={appliedErrors}
+        errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
