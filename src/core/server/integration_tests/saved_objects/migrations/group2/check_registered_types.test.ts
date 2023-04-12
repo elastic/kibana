@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "12c6b25ef1fffb36d8de893318f8a2bc5d6a46a6",
         "action_task_params": "c725c37de66135934150465f9b1e76fe349e8a23",
-        "alert": "0dd6e12f1f79edf3fe07850c8fc55ddfe6301b31",
+        "alert": "0cd1f1921014004a9ff5c0a9333ca9bde14bf748",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
