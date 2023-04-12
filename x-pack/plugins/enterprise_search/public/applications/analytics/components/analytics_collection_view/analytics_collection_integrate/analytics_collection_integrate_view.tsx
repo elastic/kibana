@@ -36,8 +36,8 @@ import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_templat
 import { javascriptClientEmbedSteps } from './analytics_collection_integrate_javascript_client_embed';
 import { javascriptEmbedSteps } from './analytics_collection_integrate_javascript_embed';
 import { searchUIEmbedSteps } from './analytics_collection_integrate_searchui';
-import { GenerateAnalyticsApiKeyModal } from './generate_analytics_api_key_modal/generate_analytics_api_key_modal';
-import { GenerateApiKeyModalLogic } from './generate_analytics_api_key_modal/generate_analytics_api_key_modal.logic';
+import { GenerateAnalyticsApiKeyModal } from './api_key_modal/generate_analytics_api_key_modal';
+import { GenerateApiKeyModalLogic } from './api_key_modal/generate_analytics_api_key_modal.logic';
 
 interface AnalyticsCollectionIntegrateProps {
   analyticsCollection: AnalyticsCollection;
