@@ -17,11 +17,14 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {
-    defaultMessage: 'Reauthorize {count} {count, plural, one {transform} other {transforms}}?',
-    values: { count: items && items.length },
-  });
-  const startModalTitle = i18n.translate('xpack.transform.transformList.startModalTitle', {
+  const bulkStartModalTitle = i18n.translate(
+    'xpack.transform.transformList.bulkReauthorizeModalTitle',
+    {
+      defaultMessage: 'Reauthorize {count} {count, plural, one {transform} other {transforms}}?',
+      values: { count: items && items.length },
+    }
+  );
+  const startModalTitle = i18n.translate('xpack.transform.transformList.reauthorizeModalTitle', {
     defaultMessage: 'Reauthorize {transformId}?',
     values: { transformId: items[0] && items[0].config.id },
   });
