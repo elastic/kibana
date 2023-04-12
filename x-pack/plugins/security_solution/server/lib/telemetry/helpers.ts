@@ -307,13 +307,13 @@ function obfuscateString(clusterId: string, toHash: string): string {
   return sha256.create().update(valueToObfuscate).hex();
 }
 
-function allowlistK8sUsernames(username: string) {
+function isAllowlistK8sUsername(username: string) {
   return (
-    username.startsWith('admin') ||
-    username.startsWith('cluster-admin') ||
-    username.startsWith('edit') ||
-    username.startsWith('system') ||
-    username.startsWith('view')
+    username === 'edit' ||
+    username === 'view' ||
+    username === 'admin' ||
+    username === 'cluster-admin' ||
+    username.startsWith('system')
   );
 }
 
@@ -326,14 +326,14 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   const username = event?.kubernetes?.audit?.user?.username;
   const impersonatedUser = event?.kubernetes?.audit?.impersonated_user?.username;
 
-  if (username !== undefined && username !== null && !allowlistK8sUsernames(username)) {
+  if (username !== undefined && username !== null && !isAllowlistK8sUsername(username)) {
     set(event, 'kubernetes.audit.user.username', obfuscateString(clusterId, username));
   }
 
   if (
     impersonatedUser !== undefined &&
     impersonatedUser !== null &&
-    !allowlistK8sUsernames(impersonatedUser)
+    !isAllowlistK8sUsername(impersonatedUser)
   ) {
     set(
       event,
