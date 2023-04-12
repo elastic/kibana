@@ -10,7 +10,7 @@ import type { RuleSnoozeSettings } from '../logic';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface RuleSnoozeBadgeProps {
-  snoozeSettings?: RuleSnoozeSettings;
+  snoozeSettings: RuleSnoozeSettings | undefined;
   hasCRUDPermissions: boolean;
   onChange: () => void;
 }
