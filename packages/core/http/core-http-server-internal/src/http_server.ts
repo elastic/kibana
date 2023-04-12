@@ -44,6 +44,7 @@ import type {
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
+import { Boom, isBoom } from '@hapi/boom';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -399,9 +400,13 @@ export class HttpServer {
     this.server!.ext('onRequest', (request, responseToolkit) => {
       const stop = startEluMeasurement(request.path, this.log);
 
-      request.events.on('finish', () => {
+      if (isBoom(request.response)) {
         stop();
-      });
+      } else {
+        request.response.on('finish', () => {
+          stop();
+        });
+      }
 
       const requestId = getRequestId(request, config.requestId);
 
