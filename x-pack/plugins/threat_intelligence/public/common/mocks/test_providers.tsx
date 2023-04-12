@@ -107,6 +107,7 @@ const core = coreMock.createStart();
 const coreServiceMock = {
   ...core,
   uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
+  settings: { client: { get: jest.fn().mockImplementation(mockUiSetting) } },
 };
 
 const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();

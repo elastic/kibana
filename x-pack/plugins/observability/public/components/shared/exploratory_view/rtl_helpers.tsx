@@ -130,6 +130,13 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.uiSettings,
+        get: getSetting,
+        get$: setSetting$,
+      },
+    },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),

@@ -15,6 +15,8 @@ import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/p
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
@@ -24,11 +26,13 @@ describe('InspectorPanel', () => {
     http: {},
     share: sharePluginMock.createStartContract(),
     uiSettings: {},
+    settings: settingsServiceMock.createStartContract(),
   } as unknown as {
     application: ApplicationStart;
     http: HttpSetup;
     share: SharePluginStart;
     uiSettings: IUiSettingsClient;
+    settings: SettingsStart;
   };
 
   beforeEach(() => {

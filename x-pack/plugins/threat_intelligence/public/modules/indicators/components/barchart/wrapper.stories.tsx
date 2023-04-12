@@ -118,7 +118,12 @@ const timelinesMock = mockKibanaTimelinesService;
 export const Default: Story<void> = () => {
   return (
     <StoryProvidersComponent
-      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+      kibana={{
+        data: dataServiceMock,
+        uiSettings: uiSettingsMock,
+        timelines: timelinesMock,
+        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+      }}
     >
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}
@@ -139,7 +144,12 @@ Default.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
 export const InitialLoad: Story<void> = () => {
   return (
     <StoryProvidersComponent
-      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+      kibana={{
+        data: dataServiceMock,
+        uiSettings: uiSettingsMock,
+        timelines: timelinesMock,
+        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+      }}
     >
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}
@@ -185,7 +195,12 @@ export const UpdatingData: Story<void> = () => {
 
   return (
     <StoryProvidersComponent
-      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+      kibana={{
+        data: dataServiceMock,
+        uiSettings: uiSettingsMock,
+        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+        timelines: timelinesMock,
+      }}
     >
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}

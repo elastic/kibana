@@ -131,7 +131,7 @@ export class Simulator {
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
 
-    coreStart.uiSettings.get.mockImplementation(uiSetting);
+    coreStart.settings.client.get.mockImplementation(uiSetting);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
