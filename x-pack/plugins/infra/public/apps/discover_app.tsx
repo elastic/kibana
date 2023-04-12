@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+<<<<<<< HEAD
+=======
+import { CoreStart } from '@kbn/core/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+>>>>>>> 643f7988a386c5c397e7c896929ac0086dd413e6
 import { interpret } from 'xstate';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
