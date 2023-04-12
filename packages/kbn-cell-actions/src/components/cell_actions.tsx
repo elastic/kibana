@@ -14,6 +14,7 @@ import { CellActionsMode } from '../constants';
 import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
 export const CellActions: React.FC<CellActionsProps> = ({
+  anchorPosition,
   field,
   triggerId,
   children,
@@ -22,6 +23,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   visibleCellActions = 3,
   disabledActionTypes = [],
   metadata,
+  panelStyle,
   className,
 }) => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -42,6 +44,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
       <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
         <HoverActionsPopover
           actionContext={actionContext}
+          anchorPosition={anchorPosition}
+          panelStyle={panelStyle}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
           disabledActionTypes={disabledActionTypes}

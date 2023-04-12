@@ -16,10 +16,17 @@ export const ADD_TO_TIMELINE = i18n.translate(
   }
 );
 
+export const SEVERITY = (level: string) =>
+  i18n.translate('xpack.securitySolution.actions.addToTimeline.severityLevel', {
+    defaultMessage: `${level} severity`,
+  });
+
 export const ALERTS_COUNT = (entity: string, description: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.alertsCountMessage', {
     values: { description, entity },
-    defaultMessage: description !== '' ? `{description} alerts from {entity}` : `{entity} alerts`,
+    defaultMessage: `${
+      description !== '' ? '{description} alerts from {entity}' : '{entity} alerts'
+    }`,
   });
 
 export const ADD_TO_TIMELINE_SUCCESS_TITLE = (value: string) =>

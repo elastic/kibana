@@ -11,8 +11,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHealth,
   EuiLink,
   EuiPanel,
@@ -151,50 +149,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="xs"
-        alignItems="center"
-        css={css`
-          .inlineActions {
-            opacity: 0;
-          }
-
-          .inlineActions-popoverOpen {
-            opacity: 1;
-          }
-
-          &:hover {
-            .inlineActions {
-              opacity: 1;
-            }
-          }
-        `}
+      <SecurityCellActions
+        anchorPosition="rightCenter"
+        panelStyle={{ marginTop: '8px' }}
+        field={{
+          name: 'host.name',
+          value: hostName,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <EuiFlexItem grow={false}>
-          <SecurityCellActions
-            field={{
-              name: 'host.name',
-              value: hostName,
-              type: 'keyword',
-              aggregatable: true,
-            }}
-            mode={CellActionsMode.INLINE}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-            metadata={{
-              andFilters: [{ field: 'kibana.alert.severity', value: '', operator: ':*' }],
-            }}
-          >
-            <EuiLink
-              data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
-              disabled={totalAlerts === 0}
-              onClick={() => handleClick({ hostName })}
-            >
-              <FormattedCount count={totalAlerts} />
-            </EuiLink>
-          </SecurityCellActions>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiLink
+          data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
+          disabled={totalAlerts === 0}
+          onClick={() => handleClick({ hostName })}
+        >
+          <FormattedCount count={totalAlerts} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {
@@ -202,50 +179,32 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="xs"
-          alignItems="center"
-          css={css`
-            .inlineActions {
-              opacity: 0;
-            }
-
-            .inlineActions-popoverOpen {
-              opacity: 1;
-            }
-
-            &:hover {
-              .inlineActions {
-                opacity: 1;
-              }
-            }
-          `}
+        <SecurityCellActions
+          anchorPosition="rightCenter"
+          panelStyle={{ marginTop: '8px' }}
+          field={{
+            name: 'host.name',
+            value: hostName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'critical' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <EuiFlexItem grow={false}>
-            <SecurityCellActions
-              field={{
-                name: 'host.name',
-                value: hostName,
-                type: 'keyword',
-                aggregatable: true,
-              }}
-              mode={CellActionsMode.INLINE}
-              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-              metadata={{
-                andFilters: [{ field: 'kibana.alert.severity', value: 'critical' }],
-              }}
-            >
-              <EuiLink
-                data-test-subj="hostSeverityAlertsTable-criticalLink"
-                disabled={count === 0}
-                onClick={() => handleClick({ hostName, severity: 'critical' })}
-              >
-                <FormattedCount count={count} />
-              </EuiLink>
-            </SecurityCellActions>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiLink
+            data-test-subj="hostSeverityAlertsTable-criticalLink"
+            disabled={count === 0}
+            onClick={() => handleClick({ hostName, severity: 'critical' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -254,49 +213,31 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="xs"
-          alignItems="center"
-          css={css`
-            .inlineActions {
-              opacity: 0;
-            }
-
-            .inlineActions-popoverOpen {
-              opacity: 1;
-            }
-
-            &:hover {
-              .inlineActions {
-                opacity: 1;
-              }
-            }
-          `}
+        <SecurityCellActions
+          anchorPosition="rightCenter"
+          panelStyle={{ marginTop: '8px' }}
+          field={{
+            name: 'host.name',
+            value: hostName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'high' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <EuiFlexItem grow={false}>
-            <SecurityCellActions
-              field={{
-                name: 'host.name',
-                value: hostName,
-                type: 'keyword',
-                aggregatable: true,
-              }}
-              mode={CellActionsMode.INLINE}
-              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-              metadata={{
-                andFilters: [{ field: 'kibana.alert.severity', value: 'high' }],
-              }}
-            >
-              <EuiLink
-                disabled={count === 0}
-                onClick={() => handleClick({ hostName, severity: 'high' })}
-              >
-                <FormattedCount count={count} />
-              </EuiLink>
-            </SecurityCellActions>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ hostName, severity: 'high' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -304,50 +245,41 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     field: 'medium',
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { hostName }) => (
-      <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="xs"
-          alignItems="center"
-          css={css`
-            .inlineActions {
-              opacity: 0;
-            }
-
-            .inlineActions-popoverOpen {
-              opacity: 1;
-            }
-
-            &:hover {
-              .inlineActions {
-                opacity: 1;
-              }
-            }
-          `}
+      <EuiHealth
+        css={css`
+          .euiPopover__anchor {
+            margin-top: -8px;
+          }
+        `}
+        data-test-subj="hostSeverityAlertsTable-medium"
+        color={SEVERITY_COLOR.medium}
+      >
+        <SecurityCellActions
+          anchorPosition="rightCenter"
+          panelStyle={{ marginTop: '8px' }}
+          className={'waluigi'}
+          field={{
+            name: 'host.name',
+            value: hostName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'medium' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <EuiFlexItem grow={false}>
-            <SecurityCellActions
-              field={{
-                name: 'host.name',
-                value: hostName,
-                type: 'keyword',
-                aggregatable: true,
-              }}
-              mode={CellActionsMode.INLINE}
-              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-              metadata={{
-                andFilters: [{ field: 'kibana.alert.severity', value: 'medium' }],
-              }}
-            >
-              <EuiLink
-                disabled={count === 0}
-                onClick={() => handleClick({ hostName, severity: 'medium' })}
-              >
-                <FormattedCount count={count} />
-              </EuiLink>
-            </SecurityCellActions>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ hostName, severity: 'medium' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -356,49 +288,31 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="xs"
-          alignItems="center"
-          css={css`
-            .inlineActions {
-              opacity: 0;
-            }
-
-            .inlineActions-popoverOpen {
-              opacity: 1;
-            }
-
-            &:hover {
-              .inlineActions {
-                opacity: 1;
-              }
-            }
-          `}
+        <SecurityCellActions
+          anchorPosition="rightCenter"
+          panelStyle={{ marginTop: '8px' }}
+          field={{
+            name: 'host.name',
+            value: hostName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'low' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <EuiFlexItem grow={false}>
-            <SecurityCellActions
-              field={{
-                name: 'host.name',
-                value: hostName,
-                type: 'keyword',
-                aggregatable: true,
-              }}
-              mode={CellActionsMode.INLINE}
-              triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-              metadata={{
-                andFilters: [{ field: 'kibana.alert.severity', value: 'low' }],
-              }}
-            >
-              <EuiLink
-                disabled={count === 0}
-                onClick={() => handleClick({ hostName, severity: 'low' })}
-              >
-                <FormattedCount count={count} />
-              </EuiLink>
-            </SecurityCellActions>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ hostName, severity: 'low' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },

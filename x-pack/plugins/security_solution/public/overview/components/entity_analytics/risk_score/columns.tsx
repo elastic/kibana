@@ -7,9 +7,8 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { css } from '@emotion/react';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -137,54 +136,33 @@ export const getRiskScoreColumns = (
     truncateText: false,
     mobileOptions: { show: true },
     render: (alertCount: number, risk) => (
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="xs"
-        alignItems="center"
-        css={css`
-          .inlineActions {
-            opacity: 0;
-          }
-
-          .inlineActions-popoverOpen {
-            opacity: 1;
-          }
-
-          &:hover {
-            .inlineActions {
-              opacity: 1;
-            }
-          }
-        `}
+      <SecurityCellActions
+        anchorPosition="rightCenter"
+        panelStyle={{ marginTop: '8px' }}
+        field={{
+          name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <EuiFlexItem grow={false}>
-          <SecurityCellActions
-            field={{
-              name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-              value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
-              type: 'keyword',
-              aggregatable: true,
-            }}
-            mode={CellActionsMode.INLINE}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-            metadata={{
-              andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
-            }}
-          >
-            <EuiLink
-              data-test-subj="risk-score-alerts"
-              disabled={alertCount === 0}
-              onClick={() =>
-                openEntityOnAlertsPage(
-                  riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
-                )
-              }
-            >
-              <FormattedCount count={alertCount} />
-            </EuiLink>
-          </SecurityCellActions>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiLink
+          data-test-subj="risk-score-alerts"
+          disabled={alertCount === 0}
+          onClick={() =>
+            openEntityOnAlertsPage(
+              riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
+            )
+          }
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
 ];

@@ -193,31 +193,31 @@ describe('createAddToTimelineCellAction', () => {
         [{ field: 'kibana.alert.severity', value: 'critical' }],
         value
       );
-      expect(result).toEqual(`critical alerts from ${value}`);
+      expect(result).toEqual(`critical severity alerts from ${value}`);
     });
 
     it('handles multiple filters', () => {
       const result = getToastMessage(
         [
-          { field: 'kibana.alert.severity', value: 'critical' },
           { field: 'kibana.alert.workflow_status', value: 'open' },
+          { field: 'kibana.alert.severity', value: 'critical' },
         ],
         value
       );
-      expect(result).toEqual(`critical, open alerts from ${value}`);
+      expect(result).toEqual(`open, critical severity alerts from ${value}`);
     });
 
     it('ignores unrelated filters', () => {
       const result = getToastMessage(
         [
-          { field: 'kibana.alert.severity', value: 'critical' },
           { field: 'kibana.alert.workflow_status', value: 'open' },
+          { field: 'kibana.alert.severity', value: 'critical' },
           // currently only supporting the above fields
           { field: 'user.name', value: 'something' },
         ],
         value
       );
-      expect(result).toEqual(`critical, open alerts from ${value}`);
+      expect(result).toEqual(`open, critical severity alerts from ${value}`);
     });
 
     it('returns entity only when unrelated filters are passed', () => {

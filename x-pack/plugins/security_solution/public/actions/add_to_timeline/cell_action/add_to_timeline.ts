@@ -23,6 +23,7 @@ import {
   ADD_TO_TIMELINE_ICON,
   ADD_TO_TIMELINE_SUCCESS_TITLE,
   ALERTS_COUNT,
+  SEVERITY,
 } from '../constants';
 import { createDataProviders, isValidDataProviderField } from '../data_provider';
 import { SecurityCellActionType } from '../../constants';
@@ -38,19 +39,21 @@ export const getToastMessage = (filters: Filter[], fieldValue?: CellActionField[
     return fieldValue.join(', ');
   }
   const descriptorFields = ['kibana.alert.severity', 'kibana.alert.workflow_status'];
-  const alertDescriptors = ['acknowledged', 'closed', 'critical', 'high', 'low', 'medium', 'open'];
+  const severityDescriptors = ['critical', 'high', 'low', 'medium'];
+  const alertDescriptors = [...severityDescriptors, 'acknowledged', 'closed', 'open'];
 
-  const descriptors = filters.reduce(
-    (msg, filter) =>
-      !isArray(filter.value)
-        ? descriptorFields.includes(filter.field) && alertDescriptors.includes(filter.value)
-          ? msg.length === 0
-            ? filter.value
-            : `${msg}, ${filter.value}`
-          : msg
-        : '',
-    ''
-  );
+  const descriptors = filters.reduce((msg, filter) => {
+    if (isArray(filter.value)) {
+      return msg;
+    }
+    if (descriptorFields.includes(filter.field) && alertDescriptors.includes(filter.value)) {
+      const val = severityDescriptors.includes(filter.value)
+        ? SEVERITY(filter.value)
+        : filter.value;
+      return msg.length === 0 ? val : `${msg}, ${val}`;
+    }
+    return msg;
+  }, '');
 
   return ALERTS_COUNT(fieldValue, descriptors);
 };

@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { debounce } from 'lodash';
+import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
@@ -36,17 +37,21 @@ const hoverContentWrapperCSS = css`
 const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
+  anchorPosition?: PopoverAnchorPosition;
   children: React.ReactNode;
   visibleCellActions: number;
   actionContext: CellActionExecutionContext;
   showActionTooltips: boolean;
+  panelStyle?: { [key: string]: string };
   disabledActionTypes: string[];
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
+  anchorPosition = 'downCenter',
   children,
   visibleCellActions,
   actionContext,
+  panelStyle = {},
   showActionTooltips,
   disabledActionTypes,
 }) => {
@@ -119,8 +124,8 @@ export const HoverActionsPopover: React.FC<Props> = ({
     <>
       <div onMouseLeave={closePopover}>
         <EuiPopover
-          panelStyle={PANEL_STYLE}
-          anchorPosition={'downCenter'}
+          panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
+          anchorPosition={anchorPosition}
           button={content}
           closePopover={closePopover}
           hasArrow={false}
