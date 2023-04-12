@@ -221,7 +221,7 @@ export function TransactionDurationRuleType(props: Props) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.apm.ruleFlyout.createAlertPerText', {
-          defaultMessage: 'Group alerts by (optional)',
+          defaultMessage: 'Group alerts by',
         })}
         helpText={i18n.translate(
           'xpack.apm.ruleFlyout.createAlertPerHelpText',
