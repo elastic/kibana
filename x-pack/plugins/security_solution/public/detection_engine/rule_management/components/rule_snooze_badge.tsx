@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { RuleSnoozeSettings } from '../../../detection_engine/rule_management/logic';
-import { useKibana } from '../../lib/kibana';
+import type { RuleSnoozeSettings } from '../logic';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface RuleSnoozeBadgeProps {
   snoozeSettings?: RuleSnoozeSettings;
