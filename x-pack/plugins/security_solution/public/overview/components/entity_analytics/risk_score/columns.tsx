@@ -168,7 +168,7 @@ export const getRiskScoreColumns = (
             mode={CellActionsMode.INLINE}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
             metadata={{
-              timelineFilter: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+              andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
             }}
           >
             <EuiLink

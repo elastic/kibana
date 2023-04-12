@@ -6,6 +6,7 @@
  */
 
 import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
+import type { Filter } from '../overview/components/detection_response/hooks/use_navigate_to_timeline';
 
 export interface SecurityMetadata extends Record<string, unknown> {
   /**
@@ -26,6 +27,11 @@ export interface SecurityMetadata extends Record<string, unknown> {
    * and we need all the filtering actions to perform the opposite (negate) operation.
    */
   negateFilters?: boolean;
+  /**
+   * `metadata.andFilters` is used by the addToTimelineAction to add
+   * an "and" query to the main data provider
+   */
+  andFilters?: Filter[];
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {

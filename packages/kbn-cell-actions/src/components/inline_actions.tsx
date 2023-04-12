@@ -47,10 +47,9 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
       data-test-subj="inlineActions"
       className={`inlineActions ${isPopoverOpen ? 'inlineActions-popoverOpen' : ''}`}
     >
-      {visibleActions.map((action, index) => (
-        <EuiFlexItem grow={false}>
+      {visibleActions.map((action) => (
+        <EuiFlexItem grow={false} key={`action-item-${action.id}`}>
           <ActionItem
-            key={`action-item-${index}`}
             action={action}
             actionContext={actionContext}
             showTooltip={showActionTooltips}

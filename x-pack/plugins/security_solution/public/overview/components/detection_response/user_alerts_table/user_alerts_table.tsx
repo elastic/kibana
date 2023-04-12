@@ -179,7 +179,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             mode={CellActionsMode.INLINE}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
             metadata={{
-              timelineFilter: [{ field: 'kibana.alert.severity', value: '*' }],
+              andFilters: [{ field: 'kibana.alert.severity', value: '', operator: ':*' }],
             }}
           >
             <EuiLink
@@ -230,7 +230,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
               mode={CellActionsMode.INLINE}
               triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
               metadata={{
-                timelineFilter: [{ name: 'kibana.alert.severity', value: 'critical' }],
+                andFilters: [{ field: 'kibana.alert.severity', value: 'critical' }],
               }}
             >
               <EuiLink
@@ -282,7 +282,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
               mode={CellActionsMode.INLINE}
               triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
               metadata={{
-                timelineFilter: [{ name: 'kibana.alert.severity', value: 'high' }],
+                andFilters: [{ field: 'kibana.alert.severity', value: 'high' }],
               }}
             >
               <EuiLink
@@ -333,7 +333,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
               mode={CellActionsMode.INLINE}
               triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
               metadata={{
-                timelineFilter: [{ name: 'kibana.alert.severity', value: 'medium' }],
+                andFilters: [{ field: 'kibana.alert.severity', value: 'medium' }],
               }}
             >
               <EuiLink
@@ -384,7 +384,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
               mode={CellActionsMode.INLINE}
               triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
               metadata={{
-                timelineFilter: [{ name: 'kibana.alert.severity', value: 'low' }],
+                andFilters: [{ field: 'kibana.alert.severity', value: 'low' }],
               }}
             >
               <EuiLink

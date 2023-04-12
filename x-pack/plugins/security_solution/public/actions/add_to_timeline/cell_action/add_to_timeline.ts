@@ -8,6 +8,7 @@
 import { createCellActionFactory } from '@kbn/cell-actions';
 import type { CellActionTemplate } from '@kbn/cell-actions';
 import type { CellActionField } from '@kbn/cell-actions/src/types';
+import { isArray } from 'lodash/fp';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import { getDataProviders } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
@@ -21,7 +22,7 @@ import {
   ADD_TO_TIMELINE_FAILED_TITLE,
   ADD_TO_TIMELINE_ICON,
   ADD_TO_TIMELINE_SUCCESS_TITLE,
-  SEVERITY_ALERTS,
+  ALERTS_COUNT,
 } from '../constants';
 import { createDataProviders, isValidDataProviderField } from '../data_provider';
 import { SecurityCellActionType } from '../../constants';
@@ -29,14 +30,40 @@ import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
-const handleTimelineFilters = (
-  filters: Filter[],
-  field: CellActionField,
-  store: SecurityAppStore
-) => {
-  const severityValue = null;
+export const getToastMessage = (filters: Filter[], fieldValue?: CellActionField['value']) => {
+  if (fieldValue == null) {
+    return '';
+  }
+  if (isArray(fieldValue)) {
+    return fieldValue.join(', ');
+  }
+
+  const countFilters = filters.filter(
+    (filter) => filter.field === 'kibana.alert.severity' || 'kibana.alert.workflow_status'
+  );
+  const alertDescriptors = ['acknowledged', 'closed', 'critical', 'high', 'low', 'medium', 'open'];
+
+  const descriptors =
+    countFilters.length > 0
+      ? countFilters.reduce(
+          (msg, filter) =>
+            !isArray(filter.value)
+              ? alertDescriptors.includes(filter.value)
+                ? msg.length === 0
+                  ? filter.value
+                  : `${msg}, ${filter.value}`
+                : msg
+              : '',
+          ''
+        )
+      : '';
+
+  return ALERTS_COUNT(fieldValue, descriptors);
+};
+
+const handleAndFilters = (filters: Filter[], field: CellActionField, store: SecurityAppStore) => {
   const dataProviders = getDataProviders([
-    [{ value: field.value ?? '*', field: field.name }, ...filters],
+    [{ value: field.value ?? '', field: field.name }, ...filters],
   ]);
 
   // clear timeline to accurately get count
@@ -47,22 +74,8 @@ const handleTimelineFilters = (
     })
   );
 
-  let messageValue;
-  if (
-    field.value != null &&
-    (severityValue === 'critical' ||
-      severityValue === 'medium' ||
-      severityValue === 'low' ||
-      severityValue === 'high' ||
-      severityValue === '*')
-  ) {
-    messageValue = SEVERITY_ALERTS(
-      Array.isArray(field.value) ? field.value.join(', ') : field.value,
-      severityValue
-    );
-  }
   return {
-    messageValue,
+    messageValue: getToastMessage(filters, field.value),
     dataProviders,
   };
 };
@@ -87,9 +100,8 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       execute: async ({ field, metadata }) => {
         let messageValue = '';
         let dataProviders = [];
-        if (metadata && metadata.timelineFilter != null) {
-          // @ts-expect-error
-          const filters = handleTimelineFilters(metadata.timelineFilter, field, store);
+        if (metadata && metadata.andFilters) {
+          const filters = handleAndFilters(metadata.andFilters, field, store);
           messageValue = filters.messageValue;
           dataProviders = filters.dataProviders;
         } else {
