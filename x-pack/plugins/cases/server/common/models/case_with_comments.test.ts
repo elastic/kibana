@@ -293,12 +293,20 @@ describe('CaseCommentModel', () => {
   });
 
   describe('bulkCreate', () => {
-    it('does not remove comments when filtering out duplicate alerts', async () => {
+    it('does not remove user comments when filtering out duplicate alerts', async () => {
       await model.bulkCreate({
         attachments: [
           {
             id: 'comment-1',
             ...userComment,
+          },
+          {
+            id: 'comment-2',
+            ...singleAlert,
+          },
+          {
+            id: 'comment-3',
+            ...multipleAlert,
           },
         ],
       });
@@ -306,8 +314,19 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      expect(attachments.length).toBe(1);
+      const singleAlertCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AttributesTypeAlerts>;
+
+      expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
+      expect(attachments[1].attributes.type).toBe('alert');
+      expect(attachments[2].attributes.type).toBe('alert');
+
+      expect(singleAlertCall.attributes.alertId).toEqual(['test-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['test-index-1']);
+
+      expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
+      expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
     });
 
     it('does not remove alerts not attached to the case', async () => {

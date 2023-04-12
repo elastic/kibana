@@ -1347,6 +1347,50 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(secondAttachment.alertId).to.eql(['test-id-3']);
         expect(secondAttachment.index).to.eql(['test-index-3']);
       });
+
+      it('does not remove user comments when filtering out duplicate alerts', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            {
+              ...postCommentAlertMultipleIdsReq,
+              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+              index: ['test-index-1', 'test-index-2', 'test-index-3'],
+            },
+            postCommentUserReq,
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(4);
+
+        const firstAlert = attachments[0] as CommentRequestAlertType;
+        const firstUserComment = attachments[1] as CommentRequestAlertType;
+        const secondAlert = attachments[2] as CommentRequestAlertType;
+        const secondUserComment = attachments[3] as CommentRequestAlertType;
+
+        expect(firstUserComment.type).to.eql('user');
+        expect(secondUserComment.type).to.eql('user');
+        expect(firstAlert.type).to.eql('alert');
+        expect(secondAlert.type).to.eql('alert');
+
+        expect(firstAlert.alertId).to.eql(['test-id-1', 'test-id-2']);
+        expect(firstAlert.index).to.eql(['test-index', 'test-index-2']);
+        expect(secondAlert.alertId).to.eql(['test-id-3']);
+        expect(secondAlert.index).to.eql(['test-index-3']);
+      });
     });
 
     describe('rbac', () => {
