@@ -14,7 +14,11 @@ import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -157,6 +161,23 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field]
   );
 
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          alertsFilter: {
+            ...(updatedActions[index].alertsFilter ?? { query: null, timeframe: null }),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
   const actionForm = useMemo(
     () =>
       getActionForm({
@@ -167,6 +188,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
         setActionFrequencyProperty: setActionFrequency,
+        setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
         // TODO: [Frequency Integration]
@@ -174,6 +196,8 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         hideActionHeader: true,
         hideNotifyWhen: false,
         hasSummary: true,
+        hideNotifyWhen: true,
+        showActionAlertsFilter: true,
       }),
     [
       actions,
@@ -183,6 +207,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
+      setActionAlertsFilterProperty,
     ]
   );
 
