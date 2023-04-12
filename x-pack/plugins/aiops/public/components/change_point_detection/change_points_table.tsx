@@ -156,25 +156,39 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={defaultSorting}
       message={
-        <EuiEmptyPrompt
-          iconType="search"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
-                defaultMessage="No change points found"
-              />
-            </h2>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-                defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
-              />
-            </p>
-          }
-        />
+        isLoading ? (
+          <EuiEmptyPrompt
+            iconType="search"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
+                  defaultMessage="Fetching change points..."
+                />
+              </h2>
+            }
+          />
+        ) : (
+          <EuiEmptyPrompt
+            iconType="search"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
+                  defaultMessage="No change points found"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
+                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
+                />
+              </p>
+            }
+          />
+        )
       }
     />
   );

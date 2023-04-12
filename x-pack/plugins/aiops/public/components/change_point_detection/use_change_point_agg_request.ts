@@ -141,7 +141,6 @@ export function useChangePointResults(
 
   const reset = useCallback(() => {
     cancelRequest();
-    setProgress(null);
     setResults([]);
   }, [cancelRequest]);
 
@@ -175,13 +174,20 @@ export function useChangePointResults(
           return;
         }
 
+        const isFetchCompleted = !(
+          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
+          pageNumber < totalAggPages
+        );
+
         const buckets = (
           isSingleMetric
             ? [result.rawResponse.aggregations]
             : result.rawResponse.aggregations.groupings.buckets
         ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
-        setProgress(Math.min(Math.round((pageNumber / totalAggPages) * 100), 100));
+        setProgress(
+          isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
+        );
 
         let groups = buckets
           .map((v) => {
@@ -219,15 +225,13 @@ export function useChangePointResults(
         });
 
         if (
-          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
-          pageNumber < totalAggPages
+          !isFetchCompleted &&
+          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm
         ) {
           await fetchResults(
             pageNumber + 1,
             result.rawResponse.aggregations.groupings.after_key.splitFieldTerm
           );
-        } else {
-          setProgress(null);
         }
       } catch (e) {
         toasts.addError(e, {
@@ -254,7 +258,14 @@ export function useChangePointResults(
 
   useEffect(
     function fetchResultsOnInputChange() {
+      setProgress(0);
       reset();
+
+      if (fieldConfig.splitField && splitFieldCardinality === null) {
+        // wait for cardinality to be resolved
+        return;
+      }
+
       fetchResults();
 
       return () => {
