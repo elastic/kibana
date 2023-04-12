@@ -19,6 +19,8 @@ import {
   EuiSwitch,
   EuiSearchBar,
   EuiLink,
+  EuiToolTip,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -190,18 +192,28 @@ export const SearchIndices: React.FC = () => {
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        checked={onlyShowSearchOptimizedIndices}
-                        label={i18n.translate(
-                          'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.label',
-                          {
-                            defaultMessage: 'Only show search optimized indices',
-                          }
-                        )}
-                        onChange={(event) =>
-                          setOnlyShowSearchOptimizedIndices(event.target.checked)
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.tooltipContent"
+                            defaultMessage="Search-optimized indices are prefixed with {code}. They are managed by ingestion mechanisms such as crawlers, connectors or ingestion APIs."
+                            values={{ code: <EuiCode>search-</EuiCode> }}
+                          />
                         }
-                      />
+                      >
+                        <EuiSwitch
+                          checked={onlyShowSearchOptimizedIndices}
+                          label={i18n.translate(
+                            'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.label',
+                            {
+                              defaultMessage: 'Only show search-optimized indices',
+                            }
+                          )}
+                          onChange={(event) =>
+                            setOnlyShowSearchOptimizedIndices(event.target.checked)
+                          }
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem className="entSearchIndicesSearchBar">
                       <EuiSearchBar

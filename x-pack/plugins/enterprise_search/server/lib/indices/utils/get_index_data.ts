@@ -14,7 +14,6 @@ import {
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { AlwaysShowPattern } from '../../../../common/types/indices';
-import { fetchConnectorIndexNames } from '../../connectors/fetch_connector_index_names';
 
 import { TotalIndexData } from '../fetch_indices';
 
@@ -101,30 +100,6 @@ export const getIndexData = async (
   searchQuery?: string
 ): Promise<{ indexData: IndicesGetResponse; indexNames: string[] }> => {
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
-  if (onlyShowSearchOptimizedIndices) {
-    const names = await fetchConnectorIndexNames(client);
-    const allIndexNames = searchQuery
-      ? names.filter((indexName) => indexName.toLowerCase().includes(searchQuery.toLowerCase()))
-      : names;
-    if (allIndexNames.length === 0) {
-      return { indexData: {}, indexNames: [] };
-    }
-    const allIndexMatches = await client.asCurrentUser.indices.get({
-      // only get specified index properties from ES to keep the response under 536MB
-      // node.js string length limit: https://github.com/nodejs/node/issues/33960
-      filter_path: ['*.aliases', '*.settings.index.hidden'],
-      ignore_unavailable: true,
-      index: allIndexNames,
-    });
-    return {
-      indexData: allIndexMatches,
-      indexNames: allIndexNames.filter((name) =>
-        returnHiddenIndices
-          ? Boolean(allIndexMatches[name])
-          : Boolean(allIndexMatches[name]) && !isHidden(allIndexMatches[name])
-      ),
-    };
-  }
   const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
   const allIndexMatches = await client.asCurrentUser.indices.get({
     expand_wildcards: expandWildcards,
@@ -133,14 +108,18 @@ export const getIndexData = async (
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
     filter_path: ['*.aliases', '*.settings.index.hidden'],
-    index: indexPattern,
+    index: onlyShowSearchOptimizedIndices ? 'search-*' : indexPattern,
   });
 
-  const indexNames = returnHiddenIndices
+  const allIndexNames = returnHiddenIndices
     ? Object.keys(allIndexMatches)
     : Object.keys(allIndexMatches).filter(
         (indexName) => allIndexMatches[indexName] && !isHidden(allIndexMatches[indexName])
       );
+  const indexNames =
+    onlyShowSearchOptimizedIndices && searchQuery
+      ? allIndexNames.filter((indexName) => indexName.includes(searchQuery.toLowerCase()))
+      : allIndexNames;
 
   return {
     indexData: allIndexMatches,
