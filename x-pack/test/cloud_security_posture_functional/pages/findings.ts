@@ -109,8 +109,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
+      // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
+      await findings.waitForPluginInitialized();
+
+      // Prepare mocked findings
       await findings.index.remove();
       await findings.index.add(data);
+
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
