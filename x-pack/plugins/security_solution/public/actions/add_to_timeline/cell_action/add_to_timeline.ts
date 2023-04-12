@@ -37,26 +37,20 @@ export const getToastMessage = (filters: Filter[], fieldValue?: CellActionField[
   if (isArray(fieldValue)) {
     return fieldValue.join(', ');
   }
-
-  const countFilters = filters.filter(
-    (filter) => filter.field === 'kibana.alert.severity' || 'kibana.alert.workflow_status'
-  );
+  const descriptorFields = ['kibana.alert.severity', 'kibana.alert.workflow_status'];
   const alertDescriptors = ['acknowledged', 'closed', 'critical', 'high', 'low', 'medium', 'open'];
 
-  const descriptors =
-    countFilters.length > 0
-      ? countFilters.reduce(
-          (msg, filter) =>
-            !isArray(filter.value)
-              ? alertDescriptors.includes(filter.value)
-                ? msg.length === 0
-                  ? filter.value
-                  : `${msg}, ${filter.value}`
-                : msg
-              : '',
-          ''
-        )
-      : '';
+  const descriptors = filters.reduce(
+    (msg, filter) =>
+      !isArray(filter.value)
+        ? descriptorFields.includes(filter.field) && alertDescriptors.includes(filter.value)
+          ? msg.length === 0
+            ? filter.value
+            : `${msg}, ${filter.value}`
+          : msg
+        : '',
+    ''
+  );
 
   return ALERTS_COUNT(fieldValue, descriptors);
 };

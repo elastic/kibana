@@ -175,7 +175,6 @@ describe('createAddToTimelineCellAction', () => {
           ],
         },
       });
-      // expect(mockWarningToast).not.toHaveBeenCalled();
     });
   });
 
@@ -192,9 +191,9 @@ describe('createAddToTimelineCellAction', () => {
     it('handles single filter', () => {
       const result = getToastMessage(
         [{ field: 'kibana.alert.severity', value: 'critical' }],
-        'Awesome host name'
+        value
       );
-      expect(result).toEqual('critical alerts from Awesome host name');
+      expect(result).toEqual(`critical alerts from ${value}`);
     });
 
     it('handles multiple filters', () => {
@@ -203,9 +202,9 @@ describe('createAddToTimelineCellAction', () => {
           { field: 'kibana.alert.severity', value: 'critical' },
           { field: 'kibana.alert.workflow_status', value: 'open' },
         ],
-        'Awesome host name'
+        value
       );
-      expect(result).toEqual('critical, open alerts from Awesome host name');
+      expect(result).toEqual(`critical, open alerts from ${value}`);
     });
 
     it('ignores unrelated filters', () => {
@@ -213,24 +212,22 @@ describe('createAddToTimelineCellAction', () => {
         [
           { field: 'kibana.alert.severity', value: 'critical' },
           { field: 'kibana.alert.workflow_status', value: 'open' },
+          // currently only supporting the above fields
           { field: 'user.name', value: 'something' },
         ],
-        'Awesome host name'
+        value
       );
-      expect(result).toEqual('critical, open alerts from Awesome host name');
+      expect(result).toEqual(`critical, open alerts from ${value}`);
     });
 
     it('returns entity only when unrelated filters are passed', () => {
-      const result = getToastMessage(
-        [{ field: 'user.name', value: 'something' }],
-        'Awesome host name'
-      );
-      expect(result).toEqual('Awesome host name alerts');
+      const result = getToastMessage([{ field: 'user.name', value: 'something' }], value);
+      expect(result).toEqual(`${value} alerts`);
     });
 
     it('returns entity only when no filters are passed', () => {
-      const result = getToastMessage([], 'Awesome host name');
-      expect(result).toEqual('Awesome host name alerts');
+      const result = getToastMessage([], value);
+      expect(result).toEqual(`${value} alerts`);
     });
 
     it('returns entity only when wildcard filters are passed', () => {
@@ -239,9 +236,9 @@ describe('createAddToTimelineCellAction', () => {
           { field: 'kibana.alert.severity', value: '*' },
           { field: 'kibana.alert.workflow_status', value: '*' },
         ],
-        'Awesome host name'
+        value
       );
-      expect(result).toEqual('Awesome host name alerts');
+      expect(result).toEqual(`${value} alerts`);
     });
   });
 });
