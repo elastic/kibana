@@ -51,6 +51,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {

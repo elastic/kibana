@@ -165,7 +165,12 @@ const bulkEnableRulesWithOCC = async (
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
+                (await createNewAPIKeySet(context, {
+                  id: rule.attributes.alertTypeId,
+                  ruleName: rule.attributes.name,
+                  username,
+                  shouldUpdateApiKey: true,
+                }))),
               ...(hasLegacyActions ? { actions: resultedActions } : {}),
               enabled: true,
               updatedBy: username,

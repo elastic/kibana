@@ -32,9 +32,9 @@ import {
   getPartialRuleFromRaw,
   addGeneratedActionValues,
   incrementRevision,
+  createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
-import { migrateLegacyActions } from '../lib';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -130,7 +130,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   );
 
   await Promise.all([
-    alertSavedObject.attributes.apiKey
+    alertSavedObject.attributes.apiKey && !alertSavedObject.attributes.apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [alertSavedObject.attributes.apiKey] },
           context.logger,
@@ -214,16 +214,13 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const username = await context.getUserName();
 
-  let createdAPIKey = null;
-  try {
-    createdAPIKey = attributes.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
-  }
-
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName: data.name,
+    username,
+    shouldUpdateApiKey: attributes.enabled,
+    errorMessage: 'Error updating rule: could not create API key',
+  });
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
@@ -268,7 +265,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
+      {
+        apiKeys:
+          createAttributes.apiKey && !createAttributes.apiKeyCreatedByUser
+            ? [createAttributes.apiKey]
+            : [],
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

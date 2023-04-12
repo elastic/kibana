@@ -25,6 +25,7 @@ export async function deleteRule(context: RulesClientContext, { id }: { id: stri
 async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
+  let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
 
   try {
@@ -33,6 +34,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
         namespace: context.namespace,
       });
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+    apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
     attributes = decryptedAlert.attributes;
   } catch (e) {
@@ -80,7 +82,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,
-    apiKeyToInvalidate
+    apiKeyToInvalidate && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [apiKeyToInvalidate] },
           context.logger,

@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { createAttachmentServiceMock } from '../../../services/mocks';
+import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { FileLimiter } from './files';
 import { createFileRequests, createUserRequests } from '../test_utils';
 
 describe('FileLimiter', () => {
-  const file = new FileLimiter();
+  const mockFileService = createFileServiceMock();
+  mockFileService.find.mockImplementation(async () => {
+    return {
+      files: [],
+      total: 5,
+    };
+  });
+
+  const file = new FileLimiter(mockFileService);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('public fields', () => {
     it('sets the errorMessage to the 100 limit', () => {
@@ -62,57 +74,25 @@ describe('FileLimiter', () => {
   });
 
   describe('countOfItemsWithinCase', () => {
-    const attachmentService = createAttachmentServiceMock();
-    attachmentService.executeCaseAggregations.mockImplementation(async () => {
-      return {
-        limiter: {
-          value: 5,
-        },
-      };
-    });
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('calls the aggregation function with the correct arguments', async () => {
-      await file.countOfItemsWithinCase(attachmentService, 'id');
+      await file.countOfItemsWithinCase('id');
 
-      expect(attachmentService.executeCaseAggregations.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(mockFileService.find.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "aggregations": Object {
-              "limiter": Object {
-                "value_count": Object {
-                  "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                },
-              },
-            },
-            "attachmentType": "externalReference",
-            "caseId": "id",
-            "filter": Object {
-              "arguments": Array [
-                Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases-comments.attributes.externalReferenceAttachmentTypeId",
-                },
-                Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": ".files",
-                },
+            "meta": Object {
+              "caseIds": Array [
+                "id",
               ],
-              "function": "is",
-              "type": "function",
             },
+            "perPage": 1,
           },
         ]
       `);
     });
 
     it('returns 5', async () => {
-      expect(await file.countOfItemsWithinCase(attachmentService, 'id')).toBe(5);
+      expect(await file.countOfItemsWithinCase('id')).toBe(5);
     });
   });
 });
