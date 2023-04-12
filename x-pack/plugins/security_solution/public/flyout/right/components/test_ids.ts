@@ -52,3 +52,31 @@ export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
 export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
+export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
+export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
+export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
+export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
+export const ENTITY_PANEL_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanel';
+export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
+export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
+export const ENTITY_PANEL_HEADER_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderTitle';
+export const ENTITY_PANEL_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
+export const TECHNICAL_PREVIEW_ICON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
+export const ENTITIES_USER_OVERVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
+export const ENTITIES_USER_OVERVIEW_IP_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewIP';
+export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewRiskLevel';
+export const ENTITIES_HOST_OVERVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
+export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewIP';
+export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';

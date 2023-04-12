@@ -25,6 +25,8 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
       return 'visualizeApp';
     case 'canvas workpad':
       return 'canvasApp';
+    case 'lens':
+      return 'lensApp';
     default:
       return 'apps';
   }
