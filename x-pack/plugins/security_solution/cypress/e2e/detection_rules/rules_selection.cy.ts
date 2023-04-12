@@ -20,7 +20,8 @@ import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe('Rules selection', () => {
+// TODO: See https://github.com/elastic/kibana/issues/154694
+describe.skip('Rules selection', () => {
   beforeEach(() => {
     cleanKibana();
     login();
