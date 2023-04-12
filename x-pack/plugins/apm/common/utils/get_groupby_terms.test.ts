@@ -28,7 +28,10 @@ describe('get terms fields based on group-by', () => {
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
       { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
-      { field: 'service.environment', missing: 'ENVIRONMENT_NOT_DEFINED' },
+      {
+        field: 'service.environment',
+        missing: 'SERVICE_ENVIRONMENT_NOT_DEFINED',
+      },
       { field: 'transaction.type', missing: 'TRANSACTION_TYPE_NOT_DEFINED' },
       { field: 'transaction.name', missing: 'TRANSACTION_NAME_NOT_DEFINED' },
     ]);
