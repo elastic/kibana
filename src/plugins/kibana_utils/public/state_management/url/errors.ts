@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { memoize, throttle } from 'lodash';
+import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
 
@@ -36,6 +36,12 @@ const throttledOnSaveError = throttle((toasts: NotificationsStart['toasts'], e: 
   });
 }, 10000);
 
+// Helper to bypass throttling if consumers need to handle errors right away
+export const flushNotifyOnErrors = () => {
+  throttledOnRestoreError.flush();
+  throttledOnSaveError.flush();
+};
+
 /**
  * Helper for configuring {@link IKbnUrlStateStorage} to notify about inner errors
  *
@@ -48,9 +54,9 @@ const throttledOnSaveError = throttle((toasts: NotificationsStart['toasts'], e: 
  * ```
  * @param toast - toastApi from core.notifications.toasts
  */
-export const withNotifyOnErrors = memoize((toasts: NotificationsStart['toasts']) => {
+export const withNotifyOnErrors = (toasts: NotificationsStart['toasts']) => {
   return {
     onGetError: (e: Error) => throttledOnRestoreError(toasts, e),
     onSetError: (e: Error) => throttledOnSaveError(toasts, e),
   };
-});
+};
