@@ -95,23 +95,20 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const decodedResourceId = decodeURIComponent(params.resourceId);
 
-  const { pageIndex, sort, queryError, pageSize, setTableOptions, urlQuery, setUrlQuery } =
-    useCloudPostureTable({
-      dataView,
-      defaultQuery: getDefaultQuery,
-      paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-    });
-
-  const onResetFilters = useCallback(() => {
-    setUrlQuery({
-      pageIndex: 0,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-    });
-  }, [setUrlQuery]);
+  const {
+    pageIndex,
+    sort,
+    queryError,
+    pageSize,
+    setTableOptions,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
 
   /**
    * Page ES query result

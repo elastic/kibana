@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -62,23 +62,12 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
-  const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery } =
+  const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery, onResetFilters } =
     useCloudPostureTable({
       dataView,
       defaultQuery: getDefaultQuery,
       paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
     });
-
-  const onResetFilters = useCallback(() => {
-    setUrlQuery({
-      pageIndex: 0,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-    });
-  }, [setUrlQuery]);
 
   /**
    * Page ES query result

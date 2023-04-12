@@ -39,7 +39,6 @@ export const getDefaultQuery = ({
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-
   const {
     pageIndex,
     query,
@@ -50,22 +49,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     urlQuery,
     setUrlQuery,
     filters,
+    onResetFilters,
   } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
-
-  const onResetFilters = useCallback(() => {
-    setUrlQuery({
-      pageIndex: 0,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-    });
-  }, [setUrlQuery]);
 
   /**
    * Page ES query result
