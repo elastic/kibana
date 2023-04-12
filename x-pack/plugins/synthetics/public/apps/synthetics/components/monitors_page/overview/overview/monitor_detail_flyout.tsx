@@ -98,8 +98,9 @@ function DetailFlyoutDurationChart({
 >) {
   const theme = useTheme();
 
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">

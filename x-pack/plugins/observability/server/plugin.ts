@@ -134,8 +134,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: [],
-                    read: [],
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   cases: {
                     delete: [observabilityFeatureId],

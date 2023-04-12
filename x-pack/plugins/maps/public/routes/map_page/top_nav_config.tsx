@@ -58,7 +58,7 @@ export function getTopNavConfig({
     {
       id: 'mapSettings',
       label: i18n.translate('xpack.maps.topNav.openSettingsButtonLabel', {
-        defaultMessage: `Map settings`,
+        defaultMessage: `Settings`,
       }),
       description: i18n.translate('xpack.maps.topNav.openSettingsDescription', {
         defaultMessage: `Open map settings`,

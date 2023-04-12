@@ -39,7 +39,14 @@ export { APP_ROUTE as EXPLORATORY_VIEW_APP_URL } from './constants';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 
-export { ExploratoryView } from './components/shared';
+export {
+  getCoreVitalsComponent,
+  ExploratoryView,
+  FieldValueSuggestions,
+  FieldValueSelection,
+  FilterValueLabel,
+  SelectableUrlList,
+} from './components/shared';
 
 export * from './typings';
 

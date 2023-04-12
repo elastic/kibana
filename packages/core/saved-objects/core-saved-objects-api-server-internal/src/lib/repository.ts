@@ -2554,6 +2554,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
+   * {@inheritDoc ISavedObjectsRepository.getCurrentNamespace}
+   */
+  getCurrentNamespace(namespace?: string) {
+    if (this._spacesExtension) {
+      return this._spacesExtension.getCurrentNamespace(namespace);
+    }
+    return normalizeNamespace(namespace);
+  }
+
+  /**
    * Returns index specified by the given type or the default index
    *
    * @param type - the type
@@ -2662,20 +2672,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createConflictError(type, id);
     }
     // any other error from this check does not matter
-  }
-
-  /**
-   * If the spaces extension is enabled, we should use that to get the current namespace (and optionally throw an error if a consumer
-   * attempted to specify the namespace option).
-   *
-   * If the spaces extension is *not* enabled, we should simply normalize the namespace option so that `'default'` can be used
-   * interchangeably with `undefined`.
-   */
-  private getCurrentNamespace(namespace?: string) {
-    if (this._spacesExtension) {
-      return this._spacesExtension.getCurrentNamespace(namespace);
-    }
-    return normalizeNamespace(namespace);
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */

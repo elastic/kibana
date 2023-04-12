@@ -10,6 +10,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexItem } from '@elastic/eui';
+import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { TimeRange } from '@kbn/es-query';
@@ -20,6 +21,8 @@ import { KibanaLogic } from '../../shared/kibana';
 
 export interface WithLensDataInputProps {
   id: string;
+  searchSessionId?: string;
+  setTimeRange?(timeRange: TimeRange): void;
   timeRange: TimeRange;
 }
 
@@ -58,6 +61,15 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
       () => dataView && formula && getAttributes(dataView, formula, props),
       [dataView, formula, props]
     );
+    const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
+      const [min, max] = range;
+
+      props.setTimeRange?.({
+        from: new Date(min).toISOString(),
+        mode: 'absolute',
+        to: new Date(max).toISOString(),
+      });
+    };
 
     useEffect(() => {
       (async () => {
@@ -85,6 +97,8 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
               id={props.id}
               timeRange={props.timeRange}
               attributes={attributes}
+              searchSessionId={props?.searchSessionId}
+              onBrushEnd={handleBrushEnd}
               onLoad={(...args) => {
                 if (dataLoadTransform) {
                   setData(dataLoadTransform(...args));

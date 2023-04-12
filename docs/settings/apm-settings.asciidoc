@@ -101,4 +101,7 @@ Matcher for all source map indices. Defaults to `apm-*`.
 `xpack.apm.autoCreateApmDataView` {ess-icon}::
 Set to `false` to disable the automatic creation of the APM data view when the APM app is opened. Defaults to `true`.
 
+`xpack.apm.latestAgentVersionsUrl` {ess-icon}::
+Specifies the URL of a self hosted file that contains latest agent versions. Defaults to `https://apm-agent-versions.elastic.co/versions.json`. Set to `''` to disable requesting latest agent versions.
+
 // end::general-apm-settings[]

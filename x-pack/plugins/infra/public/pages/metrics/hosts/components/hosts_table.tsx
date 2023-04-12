@@ -22,11 +22,9 @@ export const HostsTable = () => {
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, closeFlyout, clickedItemUuid } = useHostsTable(hostNodes, {
+  const { columns, items, isFlyoutOpen, closeFlyout, clickedItem } = useHostsTable(hostNodes, {
     time: searchCriteria.dateRange,
   });
-
-  const clickedItem = items.find(({ uuid }) => uuid === clickedItemUuid);
 
   const noData = items.length === 0;
 

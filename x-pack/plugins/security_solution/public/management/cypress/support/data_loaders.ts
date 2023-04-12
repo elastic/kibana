@@ -54,12 +54,19 @@ export const dataLoaders = (
     indexFleetEndpointPolicy: async ({
       policyName,
       endpointPackageVersion,
+      agentPolicyName,
     }: {
       policyName: string;
       endpointPackageVersion: string;
+      agentPolicyName?: string;
     }) => {
       const { kbnClient } = await stackServicesPromise;
-      return indexFleetEndpointPolicy(kbnClient, policyName, endpointPackageVersion);
+      return indexFleetEndpointPolicy(
+        kbnClient,
+        policyName,
+        endpointPackageVersion,
+        agentPolicyName
+      );
     },
 
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {

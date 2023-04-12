@@ -36,9 +36,10 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
 export const LATEST_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest-*';
+  'logs-cloud_security_posture.vulnerabilities_latest*';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
@@ -63,6 +64,8 @@ export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';
+export const CLOUDBEAT_AKS = 'cloudbeat/cis_aks';
+export const CLOUDBEAT_GKE = 'cloudbeat/cis_gke';
 export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
