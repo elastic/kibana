@@ -143,6 +143,15 @@ export function transformSummaryActionParams({
   const variables = {
     kibanaBaseUrl,
     date: new Date().toISOString(),
+    // For backwards compatibility with security solutions rules
+    context: {
+      alerts: alerts.new.data,
+      results_link: ruleUrl,
+      rule: rule.params,
+    },
+    state: {
+      signals_count: alerts.new.count,
+    },
     rule: {
       params: rule.params,
       id: rule.id,

@@ -166,6 +166,9 @@ export interface CombinedSummarizedAlerts extends SummarizedAlerts {
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+  // Optional time bounds
+  start?: number;
+  end?: number;
 }
 export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>

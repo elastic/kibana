@@ -12,6 +12,7 @@ import {
   RuleNotifyWhenTypeValues,
   ThrottledActions,
 } from '../../common';
+import { CombinedSummarizedAlerts } from '../types';
 
 export const isSummaryAction = (action?: RuleAction) => {
   return action?.frequency?.summary || false;
@@ -98,4 +99,33 @@ export const getSummaryActionsFromTaskState = ({
       return newObj;
     }
   }, {});
+};
+
+export const getTimeBoundsOfSummarizedAlerts = (
+  summarizedAlerts: CombinedSummarizedAlerts
+): { start?: number; end?: number } => {
+  let start: number | undefined;
+  let end: number | undefined;
+  // Get the time bounds for the summarized alerts
+  if (summarizedAlerts.all.count > 0) {
+    // get the time bounds for this alert array
+    const timestampMillis: number[] = summarizedAlerts.all.data
+      .map((alert: unknown) => {
+        // TODO - add typing for alerts as data, then we can clean this up
+        const timestamp = (alert as { '@timestamp': string })['@timestamp'];
+        if (timestamp) {
+          return new Date(timestamp).valueOf();
+        }
+        return null;
+      })
+      .filter((timeInMillis: number | null) => null != timeInMillis)
+      .sort() as number[];
+
+    if (timestampMillis.length > 0) {
+      start = timestampMillis[0];
+      end = timestampMillis[timestampMillis.length - 1];
+    }
+  }
+
+  return { start, end };
 };

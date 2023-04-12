@@ -40,6 +40,7 @@ import {
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
+  getTimeBoundsOfSummarizedAlerts,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
@@ -205,6 +206,7 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action) && summarizedAlerts) {
+          const { start, end } = getTimeBoundsOfSummarizedAlerts(summarizedAlerts);
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -221,7 +223,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl(spaceId, start, end),
               }),
             }),
           };
@@ -419,13 +421,13 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string): string | undefined {
+  private buildRuleUrl(spaceId: string, start?: number, end?: number): string | undefined {
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
 
     const relativePath = this.ruleType.getViewInAppRelativeUrl
-      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule })
+      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule, start, end })
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
