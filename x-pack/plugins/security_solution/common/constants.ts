@@ -318,9 +318,6 @@ export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/store
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
-// Useful to fetch extra data without extending security solution's APIs. For example it helps to decouple
-// features like rule snoozing. It's TEMPORAL a solution.
-export const INTERNAL_ALERTING_FIND_RULES = '/internal/alerting/rules/_find';
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are

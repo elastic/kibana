@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { INTERNAL_ALERTING_FIND_RULES } from '../../../../../common/constants';
 import type { RuleSnoozeSettings } from '../../logic';
 import { fetchRulesSnoozeSettings } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['GET', INTERNAL_ALERTING_FIND_RULES];
+const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['GET', INTERNAL_ALERTING_API_FIND_RULES_PATH];
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
