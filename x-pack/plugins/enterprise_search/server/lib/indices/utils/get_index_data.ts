@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ExpandWildcard, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ExpandWildcard,
+  IndicesGetResponse,
+  IndicesIndexState,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -95,13 +99,16 @@ export const getIndexData = async (
   onlyShowSearchOptimizedIndices: boolean,
   returnHiddenIndices: boolean,
   searchQuery?: string
-) => {
+): Promise<{ indexData: IndicesGetResponse; indexNames: string[] }> => {
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
   if (onlyShowSearchOptimizedIndices) {
     const names = await fetchConnectorIndexNames(client);
     const allIndexNames = searchQuery
       ? names.filter((indexName) => indexName.toLowerCase().includes(searchQuery.toLowerCase()))
       : names;
+    if (allIndexNames.length === 0) {
+      return { indexData: {}, indexNames: [] };
+    }
     const allIndexMatches = await client.asCurrentUser.indices.get({
       // only get specified index properties from ES to keep the response under 536MB
       // node.js string length limit: https://github.com/nodejs/node/issues/33960
