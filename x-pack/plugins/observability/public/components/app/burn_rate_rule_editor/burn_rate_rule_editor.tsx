@@ -127,10 +127,10 @@ export function BurnRateRuleEditor(props: Props) {
   );
 }
 
-const getErrorBudgetExhaustionText = (formatedHours: string) =>
+const getErrorBudgetExhaustionText = (formattedHours: string) =>
   i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
     defaultMessage: '{formatedHours} hours until error budget exhaustion.',
     values: {
-      formatedHours,
+      formatedHours: formattedHours,
     },
   });
