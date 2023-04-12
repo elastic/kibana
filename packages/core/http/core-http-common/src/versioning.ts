@@ -8,10 +8,13 @@
 
 /**
  * A Kibana HTTP API version
- * @note assumption that version will be monotonically increasing number where: version > 0.
+ *
+ * @note
+ * Conforms to the Elastic API version specification for public APIs as a date string formatted as YYYY-MM-DD.
+ *
  * @experimental
  */
-export type ApiVersion = `${number}`;
+export type ApiVersion = string;
 
 /** @internal */
 export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
