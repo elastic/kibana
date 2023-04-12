@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v5 as uuidv5 } from 'uuid';
 import { CoreStart } from '@kbn/core/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { interpret } from 'xstate';
