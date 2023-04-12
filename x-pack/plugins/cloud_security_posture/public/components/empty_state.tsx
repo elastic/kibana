@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiImage, EuiEmptyPrompt, EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -21,13 +21,16 @@ export const EmptyState = ({
   onResetFilters: () => void;
   docsUrl?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiEmptyPrompt
       css={css`
         max-width: 734px;
         && > .euiEmptyPrompt__main {
-          gap: 32px;
+          gap: ${euiTheme.size.xl};
         }
+        margin-top: ${euiTheme.size.xxxl}};
       `}
       data-test-subj={EMPTY_STATE_TEST_SUBJ}
       icon={
