@@ -124,7 +124,10 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Connectors',
             id: 'connectors',
-            locator: { id: locatorIds.alertingManagement, params: { appId: 'triggersActionsConnectors' } },
+            locator: {
+              id: locatorIds.alertingManagement,
+              params: { appId: 'triggersActionsConnectors' },
+            },
           },
           {
             name: 'Reporting',
