@@ -177,7 +177,6 @@ describe('Output Service', () => {
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
-    mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
     mockedAgentPolicyService.update.mockReset();
   });
   describe('create', () => {
