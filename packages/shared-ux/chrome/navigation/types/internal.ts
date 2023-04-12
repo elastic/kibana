@@ -13,8 +13,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 /**
  * @internal
  */
-export interface Locator {
-  navigateSync: <P extends SerializableRecord>(params: P) => void;
+export interface Locator<P extends SerializableRecord = {}> {
+  getRedirectUrl(params: P): string;
+  navigateSync: (params: P) => void;
 }
 
 /**

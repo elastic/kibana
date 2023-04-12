@@ -16,9 +16,8 @@ import { GetLocatorFn } from '../../types/internal';
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'navIsOpen' | 'recentItems' | 'activeNavItemId' | 'platformConfig' | 'solutions'
-> &
-  Arguments['platformConfig'];
+  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'recentItems' | 'solutions'
+>;
 
 export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
   propArguments = {};
@@ -27,6 +26,10 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     navIsOpen: {
       control: 'boolean',
       defaultValue: true,
+    },
+    loadingCount: {
+      control: 'number',
+      defaultValue: 0,
     },
   };
 
@@ -39,6 +42,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     const registerNavItemClickAction = action('Register click');
 
     const getLocator: GetLocatorFn = (locatorId: string) => ({
+      getRedirectUrl: () => `/app/for/${locatorId}`,
       navigateSync: (locatorParams?: SerializableRecord) => {
         navAction(`Locator: ${locatorId} / Params: ${JSON.stringify(locatorParams)}`);
       },

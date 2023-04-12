@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderLogo,
+  EuiLoadingSpinner,
   EuiSideNavItemType,
   EuiSpacer,
   useEuiTheme,
@@ -28,7 +29,12 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
-  const { recentItems: recentItemsFromService, ...services } = useNavigation();
+  const {
+    recentItems: recentItemsFromService,
+    loadingCount,
+    activeNavItemId,
+    ...services
+  } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
   let recentItems: Array<EuiSideNavItemType<unknown>> | undefined;
@@ -49,7 +55,7 @@ export const Navigation = (props: NavigationProps) => {
     ];
   }
 
-  const activeNav = services.activeNavItemId ?? props.activeNavItemId;
+  const activeNav = activeNavItemId ?? props.activeNavItemId;
 
   const nav = new NavigationModel(
     services,
@@ -63,21 +69,39 @@ export const Navigation = (props: NavigationProps) => {
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();
 
+  const NavHeader = () => {
+    const homeUrl = services.basePath.prepend(props.homeHref);
+    const navigateHome = (event: React.MouseEvent) => {
+      event.preventDefault();
+      services.navigateToUrl(homeUrl);
+    };
+    const logo =
+      loadingCount === 0 ? (
+        <EuiHeaderLogo iconType="logoElastic" aria-label="Go to home page" />
+      ) : (
+        <EuiLoadingSpinner size="l" aria-hidden={false} onClick={navigateHome} />
+      );
+
+    return (
+      <>
+        <a href={homeUrl} onClick={navigateHome}>
+          {logo}
+        </a>
+        {services.navIsOpen ? (
+          <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+        ) : null}
+      </>
+    );
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" style={{ overflowY: 'auto' }}>
       <EuiFlexItem grow={false}>
         <EuiCollapsibleNavGroup
-          css={{ background: euiTheme.colors.darkestShade }}
+          css={{ background: euiTheme.colors.darkestShade, height: '50px' }}
           data-test-subj="nav-header-logo"
         >
-          <EuiHeaderLogo
-            iconType="logoElastic"
-            href={props.homeHref}
-            aria-label="Go to home page"
-          />
-          {services.navIsOpen ? (
-            <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
-          ) : null}
+          <NavHeader />
         </EuiCollapsibleNavGroup>
 
         {recentItems ? <NavigationBucket {...recent} /> : null}

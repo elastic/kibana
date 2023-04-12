@@ -14,11 +14,13 @@ export const getServicesMock = (): NavigationServices => {
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
   const getLocator = jest.fn();
   const registerNavItemClick = jest.fn();
+  const loadingCount = 0;
 
   return {
     activeNavItemId: 'test.hello.lamp',
     basePath,
     getLocator,
+    loadingCount,
     navIsOpen: true,
     navigateToUrl,
     recentItems,

@@ -25,6 +25,7 @@ export interface NavigationServices {
   activeNavItemId: string | undefined;
   basePath: BasePathService;
   getLocator: GetLocatorFn;
+  loadingCount: number;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   recentItems: RecentItem[];
@@ -46,7 +47,10 @@ export interface NavigationKibanaDependencies {
       recentlyAccessed: { get$: () => Observable<RecentItem[]> };
       registerNavItemClick: (id: string) => void;
     };
-    http: { basePath: BasePathService };
+    http: {
+      basePath: BasePathService;
+      getLoadingCount$(): Observable<number>;
+    };
   };
 }
 

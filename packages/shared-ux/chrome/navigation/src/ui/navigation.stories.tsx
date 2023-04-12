@@ -93,17 +93,8 @@ SingleExpanded.args = {
 };
 SingleExpanded.argTypes = storybookMock.getArgumentTypes();
 
-export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({});
-WithRecentItems.args = {
-  activeNavItemId: 'example_project.root.get_started',
-  recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
-  solutions: [solutionProperties],
-};
-WithRecentItems.argTypes = storybookMock.getArgumentTypes();
-
-export const ReducedSections: ComponentStory<typeof Template> = Template.bind({});
-ReducedSections.args = {
-  activeNavItemId: 'example_project.root.get_started',
+export const ReducedPlatformLinks: ComponentStory<typeof Template> = Template.bind({});
+ReducedPlatformLinks.args = {
   platformConfig: {
     [Platform.Analytics]: { enabled: false },
     [Platform.MachineLearning]: { enabled: false },
@@ -127,4 +118,25 @@ ReducedSections.args = {
   },
   solutions: [solutionProperties],
 };
-ReducedSections.argTypes = storybookMock.getArgumentTypes();
+ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
+
+export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({});
+WithRecentItems.args = {
+  recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
+  solutions: [solutionProperties],
+};
+WithRecentItems.argTypes = storybookMock.getArgumentTypes();
+
+export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bind({});
+WithRequestsLoading.args = {
+  loadingCount: 1,
+  solutions: [solutionProperties],
+};
+WithRequestsLoading.argTypes = storybookMock.getArgumentTypes();
+
+export const Collapsed: ComponentStory<typeof Template> = Template.bind({});
+Collapsed.args = {
+  navIsOpen: false,
+  solutions: [solutionProperties],
+};
+Collapsed.argTypes = storybookMock.getArgumentTypes();
