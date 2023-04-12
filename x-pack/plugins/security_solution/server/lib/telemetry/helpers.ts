@@ -8,8 +8,9 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge } from 'lodash';
+import { merge, set } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import { sha256 } from 'js-sha256';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
@@ -299,4 +300,37 @@ export const createTaskMetric = (
     end_time: endTime,
     error_message: errorMessage,
   };
+};
+
+function obfuscateString(clusterId: string, toHash: string): string {
+  const valueToObfuscate = toHash + clusterId;
+  return sha256.create().update(valueToObfuscate).hex();
+}
+
+export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): TelemetryEvent => {
+  // if there is no kubernetes key, return the event as is
+  if (event.kubernetes === undefined && event.kubernetes === null) {
+    return event;
+  }
+
+  const username = event?.kubernetes?.audit?.user?.username;
+  const impersonatedUsername = event?.kubernetes?.audit?.impersonated_user?.username;
+
+  if (username !== undefined && username !== null && !username.startsWith('system')) {
+    set(event, 'kubernetes.audit.user.username', obfuscateString(clusterId, username));
+  }
+
+  if (
+    impersonatedUsername !== undefined &&
+    impersonatedUsername !== null &&
+    !impersonatedUsername.startsWith('system')
+  ) {
+    set(
+      event,
+      'kubernetes.audit.impersonated_user.username',
+      obfuscateString(clusterId, impersonatedUsername)
+    );
+  }
+
+  return event;
 };
