@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
+import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
-import { mockUseParams } from '../../../__mocks__/react_router';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { FilterBy } from '../../../utils/get_formula_by_filter';
+
+import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 
+import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
 import { AnalyticsCollectionOverview } from './analytics_collection_overview';
 
 const mockValues = {
@@ -42,8 +44,6 @@ const mockActions = {
 describe('AnalyticsOverView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUseParams.mockReturnValue({ name: '1', section: 'settings' });
   });
 
   it('renders with Data', async () => {
@@ -89,11 +89,36 @@ describe('AnalyticsOverView', () => {
       dataViewQuery: 'analytics-events-example',
       id: 'analytics-collection-chart-Analytics-Collection-1',
       searchSessionId: 'session-id',
+      selectedChart: 'Searches',
+      setSelectedChart: expect.any(Function),
       setTimeRange: mockActions.setTimeRange,
       timeRange: {
         from: 'now-90d',
         to: 'now',
       },
     });
+  });
+
+  it('displays all filter options', () => {
+    const wrapper = shallow(
+      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
+    );
+    const filterOptions = wrapper.find(AnalyticsCollectionViewMetricWithLens);
+    expect(filterOptions).toHaveLength(4);
+    expect(filterOptions.at(0).props().name).toEqual('Searches');
+    expect(filterOptions.at(1).props().name).toEqual('No results');
+    expect(filterOptions.at(2).props().name).toEqual('Click');
+    expect(filterOptions.at(3).props().name).toEqual('Sessions');
+  });
+
+  it('updates the selected chart when a filter option is clicked', () => {
+    const wrapper = shallow(
+      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
+    );
+    const filterOption = wrapper.find(AnalyticsCollectionViewMetricWithLens).at(1);
+    filterOption.simulate('click', {});
+    expect(wrapper.find(AnalyticsCollectionChartWithLens).props().selectedChart).toEqual(
+      FilterBy.NoResults
+    );
   });
 });
