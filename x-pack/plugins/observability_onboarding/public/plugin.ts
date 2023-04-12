@@ -22,8 +22,8 @@ import {
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 
-export type ObservabilitySetupPluginSetup = void;
-export type ObservabilitySetupPluginStart = void;
+export type ObservabilityOnboardingPluginSetup = void;
+export type ObservabilityOnboardingPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
@@ -36,9 +36,12 @@ export interface ApmPluginStartDeps {
   observability: ObservabilityPublicStart;
 }
 
-export class ObservabilitySetupPlugin
+export class ObservabilityOnboardingPlugin
   implements
-    Plugin<ObservabilitySetupPluginSetup, ObservabilitySetupPluginStart>
+    Plugin<
+      ObservabilityOnboardingPluginSetup,
+      ObservabilityOnboardingPluginStart
+    >
 {
   constructor() {}
 
@@ -46,8 +49,8 @@ export class ObservabilitySetupPlugin
     const pluginSetupDeps = plugins;
 
     core.application.register({
-      id: 'observabilitySetup',
-      title: 'Observability Setup',
+      id: 'observabilityOnboarding',
+      title: 'Observability Onboarding',
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,

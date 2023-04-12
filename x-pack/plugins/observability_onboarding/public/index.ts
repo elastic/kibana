@@ -7,14 +7,17 @@
 
 import { PluginInitializer } from '@kbn/core/public';
 import {
-  ObservabilitySetupPlugin,
-  ObservabilitySetupPluginSetup,
-  ObservabilitySetupPluginStart,
+  ObservabilityOnboardingPlugin,
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart,
 } from './plugin';
 
 export const plugin: PluginInitializer<
-  ObservabilitySetupPluginSetup,
-  ObservabilitySetupPluginStart
-> = () => new ObservabilitySetupPlugin();
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart
+> = () => new ObservabilityOnboardingPlugin();
 
-export type { ObservabilitySetupPluginSetup, ObservabilitySetupPluginStart };
+export type {
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart,
+};

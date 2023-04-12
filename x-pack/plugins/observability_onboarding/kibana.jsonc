@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/observability-setup-plugin",
+  "id": "@kbn/observability-onboarding-plugin",
   "owner": "@elastic/apm-ui",
   "plugin": {
-    "id": "observabilitySetup",
+    "id": "observabilityOnboarding",
     "server": false,
     "browser": true,
     "configPath": ["xpack", "observability"],

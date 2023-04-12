@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'observabilityLogsOnboarding';
-export const PLUGIN_NAME = 'observabilityLogsOnboarding';
+const path = require('path');
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: path.resolve(__dirname, '../../..'),
+  roots: ['<rootDir>/x-pack/plugins/observability_onboarding'],
+};

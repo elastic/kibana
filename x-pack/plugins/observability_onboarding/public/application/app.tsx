@@ -45,16 +45,23 @@ export interface RouteDefinition<T = any> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
 }
 
-export const onboardingSetupRoutes: RouteDefinition[] = [
+export const onBoardingTitle = i18n.translate(
+  'xpack.observability.onboarding.breadcrumbs.onboarding',
+  {
+    defaultMessage: 'Onboarding',
+  }
+);
+
+export const onboardingRoutes: RouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: () => <Redirect to="/onboardingSetup" />,
-    breadcrumb: 'FoooOOobar',
+    render: () => <Redirect to="/observabilityOnboarding" />,
+    breadcrumb: onBoardingTitle,
   },
 ];
 
-function ObservabilitySetupApp() {
+function ObservabilityOnboardingApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   const { http } = useKibana<ApmPluginStartDeps>().services;
@@ -62,13 +69,11 @@ function ObservabilitySetupApp() {
 
   useBreadcrumbs([
     {
-      text: i18n.translate('xpack.onboardingSetup.breadcrumbs.onboarding', {
-        defaultMessage: 'Onboarding',
-      }),
-      href: basePath + '/app/onboardingSetup',
+      text: onBoardingTitle,
+      href: basePath + '/app/observabilityOnboarding',
     },
     {
-      text: i18n.translate('xpack.onboardingSetup.breadcrumbs.logs', {
+      text: i18n.translate('xpack.observability.onboarding.breadcrumbs.logs', {
         defaultMessage: 'Logs',
       }),
     },
@@ -89,9 +94,9 @@ function ObservabilitySetupApp() {
   );
 }
 
-export const observabilitySetupRouter = createRouter({});
+export const observabilityOnboardingRouter = createRouter({});
 
-export function ObservabilitySetupAppRoot({
+export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
   deps,
@@ -129,11 +134,14 @@ export function ObservabilitySetupAppRoot({
           }}
         >
           <i18nCore.Context>
-            <RouterProvider history={history} router={observabilitySetupRouter}>
+            <RouterProvider
+              history={history}
+              router={observabilityOnboardingRouter}
+            >
               <DatePickerContextProvider>
                 <InspectorContextProvider>
                   <EuiErrorBoundary>
-                    <ObservabilitySetupApp />
+                    <ObservabilityOnboardingApp />
                   </EuiErrorBoundary>
                 </InspectorContextProvider>
               </DatePickerContextProvider>
@@ -163,7 +171,7 @@ export const renderApp = ({
   const { element } = appMountParameters;
 
   ReactDOM.render(
-    <ObservabilitySetupAppRoot
+    <ObservabilityOnboardingAppRoot
       appMountParameters={appMountParameters}
       core={core}
       deps={deps}

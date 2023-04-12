@@ -4613,7 +4613,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-setup-plugin@link:x-pack/plugins/observability_setup":
+"@kbn/observability-setup-plugin@link:x-pack/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 
