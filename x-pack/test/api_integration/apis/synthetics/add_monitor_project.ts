@@ -1846,5 +1846,128 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
       }
     });
+
+    it('project monitors - handles sending invalid public location', async () => {
+      const project = `test-project-${uuidv4()}`;
+      try {
+        const response = await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                locations: ['does not exist'],
+              },
+            ],
+          })
+          .expect(200);
+        expect(response.body).eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details:
+                'Invalid location "does not exist" supplied to field "locations". Please select a valid location.',
+              id: httpProjectMonitors.monitors[1].id,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: httpProjectMonitors.monitors[1].id,
+                locations: ['does not exist'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                'ssl.verification_mode': 'strict',
+                tags: 'tag2,tag2',
+                timeout: '80s',
+                type: 'http',
+                urls: ['http://localhost:9200'],
+              },
+              reason: 'Failed to save or update monitor. Configuration is not valid',
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
+
+    it('project monitors - handles sending invalid private locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+      try {
+        const response = await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                privateLocations: ['does not exist'],
+              },
+            ],
+          })
+          .expect(200);
+        expect(response.body).eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details:
+                'Invalid private location "does not exist" supplied to field "privateLocations". Please select a valid private location.',
+              id: httpProjectMonitors.monitors[1].id,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: httpProjectMonitors.monitors[1].id,
+                privateLocations: ['does not exist'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                'ssl.verification_mode': 'strict',
+                tags: 'tag2,tag2',
+                timeout: '80s',
+                type: 'http',
+                urls: ['http://localhost:9200'],
+                locations: ['localhost'],
+              },
+              reason: 'Failed to save or update monitor. Configuration is not valid',
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
   });
 }

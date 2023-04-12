@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-
+import { i18n } from '@kbn/i18n';
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
@@ -21,6 +21,8 @@ import {
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
+  Locations,
+  PrivateLocation,
 } from '../../../common/runtime_types';
 
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
@@ -108,13 +110,12 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   };
 }
 
-export function validateProjectMonitor(monitorFields: ProjectMonitor): ValidationResult {
-  const locationsError =
-    monitorFields.locations &&
-    monitorFields.locations.length === 0 &&
-    (monitorFields.privateLocations ?? []).length === 0
-      ? 'Invalid value "[]" supplied to field "locations"'
-      : '';
+export function validateProjectMonitor(
+  monitorFields: ProjectMonitor,
+  publicLocations: Locations,
+  privateLocations: PrivateLocation[]
+): ValidationResult {
+  const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = ProjectMonitorCodec.decode(monitorFields);
 
@@ -123,7 +124,7 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
       valid: false,
       reason: `Failed to save or update monitor. Configuration is not valid`,
       details: [...formatErrors(decodedMonitor.left), locationsError]
-        .filter((error) => error !== '')
+        .filter((error) => error !== '' && error !== undefined)
         .join(' | '),
       payload: monitorFields,
     };
@@ -140,3 +141,76 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
 
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
+
+export function validateLocation(
+  monitorFields: ProjectMonitor,
+  publicLocations: Locations,
+  privateLocations: PrivateLocation[]
+) {
+  const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
+  const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
+
+  if (hasPublicLocationsConfigured) {
+    let invalidLocation = '';
+    const hasValidPublicLocation = monitorFields.locations?.some((location) => {
+      return publicLocations.some((supportedLocation) => {
+        const locationIsValid = supportedLocation.id === location;
+        if (!locationIsValid) {
+          invalidLocation = location;
+        }
+        return locationIsValid;
+      });
+    });
+    if (!hasValidPublicLocation) {
+      return INVALID_PUBLIC_LOCATION_ERROR(invalidLocation);
+    }
+  }
+
+  if (hasPrivateLocationsConfigured) {
+    let invalidLocation = '';
+    const hasValidPrivateLocation = monitorFields.privateLocations?.some((location) => {
+      return privateLocations.some((supportedLocation) => {
+        const locationIsValid = supportedLocation.label === location;
+        if (!locationIsValid) {
+          invalidLocation = location;
+        }
+        return locationIsValid;
+      });
+    });
+
+    if (!hasValidPrivateLocation) {
+      return INVALID_PRIVATE_LOCATION_ERROR(invalidLocation);
+    }
+  }
+  const hasEmptyLocations =
+    monitorFields.locations &&
+    monitorFields.locations.length === 0 &&
+    (monitorFields.privateLocations ?? []).length === 0;
+
+  if (hasEmptyLocations) {
+    return EMPTY_LOCATION_ERROR;
+  }
+}
+
+const EMPTY_LOCATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.projectMonitors.privateLocationEmptyError',
+  { defaultMessage: 'Invalid value "[]" supplied to field "locations"' }
+);
+
+const INVALID_PRIVATE_LOCATION_ERROR = (location: string) =>
+  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationEmptyError', {
+    defaultMessage:
+      'Invalid private location "{location}" supplied to field "privateLocations". Please select a valid private location.',
+    values: {
+      location,
+    },
+  });
+
+const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
+  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationEmptyError', {
+    defaultMessage:
+      'Invalid location "{location}" supplied to field "locations". Please select a valid location.',
+    values: {
+      location,
+    },
+  });
