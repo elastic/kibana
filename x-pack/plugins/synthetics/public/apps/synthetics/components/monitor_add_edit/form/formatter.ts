@@ -24,14 +24,17 @@ export const ALLOWED_FIELDS = [ConfigKey.ENABLED, ConfigKey.ALERT_CONFIG];
 
 export const format = (fields: Record<string, unknown>, readOnly: boolean = false) => {
   const formattedFields = formatter(fields) as MonitorFields;
+  const textAssertion = formattedFields[ConfigKey.TEXT_ASSERTION]
+    ? `
+          expect(await page.isVisible('text=${
+            formattedFields[ConfigKey.TEXT_ASSERTION]
+          }')).toBeTruthy();`
+    : ``;
   const formattedMap = {
     [FormMonitorType.SINGLE]: {
       ...formattedFields,
       [ConfigKey.SOURCE_INLINE]: `step('Go to ${formattedFields[ConfigKey.URLS]}', async () => {
-          await page.goto('${formattedFields[ConfigKey.URLS]}');
-          expect(await page.isVisible('text=${
-            formattedFields[ConfigKey.TEXT_ASSERTION]
-          }')).toBeTruthy();
+          await page.goto('${formattedFields[ConfigKey.URLS]}');${textAssertion}
         });`,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
     },
