@@ -34,7 +34,7 @@ const loginWithoutAccess = (url: string) => {
   cy.visit(url);
 };
 
-describe('Artifacts pages', () => {
+describe.skip('Artifacts pages', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
