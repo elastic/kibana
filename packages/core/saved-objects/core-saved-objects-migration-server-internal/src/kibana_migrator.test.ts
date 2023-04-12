@@ -121,11 +121,11 @@ describe('KibanaMigrator', () => {
   });
 
   describe('runMigrations', () => {
-    it('throws if prepareMigrations is not called first', () => {
+    it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();
       const migrator = new KibanaMigrator(options);
 
-      expect(migrator.runMigrations()).rejects.toThrowError(
+      await expect(migrator.runMigrations()).rejects.toThrowError(
         'Migrations are not ready. Make sure prepareMigrations is called first.'
       );
     });

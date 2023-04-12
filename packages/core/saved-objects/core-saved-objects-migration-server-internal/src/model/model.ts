@@ -432,15 +432,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       if (stateP.mustRelocateDocuments) {
-        // if this migrator's index must dispatch documents to other indices,
-        // or it must receive documents from other indices
+        // this migrator's index must dispatch documents to other indices,
+        // and/or it must receive documents from other indices
         // we must reindex and synchronize with other migrators
         return {
           ...stateP,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
         };
       } else {
-        // we
+        // this migrator is not involved in a relocation, we can proceed with the standard flow
         return {
           ...stateP,
           controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
