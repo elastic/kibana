@@ -133,7 +133,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
         ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(() => this.forceRefresh())
+      .subscribe(() => this.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
   );
 
   this.subscriptions.add(

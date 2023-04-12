@@ -316,9 +316,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
-  public forceRefresh() {
+  public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
-    this.controlGroup?.reload();
+    if (refreshControlGroup) this.controlGroup?.reload();
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();

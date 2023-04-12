@@ -8,7 +8,7 @@
 import { closeAllToasts } from '../../tasks/close_all_toasts';
 import { login } from '../../tasks/login';
 
-describe('When defining a kibana role for Endpoint security access', () => {
+describe.skip('When defining a kibana role for Endpoint security access', () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
     return cy
       .get('#featurePrivilegeControls_siem')

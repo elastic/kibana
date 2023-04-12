@@ -6,23 +6,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
-
 interface Option {
   label: string;
   options: Array<{ value: string; label: string }>;
 }
 
-export function IndexSelection({ control }: Props) {
+export function IndexSelection() {
+  const { control, getFieldState } = useFormContext<CreateSLOInput>();
   const { isLoading, indices = [] } = useFetchIndices();
   const [indexOptions, setIndexOptions] = useState<Option[]>([]);
 
@@ -69,9 +66,10 @@ export function IndexSelection({ control }: Props) {
           defaultMessage: 'Use * to broaden your query.',
         }
       )}
+      isInvalid={getFieldState('indicator.params.index').invalid}
     >
       <Controller
-        shouldUnregister={true}
+        shouldUnregister
         defaultValue=""
         name="indicator.params.index"
         control={control}
@@ -87,8 +85,8 @@ export function IndexSelection({ control }: Props) {
             )}
             async
             data-test-subj="indexSelection"
-            isClearable={true}
-            isInvalid={!!fieldState.error}
+            isClearable
+            isInvalid={fieldState.invalid}
             isLoading={isLoading}
             onChange={(selected: EuiComboBoxOptionOption[]) => {
               if (selected.length) {
