@@ -7,10 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   RequestHandler,
-  IRouter,
   RequestHandlerContextBase,
   KibanaRequest,
   KibanaResponseFactory,
@@ -19,13 +19,17 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
+  IRouter,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
+import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
 import { isValidRouteVersion } from './is_valid_route_version';
 import { injectResponseHeaders } from './inject_response_headers';
+
+import { defaultResolvers } from './default_handler_resolvers';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
@@ -50,40 +54,28 @@ export class CoreVersionedRoute implements VersionedRoute {
     method,
     path,
     options,
-    validateResponses = false,
   }: {
-    router: IRouter;
+    router: CoreVersionedRouter;
     method: Method;
     path: string;
     options: VersionedRouteConfig<Method>;
-    validateResponses?: boolean;
   }) {
-    return new CoreVersionedRoute(router, method, path, options, validateResponses);
+    return new CoreVersionedRoute(router, method, path, options);
   }
 
   private constructor(
-    private readonly router: IRouter,
+    private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
-    public readonly options: VersionedRouteConfig<Method>,
-    private readonly validateResponses: boolean = false
-  ) {
-    this.router[this.method](
-      {
-        path: this.path,
-        validate: passThroughValidation,
-        options: this.options,
-      },
-      this.requestHandler
-    );
-  }
+    public readonly options: VersionedRouteConfig<Method>
+  ) {}
 
-  private _isPublic: undefined | boolean;
-  private get isPublic() {
-    if (this._isPublic === undefined) {
-      this._isPublic = this.options?.access === 'public';
-    }
-    return this._isPublic;
+  private isPublic: () => boolean = once(() => this.options?.access === 'public');
+
+  private getDefaultVersion(): undefined | ApiVersion {
+    return defaultResolvers[this.router.defaultHandlerResolutionStrategy]([
+      ...this.handlers.keys(),
+    ]);
   }
 
   private getAvailableVersionsMessage(): string {
@@ -93,13 +85,27 @@ export class CoreVersionedRoute implements VersionedRoute {
     }`;
   }
 
+  public register(router: IRouter): void {
+    router[this.method](
+      {
+        path: this.path,
+        validate: passThroughValidation,
+        options: this.options,
+      },
+      this.requestHandler
+    );
+  }
+
   /** This is where we must implement the versioned spec once it is available */
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
     req: KibanaRequest,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> => {
-    const version = req.headers?.[ELASTIC_HTTP_VERSION_HEADER] as undefined | ApiVersion;
+    const version = (req.headers?.[ELASTIC_HTTP_VERSION_HEADER] ?? this.getDefaultVersion()) as
+      | undefined
+      | ApiVersion;
+
     if (!version) {
       return res.badRequest({
         body: `Version expected at [${this.method}] [${
@@ -108,7 +114,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
 
-    const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
+    const invalidVersionMessage = isValidRouteVersion(this.isPublic(), version);
     if (invalidVersionMessage) {
       return res.badRequest({ body: invalidVersionMessage });
     }
@@ -152,7 +158,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.validateResponses && validation?.response?.[response.status]) {
+    if (this.router.validateResponses && validation?.response?.[response.status]) {
       const responseValidation = validation.response[response.status];
       try {
         validate(
@@ -177,7 +183,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private validateVersion(version: string) {
-    const message = isValidRouteVersion(this.isPublic, version);
+    const message = isValidRouteVersion(this.isPublic(), version);
     if (message) {
       throw new Error(message);
     }

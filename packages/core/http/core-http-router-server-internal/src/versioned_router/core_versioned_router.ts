@@ -25,8 +25,8 @@ export class CoreVersionedRouter implements VersionedRouter {
     return new CoreVersionedRouter(router, validateResponses, defaultHandlerResolutionStrategy);
   }
   private constructor(
-    private readonly router: IRouter,
-    private readonly validateResponses: boolean = false,
+    public readonly router: IRouter,
+    public readonly validateResponses: boolean = false,
     public readonly defaultHandlerResolutionStrategy: DefaultHandlerResolutionStrategy = 'oldest'
   ) {}
 
@@ -34,12 +34,12 @@ export class CoreVersionedRouter implements VersionedRouter {
     (routeMethod: Method) =>
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
-        router: this.router,
+        router: this,
         method: routeMethod,
         path: options.path,
         options,
-        validateResponses: this.validateResponses,
       });
+      route.register(this.router);
       this.routes.add(route);
       return route;
     };
