@@ -135,6 +135,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
+    // @ts-ignore
     observability: {
       useRulesLink: () => ({ href: 'newRuleLink' }),
       observabilityRuleTypeRegistry: {
