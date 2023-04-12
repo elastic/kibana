@@ -122,7 +122,7 @@ describe('Single Host Metadata (Hosts View)', () => {
     expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
   });
 
-  it('should return spinner if loading', async () => {
+  it('should return loading text if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 

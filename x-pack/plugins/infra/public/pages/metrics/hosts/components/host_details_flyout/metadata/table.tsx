@@ -137,9 +137,9 @@ export const Table = (props: Props) => {
       error={searchError ? `${searchError.message}` : ''}
       message={
         loading ? (
-          <div>{LOADING}</div>
+          <div data-test-subj="infraHostMetadataLoading">{LOADING}</div>
         ) : (
-          <div data-test-subj="infraMetadataNoData">{NO_METADATA_FOUND}</div>
+          <div data-test-subj="infraHostMetadataNoData">{NO_METADATA_FOUND}</div>
         )
       }
     />
