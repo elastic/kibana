@@ -14,6 +14,7 @@ import {
   BandwidthLimitKey,
   DEFAULT_BANDWIDTH_LIMIT,
   ThrottlingConfig,
+  ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
 import { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
@@ -24,7 +25,7 @@ import { CONNECTION_PROFILE_VALUES } from '../../constants';
 interface Props {
   validate?: Validation;
   minColumnWidth?: string;
-  onFieldBlur?: (field: keyof ThrottlingConfig) => void;
+  onFieldBlur?: (field: keyof ThrottlingConfigValue) => void;
   readOnly?: boolean;
   throttling: ThrottlingConfig;
   setValue: (value: ThrottlingConfig) => void;
@@ -45,8 +46,8 @@ export const ThrottlingFields = memo<Props>(
     // handle this in the parent component
     // const runsOnService = true;
 
-    const exceedsDownloadLimits = throttling.download > maxDownload;
-    const exceedsUploadLimits = throttling.upload > maxUpload;
+    const exceedsDownloadLimits = throttling.value.download > maxDownload;
+    const exceedsUploadLimits = throttling.value.upload > maxUpload;
     const isThrottlingEnabled = throttling.label !== CONNECTION_PROFILE_VALUES.NO_THROTTLING;
 
     const hasExceededLimits = isThrottlingEnabled && (exceedsDownloadLimits || exceedsUploadLimits);

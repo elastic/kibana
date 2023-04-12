@@ -434,10 +434,13 @@ function getMonitorDetailsMockSlice() {
       'filter_journeys.tags': [],
       ignore_https_errors: false,
       throttling: {
-        download: 5,
-        upload: 3,
-        latency: 20,
+        value: {
+          download: 5,
+          upload: 3,
+          latency: 20,
+        },
         label: 'Regular 3G',
+        isCustom: false,
       },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
