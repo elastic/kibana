@@ -54,6 +54,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   // Date picker
   isRefreshPaused?: boolean;
@@ -127,6 +128,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     showDatePicker: true,
     showSubmitButton: true,
     showAutoRefreshOnly: false,
+    filtersForSuggestions: [],
   };
 
   private services = this.props.kibana.services;
@@ -480,6 +482,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        filtersForSuggestions={this.props.filtersForSuggestions}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
@@ -500,6 +503,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           readOnly={this.props.isDisabled}
         />
@@ -510,6 +514,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
@@ -553,6 +558,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           iconType={this.props.iconType}
           nonKqlMode={this.props.nonKqlMode}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={this.props.filtersForSuggestions}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}

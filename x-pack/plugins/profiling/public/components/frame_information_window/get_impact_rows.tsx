@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
 
 export function getImpactRows({
   countInclusive,
@@ -48,17 +50,11 @@ export function getImpactRows({
 
   const impactRows = [
     {
-      label: i18n.translate(
-        'xpack.profiling.flameGraphInformationWindow.percentageCpuTimeInclusiveLabel',
-        { defaultMessage: '% of CPU time' }
-      ),
+      label: <CPULabelWithHint type="total" labelSize="s" iconSize="s" />,
       value: asPercentage(percentage),
     },
     {
-      label: i18n.translate(
-        'xpack.profiling.flameGraphInformationWindow.percentageCpuTimeExclusiveLabel',
-        { defaultMessage: '% of CPU time (excl. children)' }
-      ),
+      label: <CPULabelWithHint type="self" labelSize="s" iconSize="s" />,
       value: asPercentage(percentageNoChildren),
     },
     {

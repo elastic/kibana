@@ -22,10 +22,10 @@ describe('getSampleProbability', () => {
     expect(getSampleProbability(100000)).toEqual(0.5);
   });
   test('returns sample probability based on total docs ratio', () => {
-    expect(getSampleProbability(100001)).toEqual(0.4999950000499995);
+    expect(getSampleProbability(100001)).toEqual(0.5);
     expect(getSampleProbability(1000000)).toEqual(0.05);
-    expect(getSampleProbability(1000001)).toEqual(0.04999995000005);
-    expect(getSampleProbability(2000000)).toEqual(0.025);
+    expect(getSampleProbability(1000001)).toEqual(0.05);
+    expect(getSampleProbability(2000000)).toEqual(0.03);
     expect(getSampleProbability(5000000)).toEqual(0.01);
     expect(getSampleProbability(10000000)).toEqual(0.005);
     expect(getSampleProbability(100000000)).toEqual(0.0005);

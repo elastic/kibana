@@ -19,7 +19,13 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
-import { enabledRule1, enabledRule2, returnedRule1, returnedRule2 } from './test_helpers';
+import {
+  defaultRule,
+  enabledRule1,
+  enabledRule2,
+  returnedRule1,
+  returnedRule2,
+} from './test_helpers';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -53,6 +59,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -66,6 +74,36 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   },
 });
 
+export const enabledRule3 = {
+  ...defaultRule,
+  id: 'id3',
+  attributes: {
+    ...defaultRule.attributes,
+    enabled: true,
+    scheduledTaskId: 'id3',
+    apiKey: Buffer.from('789:ghi').toString('base64'),
+    apiKeyCreatedByUser: true,
+  },
+};
+
+export const returnedRule3 = {
+  actions: [],
+  alertTypeId: 'fakeType',
+  apiKey: 'Nzg5OmdoaQ==',
+  apiKeyCreatedByUser: true,
+  consumer: 'fakeConsumer',
+  enabled: true,
+  id: 'id3',
+  name: 'fakeName',
+  notifyWhen: undefined,
+  params: undefined,
+  schedule: {
+    interval: '5m',
+  },
+  scheduledTaskId: 'id3',
+  snoozeSchedule: [],
+};
+
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   jest.clearAllMocks();
@@ -77,7 +115,7 @@ describe('bulkDelete', () => {
   let rulesClient: RulesClient;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [enabledRule1, enabledRule2] }
+    response = { saved_objects: [enabledRule1, enabledRule2, enabledRule3] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -126,11 +164,12 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should try to delete rules, one successful and one with 500 error', async () => {
+  test('should try to delete rules, two successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
         getBulkOperationStatusErrorResponse(500),
+        { id: 'id3', type: 'alert', success: true },
       ],
     });
 
@@ -140,9 +179,10 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
       enabledRule1,
       enabledRule2,
+      enabledRule3,
     ]);
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -150,7 +190,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRule1],
+      rules: [returnedRule1, returnedRule3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -310,6 +350,25 @@ describe('bulkDelete', () => {
 
     await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
       'No rules found for bulk delete'
+    );
+  });
+
+  test('should not mark API keys for invalidation if the user is authenticated using an api key', async () => {
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id3', type: 'alert', success: true },
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      expect.anything(),
+      expect.anything()
     );
   });
 
