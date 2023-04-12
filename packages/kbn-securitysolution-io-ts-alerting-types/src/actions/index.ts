@@ -35,15 +35,29 @@ export const RuleActionAlertsFilter = t.strict({
     t.intersection([
       t.strict({
         kql: t.string,
-        filters: t.intersection([
-          t.type({
-            meta: t.record(t.string, t.unknown),
-          }),
-          t.partial({
-            $state: t.string,
-            query: t.record(t.string, t.string),
-          }),
-        ]),
+        filters: t.array(
+          t.intersection([
+            t.type({
+              meta: t.partial({
+                alias: t.union([t.string, t.null]),
+                disabled: t.boolean,
+                negate: t.boolean,
+                controlledBy: t.string,
+                group: t.string,
+                index: t.string,
+                isMultiIndex: t.boolean,
+                type: t.string,
+                key: t.string,
+                params: t.any,
+                value: t.string,
+              }),
+            }),
+            t.partial({
+              $state: t.string,
+              query: t.record(t.string, t.string),
+            }),
+          ])
+        ),
       }),
       t.partial({ dsl: t.string }),
     ]),
