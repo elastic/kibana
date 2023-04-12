@@ -77,26 +77,24 @@ describe('Routing versioned requests', () => {
     await supertest.get('/my-path').set('Elastic-Api-Version', '2').expect(400);
   });
 
-  it('handles missing version header', async () => {
+  it('handles missing version header (defaults to oldest)', async () => {
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
-      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+      .get({ path: '/my-path', access: 'public' })
+      .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
         return res.ok({ body: { v: '1' } });
       })
-      .addVersion({ validate: false, version: '2' }, async (ctx, req, res) => {
+      .addVersion({ validate: false, version: '2022-02-02' }, async (ctx, req, res) => {
         return res.ok({ body: { v: '2' } });
       });
 
     await server.start();
 
-    await expect(
-      supertest
-        .get('/my-path')
-        .expect(400)
-        .then(({ body }) => body)
-    ).resolves.toEqual(
+    await expect(supertest.get('/my-path').expect(200)).resolves.toEqual(
       expect.objectContaining({
-        message: expect.stringMatching(/Version expected at/),
+        body: { v: '1' },
+        header: expect.objectContaining({
+          'elastic-api-version': '2020-02-02',
+        }),
       })
     );
   });
