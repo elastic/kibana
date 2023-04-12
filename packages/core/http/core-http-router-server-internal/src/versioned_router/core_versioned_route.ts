@@ -159,10 +159,9 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private validateVersion(version: string) {
-    if (!isValidRouteVersion(version)) {
-      throw new Error(
-        `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`
-      );
+    const message = isValidRouteVersion(this.options.access === 'public', version);
+    if (message) {
+      throw new Error(message);
     }
 
     if (this.handlers.has(version as ApiVersion)) {

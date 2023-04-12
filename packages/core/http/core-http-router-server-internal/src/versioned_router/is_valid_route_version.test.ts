@@ -10,20 +10,20 @@ import { isValidRouteVersion } from './is_valid_route_version';
 
 describe('isValidRouteVersion', () => {
   describe('public', () => {
-    test('valid dates "true"', () => {
-      expect(isValidRouteVersion(true, '2010-02-01')).toBe(true);
+    test('allows valid dates', () => {
+      expect(isValidRouteVersion(true, '2010-02-01')).toBe(undefined);
     });
-    test.each([['2020.02.01'], [''], ['abc']])('%p returns "false"', (value: string) => {
-      expect(isValidRouteVersion(true, value)).toBe(false);
+    test.each([['2020.02.01'], [''], ['abc']])('%p returns an error message', (value: string) => {
+      expect(isValidRouteVersion(true, value)).toMatch(/Invalid version/);
     });
   });
   describe('internal', () => {
-    test('valid numbers return "true"', () => {
-      expect(isValidRouteVersion(false, '1')).toBe(true);
+    test('allows valid numbers', () => {
+      expect(isValidRouteVersion(false, '1')).toBe(undefined);
     });
 
-    test.each([['1.1'], [''], ['abc']])('%p returns "false"', (value: string) => {
-      expect(isValidRouteVersion(false, value)).toBe(false);
+    test.each([['1.1'], [''], ['abc']])('%p returns an error message', (value: string) => {
+      expect(isValidRouteVersion(false, value)).toMatch(/Invalid version number/);
     });
   });
 });
