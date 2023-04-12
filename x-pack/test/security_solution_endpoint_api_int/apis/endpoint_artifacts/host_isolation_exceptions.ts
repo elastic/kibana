@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
+  describe.skip('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
 

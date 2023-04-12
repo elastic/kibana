@@ -8,8 +8,6 @@ import React from 'react';
 import Chance from 'chance';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
-import { TestProvider } from '../../test/test_provider';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';

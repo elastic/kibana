@@ -38,6 +38,11 @@ export class RasterTileLayer extends AbstractLayer {
     this._style = new TileStyle();
   }
 
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'raster'
+    return true;
+  }
+
   getSource(): IRasterSource {
     return super.getSource() as IRasterSource;
   }
