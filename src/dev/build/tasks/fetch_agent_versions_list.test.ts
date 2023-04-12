@@ -40,9 +40,7 @@ const config = new Config(
   '',
   '',
   false,
-  true,
-  true,
-  {}
+  true
 );
 
 const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
