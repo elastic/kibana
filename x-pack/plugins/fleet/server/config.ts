@@ -158,6 +158,14 @@ export const config: PluginConfigDescriptor = {
         }
       },
     }),
+
+    internal: schema.maybe(
+      schema.object({
+        disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+      })
+    ),
   }),
 };
 
