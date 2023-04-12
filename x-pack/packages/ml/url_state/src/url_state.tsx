@@ -94,6 +94,12 @@ export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 
+  const searchStringRef = useRef<string>(searchString);
+
+  useEffect(() => {
+    searchStringRef.current = searchString;
+  }, [searchString]);
+
   const setUrlState: SetUrlState = useCallback(
     (
       accessor: Accessor,
@@ -101,7 +107,8 @@ export const UrlStateProvider: FC = ({ children }) => {
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = searchStringRef.current;
+
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -154,7 +161,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchString]
+    [searchStringRef.current]
   );
 
   return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
