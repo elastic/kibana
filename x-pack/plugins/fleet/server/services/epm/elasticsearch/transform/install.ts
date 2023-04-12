@@ -801,7 +801,7 @@ async function handleTransformInstall({
     // If isUnauthorizedAPIKey: true (due to insufficient user permission at transform creation)
     // that means the transform is created but not started.
     // Note in saved object this is a deferred installation so user can later reauthorize
-    deferred: true, // @TODO: renable isUnauthorizedAPIKey,
+    deferred: isUnauthorizedAPIKey,
     version: transform.transformVersion,
   };
 }
