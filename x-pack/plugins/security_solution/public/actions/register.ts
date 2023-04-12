@@ -6,8 +6,9 @@
  */
 
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
+import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartPlugins, StartServices } from '../types';
 import { createFilterInCellActionFactory, createFilterOutCellActionFactory } from './filter';
@@ -22,7 +23,11 @@ import {
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { SecurityCellActionsTrigger } from './constants';
-import type { SecurityCellActionName, SecurityCellActions } from './types';
+import type {
+  SecurityCellActionExecutionContext,
+  SecurityCellActionName,
+  SecurityCellActions,
+} from './types';
 
 export const registerUIActions = (
   { uiActions }: StartPlugins,
@@ -57,37 +62,58 @@ const registerCellActions = (
     toggleColumn: createToggleColumnCellActionFactory({ store }),
   };
 
-  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DEFAULT, cellActions, [
-    'filterIn',
-    'filterOut',
-    'addToTimeline',
-    'showTopN',
-    'copyToClipboard',
-  ]);
+  registerCellActionsTrigger(
+    uiActions,
+    SecurityCellActionsTrigger.DEFAULT,
+    cellActions,
+    ['filterIn', 'filterOut', 'addToTimeline', 'showTopN', 'copyToClipboard'],
+    services
+  );
 
-  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DETAILS_FLYOUT, cellActions, [
-    'filterIn',
-    'filterOut',
-    'addToTimeline',
-    'toggleColumn',
-    'showTopN',
-    'copyToClipboard',
-  ]);
+  registerCellActionsTrigger(
+    uiActions,
+    SecurityCellActionsTrigger.DETAILS_FLYOUT,
+    cellActions,
+    ['filterIn', 'filterOut', 'addToTimeline', 'toggleColumn', 'showTopN', 'copyToClipboard'],
+    services
+  );
 };
 
 const registerCellActionsTrigger = (
   uiActions: UiActionsStart,
   triggerId: SecurityCellActionsTrigger,
   cellActions: SecurityCellActions,
-  actionsOrder: SecurityCellActionName[]
+  actionsOrder: SecurityCellActionName[],
+  services: StartServices
 ) => {
   uiActions.registerTrigger({ id: triggerId });
 
   actionsOrder.forEach((actionName, order) => {
     const actionFactory = cellActions[actionName];
-    uiActions.addTriggerAction(
-      triggerId,
-      actionFactory({ id: `${triggerId}-${actionName}`, order })
-    );
+    const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+
+    uiActions.addTriggerAction(triggerId, actionWithTelemetry(action, services));
   });
+};
+
+const actionWithTelemetry = (
+  action: CellAction<CellActionExecutionContext>,
+  services: StartServices
+): CellAction<CellActionExecutionContext> => {
+  const { telemetry } = services;
+  const { execute, ...rest } = action;
+  const enhancedExecute = (
+    context: ActionExecutionContext<SecurityCellActionExecutionContext>
+  ): Promise<void> => {
+    telemetry.reportCellActionClicked({
+      actionId: rest.id,
+      displayName: rest.getDisplayName(context),
+      fieldName: context.field.name,
+      metadata: context.metadata,
+    });
+
+    return execute(context);
+  };
+
+  return { ...rest, execute: enhancedExecute };
 };

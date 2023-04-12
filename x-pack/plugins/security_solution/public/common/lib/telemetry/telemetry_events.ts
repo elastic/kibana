@@ -182,6 +182,40 @@ const mlJobUpdateEvent: TelemetryEvent = {
   },
 };
 
+const cellActionClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.CellActionClicked,
+  schema: {
+    fieldName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Field Name',
+        optional: false,
+      },
+    },
+    actionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Action id',
+        optional: false,
+      },
+    },
+    displayName: {
+      type: 'keyword',
+      _meta: {
+        description: 'User friendly action name',
+        optional: false,
+      },
+    },
+    metadata: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Action metadata',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
@@ -190,4 +224,5 @@ export const telemetryEvents = [
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
   mlJobUpdateEvent,
+  cellActionClickedEvent,
 ];
