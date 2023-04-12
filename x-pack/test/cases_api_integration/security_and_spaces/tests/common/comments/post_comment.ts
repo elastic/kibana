@@ -15,6 +15,7 @@ import {
   AttributesTypeAlerts,
   CaseStatuses,
   CommentRequestExternalReferenceSOType,
+  CommentRequestAlertType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -26,6 +27,7 @@ import {
   getFilesAttachmentReq,
   fileAttachmentMetadata,
   fileMetadata,
+  postCommentAlertMultipleIdsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -39,6 +41,7 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -121,8 +124,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(comment).to.eql({
           type: postCommentAlertReq.type,
-          alertId: postCommentAlertReq.alertId,
-          index: postCommentAlertReq.index,
+          alertId: [postCommentAlertReq.alertId],
+          index: [postCommentAlertReq.index],
           rule: postCommentAlertReq.rule,
           created_by: defaultUser,
           pushed_at: null,
@@ -935,6 +938,74 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('alert filtering', () => {
+      it('not create a new attachment if the alert is already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should create a new attachment without alerts attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertMultipleIdsReq,
+            alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+            index: ['test-index-1', 'test-index-2', 'test-index-3'],
+          },
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        const secondAttachment = attachments[1] as CommentRequestAlertType;
+
+        expect(secondAttachment.alertId).to.eql(['test-id-3']);
+        expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
     });
 
     describe('rbac', () => {
