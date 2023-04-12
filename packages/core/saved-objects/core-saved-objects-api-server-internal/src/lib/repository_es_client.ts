@@ -24,6 +24,7 @@ const methods = [
   'search',
   'update',
   'updateByQuery',
+  'indices',
 ] as const;
 
 type MethodName = typeof methods[number];
@@ -32,18 +33,27 @@ export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName | 'transpo
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
-    Object.defineProperty(acc, key, {
-      value: async (params?: unknown, options?: TransportRequestOptions) => {
-        try {
-          return await retryCallCluster(() =>
-            (client[key] as Function)(params, { maxRetries: 0, ...options })
-          );
-        } catch (e) {
-          // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
-          throw decorateEsError(e);
-        }
-      },
-    });
+    if (key === 'indices') {
+      Object.defineProperty(acc, key, {
+        value: {
+          refresh: async (params?: unknown, options?: TransportRequestOptions) =>
+            await retryCallCluster(() => (client.indices.refresh as Function)(params, options)),
+        } as RepositoryEsClient['indices'],
+      });
+    } else {
+      Object.defineProperty(acc, key, {
+        value: async (params?: unknown, options?: TransportRequestOptions) => {
+          try {
+            return await retryCallCluster(() =>
+              (client[key] as Function)(params, { maxRetries: 0, ...options })
+            );
+          } catch (e) {
+            // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
+            throw decorateEsError(e);
+          }
+        },
+      });
+    }
     return acc;
   }, {} as RepositoryEsClient);
 }

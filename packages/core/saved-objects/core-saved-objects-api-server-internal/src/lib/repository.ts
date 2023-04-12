@@ -150,7 +150,7 @@ export interface SavedObjectsRepositoryOptions {
   extensions?: SavedObjectsExtensions;
 }
 
-export const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_REFRESH_SETTING = false;
 export const DEFAULT_RETRY_COUNT = 3;
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
@@ -976,6 +976,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
           // return an error if the doc isn't found at all or the doc doesn't exist in the namespaces
           if (!docFound) {
+            console.log('here!');
             return {
               tag: 'Left',
               value: {
@@ -1220,6 +1221,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
     const kueryNode = buildNode('or', [match1, match2]);
 
+    await this.client.indices.refresh({ index: this.getIndicesForTypes(typesToUpdate) });
     const { body, statusCode, headers } = await this.client.updateByQuery(
       {
         index: this.getIndicesForTypes(typesToUpdate),
@@ -1420,6 +1422,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
     };
 
+    // Force refresh to ensure consistent search results
+
+    await this.client.indices.refresh({ index: this.getIndicesForTypes(allowedTypes) });
     const { body, statusCode, headers } = await this.client.search<SavedObjectsRawDocSource>(
       esOptions,
       {
@@ -2500,6 +2505,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
+    await this.client.indices.refresh({ index: this.getIndicesForTypes(allowedTypes) });
     const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
       ignore: [404],
       meta: true,
