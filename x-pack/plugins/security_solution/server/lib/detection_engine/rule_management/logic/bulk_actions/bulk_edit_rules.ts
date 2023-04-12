@@ -21,7 +21,6 @@ import { BulkActionEditType } from '../../../../../../common/detection_engine/ru
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import { enrichFilterWithRuleTypeMapping } from '../search/enrich_filter_with_rule_type_mappings';
-import { readRules } from '../crud/read_rules';
 import type { RuleAlertType } from '../../../rule_schema';
 
 import { ruleParamsModifier } from './rule_params_modifier';
