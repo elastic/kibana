@@ -16,7 +16,9 @@ export function addGeneratedActionValues(
   return actions.map(({ uuid, alertsFilter, ...action }) => {
     const generateDSL = (kql: string, filters: Filter[]) => {
       try {
-        return JSON.stringify(buildEsQuery(undefined, [{ query: kql, language: 'kql' }], filters));
+        return JSON.stringify(
+          buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters)
+        );
       } catch (e) {
         throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
       }

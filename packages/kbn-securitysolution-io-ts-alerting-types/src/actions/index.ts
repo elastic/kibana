@@ -53,8 +53,8 @@ export const RuleActionAlertsFilter = t.strict({
               }),
             }),
             t.partial({
-              $state: t.string,
-              query: t.record(t.string, t.string),
+              $state: t.type({ store: t.string }),
+              query: t.record(t.string, t.any),
             }),
           ])
         ),
