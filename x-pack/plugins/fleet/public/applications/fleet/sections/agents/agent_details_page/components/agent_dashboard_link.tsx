@@ -14,7 +14,7 @@ import { useGetPackageInfoByKeyQuery, useKibanaLink, useLink } from '../../../..
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
+  DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
@@ -22,7 +22,7 @@ function useAgentDashboardLink(agent: Agent) {
 
   const isInstalled = data?.item.status === 'installed';
 
-  const dashboardLink = useKibanaLink(`/dashboard/${FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID}`);
+  const dashboardLink = useKibanaLink(`/dashboard/${DASHBOARD_LOCATORS_IDS.AGENT_METRICS}`);
   const query = `_a=(query:(language:kuery,query:'elastic_agent.id:${agent.id}'))`;
   const link = `${dashboardLink}?${query}`;
 

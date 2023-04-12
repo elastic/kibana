@@ -17,13 +17,15 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX, LOCATORS_IDS, DASHBOARD_LOCATORS_IDS } from '../../../../constants';
+import { AGENTS_INDEX } from '../../../../constants';
+import { LOCATORS_IDS, DASHBOARD_LOCATORS_IDS } from '../../../../../../../common/constants';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
@@ -97,6 +99,11 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onPopoverButtonClick = () => setIsPopoverOpen(() => !isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
   const dashboardLocator = useLocator(LOCATORS_IDS.DASHBOARD_APP);
 
   // Add a agent policy id to current search
@@ -119,8 +126,11 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
-  const onClickOverviewButton = () => {
-    dashboardLocator?.navigateSync({ dashboardId: DASHBOARD_LOCATORS_IDS.OVERVIEW });
+  // const onClickOverviewButton = () => {
+  //   dashboardLocator?.navigateSync({ dashboardId: DASHBOARD_LOCATORS_IDS.OVERVIEW });
+  // };
+  const onClickDashboardButton = (dashboardId: string) => {
+    dashboardLocator?.navigateSync({ dashboardId });
   };
 
   return (
@@ -130,12 +140,54 @@ export const SearchAndFilterBar: React.FunctionComponent<{
         <FlexEndEuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
-              <EuiButton onClick={onClickOverviewButton} data-test-subj="ingestOverviewLinkButton">
+              <EuiPopover
+                button={
+                  <EuiButtonEmpty onClick={onPopoverButtonClick} iconType="popout">
+                    View more metrics
+                  </EuiButtonEmpty>
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                anchorPosition="upCenter"
+              >
+                <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart">
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      iconType="visBarVertical"
+                      onClick={() => onClickDashboardButton(DASHBOARD_LOCATORS_IDS.OVERVIEW)}
+                      data-test-subj="ingestOverviewLinkButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.ingestOverviewButton"
+                        defaultMessage="Ingest Overview"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      iconType="visBarVertical"
+                      onClick={() => onClickDashboardButton(DASHBOARD_LOCATORS_IDS.AGENT_INFO)}
+                      data-test-subj="ingestAgentInfoLinkButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.ingestOverviewButton"
+                        defaultMessage="Agent Info"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopover>
+
+              {/* <EuiButtonEmpty
+                onClick={onClickOverviewButton}
+                iconType="popout"
+                data-test-subj="ingestOverviewLinkButton"
+              >
                 <FormattedMessage
                   id="xpack.fleet.agentList.ingestOverviewButton"
-                  defaultMessage="Ingest Overview"
+                  defaultMessage="Ingest Overview Dashboard"
                 />
-              </EuiButton>
+              </EuiButtonEmpty> */}
             </EuiFlexItem>
             <EuiFlexItem>
               <AgentActivityButton
