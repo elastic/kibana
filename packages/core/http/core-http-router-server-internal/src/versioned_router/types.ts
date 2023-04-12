@@ -38,7 +38,7 @@ export interface VersionedRouterRoute {
  *
  * @internal
  */
-export type HandlerResolutionStrategy =
+export type DefaultHandlerResolutionStrategy =
   /** Use the oldest available version by default */
   | 'oldest'
   /** Use the newest available version by default */

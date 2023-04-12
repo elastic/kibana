@@ -9,7 +9,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { CoreVersionedRoute } from './core_versioned_route';
-import { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import { DefaultHandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
@@ -20,14 +20,14 @@ export class CoreVersionedRouter implements VersionedRouter {
   }: {
     router: IRouter;
     validateResponses?: boolean;
-    defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
+    defaultHandlerResolutionStrategy?: DefaultHandlerResolutionStrategy;
   }) {
     return new CoreVersionedRouter(router, validateResponses, defaultHandlerResolutionStrategy);
   }
   private constructor(
     private readonly router: IRouter,
     private readonly validateResponses: boolean = false,
-    public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest'
+    public readonly defaultHandlerResolutionStrategy: DefaultHandlerResolutionStrategy = 'oldest'
   ) {}
 
   private registerVersionedRoute =
