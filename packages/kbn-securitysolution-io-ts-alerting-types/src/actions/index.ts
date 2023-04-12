@@ -53,7 +53,7 @@ export const RuleActionAlertsFilter = t.strict({
               }),
             }),
             t.partial({
-              $state: t.type({ store: t.string }),
+              $state: t.type({ store: t.union([t.literal('appState'), t.literal('globalState')]) }),
               query: t.record(t.string, t.any),
             }),
           ])
