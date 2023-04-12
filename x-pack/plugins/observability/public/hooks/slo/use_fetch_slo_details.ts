@@ -26,7 +26,7 @@ export interface UseFetchSloDetailsResponse {
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-const LONG_REFETCH_INTERVAL = 1000 * 5; // 1 minute
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloDetails({
   sloId,
