@@ -76,6 +76,14 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   }
 
+  private _isPublic: undefined | boolean;
+  private get isPublic() {
+    if (this._isPublic === undefined) {
+      this._isPublic = this.options?.access === 'public';
+    }
+    return this._isPublic;
+  }
+
   private getAvailableVersionsMessage(): string {
     const versions = [...this.handlers.keys()];
     return `Available versions are: ${
@@ -91,18 +99,21 @@ export class CoreVersionedRoute implements VersionedRoute {
   ) => {
     const version = req.headers?.[ELASTIC_HTTP_VERSION_HEADER] as undefined | ApiVersion;
     if (!version) {
-      return res.custom({
-        statusCode: 406,
+      return res.badRequest({
         body: `Version expected at [${this.method}] [${
           this.path
         }]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
       });
     }
 
+    const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
+    if (invalidVersionMessage) {
+      return res.badRequest({ body: invalidVersionMessage });
+    }
+
     const handler = this.handlers.get(version);
     if (!handler) {
-      return res.custom({
-        statusCode: 406,
+      return res.badRequest({
         body: `No version "${version}" available for [${this.method}] [${
           this.path
         }]. ${this.getAvailableVersionsMessage()}`,
@@ -159,7 +170,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private validateVersion(version: string) {
-    const message = isValidRouteVersion(this.options.access === 'public', version);
+    const message = isValidRouteVersion(this.isPublic, version);
     if (message) {
       throw new Error(message);
     }
