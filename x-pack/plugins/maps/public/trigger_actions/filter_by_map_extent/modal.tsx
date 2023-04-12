@@ -21,10 +21,7 @@ import { getCore } from '../../kibana_services';
 export function openModal(title: string) {
   const { openModal } = createReactOverlays(getCore());
   const modalSession = openModal(
-    <FilterByMapExtentModal
-      onClose={() => modalSession.close()}
-      title={title}
-    />
+    <FilterByMapExtentModal onClose={() => modalSession.close()} title={title} />
   );
 }
 

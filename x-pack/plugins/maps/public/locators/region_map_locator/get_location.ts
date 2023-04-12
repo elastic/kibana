@@ -10,43 +10,46 @@ import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 import type { MapsAppRegionMapLocatorParams, MapsAppRegionMapLocatorDependencies } from './types';
 
-export async function getLocation(params: MapsAppRegionMapLocatorParams, deps: MapsAppRegionMapLocatorDependencies) {
+export async function getLocation(
+  params: MapsAppRegionMapLocatorParams,
+  deps: MapsAppRegionMapLocatorDependencies
+) {
   const {
-      label,
-      emsLayerId,
-      leftFieldName,
-      termsFieldName,
-      termsSize,
-      colorSchema,
-      indexPatternId,
-      metricAgg,
-      metricFieldName,
-      filters,
-      query,
-      timeRange,
-      hash = true,
-    } = params;
-    const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
-    const regionMapLayerDescriptor = createRegionMapLayerDescriptor({
-      label,
-      emsLayerId,
-      leftFieldName,
-      termsFieldName,
-      termsSize,
-      colorSchema,
-      indexPatternId,
-      metricAgg,
-      metricFieldName,
-    });
-    if (regionMapLayerDescriptor) {
-      initialLayers.push(regionMapLayerDescriptor);
-    }
+    label,
+    emsLayerId,
+    leftFieldName,
+    termsFieldName,
+    termsSize,
+    colorSchema,
+    indexPatternId,
+    metricAgg,
+    metricFieldName,
+    filters,
+    query,
+    timeRange,
+    hash = true,
+  } = params;
+  const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
+  const regionMapLayerDescriptor = createRegionMapLayerDescriptor({
+    label,
+    emsLayerId,
+    leftFieldName,
+    termsFieldName,
+    termsSize,
+    colorSchema,
+    indexPatternId,
+    metricAgg,
+    metricFieldName,
+  });
+  if (regionMapLayerDescriptor) {
+    initialLayers.push(regionMapLayerDescriptor);
+  }
 
-    return await deps.locator.getLocation({
-      initialLayers,
-      filters,
-      query,
-      timeRange,
-      hash,
-    });
+  return await deps.locator.getLocation({
+    initialLayers,
+    filters,
+    query,
+    timeRange,
+    hash,
+  });
 }
