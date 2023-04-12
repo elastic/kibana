@@ -12,7 +12,11 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  HTTPAuthorizationHeader,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
@@ -133,6 +137,30 @@ export class RulesClientFactory {
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
+      isAuthenticationTypeAPIKey() {
+        if (!securityPluginStart) {
+          return false;
+        }
+        const user = securityPluginStart.authc.getCurrentUser(request);
+        return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
+      },
+      getAuthenticationAPIKey(name: string) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        if (authorizationHeader && authorizationHeader.credentials) {
+          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+            .toString()
+            .split(':');
+          return {
+            apiKeysEnabled: true,
+            result: {
+              name,
+              id: apiKey[0],
+              api_key: apiKey[1],
+            },
+          };
+        }
+        return { apiKeysEnabled: false };
+      },
     });
   }
 }
