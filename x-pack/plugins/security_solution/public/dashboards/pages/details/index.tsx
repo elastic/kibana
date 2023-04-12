@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -52,8 +52,8 @@ const DashboardViewComponent: React.FC = () => {
     canReadDashboard ? null : DashboardViewPromptState.NoReadPermission
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails>();
-  const onDashboardContainerLoaded = useCallback((dashboardContainer: DashboardContainer) => {
-    const dashboardTitle = dashboardContainer.getTitle().trim();
+  const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
+    const dashboardTitle = dashboard.getTitle().trim();
     setDashboardDetails({ dashboardTitle });
   }, []);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
