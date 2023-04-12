@@ -79,7 +79,10 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
           cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
 
           // The correct filter is applied to the timeline query
-          cy.get(FILTER_BADGE).should('contain.text', ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}');
+          cy.get(FILTER_BADGE).should(
+            'contain.text',
+            ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
+          );
         });
     });
 
