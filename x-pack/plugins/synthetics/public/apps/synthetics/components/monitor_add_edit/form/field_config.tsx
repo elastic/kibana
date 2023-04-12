@@ -1328,7 +1328,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'IP protocols',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.ipv4.helpText', {
-      defaultMessage: 'Specifies which IP procols to use when pinging the remote host.',
+      defaultMessage: 'IP protocols to use when pinging the remote host.',
     }),
     controlled: true,
     dependencies: [ConfigKey.IPV6],
