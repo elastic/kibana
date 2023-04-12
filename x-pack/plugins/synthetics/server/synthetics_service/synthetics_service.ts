@@ -307,6 +307,10 @@ export class SyntheticsService {
 
     subject.subscribe(async (monitors) => {
       try {
+        if (monitors.length === 0) {
+          return;
+        }
+
         if (!output) {
           output = await this.getOutput();
 
