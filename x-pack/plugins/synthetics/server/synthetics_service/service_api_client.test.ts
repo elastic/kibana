@@ -8,9 +8,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-
-jest.mock('axios', () => jest.fn());
-
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -18,6 +15,7 @@ import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 
+jest.mock('axios', () => jest.fn());
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),

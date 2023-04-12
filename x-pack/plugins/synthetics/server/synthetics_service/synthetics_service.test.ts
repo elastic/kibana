@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-jest.mock('axios', () => jest.fn());
-
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -17,6 +17,27 @@ import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 
 const taskManagerSetup = taskManagerMock.createSetup();
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
+
+jest.mock('axios', () => jest.fn());
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
@@ -38,6 +59,7 @@ describe('SyntheticsService', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
