@@ -17,22 +17,25 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  const bulkStartModalTitle = i18n.translate(
+  const bulkReauthorizeModalTitle = i18n.translate(
     'xpack.transform.transformList.bulkReauthorizeModalTitle',
     {
       defaultMessage: 'Reauthorize {count} {count, plural, one {transform} other {transforms}}?',
       values: { count: items && items.length },
     }
   );
-  const startModalTitle = i18n.translate('xpack.transform.transformList.reauthorizeModalTitle', {
-    defaultMessage: 'Reauthorize {transformId}?',
-    values: { transformId: items[0] && items[0].config.id },
-  });
+  const reauthorizeModalTitle = i18n.translate(
+    'xpack.transform.transformList.reauthorizeModalTitle',
+    {
+      defaultMessage: 'Reauthorize {transformId}?',
+      values: { transformId: items[0] && items[0].config.id },
+    }
+  );
 
   return (
     <EuiConfirmModal
       data-test-subj="transformReauthorizeModal"
-      title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
+      title={isBulkAction === true ? bulkReauthorizeModalTitle : reauthorizeModalTitle}
       onCancel={closeModal}
       onConfirm={reauthorizeAndCloseModal}
       cancelButtonText={i18n.translate(
@@ -53,7 +56,7 @@ export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
       <p>
         {i18n.translate('xpack.transform.transformList.reauthorizeModalBody', {
           defaultMessage:
-            'Reauthorize will update the permissions to the current user and start the transform. Starting a transform increases search and indexing load in your cluster. If excessive load is experienced, stop the transform.',
+            'Reauthorize will update and start the transform with the the roles of the user. Starting a transform increases search and indexing load in your cluster. If excessive load is experienced, stop the transform.',
         })}
       </p>
     </EuiConfirmModal>

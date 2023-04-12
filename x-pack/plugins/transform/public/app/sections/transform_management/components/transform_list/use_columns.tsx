@@ -160,7 +160,7 @@ export const useColumns = (
                 'xpack.transform.transformList.needsReauthorizationBadgeTooltip',
                 {
                   defaultMessage:
-                    'This transform was created with insufficient permissions. Reauthorize from a user with manage_transform cluster privilege or transform_admin Kibana role to start and run the transform.',
+                    'This transform was created with insufficient permissions. You must have the transform_admin built-in role or manage_transform cluster privileges to reauthorize and start operations.',
                 }
               )}
             >
