@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { write, Task } from '../lib';
 
 const isPr = () =>
-!!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+  !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
 
 const getAvailableVersions = async (log: ToolingLog) => {
   const options = {
