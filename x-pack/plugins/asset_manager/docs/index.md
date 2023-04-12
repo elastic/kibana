@@ -406,6 +406,638 @@ GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&ean=k8s.no
 
 <a name="sample-data" id="sample-data"></a>
 
+### GET /assets/diff
+
+Returns assets found in the two time ranges, split by what occurs in only either or in both.
+
+#### Request 
+
+| Option | Type | Required? | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| aFrom | RangeDate | Yes | N/A | Starting point for baseline date range to search for assets within |
+| aTo | RangeDate | Yes | N/A | End point for baseline date range to search for assets within |
+| bFrom | RangeDate | Yes | N/A | Starting point for comparison date range |
+| bTo | RangeDate | Yes | N/A | End point for comparison date range |
+| type | AssetType[] | No | all | Restrict results to one or more asset.type value |
+
+#### Responses
+
+<details>
+
+<summary>Request where comparison range is missing assets that are found in the baseline range</summary>
+
+```curl
+GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T02:00:00.000Z
+
+{
+  "onlyInA": [
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200xrg1",
+      "asset.name": "k8s-pod-200xrg1-aws",
+      "asset.ean": "k8s.pod:pod-200xrg1",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200dfp2",
+      "asset.name": "k8s-pod-200dfp2-aws",
+      "asset.ean": "k8s.pod:pod-200dfp2",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    }
+  ],
+  "onlyInB": [],
+  "inBoth": [
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-001",
+      "asset.name": "Cluster 001 (AWS EKS)",
+      "asset.ean": "k8s.cluster:cluster-001",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-002",
+      "asset.name": "Cluster 002 (Azure AKS)",
+      "asset.ean": "k8s.cluster:cluster-002",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 002 (Azure AKS)",
+      "orchestrator.cluster.id": "cluster-002",
+      "cloud.provider": "azure",
+      "cloud.region": "eu-west",
+      "cloud.service.name": "aks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-101",
+      "asset.name": "k8s-node-101-aws",
+      "asset.ean": "k8s.node:node-101",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-102",
+      "asset.name": "k8s-node-102-aws",
+      "asset.ean": "k8s.node:node-102",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-103",
+      "asset.name": "k8s-node-103-aws",
+      "asset.ean": "k8s.node:node-103",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ohr5",
+      "asset.name": "k8s-pod-200ohr5-aws",
+      "asset.ean": "k8s.pod:pod-200ohr5",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200yyx6",
+      "asset.name": "k8s-pod-200yyx6-aws",
+      "asset.ean": "k8s.pod:pod-200yyx6",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200psd7",
+      "asset.name": "k8s-pod-200psd7-aws",
+      "asset.ean": "k8s.pod:pod-200psd7",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wmc8",
+      "asset.name": "k8s-pod-200wmc8-aws",
+      "asset.ean": "k8s.pod:pod-200wmc8",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ugg9",
+      "asset.name": "k8s-pod-200ugg9-aws",
+      "asset.ean": "k8s.pod:pod-200ugg9",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+
+<summary>Request where baseline range is missing assets that are found in the comparison range</summary>
+
+```curl
+GET /assets/diff?aFrom=2022-02-07T01:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
+
+{
+  "onlyInA": [],
+  "onlyInB": [
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wwc3",
+      "asset.name": "k8s-pod-200wwc3-aws",
+      "asset.ean": "k8s.pod:pod-200wwc3",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200naq4",
+      "asset.name": "k8s-pod-200naq4-aws",
+      "asset.ean": "k8s.pod:pod-200naq4",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    }
+  ],
+  "inBoth": [
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-001",
+      "asset.name": "Cluster 001 (AWS EKS)",
+      "asset.ean": "k8s.cluster:cluster-001",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-002",
+      "asset.name": "Cluster 002 (Azure AKS)",
+      "asset.ean": "k8s.cluster:cluster-002",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 002 (Azure AKS)",
+      "orchestrator.cluster.id": "cluster-002",
+      "cloud.provider": "azure",
+      "cloud.region": "eu-west",
+      "cloud.service.name": "aks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-101",
+      "asset.name": "k8s-node-101-aws",
+      "asset.ean": "k8s.node:node-101",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-102",
+      "asset.name": "k8s-node-102-aws",
+      "asset.ean": "k8s.node:node-102",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-103",
+      "asset.name": "k8s-node-103-aws",
+      "asset.ean": "k8s.node:node-103",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ohr5",
+      "asset.name": "k8s-pod-200ohr5-aws",
+      "asset.ean": "k8s.pod:pod-200ohr5",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200yyx6",
+      "asset.name": "k8s-pod-200yyx6-aws",
+      "asset.ean": "k8s.pod:pod-200yyx6",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200psd7",
+      "asset.name": "k8s-pod-200psd7-aws",
+      "asset.ean": "k8s.pod:pod-200psd7",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wmc8",
+      "asset.name": "k8s-pod-200wmc8-aws",
+      "asset.ean": "k8s.pod:pod-200wmc8",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ugg9",
+      "asset.name": "k8s-pod-200ugg9-aws",
+      "asset.ean": "k8s.pod:pod-200ugg9",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+
+<summary>Request where each range is missing assets found in the other range</summary>
+
+```curl
+GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
+
+{
+  "onlyInA": [
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200xrg1",
+      "asset.name": "k8s-pod-200xrg1-aws",
+      "asset.ean": "k8s.pod:pod-200xrg1",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200dfp2",
+      "asset.name": "k8s-pod-200dfp2-aws",
+      "asset.ean": "k8s.pod:pod-200dfp2",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    }
+  ],
+  "onlyInB": [
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wwc3",
+      "asset.name": "k8s-pod-200wwc3-aws",
+      "asset.ean": "k8s.pod:pod-200wwc3",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200naq4",
+      "asset.name": "k8s-pod-200naq4-aws",
+      "asset.ean": "k8s.pod:pod-200naq4",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    }
+  ],
+  "inBoth": [
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-001",
+      "asset.name": "Cluster 001 (AWS EKS)",
+      "asset.ean": "k8s.cluster:cluster-001",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.cluster",
+      "asset.id": "cluster-002",
+      "asset.name": "Cluster 002 (Azure AKS)",
+      "asset.ean": "k8s.cluster:cluster-002",
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 002 (Azure AKS)",
+      "orchestrator.cluster.id": "cluster-002",
+      "cloud.provider": "azure",
+      "cloud.region": "eu-west",
+      "cloud.service.name": "aks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-101",
+      "asset.name": "k8s-node-101-aws",
+      "asset.ean": "k8s.node:node-101",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-102",
+      "asset.name": "k8s-node-102-aws",
+      "asset.ean": "k8s.node:node-102",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.node",
+      "asset.id": "node-103",
+      "asset.name": "k8s-node-103-aws",
+      "asset.ean": "k8s.node:node-103",
+      "asset.parents": [
+        "k8s.cluster:cluster-001"
+      ],
+      "orchestrator.type": "kubernetes",
+      "orchestrator.cluster.name": "Cluster 001 (AWS EKS)",
+      "orchestrator.cluster.id": "cluster-001",
+      "cloud.provider": "aws",
+      "cloud.region": "us-east-1",
+      "cloud.service.name": "eks"
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ohr5",
+      "asset.name": "k8s-pod-200ohr5-aws",
+      "asset.ean": "k8s.pod:pod-200ohr5",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200yyx6",
+      "asset.name": "k8s-pod-200yyx6-aws",
+      "asset.ean": "k8s.pod:pod-200yyx6",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200psd7",
+      "asset.name": "k8s-pod-200psd7-aws",
+      "asset.ean": "k8s.pod:pod-200psd7",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wmc8",
+      "asset.name": "k8s-pod-200wmc8-aws",
+      "asset.ean": "k8s.pod:pod-200wmc8",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ugg9",
+      "asset.name": "k8s-pod-200ugg9-aws",
+      "asset.ean": "k8s.pod:pod-200ugg9",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+<details>
+
+<summary>Request where each range is missing assets found in the other range, but restricted by type</summary>
+
+```curl
+GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z&type=k8s.pod
+
+{
+  "onlyInA": [
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200xrg1",
+      "asset.name": "k8s-pod-200xrg1-aws",
+      "asset.ean": "k8s.pod:pod-200xrg1",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T00:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200dfp2",
+      "asset.name": "k8s-pod-200dfp2-aws",
+      "asset.ean": "k8s.pod:pod-200dfp2",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    }
+  ],
+  "onlyInB": [
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wwc3",
+      "asset.name": "k8s-pod-200wwc3-aws",
+      "asset.ean": "k8s.pod:pod-200wwc3",
+      "asset.parents": [
+        "k8s.node:node-101"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T03:00:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200naq4",
+      "asset.name": "k8s-pod-200naq4-aws",
+      "asset.ean": "k8s.pod:pod-200naq4",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    }
+  ],
+  "inBoth": [
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ohr5",
+      "asset.name": "k8s-pod-200ohr5-aws",
+      "asset.ean": "k8s.pod:pod-200ohr5",
+      "asset.parents": [
+        "k8s.node:node-102"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200yyx6",
+      "asset.name": "k8s-pod-200yyx6-aws",
+      "asset.ean": "k8s.pod:pod-200yyx6",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200psd7",
+      "asset.name": "k8s-pod-200psd7-aws",
+      "asset.ean": "k8s.pod:pod-200psd7",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200wmc8",
+      "asset.name": "k8s-pod-200wmc8-aws",
+      "asset.ean": "k8s.pod:pod-200wmc8",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    },
+    {
+      "@timestamp": "2022-02-07T01:30:00.000Z",
+      "asset.type": "k8s.pod",
+      "asset.id": "pod-200ugg9",
+      "asset.name": "k8s-pod-200ugg9-aws",
+      "asset.ean": "k8s.pod:pod-200ugg9",
+      "asset.parents": [
+        "k8s.node:node-103"
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
 #### GET /assets/sample
 
 Returns the list of pre-defined sample asset documents that would be indexed

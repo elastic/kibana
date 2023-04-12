@@ -29,7 +29,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
@@ -44,6 +44,8 @@ import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import {
   createRegionMapFn,
+  GEOHASH_GRID,
+  getGeoHashBucketAgg,
   regionMapRenderer,
   regionMapVisType,
   createTileMapFn,
@@ -81,6 +83,7 @@ import { setupLensChoroplethChart } from './lens';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
+  data: DataPublicPluginSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
@@ -201,6 +204,7 @@ export class MapsPlugin
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
+    plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
     plugins.visualizations.createBaseVisualization(regionMapVisType);

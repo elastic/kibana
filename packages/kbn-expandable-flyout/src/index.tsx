@@ -30,6 +30,9 @@ export interface ExpandableFlyoutProps extends EuiFlyoutProps {
 /**
  * Expandable flyout UI React component.
  * Displays 3 sections (right, left, preview) depending on the panels in the context.
+ *
+ * The behavior expects that the left and preview sections should only be displayed is a right section
+ * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   registeredPanels,
@@ -67,7 +70,10 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     return <></>;
   }
 
-  const width: number = (leftSection?.width ?? 0) + (rightSection?.width ?? 0);
+  const flyoutWidth: string = leftSection && rightSection ? 'l' : 's';
+  const rightSectionWidth: number = leftSection ? 0.4 : 1;
+  const leftSectionWidth: number = 0.6;
+  const previewSectionWidth: number = leftSection ? 0.4 : 1;
 
   return (
     <EuiFlyout
@@ -75,7 +81,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         overflow-y: scroll;
       `}
       {...flyoutProps}
-      size={width}
+      size={flyoutWidth}
       ownFocus={false}
       onClose={onClose}
     >
@@ -88,13 +94,13 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         {leftSection && left ? (
           <LeftSection
             component={leftSection.component({ ...(left as FlyoutPanel) })}
-            width={leftSection.width}
+            width={leftSectionWidth}
           />
         ) : null}
         {rightSection && right ? (
           <RightSection
             component={rightSection.component({ ...(right as FlyoutPanel) })}
-            width={rightSection.width}
+            width={rightSectionWidth}
           />
         ) : null}
       </EuiFlexGroup>
@@ -103,7 +109,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         <PreviewSection
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanel) })}
           showBackButton={showBackButton}
-          width={leftSection?.width}
+          width={previewSectionWidth}
         />
       ) : null}
     </EuiFlyout>

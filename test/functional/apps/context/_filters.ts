@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'context']);
   const testSubjects = getService('testSubjects');
 
-  describe('context filters', function contextSize() {
+  // FLAKY: https://github.com/elastic/kibana/issues/154387
+  describe.skip('context filters', function contextSize() {
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
