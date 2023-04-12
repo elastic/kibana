@@ -145,12 +145,12 @@ export function transformSummaryActionParams({
     date: new Date().toISOString(),
     // For backwards compatibility with security solutions rules
     context: {
-      alerts: alerts.new.data,
+      alerts: alerts.all.data ?? [],
       results_link: ruleUrl,
       rule: rule.params,
     },
     state: {
-      signals_count: alerts.new.count,
+      signals_count: alerts.all.count ?? 0,
     },
     rule: {
       params: rule.params,

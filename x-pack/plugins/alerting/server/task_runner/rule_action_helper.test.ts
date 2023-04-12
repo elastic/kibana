@@ -14,8 +14,11 @@ import {
   isSummaryAction,
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
-  getTimeBoundsOfSummarizedAlerts,
+  getSummaryActionTimeBounds,
 } from './rule_action_helper';
+
+const now = '2021-05-13T12:33:37.000Z';
+Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const mockOldAction: RuleAction = {
   id: '1',
@@ -49,39 +52,6 @@ const mockSummaryAction: RuleAction = {
     throttle: '1d',
   },
   uuid: '111-111',
-};
-
-const mockAAD = {
-  '@timestamp': '2022-12-07T15:38:43.472Z',
-  event: {
-    kind: 'signal',
-    action: 'active',
-  },
-  kibana: {
-    version: '8.7.0',
-    space_ids: ['default'],
-    alert: {
-      instance: { id: '*' },
-      uuid: '2d3e8fe5-3e8b-4361-916e-9eaab0bf2084',
-      status: 'active',
-      workflow_status: 'open',
-      reason: 'system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.',
-      time_range: { gte: '2022-01-01T12:00:00.000Z' },
-      start: '2022-12-07T15:23:13.488Z',
-      duration: { us: 100000 },
-      flapping: false,
-      rule: {
-        category: 'Metric threshold',
-        consumer: 'alerts',
-        execution: { uuid: 'c35db7cc-5bf7-46ea-b43f-b251613a5b72' },
-        name: 'test-rule',
-        producer: 'infrastructure',
-        rule_type_id: 'metrics.alert.threshold',
-        uuid: '0de91960-7643-11ed-b719-bb9db8582cb6',
-        tags: [],
-      },
-    },
-  },
 };
 
 describe('rule_action_helper', () => {
@@ -344,52 +314,59 @@ describe('rule_action_helper', () => {
     });
   });
 
-  describe('getTimeBoundsOfSummarizedAlerts', () => {
-    test('returns start and end for summarized alerts', () => {
-      const data = [
-        mockAAD,
-        {
-          ...mockAAD,
-          '@timestamp': '2022-12-07T15:45:41.4672Z',
-          alert: { instance: { id: 'all' } },
-        },
-      ];
-      expect(
-        getTimeBoundsOfSummarizedAlerts({
-          new: { count: data.length, data },
-          ongoing: { count: 0, data: [] },
-          recovered: { count: 0, data: [] },
-          all: { count: data.length, data },
-        })
-      ).toEqual({ start: 1670427523472, end: 1670427941467 });
+  describe('getSummaryActionTimeBounds', () => {
+    test('returns undefined start and end action is not summary action', () => {
+      expect(getSummaryActionTimeBounds(mockAction, { interval: '1m' }, null)).toEqual({
+        start: undefined,
+        end: undefined,
+      });
     });
 
-    test('returns undefined start and end when there are no summarized alerts', () => {
-      expect(
-        getTimeBoundsOfSummarizedAlerts({
-          new: { count: 0, data: [] },
-          ongoing: { count: 0, data: [] },
-          recovered: { count: 0, data: [] },
-          all: { count: 0, data: [] },
-        })
-      ).toEqual({ start: undefined, end: undefined });
+    test('returns start and end for summary action with throttle', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        mockSummaryAction,
+        { interval: '1m' },
+        null
+      );
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620822817000);
+      // start is end - throttle interval (1d)
+      expect(start).toEqual(new Date('2021-05-12T12:33:37.000Z').valueOf());
     });
 
-    test('returns undefined start and end when no timestamps are available', () => {
-      const data = [
+    test('returns start and end for summary action without throttle with previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
         {
-          ...mockAAD,
-          '@timestamp': null,
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
         },
-      ];
-      expect(
-        getTimeBoundsOfSummarizedAlerts({
-          new: { count: 1, data },
-          ongoing: { count: 0, data: [] },
-          recovered: { count: 0, data: [] },
-          all: { count: 1, data },
-        })
-      ).toEqual({ start: undefined, end: undefined });
+        { interval: '1m' },
+        new Date('2021-05-13T12:31:57.000Z')
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909117000);
+      // start is previous started at time
+      expect(start).toEqual(new Date('2021-05-13T12:31:57.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action without throttle without previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        { interval: '1m' },
+        null
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909157000);
+      // start is end - schedule interval (1m)
+      expect(start).toEqual(new Date('2021-05-13T12:32:37.000Z').valueOf());
     });
   });
 });

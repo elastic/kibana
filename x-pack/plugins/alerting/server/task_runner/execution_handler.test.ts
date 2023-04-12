@@ -81,6 +81,7 @@ const rule = {
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  schedule: { interval: '1m' },
   notifyWhen: 'onActiveAlert',
   actions: [
     {
@@ -117,6 +118,7 @@ const defaultExecutionParams = {
   ruleLabel: 'rule-label',
   request: {} as KibanaRequest,
   alertingEventLogger,
+  previousStartedAt: null,
   taskInstance: {
     params: { spaceId: 'test1', alertId: '1' },
   } as unknown as ConcreteTaskInstance,
@@ -1495,6 +1497,8 @@ describe('Execution Handler', () => {
     });
 
     it('populates the rule.url with start and stop time when available', async () => {
+      clock.reset();
+      clock.tick(90000);
       getSummarizedAlertsMock.mockResolvedValue({
         new: {
           count: 2,
@@ -1531,7 +1535,7 @@ describe('Execution Handler', () => {
         Array [
           Object {
             "actionParams": Object {
-              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=1670427523472&end=1670427941467",
+              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
             "ruleId": "1",

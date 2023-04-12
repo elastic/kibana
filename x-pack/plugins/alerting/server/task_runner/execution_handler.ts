@@ -40,7 +40,7 @@ import {
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  getTimeBoundsOfSummarizedAlerts,
+  getSummaryActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
@@ -92,6 +92,7 @@ export class ExecutionHandler<
   private actionsClient: PublicMethodsOf<ActionsClient>;
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
+  private previousStartedAt: Date | null;
 
   constructor({
     rule,
@@ -105,6 +106,7 @@ export class ExecutionHandler<
     ruleConsumer,
     executionId,
     ruleLabel,
+    previousStartedAt,
     actionsClient,
   }: ExecutionHandlerOptions<
     Params,
@@ -131,6 +133,7 @@ export class ExecutionHandler<
     this.ruleTypeActionGroups = new Map(
       ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
+    this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
   }
 
@@ -206,7 +209,11 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action) && summarizedAlerts) {
-          const { start, end } = getTimeBoundsOfSummarizedAlerts(summarizedAlerts);
+          const { start, end } = getSummaryActionTimeBounds(
+            action,
+            this.rule.schedule,
+            this.previousStartedAt
+          );
           const actionToRun = {
             ...action,
             params: injectActionParams({
