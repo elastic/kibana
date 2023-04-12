@@ -44,6 +44,26 @@ export class GisPageObject extends FtrService {
     this.basePath = basePath;
   }
 
+  async expectEmsToBeAvailable() {
+    this.log.debug(`expectEmsToBeAvailable`);
+    await this.openNewMap();
+    await this.clickAddLayer();
+    await this.testSubjects.click('emsBoundaries');
+    try {
+      const emsFileElement = await this.testSubjects.find('emsFileSelect', 120000); // large timeout for EMS request
+      if (!emsFileElement) {
+        throw new Error('Unable to find EMS file select');
+      }
+      const isDisabled = await this.comboBox.isDisabled(emsFileElement);
+      if (isDisabled) {
+        throw new Error('EMS file select is disabled');
+      }
+    } catch (e) {
+      this.log.debug(`EMS is not available, error: ${e.message}`);
+      throw new Error('Test requires access to Elastic Maps Service (EMS). EMS is not available');
+    }
+  }
+
   async setAbsoluteRange(start: string, end: string) {
     await this.timePicker.setAbsoluteRange(start, end);
     await this.waitForLayersToLoad();

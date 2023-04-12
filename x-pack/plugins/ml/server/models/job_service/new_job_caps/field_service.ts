@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { Field, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
@@ -103,7 +104,7 @@ class FieldsService {
   }
 
   private isCounterField(field: estypes.FieldCapsFieldCapability) {
-    return field.time_series_metric === 'counter';
+    return field.time_series_metric === TIME_SERIES_METRIC_TYPES.COUNTER;
   }
   // check to see whether the field is aggregatable
   // If it is a counter field from a time series data stream, we cannot currently

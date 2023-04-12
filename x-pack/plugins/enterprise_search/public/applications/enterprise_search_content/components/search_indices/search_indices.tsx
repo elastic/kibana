@@ -99,7 +99,7 @@ export const SearchIndices: React.FC = () => {
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
                       {
-                        defaultMessage: 'Create new index',
+                        defaultMessage: 'Create a new index',
                       }
                     )}
                   </EuiButton>

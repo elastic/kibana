@@ -18,6 +18,10 @@ export const mockGetFieldsData = (field: string): string[] => {
       return ['low'];
     case ALERT_RISK_SCORE:
       return ['0'];
+    case 'host.name':
+      return ['host1'];
+    case 'user.name':
+      return ['user1'];
     default:
       return [];
   }

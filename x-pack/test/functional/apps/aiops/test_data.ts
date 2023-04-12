@@ -15,6 +15,8 @@ export const farequoteDataViewTestData: TestData = {
   brushDeviationTargetTimestamp: 1455033600000,
   brushIntervalFactor: 1,
   chartClickCoordinates: [0, 0],
+  fieldSelectorSearch: 'airline',
+  fieldSelectorApplyAvailable: false,
   expected: {
     totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
@@ -36,6 +38,7 @@ export const farequoteDataViewTestData: TestData = {
         impact: 'High',
       },
     ],
+    fieldSelectorPopover: ['airline', 'custom_field.keyword'],
   },
 };
 
@@ -54,6 +57,8 @@ export const artificialLogDataViewTestData: TestData = {
   brushDeviationTargetTimestamp: DEVIATION_TS + DAY_MS / 2,
   brushIntervalFactor: 10,
   chartClickCoordinates: [-200, 30],
+  fieldSelectorSearch: 'user',
+  fieldSelectorApplyAvailable: true,
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
@@ -74,6 +79,10 @@ export const artificialLogDataViewTestData: TestData = {
         group: 'user: Peterurl: login.php',
       },
     ],
+    filteredAnalysisGroupsTable: [
+      { group: '* url: home.phpresponse_code: 500', docCount: '792' },
+      { group: '* url: login.phpresponse_code: 500', docCount: '790' },
+    ],
     analysisTable: [
       {
         fieldName: 'response_code',
@@ -90,6 +99,7 @@ export const artificialLogDataViewTestData: TestData = {
         pValue: '0.00974',
       },
     ],
+    fieldSelectorPopover: ['response_code', 'url', 'user'],
   },
 };
 
