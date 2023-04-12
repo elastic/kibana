@@ -66,8 +66,8 @@ import {
 } from './api';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
-import { synchronizeMovementAction } from './trigger_actions/synchronize_movement_action';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
+import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';

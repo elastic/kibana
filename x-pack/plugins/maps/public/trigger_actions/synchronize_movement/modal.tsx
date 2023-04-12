@@ -15,13 +15,22 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { mapEmbeddablesSingleton } from '../embeddable/map_embeddables_singleton';
+import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
+import { getCore } from '../../kibana_services';
+
+export function openModal() {
+  const { openModal } = createReactOverlays(getCore());
+  const modalSession = openModal(
+    <SynchronizeMovementModal onClose={() => modalSession.close()} />
+  );
+}
 
 interface Props {
   onClose: () => void;
 }
 
-export class SynchronizeMovementModal extends Component<Props> {
+class SynchronizeMovementModal extends Component<Props> {
   _renderSwitches() {
     const mapPanels = mapEmbeddablesSingleton.getMapPanels();
 
