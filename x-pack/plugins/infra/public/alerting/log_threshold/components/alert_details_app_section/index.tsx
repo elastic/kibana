@@ -83,11 +83,10 @@ const AlertDetailsAppSection = ({
       ? Number(moment(alert.start).subtract(TWENTY_TIMES_RULE_WINDOW_MS, 'millisecond').format('x'))
       : Number(moment(alert.start).subtract(ruleWindowSizeMS, 'millisecond').format('x'));
 
-  const rangeFromDuration = moment(rangeFrom).locale(i18n.getLocale()).fromNow(true);
-
   const rangeTo = alert.active
     ? Date.now()
     : Number(moment(alert.fields[ALERT_END]).add(ruleWindowSizeMS, 'millisecond').format('x'));
+
   return (
     // Create a chart per-criteria
     !!rule.params.criteria ? (
@@ -119,12 +118,7 @@ const AlertDetailsAppSection = ({
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate('xpack.infra.logs.alertDetails.chart.last', {
-                      defaultMessage: 'Last {time} ',
-                      values: {
-                        time: rangeFromDuration,
-                      },
-                    })}
+                    {moment(rangeFrom).locale(i18n.getLocale()).from(rangeTo)}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
