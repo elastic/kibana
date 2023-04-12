@@ -42,13 +42,13 @@ export const RandomSamplerRangeSlider = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowLabel',
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerPercentageRowLabel',
           {
             defaultMessage: 'Sampling percentage',
           }
         )}
         helpText={i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowHelpText',
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerPercentageRowHelpText',
           {
             defaultMessage: 'Choose a value between 0.001% and 50% to randomly sample data.',
           }
@@ -100,7 +100,7 @@ export const RandomSamplerRangeSlider = ({
               }}
             >
               <FormattedMessage
-                id="xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
+                id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
                 defaultMessage="Apply"
               />
             </EuiButton>

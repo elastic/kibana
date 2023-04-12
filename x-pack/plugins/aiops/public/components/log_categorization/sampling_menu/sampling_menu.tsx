@@ -83,56 +83,58 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
   //   [setMode]
   // );
 
-  const buttonText = useMemo(() => {
+  const { calloutInfoMessage, buttonText } = useMemo(() => {
     switch (randomSamplerPreference) {
       case RANDOM_SAMPLER_OPTION.OFF:
-        return i18n.translate('xpack.dataVisualizer.randomSamplerSettingsPopUp.offCalloutMessage', {
-          defaultMessage: 'No sampling',
-        });
+        return {
+          calloutInfoMessage: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
+            {
+              defaultMessage:
+                'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
+            }
+          ),
+          buttonText: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.button',
+            {
+              defaultMessage: 'No sampling',
+            }
+          ),
+        };
       case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
-        return i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCalloutMessage',
-          {
-            defaultMessage: 'Auto sampling',
-          }
-        );
+        return {
+          calloutInfoMessage: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.message',
+            {
+              defaultMessage:
+                'The total document count and chart use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
+            }
+          ),
+          buttonText: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.button',
+            {
+              defaultMessage: 'Auto sampling',
+            }
+          ),
+        };
 
       case RANDOM_SAMPLER_OPTION.ON_MANUAL:
       default:
-        return i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCalloutMessage',
-          {
-            defaultMessage: 'Manual sampling',
-          }
-        );
-    }
-  }, [randomSamplerPreference]);
-
-  const calloutInfoMessage = useMemo(() => {
-    switch (randomSamplerPreference) {
-      case RANDOM_SAMPLER_OPTION.OFF:
-        return i18n.translate('xpack.dataVisualizer.randomSamplerSettingsPopUp.offCalloutMessage', {
-          defaultMessage:
-            'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
-        });
-      case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
-        return i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCalloutMessage',
-          {
-            defaultMessage:
-              'The total document count and chart use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
-          }
-        );
-
-      case RANDOM_SAMPLER_OPTION.ON_MANUAL:
-      default:
-        return i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCalloutMessage',
-          {
-            defaultMessage:
-              'The total document count and chart use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
-          }
-        );
+        return {
+          calloutInfoMessage: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.message',
+            {
+              defaultMessage:
+                'The total document count and chart use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+            }
+          ),
+          buttonText: i18n.translate(
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.button',
+            {
+              defaultMessage: 'Manual sampling',
+            }
+          ),
+        };
     }
   }, [randomSamplerPreference]);
 
@@ -150,7 +152,7 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
         </EuiButtonEmpty>
 
         // <EuiToolTip
-        //   content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
+        //   content={i18n.translate('xpack.aiops.logCategorization.samplingOptionsButton', {
         //     defaultMessage: 'Sampling options',
         //   })}
         // >
@@ -159,7 +161,7 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
         //     iconType="gear"
         //     onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
         //     data-test-subj="dvRandomSamplerOptionsButton"
-        //     aria-label={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
+        //     aria-label={i18n.translate('xpack.aiops.logCategorization.samplingOptionsButton', {
         //       defaultMessage: 'Sampling options',
         //     })}
         //   />
@@ -179,7 +181,7 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
         <EuiFormRow
           data-test-subj="dvRandomSamplerOptionsFormRow"
           label={i18n.translate(
-            'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
             {
               defaultMessage: 'Random sampling',
             }
@@ -216,7 +218,7 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
       <EuiSpacer size="m" />
 
       <FormattedMessage
-        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
+        id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.probabilityLabel"
         defaultMessage="Probability used: {samplingProbability}%"
         values={{ samplingProbability: samplingProbability * 100 }}
       />
