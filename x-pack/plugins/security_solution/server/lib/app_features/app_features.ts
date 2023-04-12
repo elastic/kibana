@@ -80,7 +80,7 @@ export class AppFeatures {
   }
 
   private getEnabledAppFeaturesConfigs(
-    appFeaturesConfigs: AppFeaturesConfig
+    appFeaturesConfigs: Partial<AppFeaturesConfig>
   ): AppFeatureKibanaConfig[] {
     return Object.entries(appFeaturesConfigs).reduce<AppFeatureKibanaConfig[]>(
       (acc, [appFeatureKey, appFeatureConfig]) => {

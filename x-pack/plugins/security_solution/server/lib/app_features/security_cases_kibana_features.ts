@@ -14,7 +14,7 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import type { AppFeaturesConfig } from './types';
+import type { AppFeaturesCasesConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { casesSubFeatureDelete } from './security_cases_kibana_sub_features';
 
@@ -55,7 +55,7 @@ export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
 });
 
 // maps the AppFeatures keys to Kibana privileges
-export const getCasesAppFeaturesConfig = (): AppFeaturesConfig => ({
+export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
   cases_base: {
     cases: [APP_ID],
     privileges: {

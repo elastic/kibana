@@ -36,7 +36,7 @@ import {
   responseActionsHistorySubFeature,
   trustedApplicationsSubFeature,
 } from './security_kibana_sub_features';
-import type { AppFeaturesConfig } from './types';
+import type { AppFeaturesSecurityConfig } from './types';
 
 // Same as the plugin id defined by Cloud Security Posture
 const CLOUD_POSTURE_APP_ID = 'csp';
@@ -156,7 +156,7 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
 // maps the AppFeatures keys to Kibana privileges
 export const getSecurityAppFeaturesConfig = (
   experimentalFeatures: ExperimentalFeatures
-): AppFeaturesConfig => {
+): AppFeaturesSecurityConfig => {
   const rulesResponseActionsSubFeatures: SubFeatureConfig[] = [];
 
   if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {

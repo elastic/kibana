@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export interface AppFeatureKeys {
-  /**
-   * Enables the basic Cases feature
-   */
-  cases_base: boolean;
+export interface AppFeatureSecurityKeys {
   /**
    * Enables importing pre-packaged rules
    * */
@@ -23,5 +19,15 @@ export interface AppFeatureKeys {
    */
   isolate_host: boolean;
 }
+export type AppFeatureSecurityKey = keyof AppFeatureSecurityKeys;
 
+export interface AppFeatureCasesKeys {
+  /**
+   * Enables the basic Cases feature
+   */
+  cases_base: boolean;
+}
+export type AppFeatureCasesKey = keyof AppFeatureCasesKeys;
+
+export type AppFeatureKeys = AppFeatureSecurityKeys & AppFeatureCasesKeys;
 export type AppFeatureKey = keyof AppFeatureKeys;
