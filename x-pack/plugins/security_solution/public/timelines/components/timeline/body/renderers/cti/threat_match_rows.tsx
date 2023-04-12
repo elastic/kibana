@@ -85,7 +85,7 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
   );
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="center" alignItems="center" gutterSize="m">
+    <EuiFlexGroup direction="column" justifyContent="center" alignItems="center" gutterSize="none">
       <EuiFlexItem>{getThreatMatchRows()}</EuiFlexItem>
       {indicators.length > 10 && (
         <EuiFlexItem>
