@@ -144,7 +144,7 @@ describe('Service overview - header filters', () => {
       cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
       cy.url().should(
         'include',
-        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%2F:id%22%20'
+        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20'
       );
     });
   });
