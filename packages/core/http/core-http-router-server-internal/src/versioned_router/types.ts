@@ -29,3 +29,13 @@ export interface VersionedRouterRoute {
     options: AddVersionOpts<unknown, unknown, unknown, unknown>;
   }>;
 }
+
+/**
+ * Specifies resolution strategy to use if a request does not provide a version.
+ * @internal
+ */
+export type HandlerResolutionStrategy =
+  /** Use the oldest available version by default */
+  | 'oldest'
+  /** Use the newest available version by default */
+  | 'newest';
