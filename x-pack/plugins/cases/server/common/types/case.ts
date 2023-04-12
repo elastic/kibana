@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { User, UserProfile } from './user';
+
+export enum CaseSeveritySavedObject {
+  LOW = 0,
+  MEDIUM = 10,
+  HIGH = 20,
+  CRITICAL = 30,
+}
+
+export enum CaseStatusSavedObject {
+  OPEN = 0,
+  IN_PROGRESS = 10,
+  CLOSED = 20,
+}
+
+interface CaseExternalServiceSavedObject {
+  connector_name: string;
+  external_id: string;
+  external_title: string;
+  external_url: string;
+  pushed_at: string;
+  pushed_by: User;
+}
+
+type ConnectorFieldsSavedObject = Array<{
+  key: string;
+  value: unknown;
+}>;
+
+interface ConnectorSavedObject {
+  name: string;
+  type: string;
+  fields: ConnectorFieldsSavedObject | null;
+}
+
+export interface CaseSavedObjectAttributes {
+  assignees: UserProfile[];
+  closed_at: string | null;
+  closed_by: User | null;
+  created_at: string | null;
+  created_by: User | null;
+  connector: ConnectorSavedObject;
+  description: string;
+  duration: number | null;
+  external_service: CaseExternalServiceSavedObject | null;
+  owner: string;
+  settings: { syncAlerts: boolean };
+  severity: CaseSeveritySavedObject;
+  status: CaseStatusSavedObject;
+  tags: string[];
+  title: string;
+  total_alerts: number;
+  total_comments: number;
+  updated_at: string | null;
+  updated_by: User | null;
+}
+
+export type CaseSavedObject = SavedObject<CaseSavedObjectAttributes>;

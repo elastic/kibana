@@ -24,7 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, CaseSavedObject, FileAttachmentRequest } from './types';
+import type { AlertInfo, FileAttachmentRequest } from './types';
 
 import type {
   CaseAttributes,
@@ -56,6 +56,7 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObject } from './types/case';
 
 /**
  * Default sort field for querying saved objects.
