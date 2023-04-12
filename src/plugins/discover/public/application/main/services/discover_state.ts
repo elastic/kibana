@@ -387,10 +387,10 @@ export function getDiscoverStateContainer({
     /**
      * state containers initializing and starting to notify each other about changes
      */
-    const unsubscribeData = dataStateContainer.subscribe();
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
+    const unsubscribeData = dataStateContainer.subscribe();
     // updates saved search when app state changes, triggers data fetching if required
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
