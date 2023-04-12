@@ -1,5 +1,5 @@
 .kbnTopNavMenu {
-  button:last-child {
+  .euiHeaderLinks__list > button:last-child {
     margin-right: 0;
   }
 }
@@ -42,5 +42,27 @@
     display: block;
     pointer-events: none;
     caret-color: transparent;
+  }
+}
+
+
+
+// Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
+.kbnTopNavMenuItem__withDivider {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    margin-right: $euiSizeM;
+    position: relative;
+  }
+  &::after {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      border-right: $euiBorderThin;
+      bottom: 0;
+      content: '';
+      display: block;
+      pointer-events: none;
+      position: absolute;
+      right: -$euiSizeS;
+      top: 0;
+    }
   }
 }

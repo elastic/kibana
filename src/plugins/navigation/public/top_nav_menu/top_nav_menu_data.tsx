@@ -10,7 +10,7 @@ import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
-export interface TopNavMenuLink {
+export interface TopNavMenuData {
   id?: string;
   label: string;
   run: TopNavMenuAction;
@@ -27,8 +27,6 @@ export interface TopNavMenuLink {
   target?: string;
   href?: string;
 }
-
-export type TopNavMenuData = TopNavMenuLink | 'divider';
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;

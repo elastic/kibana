@@ -257,11 +257,12 @@ export const useDashboardMenuItems = ({
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share ? [menuItems.share] : [];
+    const shareMenuItem = share
+      ? [{ ...menuItems.share, className: 'kbnTopNavMenuItem__withDivider' }]
+      : [];
     const editModeItems: TopNavMenuData[] = [];
     if (lastSavedId) {
       editModeItems.push(
-        'divider',
         menuItems.saveAs,
         menuItems.switchToViewMode,
         menuItems.resetChanges,
