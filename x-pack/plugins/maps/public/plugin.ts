@@ -52,11 +52,9 @@ import {
   tileMapRenderer,
   tileMapVisType,
 } from './legacy_visualizations';
-import {
-  MapsAppLocatorDefinition,
-  MapsAppRegionMapLocatorDefinition,
-  MapsAppTileMapLocatorDefinition,
-} from './locators';
+import { MapsAppLocatorDefinition } from './locators/map_locator/locator_definition';
+import { MapsAppTileMapLocatorDefinition } from './locators/tile_map_locator/locator_definition';
+import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator/locator_definition';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { registerSource } from './classes/sources/source_registry';
 import { registerLayerWizardExternal } from './classes/layers/wizards/layer_wizard_registry';

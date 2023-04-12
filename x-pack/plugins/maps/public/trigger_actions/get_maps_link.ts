@@ -12,7 +12,8 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getIndexPatternService, getData, getShareService } from '../kibana_services';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
 import type { LayerDescriptor } from '../../common/descriptor_types';
-import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
+import type { MapsAppLocator } from '../locators/map_locator/types';
+import { MAPS_APP_LOCATOR } from '../locators/map_locator/locator_definition';
 
 export const getMapsLink = async (context: VisualizeFieldContext) => {
   const dataView = await getIndexPatternService().get(context.dataViewSpec.id!);
