@@ -53,6 +53,7 @@ export function LayerPanel({
               value: samplingValue * 100,
             },
           }),
+          'data-test-subj': 'lnsChangeIndexPatternSamplingInfo',
         }
       : {};
 

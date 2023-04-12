@@ -102,6 +102,7 @@ function AnnotationLayerHeaderContent({
         iconTooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
           defaultMessage: 'Ignore global filters',
         }),
+        'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
       };
   return (
     <ChangeIndexPattern

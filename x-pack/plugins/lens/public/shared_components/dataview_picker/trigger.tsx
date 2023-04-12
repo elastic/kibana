@@ -15,6 +15,7 @@ interface TriggerLabelProps {
   icon?: React.ReactElement;
   iconValue?: string;
   iconTooltipValue?: string;
+  'data-test-subj'?: string;
 }
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
@@ -24,7 +25,13 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
     isDisabled?: boolean;
   };
 
-function TriggerLabel({ label, icon, iconValue, iconTooltipValue }: TriggerLabelProps) {
+function TriggerLabel({
+  label,
+  icon,
+  iconValue,
+  iconTooltipValue,
+  'data-test-subj': dataTestSubj,
+}: TriggerLabelProps) {
   const { euiTheme } = useEuiTheme();
   if (!icon) {
     return <>{label}</>;
@@ -42,7 +49,7 @@ function TriggerLabel({ label, icon, iconValue, iconTooltipValue }: TriggerLabel
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        data-test-subj="lnsChangeIndexPatternSamplingInfo"
+        data-test-subj={dataTestSubj}
         css={css`
           display: block;
           *:hover &,
@@ -74,6 +81,7 @@ export function TriggerButton({
   icon,
   iconValue,
   iconTooltipValue,
+  'data-test-subj': dataTestSubj,
   ...rest
 }: ChangeIndexPatternTriggerProps & {
   togglePopover: () => void;
@@ -99,6 +107,7 @@ export function TriggerButton({
         icon={icon}
         iconValue={iconValue}
         iconTooltipValue={iconTooltipValue}
+        data-test-subj={dataTestSubj}
       />
     </ToolbarButton>
   );

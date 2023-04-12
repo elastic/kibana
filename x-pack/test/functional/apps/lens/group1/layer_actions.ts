@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await PageObjects.lens.createLayer('annotations');
 
-      expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(true);
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
 
       await PageObjects.lens.openLayerContextMenu(1);
       await testSubjects.click('lnsLayerSettings');
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsXY-layerSettings-ignoreGlobalFilters');
       // now close the panel and check the dataView picker has no icon
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-      expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(false);
     });
 
     it('should add a new visualization layer and disable the sampling if max operation is chosen', async () => {
