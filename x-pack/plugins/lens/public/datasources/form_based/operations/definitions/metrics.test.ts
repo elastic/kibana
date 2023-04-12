@@ -156,6 +156,7 @@ describe('metrics', () => {
             isBucketed: false,
             operationType: 'counter_rate',
             references: ['a'],
+            timeScale: 's',
           },
         },
       };
