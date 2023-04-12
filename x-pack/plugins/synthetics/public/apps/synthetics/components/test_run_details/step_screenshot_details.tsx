@@ -25,8 +25,8 @@ export const StepScreenshotDetails = ({
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} color="subdued">
-      <EuiFlexGroup>
-        <EuiFlexItem css={{ alignItems: 'flex-start' }} grow={false}>
+      <EuiFlexGroup wrap={true}>
+        <EuiFlexItem css={{ margin: '0 auto' }} grow={false}>
           {step ? (
             <JourneyStepScreenshotContainer
               key={stepIndex}
