@@ -92,7 +92,7 @@ export interface CellActionsProps {
    */
   anchorPosition?: PopoverAnchorPosition;
   /**
-   * optional styles object passed to EuiPopover
+   * optional styles object passed to EuiPopover when mode === CellActionsMode.HOVER
    */
   panelStyle?: { [key: string]: string };
 }

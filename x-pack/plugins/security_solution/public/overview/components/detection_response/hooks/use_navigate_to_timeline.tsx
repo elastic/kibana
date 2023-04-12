@@ -78,28 +78,7 @@ export const useNavigateToTimeline = () => {
    */
   const openTimelineWithFilters = useCallback(
     (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
-      const dataProviders = [];
-
-      for (const orFilterGroup of filters) {
-        const mainFilter = orFilterGroup[0];
-
-        if (mainFilter) {
-          const dataProvider = getDataProvider(
-            mainFilter.field,
-            uuidv4(),
-            mainFilter.value,
-            mainFilter.operator
-          );
-
-          for (const filter of orFilterGroup.slice(1)) {
-            dataProvider.and.push(
-              getDataProviderAnd(filter.field, uuidv4(), filter.value, filter.operator)
-            );
-          }
-          dataProviders.push(dataProvider);
-        }
-      }
-
+      const dataProviders = getDataProviders(filters);
       navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]
@@ -110,9 +89,8 @@ export const useNavigateToTimeline = () => {
   };
 };
 
-export const getDataProviders = (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+export const getDataProviders = (filters: Array<[...Filter[]]>) => {
   const dataProviders = [];
-
   for (const orFilterGroup of filters) {
     const mainFilter = orFilterGroup[0];
 
@@ -132,6 +110,5 @@ export const getDataProviders = (filters: Array<[...Filter[]]>, timeRange?: Time
       dataProviders.push(dataProvider);
     }
   }
-
   return dataProviders;
 };
