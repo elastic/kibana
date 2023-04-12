@@ -897,10 +897,16 @@ export class AlertsClient {
 
   public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
     try {
-      const index = '.alerts-*';
+      const index = `${this.ruleDataService.getResourcePrefix()}*`;
       const query = {
-        exists: {
-          field: ALERT_CASE_IDS,
+        bool: {
+          filter: [
+            {
+              terms: {
+                [ALERT_CASE_IDS]: caseIds,
+              },
+            },
+          ],
         },
       };
 
