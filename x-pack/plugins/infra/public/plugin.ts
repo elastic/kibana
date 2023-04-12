@@ -184,11 +184,13 @@ export class Plugin implements InfraClientPluginClass {
           const { renderApp } = await import('./apps/discover_app');
 
           return renderApp(plugins, pluginStart);
+        } else if (this.config.logs.app_target === 'logs-ui') {
+          const { renderApp } = await import('./apps/logs_app');
+
+          return renderApp(coreStart, plugins, pluginStart, params);
         }
 
-        const { renderApp } = await import('./apps/logs_app');
-
-        return renderApp(coreStart, plugins, pluginStart, params);
+        return () => null;
       },
     });
 

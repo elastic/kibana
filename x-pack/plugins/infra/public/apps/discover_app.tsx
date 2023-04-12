@@ -38,7 +38,7 @@ export const renderApp = (plugins: InfraClientStartDeps, pluginStart: InfraClien
     })
     .start();
 
-  return () => {};
+  return () => null;
 };
 
 const redirectToDiscover = (discover: DiscoverStart, resolvedLogView?: ResolvedLogView) => {
