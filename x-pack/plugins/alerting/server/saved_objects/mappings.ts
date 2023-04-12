@@ -9,6 +9,7 @@ import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 import { rRuleMappingsField } from './rrule_mappings_field';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',

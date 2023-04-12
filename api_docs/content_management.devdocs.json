@@ -95,7 +95,7 @@
                 "label": "crudClientProvider",
                 "description": [],
                 "signature": [
-                  "(contentType: string) => ",
+                  "(contentType?: string | undefined) => ",
                   {
                     "pluginId": "contentManagement",
                     "scope": "public",
@@ -422,6 +422,52 @@
                 "description": [],
                 "signature": [
                   "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.mSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "<T = unknown>(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.MSearchIn",
+                "text": "MSearchIn"
+              },
+              ") => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.mSearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.MSearchIn",
+                    "text": "MSearchIn"
+                  }
                 ],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
@@ -1027,6 +1073,52 @@
                     "text": "SearchIn"
                   },
                   "<string, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.mSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "((input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.MSearchIn",
+                "text": "MSearchIn"
+              },
+              ") => Promise<unknown>) | undefined"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.mSearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.MSearchIn",
+                    "text": "MSearchIn"
+                  }
                 ],
                 "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
                 "deprecated": false,
@@ -1677,6 +1769,23 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [
+              "\nOpt-in to multi-type search.\nCan only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API."
+            ],
+            "signature": [
+              "MSearchConfig",
+              "<T, unknown> | undefined"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2158,6 +2267,106 @@
       },
       {
         "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchIn",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchIn",
+        "description": [],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchIn.contentTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "contentTypes",
+            "description": [],
+            "signature": [
+              "{ contentTypeId: string; version?: number | undefined; }[]"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchIn.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchQuery",
+                "text": "SearchQuery"
+              }
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchOut",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchOut",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.MSearchOut",
+            "text": "MSearchOut"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchOut.contentTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "contentTypes",
+            "description": [],
+            "signature": [
+              "{ contentTypeId: string; version?: number | undefined; }[]"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.MSearchOut.result",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
+            ],
+            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
         "id": "def-common.ProcedureSchemas",
         "type": "Interface",
         "tags": [],
@@ -2538,6 +2747,42 @@
       },
       {
         "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "MSearchQuery",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchQuery",
+            "text": "SearchQuery"
+          }
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-common.MSearchResult",
+        "type": "Type",
+        "tags": [],
+        "label": "MSearchResult",
+        "description": [],
+        "signature": [
+          "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
+        ],
+        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -2559,7 +2804,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\""
+          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,
