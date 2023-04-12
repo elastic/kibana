@@ -19,7 +19,7 @@ import { EsHitRecord } from '../../types';
 const mockServices = {
   settings: {
     client: {
-      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200
+      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
     },
   },
   uiSettings: {

@@ -41,7 +41,7 @@ describe('SavedObjectEdition', () => {
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
-  let settings:  ReturnType<typeof settingsServiceMock.createStartContract>;
+  let settings: ReturnType<typeof settingsServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return shallowWithI18nProvider(
