@@ -18,7 +18,6 @@ export function ExplainLogRateSpikesPageProvider({
   const ml = getService('ml');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const common = getPageObject('common');
   const header = getPageObject('header');
 
   return {
@@ -49,7 +48,7 @@ export function ExplainLogRateSpikesPageProvider({
     async setQueryInput(query: string) {
       const aiopsQueryInput = await testSubjects.find('aiopsQueryInput');
       await aiopsQueryInput.type(query);
-      await common.pressEnterKey();
+      await aiopsQueryInput.pressKeys(browser.keys.ENTER);
       await header.waitUntilLoadingHasFinished();
       const queryBarText = await aiopsQueryInput.getVisibleText();
       expect(queryBarText).to.eql(

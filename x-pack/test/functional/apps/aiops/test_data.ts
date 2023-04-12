@@ -36,7 +36,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
   fieldSelectorApplyAvailable: false,
   query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
   expected: {
-    totalDocCountFormatted: '86,374',
+    totalDocCountFormatted: '48,799',
     analysisGroupsTable: [
       {
         docCount: '297',
@@ -52,7 +52,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         fieldName: 'airline',
         fieldValue: 'AAL',
         logRate: 'Chart type:bar chart',
-        pValue: '4.66e-11',
+        pValue: '1.18e-8',
         impact: 'High',
       },
     ],
