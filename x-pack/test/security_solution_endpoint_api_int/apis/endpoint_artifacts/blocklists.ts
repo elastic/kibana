@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe.skip('Endpoint artifacts (via lists plugin): Blocklists', () => {
+  describe('Endpoint artifacts (via lists plugin): Blocklists', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
