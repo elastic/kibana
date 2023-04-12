@@ -68,13 +68,14 @@ const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceSt
   return { ...state, listView: { ...state.listView, listResourceState: action.payload.newState } };
 };
 
-const trustedAppDeletionSubmissionResourceStateChanged: CaseReducer<TrustedAppDeletionSubmissionResourceStateChanged> =
-  (state, action) => {
-    return {
-      ...state,
-      deletionDialog: { ...state.deletionDialog, submissionResourceState: action.payload.newState },
-    };
+const trustedAppDeletionSubmissionResourceStateChanged: CaseReducer<
+  TrustedAppDeletionSubmissionResourceStateChanged
+> = (state, action) => {
+  return {
+    ...state,
+    deletionDialog: { ...state.deletionDialog, submissionResourceState: action.payload.newState },
   };
+};
 
 const trustedAppDeletionDialogStarted: CaseReducer<TrustedAppDeletionDialogStarted> = (
   state,
@@ -93,13 +94,14 @@ const trustedAppDeletionDialogClosed: CaseReducer<TrustedAppDeletionDialogClosed
   return { ...state, deletionDialog: initialDeletionDialogState() };
 };
 
-const trustedAppCreationSubmissionResourceStateChanged: CaseReducer<TrustedAppCreationSubmissionResourceStateChanged> =
-  (state, action) => {
-    return {
-      ...state,
-      creationDialog: { ...state.creationDialog, submissionResourceState: action.payload.newState },
-    };
+const trustedAppCreationSubmissionResourceStateChanged: CaseReducer<
+  TrustedAppCreationSubmissionResourceStateChanged
+> = (state, action) => {
+  return {
+    ...state,
+    creationDialog: { ...state.creationDialog, submissionResourceState: action.payload.newState },
   };
+};
 
 const trustedAppCreationDialogStarted: CaseReducer<TrustedAppCreationDialogStarted> = (
   state,
@@ -114,13 +116,14 @@ const trustedAppCreationDialogStarted: CaseReducer<TrustedAppCreationDialogStart
   };
 };
 
-const trustedAppCreationDialogFormStateUpdated: CaseReducer<TrustedAppCreationDialogFormStateUpdated> =
-  (state, action) => {
-    return {
-      ...state,
-      creationDialog: { ...state.creationDialog, formState: { ...action.payload } },
-    };
+const trustedAppCreationDialogFormStateUpdated: CaseReducer<
+  TrustedAppCreationDialogFormStateUpdated
+> = (state, action) => {
+  return {
+    ...state,
+    creationDialog: { ...state.creationDialog, formState: { ...action.payload } },
   };
+};
 
 const handleUpdateToEditItemState: CaseReducer<TrustedAppCreationEditItemStateChanged> = (
   state,
