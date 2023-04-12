@@ -11,6 +11,9 @@ import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { write, Task } from '../lib';
 
+const isPr = () =>
+!!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+
 const getAvailableVersions = async (log: ToolingLog) => {
   const options = {
     headers: {
@@ -21,8 +24,6 @@ const getAvailableVersions = async (log: ToolingLog) => {
   // See https://github.com/elastic/website-development/issues/9331
   const url = 'https://www.elastic.co/content/product_versions';
   log.info('Fetching Elastic Agent versions list');
-
-  log.info('process.env.BUILDKITE_PULL_REQUEST: ' + process.env.BUILDKITE_PULL_REQUEST);
 
   try {
     const results = await fetch(url, options);
@@ -43,9 +44,7 @@ const getAvailableVersions = async (log: ToolingLog) => {
   } catch (error) {
     const errorMessage = 'Failed to fetch Elastic Agent versions list';
 
-    const isPr =
-      !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
-    if (isPr) {
+    if (isPr()) {
       // For PR jobs, just log the error as a warning and continue
       log.warning(errorMessage);
       log.warning(error);
@@ -65,7 +64,7 @@ export const FetchAgentVersionsList: Task = {
 
   async run(config, log, build) {
     // Agent version list task is skipped for PR's, so as not to overwhelm the versions API
-    if (process.env.BUILDKITE_PULL_REQUEST === 'true') {
+    if (isPr()) {
       return;
     }
 
