@@ -14,8 +14,8 @@ import type {
 import type { Case } from '../../containers/types';
 
 export enum AttachmentActionType {
-  BUTTON,
-  CUSTOM,
+  BUTTON = 'button',
+  CUSTOM = 'custom',
 }
 
 interface BaseAttachmentAction {
