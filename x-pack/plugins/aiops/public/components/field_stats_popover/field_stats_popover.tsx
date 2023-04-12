@@ -48,7 +48,7 @@ export function FieldStatsPopover({
   const trigger = (
     <EuiToolTip
       content={i18n.translate('xpack.aiops.fieldContextPopover.descriptionTooltipContent', {
-        defaultMessage: 'Inspect field statistics',
+        defaultMessage: 'Show top field values',
       })}
     >
       <EuiButtonIcon
@@ -57,7 +57,7 @@ export function FieldStatsPopover({
           setInfoOpen(!infoIsOpen);
         }}
         aria-label={i18n.translate('xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel', {
-          defaultMessage: 'Inspect field statistics',
+          defaultMessage: 'Show top field values',
         })}
         data-test-subj={'aiopsContextPopoverButton'}
         style={{ marginLeft: euiTheme.euiSizeXS }}
@@ -77,6 +77,8 @@ export function FieldStatsPopover({
         <>
           <FieldStatsContent
             field={fieldForStats}
+            fieldName={fieldName}
+            fieldValue={fieldValue}
             dataView={dataView}
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
