@@ -246,7 +246,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: DEFAULT_FREQUENCY,
-        hideNotifyWhen: true,
         showActionAlertsFilter: true,
       }),
     [
