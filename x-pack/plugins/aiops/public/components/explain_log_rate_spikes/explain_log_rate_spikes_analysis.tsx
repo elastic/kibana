@@ -284,7 +284,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           significantTerms={data.significantTerms}
           groupTableItems={groupTableItems}
           loading={isRunning}
-          dataViewId={dataView.id}
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}
@@ -294,7 +293,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         <SpikeAnalysisTable
           significantTerms={data.significantTerms}
           loading={isRunning}
-          dataViewId={dataView.id}
           dataView={dataView}
           timeRangeMs={timeRangeMs}
           searchQuery={searchQuery}

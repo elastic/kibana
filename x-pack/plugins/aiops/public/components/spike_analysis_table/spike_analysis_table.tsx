@@ -56,7 +56,6 @@ const viewInDiscoverMessage = i18n.translate(
 
 interface SpikeAnalysisTableProps {
   significantTerms: SignificantTerm[];
-  dataViewId?: string;
   dataView: DataView;
   loading: boolean;
   isExpandedRow?: boolean;
@@ -66,7 +65,6 @@ interface SpikeAnalysisTableProps {
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   significantTerms,
-  dataViewId,
   dataView,
   loading,
   isExpandedRow,
@@ -75,6 +73,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
+  const dataViewId = dataView.id;
 
   const {
     pinnedSignificantTerm,
@@ -165,7 +164,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       }),
       render: (_, { fieldName, fieldValue }) => (
         <>
-          {fieldName}
           <FieldStatsPopover
             dataView={dataView}
             fieldName={fieldName}
@@ -174,10 +172,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             dslQuery={searchQuery}
             timeRangeMs={timeRangeMs}
           />
+          {fieldName}
         </>
       ),
       sortable: true,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldValue',
@@ -188,7 +187,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       render: (_, { fieldValue }) => String(fieldValue),
       sortable: true,
       textOnly: true,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnLogRate',
@@ -222,7 +221,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         />
       ),
       sortable: false,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnDocCount',
@@ -232,7 +231,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         defaultMessage: 'Doc count',
       }),
       sortable: true,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnPValue',
@@ -260,7 +259,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnImpact',
@@ -291,7 +290,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
       sortable: true,
-      valign: 'top',
+      valign: 'middle',
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
@@ -317,7 +316,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         },
       ],
       width: ACTIONS_COLUMN_WIDTH,
-      valign: 'top',
+      valign: 'middle',
     },
   ];
 
@@ -345,7 +344,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         return '';
       },
       sortable: false,
-      valign: 'top',
+      valign: 'middle',
     });
   }
 

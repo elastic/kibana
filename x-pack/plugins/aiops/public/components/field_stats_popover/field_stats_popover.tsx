@@ -74,17 +74,15 @@ export function FieldStatsPopover({
       button={trigger}
       renderHeader={() => <FieldPopoverHeader field={fieldForStats} closePopover={closePopover} />}
       renderContent={() => (
-        <>
-          <FieldStatsContent
-            field={fieldForStats}
-            fieldName={fieldName}
-            fieldValue={fieldValue}
-            dataView={dataView}
-            fieldStatsServices={fieldStatsServices}
-            timeRangeMs={timeRangeMs}
-            dslQuery={dslQuery}
-          />
-        </>
+        <FieldStatsContent
+          field={fieldForStats}
+          fieldName={fieldName}
+          fieldValue={fieldValue}
+          dataView={dataView}
+          fieldStatsServices={fieldStatsServices}
+          timeRangeMs={timeRangeMs}
+          dslQuery={dslQuery}
+        />
       )}
     />
   );

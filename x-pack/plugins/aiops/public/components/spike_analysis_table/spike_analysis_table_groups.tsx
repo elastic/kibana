@@ -62,7 +62,6 @@ const viewInDiscoverMessage = i18n.translate(
 interface SpikeAnalysisTableProps {
   significantTerms: SignificantTerm[];
   groupTableItems: GroupTableItem[];
-  dataViewId?: string;
   loading: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
   timeRangeMs: TimeRangeMs;
@@ -72,7 +71,6 @@ interface SpikeAnalysisTableProps {
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   significantTerms,
   groupTableItems,
-  dataViewId,
   loading,
   dataView,
   timeRangeMs,
@@ -92,6 +90,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
+  const dataViewId = dataView.id;
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -118,7 +117,6 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             []
           )}
           loading={loading}
-          dataViewId={dataViewId}
           isExpandedRow
           dataView={dataView}
           timeRangeMs={timeRangeMs}
