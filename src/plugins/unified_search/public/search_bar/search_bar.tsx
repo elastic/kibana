@@ -75,6 +75,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // Execute whenever time range is updated.
+  onTimeRangeChange?: (payload: { dateRange: TimeRange }) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
 
@@ -187,6 +189,19 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     if (nextDateRange) {
       nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
+
+      /**
+       * Some applications do not rely on the _g url parameter to update the time. The onTimeRangeChange
+       * callback can be used in these cases to notify the consumer for the time change.
+       */
+      if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
+        nextProps?.onTimeRangeChange?.({
+          dateRange: {
+            from: nextDateRange.dateRangeFrom,
+            to: nextDateRange.dateRangeTo,
+          },
+        });
+      }
     }
     return nextState;
   }
