@@ -19,8 +19,8 @@ import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_single
 import { getCore } from '../../kibana_services';
 
 export function openModal(title: string) {
-  const { openModal } = createReactOverlays(getCore());
-  const modalSession = openModal(
+  const { openModal: reactOverlaysOpenModal } = createReactOverlays(getCore());
+  const modalSession = reactOverlaysOpenModal(
     <FilterByMapExtentModal onClose={() => modalSession.close()} title={title} />
   );
 }

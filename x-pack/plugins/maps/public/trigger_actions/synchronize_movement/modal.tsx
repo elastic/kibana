@@ -20,8 +20,8 @@ import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_single
 import { getCore } from '../../kibana_services';
 
 export function openModal() {
-  const { openModal } = createReactOverlays(getCore());
-  const modalSession = openModal(<SynchronizeMovementModal onClose={() => modalSession.close()} />);
+  const { openModal: reactOverlaysOpenModal } = createReactOverlays(getCore());
+  const modalSession = reactOverlaysOpenModal(<SynchronizeMovementModal onClose={() => modalSession.close()} />);
 }
 
 interface Props {
