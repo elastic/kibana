@@ -195,8 +195,7 @@ export function validateLocation(
 const EMPTY_LOCATION_ERROR = i18n.translate(
   'xpack.synthetics.server.projectMonitors.locationEmptyError',
   {
-    defaultMessage:
-      'You must add at least one location or private location to this monitor.',
+    defaultMessage: 'You must add at least one location or private location to this monitor.',
   }
 );
 
