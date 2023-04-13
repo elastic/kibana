@@ -1898,7 +1898,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 urls: ['http://localhost:9200'],
               },
-              reason: 'Couldn't save or update monitor because of an invalid configuration.',
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
           ],
           updatedMonitors: [],
@@ -1960,7 +1960,7 @@ export default function ({ getService }: FtrProviderContext) {
                 urls: ['http://localhost:9200'],
                 locations: ['localhost'],
               },
-              reason: 'Couldn't save or update monitor because of an invalid configuration.',
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
           ],
           updatedMonitors: [],
@@ -1990,8 +1990,7 @@ export default function ({ getService }: FtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details:
-                'You must add at least one location or private location to this monitor.',
+              details: 'You must add at least one location or private location to this monitor.',
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2023,7 +2022,7 @@ export default function ({ getService }: FtrProviderContext) {
                 urls: ['http://localhost:9200'],
                 locations: [],
               },
-              reason: 'Couldn't save or update monitor because of an invalid configuration.',
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
           ],
           updatedMonitors: [],
