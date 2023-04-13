@@ -37,6 +37,7 @@ import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
+import { SamplingMenu } from './sampling_menu';
 
 const BAR_TARGET = 20;
 
@@ -46,7 +47,7 @@ export const LogCategorizationPage: FC = () => {
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
+  const { runCategorizeRequest, cancelRequest, sampling } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
@@ -152,6 +153,7 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
+      sampling.setDocCount(documentStats.totalCount);
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
@@ -161,7 +163,7 @@ export const LogCategorizationPage: FC = () => {
       setData(null);
       setTotalCount(documentStats.totalCount);
     }
-  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
+  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery, sampling]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -261,8 +263,10 @@ export const LogCategorizationPage: FC = () => {
             <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }} />
         <EuiFlexItem />
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
+          <SamplingMenu sampling={sampling} reload={() => loadCategories()} />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       {eventRate.length ? (
