@@ -137,7 +137,7 @@ export const searchAfterAndBulkCreate = async ({
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
-          if (toReturn.createdSignalsCount + includedEvents.length > tuple.maxSignals) {
+          if (toReturn.createdSignalsCount + includedEvents.length >= tuple.maxSignals) {
             toReturn.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
           }
           // make sure we are not going to create more signals than maxSignals allows
