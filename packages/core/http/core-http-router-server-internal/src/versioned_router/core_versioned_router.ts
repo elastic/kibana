@@ -39,7 +39,6 @@ export class CoreVersionedRouter implements VersionedRouter {
         path: options.path,
         options,
       });
-      route.register(this.router);
       this.routes.add(route);
       return route;
     };

@@ -18,7 +18,6 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
-  IRouter,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
@@ -70,6 +69,14 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly options: VersionedRouteConfig<Method>
   ) {
     this.isPublic = this.options?.access === 'public';
+    this.router.router[this.method](
+      {
+        path: this.path,
+        validate: passThroughValidation,
+        options: this.options,
+      },
+      this.requestHandler
+    );
   }
 
   /** This method assumes that one or more versions handlers are registered  */
@@ -84,17 +91,6 @@ export class CoreVersionedRoute implements VersionedRoute {
     return `Available versions are: ${
       versions.length ? '[' + [...versions].join(', ') + ']' : '<none>'
     }`;
-  }
-
-  public register(router: IRouter): void {
-    router[this.method](
-      {
-        path: this.path,
-        validate: passThroughValidation,
-        options: this.options,
-      },
-      this.requestHandler
-    );
   }
 
   private requestHandler = async (
