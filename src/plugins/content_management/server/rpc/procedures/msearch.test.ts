@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type { Version } from '@kbn/object-versioning';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+
+import { MSearchIn, MSearchQuery } from '../../../common';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { MSearchIn, MSearchQuery } from '../../../common';
-import { mSearch } from './msearch';
-import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { MSearchService } from '../../core/msearch';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { Version } from '@kbn/object-versioning';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
+import { mSearch } from './msearch';
 
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;

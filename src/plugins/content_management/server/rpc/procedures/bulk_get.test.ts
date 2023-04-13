@@ -9,7 +9,7 @@
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';

@@ -8,7 +8,7 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 
 import type { SearchQuery } from '../../../common';
 import { validate } from '../../utils';
