@@ -7,7 +7,11 @@
 
 import { format, ALLOWED_FIELDS } from './formatter';
 import { DataStream } from '../../../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../../common/constants/monitor_defaults';
 
 describe('format', () => {
   let formValues: Record<string, unknown>;
@@ -210,12 +214,7 @@ describe('format', () => {
           script: '',
           fileName: '',
         },
-        throttling: {
-          download: 5,
-          upload: 3,
-          latency: 20,
-          label: 'default',
-        },
+        throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
         source: {
           inline: {
             type: scriptType,
