@@ -194,7 +194,7 @@ describe('Versioned route', () => {
     );
 
     const kibanaResponse = await handler!(
-      {} as any,
+      { core: { env: { mode: { dev: true } } } } as any,
       createRequest({
         version: '1',
         body: { foo: 1 },
