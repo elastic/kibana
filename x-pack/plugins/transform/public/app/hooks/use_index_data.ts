@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -45,6 +46,7 @@ export const useIndexData = (
   const api = useApi();
   const toastNotifications = useToastNotifications();
   const {
+    data,
     ml: {
       getFieldType,
       getDataGridSchemaFromKibanaFieldType,
@@ -101,7 +103,11 @@ export const useIndexData = (
       },
     };
 
-    const resp = await api.esSearch(esSearchRequest);
+    const { rawResponse: resp } = await lastValueFrom(
+      data.search.search({
+        params: esSearchRequest,
+      })
+    );
 
     if (!isEsSearchResponse(resp)) {
       setErrorMessage(getErrorMessage(resp));
@@ -213,7 +219,11 @@ export const useIndexData = (
           : {}),
       },
     };
-    const resp = await api.esSearch(esSearchRequest);
+    const { rawResponse: resp } = await lastValueFrom(
+      data.search.search({
+        params: esSearchRequest,
+      })
+    );
 
     if (!isEsSearchResponse(resp)) {
       setErrorMessage(getErrorMessage(resp));
