@@ -13,10 +13,10 @@ import { number } from 'io-ts';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { useKibana } from '../../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { FindingsBaseEsQuery, Sort } from '../../types';
+import type { FindingsBaseEsQuery, Sort } from '../../../../common/types';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
+import { showErrorToast } from '../../../../common/utils/show_error_toast';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
