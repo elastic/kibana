@@ -19,6 +19,8 @@ import type {
   VersionedRouteConfig,
   IKibanaResponse,
 } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
