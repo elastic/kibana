@@ -212,7 +212,7 @@ const INVALID_PRIVATE_LOCATION_ERROR = (location: string) =>
 const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
   i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicLocationError', {
     defaultMessage:
-      'Invalid location "{location}" supplied to field "locations". Please select a valid location.',
+      'Invalid location: "{location}". Remove it or replace it with a valid location.',
     values: {
       location,
     },
