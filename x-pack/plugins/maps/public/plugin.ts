@@ -209,7 +209,7 @@ export class MapsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: getAppTitle(),
+      name: APP_NAME,
     });
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
