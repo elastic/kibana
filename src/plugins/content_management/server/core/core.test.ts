@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
 import { createMemoryStorage } from './mocks';
@@ -31,6 +32,8 @@ import type {
   SearchItemError,
 } from './event_types';
 import { ContentTypeDefinition, StorageContext } from './types';
+import { until } from '../event_stream/tests/util';
+import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -48,8 +51,13 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
     },
   };
 
-  const core = new Core({ logger });
+  const eventStream = setupEventStreamService().service;
+  const core = new Core({
+    logger,
+    eventStream,
+  });
   const coreSetup = core.setup();
+
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
@@ -76,6 +84,7 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
     fooContentCrud,
     cleanUp,
     eventBus: coreSetup.api.eventBus,
+    eventStream,
   };
 };
 
@@ -156,7 +165,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1');
-          expect(res.item.item).toBeUndefined();
+          expect(res.result.item).toBeUndefined();
 
           cleanUp();
         });
@@ -167,7 +176,7 @@ describe('Content Core', () => {
           const res = await fooContentCrud!.get(ctx, '1', { forwardInResponse: { foo: 'bar' } });
           expect(res).toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 // Options forwared in response
                 options: { foo: 'bar' },
@@ -182,7 +191,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.bulkGet(ctx, ['1', '2']);
-          expect(res.items).toEqual({
+          expect(res.result).toEqual({
             hits: [{ item: undefined }, { item: undefined }],
           });
 
@@ -198,7 +207,7 @@ describe('Content Core', () => {
 
           expect(res).toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            items: {
+            result: {
               hits: [
                 {
                   item: {
@@ -221,7 +230,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1234');
-          expect(res.item.item).toBeUndefined();
+          expect(res.result.item).toBeUndefined();
           await fooContentCrud!.create(
             ctx,
             { title: 'Hello' },
@@ -229,7 +238,7 @@ describe('Content Core', () => {
           );
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'Hello',
@@ -247,7 +256,7 @@ describe('Content Core', () => {
           await fooContentCrud!.update(ctx, '1234', { title: 'changed' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'changed',
@@ -283,7 +292,7 @@ describe('Content Core', () => {
 
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'changed',
@@ -300,14 +309,14 @@ describe('Content Core', () => {
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: expect.any(Object),
             },
           });
           await fooContentCrud!.delete(ctx, '1234');
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: undefined,
             },
           });
@@ -836,6 +845,41 @@ describe('Content Core', () => {
 
             sub.unsubscribe();
             cleanUp();
+          });
+        });
+      });
+
+      describe('eventStream', () => {
+        test('stores "delete" events', async () => {
+          const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
+
+          await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
+          await fooContentCrud!.delete(ctx, '1234');
+
+          const findEvent = async () => {
+            const tail = await eventStream.tail();
+
+            for (const event of tail) {
+              if (
+                event.predicate[0] === 'delete' &&
+                event.object &&
+                event.object[0] === 'foo' &&
+                event.object[1] === '1234'
+              ) {
+                return event;
+              }
+            }
+
+            return null;
+          };
+
+          await until(async () => !!(await findEvent()), 100);
+
+          const event = await findEvent();
+
+          expect(event).toMatchObject({
+            predicate: ['delete'],
+            object: ['foo', '1234'],
           });
         });
       });
