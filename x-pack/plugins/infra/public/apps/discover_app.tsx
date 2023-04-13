@@ -50,32 +50,14 @@ const redirectToDiscover = (discover: DiscoverStart, resolvedLogView?: ResolvedL
   }
 
   const columns = parseColumns(resolvedLogView.columns);
-  const {
-    allowNoIndex,
-    id,
-    name,
-    namespaces,
-    sourceFilters,
-    timeFieldName,
-    type,
-    typeMeta,
-    version,
-  } = resolvedLogView.dataViewReference;
+  const dataViewSpec = resolvedLogView.dataViewReference.toSpec()
+  console.log(resolvedLogView.dataViewReference);
+  
 
   return discover.locator?.navigate({
     columns,
-    dataViewId: id,
-    dataViewSpec: {
-      allowNoIndex,
-      id,
-      name,
-      namespaces,
-      sourceFilters,
-      timeFieldName,
-      type,
-      typeMeta,
-      version,
-    },
+    dataViewId: dataViewSpec.id,
+    dataViewSpec,
   });
 };
 
