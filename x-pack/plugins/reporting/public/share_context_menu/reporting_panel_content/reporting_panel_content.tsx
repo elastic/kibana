@@ -319,7 +319,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           this.props.onClose();
         }
         if (mounted) {
-          { isCreatingReportJob: false }
+          this.setState({ isCreatingReportJob: false });
         }
       })
       .catch((error) => {
@@ -334,7 +334,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           ) as unknown as string,
         });
         if (mounted) {
-          { isCreatingReportJob: false }
+          this.setState({ isCreatingReportJob: false });
         }
       });
   };
