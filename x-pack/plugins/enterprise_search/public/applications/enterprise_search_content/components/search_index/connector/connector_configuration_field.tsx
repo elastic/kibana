@@ -10,6 +10,7 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiAccordion,
   EuiFieldText,
   EuiFieldNumber,
   EuiFieldPassword,
@@ -39,11 +40,11 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { display, label, sensitive, value } = configEntry;
+  const { key, display, label, sensitive, value } = configEntry;
 
   switch (display) {
     case 'textarea':
-      return (
+      const textarea = (
         <EuiTextArea
           value={ensureStringType(value)}
           disabled={status === Status.LOADING}
@@ -51,6 +52,14 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
         />
+      );
+
+      return sensitive ? (
+        <EuiAccordion id={key + '-accordion'} buttonContent={label}>
+          {textarea}
+        </EuiAccordion>
+      ) : (
+        textarea
       );
 
     case 'numeric':
