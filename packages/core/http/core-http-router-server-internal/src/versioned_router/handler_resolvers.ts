@@ -16,7 +16,7 @@ const oldest: Resolver = (versions) => [...versions].sort((a, b) => a.localeComp
 
 const newest: Resolver = (versions) => [...versions].sort((a, b) => b.localeCompare(a))[0];
 
-export const defaultResolvers = {
+export const resolvers = {
   oldest,
   newest,
 };

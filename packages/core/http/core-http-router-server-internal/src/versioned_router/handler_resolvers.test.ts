@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defaultResolvers } from './default_handler_resolvers';
+import { resolvers } from './handler_resolvers';
 
 describe('default handler resolvers', () => {
   describe('oldest', () => {
@@ -17,7 +17,7 @@ describe('default handler resolvers', () => {
       { versions: ['2002-02-02'], expected: '2002-02-02' },
       { versions: [], expected: undefined },
     ])(`$versions returns $expected`, ({ versions, expected }) => {
-      expect(defaultResolvers.oldest(versions)).toBe(expected);
+      expect(resolvers.oldest(versions)).toBe(expected);
     });
   });
 
@@ -29,7 +29,7 @@ describe('default handler resolvers', () => {
       { versions: ['2002-02-02'], expected: '2002-02-02' },
       { versions: [], expected: undefined },
     ])(`$versions returns $expected`, ({ versions, expected }) => {
-      expect(defaultResolvers.newest(versions)).toBe(expected);
+      expect(resolvers.newest(versions)).toBe(expected);
     });
   });
 });

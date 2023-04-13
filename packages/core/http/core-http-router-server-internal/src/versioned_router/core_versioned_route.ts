@@ -27,7 +27,7 @@ import { validate } from './validate';
 import { isValidRouteVersion } from './is_valid_route_version';
 import { injectResponseHeaders } from './inject_response_headers';
 
-import { defaultResolvers } from './default_handler_resolvers';
+import { resolvers } from './handler_resolvers';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
@@ -81,9 +81,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): ApiVersion {
-    return defaultResolvers[this.router.defaultHandlerResolutionStrategy]([
-      ...this.handlers.keys(),
-    ]);
+    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
   private getAvailableVersionsMessage(): string {
