@@ -24,7 +24,7 @@ function useAgentDashboardLink(agent: Agent) {
   const dashboardLocator = useDashboardLocator();
 
   const link = dashboardLocator?.getRedirectUrl({
-    dashboardId: DASHBOARD_LOCATORS_IDS.AGENT_METRICS,
+    dashboardId: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
     query: {
       language: 'kuery',
       query: `elastic_agent.id:${agent.id}`,

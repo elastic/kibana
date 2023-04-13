@@ -26,11 +26,11 @@ export const DashboardsButtons: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="dashboardApp"
-            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.OVERVIEW)}
+            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_OVERVIEW)}
             data-test-subj="ingestOverviewLinkButton"
           >
             <FormattedMessage
-              id="xpack.fleet.agentList.ingestOverviewButton"
+              id="xpack.fleet.agentList.ingestOverviewlinkButton"
               defaultMessage="Ingest Overview Metrics"
             />
           </EuiButtonEmpty>
@@ -38,11 +38,11 @@ export const DashboardsButtons: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="dashboardApp"
-            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.AGENT_INFO)}
-            data-test-subj="ingestAgentInfoLinkButton"
+            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_INFO)}
+            data-test-subj="agentInfoLinkButton"
           >
             <FormattedMessage
-              id="xpack.fleet.agentList.ingestOverviewButton"
+              id="xpack.fleet.agentList.agentInfoLinkButton"
               defaultMessage="Agent Info Metrics"
             />
           </EuiButtonEmpty>
