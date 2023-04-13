@@ -250,11 +250,12 @@ export class AlertService {
         caseId,
       });
     } catch (error) {
-      throw createCaseError({
-        message: `Failed to remove case ${caseId} from alerts: ${error}`,
-        error,
-        logger: this.logger,
-      });
+      /**
+       * We intentionally do not throw an error.
+       * Users should be able to remove alerts from a case even
+       * in the event of an error produced by the alerts client
+       */
+      this.logger.error(`Failed removing case ${caseId} from alerts: ${error}`);
     }
   }
 
@@ -268,11 +269,12 @@ export class AlertService {
         caseIds,
       });
     } catch (error) {
-      throw createCaseError({
-        message: `Failed removing case ${caseIds} for all alerts: ${error}`,
-        error,
-        logger: this.logger,
-      });
+      /**
+       * We intentionally do not throw an error.
+       * Users should be able to remove alerts from cases even
+       * in the event of an error produced by the alerts client
+       */
+      this.logger.error(`Failed removing cases ${caseIds} for all alerts: ${error}`);
     }
   }
 

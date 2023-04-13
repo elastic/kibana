@@ -857,11 +857,6 @@ export class AlertsClient {
         return;
       }
 
-      const mgetRes = await this.ensureAllAlertsAuthorized({
-        alerts,
-        operation: ReadOperations.Get,
-      });
-
       const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
         if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
           int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
@@ -871,12 +866,12 @@ export class AlertsClient {
 
       const bulkUpdateRequest = [];
 
-      for (const doc of mgetRes.docs) {
+      for (const alert of alerts) {
         bulkUpdateRequest.push(
           {
             update: {
-              _index: doc._index,
-              _id: doc._id,
+              _index: alert.index,
+              _id: alert.id,
             },
           },
           {
@@ -890,15 +885,20 @@ export class AlertsClient {
         body: bulkUpdateRequest,
       });
     } catch (error) {
-      this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
+      this.logger.error(`Error removing case ${caseId} from alerts: ${error}`);
       throw error;
     }
   }
 
   public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
     try {
+      if (caseIds.length === 0) {
+        return;
+      }
+
       const index = `${this.ruleDataService.getResourcePrefix()}-*`;
       const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
+      const esQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
 
       const SCRIPT_PARAMS_ID = 'caseIds';
 
@@ -911,16 +911,6 @@ export class AlertsClient {
         }
       }`;
 
-      const fetchAndAuditResponse = await this.queryAndAuditAllAlerts({
-        query,
-        index,
-        operation: ReadOperations.Get,
-      });
-
-      if (!fetchAndAuditResponse?.auditedAlerts) {
-        throw Boom.forbidden('Unauthorized to remove caseIds from all alerts');
-      }
-
       await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
@@ -931,7 +921,7 @@ export class AlertsClient {
             lang: 'painless',
             params: { caseIds },
           } as InlineScript,
-          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+          query: esQuery,
         },
         ignore_unavailable: true,
       });

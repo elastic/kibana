@@ -48,6 +48,8 @@ import {
   superUser,
   obsOnlyReadAlerts,
   obsSec,
+  secSolutionOnlyReadNoIndexAlerts,
+  secOnlyReadAlerts,
 } from '../../../../common/lib/authentication/users';
 import {
   secAllUser,
@@ -294,11 +296,11 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             alerts,
             getAlerts,
-            deleteCaseAuth: { user: obsOnlyReadAlerts, space: 'space1' },
+            deleteCaseAuth: { user: secOnlyReadAlerts, space: 'space1' },
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           /**
            * The alerts client throws an expectation failed error (471) when
            * the user is unauthorized to find alerts for any rule types
@@ -308,11 +310,24 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             totalCases: 1,
             indicesOfCaseToDelete: [0],
-            expectedHttpCode: 417,
+            expectedHttpCode: 204,
             owner: 'securitySolutionFixture',
             alerts,
             getAlerts,
             deleteCaseAuth: { user: obsSec, space: 'space1' },
+          });
+        });
+
+        it('should delete the case ID from the alert schema when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          await createCaseAttachAlertAndDeleteCase({
+            supertest: supertestWithoutAuth,
+            totalCases: 1,
+            indicesOfCaseToDelete: [0],
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
+            expectedHttpCode: 204,
+            deleteCaseAuth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
         });
       });
@@ -324,6 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
 
         const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: '.alerts-observability.apm.alerts' });
           const updatedAlerts = await Promise.all(
             _alerts.map((alert) =>
               getAlertById({
@@ -392,17 +408,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
-          /**
-           * The alerts client throws an expectation failed error (471) when
-           * the user is unauthorized to find alerts for any rule types
-           */
-
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           await createCaseAttachAlertAndDeleteCase({
             supertest: supertestWithoutAuth,
             totalCases: 1,
             indicesOfCaseToDelete: [0],
-            expectedHttpCode: 417,
+            expectedHttpCode: 204,
             owner: 'observabilityFixture',
             alerts,
             getAlerts,
