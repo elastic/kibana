@@ -18,14 +18,7 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
 
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
 
-  const input = updatedPackagePolicyDoc.attributes.inputs[0];
-
-  if (input && input.config) {
-    const policy = input.config.policy.value;
-
-    // For the migration, we add an empty string, and the license watcher will correct it if needed.
-    policy.meta = { license: '' };
-  }
+  // TODO
 
   return updatedPackagePolicyDoc;
 };
