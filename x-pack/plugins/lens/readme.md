@@ -98,6 +98,22 @@ Filters and query `state.filters`/`state.query` define the visualization-global 
 
 The `EmbeddableComponent` also takes a set of callbacks to react to user interactions with the embedded Lens visualization to integrate the visualization with the surrounding app: `onLoad`, `onBrushEnd`, `onFilter`, `onTableRowClick`. A common pattern is to keep state in the solution app which is updated within these callbacks - re-rendering the surrounding application will change the Lens attributes passed to the component which will re-render the visualization (including re-fetching data if necessary).
 
+#### Preventing defaults
+
+In some scenarios it can be useful to customize the default behaviour and avoid the default Kibana triggers for a specific action, like add a filter on a bar chart/pie slice click. For this specific requirement the `data` object returned by the `onBrushEnd`, `onFilter`, `onTableRowClick` callbacks has a special `preventDefault()` function that will prevent other registered event triggers to execute:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  onFilter={(data) => {
+    // custom behaviour on "filter" event
+    ...
+    // now prevent to add a filter in Kibana 
+    data.preventDefault();
+  }}
+/>
+```
+
 ## Handling data views
 
 In most cases it makes sense to have a data view saved object to use the Lens embeddable. Use the data view service to find an existing data view for a given index pattern or create a new one if it doesn't exist yet:
