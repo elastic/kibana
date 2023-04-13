@@ -30,11 +30,6 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
     migrateLegacyActions: jest.fn(),
   };
 });
-(migrateLegacyActions as jest.Mock).mockResolvedValue({
-  hasLegacyActions: false,
-  resultedActions: [],
-  resultedReferences: [],
-});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -176,6 +171,11 @@ describe('update()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+    });
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
     });
   });
 
@@ -2800,7 +2800,6 @@ describe('update()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: '1',
-        skipActionsValidation: true,
         attributes: existingDecryptedSiemAlert.attributes,
       });
     });
