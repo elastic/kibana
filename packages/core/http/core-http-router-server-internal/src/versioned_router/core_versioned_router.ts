@@ -15,18 +15,15 @@ export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
   public static from({
     router,
-    validateResponses,
     defaultHandlerResolutionStrategy = 'oldest',
   }: {
     router: IRouter;
-    validateResponses?: boolean;
     defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   }) {
-    return new CoreVersionedRouter(router, validateResponses, defaultHandlerResolutionStrategy);
+    return new CoreVersionedRouter(router, defaultHandlerResolutionStrategy);
   }
   private constructor(
     public readonly router: IRouter,
-    public readonly validateResponses: boolean = false,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest'
   ) {}
 
