@@ -20,6 +20,7 @@ export const GET_DEFAULT_TABLE_PROPERTIES = {
   clickedItemId: '',
   selectedTabId: FlyoutTabIds.METADATA,
   searchFilter: '',
+  metadataSearch: '',
 };
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'hostFlyoutOpen';
 
@@ -55,12 +56,22 @@ const SetSearchFilterRT = rt.partial({
   searchFilter: SearchFilterRT,
 });
 
-const ActionRT = rt.intersection([SetClickedItemIdRT, SetFlyoutTabId, SetSearchFilterRT]);
+const SetMetadataSearchRT = rt.partial({
+  metadataSearch: SearchFilterRT,
+});
+
+const ActionRT = rt.intersection([
+  SetClickedItemIdRT,
+  SetFlyoutTabId,
+  SetSearchFilterRT,
+  SetMetadataSearchRT,
+]);
 
 const HostFlyoutOpenRT = rt.type({
   clickedItemId: ClickedItemIdRT,
   selectedTabId: FlyoutTabIdRT,
   searchFilter: SearchFilterRT,
+  metadataSearch: SearchFilterRT,
 });
 
 type HostFlyoutOpen = rt.TypeOf<typeof HostFlyoutOpenRT>;

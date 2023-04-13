@@ -5301,7 +5301,14 @@
             "label": "days",
             "description": [],
             "signature": [
-              "(2 | 7 | 6 | 5 | 4 | 3 | 1)[]"
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.IsoWeekday",
+                "text": "IsoWeekday"
+              },
+              "[]"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6874,6 +6881,20 @@
             "description": [],
             "signature": [
               "string | null"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.apiKeyCreatedByUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "apiKeyCreatedByUser",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -8820,6 +8841,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.IsoWeekday",
+        "type": "Type",
+        "tags": [],
+        "label": "IsoWeekday",
+        "description": [],
+        "signature": [
+          "2 | 7 | 6 | 5 | 4 | 3 | 1"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.LastScheduledActions",
         "type": "Type",
         "tags": [],
@@ -9045,6 +9081,35 @@
             "text": "SavedObjectsResolveResponse"
           },
           "<unknown>, \"saved_object\">"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleActionAlertsFilterProperty",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleActionAlertsFilterProperty",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttribute",
+            "text": "SavedObjectAttribute"
+          },
+          " | ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AlertsFilterTimeframe",
+            "text": "AlertsFilterTimeframe"
+          }
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
