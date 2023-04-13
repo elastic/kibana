@@ -9,11 +9,9 @@ import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import { pick } from 'lodash/fp';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
@@ -39,7 +37,6 @@ interface DataViewInfo {
    * @deprecated use fields list on dataview / "indexPattern"
    */
   browserFields: DangerCastForBrowserFieldsMutation;
-  indexFields: FieldSpec[];
 }
 
 /**
@@ -49,7 +46,7 @@ interface DataViewInfo {
 export const getDataViewStateFromIndexFields = memoizeOne(
   (
     _title: string,
-    fields: IIndexPatternFieldList,
+    fields: DataViewFieldBase[],
     _includeUnmapped: boolean = false
   ): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
@@ -67,16 +64,10 @@ export const getDataViewStateFromIndexFields = memoizeOne(
         }
         acc.browserFields[category].fields[field.name] = field as unknown as BrowserField;
 
-        // mutate indexFields
-        acc.indexFields.push(
-          pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-        );
-
         return acc;
       },
       {
         browserFields: {},
-        indexFields: [],
       }
     );
   },

@@ -437,7 +437,6 @@ export const useSourcererDataView = (
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      // @ts-expect-error
       sourcererDataView.fields,
       false
     );
