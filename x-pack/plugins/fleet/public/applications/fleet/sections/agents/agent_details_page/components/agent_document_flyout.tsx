@@ -19,8 +19,9 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import type { Agent } from '../../../../types';
 
-export const AgentDocumentFlyout = memo<{ agent: any; onClose: () => void }>(
+export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
     const agentToJson = JSON.stringify(agent, null, 2);
     const agentName =
@@ -33,7 +34,6 @@ export const AgentDocumentFlyout = memo<{ agent: any; onClose: () => void }>(
       link.href = `data:text/json;charset=utf-8,${encodeURIComponent(agentToJson)}`;
       link.download = `${agentName}-agent-document.json`;
       link.click();
-      link.remove();
     };
 
     return (
