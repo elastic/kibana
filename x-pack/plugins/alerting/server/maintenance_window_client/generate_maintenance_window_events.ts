@@ -89,30 +89,9 @@ export const mergeEvents = ({
 }) => {
   // If new events have more entries (expiration date got pushed), we merge the old into the new
   if (newEvents.length > oldEvents.length) {
-    const modifiedEvents: Array<{ event: DateRange; index: number }> = [];
-
-    // Find all modified events in the old events array
-    oldEvents.forEach((oldEvent, index) => {
-      const newEvent = newEvents[index];
-      if (oldEvent.lte !== newEvent.lte || oldEvent.gte !== newEvent.gte) {
-        modifiedEvents.push({
-          event: oldEvent,
-          index,
-        });
-      }
-    });
-
-    const newEventsCopy = [...newEvents];
-
-    // Update the new event array with old modified events
-    modifiedEvents.forEach(({ event, index }) => {
-      newEventsCopy[index] = event;
-    });
-
-    return newEventsCopy;
+    return [...oldEvents, ...newEvents.slice(-(newEvents.length - oldEvents.length))];
   }
   // If new events have less entries (maintenance window got archived), we trim the old events
-  // to match the same length as the new events
   if (oldEvents.length > newEvents.length) {
     return oldEvents.slice(0, newEvents.length);
   }
