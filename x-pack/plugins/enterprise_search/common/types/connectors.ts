@@ -6,8 +6,10 @@
  */
 
 export interface KeyValuePair {
+  display: string;
   label: string;
   order?: number | null;
+  sensitive: boolean;
   value: string | number | boolean | null;
 }
 
