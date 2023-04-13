@@ -43,7 +43,7 @@ export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) =>
           alt={selectedFile.name}
           size="original"
           src={filesClient.getDownloadHref({
-            id: selectedFile.id || '',
+            id: selectedFile.id,
             fileKind: constructFileKindIdByOwner(owner[0] as Owner),
           })}
           data-test-subj="cases-files-image-preview"

@@ -11,14 +11,12 @@ import { basicFileMock } from '../../containers/mock';
 import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './utils';
 
 describe('isImage', () => {
-  it('should return true for allowed image mime types', () => {
-    // @ts-ignore
-    expect(imageMimeTypes.reduce((acc, curr) => acc && isImage({ mimeType: curr }))).toBeTruthy();
+  it.each(imageMimeTypes)('should return true for image mime type: %s', (mimeType) => {
+    expect(isImage({ mimeType })).toBeTruthy();
   });
 
-  it('should return false for allowed non-image mime types', () => {
-    // @ts-ignore
-    expect(textMimeTypes.reduce((acc, curr) => acc && isImage({ mimeType: curr }))).toBeFalsy();
+  it.each(textMimeTypes)('should return false for text mime type: %s', (mimeType) => {
+    expect(isImage({ mimeType })).toBeFalsy();
   });
 });
 

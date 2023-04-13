@@ -367,6 +367,7 @@ describe('Use cases toast hook', () => {
       result.current.showDangerToast('my danger toast');
 
       expect(dangerMock).toHaveBeenCalledWith({
+        className: 'eui-textBreakWord',
         title: 'my danger toast',
       });
     });

@@ -103,9 +103,10 @@ describe('CaseViewTabs', () => {
   it('shows the files tab with the correct count and colour', async () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
 
-    expect(
-      (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
-    ).toMatch(/accent/);
+    const badge = await screen.findByTestId('case-view-files-stats-badge');
+
+    expect(badge.getAttribute('class')).toMatch(/accent/);
+    expect(badge).toHaveTextContent('3');
   });
 
   it('the files tab count has a different colour if the tab is not active', async () => {

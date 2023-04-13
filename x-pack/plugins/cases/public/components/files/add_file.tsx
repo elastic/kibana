@@ -145,9 +145,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         </EuiModal>
       )}
     </EuiFlexItem>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 AddFileComponent.displayName = 'AddFile';
 
