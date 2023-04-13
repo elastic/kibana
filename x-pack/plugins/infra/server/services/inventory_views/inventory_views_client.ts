@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
