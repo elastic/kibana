@@ -19,6 +19,8 @@ import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
+import * as i18n from './translations';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -91,6 +93,7 @@ export const useDataView = (): {
   const abortCtrl = useRef<Record<string, AbortController>>({});
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
+  const { addError } = useAppToasts();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -107,17 +110,15 @@ export const useDataView = (): {
       skipScopeUpdate = false,
     }) => {
       const asyncSearch = async () => {
-        abortCtrl.current = {
-          ...abortCtrl.current,
-          [dataViewId]: new AbortController(),
-        };
-        setLoading({ id: dataViewId, loading: true });
+        try {
+          abortCtrl.current = {
+            ...abortCtrl.current,
+            [dataViewId]: new AbortController(),
+          };
+          setLoading({ id: dataViewId, loading: true });
 
-        const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
 
-        if (needToBeInit) {
-          dispatch(sourcererActions.setDataView({ ...dataView, loading: false }));
-        } else {
           if (needToBeInit && scopeId && !skipScopeUpdate) {
             dispatch(
               sourcererActions.setSelectedDataView({
@@ -128,6 +129,10 @@ export const useDataView = (): {
             );
           }
           dispatch(sourcererActions.setDataView({ ...dataView, loading: false }));
+        } catch (exc) {
+          addError(exc?.message, {
+            title: i18n.ERROR_INDEX_FIELDS_SEARCH,
+          });
         }
       };
       if (searchSubscription$.current[dataViewId]) {
@@ -138,7 +143,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [dispatch, setLoading, data.dataViews]
+    [setLoading, data.dataViews, dispatch, addError]
   );
 
   return { indexFieldsSearch };
