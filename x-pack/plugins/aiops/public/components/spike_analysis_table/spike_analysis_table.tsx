@@ -31,6 +31,7 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
@@ -80,7 +81,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const [sortField, setSortField] = useState<keyof SignificantTerm>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
-
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
@@ -95,7 +95,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const copyToClipBoardAction = useCopyToClipboardAction();
   const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
-  
+
   const columns: Array<EuiBasicTableColumn<SignificantTerm>> = [
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
