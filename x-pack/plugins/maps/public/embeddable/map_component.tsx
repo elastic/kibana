@@ -57,7 +57,6 @@ export class MapComponent extends Component<Props> {
         .getOnRenderComplete$()
         .pipe(first())
         .subscribe(() => {
-
           if (this.props.onInitialRenderComplete) {
             this.props.onInitialRenderComplete();
           }
