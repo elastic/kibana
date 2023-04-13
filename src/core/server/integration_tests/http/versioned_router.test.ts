@@ -11,13 +11,39 @@ import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import type { IRouterWithVersion } from '@kbn/core-http-server';
+import type { Env } from '@kbn/config';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
+
+const getContextSetup = (
+  { env }: { env: Pick<Env, 'mode'> } = {
+    env: { mode: { dev: false, prod: true, name: 'production' } },
+  }
+) =>
+  contextServiceMock.createSetupContract({
+    core: Promise.resolve(
+      new CoreRouteHandlerContext(
+        {
+          deprecations: deprecationsServiceMock.createInternalStartContract(),
+          elasticsearch: elasticsearchServiceMock.createInternalStart(),
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(),
+          uiSettings: uiSettingsServiceMock.createStartContract(),
+          env,
+        },
+        {} as any
+      )
+    ),
+  });
 
 describe('Routing versioned requests', () => {
   let router: IRouterWithVersion;
