@@ -115,7 +115,8 @@ export const useDashboardMenuItems = ({
   }, [maybeRedirect, dashboardContainer]);
 
   /**
-   * Returns to view mode. If the dashboard has unsaved changes shows a warning and resets to last saved state.
+   * Resets the dashboard to the last saved state if the
+   * @param returnToViewMode: boolean Det
    */
   const resetChanges = useCallback(
     (returnToViewMode: boolean = false) => {
@@ -257,9 +258,7 @@ export const useDashboardMenuItems = ({
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share
-      ? [{ ...menuItems.share, className: 'kbnTopNavMenuItem__withDivider' }]
-      : [];
+    const shareMenuItem = share ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
     if (lastSavedId) {
       editModeItems.push(

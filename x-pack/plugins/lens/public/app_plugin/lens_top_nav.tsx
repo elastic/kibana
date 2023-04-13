@@ -149,7 +149,7 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       run: actions.goBack.execute,
-      className: 'kbnTopNavMenuItem__withDivider',
+      className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
@@ -168,7 +168,7 @@ function getLensTopNavConfig(options: {
       label: exploreDataInDiscoverLabel,
       run: actions.getUnderlyingDataUrl.execute,
       testId: 'lnsApp_openInDiscover',
-      className: 'kbnTopNavMenuItem__withDivider',
+      className: 'lnsNavItem__withDivider',
       description: exploreDataInDiscoverLabel,
       disableButton: !actions.getUnderlyingDataUrl.enabled,
       tooltip: actions.getUnderlyingDataUrl.tooltip,
@@ -209,7 +209,7 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Settings',
     }),
     run: actions.openSettings.execute,
-    className: 'kbnTopNavMenuItem__withDivider',
+    className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
