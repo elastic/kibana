@@ -148,6 +148,27 @@ describe('Policy Form Layout', () => {
       expect(saveButton.text()).toEqual('beta');
     });
 
+    it('should display minimum Agent version number for User Notification', async () => {
+      await asyncActions;
+      policyFormLayoutView.update();
+
+      const minVersionsMap = [
+        ['malware', '7.11'],
+        ['ransomware', '7.12'],
+        ['behavior', '7.15'],
+        ['memory', '7.15'],
+      ];
+
+      for (const [protection, minVersion] of minVersionsMap) {
+        expect(
+          policyFormLayoutView
+            .find(`EuiPanel[data-test-subj="${protection}ProtectionsForm"]`)
+            .find('EuiText[data-test-subj="policySupportedVersions"]')
+            .text()
+        ).toEqual(`Agent version ${minVersion}+`);
+      }
+    });
+
     describe('when the save button is clicked', () => {
       let saveButton: FindReactWrapperResponse;
       let confirmModal: FindReactWrapperResponse;
