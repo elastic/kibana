@@ -115,17 +115,18 @@ export const useDashboardMenuItems = ({
   }, [maybeRedirect, dashboardContainer]);
 
   /**
-   * Resets the dashboard to the last saved state if the
-   * @param returnToViewMode: boolean Det
+   * Show the dashboard's "Confirm discard changes" modal. If confirmed:
+   * (1) reset the dashboard to the last saved state, and
+   * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
-  const resetChanges = useCallback(
-    (returnToViewMode: boolean = false) => {
+  const discardChanges = useCallback(
+    (switchToViewMode: boolean = false) => {
       dashboardContainer.clearOverlays();
       if (hasUnsavedChanges) {
         confirmDiscardUnsavedChanges(() => {
           batch(() => {
             dashboardContainer.resetToLastSavedState();
-            if (returnToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+            if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
           });
         });
         return;
@@ -189,11 +190,11 @@ export const useDashboardMenuItems = ({
         run: () => saveDashboardAs(),
       } as TopNavMenuData,
 
-      resetChanges: {
-        ...topNavStrings.resetChanges,
+      discardChanges: {
+        ...topNavStrings.discardChanges,
         id: 'reset',
         disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
-        run: () => resetChanges(),
+        run: () => discardChanges(),
       } as TopNavMenuData,
 
       switchToViewMode: {
@@ -201,7 +202,7 @@ export const useDashboardMenuItems = ({
         id: 'cancel',
         disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(true),
+        run: () => discardChanges(true),
       } as TopNavMenuData,
 
       share: {
@@ -235,7 +236,7 @@ export const useDashboardMenuItems = ({
     hasOverlays,
     setFullScreenMode,
     isSaveInProgress,
-    resetChanges,
+    discardChanges,
     saveDashboardAs,
     setIsLabsShown,
     lastSavedId,
@@ -259,7 +260,7 @@ export const useDashboardMenuItems = ({
       menuItems.fullScreen,
       ...shareMenuItem,
       ...cloneMenuItem,
-      menuItems.resetChanges,
+      menuItems.discardChanges,
       ...editMenuItem,
     ];
   }, [menuItems, share, showWriteControls, isLabsEnabled]);
@@ -272,7 +273,7 @@ export const useDashboardMenuItems = ({
       editModeItems.push(
         menuItems.saveAs,
         menuItems.switchToViewMode,
-        menuItems.resetChanges,
+        menuItems.discardChanges,
         menuItems.quickSave
       );
     } else {

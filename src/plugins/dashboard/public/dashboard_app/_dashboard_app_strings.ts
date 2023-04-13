@@ -111,7 +111,7 @@ export const discardConfirmStrings = {
     }),
   getDiscardSubtitle: () =>
     i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+      defaultMessage: `You can’t recover unsaved changes.`,
     }),
   getDiscardConfirmButtonText: () =>
     i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
@@ -312,12 +312,12 @@ export const topNavStrings = {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
-  resetChanges: {
-    label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
-      defaultMessage: 'Reset',
+  discardChanges: {
+    label: i18n.translate('dashboard.topNave.discardChangesButtonAriaLabel', {
+      defaultMessage: 'Discard changes',
     }),
-    description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
-      defaultMessage: 'Reset your dashboard to the last saved state',
+    description: i18n.translate('dashboard.topNave.discardChangesConfigDescription', {
+      defaultMessage: 'Discard changes to dashboard',
     }),
   },
   switchToViewMode: {
