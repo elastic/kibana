@@ -234,23 +234,56 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
   // When there is no function name, only use the executable name
   return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
 }
+export enum FrameSymbolStatus {
+  PARTIALLY_SYMBOLYZED = 'PARTIALLY_SYMBOLYZED',
+  NOT_SYMBOLIZED = 'NOT_SYMBOLIZED',
+  SYMBOLIZED = 'SYMBOLIZED',
+}
+export function getFrameSymbolStatus({
+  sourceFilename,
+  sourceLine,
+  exeFileName,
+}: {
+  sourceFilename: string;
+  sourceLine: number;
+  exeFileName?: string;
+}) {
+  if (sourceFilename === '' && sourceLine === 0) {
+    if (exeFileName) {
+      return FrameSymbolStatus.PARTIALLY_SYMBOLYZED;
+    }
+
+    return FrameSymbolStatus.NOT_SYMBOLIZED;
+  }
+
+  return FrameSymbolStatus.SYMBOLIZED;
+}
+
+const nativeLanguages = [FrameType.Native, FrameType.Kernel];
+export function getLanguageType({ frameType }: { frameType: FrameType }) {
+  return nativeLanguages.includes(frameType) ? 'NATIVE' : 'INTERPRETED';
+}
 
 export function getCalleeSource(frame: StackFrameMetadata): string {
-  if (frame.SourceFilename === '' && frame.SourceLine === 0) {
-    if (frame.ExeFileName) {
+  const frameSymbolStatus = getFrameSymbolStatus({
+    sourceFilename: frame.SourceFilename,
+    sourceLine: frame.SourceLine,
+    exeFileName: frame.ExeFileName,
+  });
+
+  switch (frameSymbolStatus) {
+    case FrameSymbolStatus.NOT_SYMBOLIZED: {
+      // If we don't have the executable filename, display <unsymbolized>
+      return '<unsymbolized>';
+    }
+    case FrameSymbolStatus.PARTIALLY_SYMBOLYZED: {
       // If no source line or filename available, display the executable offset
       return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
     }
-
-    // If we don't have the executable filename, display <unsymbolized>
-    return '<unsymbolized>';
+    case FrameSymbolStatus.SYMBOLIZED: {
+      return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
+    }
   }
-
-  if (frame.SourceFilename !== '' && frame.SourceLine === 0) {
-    return frame.SourceFilename;
-  }
-
-  return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
 export function groupStackFrameMetadataByStackTrace(

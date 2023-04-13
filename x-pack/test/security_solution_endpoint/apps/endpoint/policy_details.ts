@@ -47,7 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('with a valid policy id', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/154182
+    describe.skip('with a valid policy id', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {

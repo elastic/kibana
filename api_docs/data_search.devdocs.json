@@ -481,7 +481,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -7983,6 +7983,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -8023,7 +8047,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -17611,7 +17635,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -24545,6 +24569,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -24818,7 +24866,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -30413,7 +30461,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -32112,7 +32160,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32265,6 +32313,30 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
+          "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggTypesDependencies",
+            "text": "AggTypesDependencies"
+          },
+          ") => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
           "<any>>(name: N, type: T) => void; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -32296,7 +32368,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",

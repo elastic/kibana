@@ -8,6 +8,7 @@ import { invert, mapValues } from 'lodash';
 import moment from 'moment';
 import * as i18n from './translations';
 
+// TODO - consolidate enum with backend
 export enum Frequency {
   YEARLY = '0',
   MONTHLY = '1',

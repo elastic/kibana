@@ -16,4 +16,8 @@ describe('generateNthByWeekday', () => {
   test('should parse the 3rd tuesday', () => {
     expect(getNthByWeekday(moment('2021-11-16'))).toEqual('+3TU');
   });
+
+  test('should parse the last sunday of the month', () => {
+    expect(getNthByWeekday(moment('2023-04-30'))).toEqual('-1SU');
+  });
 });

@@ -68,6 +68,7 @@ export const MonitorDetailsPanel = ({
   return (
     <PanelWithTitle
       paddingSize="m"
+      margin="none"
       title={MONITOR_DETAILS_LABEL}
       titleLeftAlign
       hasBorder={hasBorder}

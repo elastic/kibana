@@ -104,7 +104,10 @@ describe('RPC -> delete()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          any: 'object',
+          contentTypeId: 'foo',
+          result: {
+            success: true,
+          },
         },
         outputSchema
       );
@@ -142,7 +145,7 @@ describe('RPC -> delete()', () => {
     test('should return the storage delete() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'DeleteResult';
+      const expected = { success: true };
       storage.delete.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, version: 1, id: '1234' });
