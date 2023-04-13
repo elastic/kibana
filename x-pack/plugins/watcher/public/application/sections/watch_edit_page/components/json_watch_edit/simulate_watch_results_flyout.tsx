@@ -206,7 +206,7 @@ export const SimulateWatchResultsFlyout = ({
 
   const conditionMetStatus = (details?.result?.condition.met && (
     <>
-      <EuiIcon color="green" type="check" />{' '}
+      <EuiIcon color="green" type="check" data-test-subj="conditionMetStatus" />{' '}
       <FormattedMessage
         id="xpack.watcher.sections.watchEdit.simulateResults.conditionMetStatus"
         defaultMessage="Condition met"
@@ -214,7 +214,7 @@ export const SimulateWatchResultsFlyout = ({
     </>
   )) || (
     <>
-      <EuiIcon color="subdued" type="cross" />{' '}
+      <EuiIcon color="subdued" type="cross" data-test-subj="conditionNotMetStatus" />{' '}
       <FormattedMessage
         id="xpack.watcher.sections.watchEdit.simulateResults.conditionNotMetStatus"
         defaultMessage="Condition not met"
@@ -250,7 +250,11 @@ export const SimulateWatchResultsFlyout = ({
               </h5>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiBasicTable columns={columns} items={actionsTableData} />
+            <EuiBasicTable
+              columns={columns}
+              items={actionsTableData}
+              data-test-subj="simulateResultsTable"
+            />
             <EuiSpacer size="l" />
           </Fragment>
         )}
