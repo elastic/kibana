@@ -318,7 +318,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         if (this.props.onClose) {
           this.props.onClose();
         }
-        if (mounted) {
+        if (this.mounted) {
           this.setState({ isCreatingReportJob: false });
         }
       })
@@ -333,7 +333,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
-        if (mounted) {
+        if (this.mounted) {
           this.setState({ isCreatingReportJob: false });
         }
       });
