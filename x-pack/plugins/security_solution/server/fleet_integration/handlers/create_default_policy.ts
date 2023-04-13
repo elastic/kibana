@@ -34,10 +34,9 @@ export const createDefaultPolicy = (
   const factoryPolicy = policyConfigFactory();
 
   logger.error('testing the create default');
-  // Add license information after policy creation
+  // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
-  const cloudEnabled = cloud?.isCloudEnabled;
-  logger.error(`hi i am the cloud: ${cloudEnabled}`);
+  factoryPolicy.meta.cloud = cloud?.isCloudEnabled ? cloud.cloudId : '';
 
   const defaultPolicyPerType =
     config?.type === 'cloud'
