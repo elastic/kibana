@@ -60,6 +60,20 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
   });
 
+  it('FileAdd in empty table is clickable', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+
+    expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
+
+    const addFileButton = await screen.findByTestId('cases-files-add');
+
+    expect(addFileButton).toBeInTheDocument();
+
+    userEvent.click(addFileButton);
+
+    expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+  });
+
   it('renders single result count properly', async () => {
     const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 4 };
     appMockRender.render(<FilesTable {...defaultProps} pagination={mockPagination} />);
