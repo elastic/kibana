@@ -22,8 +22,6 @@ export const FileAttachmentMetadataRt = rt.type({
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
 
-export type DownloadableFile = rt.TypeOf<typeof SingleFileAttachmentMetadataRt> & { id: string };
-
 export const FILE_ATTACHMENT_TYPE = '.files';
 
 const MIN_DELETE_IDS = 1;

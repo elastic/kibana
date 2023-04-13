@@ -6,11 +6,11 @@
  */
 import React from 'react';
 
-import type { DownloadableFile } from '../../../common/api';
 import type {
   ExternalReferenceAttachmentType,
   ExternalReferenceAttachmentViewProps,
 } from '../../client/attachment_framework/types';
+import type { DownloadableFile } from './types';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
