@@ -7,7 +7,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { once } from 'lodash';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   RequestHandler,
@@ -63,14 +62,15 @@ export class CoreVersionedRoute implements VersionedRoute {
     return new CoreVersionedRoute(router, method, path, options);
   }
 
+  private isPublic: boolean;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
-  ) {}
-
-  private isPublic: () => boolean = once(() => this.options?.access === 'public');
+  ) {
+    this.isPublic = this.options?.access === 'public';
+  }
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): ApiVersion {
@@ -110,7 +110,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const version = this.getVersion(req);
 
-    const invalidVersionMessage = isValidRouteVersion(this.isPublic(), version);
+    const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
     if (invalidVersionMessage) {
       return res.badRequest({ body: invalidVersionMessage });
     }
@@ -184,7 +184,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private validateVersion(version: string) {
-    const message = isValidRouteVersion(this.isPublic(), version);
+    const message = isValidRouteVersion(this.isPublic, version);
     if (message) {
       throw new Error(message);
     }
