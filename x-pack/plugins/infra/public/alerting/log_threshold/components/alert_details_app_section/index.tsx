@@ -65,12 +65,11 @@ const AlertDetailsAppSection = ({
       ) || {};
 
     setSelectedSeries(getChartGroupNames(Object.values(alertFieldsFromGroupBy)));
-    const test = Object.keys(alertFieldsFromGroupBy).map((key) => ({
-      label: key,
-      value: alertFieldsFromGroupBy[key],
+    const alertSummaryFields = Object.entries(alertFieldsFromGroupBy).map(([label, value]) => ({
+      label,
+      value,
     }));
-
-    setAlertSummaryFields(test);
+    setAlertSummaryFields(alertSummaryFields);
   }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
 
   return (
