@@ -33,6 +33,16 @@ export const SyntheticsMonitorStatusTranslations = {
       },
     }
   ),
+  defaultRecoverySubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
+    {
+      defaultMessage: 'The monitor {monitorName} checking {monitorUrl} has recoverd.',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+      },
+    }
+  ),
   defaultRecoveryMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
