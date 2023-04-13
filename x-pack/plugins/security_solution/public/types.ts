@@ -62,6 +62,8 @@ import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
 import type { TelemetryClientStart } from './common/lib/telemetry';
+import type { Dashboards } from './dashboards';
+
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -139,34 +141,36 @@ export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
-  alerts: Detections;
-  rules: Rules;
-  exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  explore: Explore;
-  kubernetes: Kubernetes;
-  overview: Overview;
-  timelines: Timelines;
-  management: Management;
-  landingPages: LandingPages;
+  alerts: Detections;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
+  dashboards: Dashboards;
+  exceptions: Exceptions;
+  explore: Explore;
+  kubernetes: Kubernetes;
+  landingPages: LandingPages;
+  management: Management;
+  overview: Overview;
+  rules: Rules;
   threatIntelligence: ThreatIntelligence;
+  timelines: Timelines;
 }
 
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
-  alerts: ReturnType<Detections['start']>;
-  rules: ReturnType<Rules['start']>;
-  exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  explore: ReturnType<Explore['start']>;
-  kubernetes: ReturnType<Kubernetes['start']>;
-  overview: ReturnType<Overview['start']>;
-  timelines: ReturnType<Timelines['start']>;
-  management: ReturnType<Management['start']>;
-  landingPages: ReturnType<LandingPages['start']>;
+  alerts: ReturnType<Detections['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
+  dashboards: ReturnType<Dashboards['start']>;
+  exceptions: ReturnType<Exceptions['start']>;
+  explore: ReturnType<Explore['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
+  landingPages: ReturnType<LandingPages['start']>;
+  management: ReturnType<Management['start']>;
+  overview: ReturnType<Overview['start']>;
+  rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
+  timelines: ReturnType<Timelines['start']>;
 }
