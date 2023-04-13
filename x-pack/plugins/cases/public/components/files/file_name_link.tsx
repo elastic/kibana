@@ -8,13 +8,13 @@
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import * as i18n from './translations';
 import { isImage } from './utils';
 
 interface FileNameLinkProps {
-  file: FileJSON;
+  file: Pick<FileJSON, 'name' | 'extension' | 'mimeType'>;
   showPreview: () => void;
 }
 

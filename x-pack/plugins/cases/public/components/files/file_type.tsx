@@ -6,8 +6,7 @@
  */
 import React from 'react';
 
-import type { FileJSON } from '@kbn/shared-ux-file-types';
-
+import type { DownloadableFile } from '../../../common/api';
 import type {
   ExternalReferenceAttachmentType,
   ExternalReferenceAttachmentViewProps,
@@ -24,7 +23,7 @@ import { useFilePreview } from './use_file_preview';
 import { FileDeleteButtonIcon } from './file_delete_button_icon';
 
 interface FileAttachmentEventProps {
-  file: FileJSON;
+  file: DownloadableFile;
 }
 
 const FileAttachmentEvent = ({ file }: FileAttachmentEventProps) => {
@@ -77,13 +76,11 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
   const fileId = props.externalReferenceId;
   const caseId = props.caseData.id;
 
-  // @ts-ignore
-  const partialFileJSON = props.externalReferenceMetadata?.files[0] as Partial<FileJSON>;
-
+  const fileMetadata = props.externalReferenceMetadata.files[0];
   const file = {
     id: fileId,
-    ...partialFileJSON,
-  } as FileJSON;
+    ...fileMetadata,
+  };
 
   return {
     event: <FileAttachmentEvent file={file} />,

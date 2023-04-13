@@ -19,7 +19,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilePreviewProps {
   closePreview: () => void;
-  selectedFile: FileJSON;
+  selectedFile: Pick<FileJSON, 'id' | 'name'>;
 }
 
 const StyledOverlayMask = styled(EuiOverlayMask)`

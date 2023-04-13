@@ -9,18 +9,20 @@ import * as rt from 'io-ts';
 import { MAX_DELETE_FILES } from '../../../constants';
 import { limitedArraySchema, NonEmptyString } from '../../../schema';
 
+export const SingleFileAttachmentMetadataRt = rt.type({
+  name: rt.string,
+  extension: rt.string,
+  mimeType: rt.string,
+  created: rt.string,
+});
+
 export const FileAttachmentMetadataRt = rt.type({
-  files: rt.array(
-    rt.type({
-      name: rt.string,
-      extension: rt.string,
-      mimeType: rt.string,
-      created: rt.string,
-    })
-  ),
+  files: rt.array(SingleFileAttachmentMetadataRt),
 });
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
+
+export type DownloadableFile = rt.TypeOf<typeof SingleFileAttachmentMetadataRt> & { id: string };
 
 export const FILE_ATTACHMENT_TYPE = '.files';
 
