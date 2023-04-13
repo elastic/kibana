@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -197,11 +198,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
+          const test = await latestFindingsTable.getLoading();
+          expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
         }
       });
 
@@ -215,11 +217,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
+          const test = await latestFindingsTable.getLoading();
+          expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
         }
       });
 
@@ -233,11 +236,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
+          const test = await latestFindingsTable.getLoading();
+          expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
         }
       });
 
@@ -251,11 +255,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
+          const test = await latestFindingsTable.getLoading();
+          expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
         }
       });
     });
