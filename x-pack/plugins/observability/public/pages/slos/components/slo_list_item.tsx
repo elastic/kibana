@@ -129,7 +129,7 @@ export function SloListItem({
               </EuiFlexGroup>
             </EuiFlexItem>
 
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <SloSummary
                 slo={slo}
                 historicalSummary={historicalSummary}
