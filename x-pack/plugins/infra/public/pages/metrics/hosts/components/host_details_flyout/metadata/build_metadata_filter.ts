@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { buildPhrasesFilter, buildPhraseFilter, FilterStateStore } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export function buildMetadataFilter({
@@ -17,8 +17,11 @@ export function buildMetadataFilter({
   value: string | Array<string | number>;
   negate: boolean;
   field: string;
-  dataView: DataView;
+  dataView: DataView | undefined;
 }) {
+  if (!dataView) {
+    return null;
+  }
   const indexField = dataView.getFieldByName(field)!;
   const areMultipleValues = Array.isArray(value) && value.length > 1;
   const filter = areMultipleValues
@@ -26,6 +29,7 @@ export function buildMetadataFilter({
     : buildPhraseFilter(indexField, Array.isArray(value) ? value[0] : value, dataView);
 
   filter.meta.type = areMultipleValues ? 'phrases' : 'phrase';
+  filter.$state = { store: 'appState' as FilterStateStore.APP_STATE };
 
   filter.meta.value = Array.isArray(value)
     ? !areMultipleValues

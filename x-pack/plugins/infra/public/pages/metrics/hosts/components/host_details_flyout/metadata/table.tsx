@@ -126,6 +126,7 @@ export const Table = (props: Props) => {
         field: 'value',
         name: 'Actions',
         sortable: false,
+        showOnHover: true,
         render: (_name: string, item: Row) => {
           return <AddMetadataFilterButton item={item} />;
         },
@@ -141,6 +142,7 @@ export const Table = (props: Props) => {
       responsive={false}
       columns={columns}
       items={rows}
+      rowProps={{ className: 'euiTableRow-hasActions' }}
       search={search}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}

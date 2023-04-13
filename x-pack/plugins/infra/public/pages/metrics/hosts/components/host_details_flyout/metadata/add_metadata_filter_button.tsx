@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import { Filter, PhraseFilter, PhrasesFilter, ScriptedPhraseFilter } from '@kbn/es-query';
 import { buildMetadataFilter } from './build_metadata_filter';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -24,6 +24,9 @@ interface AddMetadataFilterButtonProps {
 export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) => {
   const { dataView } = useMetricsDataViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
+  const [existingFilter, setExistingFilter] = useState<
+    PhrasesFilter | PhraseFilter | ScriptedPhraseFilter | Filter | undefined
+  >(() => undefined);
   const {
     services: {
       data: {
@@ -32,8 +35,37 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     },
   } = useKibanaContextForPlugin();
 
+  useMemo(() => {
+    const addedFilter = searchCriteria.filters.find((filter) => filter.meta.key === item.name);
+    if (addedFilter) {
+      setExistingFilter(addedFilter);
+    }
+  }, [item.name, searchCriteria.filters]);
+
+  if (existingFilter) {
+    return (
+      <span>
+        <EuiToolTip
+          content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
+            defaultMessage: 'Remove filter',
+          })}
+        >
+          <EuiButtonIcon
+            color="primary"
+            size="s"
+            iconType="filter"
+            aria-label={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel', {
+              defaultMessage: 'Filter',
+            })}
+            onClick={() => filterManagerService.removeFilter(existingFilter)}
+          />
+        </EuiToolTip>
+      </span>
+    );
+  }
+
   return (
-    <span>
+    <span className="euiTableCellContent__hoverItem expandedItemActions__completelyHide">
       <EuiToolTip
         content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
           defaultMessage: 'View event with filter',
@@ -44,19 +76,17 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           size="s"
           iconType="filter"
           aria-label={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel', {
-            defaultMessage: 'Filter',
+            defaultMessage: 'Add Filter',
           })}
           onClick={() => {
-            if (dataView) {
-              const filter = buildMetadataFilter({
-                field: item.name,
-                value: item.value ?? '',
-                dataView,
-                negate: false,
-              });
-              if (!compareFilters(searchCriteria.filters, filter, COMPARE_ALL_OPTIONS)) {
-                filterManagerService.addFilters(filter);
-              }
+            const newFilter = buildMetadataFilter({
+              field: item.name,
+              value: item.value ?? '',
+              dataView,
+              negate: false,
+            });
+            if (newFilter) {
+              filterManagerService.addFilters(newFilter);
             }
           }}
         />
