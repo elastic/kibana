@@ -26,6 +26,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-network",
-    "security_app_display_name": "Spike in Network Traffic"
+    "security_app_display_name": "Spike in Network Traffic",
+    "managed": true,
+    "job_revision": 4
   }
 }

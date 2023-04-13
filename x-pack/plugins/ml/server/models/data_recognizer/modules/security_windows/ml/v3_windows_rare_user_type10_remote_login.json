@@ -21,6 +21,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Unusual Windows Remote User"
+    "security_app_display_name": "Unusual Windows Remote User",
+    "managed": true,
+    "job_revision": 4
   }
 }

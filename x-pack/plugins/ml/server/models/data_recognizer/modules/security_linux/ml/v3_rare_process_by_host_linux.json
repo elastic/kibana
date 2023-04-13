@@ -24,6 +24,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-linux-v3",
-    "security_app_display_name": "Unusual Process for a Linux Host"
+    "security_app_display_name": "Unusual Process for a Linux Host",
+    "managed": true,
+    "job_revision": 4
   }
 }

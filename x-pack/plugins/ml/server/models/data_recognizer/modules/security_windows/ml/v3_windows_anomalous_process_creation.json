@@ -23,6 +23,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Anomalous Windows Process Creation"
+    "security_app_display_name": "Anomalous Windows Process Creation",
+    "managed": true,
+    "job_revision": 4
   }
 }

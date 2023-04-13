@@ -23,6 +23,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Unusual Process for a Windows Host"
+    "security_app_display_name": "Unusual Process for a Windows Host",
+    "managed": true,
+    "job_revision": 4
   }
 }
