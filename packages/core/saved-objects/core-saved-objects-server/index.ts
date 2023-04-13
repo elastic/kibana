@@ -52,6 +52,7 @@ export type {
   SavedObjectsExportablePredicate,
 } from './src/saved_objects_management';
 export type { SavedObjectStatusMeta } from './src/saved_objects_status';
+export { MAIN_SAVED_OBJECT_INDEX } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,

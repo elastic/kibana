@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export type {
-  SavedObjectsTypeMappingDefinitions,
-  IndexMappingMeta,
-  IndexMapping,
-  IndexTypesMap,
-  IndexMappingMigrationStateMeta,
-} from './types';
+export const MAIN_SAVED_OBJECT_INDEX = '.kibana';

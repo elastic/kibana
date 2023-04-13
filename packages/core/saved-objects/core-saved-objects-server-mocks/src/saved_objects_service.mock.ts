@@ -29,6 +29,7 @@ import {
   savedObjectsImporterMock,
 } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -70,7 +71,7 @@ const createSetupContractMock = () => {
     getKibanaIndex: jest.fn(),
   };
 
-  setupContract.getKibanaIndex.mockReturnValue('.kibana');
+  setupContract.getKibanaIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
 
   return setupContract;
 };
