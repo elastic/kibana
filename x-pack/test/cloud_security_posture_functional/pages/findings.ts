@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -203,7 +202,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
+          values.forEach((value, i) =>
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            )
+          );
         }
       });
 
@@ -222,7 +226,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
+          values.forEach((value, i) =>
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            )
+          );
         }
       });
 
@@ -241,7 +250,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
+          values.forEach((value, i) =>
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            )
+          );
         }
       });
 
@@ -260,7 +274,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`))
+          values.forEach((value, i) =>
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            )
+          );
         }
       });
     });
