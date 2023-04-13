@@ -6,9 +6,17 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getEmptyValue } from '../../empty_value';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -16,8 +24,11 @@ import { useGetEndpointPendingActionsSummary } from '../../../../management/hook
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import type { HostInfo, EndpointPendingActions } from '../../../../../common/endpoint/types';
 import { AgentStatus } from '../agent_status';
+import { useGetEndpointDetails } from '../../../../management/hooks';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
+
+const AUTO_REFRESH_INTERVAL = 10_000;
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -27,6 +38,11 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 
 export interface EndpointAgentStatusProps {
   endpointHostInfo: HostInfo;
+  /**
+   * If set to `true` (Default), then the endpoint status will be kept up to date
+   * by querying the API periodically
+   */
+  autoFresh?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -35,12 +51,12 @@ export interface EndpointAgentStatusProps {
  * response actions against it.
  */
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
-  ({ endpointHostInfo, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointHostInfo, autoFresh = true, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
       [endpointHostInfo.metadata.agent.id],
       {
-        refetchInterval: 10000,
+        refetchInterval: autoFresh ? AUTO_REFRESH_INTERVAL : false,
       }
     );
 
@@ -83,6 +99,50 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   }
 );
 EndpointAgentStatus.displayName = 'EndpointAgentStatus';
+
+export interface EndpointAgentStatusByIdProps {
+  endpointAgentId: string;
+  /**
+   * If set to `true` (Default), then the endpoint status will be kept up to date
+   * by querying the API periodically
+   */
+  autoFresh?: boolean;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Given an Endpoint Agent Id, it will make the necessary API calls and then display the agent
+ * status using the `<EndpointAgentStatus />` component.
+ *
+ * NOTE: if the `HostInfo` is already available, consider using `<EndpointAgentStatus/>` component
+ * instead in order to avoid duplicate API calls.
+ */
+export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
+  ({ endpointAgentId, autoFresh, 'data-test-subj': dataTestSubj }) => {
+    const { data } = useGetEndpointDetails(endpointAgentId, {
+      refetchInterval: autoFresh ? AUTO_REFRESH_INTERVAL : false,
+    });
+
+    const emptyValue = (
+      <EuiText size="xs" data-test-subj={dataTestSubj}>
+        <p>{getEmptyValue()}</p>
+      </EuiText>
+    );
+
+    if (!data) {
+      return emptyValue;
+    }
+
+    return (
+      <EndpointAgentStatus
+        endpointHostInfo={data}
+        data-test-subj={dataTestSubj}
+        autoFresh={autoFresh}
+      />
+    );
+  }
+);
+EndpointAgentStatusById.displayName = 'EndpointAgentStatusById';
 
 interface EndpointHostResponseActionsStatusProps {
   /** The host's individual pending action list as return by the pending action summary api */
