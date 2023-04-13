@@ -13,9 +13,12 @@ describe('isValidRouteVersion', () => {
     test('allows valid dates', () => {
       expect(isValidRouteVersion(true, '2010-02-01')).toBe(undefined);
     });
-    test.each([['2020.02.01'], [''], ['abc']])('%p returns an error message', (value: string) => {
-      expect(isValidRouteVersion(true, value)).toMatch(/Invalid version/);
-    });
+    test.each([['2020.02.01'], ['2020-99-99'], [''], ['abc']])(
+      '%p returns an error message',
+      (value: string) => {
+        expect(isValidRouteVersion(true, value)).toMatch(/Invalid version/);
+      }
+    );
   });
   describe('internal', () => {
     test('allows valid numbers', () => {

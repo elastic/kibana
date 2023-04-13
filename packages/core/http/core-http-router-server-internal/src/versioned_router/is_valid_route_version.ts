@@ -7,6 +7,7 @@
  */
 
 const VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+import moment from 'moment';
 
 /**
  * For public routes we must check that the version is a string that is YYYY-MM-DD.
@@ -15,9 +16,9 @@ const VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
  */
 export function isValidRouteVersion(isPublicApi: boolean, version: string): undefined | string {
   if (isPublicApi) {
-    return VERSION_REGEX.test(version)
+    return VERSION_REGEX.test(version) && moment(version, 'YYYY-MM-DD').isValid()
       ? undefined
-      : `Invalid version. Received "${version}", expected a string formatted as YYYY-MM-DD.`;
+      : `Invalid version. Received "${version}", expected a valid date string formatted as YYYY-MM-DD.`;
   }
   const float = parseFloat(version);
   return isFinite(float) && !isNaN(float) && float > 0 && Math.round(float) === float
