@@ -51,8 +51,6 @@ const redirectToDiscover = (discover: DiscoverStart, resolvedLogView?: ResolvedL
 
   const columns = parseColumns(resolvedLogView.columns);
   const dataViewSpec = resolvedLogView.dataViewReference.toSpec()
-  console.log(resolvedLogView.dataViewReference);
-  
 
   return discover.locator?.navigate({
     columns,
