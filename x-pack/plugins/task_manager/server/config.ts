@@ -140,6 +140,9 @@ export const configSchema = schema.object(
     claim_eager_search_multiplier: schema.number({
       defaultValue: 4,
     }),
+    prune_stale_docs: schema.boolean({
+      defaultValue: true,
+    }),
   },
   {
     validate: (config) => {

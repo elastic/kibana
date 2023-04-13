@@ -51,6 +51,7 @@ export interface TaskClaimingOpts {
   getCapacity: (taskType?: string) => number;
   taskPartitioner: TaskPartitioner;
   claimEagerSearchMultiplier: number;
+  pruneStaleDocs: boolean;
 }
 
 export interface OwnershipClaimingOpts {
@@ -116,6 +117,8 @@ export class TaskClaiming {
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
   private readonly taskPartitioner: TaskPartitioner;
+  private readonly claimEagerSearchMultiplier: number;
+  private readonly pruneStaleDocs: boolean;
 
   /**
    * Constructs a new TaskStore.
@@ -135,6 +138,7 @@ export class TaskClaiming {
     this.unusedTypes = opts.unusedTypes;
     this.taskPartitioner = opts.taskPartitioner;
     this.claimEagerSearchMultiplier = opts.claimEagerSearchMultiplier;
+    this.pruneStaleDocs = opts.pruneStaleDocs;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -356,18 +360,23 @@ export class TaskClaiming {
           // going to do a mget to use realtime search to get the most recent
           // doc, and if it has been updated we will skip updating it below
           const bulkGetResult = await this.taskStore.bulkGet(updateableDocs.map((docs) => docs.id));
-          const bulkGetResultVersions = bulkGetResult.reduce((acc, bulkGetResultItem) => {
-            if (isOk(bulkGetResultItem)) {
-              acc.set(bulkGetResultItem.value.id, bulkGetResultItem.value.version!);
+          const bulkGetResultVersions = new Map<string, string>();
+          if (this.pruneStaleDocs) {
+            for (const bulkGetResultItem of bulkGetResult) {
+              if (isOk(bulkGetResultItem)) {
+                bulkGetResultVersions.set(
+                  bulkGetResultItem.value.id,
+                  bulkGetResultItem.value.version!
+                );
+              }
             }
-            return acc;
-          }, new Map<string, string>());
+          }
           while (
             docsToUpdate.length < claimSize - updatedDocs.length &&
             updateableDocs.length > 0
           ) {
             const doc = updateableDocs.shift()!;
-            if (bulkGetResultVersions.get(doc.id) !== doc.version) {
+            if (this.pruneStaleDocs && bulkGetResultVersions.get(doc.id) !== doc.version) {
               ++staleTasks;
             } else if (taskTypesToClaim.includes(doc.taskType)) {
               docsToUpdate.push(doc);
@@ -412,7 +421,11 @@ export class TaskClaiming {
       this.logger
         .get('claim')
         .debug(
-          `# task types: ${taskTypesToClaim.length}\t# claim size: ${claimSize}\t# claimed: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale pruned: ${staleTasks}\thas more: ${hasMore}`
+          `# task types: ${taskTypesToClaim.length}\t# claim size: ${claimSize}\t# claimed: ${
+            updatedDocs.length
+          }\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale pruned: ${
+            this.pruneStaleDocs ? staleTasks : 'N/A'
+          }\thas more: ${hasMore}`
         );
 
       // Not all of the updated docs are "claimed" and ready to be ran
