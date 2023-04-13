@@ -36,9 +36,9 @@ function prepareTest(setCustomUrlsFn: jest.Mock) {
   ];
 
   const props: CustomUrlListProps = {
-    job: {} as Job,
+    job: { job_id: 'test', analysis_config: {} } as Job,
     customUrls,
-    setCustomUrls: setCustomUrlsFn,
+    onChange: setCustomUrlsFn,
   };
 
   return shallow(<CustomUrlList {...props} />);

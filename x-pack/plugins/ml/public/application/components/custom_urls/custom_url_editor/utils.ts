@@ -5,29 +5,77 @@
  * 2.0.
  */
 
-import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { isFilterPinned, Filter } from '@kbn/es-query';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
+import {
+  isDataFrameAnalyticsConfigs,
+  type DataFrameAnalyticsConfig,
+} from '../../../../../common/types/data_frame_analytics';
+import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
+import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
+import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import {
   getPartitioningFieldNames,
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
+import {
+  replaceTokensInUrlValue,
+  replaceTokensInDFAUrlValue,
+  isValidLabel,
+} from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
+import { UrlConfig } from '../../../../../common/types/custom_urls';
+import {
+  CombinedJob,
+  Job,
+  isAnomalyDetectionJob,
+} from '../../../../../common/types/anomaly_detection_jobs';
+import { TimeRangeType } from './constants';
 
-export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
+export interface TimeRange {
+  type: TimeRangeType;
+  interval: string;
+}
+
+export interface CustomUrlSettings {
+  label: string;
+  type: string;
+  // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
+  // as for other URLs we have no way of knowing how the field will be used in the URL.
+  timeRange: TimeRange;
+  kibanaSettings?: {
+    dashboardId?: string;
+    queryFieldNames?: string[];
+    discoverIndexPatternId?: string;
+    filters?: Filter[];
+  };
+  otherUrlSettings?: {
+    urlValue: string;
+  };
+}
+
+export function getNewCustomUrlDefaults(
+  job: Job | DataFrameAnalyticsConfig,
+  dashboards: Array<{ id: string; title: string }>,
+  dataViews: DataViewListItem[]
+): CustomUrlSettings {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
-  const kibanaSettings = {
+  const kibanaSettings: CustomUrlSettings['kibanaSettings'] = {
     queryFieldNames: [],
   };
 
@@ -42,22 +90,30 @@ export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
 
   // For the Discover option, set the default data view to that
   // which matches the indices configured in the job datafeed.
-  const datafeedConfig = job.datafeed_config;
+  let query: estypes.QueryDslQueryContainer = {};
+  let indicesName: string | undefined;
+  let jobId;
   if (
+    isAnomalyDetectionJob(job) &&
     dataViews !== undefined &&
     dataViews.length > 0 &&
-    datafeedConfig !== undefined &&
-    datafeedConfig.indices !== undefined &&
-    datafeedConfig.indices.length > 0
+    job.datafeed_config !== undefined &&
+    job.datafeed_config.indices !== undefined &&
+    job.datafeed_config.indices.length > 0
   ) {
-    const indicesName = datafeedConfig.indices.join();
-    const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
-    kibanaSettings.discoverIndexPatternId = defaultDataViewId;
-    kibanaSettings.filters =
-      defaultDataViewId === null
-        ? []
-        : getFiltersForDSLQuery(job.datafeed_config.query, defaultDataViewId, job.job_id);
+    indicesName = job.datafeed_config.indices.join();
+    query = job.datafeed_config?.query ?? {};
+    jobId = job.job_id;
+  } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
+    indicesName = job.dest.index;
+    query = job.source?.query ?? {};
+    jobId = job.id;
   }
+
+  const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
+  kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+  kibanaSettings.filters =
+    defaultDataViewId === null ? [] : getFiltersForDSLQuery(query, defaultDataViewId, jobId);
 
   return {
     label: '',
@@ -75,18 +131,35 @@ export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   };
 }
 
-export function getQueryEntityFieldNames(job) {
+// Returns the list of supported field names that can be used
+// to add to the query used when linking to a Kibana dashboard or Discover.
+export function getSupportedFieldNames(
+  job: DataFrameAnalyticsConfig,
+  dataView: DataView
+): string[] {
+  const resultsField = job.dest.results_field;
+  const sortedFields = dataView.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
+  const categoryFields = sortedFields.filter(
+    (f) =>
+      categoryFieldTypes.some((type) => {
+        return f.esTypes?.includes(type);
+      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD)
+  );
+  return categoryFields.map((field) => field.name);
+}
+
+export function getQueryEntityFieldNames(job: Job): string[] {
   // Returns the list of partitioning and influencer field names that can be used
   // as entities to add to the query used when linking to a Kibana dashboard or Discover.
   const influencers = job.analysis_config.influencers;
   const detectors = job.analysis_config.detectors;
-  const entityFieldNames = [];
+  const entityFieldNames: string[] = [];
   if (influencers !== undefined) {
     entityFieldNames.push(...influencers);
   }
 
   detectors.forEach((detector, detectorIndex) => {
-    const partitioningFields = getPartitioningFieldNames(job, detectorIndex);
+    const partitioningFields = getPartitioningFieldNames(job as CombinedJob, detectorIndex);
 
     partitioningFields.forEach((fieldName) => {
       if (entityFieldNames.indexOf(fieldName) === -1) {
@@ -98,7 +171,7 @@ export function getQueryEntityFieldNames(job) {
   return entityFieldNames;
 }
 
-export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
+export function isValidCustomUrlSettingsTimeRange(timeRangeSettings: TimeRange): boolean {
   if (timeRangeSettings.type === TIME_RANGE_TYPE.INTERVAL) {
     const interval = parseInterval(timeRangeSettings.interval);
     return interval !== null;
@@ -107,7 +180,10 @@ export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   return true;
 }
 
-export function isValidCustomUrlSettings(settings, savedCustomUrls) {
+export function isValidCustomUrlSettings(
+  settings: CustomUrlSettings,
+  savedCustomUrls: UrlConfig[]
+): boolean {
   let isValid = isValidLabel(settings.label, savedCustomUrls);
   if (isValid === true) {
     isValid = isValidCustomUrlSettingsTimeRange(settings.timeRange);
@@ -115,7 +191,7 @@ export function isValidCustomUrlSettings(settings, savedCustomUrls) {
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings) {
+export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
@@ -125,27 +201,27 @@ export function buildCustomUrlFromSettings(settings) {
   } else {
     const urlToAdd = {
       url_name: settings.label,
-      url_value: settings.otherUrlSettings.urlValue,
+      url_value: settings.otherUrlSettings?.urlValue ?? '',
     };
 
     return Promise.resolve(urlToAdd);
   }
 }
 
-async function buildDashboardUrlFromSettings(settings) {
+async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
-  const { dashboardId, queryFieldNames } = settings.kibanaSettings;
+  const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
   const savedObjectsClient = getSavedObjectsClient();
 
-  const response = await savedObjectsClient.get('dashboard', dashboardId);
+  const response = await savedObjectsClient.get('dashboard', dashboardId ?? '');
 
   // Query from the datafeed config will be saved as custom filters
   // Use them if there are set.
-  let filters = settings.kibanaSettings.filters;
+  let filters = settings?.kibanaSettings?.filters;
 
   // Use the query from the dashboard only if no job entities are selected.
-  let query = undefined;
+  let query;
 
   // Override with filters and queries from saved dashboard if they are available.
   const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
@@ -157,14 +233,14 @@ async function buildDashboardUrlFromSettings(settings) {
     query = searchSourceData.query;
   }
 
-  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);
   if (queryFromEntityFieldNames !== undefined) {
     query = queryFromEntityFieldNames;
   }
 
   const dashboard = getDashboard();
 
-  const location = await dashboard.locator.getLocation({
+  const location = await dashboard?.locator?.getLocation({
     dashboardId,
     timeRange: {
       from: '$earliest$',
@@ -179,22 +255,22 @@ async function buildDashboardUrlFromSettings(settings) {
   });
 
   // Temp workaround
-  const state = location.state;
+  const state: any = location?.state;
   const resultPath = setStateToKbnUrl(
     '_a',
     cleanEmptyKeys({
       query: state.query,
-      filters: state.filters?.filter((f) => !isFilterPinned(f)),
+      filters: state.filters?.filter((f: Filter) => !isFilterPinned(f)),
       savedQuery: state.savedQuery,
     }),
     { useHash: false, storeInHashQuery: true },
-    location.path
+    location?.path
   );
 
   const urlToAdd = {
     url_name: settings.label,
     url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
-    time_range: TIME_RANGE_TYPE.AUTO,
+    time_range: TIME_RANGE_TYPE.AUTO as string,
   };
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
@@ -204,8 +280,8 @@ async function buildDashboardUrlFromSettings(settings) {
   return urlToAdd;
 }
 
-function buildDiscoverUrlFromSettings(settings) {
-  const { discoverIndexPatternId, queryFieldNames, filters } = settings.kibanaSettings;
+function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
+  const { discoverIndexPatternId, queryFieldNames, filters } = settings.kibanaSettings ?? {};
 
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
@@ -219,7 +295,7 @@ function buildDiscoverUrlFromSettings(settings) {
   });
 
   // Add the index pattern and query to the appState part of the URL.
-  const appState = {
+  const appState: SerializableRecord = {
     index: discoverIndexPatternId,
     filters,
   };
@@ -234,7 +310,7 @@ function buildDiscoverUrlFromSettings(settings) {
 
   // So for simplicity, put entities in the query, replacing any query which is there already.
   // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
-  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);
   if (queryFromEntityFieldNames !== undefined) {
     appState.query = queryFromEntityFieldNames;
   }
@@ -243,7 +319,7 @@ function buildDiscoverUrlFromSettings(settings) {
 
   const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
-  const urlToAdd = {
+  const urlToAdd: KibanaUrlConfig = {
     url_name: settings.label,
     url_value: urlValue,
     time_range: TIME_RANGE_TYPE.AUTO,
@@ -257,7 +333,7 @@ function buildDiscoverUrlFromSettings(settings) {
 }
 
 // Builds the query parameter for use in the _a AppState part of a Kibana Dashboard or Discover URL.
-function buildAppStateQueryParam(queryFieldNames) {
+function buildAppStateQueryParam(queryFieldNames: string[]) {
   let queryParam;
   if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
     let queryString = '';
@@ -280,8 +356,9 @@ function buildAppStateQueryParam(queryFieldNames) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-export async function getTestUrl(job, customUrl) {
-  const bucketSpanSecs = parseInterval(job.analysis_config.bucket_span).asSeconds();
+async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Promise<string> {
+  const interval = parseInterval(job.analysis_config.bucket_span);
+  const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
   // tokens with values from the highest scoring anomaly, or if no anomalies, with
@@ -289,7 +366,7 @@ export async function getTestUrl(job, customUrl) {
   let testUrl = customUrl.url_value;
 
   // Query to look for the highest scoring anomaly.
-  const body = {
+  const body: estypes.SearchRequest['body'] = {
     query: {
       bool: {
         must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],
@@ -323,12 +400,13 @@ export async function getTestUrl(job, customUrl) {
     // No anomalies yet for this job, so do a preview of the search
     // configured in the job datafeed to obtain sample docs.
 
-    let { datafeed_config: datafeedConfig, ...jobConfig } = job;
+    let { datafeed_config: datafeedConfig } = job;
+    let jobConfig = job;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
         ml.getJobs({ jobId: job.job_id }),
-        ml.getDatafeeds({ datafeedId: job.datafeed_config.datafeed_id }),
+        ml.getDatafeeds({ datafeedId: job.datafeed_config?.datafeed_id ?? '' }),
       ]);
       datafeedConfig = datafeeds[0];
       jobConfig = jobs[0];
@@ -341,16 +419,82 @@ export async function getTestUrl(job, customUrl) {
       return testUrl;
     }
 
-    const preview = await ml.jobs.datafeedPreview(undefined, jobConfig, datafeedConfig);
+    if (datafeedConfig.authorization !== undefined) {
+      delete datafeedConfig.authorization;
+    }
+    if (datafeedConfig && jobConfig.datafeed_config !== undefined) {
+      delete jobConfig.datafeed_config;
+    }
+
+    const preview = (await ml.jobs.datafeedPreview(
+      undefined,
+      jobConfig,
+      datafeedConfig
+    )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;
 
     // Create a dummy object which contains the fields necessary to build the URL.
     const firstBucket = preview[0];
     if (firstBucket !== undefined) {
-      testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, firstBucket, docTimeFieldName);
+      testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, firstBucket, docTimeFieldName!);
     }
 
     return testUrl;
   }
+}
+
+async function getDataFrameAnalyticsTestUrl(
+  job: DataFrameAnalyticsConfig,
+  customUrl: UrlConfig,
+  currentTimeFilter?: EsQueryTimeRange
+): Promise<string> {
+  // By default, return configured url_value. Look to substitute any dollar-delimited
+  // tokens with values from a sample doc in the destination index
+  let testUrl = customUrl.url_value;
+  let record;
+  let resp;
+
+  try {
+    resp = await ml.esSearch({
+      index: job.dest.index,
+      body: {
+        size: 1,
+      },
+    });
+
+    if (resp && resp.hits.total.value > 0) {
+      record = resp.hits.hits[0]._source;
+      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+      return testUrl;
+    } else {
+      // No results for this job yet so use source index for example doc.
+      resp = await ml.esSearch({
+        index: Array.isArray(job.source.index) ? job.source.index.join(',') : job.source.index,
+        body: {
+          size: 1,
+        },
+      });
+
+      record = resp?.hits?.hits[0]._source;
+      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+    }
+  } catch (error) {
+    // search may fail if the job doesn't already exist
+    // ignore this error as the outer function call will raise a toast
+  }
+
+  return testUrl;
+}
+
+export function getTestUrl(
+  job: Job | DataFrameAnalyticsConfig,
+  customUrl: UrlConfig,
+  currentTimeFilter?: EsQueryTimeRange
+) {
+  if (isDataFrameAnalyticsConfigs(job)) {
+    return getDataFrameAnalyticsTestUrl(job, customUrl, currentTimeFilter);
+  }
+
+  return getAnomalyDetectionJobTestUrl(job, customUrl);
 }
