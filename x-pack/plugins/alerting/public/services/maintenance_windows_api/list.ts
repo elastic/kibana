@@ -40,14 +40,11 @@ const transform: RewriteRequestCase<MaintenanceWindowResponse> = ({
 
 export async function getMaintenanceWindowsList({
   http,
-  filter,
 }: {
   http: HttpSetup;
-  filter?: string;
 }): Promise<MaintenanceWindowResponse[]> {
-  const res = await http.post<Array<AsApiContract<MaintenanceWindowResponse>>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`,
-    { body: JSON.stringify({ filter }) }
+  const res = await http.get<Array<AsApiContract<MaintenanceWindowResponse>>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`
   );
   return rewriteBodyRes(res);
 }

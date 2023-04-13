@@ -40,7 +40,7 @@ describe('getMaintenanceWindowsList', () => {
         total: 1000,
       },
     ];
-    http.post.mockResolvedValueOnce(apiResponse);
+    http.get.mockResolvedValueOnce(apiResponse);
 
     const maintenanceWindow: MaintenanceWindowResponse[] = [
       {
@@ -70,12 +70,9 @@ describe('getMaintenanceWindowsList', () => {
 
     const result = await getMaintenanceWindowsList({ http });
     expect(result).toEqual(maintenanceWindow);
-    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/maintenance_window/_find",
-        Object {
-          "body": "{}",
-        },
       ]
     `);
   });
