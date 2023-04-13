@@ -104,13 +104,59 @@ describe('#rawToSavedObject', () => {
     });
   });
 
-  test(`if _source.migrationVersion is unspecified it doesn't set migrationVersion`, () => {
-    const actual = singleNamespaceSerializer.rawToSavedObject({
-      _id: 'foo:bar',
-      _source: {
-        type: 'foo',
+  test('derives original `migrationVersion` in compatibility mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          migrationVersion: { foo: '1.0.0' },
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
       },
-    });
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).toHaveProperty('migrationVersion', { foo: '1.0.0' });
+  });
+
+  test('derives `migrationVersion` in compatibility mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
+      },
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).toHaveProperty('migrationVersion', { foo: '1.2.3' });
+  });
+
+  test('does not derive `migrationVersion` if there is no type version', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+        },
+      },
+      { migrationVersionCompatibility: 'compatible' }
+    );
+    expect(actual).not.toHaveProperty('migrationVersion');
+  });
+
+  test('does not derive `migrationVersion` in raw mode', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject(
+      {
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          typeMigrationVersion: '1.2.3',
+        },
+      },
+      { migrationVersionCompatibility: 'raw' }
+    );
     expect(actual).not.toHaveProperty('migrationVersion');
   });
 

@@ -69,4 +69,6 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
