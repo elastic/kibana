@@ -7,6 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Env } from '@kbn/config';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   CoreElasticsearchRouteHandlerContext,
@@ -34,6 +35,7 @@ export interface CoreRouteHandlerContextParams {
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
+  env: Pick<Env, 'mode'>;
 }
 
 /**
@@ -46,18 +48,17 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
   readonly deprecations: CoreDeprecationsRouteHandlerContext;
+  readonly env: Pick<Env, 'mode'>;
 
-  constructor(coreStart: CoreRouteHandlerContextParams, request: KibanaRequest) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
-    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
-    this.uiSettings = new CoreUiSettingsRouteHandlerContext(
-      coreStart.uiSettings,
-      this.savedObjects
-    );
+  constructor(deps: CoreRouteHandlerContextParams, request: KibanaRequest) {
+    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(deps.elasticsearch, request);
+    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(deps.savedObjects, request);
+    this.uiSettings = new CoreUiSettingsRouteHandlerContext(deps.uiSettings, this.savedObjects);
     this.deprecations = new CoreDeprecationsRouteHandlerContext(
-      coreStart.deprecations,
+      deps.deprecations,
       this.elasticsearch,
       this.savedObjects
     );
+    this.env = { mode: deps.env.mode };
   }
 }
