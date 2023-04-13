@@ -139,7 +139,7 @@ export class Plugin implements InfraClientPluginClass {
 
     if (this.config.logs.app_target === 'discover') {
       core.application.register({
-        id: 'discover-to-logs',
+        id: 'logs-to-discover',
         title: '',
         navLinkStatus: AppNavLinkStatus.hidden,
         appRoute: '/app/logs',
