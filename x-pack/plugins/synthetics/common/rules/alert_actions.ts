@@ -108,6 +108,7 @@ export function populateAlertActions({
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
           recoveredAction.params = getEmailActionParams(translations, defaultEmail);
+          actions.push(recoveredAction);
         }
         break;
       default:
