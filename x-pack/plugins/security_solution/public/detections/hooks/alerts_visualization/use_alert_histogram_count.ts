@@ -33,8 +33,7 @@ export const useAlertHistogramCount = ({
         totalAlertsObj.value,
         totalAlertsObj.relation === 'gte' ? '>' : totalAlertsObj.relation === 'lte' ? '<' : ''
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [totalAlertsObj.value, totalAlertsObj.relation]
+    [totalAlertsObj.value, totalAlertsObj.relation, defaultNumberFormat]
   );
 
   const visualizationAlerts = useMemo(() => {
