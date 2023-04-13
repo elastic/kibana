@@ -6,7 +6,6 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import omit from 'lodash/omit';
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
@@ -41,7 +40,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
   context: RulesClientContext,
   { ruleId, actions = [], references = [], attributes, skipActionsValidation }
 ) => {
-  if (attributes?.consumer === AlertConsumers.SIEM) {
+  if (attributes.consumer !== AlertConsumers.SIEM) {
     return {
       resultedActions: [],
       hasLegacyActions: false,
@@ -53,23 +52,15 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     ruleId,
   });
 
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  // we put frequency into legacy action already. Once https://github.com/elastic/kibana/pull/153113 is merged, we should get rid of this code
-  const legacyActionsWithoutFrequencies = legacyActions.map(
-    (action) => omit(action, 'frequency') as RawRuleAction
-  );
-
   // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
-  if (skipActionsValidation) {
+  if (skipActionsValidation !== true) {
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
     await validateActions(context, ruleType, {
       ...attributes,
-      actions: injectReferencesIntoActions(
-        ruleId,
-        legacyActionsWithoutFrequencies,
-        legacyActionsReferences
-      ),
+      // set to undefined to avoid both per-actin and rule level values clashing
+      throttle: undefined,
+      notifyWhen: undefined,
+      actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
     });
   }
 
@@ -94,9 +85,8 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     ...action,
     frequency: {
       summary: true,
-      notifyWhen:
-        attributes.notifyWhen ?? legacyActions[0].frequency?.notifyWhen ?? 'onThrottleInterval',
-      throttle: attributes.throttle ?? legacyActions[0].frequency?.throttle ?? null,
+      notifyWhen: attributes.notifyWhen ?? 'onActiveAlert',
+      throttle: attributes.throttle ?? null,
     },
   }));
 
