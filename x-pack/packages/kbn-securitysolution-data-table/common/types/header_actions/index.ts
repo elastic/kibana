@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumn,
-  EuiDataGridColumnCellActionProps,
-  EuiDataGridControlColumn,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ComponentType, JSXElementConstructor, ReactNode } from 'react';
+import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
@@ -25,50 +20,6 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
 export type ColumnId = string;
-
-/**
- * A `DataTableCellAction` function accepts `data`, where each row of data is
- * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
- * contain a `TimelineNonEcsData[]` with the first row of data.
- *
- * A `DataTableCellAction` returns a function that has access to all the
- * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
- *  which enables code like the following example to be written:
- *
- * Example:
- * ```
- * ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
- *   const value = getMappedNonEcsValue({
- *     data: data[rowIndex], // access a specific row's values
- *     fieldName: columnId,
- *   });
- *
- *   return (
- *     <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType="heart">
- *       {'Love it'}
- *      </Component>
- *   );
- * };
- * ```
- */
-export type DataTableCellAction = ({
-  browserFields,
-  data,
-  ecsData,
-  header,
-  pageSize,
-  scopeId,
-  closeCellPopover,
-}: {
-  browserFields: BrowserFields;
-  /** each row of data is represented as one TimelineNonEcsData[] */
-  data: TimelineNonEcsData[][];
-  ecsData: Ecs[];
-  header?: ColumnHeaderOptions;
-  pageSize: number;
-  scopeId: string;
-  closeCellPopover?: () => void;
-}) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
@@ -153,26 +104,3 @@ export interface ActionProps {
   toggleShowNotes?: () => void;
   width?: number;
 }
-
-interface AdditionalControlColumnProps {
-  ariaRowindex: number;
-  actionsColumnWidth: number;
-  columnValues: string;
-  checked: boolean;
-  onRowSelected: OnRowSelected;
-  eventId: string;
-  id: string;
-  columnId: string;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  showCheckboxes: boolean;
-  // Override these type definitions to support either a generic custom component or the one used in security_solution today.
-  headerCellRender: HeaderCellRender;
-  rowCellRender: RowCellRender;
-}
-
-export type ControlColumnProps = Omit<
-  EuiDataGridControlColumn,
-  keyof AdditionalControlColumnProps
-> &
-  Partial<AdditionalControlColumnProps>;
