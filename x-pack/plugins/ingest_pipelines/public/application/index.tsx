@@ -15,6 +15,8 @@ import { NotificationsSetup, IUiSettingsClient, CoreTheme } from '@kbn/core/publ
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+
 import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -39,6 +41,7 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
   application: ApplicationStart;

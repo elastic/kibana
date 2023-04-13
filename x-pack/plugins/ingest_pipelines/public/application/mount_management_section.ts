@@ -43,6 +43,7 @@ export async function mountManagementSection(
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     share: depsStart.share,
     fileUpload: depsStart.fileUpload,
     application,
