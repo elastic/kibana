@@ -72,7 +72,8 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private isPublic: () => boolean = once(() => this.options?.access === 'public');
 
-  private getDefaultVersion(): undefined | ApiVersion {
+  /** This method assumes that one or more versions handlers are registered  */
+  private getDefaultVersion(): ApiVersion {
     return defaultResolvers[this.router.defaultHandlerResolutionStrategy]([
       ...this.handlers.keys(),
     ]);
@@ -96,23 +97,18 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   }
 
-  /** This is where we must implement the versioned spec once it is available */
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
     req: KibanaRequest,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> => {
-    const version = (req.headers?.[ELASTIC_HTTP_VERSION_HEADER] ?? this.getDefaultVersion()) as
-      | undefined
-      | ApiVersion;
-
-    if (!version) {
-      return res.badRequest({
-        body: `Version expected at [${this.method}] [${
-          this.path
-        }]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
+    if (this.handlers.size <= 0) {
+      return res.custom({
+        statusCode: 500,
+        body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
     }
+    const version = this.getVersion(req);
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic(), version);
     if (invalidVersionMessage) {
@@ -181,6 +177,11 @@ export class CoreVersionedRoute implements VersionedRoute {
       response
     );
   };
+
+  private getVersion(request: KibanaRequest): ApiVersion {
+    const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
+    return Array.isArray(versions) ? versions[0] : versions ?? this.getDefaultVersion();
+  }
 
   private validateVersion(version: string) {
     const message = isValidRouteVersion(this.isPublic(), version);

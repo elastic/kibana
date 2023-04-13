@@ -70,13 +70,6 @@ describe('Routing versioned requests', () => {
     ).resolves.toBe('2');
   });
 
-  it('handles non-existent version', async () => {
-    router.versioned.get({ path: '/my-path', access: 'internal' }); // do not actually register any versions
-    await server.start();
-
-    await supertest.get('/my-path').set('Elastic-Api-Version', '2').expect(400);
-  });
-
   it('handles missing version header (defaults to oldest)', async () => {
     router.versioned
       .get({ path: '/my-path', access: 'public' })
@@ -164,5 +157,21 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ header }) => header)
     ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2020-02-02' }));
+  });
+
+  it('errors when no handler could be found', async () => {
+    router.versioned.get({ path: '/my-path', access: 'public' });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2020-02-02')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
+    );
   });
 });

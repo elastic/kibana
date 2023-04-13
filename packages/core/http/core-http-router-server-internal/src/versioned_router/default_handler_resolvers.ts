@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-type Resolver = (versions: string[]) => undefined | string;
+/**
+ * Assumes that there is at least one version in the array.
+ * @internal
+ */
+type Resolver = (versions: string[]) => string;
 
 const oldest: Resolver = (versions) => [...versions].sort((a, b) => a.localeCompare(b))[0];
 
