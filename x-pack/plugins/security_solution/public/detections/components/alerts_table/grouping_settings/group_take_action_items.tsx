@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
@@ -30,6 +30,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
 import type { StartServices } from '../../../../types';
+
 export interface TakeActionsProps {
   currentStatus?: Status[];
   indexName: string;
@@ -182,7 +183,7 @@ export const useGroupTakeActionsItems = ({
     ]
   );
 
-  const items = useMemo(() => {
+  return useMemo(() => {
     const getActionItems = ({
       query,
       tableId,
@@ -255,7 +256,7 @@ export const useGroupTakeActionsItems = ({
               </EuiContextMenuItem>
             );
           }
-        } else if (currentStatus && currentStatus.length !== 1) {
+        } else {
           const statusArr = {
             [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
             [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
@@ -287,6 +288,4 @@ export const useGroupTakeActionsItems = ({
 
     return getActionItems;
   }, [currentStatus, onClickUpdate, showAlertStatusActions]);
-
-  return items;
 };
