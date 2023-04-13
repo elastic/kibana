@@ -200,4 +200,24 @@ describe('FilesTable', () => {
       })
     );
   });
+
+  it('changing perPage calls onTableChange with correct values', async () => {
+    appMockRender.render(
+      <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
+    );
+
+    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+    const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
+
+    pageSizeOption.style.pointerEvents = 'all';
+
+    userEvent.click(pageSizeOption);
+
+    await waitFor(() =>
+      expect(onTableChange).toHaveBeenCalledWith({
+        page: { index: 0, size: 50 },
+      })
+    );
+  });
 });

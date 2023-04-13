@@ -81,6 +81,7 @@ describe('Case View Page files tab', () => {
     userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
+
     pageSizeOption.style.pointerEvents = 'all';
 
     userEvent.click(pageSizeOption);
