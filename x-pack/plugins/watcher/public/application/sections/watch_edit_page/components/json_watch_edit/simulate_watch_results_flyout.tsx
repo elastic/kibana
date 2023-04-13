@@ -80,14 +80,13 @@ export const SimulateWatchResultsFlyout = ({
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
       return Object.keys(actions).map((actionKey) => {
         const actionStatus = actionStatuses.find((status) => status.id === actionKey);
-        const isConditionMet = executeResults.details.result.condition.met;
+        const isConditionMet = executeResults.details?.result?.condition.met;
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
           actionMode: actionModes[actionKey],
           actionState: actionStatus && actionStatus.state,
           actionReason: actionStatus && actionStatus.lastExecutionReason,
-          metCondition: isConditionMet,
           actionStatus:
             (isConditionMet &&
               executeResults.details.result.actions.find((action: any) => action.id === actionKey)
@@ -205,7 +204,7 @@ export const SimulateWatchResultsFlyout = ({
 
   const { details } = executeResults;
 
-  const conditionMetStatus = (details.result.condition.met && (
+  const conditionMetStatus = (details?.result?.condition.met && (
     <>
       <EuiIcon color="green" type="check" />{' '}
       <FormattedMessage
