@@ -452,7 +452,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
-            defaultMessage: tableColumnMetadata.title.name,
+            defaultMessage: 'Name, description, tags',
           }),
         sortable: true,
         render: (field: keyof T, record: T) => {
@@ -484,7 +484,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       columns.push({
         field: tableColumnMetadata.updatedAt.field,
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
-          defaultMessage: tableColumnMetadata.updatedAt.name,
+          defaultMessage: 'Last updated',
         }),
         render: (field: string, record: { updatedAt?: string }) => (
           <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
