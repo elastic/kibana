@@ -129,6 +129,13 @@ function createCoreRequestHandlerContextMock() {
     deprecations: {
       client: deprecationsServiceMock.createClient(),
     },
+    env: {
+      mode: {
+        dev: true,
+        prod: false,
+        name: 'development' as const,
+      },
+    },
   };
 }
 
