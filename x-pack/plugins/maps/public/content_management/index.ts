@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
+export { mapsClient } from './maps_client';
 
-export type MapSavedObjectAttributes = {
-  title: string;
-  description?: string;
-  mapStateJSON?: string;
-  layerListJSON?: string;
-  uiStateJSON?: string;
-};
+export { checkForDuplicateTitle } from './duplicate_title_check';
