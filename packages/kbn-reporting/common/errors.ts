@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -94,7 +95,7 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
   }
 
   public humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
+    return i18n.translate('reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
       defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
     });
   }
@@ -107,7 +108,7 @@ export class BrowserCouldNotLaunchError extends ReportingError {
   }
 
   public humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+    return i18n.translate('reporting.common.browserCouldNotLaunchErrorMessage', {
       defaultMessage: `Can't generate screenshots because the browser did not launch. See the server logs for more information.`,
     });
   }
@@ -145,7 +146,7 @@ export class VisualReportingSoftDisabledError extends ReportingError {
   }
 
   humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
+    return i18n.translate('reporting.common.cloud.insufficientSystemMemoryError', {
       defaultMessage: `Can't generate this report due to insufficient memory.`,
     });
   }

@@ -1,28 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
-  UI_SETTINGS_DATEFORMAT_TZ,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '../../../../common/constants';
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from '@kbn/reporting-common';
 import { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { getExportSettings } from './get_export_settings';
+import { CsvConfig } from '@kbn/generate-csv-types';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config = createMockConfig(createMockConfigSchema({})).get('csv');
+  const config: CsvConfig = {
+    checkForFormulas: true,
+    escapeFormulaValues: false,
+    maxSizeBytes: 180000,
+    scroll: { size: 500, duration: '30s' },
+    useByteOrderMarkEncoding: false,
+  };
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -49,11 +55,11 @@ describe('getExportSettings', () => {
     expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchInlineSnapshot(`
       Object {
         "bom": "",
-        "checkForFormulas": undefined,
-        "escapeFormulaValues": undefined,
+        "checkForFormulas": true,
+        "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
-        "maxSizeBytes": undefined,
+        "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",
           "size": 500,
