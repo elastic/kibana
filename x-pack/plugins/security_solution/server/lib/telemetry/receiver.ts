@@ -582,7 +582,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             'message',
             'kibana.alert.rule.note',
             'kibana.alert.rule.parameters.note',
-            'powershell.file.script_block_text',
           ],
         },
         query: {
