@@ -115,7 +115,7 @@ export const createAddToNewCaseLensAction = ({
           });
         },
         attachments,
-        owner: currentAppId ? [currentAppId] : [APP_ID],
+        owner: [APP_ID],
       });
 
       const element = (
