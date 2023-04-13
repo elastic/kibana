@@ -50,10 +50,18 @@ describe('getFileType', () => {
       // @ts-ignore
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
 
-      const nameLink = await screen.findByTestId('cases-files-name-link');
+      expect(await screen.findByText('my-super-cool-screenshot.png')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
+    });
 
-      expect(nameLink).toBeInTheDocument();
-      expect(nameLink).toHaveTextContent('my-super-cool-screenshot.png');
+    it('clicking the name rendered in event opens the file preview', async () => {
+      appMockRender = createAppMockRenderer();
+
+      // @ts-ignore
+      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
+
+      userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
+      expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
     });
 
     it('actions renders a download button', async () => {

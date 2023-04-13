@@ -52,9 +52,8 @@ describe('CaseViewTabs', () => {
   let appMockRenderer: AppMockRenderer;
   const data = { total: 3 };
 
-  useGetCaseFileStatsMock.mockReturnValue({ data });
-
   beforeEach(() => {
+    useGetCaseFileStatsMock.mockReturnValue({ data });
     mockGetCase();
 
     appMockRenderer = createAppMockRenderer();
@@ -107,6 +106,14 @@ describe('CaseViewTabs', () => {
 
     expect(badge.getAttribute('class')).toMatch(/accent/);
     expect(badge).toHaveTextContent('3');
+  });
+
+  it('do not show count on the files tab if the call isLoading', async () => {
+    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
+
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
+
+    expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
   it('the files tab count has a different colour if the tab is not active', async () => {

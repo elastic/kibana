@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -36,7 +36,7 @@ describe('FileNameLink', () => {
 
     userEvent.click(nameLink);
 
-    await waitFor(() => expect(defaultProps.showPreview).toHaveBeenCalled());
+    expect(defaultProps.showPreview).toHaveBeenCalled();
   });
 
   it('renders simple text name if file is not image', async () => {
@@ -53,6 +53,6 @@ describe('FileNameLink', () => {
 
     userEvent.click(nameLink);
 
-    await waitFor(() => expect(defaultProps.showPreview).not.toHaveBeenCalled());
+    expect(defaultProps.showPreview).not.toHaveBeenCalled();
   });
 });

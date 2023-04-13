@@ -70,4 +70,44 @@ describe('Case View Page files tab', () => {
       })
     );
   });
+
+  it('changing perPage value triggers calls to useGetCaseFiles', async () => {
+    const targetPagination = 50;
+
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+    const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
+    pageSizeOption.style.pointerEvents = 'all';
+
+    userEvent.click(pageSizeOption);
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
+        perPage: targetPagination,
+      })
+    );
+  });
+
+  it('search by word triggers calls to useGetCaseFiles', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'Foobar{enter}');
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
+        perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+        searchTerm: 'Foobar',
+      })
+    );
+  });
 });
