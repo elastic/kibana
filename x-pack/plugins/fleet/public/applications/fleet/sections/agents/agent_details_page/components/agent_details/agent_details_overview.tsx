@@ -17,8 +17,6 @@ import {
   EuiIcon,
   EuiSkeletonText,
   EuiToolTip,
-  EuiAccordion,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -275,21 +273,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Tags',
               }),
               description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
-            },
-            {
-              title: i18n.translate('xpack.fleet.agentDetails.allDetailsLabel', {
-                defaultMessage: 'All details',
-              }),
-              description: (
-                <EuiAccordion
-                  id="xpack.fleet.agentDetails.allDetails"
-                  buttonContent={i18n.translate('xpack.fleet.agentDetails.allDetailsExpand', {
-                    defaultMessage: 'Click to expand',
-                  })}
-                >
-                  <EuiCodeBlock language="json">{JSON.stringify(agent, null, 2)}</EuiCodeBlock>
-                </EuiAccordion>
-              ),
             },
           ].map(({ title, description }) => {
             const tooltip =

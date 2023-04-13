@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +23,7 @@ import { useAgentRefresh } from '../hooks';
 import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
+import { AgentDocumentFlyout } from './agent_document_flyout';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -37,7 +38,16 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
+  const [isAgentDocumentFlyoutOpen, setIsAgentDocumentFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
+
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const onContextMenuChange = useCallback(
+    (open: boolean) => {
+      setIsContextMenuOpen(open);
+    },
+    [setIsContextMenuOpen]
+  );
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
@@ -70,6 +80,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       onClick={() => {
         setIsUnenrollModalOpen(true);
       }}
+      key="unenrollAgent"
     >
       {isUnenrolling ? (
         <FormattedMessage
@@ -89,10 +100,24 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       onClick={() => {
         setIsUpgradeModalOpen(true);
       }}
+      key="upgradeAgent"
     >
       <FormattedMessage
         id="xpack.fleet.agentList.upgradeOneButton"
         defaultMessage="Upgrade agent"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      icon="inspect"
+      onClick={() => {
+        setIsContextMenuOpen(false);
+        setIsAgentDocumentFlyoutOpen(!isAgentDocumentFlyoutOpen);
+      }}
+      key="agentDocument"
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentList.viewAgentDocumentText"
+        defaultMessage="View agent document"
       />
     </EuiContextMenuItem>,
   ];
@@ -105,6 +130,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}
+        key="requestDiagnostics"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.diagnosticsOneButton"
@@ -158,7 +184,14 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
+      {isAgentDocumentFlyoutOpen && (
+        <EuiPortal>
+          <AgentDocumentFlyout agent={agent} onClose={() => setIsAgentDocumentFlyoutOpen(false)} />
+        </EuiPortal>
+      )}
       <ContextMenuActions
+        isOpen={isContextMenuOpen}
+        onChange={onContextMenuChange}
         button={{
           props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
           children: (
