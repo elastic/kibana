@@ -20,7 +20,7 @@ export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 export const throttlingFormatter: Formatter = (fields) => {
   const throttling = fields[ConfigKey.THROTTLING_CONFIG];
 
-  if (!throttling || throttling?.label === 'no-throttling') {
+  if (!throttling || throttling?.id === 'no-throttling' || !throttling?.value) {
     return 'false';
   }
 

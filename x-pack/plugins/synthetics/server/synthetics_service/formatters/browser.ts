@@ -20,7 +20,10 @@ const throttlingFormatter: Formatter = (fields) => {
 
   const thValue = value?.value;
 
-  if (thValue?.download === 0 && thValue?.upload === 0 && thValue?.latency === 0) return false;
+  if (!thValue || !defaultThrottling) return false;
+
+  if (thValue?.download === '0' && thValue?.upload === '0' && thValue?.latency === '0')
+    return false;
   if (value?.label === 'no-throttling') return false;
 
   return {
