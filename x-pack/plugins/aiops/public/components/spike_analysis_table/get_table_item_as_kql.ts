@@ -10,7 +10,7 @@ import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-export const getTableItemAsKuery = (tableItem: GroupTableItem | SignificantTerm) => {
+export const getTableItemAsKQL = (tableItem: GroupTableItem | SignificantTerm) => {
   if (isSignificantTerm(tableItem)) {
     return `${escapeKuery(tableItem.fieldName)}:${escapeKuery(String(tableItem.fieldValue))}`;
   }
