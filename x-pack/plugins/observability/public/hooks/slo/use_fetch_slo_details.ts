@@ -26,7 +26,15 @@ export interface UseFetchSloDetailsResponse {
   ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
+export function useFetchSloDetails({
+  sloId,
+  shouldRefetch,
+}: {
+  sloId?: string;
+  shouldRefetch?: boolean;
+}): UseFetchSloDetailsResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
@@ -46,6 +54,7 @@ export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
       },
       keepPreviousData: true,
       enabled: Boolean(sloId),
+      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
     }
   );

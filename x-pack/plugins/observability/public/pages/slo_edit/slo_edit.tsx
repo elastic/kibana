@@ -38,7 +38,7 @@ export function SloEditPage() {
     },
   ]);
 
-  const { slo, isInitialLoading } = useFetchSloDetails(sloId);
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));

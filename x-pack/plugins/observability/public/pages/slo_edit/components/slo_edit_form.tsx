@@ -44,6 +44,7 @@ export interface Props {
 export const maxWidth = 775;
 
 const CREATE_RULE_SEARCH_PARAM = 'create-rule';
+
 export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
@@ -260,12 +261,12 @@ export function SloEditForm({ slo }: Props) {
 
       {isAddRuleFlyoutOpen && slo ? (
         <AddRuleFlyout
-          consumer={sloFeatureId}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
           canChangeTrigger={false}
+          consumer={sloFeatureId}
+          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          ruleTypeId={SLO_BURN_RATE_RULE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
         />
       ) : null}
     </>
