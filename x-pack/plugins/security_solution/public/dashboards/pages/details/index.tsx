@@ -53,7 +53,7 @@ const DashboardViewComponent: React.FC = () => {
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails>();
   const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
-    const dashboardTitle = dashboard.getTitle().trim();
+    const dashboardTitle = dashboard?.getTitle().trim();
     setDashboardDetails({ dashboardTitle });
   }, []);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
