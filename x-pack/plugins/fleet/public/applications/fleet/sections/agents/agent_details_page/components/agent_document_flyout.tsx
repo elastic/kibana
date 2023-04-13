@@ -30,7 +30,7 @@ export const AgentDocumentFlyout = memo<{ agent: any; onClose: () => void }>(
 
     const downloadJson = () => {
       const link = document.createElement('a');
-      link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(agentToJson)}`;
+      link.href = `data:text/json;charset=utf-8,${encodeURIComponent(agentToJson)}`;
       link.download = `${agentName}-agent-document.json`;
       link.click();
       link.remove();
