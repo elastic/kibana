@@ -250,7 +250,9 @@ export const startFleetServerWithDocker = async ({
       '--publish',
       '8220:8220',
 
-      `docker.elastic.co/beats/elastic-agent:${version}`,
+      // TODO: revert once 8.8.0-SNAPSHOT includes https://github.com/elastic/fleet-server/pull/2488
+      // `docker.elastic.co/beats/elastic-agent:${version}`,
+      `docker.elastic.co/observability-ci/elastic-agent:8.8.0-SNAPSHOT-laterman-1681227221`,
     ];
 
     await execa('docker', ['kill', containerName])
