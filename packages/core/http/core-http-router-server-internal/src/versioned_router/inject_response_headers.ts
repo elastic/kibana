@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
+import type { Mutable } from 'utility-types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { KibanaResponse } from '../response';
 
 /**
  * We "copy" to inject our headers without mutating the original response.
+ *
+ * @note mutates the response object passed in
  * @internal
  */
 export function injectResponseHeaders(headers: object, response: IKibanaResponse): IKibanaResponse {
-  return new KibanaResponse(response.status, response.payload, {
-    ...response.options,
+  const mutableResponse = response as Mutable<IKibanaResponse>;
+  mutableResponse.options = {
+    ...mutableResponse.options,
     headers: {
-      ...response.options?.headers,
+      ...mutableResponse.options.headers,
       ...headers,
     },
-  });
+  };
+  return mutableResponse;
 }
