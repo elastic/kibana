@@ -236,3 +236,10 @@ export const COPY_FULL_MESSAGE_TEXT = i18n.translate(
     defaultMessage: 'Copy full message text',
   }
 );
+
+export const ROW_DETAILS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.fullMessage',
+  {
+    defaultMessage: 'Full message',
+  }
+);

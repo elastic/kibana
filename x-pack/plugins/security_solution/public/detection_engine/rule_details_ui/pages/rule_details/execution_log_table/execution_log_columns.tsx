@@ -8,7 +8,13 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiText,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,13 +25,43 @@ import type {
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { CopyTextIconButton } from '../../../../../detections/components/rules/rule_execution_status/copy_text_icon_button';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { RuleDurationFormat } from './rule_duration_format';
 
 import * as i18n from './translations';
+
+type TableColumn = EuiBasicTableColumn<RuleExecutionResult>;
+
+interface UseColumnsArgs {
+  toggleRowExpanded: (item: RuleExecutionResult) => void;
+  isRowExpanded: (item: RuleExecutionResult) => boolean;
+}
+
+export const expanderColumn = ({
+  toggleRowExpanded,
+  isRowExpanded,
+}: UseColumnsArgs): TableColumn => {
+  return {
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    name: (
+      <EuiScreenReaderOnly>
+        <span>{'Expand rows'}</span>
+      </EuiScreenReaderOnly>
+    ),
+    render: (item: RuleExecutionResult) =>
+      item.security_status === 'succeeded' ? null : (
+        <EuiButtonIcon
+          onClick={() => toggleRowExpanded(item)}
+          aria-label={isRowExpanded(item) ? 'Collapse' : 'Expand'}
+          iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+  };
+};
 
 export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResult>> = [
   {
@@ -87,32 +123,19 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
       return (
         <div
           css={css`
-            display: flex;
-            width: 100%;
-            align-items: center;
-            justify-content: space-between;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           `}
         >
-          <div
-            css={css`
-              display: -webkit-box;
-              -webkit-line-clamp: 3;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
-            `}
-          >
-            {value}
-          </div>
-          <CopyTextIconButton
-            textToCopy={value}
-            tooltipTextBeforeCopying={i18n.COPY_FULL_MESSAGE_TEXT}
-          />
+          {value}
         </div>
       );
     },
     sortable: false,
     truncateText: false,
-    width: '35%',
+    width: '50%',
   },
 ];
 

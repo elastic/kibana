@@ -54,8 +54,8 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           overflow-y: auto;
         `}
       >
-        {message.split('\n').map((line) => (
-          <p>{line}</p>
+        {message.split('\n').map((line, index) => (
+          <p key={index}>{line}</p>
         ))}
       </div>
     </EuiCallOut>
