@@ -1,0 +1,54 @@
+PostWebhookRuleExampleRequestBody:
+  $usage: general
+  $description: request body for POST webhook rule example
+  properties:
+    ruleId: 
+      $description: the id of the rule being run
+      type: text
+    executionId: 
+      $description: execution UUID
+      type: text
+    params: 
+      $description: rule parameters
+      type: object
+    state: 
+      $description: old rule state from Kibana
+      type: object
+
+PostWebhookRuleExampleRequestQuery:
+  $usage: general
+  $description: query string for POST webhook rule example
+  properties:
+    active: 
+      $description: use this param to make all instances active
+      type: text
+      $optional: true
+    off: 
+      $description: use this param to make all instances inactive
+      type: text
+      $optional: true
+    random: 
+      $description: use this param to make all instances randomly active
+      type: text
+      $optional: true
+
+PostWebhookRuleExampleResponseBody:
+  $usage: general
+  $description: response body for POST webhook rule example
+  properties:
+    state: 
+      $description: new rule state to Kibana
+      type: object
+    instances:
+      $description: one entry for every alert (instance)
+      type: nested
+      properties:
+        instanceId: 
+          $description: alert instance id - like host name, service, etc
+          type: text
+        actionGroup: 
+          $description: action group
+          type: text
+        context: 
+          $description: context variables for actions
+          type: object
