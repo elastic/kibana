@@ -207,7 +207,6 @@ describe('SyntheticsService', () => {
   describe('apiKey errors', () => {
     jest.spyOn(apiKeys, 'getAPIKeyForSyntheticsService').mockResolvedValue({
       isValid: false,
-      hasReadPermissions: false,
     });
     beforeEach(() => {
       jest.clearAllMocks();
