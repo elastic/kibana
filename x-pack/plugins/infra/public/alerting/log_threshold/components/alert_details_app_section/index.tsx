@@ -32,6 +32,7 @@ import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
+const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({
   rule,
@@ -43,7 +44,6 @@ const AlertDetailsAppSection = ({
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
-  const formatValue = (threshold: number) => String(threshold);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const AlertDetailsAppSection = ({
                       id={`${chartCriterion.field}-${chartCriterion.value}`}
                       threshold={rule.params.count.value}
                       value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
-                      valueFormatter={formatValue}
+                      valueFormatter={formatThreshold}
                     />
                   )}
                 </EuiFlexItem>
