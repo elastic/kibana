@@ -21,7 +21,6 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
-import { css } from '@emotion/react';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -245,19 +244,10 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     field: 'medium',
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { hostName }) => (
-      <EuiHealth
-        css={css`
-          .euiPopover__anchor {
-            margin-top: -8px;
-          }
-        `}
-        data-test-subj="hostSeverityAlertsTable-medium"
-        color={SEVERITY_COLOR.medium}
-      >
+      <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         <SecurityCellActions
           anchorPosition="rightCenter"
           panelStyle={{ marginTop: '8px' }}
-          className={'waluigi'}
           field={{
             name: 'host.name',
             value: hostName,
