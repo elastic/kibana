@@ -119,9 +119,9 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           tags: [],
           throttling: {
             value: {
-              download: 5,
-              latency: 20,
-              upload: 3,
+              download: '5',
+              latency: '20',
+              upload: '3',
             },
             label: 'default',
             id: 'default',
@@ -165,7 +165,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           name: null,
         },
       };
-      // @ts-ignore specificially testing monitors with invalid values
+      // @ts-ignore specifically testing monitors with invalid values
       const actual = migration880(encryptedSavedObjectsSetup)(invalidTestMonitor, context);
       expect(actual).toEqual(invalidTestMonitor);
     });
