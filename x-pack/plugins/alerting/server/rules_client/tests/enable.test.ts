@@ -131,6 +131,11 @@ describe('enable()', () => {
       apiKeysEnabled: false,
     });
     taskManager.get.mockResolvedValue(mockTask);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   describe('authorization', () => {
@@ -669,7 +674,7 @@ describe('enable()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemRule = {
         ...existingRule,
         attributes: { ...existingRule.attributes, consumer: AlertConsumers.SIEM },
@@ -696,12 +701,6 @@ describe('enable()', () => {
         references: [],
         ruleId: '1',
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      await rulesClient.enable({ id: '1' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

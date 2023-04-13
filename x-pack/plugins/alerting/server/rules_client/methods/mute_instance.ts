@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObjectReference } from '@kbn/core/server';
 
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -67,23 +65,12 @@ async function muteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
-    let resultedActions: RawRule['actions'] = [];
-    let resultedReferences: SavedObjectReference[] = [];
-    let hasLegacyActions = false;
-
-    // migrate legacy actions only for SIEM rules
-    if (attributes.consumer === AlertConsumers.SIEM) {
-      const migratedActions = await migrateLegacyActions(context, {
-        ruleId: alertId,
-        actions: attributes.actions,
-        references,
-        attributes,
-      });
-
-      resultedActions = migratedActions.actions;
-      resultedReferences = migratedActions.references;
-      hasLegacyActions = migratedActions.hasLegacyActions;
-    }
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: alertId,
+      actions: attributes.actions,
+      references,
+      attributes,
+    });
 
     mutedInstanceIds.push(alertInstanceId);
     await context.unsecuredSavedObjectsClient.update(

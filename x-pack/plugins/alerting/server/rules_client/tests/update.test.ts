@@ -30,6 +30,11 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
     migrateLegacyActions: jest.fn(),
   };
 });
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -2763,7 +2768,7 @@ describe('update()', () => {
       });
     });
 
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemAlert = {
         ...existingDecryptedAlert,
         attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
@@ -2795,31 +2800,9 @@ describe('update()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: '1',
+        skipActionsValidation: true,
+        attributes: existingDecryptedSiemAlert.attributes,
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      actionsClient.getBulk.mockReset();
-      actionsClient.isPreconfigured.mockReset();
-
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-            risk_score: 40,
-            severity: 'low',
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-        },
-      });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 

@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObjectReference } from '@kbn/core/server';
 
 import { RawRule } from '../../types';
 import { partiallyUpdateAlert } from '../../saved_objects';

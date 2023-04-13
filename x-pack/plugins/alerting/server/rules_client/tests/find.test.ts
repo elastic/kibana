@@ -816,7 +816,7 @@ describe('find()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+    test('should call migrateLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       (formatLegacyActions as jest.Mock).mockResolvedValueOnce([

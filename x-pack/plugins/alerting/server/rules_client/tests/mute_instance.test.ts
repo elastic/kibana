@@ -58,6 +58,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
+  (migrateLegacyActions as jest.Mock).mockResolvedValue({
+    hasLegacyActions: false,
+    resultedActions: [],
+    resultedReferences: [],
+  });
 });
 
 setGlobalDate();
@@ -286,7 +291,7 @@ describe('muteInstance()', () => {
       references: [],
     };
 
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         ...rule,
@@ -305,15 +310,6 @@ describe('muteInstance()', () => {
         references: [],
         ruleId: '1',
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      const rulesClient = new RulesClient(rulesClientParams);
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(rule);
-
-      await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

@@ -131,6 +131,11 @@ describe('disable()', () => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedRule);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   describe('authorization', () => {
@@ -584,7 +589,7 @@ describe('disable()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemRule = {
         ...existingDecryptedRule,
         attributes: { ...existingDecryptedRule.attributes, consumer: AlertConsumers.SIEM },
@@ -611,12 +616,6 @@ describe('disable()', () => {
         references: [],
         ruleId: '1',
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      await rulesClient.disable({ id: '1' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

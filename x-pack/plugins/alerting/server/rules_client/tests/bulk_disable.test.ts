@@ -135,6 +135,11 @@ describe('bulkDisableRules', () => {
     });
     mockCreatePointInTimeFinderAsInternalUser();
     mockUnsecuredSavedObjectFind(2);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   test('should disable two rule', async () => {
@@ -609,7 +614,7 @@ describe('bulkDisableRules', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+    test('should call migrateLegacyActions', async () => {
       encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
         .fn()
         .mockResolvedValueOnce({
@@ -625,7 +630,19 @@ describe('bulkDisableRules', () => {
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule1.attributes,
+        ruleId: enabledRule1.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule2.attributes,
+        ruleId: enabledRule2.id,
+        actions: [],
+        references: [],
+      });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRule1.id,

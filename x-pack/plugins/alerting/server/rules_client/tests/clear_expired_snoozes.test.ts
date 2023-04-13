@@ -116,6 +116,11 @@ describe('clearExpiredSnoozes()', () => {
     rulesClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
     });
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   test('clears expired unscheduled snoozes and leaves unexpired scheduled snoozes', async () => {
@@ -232,7 +237,7 @@ describe('clearExpiredSnoozes()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const siemRule = {
         ...ruleMock,
         attributes: { ...ruleMock.attributes, consumer: AlertConsumers.SIEM },
@@ -270,22 +275,6 @@ describe('clearExpiredSnoozes()', () => {
         ],
         references: [],
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      setupTestWithSnoozeSchedule([
-        {
-          duration: 1000,
-          rRule: {
-            tzid: 'UTC',
-            dtstart: moment().subtract(1, 'd').toISOString(),
-            count: 1,
-          },
-        },
-      ]);
-      await rulesClient.clearExpiredSnoozes({ id: '1' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });
