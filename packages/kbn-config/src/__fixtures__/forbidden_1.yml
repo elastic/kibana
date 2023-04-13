@@ -1,5 +1,5 @@
 test: {
-  "aaa['__proto__.main']": "Hello",
-  "aaa['__proto__.env.AAAAAAAAAAAA']": "There",
-  "aaa['__proto__.env.NODE_OPTIONS']": "This JS syntax is apparently valid for our parser"
+  "aaa['__proto__.hello']": "Hello",
+  "aaa['__proto__.nested.there']": "There",
+  "aaa['__proto__.nested.here']": "This JS syntax is apparently valid for our parser"
 }

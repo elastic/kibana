@@ -150,7 +150,7 @@ describe('forbidden patterns', () => {
       const obj = {
         foo: {
           hello: 'dolly',
-          'bar.__proto__': { main: 'mine' },
+          'bar.__proto__': { yours: 'mine' },
         },
       };
 
@@ -164,7 +164,7 @@ describe('forbidden patterns', () => {
         array: [
           'hello',
           {
-            'bar.__proto__': { main: 'mine' },
+            'bar.__proto__': { their: 'mine' },
           },
         ],
       };
@@ -180,7 +180,7 @@ describe('forbidden patterns', () => {
       const obj = {
         foo: {
           hello: 'dolly',
-          'bar.constructor.prototype': { main: 'mine' },
+          'bar.constructor.prototype': { foo: 'bar' },
         },
       };
 
@@ -192,9 +192,9 @@ describe('forbidden patterns', () => {
     test('throws when finding the first pattern within a nested object', () => {
       const obj = {
         foo: {
-          // hello: 'dolly',
+          hello: 'dolly',
           'bar.constructor': {
-            // main: 'mine',
+            main: 'mine',
             prototype: 'nope',
           },
         },
@@ -210,7 +210,7 @@ describe('forbidden patterns', () => {
         array: [
           'hello',
           {
-            'bar.constructor.prototype': { main: 'mine' },
+            'bar.constructor.prototype': { foo: 'bar' },
           },
         ],
       };
