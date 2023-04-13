@@ -1991,7 +1991,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'This monitor has not been configured with a location. Please supply a location to the "locations" or "privateLocations" field.',
+                'You must add at least one location or private location to this monitor.',
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
