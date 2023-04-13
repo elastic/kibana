@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-export type MapSavedObjectAttributes = {
-  title: string;
-  description?: string;
-  mapStateJSON?: string;
-  layerListJSON?: string;
-  uiStateJSON?: string;
-};
+export * from './use_cloud_posture_table';
