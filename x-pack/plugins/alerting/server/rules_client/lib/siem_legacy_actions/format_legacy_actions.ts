@@ -129,9 +129,6 @@ export const formatLegacyActions = async <T extends Rule>(
       actions: [...rule.actions, ...legacyRuleActions],
       throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
       notifyWhen: transformToNotifyWhen(ruleThrottle),
-      // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
-      // So it should be safe to set it as false, so it won't be displayed to user as w/o actions see transformFromAlertThrottle method
-      muteAll: legacyRuleActions.length ? false : rule.muteAll,
     };
   });
 };
