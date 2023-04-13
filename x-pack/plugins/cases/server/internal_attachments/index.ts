@@ -24,5 +24,12 @@ export const registerInternalAttachments = (
 };
 
 const schemaValidator = (data: unknown): void => {
-  pipe(excess(FileAttachmentMetadataRt).decode(data), fold(throwErrors(badRequest), identity));
+  const fileMetadata = pipe(
+    excess(FileAttachmentMetadataRt).decode(data),
+    fold(throwErrors(badRequest), identity)
+  );
+
+  if (fileMetadata.files.length > 1) {
+    throw badRequest('Only a single file can be stored in an attachment');
+  }
 };
