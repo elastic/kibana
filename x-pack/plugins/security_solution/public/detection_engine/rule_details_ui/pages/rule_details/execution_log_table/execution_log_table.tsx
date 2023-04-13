@@ -66,6 +66,7 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
+  GET_MESSAGE_COLUMN,
   GET_EXECUTION_LOG_METRICS_COLUMNS,
   expanderColumn,
 } from './execution_log_columns';
@@ -417,28 +418,25 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     renderItem: renderExpandedItem,
   });
 
-  const executionLogColumns = useMemo(
-    () =>
-      showMetricColumns
-        ? [
-            ...EXECUTION_LOG_COLUMNS,
-            ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks),
-            ...actions,
-            expanderColumn({
-              toggleRowExpanded: rows.toggleRowExpanded,
-              isRowExpanded: rows.isRowExpanded,
-            }),
-          ]
-        : [
-            ...EXECUTION_LOG_COLUMNS,
-            ...actions,
-            expanderColumn({
-              toggleRowExpanded: rows.toggleRowExpanded,
-              isRowExpanded: rows.isRowExpanded,
-            }),
-          ],
-    [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]
-  );
+  const executionLogColumns = useMemo(() => {
+    const columns = [...EXECUTION_LOG_COLUMNS];
+
+    if (showMetricColumns) {
+      columns.push(GET_MESSAGE_COLUMN('20%'), ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks));
+    } else {
+      columns.push(GET_MESSAGE_COLUMN('50%'));
+    }
+
+    columns.push(
+      ...actions,
+      expanderColumn({
+        toggleRowExpanded: rows.toggleRowExpanded,
+        isRowExpanded: rows.isRowExpanded,
+      })
+    );
+
+    return columns;
+  }, [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]);
 
   return (
     <EuiPanel hasBorder>

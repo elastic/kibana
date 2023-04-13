@@ -49,14 +49,14 @@ export const expanderColumn = ({
     isExpander: true,
     name: (
       <EuiScreenReaderOnly>
-        <span>{'Expand rows'}</span>
+        <span>{i18n.EXPAND_ROW}</span>
       </EuiScreenReaderOnly>
     ),
     render: (item: RuleExecutionResult) =>
       item.security_status === 'succeeded' ? null : (
         <EuiButtonIcon
           onClick={() => toggleRowExpanded(item)}
-          aria-label={isRowExpanded(item) ? 'Collapse' : 'Expand'}
+          aria-label={isRowExpanded(item) ? i18n.COLLAPSE : i18n.EXPAND}
           iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
         />
       ),
@@ -107,37 +107,38 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
     truncateText: false,
     width: '10%',
   },
-  {
-    field: 'security_message',
-    name: (
-      <TableHeaderTooltipCell
-        title={i18n.COLUMN_MESSAGE}
-        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
-      />
-    ),
-    render: (value: string, record) => {
-      if (record.security_status === 'succeeded') {
-        return value;
-      }
-
-      return (
-        <div
-          css={css`
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          `}
-        >
-          {value}
-        </div>
-      );
-    },
-    sortable: false,
-    truncateText: false,
-    width: '50%',
-  },
 ];
+
+export const GET_MESSAGE_COLUMN = (width: string) => ({
+  field: 'security_message',
+  name: (
+    <TableHeaderTooltipCell
+      title={i18n.COLUMN_MESSAGE}
+      tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+    />
+  ),
+  render: (value: string, record: RuleExecutionResult) => {
+    if (record.security_status === 'succeeded') {
+      return value;
+    }
+
+    return (
+      <div
+        css={css`
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        `}
+      >
+        {value}
+      </div>
+    );
+  },
+  sortable: false,
+  truncateText: false,
+  width,
+});
 
 export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
   docLinks: DocLinksStart
