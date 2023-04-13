@@ -462,8 +462,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     if (migratedActions.hasLegacyActions) {
       rule.attributes.actions = migratedActions.resultedActions;
       rule.references = migratedActions.resultedReferences;
-      rule.attributes.throttle = undefined;
-      rule.attributes.notifyWhen = undefined;
     }
 
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
