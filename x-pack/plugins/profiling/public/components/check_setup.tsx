@@ -48,12 +48,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   if (!license?.hasAtLeast('enterprise')) {
     return (
       <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
-        <LicensePrompt
-          text={i18n.translate('xpack.profiling.license.description', {
-            defaultMessage:
-              'The Universal Profiling is not available because it requires at least an Enterprise license.',
-          })}
-        />
+        <LicensePrompt />
       </ProfilingAppPageTemplate>
     );
   }

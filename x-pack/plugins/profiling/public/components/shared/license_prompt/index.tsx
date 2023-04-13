@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import url from 'url';
 import { useProfilingDependencies } from '../../contexts/profiling_dependencies/use_profiling_dependencies';
-
-interface Props {
-  text: string;
-}
 
 const KIBANA_LICENSE_MANAGEMENT_URL = '/app/management/stack/license_management';
 
-export function LicensePrompt({ text }: Props) {
+export function LicensePrompt() {
   const { core } = useProfilingDependencies().start;
   const manageLicenseURL = url.format({
     pathname: core.http.basePath.prepend(KIBANA_LICENSE_MANAGEMENT_URL),
@@ -24,20 +20,27 @@ export function LicensePrompt({ text }: Props) {
 
   return (
     <EuiEmptyPrompt
-      iconType="warning"
+      iconType="logoObservability"
       iconColor="warning"
       title={
         <h1>
-          {i18n.translate('xpack.profiling.invalidLicense.title', {
-            defaultMessage: 'Invalid License',
+          {i18n.translate('xpack.profiling.invalidLicense.message', {
+            defaultMessage: 'To access Universal Profiling, upgrade to an Enterprise subscription',
           })}
         </h1>
       }
-      body={<p>{text}</p>}
+      body={
+        <p>
+          {i18n.translate('xpack.profiling.invalidLicense.description', {
+            defaultMessage:
+              'You must have an Enterprise subscription to use Universal Profiling features.',
+          })}
+        </p>
+      }
       actions={[
-        <EuiButton href={manageLicenseURL}>
-          {i18n.translate('xpack.profiling.invalidLicense.licenseManagementLink', {
-            defaultMessage: 'Manage your license',
+        <EuiButton href={manageLicenseURL} fill>
+          {i18n.translate('xpack.profiling.invalidLicense.subscriptionManagementLink', {
+            defaultMessage: 'Upgrade subscription',
           })}
         </EuiButton>,
       ]}

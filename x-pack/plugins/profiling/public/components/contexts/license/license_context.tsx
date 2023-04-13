@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import { ILicense } from '@kbn/licensing-plugin/public';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../profiling_app_page_template';
 import { LicensePrompt } from '../../shared/license_prompt';
+import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 
 export const LicenseContext = React.createContext<ILicense | undefined>(undefined);
 
@@ -25,12 +24,7 @@ export function LicenseProvider({ children }: { children: React.ReactChild }) {
   if (hasInvalidLicense) {
     return (
       <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
-        <LicensePrompt
-          text={i18n.translate('xpack.profiling.invalidLicense.message', {
-            defaultMessage:
-              'The Universal Profiling is not available because your current license has expired or is no longer valid.',
-          })}
-        />
+        <LicensePrompt />
       </ProfilingAppPageTemplate>
     );
   }
