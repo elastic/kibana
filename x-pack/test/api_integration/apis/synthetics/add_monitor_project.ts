@@ -1898,7 +1898,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 urls: ['http://localhost:9200'],
               },
-              reason: 'Failed to save or update monitor. Configuration is not valid',
+              reason: 'Couldn't save or update monitor because of an invalid configuration.',
             },
           ],
           updatedMonitors: [],
