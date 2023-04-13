@@ -62,6 +62,7 @@
     "@kbn/shared-ux-file-mocks",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
+    "@kbn/utility-types-jest",
   ],
   "exclude": [
     "target/**/*",
