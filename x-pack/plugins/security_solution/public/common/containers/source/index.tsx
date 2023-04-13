@@ -14,7 +14,9 @@ import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
+import * as i18n from './translations';
 import { getDataViewStateFromIndexFields } from './use_data_view';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type { BrowserField, BrowserFields };
 
@@ -130,49 +132,42 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
-  // const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
       const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
-        const { browserFields } = getDataViewStateFromIndexFields(
-          iNames,
-          dv.fields,
-          includeUnmapped
-        );
+        try {
+          abortCtrl.current = new AbortController();
+          setLoading(true);
+          const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+          const { browserFields } = getDataViewStateFromIndexFields(
+            iNames,
+            dv.fields,
+            includeUnmapped
+          );
 
-        setState({
-          browserFields,
-          indexes: dv.getIndexPattern().split(','),
-          indexExists: dv.getIndexPattern().split(',').length > 0,
-          indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
-        });
-        setLoading(false);
+          setState({
+            browserFields,
+            indexes: dv.getIndexPattern().split(','),
+            indexExists: dv.getIndexPattern().split(',').length > 0,
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
+          });
+          setLoading(false);
+        } catch (exc) {
+          addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
+        }
       };
 
-      // searchSubscription$.current.unsubscribe();
-      // abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.dataViews, includeUnmapped]
+    [addError, data.dataViews, includeUnmapped]
   );
 
   useEffect(() => {
-    // console.error(
-    //   `indexNames: ${indexNames}, indexFieldsSearch: ${indexFieldsSearch}, previousIndexesName: ${previousIndexesName}`
-    // );
     if (!isEmpty(indexNames)) {
-      // && !isEqual(previousIndexesName.current, indexNames)) {
-      // console.log('about to call indexFieldsSearch');
       indexFieldsSearch(indexNames);
     }
-    // return () => {
-    //   searchSubscription$.current.unsubscribe();
-    //   abortCtrl.current.abort();
-    // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexNames]);
 
