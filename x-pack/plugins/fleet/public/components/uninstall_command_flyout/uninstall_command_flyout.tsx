@@ -25,13 +25,13 @@ const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElem
     <>
       <h3>
         <FormattedMessage
-          id="xpack.fleet.agentUninstallCommand.subtitle"
+          id="xpack.fleet.agentUninstallCommandFlyout.subtitle"
           defaultMessage="Uninstall Elastic Agent on your host"
         />
       </h3>
       <p>
         <FormattedMessage
-          id="xpack.fleet.agentUninstallCommand.description"
+          id="xpack.fleet.agentUninstallCommandFlyout.description"
           defaultMessage="Use the below uninstall command to uninstall Agent... [TODO]"
         />
       </p>
@@ -41,13 +41,13 @@ const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElem
     <>
       <h3>
         <FormattedMessage
-          id="xpack.fleet.endpointUninstallCommand.subtitle"
+          id="xpack.fleet.endpointUninstallCommandFlyout.subtitle"
           defaultMessage="Uninstall Elastic Defend integration on your host"
         />
       </h3>
       <p>
         <FormattedMessage
-          id="xpack.fleet.endpointUninstallCommand.description"
+          id="xpack.fleet.endpointUninstallCommandFlyout.description"
           defaultMessage="Use the below uninstall command to uninstall Endpoint integration... [TODO]"
         />
       </p>
@@ -74,7 +74,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.fleet.agentUninstallCommand.title"
+              id="xpack.fleet.agentUninstallCommandFlyout.title"
               defaultMessage="Get uninstall command"
             />
           </h2>
