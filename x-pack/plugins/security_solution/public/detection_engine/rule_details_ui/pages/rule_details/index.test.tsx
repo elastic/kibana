@@ -112,7 +112,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         data: {
           dataViews: {
-            // ...originalModule.useKibana().services.data.dataViews,
             getIdsWithTitle: async () =>
               Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
             create: async ({ title }: { title: string }) =>

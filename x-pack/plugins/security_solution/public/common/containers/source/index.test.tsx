@@ -74,7 +74,6 @@ describe('source/index.tsx', () => {
           data: {
             dataViews: {
               ...useKibana().services.data.dataViews,
-              // getIdsWithTitle: () => [],
               get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
                 Promise.resolve({
                   id: dataViewId,

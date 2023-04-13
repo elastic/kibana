@@ -21,7 +21,6 @@ jest.mock('../../../../common/components/query_bar', () => {
     }),
   };
 });
-// jest.mock('../../../../common/lib/kibana');
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
@@ -49,7 +48,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         data: {
           dataViews: {
-            // ...originalModule.useKibana().services.data.dataViews,
             getIdsWithTitle: async () =>
               Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
             create: async ({ title }: { title: string }) =>
