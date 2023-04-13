@@ -142,6 +142,7 @@ export class TaskPollingLifecycle {
       unusedTypes,
       logger: this.logger,
       taskPartitioner,
+      claimEagerSearchMultiplier: config.claim_eager_search_multiplier,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
           ? Math.max(

@@ -50,6 +50,7 @@ export interface TaskClaimingOpts {
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
   taskPartitioner: TaskPartitioner;
+  claimEagerSearchMultiplier: number;
 }
 
 export interface OwnershipClaimingOpts {
@@ -133,6 +134,7 @@ export class TaskClaiming {
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
     this.taskPartitioner = opts.taskPartitioner;
+    this.claimEagerSearchMultiplier = opts.claimEagerSearchMultiplier;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -312,9 +314,9 @@ export class TaskClaiming {
       TASK_MANAGER_TRANSACTION_TYPE
     );
 
-    // ugly constant... this accommodates for 2 Kibana nodes trying to claim the same tasks
-    // and Elasticsearch's refresh rate being twice the poll interval
-    const searchSize = claimSize * 4;
+    // ugly constant... this should probably be dynamically adjusted internally based on
+    // how many stale doc's we're seeing from both the prune and the version conflicts.
+    const searchSize = claimSize * this.claimEagerSearchMultiplier;
 
     // counters just used for logging
     let searchesCount = 0;
@@ -410,7 +412,7 @@ export class TaskClaiming {
       this.logger
         .get('claim')
         .debug(
-          `# task types: ${taskTypesToClaim.length}\t# claim size: ${claimSize}\t# claimed: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale pruned: ${staleTasks}}`
+          `# task types: ${taskTypesToClaim.length}\t# claim size: ${claimSize}\t# claimed: ${updatedDocs.length}\t# searches: ${searchesCount}\t# bulk updates: ${bulkUpdatesCount}\t# version conflicts: ${tasksConflicted}\t# stale pruned: ${staleTasks}\thas more: ${hasMore}`
         );
 
       // Not all of the updated docs are "claimed" and ready to be ran

@@ -137,6 +137,9 @@ export const configSchema = schema.object(
     k8s_task_partitioning_enabled: schema.boolean({
       defaultValue: false,
     }),
+    claim_eager_search_multiplier: schema.number({
+      defaultValue: 4,
+    }),
   },
   {
     validate: (config) => {
