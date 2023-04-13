@@ -6,7 +6,7 @@
  */
 
 import { Moment } from 'moment';
-import { RRule, RRuleFrequencyMap } from '../types';
+import { RRule, RRuleFrequency, RRuleFrequencyMap } from '../types';
 import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
@@ -24,7 +24,14 @@ export const convertToRRule = (
     tzid: timezone,
   };
 
-  if (!recurringForm) return rRule;
+  if (!recurringForm)
+    return {
+      ...rRule,
+      // default to yearly and a count of 1
+      // if the maintenance window is not recurring
+      freq: RRuleFrequency.YEARLY,
+      count: 1,
+    };
 
   if (recurringForm) {
     let form = recurringForm;
