@@ -127,18 +127,19 @@ const updateThrottlingFields = (
       Partial<{
         [LegacyConfigKey.THROTTLING_CONFIG]: string;
         [LegacyConfigKey.IS_THROTTLING_ENABLED]: boolean;
-        [LegacyConfigKey.DOWNLOAD_SPEED]: number;
-        [LegacyConfigKey.UPLOAD_SPEED]: number;
-        [LegacyConfigKey.LATENCY]: number;
+        [LegacyConfigKey.DOWNLOAD_SPEED]: string;
+        [LegacyConfigKey.UPLOAD_SPEED]: string;
+        [LegacyConfigKey.LATENCY]: string;
       }>
   >
 ) => {
   const { attributes } = doc;
   const isThrottlingEnabled = attributes[LegacyConfigKey.THROTTLING_CONFIG];
   if (isThrottlingEnabled) {
-    const download = attributes[LegacyConfigKey.DOWNLOAD_SPEED]!;
-    const upload = attributes[LegacyConfigKey.UPLOAD_SPEED]!;
-    const latency = attributes[LegacyConfigKey.LATENCY]!;
+    const download = String(attributes[LegacyConfigKey.DOWNLOAD_SPEED])!;
+    const upload = String(attributes[LegacyConfigKey.UPLOAD_SPEED])!;
+    const latency = String(attributes[LegacyConfigKey.LATENCY])!;
+
     const newThrottlingConfig: ThrottlingConfig = {
       value: {
         download,
@@ -174,11 +175,11 @@ const updateThrottlingFields = (
   }
 };
 
-const isDefaultThrottlingConfig = (download?: number, upload?: number, latency?: number) => {
+const isDefaultThrottlingConfig = (download?: string, upload?: string, latency?: string) => {
   const throttling = DEFAULT_BROWSER_ADVANCED_FIELDS.throttling.value;
   return (
-    download === throttling.download &&
-    upload === throttling.upload &&
-    latency === throttling.latency
+    download === throttling?.download &&
+    upload === throttling?.upload &&
+    latency === throttling?.latency
   );
 };
