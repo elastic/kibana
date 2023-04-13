@@ -137,7 +137,6 @@ export function TransactionDurationRuleType(props: Props) {
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  console.log('params', params);
   const chartPreview = (
     <ChartPreview
       series={latencyChartPreview}
