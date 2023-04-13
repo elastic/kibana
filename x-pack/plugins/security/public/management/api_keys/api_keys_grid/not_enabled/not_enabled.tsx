@@ -33,7 +33,11 @@ export const NotEnabled: React.FunctionComponent = () => {
             defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
             values={{
               link: (
-                <EuiLink href={`${docLinks.links.security.apiKeyServiceSettings}`} target="_blank">
+                <EuiLink
+                  data-test-subj="securityNotEnabledDocsLink"
+                  href={`${docLinks.links.security.apiKeyServiceSettings}`}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
                     defaultMessage="docs"

@@ -174,7 +174,11 @@ export class APIKeysGridPage extends Component<Props, State> {
       if (error) {
         return (
           <ApiKeysEmptyPrompt error={error}>
-            <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
+            <EuiButton
+              data-test-subj="securityTryAgainButton"
+              iconType="refresh"
+              onClick={this.reloadApiKeys}
+            >
               <FormattedMessage
                 id="xpack.security.accountManagement.apiKeys.retryButton"
                 defaultMessage="Try again"

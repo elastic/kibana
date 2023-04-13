@@ -120,6 +120,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 values={{
                   learnMoreLink: (
                     <EuiLink
+                      data-test-subj="securityLearnMoreAboutRoleMappingsLink"
                       href={this.props.docLinks.links.security.mappingRoles}
                       external={true}
                       target="_blank"
@@ -259,7 +260,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
   private getCancelButton = () => {
     return (
-      <EuiButton onClick={this.backToRoleMappingsList}>
+      <EuiButton data-test-subj="securityCancelButton" onClick={this.backToRoleMappingsList}>
         <FormattedMessage
           id="xpack.security.management.editRoleMapping.cancelButton"
           defaultMessage="Cancel"

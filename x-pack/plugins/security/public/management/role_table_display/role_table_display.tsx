@@ -41,5 +41,12 @@ export const RoleTableDisplay = ({ role, navigateToApp }: Props) => {
     path = `security/roles/edit/${encodeURIComponent(role.name)}`;
   }
 
-  return <EuiLink onClick={() => navigateToApp('management', { path })}>{content}</EuiLink>;
+  return (
+    <EuiLink
+      data-test-subj="securityRoleTableDisplayLink"
+      onClick={() => navigateToApp('management', { path })}
+    >
+      {content}
+    </EuiLink>
+  );
 };

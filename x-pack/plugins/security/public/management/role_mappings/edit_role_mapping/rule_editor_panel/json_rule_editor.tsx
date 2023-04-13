@@ -133,6 +133,7 @@ export const JSONRuleEditor = (props: Props) => {
               values={{
                 roleMappingAPI: (
                   <EuiLink
+                    data-test-subj="securityJSONRuleEditorElasticsearchRoleMappingApiLink"
                     href={docLinks.links.apis.createRoleMapping}
                     external={true}
                     target="_blank"

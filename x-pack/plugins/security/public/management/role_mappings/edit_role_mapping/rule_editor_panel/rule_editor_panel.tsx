@@ -100,6 +100,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
+                        data-test-subj="securityLearnAboutSupportedFieldValuesLink"
                         href={this.props.docLinks.links.security.mappingRolesFieldRules}
                         target="_blank"
                         external={true}

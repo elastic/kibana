@@ -220,6 +220,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 defaultMessage="Create templates that describe the roles to assign to your users."
               />{' '}
               <EuiLink
+                data-test-subj="securityLearnAboutRoleTemplatesLink"
                 href={this.props.docLinks.links.apis.createRoleMappingTemplates}
                 external={true}
                 target="_blank"

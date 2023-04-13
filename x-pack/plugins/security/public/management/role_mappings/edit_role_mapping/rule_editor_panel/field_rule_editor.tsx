@@ -269,6 +269,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
       case 'boolean':
         return (
           <EuiSelect
+            data-test-subj="securitySelect"
             {...commonProps}
             value={rowRuleValue?.toString()}
             onChange={this.onBooleanValueChange(valueIndex)}
@@ -283,6 +284,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
       case 'null':
         return (
           <EuiFieldText
+            data-test-subj="securityFieldText"
             {...commonProps}
             value={isNullValue ? '-- null --' : (rowRuleValue as string)}
             onChange={this.onValueChange(valueIndex)}

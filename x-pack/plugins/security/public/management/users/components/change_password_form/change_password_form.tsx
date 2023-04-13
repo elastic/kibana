@@ -152,7 +152,11 @@ export class ChangePasswordForm extends Component<Props, State> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={this.onCancelClick} isDisabled={this.state.changeInProgress}>
+              <EuiButtonEmpty
+                data-test-subj="securityResetButton"
+                onClick={this.onCancelClick}
+                isDisabled={this.state.changeInProgress}
+              >
                 <FormattedMessage
                   id="xpack.security.account.changePasswordForm.cancelButtonLabel"
                   defaultMessage="Reset"
