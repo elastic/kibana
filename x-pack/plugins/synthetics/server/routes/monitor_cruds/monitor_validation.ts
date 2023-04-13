@@ -196,7 +196,7 @@ const EMPTY_LOCATION_ERROR = i18n.translate(
   'xpack.synthetics.server.projectMonitors.locationEmptyError',
   {
     defaultMessage:
-      'This monitor has not been configured with a location. Please supply a location to the "locations" or "privateLocations" field.',
+      'You must add at least one location or private location to this monitor.',
   }
 );
 
