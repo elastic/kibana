@@ -1291,6 +1291,8 @@ export interface Visualization<T = unknown, P = T> {
   ) => Suggestion<T> | undefined;
 
   getVisualizationInfo?: (state: T) => VisualizationInfo;
+
+  getReportingLayout?: (state: T) => { height: number; width: number };
 }
 
 // Use same technique as TriggerContext
