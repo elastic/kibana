@@ -840,7 +840,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={filterGroup}
+                        currentAlertStatusFilterValue={[filterGroup]}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
