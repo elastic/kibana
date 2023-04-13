@@ -7,37 +7,35 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, rewriteMaintenanceWindowRes } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../common';
+import { ILicenseState } from '../../lib';
+import { verifyAccessAndContext } from '../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const getMaintenanceWindowRoute = (
+export const deleteMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.delete(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/{id}`,
       validate: {
         params: paramSchema,
       },
       options: {
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const { id } = req.params;
-        const maintenanceWindow = await maintenanceWindowClient.get({ id });
-        return res.ok({
-          body: rewriteMaintenanceWindowRes(maintenanceWindow),
-        });
+        await maintenanceWindowClient.delete({ id });
+        return res.noContent();
       })
     )
   );

@@ -6,18 +6,18 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
 import { findMaintenanceWindowsRoute } from './find_maintenance_windows';
-import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
-import { MaintenanceWindowStatus } from '../../common';
-import { rewriteMaintenanceWindowRes } from './lib';
+import { getMockMaintenanceWindow } from '../../maintenance_window_client/methods/test_helpers';
+import { MaintenanceWindowStatus } from '../../../common';
+import { rewriteMaintenanceWindowRes } from '../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -52,20 +52,15 @@ describe('findMaintenanceWindowsRoute', () => {
     findMaintenanceWindowsRoute(router, licenseState);
 
     maintenanceWindowClient.find.mockResolvedValueOnce(mockMaintenanceWindows);
-    const [config, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments(
-      { maintenanceWindowClient },
-      { body: { filter: 'maintenance-window.attributes.title: test-title' } }
-    );
+    const [config, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
     expect(config.options?.tags?.[0]).toEqual('access:read-maintenance-window');
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.find).toHaveBeenLastCalledWith({
-      filter: 'maintenance-window.attributes.title: test-title',
-    });
+    expect(maintenanceWindowClient.find).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
@@ -81,11 +76,8 @@ describe('findMaintenanceWindowsRoute', () => {
     findMaintenanceWindowsRoute(router, licenseState);
 
     maintenanceWindowClient.find.mockResolvedValueOnce(mockMaintenanceWindows);
-    const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments(
-      { maintenanceWindowClient },
-      { body: { filter: 'maintenance-window.attributes.title: test-title' } }
-    );
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -99,11 +91,8 @@ describe('findMaintenanceWindowsRoute', () => {
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
-    const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments(
-      { maintenanceWindowClient },
-      { body: { filter: 'maintenance-window.attributes.title: test-title' } }
-    );
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

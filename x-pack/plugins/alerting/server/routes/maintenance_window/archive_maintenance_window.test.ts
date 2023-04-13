@@ -6,18 +6,18 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
 import { archiveMaintenanceWindowRoute } from './archive_maintenance_window';
-import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
-import { MaintenanceWindowStatus } from '../../common';
-import { rewritePartialMaintenanceBodyRes } from './lib';
+import { getMockMaintenanceWindow } from '../../maintenance_window_client/methods/test_helpers';
+import { MaintenanceWindowStatus } from '../../../common';
+import { rewritePartialMaintenanceBodyRes } from '../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

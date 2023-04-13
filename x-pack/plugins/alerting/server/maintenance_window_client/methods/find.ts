@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { buildKueryNodeFilter } from '../../rules_client/common';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindowSOAttributes,
@@ -15,26 +14,16 @@ import {
   MaintenanceWindowClientContext,
 } from '../../../common';
 
-export interface FindParams {
-  filter?: string;
-}
-
 export interface FindResult {
   data: MaintenanceWindow[];
 }
 
-export async function find(
-  context: MaintenanceWindowClientContext,
-  params: FindParams
-): Promise<FindResult> {
+export async function find(context: MaintenanceWindowClientContext): Promise<FindResult> {
   const { savedObjectsClient, logger } = context;
-  const { filter } = params;
-  const filterKueryNode = buildKueryNodeFilter(filter);
 
   try {
     const result = await savedObjectsClient.find<MaintenanceWindowSOAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      filter: filterKueryNode,
     });
 
     return {
@@ -46,7 +35,7 @@ export async function find(
       ),
     };
   } catch (e) {
-    const errorMessage = `Failed to find maintenance window: Filter: ${filter}, Error: ${e}`;
+    const errorMessage = `Failed to find maintenance window, Error: ${e}`;
     logger.error(errorMessage);
     throw Boom.boomify(e, { message: errorMessage });
   }

@@ -7,10 +7,10 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, rewritePartialMaintenanceBodyRes } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../common';
+import { ILicenseState } from '../../lib';
+import { verifyAccessAndContext, rewritePartialMaintenanceBodyRes } from '../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),

@@ -59,7 +59,7 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
           );
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window/_find`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});

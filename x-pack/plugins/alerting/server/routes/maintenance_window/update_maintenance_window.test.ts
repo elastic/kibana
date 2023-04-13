@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { RRule } from 'rrule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { createMaintenanceWindowRoute, rewriteQueryReq } from './create_maintenance_window';
-import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
-import { MaintenanceWindowStatus } from '../../common';
-import { rewritePartialMaintenanceBodyRes } from './lib';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
+import { updateMaintenanceWindowRoute, rewriteQueryReq } from './update_maintenance_window';
+import { getMockMaintenanceWindow } from '../../maintenance_window_client/methods/test_helpers';
+import { MaintenanceWindowStatus } from '../../../common';
+import { rewritePartialMaintenanceBodyRes } from '../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -29,62 +29,78 @@ const mockMaintenanceWindow = {
   id: 'test-id',
 };
 
-const createParams = {
-  title: 'test-title',
-  duration: 1000,
-  r_rule: mockMaintenanceWindow.rRule,
+const updateParams = {
+  title: 'new-title',
+  duration: 5000,
+  enabled: false,
+  r_rule: {
+    tzid: 'CET',
+    dtstart: '2023-03-26T00:00:00.000Z',
+    freq: RRule.WEEKLY,
+    count: 10,
+  },
 };
 
-describe('createMaintenanceWindowRoute', () => {
+describe('updateMaintenanceWindowRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  test('should create the maintenance window', async () => {
+  test('should update the maintenance window', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.create.mockResolvedValueOnce(mockMaintenanceWindow);
+    maintenanceWindowClient.update.mockResolvedValueOnce(mockMaintenanceWindow);
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: { id: 'test-id' },
+        body: updateParams,
+      }
     );
 
-    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window');
+    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
     expect(config.options?.tags?.[0]).toEqual('access:write-maintenance-window');
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith(rewriteQueryReq(createParams));
+    expect(maintenanceWindowClient.update).toHaveBeenLastCalledWith({
+      id: 'test-id',
+      ...rewriteQueryReq(updateParams),
+    });
+
     expect(res.ok).toHaveBeenLastCalledWith({
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });
 
-  test('ensures the license allows for creating maintenance windows', async () => {
+  test('ensures the license allows for updating maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.create.mockResolvedValueOnce(mockMaintenanceWindow);
+    maintenanceWindowClient.update.mockResolvedValueOnce(mockMaintenanceWindow);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: { id: 'test-id' },
+        body: updateParams,
+      }
     );
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for creating maintenance windows', async () => {
+  test('ensures the license check prevents for updating maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
@@ -92,7 +108,10 @@ describe('createMaintenanceWindowRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: { id: 'test-id' },
+        body: updateParams,
+      }
     );
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });

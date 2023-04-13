@@ -9,7 +9,7 @@ import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { create, CreateParams } from './methods/create';
 import { get, GetParams } from './methods/get';
 import { update, UpdateParams } from './methods/update';
-import { find, FindParams, FindResult } from './methods/find';
+import { find, FindResult } from './methods/find';
 import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
 import { archive, ArchiveParams } from './methods/archive';
 import {
@@ -64,7 +64,7 @@ export class MaintenanceWindowClient {
   public get = (params: GetParams): Promise<MaintenanceWindow> => get(this.context, params);
   public update = (params: UpdateParams): Promise<MaintenanceWindow> =>
     update(this.context, params);
-  public find = (params: FindParams): Promise<FindResult> => find(this.context, params);
+  public find = (): Promise<FindResult> => find(this.context);
   public delete = (params: DeleteParams): Promise<{}> =>
     deleteMaintenanceWindow(this.context, params);
   public archive = (params: ArchiveParams): Promise<MaintenanceWindow> =>
