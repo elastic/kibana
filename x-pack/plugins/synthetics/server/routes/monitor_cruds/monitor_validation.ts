@@ -193,12 +193,15 @@ export function validateLocation(
 }
 
 const EMPTY_LOCATION_ERROR = i18n.translate(
-  'xpack.synthetics.server.projectMonitors.privateLocationEmptyError',
-  { defaultMessage: 'Invalid value "[]" supplied to field "locations"' }
+  'xpack.synthetics.server.projectMonitors.locationEmptyError',
+  {
+    defaultMessage:
+      'This monitor has not been configured with a location. Please supply a location to the "locations" or "privateLocations" field.',
+  }
 );
 
 const INVALID_PRIVATE_LOCATION_ERROR = (location: string) =>
-  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationEmptyError', {
+  i18n.translate('xpack.synthetics.server.projectMonitors.invalidPrivateLocationError', {
     defaultMessage:
       'Invalid private location "{location}" supplied to field "privateLocations". Please select a valid private location.',
     values: {
@@ -207,7 +210,7 @@ const INVALID_PRIVATE_LOCATION_ERROR = (location: string) =>
   });
 
 const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
-  i18n.translate('xpack.synthetics.server.projectMonitors.privateLocationEmptyError', {
+  i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicLocationError', {
     defaultMessage:
       'Invalid location "{location}" supplied to field "locations". Please select a valid location.',
     values: {
