@@ -85,7 +85,8 @@ export type TelemetryEventParams =
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
-  | ReportMLJobUpdateParams;
+  | ReportMLJobUpdateParams
+  | ReportCellActionClickedParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
