@@ -53,7 +53,7 @@ export const ThrottlingFields = memo<Props>(
 
     const hasExceededLimits = isThrottlingEnabled && (exceedsDownloadLimits || exceedsUploadLimits);
 
-    if (!isThrottlingEnabled) {
+    if (!isThrottlingEnabled || !throttling.value) {
       return <ThrottlingDisabledCallout />;
     }
 
@@ -65,12 +65,14 @@ export const ThrottlingFields = memo<Props>(
           validate={validate}
           onFieldBlur={onFieldBlur}
           throttling={throttling}
+          throttlingValue={throttling.value}
           handleInputChange={(val) => {
             handleInputChange({ value: val, configKey: 'download' });
           }}
           readOnly={readOnly}
         />
         <ThrottlingUploadField
+          throttlingValue={throttling.value}
           validate={validate}
           onFieldBlur={onFieldBlur}
           throttling={throttling}
@@ -80,6 +82,7 @@ export const ThrottlingFields = memo<Props>(
           readOnly={readOnly}
         />
         <ThrottlingLatencyField
+          throttlingValue={throttling.value}
           validate={validate}
           onFieldBlur={onFieldBlur}
           throttling={throttling}

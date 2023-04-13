@@ -12,6 +12,7 @@ import { Validation } from '../../../../../../../common/types';
 import {
   BandwidthLimitKey,
   ConfigKey,
+  DEFAULT_BANDWIDTH_LIMIT,
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
@@ -24,16 +25,18 @@ export const ThrottlingUploadField = ({
   throttling,
   validate,
   handleInputChange,
+  throttlingValue,
 }: {
   readOnly?: boolean;
   handleInputChange: (value: string) => void;
   onFieldBlur?: (field: keyof ThrottlingConfigValue) => void;
   validate?: Validation;
   throttling: ThrottlingConfig;
+  throttlingValue: ThrottlingConfigValue;
 }) => {
-  const maxUpload = throttling.value[BandwidthLimitKey.UPLOAD];
+  const maxUpload = Number(DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD]);
 
-  const exceedsUploadLimits = throttling.value.upload > maxUpload;
+  const exceedsUploadLimits = Number(throttlingValue.upload) > maxUpload;
 
   return (
     <EuiFormRow
@@ -56,7 +59,7 @@ export const ThrottlingUploadField = ({
         fullWidth
         min={0}
         step={0.001}
-        value={throttling.value.upload}
+        value={throttlingValue.upload}
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('upload')}
         data-test-subj="syntheticsBrowserUploadSpeed"

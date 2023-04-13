@@ -22,12 +22,14 @@ export const ThrottlingLatencyField = ({
   onFieldBlur,
   validate,
   handleInputChange,
+  throttlingValue,
 }: {
   readOnly?: boolean;
   handleInputChange: (value: string) => void;
   onFieldBlur?: (field: keyof ThrottlingConfigValue) => void;
   validate?: Validation;
   throttling: ThrottlingConfig;
+  throttlingValue: ThrottlingConfigValue;
 }) => {
   return (
     <EuiFormRow
@@ -40,7 +42,7 @@ export const ThrottlingLatencyField = ({
       <EuiFieldNumber
         fullWidth
         min={0}
-        value={throttling.value.latency}
+        value={throttlingValue.latency}
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('latency')}
         data-test-subj="syntheticsBrowserLatency"

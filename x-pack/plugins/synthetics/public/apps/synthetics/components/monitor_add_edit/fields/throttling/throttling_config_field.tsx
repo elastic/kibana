@@ -42,12 +42,18 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
         data-test-subj="syntheticsThrottlingSelect"
         options={options}
         onChange={(newValue) => {
-          props.onChange({
-            ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
-            ...PROFILES_MAP[newValue],
-            id: newValue,
-            label: 'Custom',
-          });
+          if (newValue === 'custom') {
+            props.onChange({
+              ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
+              id: 'custom',
+              label: 'Custom',
+            });
+          } else {
+            props.onChange({
+              ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
+              ...PROFILES_MAP[newValue],
+            });
+          }
         }}
         defaultValue={CONNECTION_PROFILE_VALUES.DEFAULT}
         valueOfSelected={value?.id}

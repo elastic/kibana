@@ -12,6 +12,7 @@ import { Validation } from '../../../../../../../common/types';
 import {
   BandwidthLimitKey,
   ConfigKey,
+  DEFAULT_BANDWIDTH_LIMIT,
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
@@ -24,16 +25,18 @@ export const ThrottlingDownloadField = ({
   onFieldBlur,
   validate,
   throttling,
+  throttlingValue,
 }: {
   readOnly?: boolean;
   handleInputChange: (value: string) => void;
   onFieldBlur?: (field: keyof ThrottlingConfigValue) => void;
   validate?: Validation;
   throttling: ThrottlingConfig;
+  throttlingValue: ThrottlingConfigValue;
 }) => {
-  const maxDownload = throttling.value[BandwidthLimitKey.DOWNLOAD];
+  const maxDownload = Number(DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD]);
 
-  const exceedsDownloadLimits = throttling.value.download > maxDownload;
+  const exceedsDownloadLimits = Number(throttlingValue.download) > maxDownload;
 
   return (
     <EuiFormRow
@@ -56,7 +59,7 @@ export const ThrottlingDownloadField = ({
         fullWidth
         min={0}
         step={0.001}
-        value={throttling.value.download}
+        value={throttlingValue.download}
         onChange={(event) => {
           handleInputChange(event.target.value);
         }}
