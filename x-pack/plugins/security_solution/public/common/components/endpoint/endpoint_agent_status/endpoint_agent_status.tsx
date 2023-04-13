@@ -25,7 +25,7 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-export interface EndpointAgentAndIsolationStatusProps {
+export interface EndpointAgentStatusProps {
   endpointHostInfo: HostInfo;
   'data-test-subj'?: string;
 }
@@ -34,7 +34,7 @@ export interface EndpointAgentAndIsolationStatusProps {
  * Displays the status of an Endpoint agent along with its Isolation state or the number of pending
  * response actions against it.
  */
-export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationStatusProps>(
+export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
   ({ endpointHostInfo, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
@@ -82,9 +82,9 @@ export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationSta
     );
   }
 );
-EndpointAgentAndIsolationStatus.displayName = 'EndpointAgentAndIsolationStatus';
+EndpointAgentStatus.displayName = 'EndpointAgentStatus';
 
-export interface EndpointHostResponseActionsStatusProps {
+interface EndpointHostResponseActionsStatusProps {
   /** The host's individual pending action list as return by the pending action summary api */
   pendingActions: EndpointPendingActions['pending_actions'];
   /** Is host currently isolated */
@@ -92,7 +92,7 @@ export interface EndpointHostResponseActionsStatusProps {
   'data-test-subj'?: string;
 }
 
-export const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatusProps>(
+const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatusProps>(
   ({ pendingActions, isIsolated, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPendingStatusDisabled = useIsExperimentalFeatureEnabled(

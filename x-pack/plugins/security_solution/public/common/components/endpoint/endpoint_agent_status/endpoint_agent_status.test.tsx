@@ -7,15 +7,15 @@
 
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
-import type { EndpointAgentAndIsolationStatusProps } from './endpoint_agent_and_isolation_status';
-import { EndpointAgentAndIsolationStatus } from './endpoint_agent_and_isolation_status';
+import type { EndpointAgentStatusProps } from './endpoint_agent_status';
+import { EndpointAgentStatus } from './endpoint_agent_status';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import React from 'react';
 
-describe('When using the EndpointAgentAndIsolationStatus component', () => {
+describe('When using the EndpointAgentStatus component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let renderProps: EndpointAgentAndIsolationStatusProps;
+  let renderProps: EndpointAgentStatusProps;
 
   beforeEach(() => {
     const appTestContext = createAppRootMockRenderer();
@@ -27,7 +27,7 @@ describe('When using the EndpointAgentAndIsolationStatus component', () => {
     };
 
     render = () => {
-      renderResult = appTestContext.render(<EndpointAgentAndIsolationStatus {...renderProps} />);
+      renderResult = appTestContext.render(<EndpointAgentStatus {...renderProps} />);
       return renderResult;
     };
   });

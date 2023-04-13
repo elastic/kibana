@@ -17,7 +17,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { EndpointAgentAndIsolationStatus } from '../../../../common/components/endpoint/endpoint_agent_and_isolation_status';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
@@ -74,7 +74,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EndpointAgentAndIsolationStatus
+                <EndpointAgentStatus
                   endpointHostInfo={endpointDetails}
                   data-test-subj="responderHeaderEndpointAgentIsolationStatus"
                 />
