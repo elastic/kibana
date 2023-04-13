@@ -29,7 +29,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import {
-  CONNECTION_PROFILE_OPTIONS,
+  PROFILE_OPTIONS,
   ThrottlingConfigField,
   ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
@@ -1111,9 +1111,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {
       defaultMessage: 'Simulate network throttling (download, upload, latency).',
     }),
-    props: ({ field, setValue, locations, formState }): Partial<ThrottlingConfigFieldProps> => {
+    props: ({ formState }): Partial<ThrottlingConfigFieldProps> => {
       return {
-        options: CONNECTION_PROFILE_OPTIONS,
+        options: PROFILE_OPTIONS,
         readOnly,
         disabled: false,
         initialValue: formState.defaultValues?.[ConfigKey.THROTTLING_CONFIG] as ThrottlingConfig,

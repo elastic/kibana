@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import { ConnectionProfile } from './connection_profile';
+import { PROFILE_OPTIONS } from './throttling_config_field';
+import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
+
+export const useConnectionProfiles = (initialValue?: ThrottlingConfig) => {
+  return useMemo(() => {
+    return [
+      ...PROFILE_OPTIONS,
+      {
+        value: 'custom',
+        inputDisplay: (
+          <ConnectionProfile
+            throttling={initialValue?.id === 'custom' ? initialValue : undefined}
+          />
+        ),
+      },
+    ];
+  }, [initialValue]);
+};

@@ -217,15 +217,15 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
 ]);
 
 export const ThrottlingConfigValueCodec = t.interface({
-  download: t.number,
-  upload: t.number,
-  latency: t.number,
+  download: t.string,
+  upload: t.string,
+  latency: t.string,
 });
 
 export type ThrottlingConfigValue = t.TypeOf<typeof ThrottlingConfigValueCodec>;
 
 export const ThrottlingConfigCodec = t.interface({
-  value: ThrottlingConfigValueCodec,
+  value: t.union([ThrottlingConfigValueCodec, t.null]),
   label: t.string,
   id: t.string,
 });

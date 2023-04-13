@@ -45,56 +45,56 @@ export enum CONNECTION_PROFILE_VALUES {
 
 export const PROFILE_VALUES: ThrottlingConfig[] = [
   {
-    value: { download: 5, upload: 3, latency: 20 },
+    value: { download: '5', upload: '3', latency: '20' },
     id: CONNECTION_PROFILE_VALUES.DEFAULT,
     label: i18n.translate('xpack.synthetics.connectionProfile.default', {
       defaultMessage: 'Default',
     }),
   },
   {
-    value: { download: 5, upload: 1, latency: 28 },
+    value: { download: '5', upload: '1', latency: '28' },
     id: CONNECTION_PROFILE_VALUES.CABLE,
     label: i18n.translate('xpack.synthetics.connectionProfile.cable', {
       defaultMessage: 'Cable',
     }),
   },
   {
-    value: { download: 1.5, upload: 0.384, latency: 50 },
+    value: { download: '1.5', upload: '0.384', latency: '50' },
     id: CONNECTION_PROFILE_VALUES.DSL,
     label: i18n.translate('xpack.synthetics.connectionProfile.dsl', {
       defaultMessage: 'DSL',
     }),
   },
   {
-    value: { download: 1.6, upload: 0.768, latency: 300 },
+    value: { download: '1.6', upload: '0.768', latency: '300' },
     id: CONNECTION_PROFILE_VALUES.THREE_G,
     label: i18n.translate('xpack.synthetics.connectionProfile.threeG', {
       defaultMessage: '3G',
     }),
   },
   {
-    value: { download: 9, upload: 0.75, latency: 170 },
+    value: { download: '9', upload: '0.75', latency: '170' },
     id: CONNECTION_PROFILE_VALUES.FOUR_G,
     label: i18n.translate('xpack.synthetics.connectionProfile.fourG', {
       defaultMessage: '4G',
     }),
   },
   {
-    value: { download: 12, upload: 0.75, latency: 70 },
+    value: { download: '12', upload: '0.75', latency: '70' },
     id: CONNECTION_PROFILE_VALUES.LTE,
     label: i18n.translate('xpack.synthetics.connectionProfile.lte', {
       defaultMessage: 'LTE',
     }),
   },
   {
-    value: { download: 20, upload: 5, latency: 4 },
+    value: { download: '20', upload: '5', latency: '4' },
     id: CONNECTION_PROFILE_VALUES.FIBRE,
     label: i18n.translate('xpack.synthetics.connectionProfile.fibre', {
       defaultMessage: 'Fibre',
     }),
   },
   {
-    value: { download: 0, upload: 0, latency: 0 },
+    value: null,
     id: CONNECTION_PROFILE_VALUES.NO_THROTTLING,
     label: i18n.translate('xpack.synthetics.connectionProfile.noThrottling', {
       defaultMessage: 'No throttling',
@@ -150,9 +150,9 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
   [ConfigKey.THROTTLING_CONFIG]: {
     value: {
-      download: 5,
-      upload: 3,
-      latency: 20,
+      download: '5',
+      upload: '3',
+      latency: '20',
     },
     label: CONNECTION_PROFILE_VALUES.DEFAULT,
     id: 'default',

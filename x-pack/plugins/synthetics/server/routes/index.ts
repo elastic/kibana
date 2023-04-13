@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getMonitorProfilesRoute } from './monitor_cruds/get_monitor_profiles';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
@@ -95,7 +94,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,
-  getMonitorProfilesRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

@@ -6,7 +6,6 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { fetchProfilesEffect } from './monitor_management/effects';
 import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -54,6 +53,5 @@ export const rootEffect = function* root(): Generator {
     fork(executeEsQueryEffect),
     fork(fetchJourneyStepsEffect),
     fork(fetchManualTestRunsEffect),
-    fork(fetchProfilesEffect),
   ]);
 };
