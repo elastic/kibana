@@ -6,13 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-// import { logViewRT } from '../../log_views';
 
-export const getInventoryViewRequestParamsRT = rt.type({
-  // the id of the log view
-  logViewId: rt.string,
+export const getInventoryViewRequestQueryRT = rt.partial({
+  sourceId: rt.string,
 });
 
-// export const getInventoryViewResponsePayloadRT = rt.type({
-//   data: logViewRT,
-// });
+export type GetInventoryViewRequestQuery = rt.TypeOf<typeof getInventoryViewRequestQueryRT>;

@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import {
-  defaultInventoryViewAttributes,
-  InventoryView,
-  InventoryViewAttributes,
-} from '../../../common/inventory_views';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { InventoryViewsClient } from './inventory_views_client';
 import {
   InventoryViewsServiceSetup,
@@ -29,34 +19,20 @@ export class InventoryViewsService {
   public setup(): InventoryViewsServiceSetup {}
 
   public start({
-    config,
-    dataViews,
-    elasticsearch,
     infraSources,
     savedObjects,
   }: InventoryViewsServiceStartDeps): InventoryViewsServiceStart {
     const { logger } = this;
 
     return {
-      getClient(
-        savedObjectsClient: SavedObjectsClientContract,
-        elasticsearchClient: ElasticsearchClient,
-        request?: KibanaRequest
-      ) {
-        return new InventoryViewsClient(
-          logger,
-          dataViews.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient, request),
-          savedObjectsClient,
-          infraSources,
-          config
-        );
+      getClient(savedObjectsClient: SavedObjectsClientContract) {
+        return new InventoryViewsClient(logger, savedObjectsClient, infraSources);
       },
 
       getScopedClient(request: KibanaRequest) {
         const savedObjectsClient = savedObjects.getScopedClient(request);
-        const elasticsearchClient = elasticsearch.client.asScoped(request).asCurrentUser;
 
-        return this.getClient(savedObjectsClient, elasticsearchClient, request);
+        return this.getClient(savedObjectsClient);
       },
     };
   }

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { InfraPluginStartServicesAccessor } from '../../types';
+import { InfraBackendLibs } from '../../lib/infra_types';
+import { initCreateInventoryViewRoute } from './create_inventory_view';
 import { initDeleteInventoryViewRoute } from './delete_inventory_view';
 import { initFindInventoryViewRoute } from './find_inventory_view';
 import { initGetInventoryViewRoute } from './get_inventory_view';
-import { initPutInventoryViewRoute } from './put_inventory_view';
+import { initUpdateInventoryViewRoute } from './update_inventory_view';
 
-export const initInventoryViewRoutes = (dependencies: {
-  framework: KibanaFramework;
-  getStartServices: InfraPluginStartServicesAccessor;
-}) => {
+export const initInventoryViewRoutes = (
+  dependencies: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>
+) => {
+  initCreateInventoryViewRoute(dependencies);
   initDeleteInventoryViewRoute(dependencies);
   initFindInventoryViewRoute(dependencies);
   initGetInventoryViewRoute(dependencies);
-  initPutInventoryViewRoute(dependencies);
+  initUpdateInventoryViewRoute(dependencies);
 };

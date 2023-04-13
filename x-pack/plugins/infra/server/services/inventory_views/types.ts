@@ -6,26 +6,19 @@
  */
 
 import {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  InventoryView,
-  InventoryViewAttributes,
-  InventoryViewReference,
-  InventoryViewsStaticConfig,
-  ResolvedInventoryView,
-} from '../../../common/inventory_views';
+  CreateInventoryViewAttributesRequestPayload,
+  InventoryViewRequestQuery,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../../common/http_api/latest';
+import { InventoryView } from '../../../common/inventory_views';
 import { InfraSources } from '../../lib/sources';
 
 export interface InventoryViewsServiceStartDeps {
-  config: InventoryViewsStaticConfig;
-  dataViews: DataViewsServerPluginStart;
-  elasticsearch: ElasticsearchServiceStart;
   infraSources: InfraSources;
   savedObjects: SavedObjectsServiceStart;
 }
@@ -33,20 +26,20 @@ export interface InventoryViewsServiceStartDeps {
 export type InventoryViewsServiceSetup = void;
 
 export interface InventoryViewsServiceStart {
-  getClient(
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient,
-    request?: KibanaRequest
-  ): IInventoryViewsClient;
+  getClient(savedObjectsClient: SavedObjectsClientContract): IInventoryViewsClient;
   getScopedClient(request: KibanaRequest): IInventoryViewsClient;
 }
 
 export interface IInventoryViewsClient {
-  findInventoryView(inventoryViewId: string): Promise<InventoryView>;
-  getInventoryView(inventoryViewId: string): Promise<InventoryView>;
-  putInventoryView(
-    inventoryViewId: string,
-    inventoryViewAttributes: Partial<InventoryViewAttributes>
+  delete(inventoryViewId: string): Promise<{}>;
+  find(query: InventoryViewRequestQuery): Promise<InventoryView[]>;
+  get(inventoryViewId: string, query: InventoryViewRequestQuery): Promise<InventoryView>;
+  create(
+    inventoryViewAttributes: CreateInventoryViewAttributesRequestPayload
   ): Promise<InventoryView>;
-  deleteInventoryView(inventoryViewId: string): Promise<void>;
+  update(
+    inventoryViewId: string,
+    inventoryViewAttributes: UpdateInventoryViewAttributesRequestPayload,
+    query: InventoryViewRequestQuery
+  ): Promise<InventoryView>;
 }

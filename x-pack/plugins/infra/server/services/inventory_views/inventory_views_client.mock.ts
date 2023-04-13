@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { InventoryViewReference } from '../../../common/inventory_views';
-import { createResolvedInventoryViewMock } from '../../../common/inventory_views/resolved_Inventory_view.mock';
 import { IInventoryViewsClient } from './types';
 
 export const createInventoryViewsClientMock = (): jest.Mocked<IInventoryViewsClient> => ({
-  getInventoryView: jest.fn(),
-  getResolvedInventoryView: jest.fn((inventoryViewReference: InventoryViewReference) =>
-    Promise.resolve(createResolvedInventoryViewMock())
-  ),
-  putInventoryView: jest.fn(),
-  resolveInventoryView: jest.fn(),
+  delete: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
 });

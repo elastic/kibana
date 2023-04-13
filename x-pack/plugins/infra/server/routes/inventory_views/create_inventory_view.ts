@@ -8,32 +8,35 @@
 import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  inventoryViewRequestParamsRT,
-  INVENTORY_VIEW_URL_ENTITY,
+  createInventoryViewRequestPayloadRT,
+  inventoryViewResponsePayloadRT,
+  INVENTORY_VIEW_URL,
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
-export const initDeleteInventoryViewRoute = ({
+export const initCreateInventoryViewRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
-      method: 'delete',
-      path: INVENTORY_VIEW_URL_ENTITY,
+      method: 'post',
+      path: INVENTORY_VIEW_URL,
       validate: {
-        params: createValidationFunction(inventoryViewRequestParamsRT),
+        body: createValidationFunction(createInventoryViewRequestPayloadRT),
       },
     },
     async (_requestContext, request, response) => {
-      const { params } = request;
+      const { body } = request;
       const { inventoryViews } = (await getStartServices())[2];
       const inventoryViewsClient = inventoryViews.getScopedClient(request);
 
       try {
-        await inventoryViewsClient.delete(params.inventoryViewId);
+        const inventoryView = await inventoryViewsClient.create(body.attributes);
 
-        return response.noContent();
+        return response.ok({
+          body: inventoryViewResponsePayloadRT.encode({ data: inventoryView }),
+        });
       } catch (error) {
         if (isBoom(error)) {
           return response.customError({

@@ -7,12 +7,18 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT } from '../../../common/inventory_views';
+
+export const inventoryViewSavedObjectAttributesRT = rt.intersection([
+  rt.strict({
+    name: rt.string,
+  }),
+  rt.UnknownRecord,
+]);
 
 export const inventoryViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: inventoryViewAttributesRT,
+    attributes: inventoryViewSavedObjectAttributesRT,
   }),
   rt.partial({
     version: rt.string,

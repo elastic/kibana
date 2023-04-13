@@ -8,21 +8,16 @@
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
-export const inventoryViewAttributesRT = rt.intersection([
-  rt.strict({
-    name: nonEmptyStringRt,
-    isDefault: rt.boolean,
-  }),
-  rt.UnknownRecord,
-]);
+export const findInventoryViewAttributesResponseRT = rt.strict({
+  name: nonEmptyStringRt,
+  isDefault: rt.boolean,
+});
 
-export type InventoryViewAttributes = rt.TypeOf<typeof inventoryViewAttributesRT>;
-
-export const inventoryViewRT = rt.exact(
+const findInventoryViewResponseRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
-      attributes: inventoryViewAttributesRT,
+      attributes: findInventoryViewAttributesResponseRT,
     }),
     rt.partial({
       updatedAt: rt.number,
@@ -31,4 +26,8 @@ export const inventoryViewRT = rt.exact(
   ])
 );
 
-export type InventoryView = rt.TypeOf<typeof inventoryViewRT>;
+export const findInventoryViewResponsePayloadRT = rt.type({
+  data: rt.array(findInventoryViewResponseRT),
+});
+
+export type FindInventoryViewResponsePayload = rt.TypeOf<typeof findInventoryViewResponsePayloadRT>;

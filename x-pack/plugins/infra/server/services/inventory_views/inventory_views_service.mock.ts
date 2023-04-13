@@ -13,8 +13,6 @@ export const createInventoryViewsServiceSetupMock =
 
 export const createInventoryViewsServiceStartMock =
   (): jest.Mocked<InventoryViewsServiceStart> => ({
-    getClient: jest.fn((_savedObjectsClient: any, _elasticsearchClient: any) =>
-      createInventoryViewsClientMock()
-    ),
+    getClient: jest.fn((_savedObjectsClient: any) => createInventoryViewsClientMock()),
     getScopedClient: jest.fn((_request: any) => createInventoryViewsClientMock()),
   });

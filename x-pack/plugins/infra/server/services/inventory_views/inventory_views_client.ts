@@ -10,235 +10,146 @@ import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsUtils,
-  SavedObjectsErrorHelpers,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import Boom from '@hapi/boom';
 import {
-  defaultInventoryViewAttributes,
-  defaultInventoryViewId,
-  LogIndexReference,
-  InventoryView,
-  InventoryViewAttributes,
-  InventoryViewReference,
-  InventoryViewsStaticConfig,
-  persistedInventoryViewReferenceRT,
-  ResolvedInventoryView,
-  resolveInventoryView,
-} from '../../../common/inventory_views';
+  CreateInventoryViewAttributesRequestPayload,
+  InventoryViewRequestQuery,
+} from '../../../common/http_api/latest';
+import { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { LogIndexReference as SourceConfigurationLogIndexReference } from '../../../common/source_configuration/source_configuration';
-import type { IInfraSources, InfraSource } from '../../lib/sources';
-import {
-  extractInventoryViewSavedObjectReferences,
-  inventoryViewSavedObjectName,
-  resolveInventoryViewSavedObjectReferences,
-} from '../../saved_objects/inventory_view';
+import type { IInfraSources } from '../../lib/sources';
+import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { inventoryViewSavedObjectRT } from '../../saved_objects/inventory_view/types';
-import { NotFoundError } from './errors';
 import { IInventoryViewsClient } from './types';
 
-type DataViewsService = ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>;
-
 export class InventoryViewsClient implements IInventoryViewsClient {
-  static errors = {
-    NotFoundError,
-  };
-
   constructor(
     private readonly logger: Logger,
-    private readonly dataViews: DataViewsService,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly infraSources: IInfraSources,
-    private readonly config: InventoryViewsStaticConfig
+    private readonly infraSources: IInfraSources
   ) {}
 
-  public async get(inventoryViewId: string): Promise<InventoryView> {
-    return await this.getSavedInventoryView(inventoryViewId)
-      .catch((err) =>
-        SavedObjectsErrorHelpers.isNotFoundError(err) || err instanceof NotFoundError
-          ? this.getInternalInventoryView(inventoryViewId)
-          : Promise.reject(err)
+  public async find(query: InventoryViewRequestQuery): Promise<InventoryView[]> {
+    this.logger.debug('Trying to load inventory views ...');
+
+    const sourceId = query.sourceId ?? 'default';
+
+    const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
+      this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
+      this.savedObjectsClient.find({
+        type: inventoryViewSavedObjectName,
+        perPage: 1000, // Fetch 1 page by default with a max of 1000 results
+      }),
+    ]);
+
+    return inventoryViewSavedObject.saved_objects.map((savedObject) =>
+      this.mapSavedObjectToInventoryView(
+        savedObject,
+        sourceConfiguration.configuration.inventoryDefaultView
       )
-      .catch((err) =>
-        err instanceof NotFoundError
-          ? this.getInventoryViewFromInfraSourceConfiguration(inventoryViewId)
-          : Promise.reject(err)
-      );
-  }
-
-  public async find() {
-    const savedObject = await this.savedObjectsClient.find({
-      type: inventoryViewSavedObjectName,
-      perPage: 1000, // Fetch 1 page by default with a max of 1000 results
-    });
-  }
-
-  public async deleteInventoryView(inventoryViewId: string) {}
-
-  public async getResolvedInventoryView(
-    inventoryViewReference: InventoryViewReference
-  ): Promise<ResolvedInventoryView> {
-    const inventoryView = persistedInventoryViewReferenceRT.is(inventoryViewReference)
-      ? await this.getInventoryView(inventoryViewReference.inventoryViewId)
-      : inventoryViewReference;
-    const resolvedInventoryView = await this.resolveInventoryView(
-      inventoryView.id,
-      inventoryView.attributes
     );
-    return resolvedInventoryView;
   }
 
-  public async putInventoryView(
+  public async get(
     inventoryViewId: string,
-    inventoryViewAttributes: Partial<InventoryViewAttributes>
+    query: InventoryViewRequestQuery
   ): Promise<InventoryView> {
-    const resolvedInventoryViewId =
-      (await this.resolveInventoryViewId(inventoryViewId)) ?? SavedObjectsUtils.generateId();
+    this.logger.debug(`Trying to load inventory view with id ${inventoryViewId} ...`);
 
-    this.logger.debug(
-      `Trying to store inventory view "${inventoryViewId}" as "${resolvedInventoryViewId}"...`
+    const sourceId = query.sourceId ?? 'default';
+
+    const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
+      this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
+      this.savedObjectsClient.get(inventoryViewSavedObjectName, inventoryViewId),
+    ]);
+
+    return this.mapSavedObjectToInventoryView(
+      inventoryViewSavedObject,
+      sourceConfiguration.configuration.inventoryDefaultView
     );
-
-    const inventoryViewAttributesWithDefaults = {
-      ...defaultInventoryViewAttributes,
-      ...inventoryViewAttributes,
-    };
-
-    const { attributes, references } = extractInventoryViewSavedObjectReferences(
-      inventoryViewAttributesWithDefaults
-    );
-
-    const savedObject = await this.savedObjectsClient.create(
-      inventoryViewSavedObjectName,
-      attributes,
-      {
-        id: resolvedInventoryViewId,
-        overwrite: true,
-        references,
-      }
-    );
-
-    return getInventoryViewFromSavedObject(savedObject);
   }
 
-  public async resolveInventoryView(
+  public async create(
+    attributes: CreateInventoryViewAttributesRequestPayload
+  ): Promise<InventoryView> {
+    this.logger.debug(`Trying to create inventory view ...`);
+
+    // Validate there is not a view with the same name
+    await this.assertNameConflict(attributes.name);
+
+    const inventoryViewSavedObject = await this.savedObjectsClient.create(
+      inventoryViewSavedObjectName,
+      attributes
+    );
+
+    return this.mapSavedObjectToInventoryView(inventoryViewSavedObject);
+  }
+
+  public async update(
     inventoryViewId: string,
-    inventoryViewAttributes: InventoryViewAttributes
-  ): Promise<ResolvedInventoryView> {
-    return await resolveInventoryView(
-      inventoryViewId,
-      inventoryViewAttributes,
-      await this.dataViews,
-      this.config
-    );
-  }
-
-  private async getSavedInventoryView(inventoryViewId: string): Promise<InventoryView> {
-    this.logger.debug(`Trying to load stored Inventory view "${inventoryViewId}"...`);
-
-    const resolvedInventoryViewId = await this.resolveInventoryViewId(inventoryViewId);
-
-    if (!resolvedInventoryViewId) {
-      throw new NotFoundError(
-        `Failed to load saved Inventory view: the Inventory view id "${inventoryViewId}" could not be resolved.`
-      );
-    }
-
-    const savedObject = await this.savedObjectsClient.get(
-      inventoryViewSavedObjectName,
-      resolvedInventoryViewId
-    );
-
-    return getInventoryViewFromSavedObject(savedObject);
-  }
-
-  private async getInternalInventoryView(inventoryViewId: string): Promise<InventoryView> {
-    this.logger.debug(`Trying to load internal Inventory view "${inventoryViewId}"...`);
-
-    const internalInventoryView = this.internalInventoryViews.get(inventoryViewId);
-
-    if (!internalInventoryView) {
-      throw new NotFoundError(
-        `Failed to load internal Inventory view: no view with id "${inventoryViewId}" found.`
-      );
-    }
-
-    return internalInventoryView;
-  }
-
-  private async getInventoryViewFromInfraSourceConfiguration(
-    sourceId: string
+    attributes: CreateInventoryViewAttributesRequestPayload,
+    query: InventoryViewRequestQuery
   ): Promise<InventoryView> {
-    this.logger.debug(`Trying to load Inventory view from source configuration "${sourceId}"...`);
+    this.logger.debug(`Trying to create inventory view ...`);
 
-    const sourceConfiguration = await this.infraSources.getSourceConfiguration(
-      this.savedObjectsClient,
-      sourceId
+    // Validate there is not a view with the same name
+    await this.assertNameConflict(attributes.name, [inventoryViewId]);
+
+    const sourceId = query.sourceId ?? 'default';
+
+    const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
+      this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
+      this.savedObjectsClient.update(inventoryViewSavedObjectName, inventoryViewId, attributes),
+    ]);
+
+    return this.mapSavedObjectToInventoryView(
+      inventoryViewSavedObject,
+      sourceConfiguration.configuration.inventoryDefaultView
     );
+  }
+
+  public delete(inventoryViewId: string): Promise<{}> {
+    this.logger.debug(`Trying to delete inventory view with id ${inventoryViewId} ...`);
+
+    return this.savedObjectsClient.delete(inventoryViewSavedObjectName, inventoryViewId);
+  }
+
+  private mapSavedObjectToInventoryView(
+    savedObject: SavedObject | SavedObjectsUpdateResponse,
+    defaultViewId?: string
+  ) {
+    const inventoryViewSavedObject = decodeOrThrow(inventoryViewSavedObjectRT)(savedObject);
 
     return {
-      id: sourceConfiguration.id,
-      version: sourceConfiguration.version,
-      updatedAt: sourceConfiguration.updatedAt,
-      origin: `infra-source-${sourceConfiguration.origin}`,
-      attributes: getAttributesFromSourceConfiguration(sourceConfiguration),
+      id: inventoryViewSavedObject.id,
+      version: inventoryViewSavedObject.version,
+      updatedAt: inventoryViewSavedObject.updated_at,
+      attributes: {
+        ...inventoryViewSavedObject.attributes,
+        isDefault: inventoryViewSavedObject.id === defaultViewId,
+      },
     };
   }
 
-  private async resolveInventoryViewId(inventoryViewId: string): Promise<string | null> {
-    // only the default id needs to be transformed
-    if (inventoryViewId !== defaultInventoryViewId) {
-      return inventoryViewId;
-    }
-
-    return await this.getNewestSavedInventoryViewId();
-  }
-
-  private async getNewestSavedInventoryViewId(): Promise<string | null> {
-    const response = await this.savedObjectsClient.find({
+  /**
+   * We want to control conflicting names on the views
+   */
+  private async assertNameConflict(name: string, whitelist: string[] = []) {
+    const results = await this.savedObjectsClient.find<InventoryViewAttributes>({
       type: inventoryViewSavedObjectName,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-      perPage: 1,
-      fields: [],
+      perPage: 1000,
     });
 
-    const [newestSavedInventoryView] = response.saved_objects;
+    const hasConflict = results.saved_objects.some(
+      (obj) => !whitelist.includes(obj.id) && obj.attributes.name === name
+    );
 
-    return newestSavedInventoryView?.id ?? null;
+    if (hasConflict) {
+      throw Boom.conflict('A view with that name already exists.');
+    }
   }
 }
-
-const getInventoryViewFromSavedObject = (savedObject: SavedObject<unknown>): InventoryView => {
-  const inventoryViewSavedObject = decodeOrThrow(inventoryViewSavedObjectRT)(savedObject);
-
-  return {
-    id: inventoryViewSavedObject.id,
-    version: inventoryViewSavedObject.version,
-    updatedAt: inventoryViewSavedObject.updated_at,
-    origin: 'stored',
-    attributes: resolveInventoryViewSavedObjectReferences(
-      inventoryViewSavedObject.attributes,
-      savedObject.references
-    ),
-  };
-};
-
-export const getAttributesFromSourceConfiguration = ({
-  configuration: { name, description, InventoryIndices, InventoryColumns },
-}: InfraSource): InventoryViewAttributes => ({
-  name,
-  description,
-  InventoryIndices: getLogIndicesFromSourceConfigurationLogIndices(InventoryIndices),
-  InventoryColumns,
-});
-
-const getLogIndicesFromSourceConfigurationLogIndices = (
-  InventoryIndices: SourceConfigurationLogIndexReference
-): LogIndexReference =>
-  InventoryIndices.type === 'index_pattern'
-    ? {
-        type: 'data_view',
-        dataViewId: InventoryIndices.indexPatternId,
-      }
-    : InventoryIndices;
