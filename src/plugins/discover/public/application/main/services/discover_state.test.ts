@@ -453,7 +453,7 @@ describe('actions', () => {
   test('loadSavedSearch resetting query & filters of data service', async () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    expect(discoverServiceMock.data.query.queryString.clearQuery()).toHaveBeenCalled();
+    expect(discoverServiceMock.data.query.queryString.clearQuery).toHaveBeenCalled();
     expect(discoverServiceMock.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
   });
 
