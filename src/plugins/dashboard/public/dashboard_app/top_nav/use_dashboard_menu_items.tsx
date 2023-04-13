@@ -252,8 +252,16 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
-    const writePermissionsMenuItems = showWriteControls ? [menuItems.clone, menuItems.edit] : [];
-    return [...labsMenuItem, menuItems.fullScreen, ...shareMenuItem, ...writePermissionsMenuItems];
+    const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
+    const editMenuItem = showWriteControls ? [menuItems.edit] : [];
+    return [
+      ...labsMenuItem,
+      menuItems.fullScreen,
+      ...shareMenuItem,
+      ...cloneMenuItem,
+      menuItems.resetChanges,
+      ...editMenuItem,
+    ];
   }, [menuItems, share, showWriteControls, isLabsEnabled]);
 
   const editModeTopNavConfig = useMemo(() => {

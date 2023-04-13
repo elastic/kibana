@@ -314,7 +314,7 @@ export const topNavStrings = {
   },
   resetChanges: {
     label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
-      defaultMessage: 'Reset changes',
+      defaultMessage: 'Reset',
     }),
     description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
       defaultMessage: 'Reset your dashboard to the last saved state',
