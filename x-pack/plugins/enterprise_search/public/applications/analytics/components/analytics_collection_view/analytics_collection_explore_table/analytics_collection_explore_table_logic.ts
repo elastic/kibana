@@ -235,7 +235,6 @@ export interface AnalyticsCollectionExploreTableLogicValues {
 }
 
 export interface AnalyticsCollectionExploreTableLogicActions {
-  findDataView(collection: AnalyticsCollection): { collection: AnalyticsCollection };
   setDataView(dataView: DataView): { dataView: DataView };
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
   setSelectedTable(
@@ -252,7 +251,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
   >
 >({
   actions: {
-    findDataView: (collection) => ({ collection }),
+    reset: true,
     setDataView: (dataView) => ({ dataView }),
     setItems: (items) => ({ items }),
     setSelectedTable: (id, sorting) => ({ id, sorting }),
@@ -288,7 +287,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     };
 
     return {
-      findDataView: async ({ collection }) => {
+      [FetchAnalyticsCollectionLogic.actionTypes.apiSuccess]: async (collection) => {
         const dataView = (
           await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
         )?.[0];

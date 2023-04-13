@@ -240,17 +240,11 @@ export const AnalyticsCollectionExploreTable: React.FC<AnalyticsCollectionExplor
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
-  const { findDataView, setSelectedTable, setSorting } = useActions(
-    AnalyticsCollectionExploreTableLogic
-  );
+  const { setSelectedTable, setSorting } = useActions(AnalyticsCollectionExploreTableLogic);
   const { items, isLoading, selectedTable, sorting } = useValues(
     AnalyticsCollectionExploreTableLogic
   );
   const tabs = tabsByFilter[filterBy];
-
-  useEffect(() => {
-    findDataView(analyticsCollection);
-  }, [analyticsCollection]);
 
   useEffect(() => {
     const firstTableInTabsId = tabs[0].id;
