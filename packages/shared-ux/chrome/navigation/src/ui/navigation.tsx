@@ -77,16 +77,16 @@ export const Navigation = (props: NavigationProps) => {
     };
     const logo =
       loadingCount === 0 ? (
-        <EuiHeaderLogo iconType="logoElastic" aria-label="Go to home page" />
+        <EuiHeaderLogo iconType="logoElastic" aria-label="Go to home page" onClick={navigateHome} />
       ) : (
-        <EuiLoadingSpinner size="l" aria-hidden={false} onClick={navigateHome} />
+        <a href={homeUrl} onClick={navigateHome}>
+          <EuiLoadingSpinner size="l" aria-hidden={false} onClick={navigateHome} />
+        </a>
       );
 
     return (
       <>
-        <a href={homeUrl} onClick={navigateHome}>
-          {logo}
-        </a>
+        {logo}
         {services.navIsOpen ? (
           <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
         ) : null}
