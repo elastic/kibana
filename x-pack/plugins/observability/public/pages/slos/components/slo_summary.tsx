@@ -29,6 +29,11 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
   const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
+  const errorBudgetRemaining =
+    slo.summary.errorBudget.remaining <= 0
+      ? Math.trunc(slo.summary.errorBudget.remaining * 100) / 100
+      : slo.summary.errorBudget.remaining;
+
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l">
       <EuiFlexItem grow style={{ width: 220 }}>
@@ -82,7 +87,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                 defaultMessage: 'Budget remaining',
               })}
               textAlign="right"
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+              title={numeral(errorBudgetRemaining).format(percentFormat)}
               titleColor={titleColor}
               titleSize="m"
               reverse
