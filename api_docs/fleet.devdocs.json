@@ -60,7 +60,7 @@
         "label": "PackagePolicyEditorDatastreamMappings",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -79,7 +79,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -109,7 +109,7 @@
         "label": "PackagePolicyEditorDatastreamPipelines",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -128,7 +128,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1888,6 +1888,20 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1973,6 +1987,20 @@
             "description": [],
             "signature": [
               "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
             "deprecated": false,
@@ -19076,9 +19104,9 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Record<",
+              "{ data_stream: string; features: Partial<Record<",
               "ExperimentalIndexingFeature",
-              ", boolean>; }[] | undefined"
+              ", boolean>>; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -21800,7 +21828,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"password\" | \"bool\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -23547,7 +23575,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"monitoring\" | \"security\" | \"infrastructure\" | \"cloud\" | \"custom\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"connector\" | \"monitoring\" | \"security\" | \"infrastructure\" | \"observability\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,

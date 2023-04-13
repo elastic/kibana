@@ -157,7 +157,6 @@ describe('ESGeoGridSource', () => {
 
   const vectorSourceRequestMeta: VectorSourceRequestMeta = {
     isReadOnly: false,
-    geogridPrecision: 4,
     filters: [],
     timeFilters: {
       from: 'now',
@@ -175,7 +174,7 @@ describe('ESGeoGridSource', () => {
       language: 'KQL',
     },
     sourceMeta: null,
-    zoom: 0,
+    zoom: 2, // returns 4 precision
     isForceRefresh: false,
     isFeatureEditorOpenForLayer: false,
     executionContext: { name: APP_ID },
@@ -225,7 +224,7 @@ describe('ESGeoGridSource', () => {
           meta: {
             alias: null,
             disabled: false,
-            key: 'bar',
+            isMultiIndex: true,
             negate: false,
             type: 'spatial_filter',
           },
@@ -290,7 +289,7 @@ describe('ESGeoGridSource', () => {
         type: SOURCE_TYPES.ES_GEO_GRID,
         requestType: RENDER_AS.HEATMAP,
       });
-      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
+      expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
     });
   });
 

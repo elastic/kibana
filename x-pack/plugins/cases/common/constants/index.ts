@@ -47,6 +47,7 @@ export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors` as const;
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments` as const;
+export const CASE_FIND_ATTACHMENTS_URL = `${CASE_COMMENTS_URL}/_find` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
@@ -78,6 +79,8 @@ export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as 
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
+export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
 
 /**
  * Action routes

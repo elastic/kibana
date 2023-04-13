@@ -61,6 +61,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     optional: true,
     formKey: 'description',
   },
+  _meta: {
+    optional: true,
+    defaultValue: config._meta,
+  },
   analysis: {
     ...(isClassificationAnalysis(config.analysis)
       ? {

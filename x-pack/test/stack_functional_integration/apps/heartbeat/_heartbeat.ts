@@ -16,7 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('check heartbeat overview page', function () {
     it('Uptime app should show 1 UP monitor', async function () {
       await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
-      await testSubjects.click('syntheticsManagementTourDismiss');
+      // dismiss the Management tour if it's present
+      if (await testSubjects.exists('syntheticsManagementTourDismiss')) {
+        await testSubjects.click('syntheticsManagementTourDismiss');
+      }
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async function () {
         const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up, 10);

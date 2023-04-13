@@ -260,6 +260,7 @@ export class TaskRunner<
       enabled,
       actions,
       muteAll,
+      revision,
       snoozeSchedule,
     } = rule;
     const {
@@ -379,6 +380,7 @@ export class TaskRunner<
                 tags,
                 consumer,
                 producer: ruleType.producer,
+                revision,
                 ruleTypeId: rule.alertTypeId,
                 ruleTypeName: ruleType.name,
                 enabled,

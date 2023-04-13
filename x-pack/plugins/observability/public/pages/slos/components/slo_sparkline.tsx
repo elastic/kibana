@@ -9,6 +9,7 @@ import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elasti
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+
 import { useKibana } from '../../../utils/kibana_react';
 
 interface Data {

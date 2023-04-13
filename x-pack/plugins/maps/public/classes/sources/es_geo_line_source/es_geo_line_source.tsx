@@ -163,7 +163,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
@@ -182,7 +182,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     // Fetch entities
     //
-    const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
+    const entitySearchSource = await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
@@ -217,10 +217,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_geo_line:entities' },
-        searchFilters.executionContext
+        requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
     });
@@ -255,7 +255,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         indexPattern
       ).query;
     }
-    const tracksSearchFilters = { ...searchFilters };
+    const tracksSearchFilters = { ...requestMeta };
     delete tracksSearchFilters.buffer;
     const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
     tracksSearchSource.setField('trackTotalHits', false);
@@ -293,10 +293,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage:
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_geo_line:tracks' },
-        searchFilters.executionContext
+        requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
     });

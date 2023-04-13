@@ -45,7 +45,6 @@ import {
   ESTermSourceDescriptor,
   JoinDescriptor,
   StyleMetaDescriptor,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
@@ -271,21 +270,16 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getSource().showJoinEditor();
   }
 
-  isInitialDataLoadComplete() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (!sourceDataRequest || !sourceDataRequest.hasData()) {
-      return false;
+  isLayerLoading() {
+    const isSourceLoading = super.isLayerLoading();
+    if (isSourceLoading) {
+      return true;
     }
 
-    const joins = this.getValidJoins();
-    for (let i = 0; i < joins.length; i++) {
-      const joinDataRequest = this.getDataRequest(joins[i].getSourceDataRequestId());
-      if (!joinDataRequest || !joinDataRequest.hasData()) {
-        return false;
-      }
-    }
-
-    return true;
+    return this.getValidJoins().some((join) => {
+      const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+      return !joinDataRequest || joinDataRequest.isLoading();
+    });
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
@@ -566,14 +560,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
-    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+    const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
       joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,
       isFeatureEditorOpenForLayer
-    ) as VectorJoinSourceRequestMeta;
+    );
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = await canSkipSourceUpdate({

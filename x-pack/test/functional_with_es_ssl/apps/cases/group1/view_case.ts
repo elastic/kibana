@@ -359,26 +359,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
-      it('filters by history successfully', async () => {
-        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
-
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.click('user-actions-filter-activity-button-history');
-
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
+      it('filters by comment successfully', async () => {
+        const commentBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
         );
 
-        expect(await historyBadge.getVisibleText()).equal('2');
-      });
-
-      it('filters by comment successfully', async () => {
-        await testSubjects.click('user-actions-filter-activity-button-comments');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await commentBadge.getVisibleText()).equal('0');
 
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -389,11 +375,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
+        expect(await commentBadge.getVisibleText()).equal('1');
+      });
+
+      it('filters by history successfully', async () => {
+        const historyBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
         );
 
-        expect(await commentBadge.getVisibleText()).equal('1');
+        expect(await historyBadge.getVisibleText()).equal('1');
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('user-actions-filter-activity-button-history');
+
+        expect(await historyBadge.getVisibleText()).equal('3');
       });
 
       it('sorts by newest first successfully', async () => {
@@ -403,7 +403,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
         );
 
-        expect(await AllBadge.getVisibleText()).equal('3');
+        expect(await AllBadge.getVisibleText()).equal('4');
 
         const sortDesc = await find.byCssSelector(
           '[data-test-subj="user-actions-sort-select"] [value="desc"]'
@@ -413,13 +413,63 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const userActions = await find.byCssSelector('[data-test-subj="user-actions"]');
-
-        const actionsList = await userActions.findAllByClassName('euiComment');
-
-        expect(await actionsList[0].getAttribute('data-test-subj')).contain(
-          'comment-create-action'
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
         );
+
+        const actionList = await userActionsLists[0].findAllByClassName('euiComment');
+
+        expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
+      });
+    });
+
+    describe('pagination', async () => {
+      let createdCase: any;
+
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        createdCase = await cases.api.createCase({ title: 'Pagination feature' });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('shows more actions on button click', async () => {
+        await cases.api.generateUserActions({
+          caseId: createdCase.id,
+          caseVersion: createdCase.version,
+          totalUpdates: 4,
+        });
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('case-refresh');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(2);
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+
+        testSubjects.click('cases-show-more-user-actions');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
       });
     });
 

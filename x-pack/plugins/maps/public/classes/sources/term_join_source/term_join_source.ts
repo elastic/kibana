@@ -10,7 +10,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/data-plugin/common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
-import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
+import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
@@ -20,7 +20,7 @@ export interface ITermJoinSource extends ISource {
   getTermField(): IField;
   getWhereQuery(): Query | undefined;
   getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,

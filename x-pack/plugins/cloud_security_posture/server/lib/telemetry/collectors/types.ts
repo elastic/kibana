@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BaseCspSetupBothPolicy } from '../../../../common/types';
+
 export interface CspmUsage {
   indices: CspmIndicesStats;
   resources_stats: CspmResourcesStats[];
@@ -16,6 +18,10 @@ export interface CspmIndicesStats {
   findings: IndexStats | {};
   latest_findings: IndexStats | {};
   score: IndexStats | {};
+  latestPackageVersion: string;
+  cspm: BaseCspSetupBothPolicy;
+  kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
 }
 
 export interface IndexStats {
