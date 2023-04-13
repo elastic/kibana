@@ -143,3 +143,81 @@ test('array composed of flat objects', () => {
 
   expect(ensureDeepObject(arr)).toEqual([{ c: { d: 2 } }, { e: { f: 3 } }]);
 });
+
+describe('forbidden patterns', () => {
+  describe('first pattern', () => {
+    test('throws when finding the first pattern within an object', () => {
+      const obj = {
+        foo: {
+          hello: 'dolly',
+          'bar.__proto__': { yours: 'mine' },
+        },
+      };
+
+      expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
+        `"Forbidden path detected: foo.bar.__proto__"`
+      );
+    });
+
+    test('throws when finding the first pattern within an array', () => {
+      const obj = {
+        array: [
+          'hello',
+          {
+            'bar.__proto__': { their: 'mine' },
+          },
+        ],
+      };
+
+      expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
+        `"Forbidden path detected: array.1.bar.__proto__"`
+      );
+    });
+  });
+
+  describe('second pattern', () => {
+    test('throws when finding the first pattern within an object', () => {
+      const obj = {
+        foo: {
+          hello: 'dolly',
+          'bar.constructor.prototype': { foo: 'bar' },
+        },
+      };
+
+      expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
+        `"Forbidden path detected: foo.bar.constructor.prototype"`
+      );
+    });
+
+    test('throws when finding the first pattern within a nested object', () => {
+      const obj = {
+        foo: {
+          hello: 'dolly',
+          'bar.constructor': {
+            main: 'mine',
+            prototype: 'nope',
+          },
+        },
+      };
+
+      expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
+        `"Forbidden path detected: foo.bar.constructor.prototype"`
+      );
+    });
+
+    test('throws when finding the first pattern within an array', () => {
+      const obj = {
+        array: [
+          'hello',
+          {
+            'bar.constructor.prototype': { foo: 'bar' },
+          },
+        ],
+      };
+
+      expect(() => ensureDeepObject(obj)).toThrowErrorMatchingInlineSnapshot(
+        `"Forbidden path detected: array.1.bar.constructor.prototype"`
+      );
+    });
+  });
+});
