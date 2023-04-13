@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptionsReference,
+} from '@kbn/core-saved-objects-api-server';
 import type { MSearchResult, SearchQuery } from '../../common';
 import { ContentRegistry } from './registry';
 import { StorageContext } from './types';
@@ -66,11 +69,16 @@ export class MSearchService {
     const page = query.cursor ? Number(query.cursor) : 1;
     const perPage = query.limit ? query.limit : defaultPerPage;
 
-    if (page * perPage >= listingLimit) {
+    if (page * perPage > listingLimit) {
       throw new Error(
         `Requested page ${page} with ${perPage} items per page exceeds the maximum allowed limit of ${listingLimit} items`
       );
     }
+
+    const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
+      type: 'tag',
+      id: tagId,
+    });
 
     const soResult = await savedObjectsClient.find({
       type: soSearchTypes,
@@ -83,8 +91,8 @@ export class MSearchService {
       perPage,
 
       // tags
-      hasReference: query.tags?.included?.map((tagId) => ({ type: 'tag', id: tagId })),
-      hasNoReference: query.tags?.excluded?.map((tagId) => ({ type: 'tag', id: tagId })),
+      hasReference: query.tags?.included?.map(tagIdToSavedObjectReference),
+      hasNoReference: query.tags?.excluded?.map(tagIdToSavedObjectReference),
     });
 
     const contentItemHits = soResult.saved_objects.map((savedObject) => {

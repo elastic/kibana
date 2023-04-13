@@ -13,6 +13,9 @@ import { createMockedStorage } from './mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { StorageContext } from '.';
 
+const SEARCH_LISTING_LIMIT = 100;
+const SEARCH_PER_PAGE = 10;
+
 const setup = () => {
   const contentRegistry = new ContentRegistry(new EventBus());
 
@@ -51,8 +54,8 @@ const setup = () => {
     getSavedObjectsClient: async () => savedObjectsClient,
     contentRegistry,
     getConfig: {
-      listingLimit: async () => 100,
-      perPage: async () => 10,
+      listingLimit: async () => SEARCH_LISTING_LIMIT,
+      perPage: async () => SEARCH_PER_PAGE,
     },
   });
 
@@ -98,7 +101,7 @@ test('should cross-content search using saved objects api', async () => {
     saved_objects: [soResultFoo, soResultBar],
     total: 2,
     page: 1,
-    per_page: 10,
+    per_page: SEARCH_PER_PAGE,
   });
 
   const result = await mSearchService.search(
@@ -121,7 +124,7 @@ test('should cross-content search using saved objects api', async () => {
     searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
     type: ['foo-type', 'bar-type'],
     page: 1,
-    perPage: 10,
+    perPage: SEARCH_PER_PAGE,
     hasNoReference: [
       {
         id: 'excluded-tag',
@@ -270,11 +273,11 @@ test('should error if outside of pagination limit', async () => {
 
       {
         text: 'search text',
-        cursor: '10',
+        cursor: '11',
         limit: 10,
       }
     )
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Requested page 10 with 10 items per page exceeds the maximum allowed limit of 100 items"`
+    `"Requested page 11 with 10 items per page exceeds the maximum allowed limit of ${SEARCH_LISTING_LIMIT} items"`
   );
 });
