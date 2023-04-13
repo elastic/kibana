@@ -211,7 +211,7 @@ export interface ConnectorSyncJob {
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
 
 export interface NativeConnector {
-  configuration: ConnectorConfiguration;
+  configuration: ConnectorSyncConfiguration;
   features: Connector['features'];
   name: string;
   serviceType: string;
