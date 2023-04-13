@@ -661,12 +661,7 @@ export const LensTopNavMenu = ({
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
-                  newDescription:
-                    initialContext &&
-                    'isEmbeddable' in initialContext &&
-                    initialContext.isEmbeddable
-                      ? initialContext.description
-                      : '',
+                  newDescription: contextFromEmbeddable ? initialContext.description : '',
                 },
                 {
                   saveToLibrary:
