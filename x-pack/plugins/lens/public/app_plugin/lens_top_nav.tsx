@@ -15,6 +15,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import moment from 'moment';
+import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { ENABLE_SQL } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
@@ -457,8 +459,9 @@ export const LensTopNavMenu = ({
     isSaveable && application.capabilities.dashboard?.showWriteControls
   );
 
-  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
-    defaultMessage: 'unsaved',
+  const defaultLensTitle = i18n.translate('xpack.lens.app.share.defaultDashboardTitle', {
+    defaultMessage: 'Lens Visualization [{date}]',
+    values: { date: moment().toISOString(true) },
   });
   const additionalMenuEntries = useMemo(() => {
     if (!visualization.activeId) return undefined;
@@ -574,13 +577,12 @@ export const LensTopNavMenu = ({
             if (!share) {
               return;
             }
-            const sharingData = {
-              activeData,
-              csvEnabled,
-              title: title || unsavedTitle,
-            };
 
-            const { shareableUrl, savedObjectURL } = await getShareURL(
+            const {
+              shareableUrl,
+              savedObjectURL,
+              reportingLocatorParams: locatorParams,
+            } = await getShareURL(
               shortUrlService,
               { application, data },
               {
@@ -593,8 +595,20 @@ export const LensTopNavMenu = ({
                 visualization,
                 currentDoc,
                 adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-              }
+              },
+              shareUrlEnabled,
+              isCurrentStateDirty
             );
+            const sharingData = {
+              activeData,
+              csvEnabled,
+              reportingDisabled: !csvEnabled,
+              title: title || defaultLensTitle,
+              locatorParams: {
+                id: LENS_APP_LOCATOR,
+                params: locatorParams,
+              },
+            };
 
             share.toggleShareContextMenu({
               anchorElement,
@@ -603,7 +617,7 @@ export const LensTopNavMenu = ({
               shareableUrl: shareableUrl || '',
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
-              objectType: 'lens_visualization',
+              objectType: 'lens',
               objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
                 defaultMessage: 'visualization',
               }),
@@ -741,7 +755,6 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     activeData,
     isSaveable,
-    shortUrlService,
     application,
     getIsByValueMode,
     savingToLibraryPermitted,
@@ -752,7 +765,7 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
-    unsavedTitle,
+    shortUrlService,
     data,
     filters,
     query,
@@ -762,6 +775,8 @@ export const LensTopNavMenu = ({
     visualizationMap,
     visualization,
     currentDoc,
+    adHocDataViews,
+    defaultLensTitle,
     isCurrentStateDirty,
     onAppLeave,
     runSave,
@@ -776,7 +791,6 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
-    adHocDataViews,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -1078,6 +1092,7 @@ export const LensTopNavMenu = ({
       screenTitle={'lens'}
       appName={'lens'}
       displayStyle="detached"
+      className="hide-for-sharing"
     />
   );
 };
