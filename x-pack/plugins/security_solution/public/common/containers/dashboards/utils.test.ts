@@ -5,75 +5,82 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/public';
-import { SECURITY_TAG_NAME } from '../../../../common/constants';
-import { getSecurityTagId } from './utils';
+import type { HttpSetup } from '@kbn/core/public';
+import {
+  getSecuritySolutionTags as mockGetSecuritySolutionTags,
+  getSecuritySolutionDashboards as mockGetSecuritySolutionDashboards,
+} from './api';
+import { getSecurityDashboards, getSecurityTagIds } from './utils';
 
-const TAG_ID = 'securityTagId';
-const DEFAULT_TAGS_RESPONSE = [
-  {
-    id: TAG_ID,
-    attributes: { name: SECURITY_TAG_NAME },
-  },
-  {
-    id: `${TAG_ID}_2`,
-    attributes: { name: `${SECURITY_TAG_NAME}_2` },
-  },
-];
-
-const mockSavedObjectsFind = jest.fn(async () => ({ savedObjects: DEFAULT_TAGS_RESPONSE }));
-const savedObjectsClient = {
-  find: mockSavedObjectsFind,
-} as unknown as SavedObjectsClientContract;
+jest.mock('./api');
+const mockHttp = {} as unknown as HttpSetup;
 
 describe('dashboards utils', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('getSecurityTagId', () => {
-    it('should call saved objects find with security tag name', async () => {
-      await getSecurityTagId(savedObjectsClient);
+  describe('getSecurityTagIds', () => {
+    it('should call getSecuritySolutionTags with http', async () => {
+      await getSecurityTagIds(mockHttp);
 
-      expect(mockSavedObjectsFind).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'tag', search: SECURITY_TAG_NAME, searchFields: ['name'] })
+      expect(mockGetSecuritySolutionTags).toHaveBeenCalledWith(
+        expect.objectContaining({ http: mockHttp })
       );
     });
 
-    it('should find saved object with security tag name', async () => {
-      const result = await getSecurityTagId(savedObjectsClient);
+    it('should find saved objects Ids with security tags', async () => {
+      const result = await getSecurityTagIds(mockHttp);
 
-      expect(result).toEqual(TAG_ID);
-    });
-
-    it('should not find saved object with wrong security tag name', async () => {
-      mockSavedObjectsFind.mockResolvedValueOnce({ savedObjects: [DEFAULT_TAGS_RESPONSE[1]] });
-      const result = await getSecurityTagId(savedObjectsClient);
-
-      expect(result).toBeUndefined();
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          "securityTagId",
+        ]
+      `);
     });
   });
 
-  describe('createSecurityTag', () => {
-    it('should call saved objects find with security tag name', async () => {
-      await getSecurityTagId(savedObjectsClient);
+  describe('getSecurityDashboards', () => {
+    it('should call getSecuritySolutionDashboards with http', async () => {
+      await getSecurityDashboards(mockHttp);
 
-      expect(mockSavedObjectsFind).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'tag', search: SECURITY_TAG_NAME, searchFields: ['name'] })
+      expect(mockGetSecuritySolutionDashboards).toHaveBeenCalledWith(
+        expect.objectContaining({ http: mockHttp })
       );
     });
 
-    it('should find saved object with security tag name', async () => {
-      const result = await getSecurityTagId(savedObjectsClient);
+    it('should find saved objects with security tags', async () => {
+      const result = await getSecurityDashboards(mockHttp);
 
-      expect(result).toEqual(TAG_ID);
-    });
-
-    it('should not find saved object with wrong security tag name', async () => {
-      mockSavedObjectsFind.mockResolvedValueOnce({ savedObjects: [DEFAULT_TAGS_RESPONSE[1]] });
-      const result = await getSecurityTagId(savedObjectsClient);
-
-      expect(result).toBeUndefined();
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attributes": Object {
+              "description": "Summary of Linux kernel audit events.",
+              "title": "[Auditbeat Auditd] Overview ECS",
+              "version": 1,
+            },
+            "coreMigrationVersion": "8.8.0",
+            "created_at": "2023-04-03T11:20:50.603Z",
+            "id": "c0ac2c00-c1c0-11e7-8995-936807a28b16-ecs",
+            "namespaces": Array [
+              "default",
+            ],
+            "references": Array [
+              Object {
+                "id": "ba964280-d211-11ed-890b-153ddf1a08e9",
+                "name": "tag-ref-ba964280-d211-11ed-890b-153ddf1a08e9",
+                "type": "tag",
+              },
+            ],
+            "score": 0,
+            "type": "dashboard",
+            "typeMigrationVersion": "8.7.0",
+            "updated_at": "2023-04-03T11:38:00.902Z",
+            "version": "WzE4NzQsMV0=",
+          },
+        ]
+      `);
     });
   });
 });

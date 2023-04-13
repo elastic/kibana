@@ -10,13 +10,14 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RawEventData } from './types';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -24,21 +25,10 @@ const TabContentWrapper = styled.div`
 `;
 type RuleParameters = Array<{
   response_actions: Array<{
-    action_type_id: RESPONSE_ACTION_TYPES.OSQUERY;
+    action_type_id: RESPONSE_ACTION_TYPES;
     params: Record<string, unknown>;
   }>;
 }>;
-
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: RuleParameters;
-    ['kibana.alert.rule.name']: string[];
-  };
-
-  [key: string]: unknown;
-}
 
 interface ExpandedEventFieldsObject {
   agent?: {
@@ -58,7 +48,7 @@ export const useOsqueryTab = ({
   rawEventData,
   ecsData,
 }: {
-  rawEventData?: AlertRawEventData;
+  rawEventData?: RawEventData;
   ecsData?: Ecs;
 }) => {
   const {
@@ -88,35 +78,39 @@ export const useOsqueryTab = ({
     []
   );
 
-  if (!osquery || !rawEventData || !responseActionsEnabled || !ecsData) {
-    return;
-  }
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !ecsData;
+  const alertId = rawEventData?._id ?? '';
 
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
+
+  const { data: actionsData } = fetchAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
+    alertId,
+    skip: shouldEarlyReturn,
+  });
+
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  if (!responseActions?.length) {
+  const osqueryResponseActions = useMemo(
+    () =>
+      responseActions?.filter(
+        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+      ),
+    [responseActions]
+  );
+
+  if (!osqueryResponseActions?.length || shouldEarlyReturn) {
     return;
   }
 
-  const { OsqueryResults, fetchAllLiveQueries } = osquery;
-
-  const alertId = rawEventData._id;
-
-  const { data: actionsData } = fetchAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
-    activePage: 0,
-    limit: 100,
-    sortField: '@timestamp',
-    alertId,
-  });
   const actionItems = actionsData?.data.items || [];
 
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
   return {
     id: EventsViewType.osqueryView,

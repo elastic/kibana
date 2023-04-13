@@ -7,8 +7,11 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { mockGlobals } from '../../../utils/testing';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { SourceField } from './source_field';
+
+mockGlobals();
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),

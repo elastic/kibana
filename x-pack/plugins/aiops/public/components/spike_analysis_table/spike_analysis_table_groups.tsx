@@ -419,7 +419,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
-      pagination={pagination}
+      pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
       rowProps={(group) => {

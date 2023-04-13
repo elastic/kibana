@@ -129,7 +129,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_zip_url_tls_enabled: false,
               script_source: {
                 file_name: '',
                 is_generated_script: false,
@@ -174,11 +173,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             screenshots: 'on',
             'service.name': '',
-            'source.zip_url.folder': '',
-            'source.zip_url.proxy_url': '',
-            'source.zip_url.url': '',
-            'source.zip_url.password': '',
-            'source.zip_url.username': '',
             synthetics_args: [],
             tags: [],
             'throttling.config': '5d/3u/20l',
