@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
-import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status/endpoint_agent_status';
+import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
