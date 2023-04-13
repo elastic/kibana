@@ -11,6 +11,8 @@ import type {
   SavedObjectAttribute,
 } from '@kbn/core/server';
 
+import type { LegacyRuleNotificationAlertType } from './types';
+
 export const migrateLegacyActionsMock = {
   legacyActions: [],
   legacyActionsReferences: [],
@@ -19,7 +21,10 @@ export const migrateLegacyActionsMock = {
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyGetHourlyNotificationResult = (id = '456', ruleId = '123') => ({
+export const legacyGetHourlyNotificationResult = (
+  id = '456',
+  ruleId = '123'
+): LegacyRuleNotificationAlertType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -65,7 +70,10 @@ export const legacyGetHourlyNotificationResult = (id = '456', ruleId = '123') =>
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyGetWeeklyNotificationResult = (id = '456', ruleId = '123') => ({
+export const legacyGetWeeklyNotificationResult = (
+  id = '456',
+  ruleId = '123'
+): LegacyRuleNotificationAlertType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -111,7 +119,10 @@ export const legacyGetWeeklyNotificationResult = (id = '456', ruleId = '123') =>
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyGetDailyNotificationResult = (id = '456', ruleId = '123') => ({
+export const legacyGetDailyNotificationResult = (
+  id = '456',
+  ruleId = '123'
+): LegacyRuleNotificationAlertType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],

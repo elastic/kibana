@@ -6,6 +6,8 @@
  */
 
 import { RuleActionParams } from '../../../types';
+import type { RuleTypeParams } from '../../..';
+import type { Rule } from '../../../../common';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -34,3 +36,15 @@ export interface LegacyIRuleActionsAttributes extends Record<string, unknown> {
   ruleThrottle: string;
   alertThrottle: string | null;
 }
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+interface LegacyRuleNotificationAlertTypeParams extends RuleTypeParams {
+  ruleAlertId: string;
+}
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export type LegacyRuleNotificationAlertType = Rule<LegacyRuleNotificationAlertTypeParams>;
