@@ -30,7 +30,6 @@ interface Props {
 }
 
 export class MapComponent extends Component<Props> {
-  private _isMounted = false;
   private _mapEmbeddable: MapEmbeddableType;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
 
@@ -58,7 +57,8 @@ export class MapComponent extends Component<Props> {
         .getOnRenderComplete$()
         .pipe(first())
         .subscribe(() => {
-          if (this._isMounted && this.props.onInitialRenderComplete) {
+
+          if (this.props.onInitialRenderComplete) {
             this.props.onInitialRenderComplete();
           }
         });
