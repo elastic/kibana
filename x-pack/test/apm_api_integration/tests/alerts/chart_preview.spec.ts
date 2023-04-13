@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start,
             end,
             serviceName: 'opbeans-java',
-            transactionName: 'GET /api',
+            transactionName: 'DispatcherServlet#doGet',
             transactionType: 'request',
             environment: 'ENVIRONMENT_ALL',
             interval: '5m',
