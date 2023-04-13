@@ -332,7 +332,7 @@ function _generateMappings(
               metrics: field.metrics,
               default_metric: field.default_metric,
               type: 'aggregate_metric_double',
-            }
+            };
             break;
           default:
             fieldProps.type = type;

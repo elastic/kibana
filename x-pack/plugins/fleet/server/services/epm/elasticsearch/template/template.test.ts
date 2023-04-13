@@ -1047,8 +1047,8 @@ describe('EPM template', () => {
           metrics: ['min', 'max', 'sum', 'value_count'],
           default_metric: 'max',
           type: 'aggregate_metric_double',
-        }
-      }
+        },
+      },
     };
     const fields: Field[] = safeLoad(fieldLiteralYaml);
     const processedFields = processFields(fields);
