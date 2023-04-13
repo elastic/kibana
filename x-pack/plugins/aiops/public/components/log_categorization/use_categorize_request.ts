@@ -14,13 +14,9 @@ import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { estypes } from '@elastic/elasticsearch';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { Sampling } from './sampling_menu';
-// import { RANDOM_SAMPLER_OPTION } from './sampling_menu/random_sampler';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
-
-// const USE_RANDOM_SAMPLING = true;
-// const randomSamplerProbability = 0.4;
 
 interface CategoriesAgg {
   categories: {
@@ -35,14 +31,6 @@ interface CategoriesAgg {
   };
 }
 
-// interface CatSampleResponse {
-//   rawResponse: {
-//     aggregations: {
-//       sample: CategoriesAgg;
-//     };
-//   };
-// }
-
 interface CategoriesSampleAgg {
   sample: CategoriesAgg;
 }
@@ -50,10 +38,6 @@ interface CategoriesSampleAgg {
 interface CatResponse {
   rawResponse: estypes.SearchResponseBody<unknown, CategoriesAgg | CategoriesSampleAgg>;
 }
-
-// export function isSampleCatResponse(resp: any): resp is CatSampleResponse {
-//   return resp.rawResponse.aggregations.sample !== undefined;
-// }
 
 export interface Category {
   key: string;
@@ -75,8 +59,6 @@ export function useCategorizeRequest() {
   const abortController = useRef(new AbortController());
 
   const sampling = useMemo(() => new Sampling(), []);
-  // const samplingMenu = useSamplingMenu();
-  // const { probability, mode } = samplingMenu;
 
   const runCategorizeRequest = useCallback(
     (

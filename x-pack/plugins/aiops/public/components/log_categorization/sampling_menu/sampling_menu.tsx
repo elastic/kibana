@@ -9,8 +9,6 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiPopover,
-  // EuiToolTip,
-  // EuiButtonIcon,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
@@ -28,21 +26,14 @@ import {
 } from './random_sampler';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import { Sampling } from './sampling';
-// import { useSamplingMenu } from './use_sampling_menu';
 
 interface Props {
   sampling: Sampling;
   reload: () => void;
-  // samplingMenu: ReturnType<typeof useSamplingMenu>;
 }
 
 export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
-
-  // const [samplingProbability, setSamplingProbability] = useState<number | null>(0.1);
-  // const [randomSamplerPreference, setRandomSamplerPreference] = useState<RandomSamplerOption>(
-  //   RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
-  // );
 
   const samplingProbability = useObservable(sampling.getProbability$(), sampling.getProbability());
   const setSamplingProbability = useCallback(
@@ -61,27 +52,6 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
     },
     [reload, sampling]
   );
-  // const {
-  //   setProbability,
-  //   setMode,
-  //   mode: randomSamplerPreference,
-  //   probability: samplingProbability,
-  // } = samplingMenu;
-  // const setSamplingProbability = useCallback(
-  //   (probability: number | null) => {
-  //     if (probability !== null) {
-  //       setProbability(probability);
-  //     }
-  //   },
-  //   [setProbability]
-  // );
-
-  // const setRandomSamplerPreference = useCallback(
-  //   (mode: RandomSamplerOption) => {
-  //     setMode(mode);
-  //   },
-  //   [setMode]
-  // );
 
   const { calloutInfoMessage, buttonText } = useMemo(() => {
     switch (randomSamplerPreference) {
@@ -150,22 +120,6 @@ export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
         >
           {buttonText}
         </EuiButtonEmpty>
-
-        // <EuiToolTip
-        //   content={i18n.translate('xpack.aiops.logCategorization.samplingOptionsButton', {
-        //     defaultMessage: 'Sampling options',
-        //   })}
-        // >
-        //   <EuiButtonIcon
-        //     size="xs"
-        //     iconType="gear"
-        //     onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
-        //     data-test-subj="dvRandomSamplerOptionsButton"
-        //     aria-label={i18n.translate('xpack.aiops.logCategorization.samplingOptionsButton', {
-        //       defaultMessage: 'Sampling options',
-        //     })}
-        //   />
-        // </EuiToolTip>
       }
       isOpen={showSamplingOptionsPopover}
       closePopover={() => setShowSamplingOptionsPopover(false)}
