@@ -68,6 +68,10 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
 
 /**
  * @deprecated use fields list on dataview / "indexPattern"
+ * about to use browserFields? Reconsider! Maybe you can accomplish
+ * everything you need via the `fields` property on the data view
+ * you are working with? Or perhaps you need a description for a
+ * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
 export interface BrowserField {
   aggregatable: boolean;
@@ -88,6 +92,10 @@ export interface BrowserField {
 
 /**
  * @deprecated use fields list on dataview / "indexPattern"
+ * about to use browserFields? Reconsider! Maybe you can accomplish
+ * everything you need via the `fields` property on the data view
+ * you are working with? Or perhaps you need a description for a
+ * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
