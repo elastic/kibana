@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoint_hosts/view/host_constants';
 import { getEmptyValue } from '../../empty_value';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -23,8 +24,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import type { HostInfo, EndpointPendingActions } from '../../../../../common/endpoint/types';
-import { AgentStatus } from '../agent_status';
 import { useGetEndpointDetails } from '../../../../management/hooks';
+import { getAgentStatusText } from '../agent_status_text';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 
@@ -83,7 +84,13 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          <AgentStatus hostStatus={status} />
+          <EuiBadge
+            color={status != null ? HOST_STATUS_TO_BADGE_COLOR[status] : 'warning'}
+            data-test-subj="rowHostStatus"
+            className="eui-textTruncate"
+          >
+            {getAgentStatusText(status)}
+          </EuiBadge>
         </EuiFlexItem>
         {(isIsolated || hasPendingActions) && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
