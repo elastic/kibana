@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CustomPresaveTransform } from '../../../common/types';
 import type {
   AddDataControlProps,
   AddOptionsListControlProps,
@@ -26,9 +27,7 @@ import {
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
-  overrideControlInput?: Partial<
-    AddOptionsListControlProps & AddDataControlProps & AddRangeSliderControlProps
-  >
+  customPresaveTransform?: CustomPresaveTransform
 ) {
   const {
     overlays: { openFlyout, openConfirm },
@@ -38,7 +37,7 @@ export function openAddDataControlFlyout(
   const ControlsServicesProvider = pluginServices.getContextProvider();
   const ReduxWrapper = this.getReduxEmbeddableTools().Wrapper;
 
-  let controlInput: Partial<DataControlInput> = overrideControlInput ?? {};
+  let controlInput: Partial<DataControlInput> = {};
   const onCancel = () => {
     if (Object.keys(controlInput).length === 0) {
       this.closeAllFlyouts();
@@ -70,6 +69,7 @@ export function openAddDataControlFlyout(
             updateTitle={(newTitle) => (controlInput.title = newTitle)}
             updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
             updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
+            filterPredicate={(f) => f.type !== 'number'}
             onSave={(type) => {
               this.closeAllFlyouts();
               if (!type) {
@@ -79,6 +79,10 @@ export function openAddDataControlFlyout(
               const factory = getControlFactory(type) as IEditableControlFactory;
               if (factory.presaveTransformFunction) {
                 controlInput = factory.presaveTransformFunction(controlInput);
+              }
+
+              if (customPresaveTransform) {
+                controlInput = customPresaveTransform({ ...controlInput }, type);
               }
 
               if (type === OPTIONS_LIST_CONTROL) {

@@ -103,6 +103,7 @@ export const ControlEditor = ({
 
   const { useEmbeddableSelector: select } = useControlGroupContainerContext();
   const editorConfig = select((state) => state.componentState.editorConfig);
+  const customFilterPredicate = select((state) => state.explicitInput.fieldFilterPredicate);
 
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
@@ -201,7 +202,12 @@ export const ControlEditor = ({
           {fieldRegistry && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
               <FieldPicker
-                filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
+                filterPredicate={(field: DataViewField) => {
+                  const customPredicate = customFilterPredicate
+                    ? customFilterPredicate(field)
+                    : true;
+                  return Boolean(fieldRegistry[field.name]) && customPredicate;
+                }}
                 selectedFieldName={selectedField}
                 dataView={dataView}
                 onSelectField={(field) => {

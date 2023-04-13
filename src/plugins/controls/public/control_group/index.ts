@@ -17,6 +17,7 @@ export { ControlGroupContainerFactory } from './embeddable/control_group_contain
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   controlGroupInputBuilder,
 } from './control_group_input_builder';
 

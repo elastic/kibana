@@ -20,6 +20,11 @@ import {
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  CustomPresaveTransform,
+} from '@kbn/controls-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
@@ -62,6 +67,25 @@ export const EditExample = () => {
     return input;
   }
 
+  const customPresaveControlsTransform: CustomPresaveTransform = (newState, type) => {
+    // TODO, need to see how to get an instance of embeddable being added
+    if (type === OPTIONS_LIST_CONTROL) {
+      return {
+        ...newState,
+        placeholder: 'Custom Placeholder',
+      };
+    }
+
+    if (type === RANGE_SLIDER_CONTROL) {
+      return {
+        ...newState,
+        value: ['0', '4'],
+      };
+    }
+
+    return newState;
+  };
+
   return (
     <>
       <EuiTitle>
@@ -79,12 +103,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroup === undefined}
               onClick={() => {
-                controlGroup!.openAddDataControlFlyout({
-                  // default placeholder for options list control
-                  placeholder: 'Custom placeholder',
-                  // default value for range slider
-                  value: ['0', '4'],
-                });
+                controlGroup!.openAddDataControlFlyout(customPresaveControlsTransform);
               }}
             >
               Add control
@@ -116,6 +135,7 @@ export const EditExample = () => {
                 ...initialInput,
                 ...persistedInput,
                 viewMode: ViewMode.EDIT,
+                fieldFilterPredicate: (f) => f.type !== 'number',
               },
             };
           }}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ControlWidth } from './types';
+export type { ControlWidth, CustomPresaveTransform } from './types';
 
 // Control Group exports
 export {
