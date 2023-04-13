@@ -102,7 +102,7 @@ Fixes the timezone that *Lens* uses in normalize by unit {kibana-pull}154472[#15
 
 Machine Learning::
 * Change point detection: Fixes applied filters and queries to the charts {kibana-pull}154707[#154707]
-* Fixes relative time range for Change Point Detection {kibana-pull}154313[#154313]
+* Change point detection: Fixes support for running over relative time range {kibana-pull}154313[#154313]
 * Reinstates cold and frozen tier filters for Linux and Windows security modules {kibana-pull}153222[#153222]
 
 Maps::
