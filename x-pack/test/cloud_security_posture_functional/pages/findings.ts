@@ -176,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
+    describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
@@ -187,15 +187,63 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         return a.localeCompare(b);
       };
 
-      it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
+      it('sorts by a column CIS Selection, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
           ['CIS Section', 'asc', sortByAlphabeticalOrder],
           ['CIS Section', 'desc', sortByAlphabeticalOrder],
+        ];
+        for (const [columnName, dir, sortingMethod] of testCases) {
+          await latestFindingsTable.toggleColumnSort(columnName, dir);
+          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
+          expect(values).to.not.be.empty();
+
+          const sorted = values
+            .slice()
+            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
+          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+        }
+      });
+
+      it('sorts by a column Resource ID, should be case sensitive/insensitive depending on the column', async () => {
+        type TestCase = [string, SortDirection, SortingMethod];
+        const testCases: TestCase[] = [
           ['Resource ID', 'asc', compareStringByLexicographicOrder],
           ['Resource ID', 'desc', compareStringByLexicographicOrder],
+        ];
+        for (const [columnName, dir, sortingMethod] of testCases) {
+          await latestFindingsTable.toggleColumnSort(columnName, dir);
+          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
+          expect(values).to.not.be.empty();
+
+          const sorted = values
+            .slice()
+            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
+          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+        }
+      });
+
+      it('sorts by a column Resource Name, should be case sensitive/insensitive depending on the column', async () => {
+        type TestCase = [string, SortDirection, SortingMethod];
+        const testCases: TestCase[] = [
           ['Resource Name', 'asc', sortByAlphabeticalOrder],
           ['Resource Name', 'desc', sortByAlphabeticalOrder],
+        ];
+        for (const [columnName, dir, sortingMethod] of testCases) {
+          await latestFindingsTable.toggleColumnSort(columnName, dir);
+          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
+          expect(values).to.not.be.empty();
+
+          const sorted = values
+            .slice()
+            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
+          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+        }
+      });
+
+      it('sorts by a column Resource Type, should be case sensitive/insensitive depending on the column', async () => {
+        type TestCase = [string, SortDirection, SortingMethod];
+        const testCases: TestCase[] = [
           ['Resource Type', 'asc', sortByAlphabeticalOrder],
           ['Resource Type', 'desc', sortByAlphabeticalOrder],
         ];
