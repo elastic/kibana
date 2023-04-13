@@ -646,9 +646,7 @@ export const LensTopNavMenu = ({
                 {
                   newTitle:
                     title ||
-                    (initialContext &&
-                    'isEmbeddable' in initialContext &&
-                    initialContext.isEmbeddable
+                    (contextFromEmbeddable
                       ? i18n.translate('xpack.lens.app.convertedLabel', {
                           defaultMessage: '{title} (converted)',
                           values: {
@@ -661,6 +659,7 @@ export const LensTopNavMenu = ({
                   newCopyOnSave: false,
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
+                  newDescription: contextFromEmbeddable ? initialContext.description : '',
                 },
                 {
                   saveToLibrary:
