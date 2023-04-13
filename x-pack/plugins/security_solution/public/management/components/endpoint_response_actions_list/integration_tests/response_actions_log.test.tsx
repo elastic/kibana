@@ -13,27 +13,29 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
-} from '../../../common/mock/endpoint';
-import { ResponseActionsLog } from './response_actions_log';
+} from '../../../../common/mock/endpoint';
+import { ResponseActionsLog } from '../response_actions_log';
 import type {
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
-} from '../../../../common/endpoint/types';
-import { MANAGEMENT_PATH } from '../../../../common/constants';
-import { getActionListMock } from './mocks';
-import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
+} from '../../../../../common/endpoint/types';
+import { MANAGEMENT_PATH } from '../../../../../common/constants';
+import { getActionListMock } from '../mocks';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 import { v4 as uuidv4 } from 'uuid';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { useGetEndpointActionList as _useGetEndpointActionList } from '../../hooks/response_actions/use_get_endpoint_action_list';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
-jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
+jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: jest.fn(original.useGetEndpointActionList),
@@ -114,11 +116,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../hooks/endpoint/use_get_endpoints_list');
+jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 
-jest.mock('../../../common/experimental_features_service');
+jest.mock('../../../../common/experimental_features_service');
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 let mockUseGetFileInfo: {
@@ -126,8 +128,8 @@ let mockUseGetFileInfo: {
   error?: Partial<IHttpFetchError> | null;
   data?: ActionFileInfoApiResponse;
 };
-jest.mock('../../hooks/response_actions/use_get_file_info', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_file_info');
+jest.mock('../../../hooks/response_actions/use_get_file_info', () => {
+  const original = jest.requireActual('../../../hooks/response_actions/use_get_file_info');
   return {
     ...original,
     useGetFileInfo: () => mockUseGetFileInfo,
@@ -140,8 +142,8 @@ let mockUseGetActionDetails: {
   error?: Partial<IHttpFetchError> | null;
   data?: ActionDetailsApiResponse;
 };
-jest.mock('../../hooks/response_actions/use_get_action_details', () => {
-  const original = jest.requireActual('../../hooks/response_actions/use_get_action_details');
+jest.mock('../../../hooks/response_actions/use_get_action_details', () => {
+  const original = jest.requireActual('../../../hooks/response_actions/use_get_action_details');
   return {
     ...original,
     useGetActionDetails: () => mockUseGetActionDetails,
@@ -156,8 +158,8 @@ const getBaseMockedActionList = () => ({
   error: null,
   refetch: jest.fn(),
 });
-// FLAKY: https://github.com/elastic/kibana/issues/145635
-describe.skip('Response actions history', () => {
+
+describe('Response actions history', () => {
   const testPrefix = 'test';
   const hostsFilterPrefix = 'hosts-filter';
 
@@ -642,14 +644,14 @@ describe.skip('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadExecuteLink = getByTestId(`${testPrefix}-getExecuteLink`);
+        const downloadExecuteLink = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
         expect(downloadExecuteLink).toBeTruthy();
         expect(downloadExecuteLink.textContent).toEqual(
           'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
       });
 
-      it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
+      it('should contain expected output accordions for `execute` action WITH execute operation privilege', async () => {
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
@@ -691,11 +693,17 @@ describe.skip('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
-        expect(executeAccordions).toBeTruthy();
-        const accordionButtons = Array.from(executeAccordions.querySelectorAll('.euiAccordion'));
-        expect(accordionButtons[0]).toHaveTextContent('Execution output (truncated)');
-        expect(accordionButtons[1]).toHaveTextContent('Execution error (truncated)');
+        const accordionTitles = Array.from(
+          getByTestId(`${testPrefix}-executeDetails`).querySelectorAll(
+            '.euiAccordion__triggerWrapper'
+          )
+        ).map((el) => el.textContent);
+
+        expect(accordionTitles).toEqual([
+          'Execution context',
+          'Execution error (truncated)',
+          'Execution output (truncated)',
+        ]);
       });
 
       it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
@@ -715,7 +723,9 @@ describe.skip('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        const executeAccordions = getByTestId(
+          `${testPrefix}-actionsLogTray-executeResponseOutput-output`
+        );
         expect(executeAccordions).toBeTruthy();
       });
 
@@ -737,7 +747,7 @@ describe.skip('Response actions history', () => {
 
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
-        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
+        expect(queryByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`)).toBeNull();
 
         const output = getByTestId(`${testPrefix}-details-tray-output`);
         expect(output).toBeTruthy();
@@ -775,7 +785,7 @@ describe.skip('Response actions history', () => {
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
           userEvent.click(expandButton);
 
-          const output = getByTestId(`${testPrefix}-getExecuteLink`);
+          const output = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
           expect(output).toBeTruthy();
           expect(output.textContent).toEqual(
             'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'

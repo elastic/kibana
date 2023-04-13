@@ -7,15 +7,30 @@
  */
 
 import { omit } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 
+import type { SearchQuery } from '../../../common';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { search } from './search';
-import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
-import { schema } from '@kbn/config-schema';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
+import { search } from './search';
+
+const storageContextGetTransforms = jest.fn();
+const spy = () => storageContextGetTransforms;
+
+jest.mock('@kbn/object-versioning', () => {
+  const original = jest.requireActual('@kbn/object-versioning');
+  return {
+    ...original,
+    getContentManagmentServicesTransforms: (...args: any[]) => {
+      spy()(...args);
+      return original.getContentManagmentServicesTransforms(...args);
+    },
+  };
+});
 
 const { fn, schemas } = search;
 
@@ -34,7 +49,12 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
-    const query = { text: 'hello' };
+    const query: SearchQuery = {
+      text: 'hello',
+      tags: { included: ['abc'], excluded: ['def'] },
+      cursor: '1',
+      limit: 50,
+    };
     const validInput = { contentTypeId: 'foo', version: 1, query };
 
     test('should validate that a contentTypeId and "query" object is passed', () => {
@@ -62,6 +82,10 @@ describe('RPC -> search()', () => {
         {
           input: { ...validInput, query: 123 }, // query is not an object
           expectedError: '[query]: expected a plain object value, but found [number] instead.',
+        },
+        {
+          input: { ...validInput, query: { tags: { included: 123 } } }, // invalid query
+          expectedError: '[query.tags.included]: expected value of type [array] but got [number]',
         },
         {
           input: { ...validInput, unknown: 'foo' },
@@ -153,7 +177,8 @@ describe('RPC -> search()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: getServiceObjectTransformFactory,
+        getTransformsFactory: (contentTypeId: string, version: Version) =>
+          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };
@@ -196,6 +221,31 @@ describe('RPC -> search()', () => {
         { text: 'Hello' },
         undefined
       );
+    });
+
+    test('should implicitly set the requestVersion in storageContext -> utils -> getTransforms()', async () => {
+      const { ctx, storage } = setup();
+
+      const requestVersion = 1;
+      await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        query: { text: 'Hello' },
+        version: requestVersion,
+      });
+
+      const [storageContext] = storage.search.mock.calls[0];
+      storageContext.utils.getTransforms({ 1: {} });
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith(
+        { 1: {} },
+        requestVersion,
+        expect.any(Object)
+      );
+
+      // We can still pass custom version
+      storageContext.utils.getTransforms({ 1: {} }, 1234);
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith({ 1: {} }, 1234, expect.any(Object));
     });
 
     describe('validation', () => {
@@ -244,7 +294,7 @@ describe('RPC -> search()', () => {
           2: {},
         };
 
-        const transforms = getTransforms(definitions, 1);
+        const transforms = getTransforms(definitions);
 
         // Some smoke tests for the getTransforms() utils. Complete test suite is inside
         // the package @kbn/object-versioning

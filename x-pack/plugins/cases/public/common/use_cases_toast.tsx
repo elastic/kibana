@@ -169,6 +169,13 @@ export const useCasesToast = () => {
     showSuccessToast: (title: string) => {
       toasts.addSuccess({ title, className: 'eui-textBreakWord' });
     },
+    showInfoToast: (title: string, text?: string) => {
+      toasts.addInfo({
+        title,
+        text,
+        className: 'eui-textBreakWord',
+      });
+    },
   };
 };
 
