@@ -7,9 +7,13 @@
  */
 
 import fetch from 'node-fetch';
+import pRetry from 'p-retry';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { write, Task } from '../lib';
+
+// Endpoint maintained by the web-team and hosted on the elastic website
+const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
 
 const isPr = () =>
   !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
@@ -20,13 +24,10 @@ const getAvailableVersions = async (log: ToolingLog) => {
       'Content-Type': 'application/json',
     },
   };
-  // Endpoint maintained by the web-team and hosted on the elastic website
-  // See https://github.com/elastic/website-development/issues/9331
-  const url = 'https://www.elastic.co/content/product_versions';
   log.info('Fetching Elastic Agent versions list');
 
   try {
-    const results = await fetch(url, options);
+    const results = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 3 });
     const rawBody = await results.text();
 
     if (results.status >= 400) {
