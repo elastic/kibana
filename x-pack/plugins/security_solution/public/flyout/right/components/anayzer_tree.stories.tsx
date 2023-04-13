@@ -36,8 +36,8 @@ export const HasChildren: Story<void> = () => {
   return <AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesHasChildren} />;
 };
 
-export const HasMoreThanFiveChildren: Story<void> = () => {
-  return <AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesMoreThanFiveChildren} />;
+export const HasMoreThanThreeChildren: Story<void> = () => {
+  return <AnalyzerTree {...defaultProps} statsNodes={mock.mockStatsNodesMoreThanThreeChildren} />;
 };
 
 export const HasGrandChildren: Story<void> = () => {

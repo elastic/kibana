@@ -21,7 +21,7 @@ export const ExpandDetailButton: FC = memo(() => {
   const { closeLeftPanel, openLeftPanel, panels } = useExpandableFlyoutContext();
   const isExpanded: boolean = panels.left != null;
 
-  const { eventId, indexName } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useRightPanelContext();
 
   const expandDetails = () => {
     openLeftPanel({
@@ -29,6 +29,7 @@ export const ExpandDetailButton: FC = memo(() => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
   };

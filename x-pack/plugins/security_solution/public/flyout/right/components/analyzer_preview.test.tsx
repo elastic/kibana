@@ -9,8 +9,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { mockContextValue, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { RightPanelContext } from '../context';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_TREE_TEST_ID } from './test_ids';
 import * as mock from '../mocks/mock_analyzer_data';
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
@@ -18,23 +20,22 @@ jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_t
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-const defaultProps = {
-  entityId: {
-    field: 'testfield',
-    values: ['test entityId'],
-    isObjectArray: false,
-  },
-  documentId: {
-    field: '_id',
-    values: ['original'],
-    isObjectArray: false,
-  },
-  index: {
-    field: 'index',
-    values: ['test index'],
-    isObjectArray: false,
-  },
-  'data-test-subj': ANALYZER_PREVIEW_TEST_ID,
+const contextValue = {
+  ...mockContextValue,
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+};
+
+const contextValueEmpty = {
+  ...mockContextValue,
+  dataFormattedForFieldBrowser: [
+    {
+      category: 'kibana',
+      field: 'kibana.alert.rule.uuid',
+      values: ['rule-uuid'],
+      originalValue: ['rule-uuid'],
+      isObjectArray: false,
+    },
+  ],
 };
 
 describe('<AnalyzerPreview />', () => {
@@ -42,7 +43,7 @@ describe('<AnalyzerPreview />', () => {
     jest.resetAllMocks();
   });
 
-  it('shows analyzer preview correctly', () => {
+  it('shows analyzer preview correctly when documentid and index are present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -51,16 +52,43 @@ describe('<AnalyzerPreview />', () => {
     });
     const wrapper = render(
       <TestProviders>
-        <AnalyzerPreview {...defaultProps} />
+        <RightPanelContext.Provider value={contextValue}>
+          <AnalyzerPreview />
+        </RightPanelContext.Provider>
       </TestProviders>
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: 'test entityId',
+      processEntityId: '',
       isActiveTimeline: false,
-      documentId: 'original',
-      indices: ['test index'],
+      documentId: 'ancestors-id',
+      indices: ['rule-parameters-index'],
     });
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(ANALYZER_TREE_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not show analyzer preview when documentid and index are not present', () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: undefined,
+      statsNodes: undefined,
+    });
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={contextValueEmpty}>
+          <AnalyzerPreview />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      processEntityId: '',
+      isActiveTimeline: false,
+      documentId: '',
+      indices: [],
+    });
+    expect(queryByTestId(ANALYZER_TREE_TEST_ID)).not.toBeInTheDocument();
   });
 });

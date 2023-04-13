@@ -6,59 +6,161 @@
  */
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 
-export const mockStatsNodes = [
-  { id: '70e19mhyda', name: 'mimikatz.exe', parent: '92ogx18xdh' },
-  { id: '92ogx18xdh', parent: 'skq89ren5b', name: 'explorer.exe' },
-  { id: 'skq89ren5b', name: 'notepad.exe' },
-  { id: '6b4ffkdr0r', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'gimoywlglz', parent: '70e19mhyda', name: 'iexlorer.exe' },
-  { id: 'p6t1v7jum9', parent: '70e19mhyda', name: 'notepad.exe' },
-  { id: 't037f0qec3', parent: 'gimoywlglz', name: 'powershell.exe' },
-  { id: '8bxu0crntu', parent: 'gimoywlglz', name: 'lsass.exe' },
-  { id: 'cpsi3oaguo', parent: '6b4ffkdr0r', name: 'notepad.exe' },
-] as StatsNode[];
+const mockNode: StatsNode = {
+  id: '70e19mhyda',
+  name: 'mimikatz.exe',
+  parent: '92ogx18xdh',
+  data: {},
+  stats: {
+    total: 2,
+    byCategory: { alerts: 2 },
+  },
+};
 
-export const mockStatsNodesHasParent = [
-  { id: '70e19mhyda', name: 'mimikatz.exe', parent: '92ogx18xdh' },
-  { id: '92ogx18xdh', name: 'explorer.exe' },
-] as StatsNode[];
+const mockParentNodeNoGrandparent: StatsNode = {
+  id: '92ogx18xdh',
+  name: 'explorer.exe',
+  data: {},
+  stats: {
+    total: 0,
+    byCategory: {},
+  },
+};
 
-export const mockStatsNodesHasGrandparent = [
-  { id: '70e19mhyda', name: 'mimikatz.exe', parent: '92ogx18xdh' },
-  { id: '92ogx18xdh', parent: 'skq89ren5b', name: 'explorer.exe' },
-  { id: 'skq89ren5b', name: 'notepad.exe' },
-] as StatsNode[];
+const mockParentNode: StatsNode = {
+  ...mockParentNodeNoGrandparent,
+  parent: 'skq89ren5b',
+};
 
-export const mockStatsNodesHasChildren = [
-  { id: '70e19mhyda', name: 'mimikatz.exe' },
-  { id: '6b4ffkdr0r', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'gimoywlglz', parent: '70e19mhyda', name: 'iexlorer.exe' },
-  { id: 'p6t1v7jum9', parent: '70e19mhyda', name: 'notepad.exe' },
-] as StatsNode[];
+const mockGrandparentNode: StatsNode = {
+  id: 'skq89ren5b',
+  name: 'notepad.exe',
+  data: {},
+  stats: {
+    total: 0,
+    byCategory: {},
+  },
+};
 
-export const mockStatsNodesMoreThanFiveChildren = [
-  { id: '70e19mhyda', name: 'mimikatz.exe', parent: '92ogx18xdh' },
-  { id: '6b4ffkdr0r', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'gimoywlglz', parent: '70e19mhyda', name: 'iexlorer.exe' },
-  { id: 'p6t1v7jum9', parent: '70e19mhyda', name: 'notepad.exe' },
-  { id: 't037f0qec3', parent: '70e19mhyda', name: 'powershell.exe' },
-  { id: '8bxu0crntu', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'cpsi3oaguo', parent: '70e19mhyda', name: 'notepad.exe' },
-] as StatsNode[];
+export const mockChildrenNodes: StatsNode[] = [
+  {
+    id: '6b4ffkdr0r',
+    parent: '70e19mhyda',
+    name: 'lsass.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+  {
+    id: 'gimoywlglz',
+    parent: '70e19mhyda',
+    name: 'iexlorer.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+  {
+    id: 'p6t1v7jum9',
+    parent: '70e19mhyda',
+    name: 'notepad.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+];
 
-export const mockStatsNodesHasGrandchildren = [
-  { id: '70e19mhyda', name: 'mimikatz.exe' },
-  { id: '6b4ffkdr0r', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'gimoywlglz', parent: '70e19mhyda', name: 'iexlorer.exe' },
-  { id: 'p6t1v7jum9', parent: '70e19mhyda', name: 'notepad.exe' },
-  { id: 't037f0qec3', parent: 'gimoywlglz', name: 'powershell.exe' },
-  { id: '8bxu0crntu', parent: 'gimoywlglz', name: 'lsass.exe' },
-  { id: 'cpsi3oaguo', parent: '6b4ffkdr0r', name: 'notepad.exe' },
-] as StatsNode[];
+const mockExtraChildrenNodes: StatsNode[] = [
+  {
+    id: 'rxccek8vqu',
+    parent: '70e19mhyda',
+    name: 'powershell.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+  {
+    id: 'mq0n2g7093',
+    parent: '70e19mhyda',
+    name: 'exlorer.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+];
 
-export const mockStatsNodesSingleNode = [
-  { id: '70e19mhyda', name: 'mimikatz.exe', parent: '92ogx18xdh' },
-] as StatsNode[];
+const mockGrandchildrenNodes: StatsNode[] = [
+  {
+    id: 't037f0qec3',
+    parent: 'gimoywlglz',
+    name: 'powershell.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+  {
+    id: '8bxu0crntu',
+    parent: 'gimoywlglz',
+    name: 'lsass.exe',
+    data: {},
+    stats: {
+      total: 0,
+      byCategory: {},
+    },
+  },
+];
+
+export const mockStatsNodesSingleNode: StatsNode[] = [mockNode];
+
+export const mockStatsNodesHasParent: StatsNode[] = [mockNode, mockParentNodeNoGrandparent];
+
+export const mockStatsNodesHasGrandparent: StatsNode[] = [
+  mockNode,
+  mockParentNode,
+  mockGrandparentNode,
+];
+
+export const mockStatsNodesHasChildren: StatsNode[] = [mockNode, ...mockChildrenNodes];
+
+export const mockStatsNodesMoreThanThreeChildren: StatsNode[] = [
+  mockNode,
+  ...mockChildrenNodes,
+  ...mockExtraChildrenNodes,
+];
+
+export const mockStatsNodesHasGrandchildren: StatsNode[] = [
+  mockNode,
+  ...mockChildrenNodes,
+  ...mockGrandchildrenNodes,
+];
+
+export const mockStatsNodes: StatsNode[] = [
+  mockNode,
+  mockParentNode,
+  mockGrandparentNode,
+  ...mockChildrenNodes,
+  ...mockGrandchildrenNodes,
+];
+
+export const mockTreeNodesSingleNode = [
+  {
+    label: '--> (Analyzed Event) mimikatz.exe',
+    id: '70e19mhyda',
+    isExpanded: true,
+    children: [],
+  },
+];
 
 export const mockTreeNodesHasParent = [
   {
@@ -112,7 +214,7 @@ export const mockTreeNodesHasChildren = [
   },
 ];
 
-export const mockTreeNodesHasMoreThanFiveChildren = [
+export const mockTreeNodesHasFourChildren = [
   {
     label: '--> (Analyzed Event) mimikatz.exe',
     id: '70e19mhyda',
@@ -121,8 +223,7 @@ export const mockTreeNodesHasMoreThanFiveChildren = [
       { label: '--> lsass.exe', id: '6b4ffkdr0r', isExpanded: true, children: [] },
       { label: '--> iexlorer.exe', id: 'gimoywlglz', isExpanded: true, children: [] },
       { label: '--> notepad.exe', id: 'p6t1v7jum9', isExpanded: true, children: [] },
-      { label: '--> powershell.exe', id: 't037f0qec3', isExpanded: true, children: [] },
-      { label: '--> lsass.exe', id: '8bxu0crntu', isExpanded: true, children: [] },
+      { label: '--> powershell.exe', id: 'rxccek8vqu', isExpanded: true, children: [] },
     ],
   },
 ];
@@ -140,15 +241,6 @@ export const mockTreeNodesHasGrandchildren = [
   },
 
   { label: '...', id: 'grandchild', isExpanded: true, children: [] },
-];
-
-export const mockTreeNodesSingleNode = [
-  {
-    label: '--> (Analyzed Event) mimikatz.exe',
-    id: '70e19mhyda',
-    isExpanded: true,
-    children: [],
-  },
 ];
 
 export const mockTreeNodes = [
@@ -178,12 +270,6 @@ export const mockTreeNodes = [
   },
   { label: '...', id: 'grandchild', isExpanded: true, children: [] },
 ];
-
-export const mockChildrenStatsNodes = [
-  { id: '6b4ffkdr0r', parent: '70e19mhyda', name: 'lsass.exe' },
-  { id: 'gimoywlglz', parent: '70e19mhyda', name: 'iexlorer.exe' },
-  { id: 'p6t1v7jum9', parent: '70e19mhyda', name: 'notepad.exe' },
-] as StatsNode[];
 
 export const mockChildrenTreeNodes = [
   { label: 'lsass.exe', id: '6b4ffkdr0r', isExpanded: true, children: [] },

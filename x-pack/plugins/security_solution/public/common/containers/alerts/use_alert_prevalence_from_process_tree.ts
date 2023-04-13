@@ -14,7 +14,7 @@ export interface StatsNode {
   data: object;
   id: string;
   name: string;
-  parent: string;
+  parent?: string;
   stats: {
     total: number;
     byCategory: {

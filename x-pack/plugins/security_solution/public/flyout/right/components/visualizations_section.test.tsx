@@ -7,23 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { VISUALIZATIONS_SECTION_HEADER_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { VISUALIZATIONS_SECTION_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { VisualizationsSection } from './visualizations_section';
+import { mockContextValue, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { RightPanelContext } from '../context';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import * as mock from '../mocks/mock_analyzer_data';
-
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
 
 jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -31,29 +20,25 @@ jest.mock('../../../common/containers/alerts/use_alert_prevalence_from_process_t
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
 const contextValue = {
+  ...mockContextValue,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-} as RightPanelContext;
-
-const contextValueEmpty = {
-  dataFormattedForFieldBrowser: [
-    {
-      category: 'kibana',
-      field: 'kibana.alert.rule.uuid',
-      values: ['rule-uuid'],
-      originalValue: ['rule-uuid'],
-      isObjectArray: false,
-    },
-  ],
-} as RightPanelContext;
+};
 
 describe('<VisualizationsSection />', () => {
+  beforeEach(() => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: undefined,
+      statsNodes: undefined,
+    });
+  });
+
   it('should render visualizations component', () => {
     const { getByTestId, getAllByRole } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValueEmpty}>
-          <VisualizationsSection />
-        </RightPanelContext.Provider>
-      </TestProviders>
+      <RightPanelContext.Provider value={contextValue}>
+        <VisualizationsSection />
+      </RightPanelContext.Provider>
     );
 
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
@@ -64,7 +49,7 @@ describe('<VisualizationsSection />', () => {
   it('should render visualization component as expanded when expanded is true', () => {
     const { getByTestId, getAllByRole } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={contextValueEmpty}>
+        <RightPanelContext.Provider value={contextValue}>
           <VisualizationsSection expanded={true} />
         </RightPanelContext.Provider>
       </TestProviders>
@@ -73,33 +58,5 @@ describe('<VisualizationsSection />', () => {
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
     expect(getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
     expect(getAllByRole('button')[0]).not.toHaveAttribute('disabled');
-  });
-
-  it('should display analyzer preview when required fields are present', () => {
-    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
-      loading: false,
-      error: false,
-      alertIds: undefined,
-      statsNodes: mock.mockStatsNodes,
-    });
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <VisualizationsSection />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
-    expect(getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not display analyzer preview when required fields are not present', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValueEmpty}>
-          <VisualizationsSection />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
-    expect(queryByTestId(ANALYZER_PREVIEW_TEST_ID)).not.toBeInTheDocument();
   });
 });

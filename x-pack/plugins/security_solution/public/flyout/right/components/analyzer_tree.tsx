@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiPanel,
   EuiButtonEmpty,
@@ -41,6 +41,8 @@ export interface AnalyzerTreeProps {
  * Analyzer tree that represent a summary view of analyzer. It shows current process, and its parent and child processes
  */
 export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({ statsNodes, loading, error }) => {
+  const items = useMemo(() => getTreeNodes(statsNodes ?? []), [statsNodes]);
+
   if (loading) {
     return <EuiLoadingSpinner data-test-subj={ANALYZER_TREE_LOADING_TEST_ID} />;
   }
@@ -57,18 +59,14 @@ export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({ statsNodes, loading,
     );
   }
 
-  if (statsNodes && statsNodes.length !== 0) {
+  if (items && items.length !== 0) {
     return (
       <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={ANALYZER_TREE_TEST_ID}>
         <EuiPanel color="subdued" paddingSize="s">
           <EuiButtonEmpty color="primary" iconType="sessionViewer" onClick={() => {}}>
             {ANALYZER_PREVIEW_TITLE}
           </EuiButtonEmpty>
-          <EuiTreeView
-            items={getTreeNodes(statsNodes)}
-            display="compressed"
-            aria-label={ANALYZER_PREVIEW_TITLE}
-          />
+          <EuiTreeView items={items} display="compressed" aria-label={ANALYZER_PREVIEW_TITLE} />
         </EuiPanel>
       </EuiPanel>
     );

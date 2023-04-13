@@ -6,6 +6,7 @@
  */
 
 import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { RightPanelContext } from '../context';
 
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -135,4 +136,19 @@ export const mockSearchHit = {
       },
     ],
   },
+};
+
+/**
+ * Mock contextValue for right panel context
+ */
+export const mockContextValue: RightPanelContext = {
+  eventId: 'eventId',
+  indexName: 'index',
+  scopeId: 'scopeId',
+  getFieldsData: mockGetFieldsData,
+  dataFormattedForFieldBrowser: null,
+  browserFields: null,
+  dataAsNestedObject: null,
+  searchHit: undefined,
+  refetchFlyoutData: jest.fn(),
 };
