@@ -19,6 +19,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+
 import type { Agent } from '../../../../types';
 
 export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(

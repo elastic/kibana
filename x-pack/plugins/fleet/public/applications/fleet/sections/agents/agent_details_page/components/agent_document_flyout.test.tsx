@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+
 import type { Agent } from '../../../../types';
+
 import { AgentDocumentFlyout } from './agent_document_flyout';
 
 describe('AgentDocumentFlyout', () => {
