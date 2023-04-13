@@ -42,7 +42,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: { status: 'indexed', installedPackageVersion: '1.2.13' },
       })
     );
 
@@ -94,6 +94,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
           cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -131,6 +132,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
           cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -168,6 +170,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
           cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -205,6 +208,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
           cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -242,6 +246,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'indexed' },
           cspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -280,6 +285,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'indexed' },
           cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -318,6 +324,7 @@ describe('<ComplianceDashboard />', () => {
         status: 'success',
         data: {
           cspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -356,6 +363,7 @@ describe('<ComplianceDashboard />', () => {
         status: 'success',
         data: {
           cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -395,6 +403,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
           cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -434,6 +443,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -473,6 +483,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
@@ -512,6 +523,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
           cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -527,7 +539,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
-      data: undefined,
+      data: { stats: { totalFindings: 0 } },
     }));
 
     renderComplianceDashboardPage();
@@ -553,6 +565,7 @@ describe('<ComplianceDashboard />', () => {
         data: {
           cspm: { status: 'not-deployed' },
           kspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
@@ -568,7 +581,7 @@ describe('<ComplianceDashboard />', () => {
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
-      data: undefined,
+      data: { stats: { totalFindings: 0 } },
     }));
 
     renderComplianceDashboardPage();
