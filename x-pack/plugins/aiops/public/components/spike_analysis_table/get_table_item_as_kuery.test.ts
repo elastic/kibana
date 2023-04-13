@@ -13,10 +13,10 @@ import { getTableItemAsKuery } from './get_table_item_as_kuery';
 
 describe('getTableItemAsKuery', () => {
   it('returns a KUERY for a significant term', () => {
-    expect(getTableItemAsKuery(significantTerms[0])).toBe('response_code:500');
-    expect(getTableItemAsKuery(significantTerms[1])).toBe('url:home.php');
-    expect(getTableItemAsKuery(significantTerms[2])).toBe('url:login.php');
-    expect(getTableItemAsKuery(significantTerms[3])).toBe('user:Peter');
+    expect(getTableItemAsKuery(significantTerms[0])).toBe('user:Peter');
+    expect(getTableItemAsKuery(significantTerms[1])).toBe('response_code:500');
+    expect(getTableItemAsKuery(significantTerms[2])).toBe('url:home.php');
+    expect(getTableItemAsKuery(significantTerms[3])).toBe('url:login.php');
   });
   it('returns a KUERY for a group of significant terms', () => {
     const groupTableItems = getGroupTableItems(finalSignificantTermGroups);
