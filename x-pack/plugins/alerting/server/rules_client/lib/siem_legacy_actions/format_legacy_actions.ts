@@ -34,6 +34,12 @@ export interface LegacyActionsObj {
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * this function finds all legacy actions associated with rules in bulk
+ * it's useful for such methods as find, so we do not request legacy actions in a separate request per rule
+ * @params params.alertIds - list of rule ids to look for legacy actions for
+ * @params params.savedObjectsClient - savedObjectsClient
+ * @params params.logger - logger
+ * @returns map of legacy actions objects per rule with legacy actions
  */
 export const legacyGetBulkRuleActionsSavedObject = async ({
   alertIds,
@@ -50,6 +56,8 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
     async (referencesChunk) => {
       try {
         return savedObjectsClient.find<LegacyIRuleActionsAttributes>({
+          // here we looking legacyRuleActionsSavedObjectType, as not all of rules create `siem.notifications`
+          // more information on that can be found in https://github.com/elastic/kibana/pull/130511 PR
           type: legacyRuleActionsSavedObjectType,
           perPage: 10000,
           hasReference: referencesChunk,
@@ -102,7 +110,7 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * formats rules with associated SIEM legacy actions, if any
+ * formats rules with associated SIEM legacy actions, if any legacy actions present
  * @param rules - list of rules to format
  * @param params - logger, savedObjectsClient
  * @returns

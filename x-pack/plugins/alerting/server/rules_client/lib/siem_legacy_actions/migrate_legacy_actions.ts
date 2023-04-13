@@ -31,7 +31,7 @@ type MigrateLegacyActions = (
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * migrates SIEM legacy  actions and merges rule actions and references
+ * migrates SIEM legacy actions and merges rule actions and references
  * @param context RulesClient context
  * @param params
  * @returns

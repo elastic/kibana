@@ -20,7 +20,7 @@ type RetrieveMigratedLegacyActions = (
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * migrates legacy actions for SIEM rules
+ * retrieves legacy actions for SIEM rule and deletes associated sidecar SO
  * @param context RulesClient context
  * @param params.ruleId - id of rule to be migrated
  * @returns
@@ -70,20 +70,22 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
     if (!siemNotificationsExist && !legacyRuleNotificationSOsExist) {
       return { legacyActions: [], legacyActionsReferences: [] };
     }
-    // If the legacy notification rule type ("siem.notification") exist,
-    // migration and cleanup are needed
-    if (siemNotificationsExist) {
-      await deleteRule(context, { id: siemNotification.data[0].id });
-    }
-    // If legacy notification sidecar ("siem-detection-engine-rule-actions")
-    // exist, migration and cleanup are needed
-    if (legacyRuleNotificationSOsExist) {
-      // Delete the legacy sidecar SO
-      await unsecuredSavedObjectsClient.delete(
-        legacyRuleActionsSavedObjectType,
-        legacyRuleActionsSO.saved_objects[0].id
-      );
 
+    await Promise.all([
+      // If the legacy notification rule type ("siem.notification") exist,
+      // migration and cleanup are needed
+      siemNotificationsExist && deleteRule(context, { id: siemNotification.data[0].id }),
+      // Delete the legacy sidecar SO if it exists
+      legacyRuleNotificationSOsExist &&
+        unsecuredSavedObjectsClient.delete(
+          legacyRuleActionsSavedObjectType,
+          legacyRuleActionsSO.saved_objects[0].id
+        ),
+    ]);
+
+    // If legacy notification sidecar ("siem-detection-engine-rule-actions")
+    // exist, migration is needed
+    if (legacyRuleNotificationSOsExist) {
       // If "siem-detection-engine-rule-actions" notes that `ruleThrottle` is
       // "no_actions" or "rule", rule has no actions or rule is set to run
       // action on every rule run. In these cases, sidecar deletion is the only
