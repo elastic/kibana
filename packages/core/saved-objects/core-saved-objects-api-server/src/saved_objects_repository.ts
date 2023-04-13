@@ -10,6 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -19,6 +20,7 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsRemoveReferencesToOptions,
@@ -78,6 +80,7 @@ export interface ISavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {string} [options.namespace]
    * @property {array} [options.references=[]] - [{ name, type, id }]
+   * @property {string} [options.migrationVersionCompatibility]
    * @returns {promise} the created saved object { id, type, version, attributes }
    */
   create<T = unknown>(
@@ -93,6 +96,7 @@ export interface ISavedObjectsRepository {
    * @param {object} [options={}] {@link SavedObjectsCreateOptions} - options for the bulk create operation
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
+   * @property {string} [options.migrationVersionCompatibility]
    * @returns {promise} - {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   bulkCreate<T = unknown>(
@@ -177,7 +181,8 @@ export interface ISavedObjectsRepository {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array of objects containing id, type and optionally fields
-   * @param {object} [options={}] {@link SavedObjectsBaseOptions} - options for the bulk get operation
+   * @param {object} [options={}] {@link SavedObjectsGetOptions} - options for the bulk get operation
+   * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
@@ -189,14 +194,15 @@ export interface ISavedObjectsRepository {
    */
   bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsBulkResponse<T>>;
 
   /**
    * Resolves an array of objects by id, using any legacy URL aliases if they exist
    *
    * @param {array} objects - an array of objects containing id, type
-   * @param {object} [options={}] {@link SavedObjectsBaseOptions} - options for the bulk resolve operation
+   * @param {object} [options={}] {@link SavedObjectsResolveOptions} - options for the bulk resolve operation
+   * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
    * @example
@@ -208,7 +214,7 @@ export interface ISavedObjectsRepository {
    */
   bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
@@ -216,14 +222,15 @@ export interface ISavedObjectsRepository {
    *
    * @param {string} type - the type of the object to get
    * @param {string} id - the ID of the object to get
-   * @param {object} [options={}] {@link SavedObjectsBaseOptions} - options for the get operation
+   * @param {object} [options={}] {@link SavedObjectsGetOptions} - options for the get operation
+   * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
   get<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObject<T>>;
 
   /**
@@ -231,14 +238,15 @@ export interface ISavedObjectsRepository {
    *
    * @param {string} type - the type of the object to resolve
    * @param {string} id - the id of the object to resolve
-   * @param {object} [options={}] {@link SavedObjectsBaseOptions} - options for the resolve operation
+   * @param {object} [options={}] {@link SavedObjectsResolveOptions} - options for the resolve operation
+   * @property {string} [options.migrationVersionCompatibility]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_object, outcome }
    */
   resolve<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsResolveResponse<T>>;
 
   /**
