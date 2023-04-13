@@ -8,7 +8,6 @@
 import * as buildQuery from './query.observed_user_details.dsl';
 import { observedUserDetails } from '.';
 import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
-import { mockGlobalState } from '../../../../../../public/common/mock';
 
 describe('userDetails search strategy', () => {
   const buildUserDetailsQuery = jest.spyOn(buildQuery, 'buildObservedUserDetailsQuery');
@@ -19,11 +18,8 @@ describe('userDetails search strategy', () => {
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
-      observedUserDetails.buildDsl(mockOptions, mockGlobalState.app.enableExperimental);
-      expect(buildUserDetailsQuery).toHaveBeenCalledWith(
-        mockOptions,
-        mockGlobalState.app.enableExperimental
-      );
+      observedUserDetails.buildDsl(mockOptions);
+      expect(buildUserDetailsQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 

@@ -117,6 +117,25 @@ Object {
       \\"bool\\": {
         \\"filter\\": [
           {
+            \\"bool\\": {
+              \\"must\\": [],
+              \\"filter\\": [
+                {
+                  \\"match_all\\": {}
+                },
+                {
+                  \\"match_phrase\\": {
+                    \\"user.name\\": {
+                      \\"query\\": \\"test_user\\"
+                    }
+                  }
+                }
+              ],
+              \\"should\\": [],
+              \\"must_not\\": []
+            }
+          },
+          {
             \\"term\\": {
               \\"user.name\\": \\"bastion00.siem.estc.dev\\"
             }

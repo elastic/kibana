@@ -7,8 +7,6 @@
 
 import * as buildQuery from './query.managed_user_details.dsl';
 import { managedUserDetails } from '.';
-// import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
-import { mockGlobalState } from '../../../../../../public/common/mock';
 import type {
   AzureManagedUser,
   ManagedUserDetailsRequestOptions,
@@ -100,7 +98,7 @@ describe('userDetails search strategy', () => {
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
-      managedUserDetails.buildDsl(mockOptions, mockGlobalState.app.enableExperimental);
+      managedUserDetails.buildDsl(mockOptions);
       expect(buildManagedUserDetailsQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
