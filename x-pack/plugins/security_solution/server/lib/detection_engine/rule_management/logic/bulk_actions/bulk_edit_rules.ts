@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
-import pMap from 'p-map';
-import {
-  MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../../common/constants';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type {
-  BulkActionEditPayload,
-  BulkActionEditPayloadRuleActions,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
