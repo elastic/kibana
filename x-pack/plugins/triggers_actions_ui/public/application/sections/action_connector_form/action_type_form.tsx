@@ -34,6 +34,7 @@ import {
   ActionVariable,
   RuleActionAlertsFilterProperty,
   RuleActionParam,
+  RuleNotifyWhenType,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
@@ -49,6 +50,7 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   ActionConnectorMode,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -82,6 +84,8 @@ export type ActionTypeFormProps = {
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
   showActionAlertsFilter?: boolean;
 } & Pick<
   ActionAccordionFormProps,
@@ -125,6 +129,8 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  defaultNotifyWhenValue,
   showActionAlertsFilter,
 }: ActionTypeFormProps) => {
   const {
@@ -294,6 +300,8 @@ export const ActionTypeForm = ({
       )}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
   );
 
