@@ -90,19 +90,21 @@ function AnnotationLayerHeaderContent({
   const extraIconLabelProps = !layer.ignoreGlobalFilters
     ? {}
     : {
-        icon: (
-          <EuiIcon
-            type={'filterIgnore'}
-            color={euiTheme.colors.disabledText}
-            css={css`
-              margin-top: 15px;
-            `}
-          />
-        ),
-        iconTooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
-          defaultMessage: 'Ignore global filters',
-        }),
-        'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
+        icon: {
+          component: (
+            <EuiIcon
+              type={'filterIgnore'}
+              color={euiTheme.colors.disabledText}
+              css={css`
+                margin-top: 15px;
+              `}
+            />
+          ),
+          tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
+            defaultMessage: 'Ignore global filters',
+          }),
+          'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
+        },
       };
   return (
     <ChangeIndexPattern

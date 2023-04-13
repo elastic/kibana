@@ -12,10 +12,12 @@ import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
 
 interface TriggerLabelProps {
   label: string;
-  icon?: React.ReactElement;
-  iconValue?: string;
-  iconTooltipValue?: string;
-  'data-test-subj'?: string;
+  icon?: {
+    component: React.ReactElement;
+    value?: string;
+    tooltipValue?: string;
+    'data-test-subj': string;
+  };
 }
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
@@ -25,13 +27,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
     isDisabled?: boolean;
   };
 
-function TriggerLabel({
-  label,
-  icon,
-  iconValue,
-  iconTooltipValue,
-  'data-test-subj': dataTestSubj,
-}: TriggerLabelProps) {
+function TriggerLabel({ label, icon }: TriggerLabelProps) {
   const { euiTheme } = useEuiTheme();
   if (!icon) {
     return <>{label}</>;
@@ -49,7 +45,7 @@ function TriggerLabel({
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        data-test-subj={dataTestSubj}
+        data-test-subj={icon['data-test-subj']}
         css={css`
           display: block;
           *:hover &,
@@ -58,12 +54,12 @@ function TriggerLabel({
           }
         `}
       >
-        <EuiToolTip content={iconTooltipValue} position="top">
+        <EuiToolTip content={icon.tooltipValue} position="top">
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-            {iconValue ? (
+            <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
+            {icon.value ? (
               <EuiFlexItem grow={false}>
-                <EuiTextColor color={euiTheme.colors.disabledText}>{iconValue}</EuiTextColor>
+                <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -79,9 +75,6 @@ export function TriggerButton({
   togglePopover,
   isMissingCurrent,
   icon,
-  iconValue,
-  iconTooltipValue,
-  'data-test-subj': dataTestSubj,
   ...rest
 }: ChangeIndexPatternTriggerProps & {
   togglePopover: () => void;
@@ -102,13 +95,7 @@ export function TriggerButton({
       {...rest}
       textProps={{ style: { width: '100%' } }}
     >
-      <TriggerLabel
-        label={label}
-        icon={icon}
-        iconValue={iconValue}
-        iconTooltipValue={iconTooltipValue}
-        data-test-subj={dataTestSubj}
-      />
+      <TriggerLabel label={label} icon={icon} />
     </ToolbarButton>
   );
 }

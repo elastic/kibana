@@ -45,15 +45,19 @@ export function LayerPanel({
   const extraIconLabelProps =
     samplingValue !== 1
       ? {
-          icon: <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />,
-          iconValue: `${samplingValue * 100}%`,
-          iconTooltipValue: i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
-            defaultMessage: '{value}% sampling',
-            values: {
-              value: samplingValue * 100,
-            },
-          }),
-          'data-test-subj': 'lnsChangeIndexPatternSamplingInfo',
+          icon: {
+            component: (
+              <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />
+            ),
+            value: `${samplingValue * 100}%`,
+            tooltipValue: i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
+              defaultMessage: '{value}% sampling',
+              values: {
+                value: samplingValue * 100,
+              },
+            }),
+            'data-test-subj': 'lnsChangeIndexPatternSamplingInfo',
+          },
         }
       : {};
 
