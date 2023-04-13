@@ -32,7 +32,7 @@ import { ConfigKey } from './monitor_management';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 
-export enum CONNECTION_PROFILE_VALUES {
+export enum PROFILE_VALUES_ENUM {
   DEFAULT = 'default',
   CABLE = 'cable',
   DSL = 'dsl',
@@ -46,56 +46,56 @@ export enum CONNECTION_PROFILE_VALUES {
 export const PROFILE_VALUES: ThrottlingConfig[] = [
   {
     value: { download: '5', upload: '3', latency: '20' },
-    id: CONNECTION_PROFILE_VALUES.DEFAULT,
+    id: PROFILE_VALUES_ENUM.DEFAULT,
     label: i18n.translate('xpack.synthetics.connectionProfile.default', {
       defaultMessage: 'Default',
     }),
   },
   {
     value: { download: '5', upload: '1', latency: '28' },
-    id: CONNECTION_PROFILE_VALUES.CABLE,
+    id: PROFILE_VALUES_ENUM.CABLE,
     label: i18n.translate('xpack.synthetics.connectionProfile.cable', {
       defaultMessage: 'Cable',
     }),
   },
   {
     value: { download: '1.5', upload: '0.384', latency: '50' },
-    id: CONNECTION_PROFILE_VALUES.DSL,
+    id: PROFILE_VALUES_ENUM.DSL,
     label: i18n.translate('xpack.synthetics.connectionProfile.dsl', {
       defaultMessage: 'DSL',
     }),
   },
   {
     value: { download: '1.6', upload: '0.768', latency: '300' },
-    id: CONNECTION_PROFILE_VALUES.THREE_G,
+    id: PROFILE_VALUES_ENUM.THREE_G,
     label: i18n.translate('xpack.synthetics.connectionProfile.threeG', {
       defaultMessage: '3G',
     }),
   },
   {
     value: { download: '9', upload: '0.75', latency: '170' },
-    id: CONNECTION_PROFILE_VALUES.FOUR_G,
+    id: PROFILE_VALUES_ENUM.FOUR_G,
     label: i18n.translate('xpack.synthetics.connectionProfile.fourG', {
       defaultMessage: '4G',
     }),
   },
   {
     value: { download: '12', upload: '0.75', latency: '70' },
-    id: CONNECTION_PROFILE_VALUES.LTE,
+    id: PROFILE_VALUES_ENUM.LTE,
     label: i18n.translate('xpack.synthetics.connectionProfile.lte', {
       defaultMessage: 'LTE',
     }),
   },
   {
     value: { download: '20', upload: '5', latency: '4' },
-    id: CONNECTION_PROFILE_VALUES.FIBRE,
+    id: PROFILE_VALUES_ENUM.FIBRE,
     label: i18n.translate('xpack.synthetics.connectionProfile.fibre', {
       defaultMessage: 'Fibre',
     }),
   },
   {
     value: null,
-    id: CONNECTION_PROFILE_VALUES.NO_THROTTLING,
+    id: PROFILE_VALUES_ENUM.NO_THROTTLING,
     label: i18n.translate('xpack.synthetics.connectionProfile.noThrottling', {
       defaultMessage: 'No throttling',
     }),
@@ -148,15 +148,7 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
   [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
-  [ConfigKey.THROTTLING_CONFIG]: {
-    value: {
-      download: '5',
-      upload: '3',
-      latency: '20',
-    },
-    label: CONNECTION_PROFILE_VALUES.DEFAULT,
-    id: 'default',
-  },
+  [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
 };
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {

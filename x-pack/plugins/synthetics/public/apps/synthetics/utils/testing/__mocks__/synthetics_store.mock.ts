@@ -141,9 +141,6 @@ export const mockState: SyntheticsAppState = {
     status: null,
     error: null,
   },
-  monitorManagementState: {
-    profiles: [],
-  },
 };
 
 function getBrowserJourneyMockSlice() {
@@ -435,9 +432,9 @@ function getMonitorDetailsMockSlice() {
       ignore_https_errors: false,
       throttling: {
         value: {
-          download: 5,
-          upload: 3,
-          latency: 20,
+          download: '5',
+          upload: '3',
+          latency: '20',
         },
         label: 'Regular 3G',
         id: 'three_g',

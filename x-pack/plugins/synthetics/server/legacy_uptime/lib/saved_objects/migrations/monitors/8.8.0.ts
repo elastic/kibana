@@ -18,8 +18,9 @@ import {
 } from '../../../../../../common/runtime_types';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
-  CONNECTION_PROFILE_VALUES,
+  PROFILE_VALUES_ENUM,
   DEFAULT_BROWSER_ADVANCED_FIELDS,
+  PROFILES_MAP,
 } from '../../../../../../common/constants/monitor_defaults';
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -63,12 +64,12 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
       };
       if (migrated.attributes.type === 'browser') {
         try {
+          migrated = updateThrottlingFields(migrated);
           const normalizedMonitorAttributes = normalizeMonitorSecretAttributes(migrated.attributes);
           migrated = {
             ...migrated,
             attributes: omitZipUrlFields(normalizedMonitorAttributes as BrowserFields),
           };
-          migrated = updateThrottlingFields(migrated);
         } catch (e) {
           logger.log.warn(
             `Failed to remove ZIP URL fields from legacy Synthetics monitor: ${e.message}`
@@ -134,11 +135,22 @@ const updateThrottlingFields = (
   >
 ) => {
   const { attributes } = doc;
-  const isThrottlingEnabled = attributes[LegacyConfigKey.THROTTLING_CONFIG];
+
+  const migrated = {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      [ConfigKey.CONFIG_HASH]: '',
+    },
+  };
+
+  const isThrottlingEnabled = attributes[LegacyConfigKey.IS_THROTTLING_ENABLED];
   if (isThrottlingEnabled) {
     const download = String(attributes[LegacyConfigKey.DOWNLOAD_SPEED])!;
     const upload = String(attributes[LegacyConfigKey.UPLOAD_SPEED])!;
     const latency = String(attributes[LegacyConfigKey.LATENCY])!;
+
+    const isDefault = isDefaultThrottlingConfig(download, upload, latency);
 
     const newThrottlingConfig: ThrottlingConfig = {
       value: {
@@ -146,33 +158,29 @@ const updateThrottlingFields = (
         upload,
         latency,
       },
-      id: 'custom',
-      label: isDefaultThrottlingConfig(download, upload, latency)
-        ? CONNECTION_PROFILE_VALUES.DEFAULT
-        : `Custom ${download}d/${upload}u/${latency}`,
+      id: isDefault ? PROFILE_VALUES_ENUM.DEFAULT : 'custom',
+      label: isDefault ? 'Default' : `Custom`,
     };
-    const migrated = {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        [ConfigKey.THROTTLING_CONFIG]: newThrottlingConfig,
-        [ConfigKey.CONFIG_HASH]: '',
-      },
-    };
-    // filter out legacy throttling fields
-    return {
-      ...migrated,
-      attributes: omit(attributes, [
-        LegacyConfigKey.THROTTLING_CONFIG,
-        LegacyConfigKey.IS_THROTTLING_ENABLED,
-        LegacyConfigKey.DOWNLOAD_SPEED,
-        LegacyConfigKey.UPLOAD_SPEED,
-        LegacyConfigKey.LATENCY,
-      ]),
-    };
+
+    // @ts-ignore
+    migrated.attributes[ConfigKey.THROTTLING_CONFIG] = newThrottlingConfig;
   } else {
-    return doc;
+    // @ts-ignore
+    migrated.attributes[ConfigKey.THROTTLING_CONFIG] =
+      PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
   }
+
+  // filter out legacy throttling fields
+  return {
+    ...migrated,
+    attributes: omit(migrated.attributes, [
+      LegacyConfigKey.THROTTLING_CONFIG,
+      LegacyConfigKey.IS_THROTTLING_ENABLED,
+      LegacyConfigKey.DOWNLOAD_SPEED,
+      LegacyConfigKey.UPLOAD_SPEED,
+      LegacyConfigKey.LATENCY,
+    ]),
+  };
 };
 
 const isDefaultThrottlingConfig = (download?: string, upload?: string, latency?: string) => {

@@ -10,7 +10,7 @@ import { useConnectionProfiles } from './use_connection_profiles';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 import { ThrottlingFields } from './throttling_fields';
-import { CONNECTION_PROFILE_VALUES, PROFILE_VALUES, PROFILES_MAP } from '../../constants';
+import { PROFILE_VALUES_ENUM, PROFILE_VALUES, PROFILES_MAP } from '../../constants';
 import { ConnectionProfile } from './connection_profile';
 
 export interface ThrottlingConfigFieldProps {
@@ -32,7 +32,7 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
 
   const isCustom = PROFILES_MAP[value?.id] === undefined;
 
-  const isThrottlingDisabled = value?.id === CONNECTION_PROFILE_VALUES.NO_THROTTLING;
+  const isThrottlingDisabled = value?.id === PROFILE_VALUES_ENUM.NO_THROTTLING;
 
   const options = useConnectionProfiles(initialValue);
 
@@ -44,18 +44,18 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
         onChange={(newValue) => {
           if (newValue === 'custom') {
             props.onChange({
-              ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
+              ...PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
               id: 'custom',
               label: 'Custom',
             });
           } else {
             props.onChange({
-              ...PROFILES_MAP[CONNECTION_PROFILE_VALUES.DEFAULT],
+              ...PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
               ...PROFILES_MAP[newValue],
             });
           }
         }}
-        defaultValue={CONNECTION_PROFILE_VALUES.DEFAULT}
+        defaultValue={PROFILE_VALUES_ENUM.DEFAULT}
         valueOfSelected={value?.id}
         fullWidth={props.fullWidth}
         readOnly={props.readOnly}

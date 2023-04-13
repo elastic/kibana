@@ -12,7 +12,7 @@ import {
   FormMonitorType,
 } from '../../../../common/runtime_types';
 import {
-  CONNECTION_PROFILE_VALUES,
+  PROFILE_VALUES_ENUM,
   DEFAULT_FIELDS,
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
@@ -44,7 +44,7 @@ export const getNormalizeBrowserFields = ({
 
   let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
   if (typeof monitor.throttling === 'boolean' && !monitor.throttling) {
-    throttling = PROFILES_MAP[CONNECTION_PROFILE_VALUES.NO_THROTTLING];
+    throttling = PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
   }
 
   const normalizedFields = {

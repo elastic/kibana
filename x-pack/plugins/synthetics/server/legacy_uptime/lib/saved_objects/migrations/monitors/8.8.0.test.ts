@@ -8,7 +8,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { migration880 } from './8.8.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { ConfigKey, ScheduleUnit } from '../../../../../../common/runtime_types';
-import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../../common/constants/monitor_defaults';
 import {
   browserUI,
   browserProject,
@@ -17,6 +21,7 @@ import {
   icmpUptimeUI,
   httpUptimeUI,
 } from './test_fixtures/8.7.0';
+import { LegacyConfigKey } from '../../../../../../common/constants/monitor_management';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -381,6 +386,33 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
       ).toBe(true);
       expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    });
+  });
+
+  describe('throttling migration', () => {
+    it('handles migrating with enabled throttling', () => {
+      const actual = migration880(encryptedSavedObjectsSetup)(browserUI, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual(
+        PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT]
+      );
+    });
+
+    it('handles migrating with disabled throttling', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.IS_THROTTLING_ENABLED]: false,
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: 'no-throttling',
+        label: 'No throttling',
+        value: null,
+      });
     });
   });
 });

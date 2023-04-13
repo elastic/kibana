@@ -19,7 +19,7 @@ import { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingDownloadField } from './throttling_download_field';
 import { ThrottlingLatencyField } from './throttling_latency_field';
-import { CONNECTION_PROFILE_VALUES } from '../../constants';
+import { PROFILE_VALUES_ENUM } from '../../constants';
 
 interface Props {
   validate?: Validation;
@@ -49,7 +49,7 @@ export const ThrottlingFields = memo<Props>(
 
     const exceedsDownloadLimits = Number(throttling.value?.download) > maxDownload;
     const exceedsUploadLimits = Number(throttling.value?.upload) > maxUpload;
-    const isThrottlingEnabled = throttling.id !== CONNECTION_PROFILE_VALUES.NO_THROTTLING;
+    const isThrottlingEnabled = throttling.id !== PROFILE_VALUES_ENUM.NO_THROTTLING;
 
     const hasExceededLimits = isThrottlingEnabled && (exceedsDownloadLimits || exceedsUploadLimits);
 
