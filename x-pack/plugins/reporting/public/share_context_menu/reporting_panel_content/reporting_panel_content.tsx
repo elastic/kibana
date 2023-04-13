@@ -333,6 +333,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
+        if (mounted) {
+          { isCreatingReportJob: false }
+        }
       });
   };
 }
