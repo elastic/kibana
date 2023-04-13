@@ -280,7 +280,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = useMemo(() => {
+  const workspaceErrors = useCallback(() => {
     return getUserMessages(['visualization', 'visualizationInEditor'], {
       severity: 'error',
     });
@@ -290,7 +290,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const unappliedExpression = useMemo(() => {
     // shouldn't build expression if there is any type of error other than an expression build error
     // (in which case we try again every time because the config might have changed)
-    if (workspaceErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+    if (workspaceErrors().every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -365,7 +365,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
-        errors: workspaceErrors,
+        errors: workspaceErrors(),
       }));
     }
   }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
