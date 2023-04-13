@@ -1928,7 +1928,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'Invalid private location "does not exist" supplied to field "privateLocations". Please select a valid private location.',
+                'Invalid private location: "does not exist" . Remove it or replace it with a valid private location.',
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
