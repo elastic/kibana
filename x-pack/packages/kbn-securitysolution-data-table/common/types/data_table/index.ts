@@ -8,6 +8,8 @@
 import { Direction } from '@kbn/timelines-plugin/common';
 import * as runtimeTypes from 'io-ts';
 
+export { Direction };
+
 export type SortDirectionTable = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTable {
   columnId: string;
