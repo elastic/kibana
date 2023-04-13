@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import { rRuleMappingsField } from './rrule_mappings_field';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
@@ -221,61 +222,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           format: 'strict_date_time',
         },
         // NO NEED TO BE INDEXED
-        // rRule: {
-        //   type: 'nested',
-        //   properties: {
-        //     freq: {
-        //       type: 'keyword',
-        //     },
-        //     dtstart: {
-        //       type: 'date',
-        //       format: 'strict_date_time',
-        //     },
-        //     tzid: {
-        //       type: 'keyword',
-        //     },
-        //     until: {
-        //       type: 'date',
-        //       format: 'strict_date_time',
-        //     },
-        //     count: {
-        //       type: 'long',
-        //     },
-        //     interval: {
-        //       type: 'long',
-        //     },
-        //     wkst: {
-        //       type: 'keyword',
-        //     },
-        //     byweekday: {
-        //       type: 'keyword',
-        //     },
-        //     bymonth: {
-        //       type: 'short',
-        //     },
-        //     bysetpos: {
-        //       type: 'long',
-        //     },
-        //     bymonthday: {
-        //       type: 'short',
-        //     },
-        //     byyearday: {
-        //       type: 'short',
-        //     },
-        //     byweekno: {
-        //       type: 'short',
-        //     },
-        //     byhour: {
-        //       type: 'long',
-        //     },
-        //     byminute: {
-        //       type: 'long',
-        //     },
-        //     bysecond: {
-        //       type: 'long',
-        //     },
-        //   },
-        // },
+        // rRule: rRuleMappingsField,
       },
     },
     // NO NEED TO BE INDEXED
