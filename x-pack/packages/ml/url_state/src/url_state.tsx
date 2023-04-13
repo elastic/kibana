@@ -161,7 +161,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchStringRef.current]
+    []
   );
 
   return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
