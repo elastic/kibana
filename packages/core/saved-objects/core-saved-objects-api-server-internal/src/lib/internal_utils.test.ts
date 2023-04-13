@@ -369,17 +369,17 @@ describe('#getCurrentTime', () => {
 
 describe('#setManaged', () => {
   it('returns false if no arguments are provided', () => {
-    expect(setManaged({}).managed).toEqual(false);
+    expect(setManaged({})).toEqual(false);
   });
 
   it('returns false if only one argument is provided as false', () => {
-    expect(setManaged({ optionsManaged: false }).managed).toEqual(false);
-    expect(setManaged({ objectManaged: false }).managed).toEqual(false);
+    expect(setManaged({ optionsManaged: false })).toEqual(false);
+    expect(setManaged({ objectManaged: false })).toEqual(false);
   });
 
   it('returns true if only one argument is provided as true', () => {
-    expect(setManaged({ optionsManaged: true }).managed).toEqual(true);
-    expect(setManaged({ objectManaged: true }).managed).toEqual(true);
+    expect(setManaged({ optionsManaged: true })).toEqual(true);
+    expect(setManaged({ objectManaged: true })).toEqual(true);
   });
 
   it('overrides objectManaged with optionsManaged', () => {
