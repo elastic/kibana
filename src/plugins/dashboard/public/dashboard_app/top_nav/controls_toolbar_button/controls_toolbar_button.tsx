@@ -27,6 +27,7 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       panelPaddingSize="none"
       label={getControlButtonTitle()}
       zIndex={Number(euiTheme.levels.header) - 1}
+      size="s"
       data-test-subj="dashboard-controls-menu-button"
     >
       {({ closePopover }: { closePopover: () => void }) => (
