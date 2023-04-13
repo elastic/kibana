@@ -9,16 +9,19 @@ import React, { useState } from 'react';
 import { fireEvent } from '@testing-library/react';
 import 'jest-canvas-mock';
 import { MIME_FILTERS, MimeType } from '../../../common/network_data/types';
-import { WaterfallLegend } from './waterfall_legend';
+import { WaterfallMimeLegend } from './waterfall_mime_legend';
 import { render } from '../../../../../utils/testing';
 
-describe('waterfall_legend', () => {
+describe('WaterfallMimeLegend', () => {
   jest.useFakeTimers();
   const activeFilters = [MimeType.XHR];
   const setActiveFilters = jest.fn();
+  const setShowCustomMarks = jest.fn();
   const defaultProps = {
     activeFilters,
     setActiveFilters,
+    showCustomMarks: false,
+    setShowCustomMarks,
   };
 
   beforeEach(() => {
@@ -30,7 +33,7 @@ describe('waterfall_legend', () => {
   });
 
   it('renders correctly', () => {
-    const { getByText } = render(<WaterfallLegend {...defaultProps} />);
+    const { getByText } = render(<WaterfallMimeLegend {...defaultProps} />);
 
     MIME_FILTERS.forEach((filter) => {
       expect(getByText(filter.label));
@@ -42,9 +45,11 @@ describe('waterfall_legend', () => {
       const [activeFiltersTest, setActiveFiltersTest] = useState<string[]>([]);
 
       return (
-        <WaterfallLegend
+        <WaterfallMimeLegend
           activeFilters={activeFiltersTest}
           setActiveFilters={setActiveFiltersTest}
+          showCustomMarks={false}
+          setShowCustomMarks={setShowCustomMarks}
         />
       );
     };
@@ -72,9 +77,11 @@ describe('waterfall_legend', () => {
       const [activeFiltersTest, setActiveFiltersTest] = useState<string[]>([]);
 
       return (
-        <WaterfallLegend
+        <WaterfallMimeLegend
           activeFilters={activeFiltersTest}
           setActiveFilters={setActiveFiltersTest}
+          showCustomMarks={false}
+          setShowCustomMarks={setShowCustomMarks}
         />
       );
     };
