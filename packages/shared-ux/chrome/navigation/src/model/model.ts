@@ -34,7 +34,7 @@ export class NavigationModel {
     private recentItems: Array<EuiSideNavItemType<unknown>> | undefined,
     private platformConfig: NavigationProps['platformConfig'] | undefined,
     private solutions: SolutionProperties[],
-    private activeNavItemId: string | undefined
+    activeNavItemId: string | undefined
   ) {
     this.createSideNavData = createSideNavDataFactory(deps, activeNavItemId);
   }
@@ -67,7 +67,6 @@ export class NavigationModel {
           navItemSet[Platform.Analytics],
           this.platformConfig?.[Platform.Analytics]
         ),
-        activeNavItemId: this.activeNavItemId,
       },
       [Platform.MachineLearning]: {
         id: Platform.MachineLearning,
@@ -78,7 +77,6 @@ export class NavigationModel {
           navItemSet[Platform.MachineLearning],
           this.platformConfig?.[Platform.MachineLearning]
         ),
-        activeNavItemId: this.activeNavItemId,
       },
       [Platform.DevTools]: {
         id: Platform.DevTools,
@@ -89,7 +87,6 @@ export class NavigationModel {
           navItemSet[Platform.DevTools],
           this.platformConfig?.[Platform.DevTools]
         ),
-        activeNavItemId: this.activeNavItemId,
       },
       [Platform.Management]: {
         id: Platform.Management,
@@ -100,7 +97,6 @@ export class NavigationModel {
           navItemSet[Platform.Management],
           this.platformConfig?.[Platform.Management]
         ),
-        activeNavItemId: this.activeNavItemId,
       },
     };
   }
@@ -112,7 +108,6 @@ export class NavigationModel {
       name: s.name,
       icon: s.icon,
       items: this.convertToSideNavItems(s.id, s.items),
-      activeNavItemId: this.activeNavItemId,
     }));
   }
 

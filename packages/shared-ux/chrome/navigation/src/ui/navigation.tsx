@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import { NavigationProps } from '../../types';
+import { NavigationBucketProps, NavigationProps } from '../../types';
 import { NavigationModel } from '../model';
 import { useNavigation } from '../services';
 import { ElasticMark } from './elastic_mark';
@@ -94,6 +94,11 @@ export const Navigation = (props: NavigationProps) => {
     );
   };
 
+  // higher-order-component to keep the common props DRY
+  const NavigationBucketHoc = (outerProps: Omit<NavigationBucketProps, 'activeNavItemId'>) => (
+    <NavigationBucket {...outerProps} activeNavItemId={activeNav} />
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" style={{ overflowY: 'auto' }}>
       <EuiFlexItem grow={false}>
@@ -104,14 +109,14 @@ export const Navigation = (props: NavigationProps) => {
           <NavHeader />
         </EuiCollapsibleNavGroup>
 
-        {recentItems ? <NavigationBucket {...recent} /> : null}
+        {recentItems ? <NavigationBucketHoc {...recent} /> : null}
 
         {solutions.map((solutionBucket, idx) => {
-          return <NavigationBucket {...solutionBucket} key={`solution${idx}`} />;
+          return <NavigationBucketHoc {...solutionBucket} key={`solution${idx}`} />;
         })}
 
-        {nav.isEnabled('analytics') ? <NavigationBucket {...analytics} /> : null}
-        {nav.isEnabled('ml') ? <NavigationBucket {...ml} /> : null}
+        {nav.isEnabled('analytics') ? <NavigationBucketHoc {...analytics} /> : null}
+        {nav.isEnabled('ml') ? <NavigationBucketHoc {...ml} /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -119,8 +124,8 @@ export const Navigation = (props: NavigationProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {nav.isEnabled('devTools') ? <NavigationBucket {...devTools} /> : null}
-        {nav.isEnabled('management') ? <NavigationBucket {...management} /> : null}
+        {nav.isEnabled('devTools') ? <NavigationBucketHoc {...devTools} /> : null}
+        {nav.isEnabled('management') ? <NavigationBucketHoc {...management} /> : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
