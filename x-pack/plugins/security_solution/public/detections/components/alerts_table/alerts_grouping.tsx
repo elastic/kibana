@@ -27,7 +27,7 @@ import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
 
 export interface AlertsTableComponentProps {
-  currentAlertStatusFilterValue?: Status;
+  currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
   globalFilters: Filter[];
