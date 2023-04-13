@@ -17,7 +17,6 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -25,23 +24,17 @@ import styled from 'styled-components';
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
-import { LOCATORS_IDS, DASHBOARD_LOCATORS_IDS } from '../../../../../../../common/constants';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
-
-import { useLocator } from '../../../../hooks';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
 import { AgentStatusFilter } from './agent_status_filter';
+import { DashboardsButtons } from './dashboards_buttons';
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
-`;
-
-const FlexEndEuiFlexItem = styled(EuiFlexItem)`
-  align-self: flex-end;
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -99,12 +92,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onPopoverButtonClick = () => setIsPopoverOpen(() => !isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
-
-  const dashboardLocator = useLocator(LOCATORS_IDS.DASHBOARD_APP);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -126,76 +113,22 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
-  // const onClickOverviewButton = () => {
-  //   dashboardLocator?.navigateSync({ dashboardId: DASHBOARD_LOCATORS_IDS.OVERVIEW });
-  // };
-  const onClickDashboardButton = (dashboardId: string) => {
-    dashboardLocator?.navigateSync({ dashboardId });
-  };
-
   return (
     <>
-      {/* Search and filter bar */}
       <EuiFlexGroup direction="column">
-        <FlexEndEuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiPopover
-                button={
-                  <EuiButtonEmpty onClick={onPopoverButtonClick} iconType="popout">
-                    View more metrics
-                  </EuiButtonEmpty>
-                }
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                anchorPosition="upCenter"
-              >
-                <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart">
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      iconType="visBarVertical"
-                      onClick={() => onClickDashboardButton(DASHBOARD_LOCATORS_IDS.OVERVIEW)}
-                      data-test-subj="ingestOverviewLinkButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.ingestOverviewButton"
-                        defaultMessage="Ingest Overview"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      iconType="visBarVertical"
-                      onClick={() => onClickDashboardButton(DASHBOARD_LOCATORS_IDS.AGENT_INFO)}
-                      data-test-subj="ingestAgentInfoLinkButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.ingestOverviewButton"
-                        defaultMessage="Agent Info"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPopover>
-
-              {/* <EuiButtonEmpty
-                onClick={onClickOverviewButton}
-                iconType="popout"
-                data-test-subj="ingestOverviewLinkButton"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentList.ingestOverviewButton"
-                  defaultMessage="Ingest Overview Dashboard"
-                />
-              </EuiButtonEmpty> */}
-            </EuiFlexItem>
-            <EuiFlexItem>
+        {/* Top Buttons and Links */}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DashboardsButtons />
+          </EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   <FormattedMessage
@@ -212,7 +145,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   <FormattedMessage
@@ -230,7 +163,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </FlexEndEuiFlexItem>
+        </EuiFlexGroup>
+        {/* Search and filters */}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
