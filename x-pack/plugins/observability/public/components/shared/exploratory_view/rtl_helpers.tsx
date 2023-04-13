@@ -30,6 +30,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -53,7 +54,6 @@ import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
