@@ -35,6 +35,9 @@ export interface IndexField extends Omit<FieldSpec, 'format'> {
   format?: Maybe<string>;
 }
 
+/**
+ * @deprecated use EcsFlat from @kbn/ecs or kibana data views api
+ */
 export type BeatFields = Record<string, FieldInfo>;
 
 export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
@@ -47,10 +50,16 @@ export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
   onlyCheckIfIndicesExist: boolean;
 }
 
+/**
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/plugins/data_views/common/data_views/data_views.ts#L294
+ */
 export type IndexFieldsStrategyRequest<T extends 'indices' | 'dataView'> = T extends 'dataView'
   ? IndexFieldsStrategyRequestById
   : IndexFieldsStrategyRequestByIndices;
 
+/**
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/plugins/data_views/common/data_views/data_views.ts#L294
+ */
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];
   indicesExist: string[];
