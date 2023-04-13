@@ -15,7 +15,8 @@ import { getInitialByWeekday } from './get_initial_by_weekday';
 export const convertFromMaintenanceWindow = (maintenanceWindow: MaintenanceWindow): FormProps => {
   const startDate = maintenanceWindow.rRule.dtstart;
   const endDate = moment(startDate).add(maintenanceWindow.duration);
-  const recurring = has(maintenanceWindow, 'rRule.freq');
+  // maintenance window is considered recurring if interval is defined
+  const recurring = has(maintenanceWindow, 'rRule.interval');
   const form: FormProps = {
     title: maintenanceWindow.title,
     startDate,

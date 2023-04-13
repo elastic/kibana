@@ -25,6 +25,8 @@ describe('convertFromMaintenanceWindow', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
+        freq: RRuleFrequency.YEARLY,
+        count: 1,
       },
     });
 
