@@ -32,7 +32,7 @@ describe('useCopyToClipboardAction', () => {
     const { result } = renderHook(() => useCopyToClipboardAction());
     const { getByLabelText } = render((result.current as Action).render(significantTerms[0]));
 
-    const button = getByLabelText('Copy field/value pair as KUERY filter to clipboard');
+    const button = getByLabelText('Copy field/value pair as KQL syntax to clipboard');
 
     expect(button).toBeInTheDocument();
 
@@ -53,7 +53,7 @@ describe('useCopyToClipboardAction', () => {
     const { result } = renderHook(() => useCopyToClipboardAction());
     const { getByLabelText } = render((result.current as Action).render(groupTableItems[0]));
 
-    const button = getByLabelText('Copy group items as KUERY filter to clipboard');
+    const button = getByLabelText('Copy group items as KQL syntax to clipboard');
 
     expect(button).toBeInTheDocument();
 

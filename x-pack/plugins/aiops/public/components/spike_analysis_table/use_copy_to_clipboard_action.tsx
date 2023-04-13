@@ -18,14 +18,14 @@ import type { GroupTableItem, TableItemAction } from './types';
 const copyToClipboardSignificantTermMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardSignificantTermMessage',
   {
-    defaultMessage: 'Copy field/value pair as KUERY filter to clipboard',
+    defaultMessage: 'Copy field/value pair as KQL syntax to clipboard',
   }
 );
 
 const copyToClipboardGroupMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardGroupMessage',
   {
-    defaultMessage: 'Copy group items as KUERY filter to clipboard',
+    defaultMessage: 'Copy group items as KQL syntax to clipboard',
   }
 );
 
