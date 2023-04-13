@@ -149,7 +149,7 @@ const validateBrowser: ValidationLibrary = {
   ...validateCommon,
   [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
   [ConfigKey.THROTTLING_CONFIG]: ({ throttling }) => {
-    if (!throttling) return true;
+    if (!throttling || throttling.value === null) return true;
     const { download, upload, latency } = throttling.value;
     return (
       validateThrottleValue(String(download)) ||

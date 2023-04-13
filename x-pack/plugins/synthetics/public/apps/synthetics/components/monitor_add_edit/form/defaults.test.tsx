@@ -54,9 +54,9 @@ describe('defaults', () => {
     tags: [],
     throttling: {
       value: {
-        download: 5,
-        latency: 20,
-        upload: 3,
+        download: '5',
+        latency: '20',
+        upload: '3',
       },
       id: 'default',
       label: 'default',
