@@ -19,9 +19,7 @@ interface FilesUtilityBarProps {
 export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        <AddFile caseId={caseId} />
-      </EuiFlexItem>
+      <AddFile caseId={caseId} />
       <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
         <EuiFieldSearch
           fullWidth

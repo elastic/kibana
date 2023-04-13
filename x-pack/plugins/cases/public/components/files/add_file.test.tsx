@@ -72,8 +72,7 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
   const original = jest.requireActual('@kbn/shared-ux-file-upload');
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FileUpload: (props: any) => mockFileUpload(props),
+    FileUpload: (props: unknown) => mockFileUpload(props),
   };
 });
 
@@ -108,24 +107,24 @@ describe('AddFile', () => {
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
   });
 
-  it('AddFile is disabled if user has no create permission', async () => {
+  it('AddFile is not rendered if user has no create permission', async () => {
     appMockRender = createAppMockRenderer({
       permissions: buildCasesPermissions({ create: false }),
     });
 
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
-    expect(await screen.findByTestId('cases-files-add')).toBeDisabled();
+    expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
   });
 
-  it('AddFile is if user has no update permission', async () => {
+  it('AddFile is not rendered if user has no update permission', async () => {
     appMockRender = createAppMockRenderer({
       permissions: buildCasesPermissions({ update: false }),
     });
 
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
-    expect(await screen.findByTestId('cases-files-add')).toBeDisabled();
+    expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
   });
 
   it('clicking button renders modal', async () => {

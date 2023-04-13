@@ -27,13 +27,13 @@ const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ ca
     onDelete: () => deleteFileAttachment({ caseId, fileId }),
   });
 
-  return (
+  return permissions.delete ? (
     <>
       <EuiButtonIcon
         iconType={'trash'}
         aria-label={i18n.DELETE_FILE}
         color={'danger'}
-        isDisabled={isLoading || !permissions.delete}
+        isDisabled={isLoading}
         onClick={onModalOpen}
         data-test-subj={'cases-files-delete-button'}
       />
@@ -46,6 +46,8 @@ const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ ca
         />
       ) : null}
     </>
+  ) : (
+    <></>
   );
 };
 FileDeleteButtonIconComponent.displayName = 'FileDeleteButtonIcon';

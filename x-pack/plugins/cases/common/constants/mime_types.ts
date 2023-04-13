@@ -89,7 +89,7 @@ export const imageMimeTypes = [
 
 export const textMimeTypes = ['text/plain', 'text/csv', 'text/json', 'application/json'];
 
-export const compressionMimeTypes = [
+const compressionMimeTypes = [
   'application/zip',
   'application/gzip',
   'application/x-bzip',
@@ -98,7 +98,7 @@ export const compressionMimeTypes = [
   'application/x-tar',
 ];
 
-export const pdfMimeTypes = ['application/pdf'];
+const pdfMimeTypes = ['application/pdf'];
 
 export const ALLOWED_MIME_TYPES = [
   ...imageMimeTypes,

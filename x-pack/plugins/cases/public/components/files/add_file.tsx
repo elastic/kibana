@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -117,12 +118,12 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
     ]
   );
 
-  return (
-    <>
+  return permissions.create && permissions.update ? (
+    <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="cases-files-add"
         iconType="plusInCircle"
-        isDisabled={isLoading || !permissions.create || !permissions.update}
+        isDisabled={isLoading}
         isLoading={isLoading}
         onClick={showModal}
       >
@@ -143,7 +144,9 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
           </EuiModalBody>
         </EuiModal>
       )}
-    </>
+    </EuiFlexItem>
+  ) : (
+    <></>
   );
 };
 AddFileComponent.displayName = 'AddFile';

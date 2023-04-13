@@ -25,6 +25,7 @@ import { render as reactRender } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
@@ -51,9 +52,10 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 
 window.scrollTo = jest.fn();
 
-export const mockedFilesClient = createMockFilesClient() as unknown as ScopedFilesClient<unknown>;
+export const mockedFilesClient = createMockFilesClient() as unknown as DeeplyMockedKeys<
+  ScopedFilesClient<unknown>
+>;
 
-// @ts-ignore
 mockedFilesClient.getFileKind.mockImplementation(() => ({
   id: 'test',
   maxSizeBytes: 10000,

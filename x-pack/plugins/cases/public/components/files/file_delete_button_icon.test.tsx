@@ -74,13 +74,13 @@ describe('FileDeleteButtonIcon', () => {
     });
   });
 
-  it('delete button is disabled if user has no delete permission', async () => {
+  it('delete button is not rendered if user has no delete permission', async () => {
     appMockRender = createAppMockRenderer({
       permissions: buildCasesPermissions({ delete: false }),
     });
 
     appMockRender.render(<FileDeleteButtonIcon caseId={basicCaseId} fileId={basicFileMock.id} />);
 
-    expect(await screen.findByTestId('cases-files-delete-button')).toBeDisabled();
+    expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
   });
 });
