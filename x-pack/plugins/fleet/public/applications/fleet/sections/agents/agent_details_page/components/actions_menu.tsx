@@ -23,6 +23,7 @@ import { useAgentRefresh } from '../hooks';
 import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
+
 import { AgentDocumentFlyout } from './agent_document_flyout';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
