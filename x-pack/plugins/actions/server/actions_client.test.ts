@@ -546,6 +546,7 @@ describe('create()', () => {
         verificationMode: 'full',
         proxyVerificationMode: 'full',
       },
+      enableFooterInEmail: true,
     });
 
     const localActionTypeRegistryParams = {
