@@ -9,9 +9,10 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Switch } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useActions, useMountedLogic, useValues } from 'kea';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -25,11 +26,13 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate/analytics_collection_integrate_view';
-import { AnalyticsCollectionOverview } from './analytics_collection_overview';
+import { AnalyticsCollectionOverview } from './analytics_collection_overview/analytics_collection_overview';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 export const AnalyticsCollectionView: React.FC = () => {
+  useMountedLogic(AnalyticsCollectionToolbarLogic);
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
   const { name } = useParams<{ name: string }>();
