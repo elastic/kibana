@@ -23,6 +23,7 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-deprecations-server-mocks",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",
