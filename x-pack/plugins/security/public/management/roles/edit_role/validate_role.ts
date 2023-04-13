@@ -199,7 +199,7 @@ export class RoleValidator {
     if (!indexPrivilege.names.length) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
+          'xpack.security.management.editRole.validateRole.oneIndexRequiredWarningMessage',
           {
             defaultMessage: 'Enter or select at least one index pattern',
           }
