@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export function roundToDecimalPlace(num?: number, dp: number = 2): number | string {
+/**
+ * Rounds a number to a specified decimal place.
+ * If the specified number is undefined, an empty string is returned.
+ *
+ * @param num - number to round
+ * @param dp - decimal place, default value is 2
+ * @returns rounded number
+ */
+export function roundToDecimalPlace(num: number | undefined, dp: number = 2): number | string {
   if (num === undefined) return '';
   if (num % 1 === 0) {
     // no decimal place

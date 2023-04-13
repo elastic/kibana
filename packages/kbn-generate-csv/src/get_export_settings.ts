@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
+import { CsvConfig } from '@kbn/generate-csv-types';
+import {
+  UI_SETTINGS_DATEFORMAT_TZ,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
+} from '@kbn/reporting-common';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-  UI_SETTINGS_DATEFORMAT_TZ,
-  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '../../../../common/constants';
-import { ReportingConfigType } from '../../../config';
+} from './constants';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -34,7 +37,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: ReportingConfigType['csv'],
+  config: CsvConfig,
   timezone: string | undefined,
   logger: Logger
 ): Promise<CsvExportSettings> => {

@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
@@ -22,25 +23,18 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import type { DeepPartial } from 'utility-types';
-import { CancellationToken } from '../../../../common/cancellation_token';
-import {
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
-  UI_SETTINGS_DATEFORMAT_TZ,
-} from '../../../../common/constants';
-import { ReportingConfigType } from '../../../config';
-import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
-import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
+import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
+import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
-const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
+const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
 });
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
-let mockConfig: ReportingConfigType['csv'];
+let mockConfig: CsvConfig;
 let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
@@ -83,11 +77,6 @@ const mockFieldFormatsRegistry = {
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
 
-const getMockConfig = (properties: DeepPartial<ReportingConfigType> = {}) => {
-  const config = createMockConfig(createMockConfigSchema(properties));
-  return config.get('csv');
-};
-
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
@@ -111,14 +100,13 @@ beforeEach(async () => {
     }
   });
 
-  mockConfig = getMockConfig({
-    csv: {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: 180000,
-      scroll: { size: 500, duration: '30s' },
-    },
-  });
+  mockConfig = {
+    checkForFormulas: true,
+    escapeFormulaValues: true,
+    maxSizeBytes: 180000,
+    useByteOrderMarkEncoding: false,
+    scroll: { size: 500, duration: '30s' },
+  };
 
   searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
@@ -238,14 +226,13 @@ it('calculates the bytes of the content', async () => {
 
 it('warns if max size was reached', async () => {
   const TEST_MAX_SIZE = 500;
-  mockConfig = getMockConfig({
-    csv: {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: TEST_MAX_SIZE,
-      scroll: { size: 500, duration: '30s' },
-    },
-  });
+  mockConfig = {
+    checkForFormulas: true,
+    escapeFormulaValues: true,
+    maxSizeBytes: TEST_MAX_SIZE,
+    useByteOrderMarkEncoding: false,
+    scroll: { size: 500, duration: '30s' },
+  };
 
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
@@ -752,14 +739,13 @@ describe('formulas', () => {
   });
 
   it('can check for formulas, without escaping them', async () => {
-    mockConfig = getMockConfig({
-      csv: {
-        checkForFormulas: true,
-        escapeFormulaValues: false,
-        maxSizeBytes: 180000,
-        scroll: { size: 500, duration: '30s' },
-      },
-    });
+    mockConfig = {
+      checkForFormulas: true,
+      escapeFormulaValues: false,
+      maxSizeBytes: 180000,
+      useByteOrderMarkEncoding: false,
+      scroll: { size: 500, duration: '30s' },
+    };
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse([
@@ -829,6 +815,16 @@ it('can override ignoring frozen indices', async () => {
     { maxRetries: 0, requestTimeout: '30s' }
   );
 
+  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+    {
+      ignore_unavailable: true,
+      ignore_throttled: false,
+      index: 'logstash-*',
+      keep_alive: '30s',
+    },
+    { maxRetries: 0, requestTimeout: '30s' }
+  );
+
   expect(mockDataClient.search).toBeCalledWith(
     {
       params: {
@@ -866,21 +862,21 @@ it('adds a warning if export was unable to close the PIT', async () => {
   );
 
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "csv": Object {
+          "rows": 0,
+        },
+      },
+      "warnings": Array [
+        "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
+      ],
+    }
+  `);
 });
 
 it('will return partial data if the scroll or search fails', async () => {
@@ -909,22 +905,22 @@ it('will return partial data if the scroll or search fails', async () => {
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Received a 500 response from Elasticsearch: my error",
-              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "csv": Object {
+          "rows": 0,
+        },
+      },
+      "warnings": Array [
+        "Received a 500 response from Elasticsearch: my error",
+        "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+      ],
+    }
+  `);
   expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -958,22 +954,22 @@ it('handles unknown errors', async () => {
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Encountered an unknown error: An unknown error",
-              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "csv": Object {
+          "rows": 0,
+        },
+      },
+      "warnings": Array [
+        "Encountered an unknown error: An unknown error",
+        "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+      ],
+    }
+  `);
 });
 
 describe('error codes', () => {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CsvGenerator } from './generate_csv';
+export { roundToDecimalPlace } from './src/round_to_decimal_place';

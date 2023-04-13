@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
@@ -18,16 +19,18 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '../../../../common/cancellation_token';
-import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
-import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { ReportingConfigType } from '../../../config';
-import type { TaskRunResult } from '../../../lib/tasks';
-import type { JobParamsCSV } from '../types';
-import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { i18nTexts } from './i18n_texts';
+import {
+  CancellationToken,
+  AuthenticationExpiredError,
+  ReportingError,
+  TaskRunResult,
+  byteSizeValueToNumber,
+} from '@kbn/reporting-common';
+import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { i18nTexts } from './i18n_texts';
+import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import { CONTENT_TYPE_CSV } from './constants';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -46,8 +49,8 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParamsCSV, 'version'>,
-    private config: ReportingConfigType['csv'],
+    private job: Omit<JobParams, 'version'>,
+    private config: CsvConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,

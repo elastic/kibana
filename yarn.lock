@@ -4241,6 +4241,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/generate-csv@link:packages/kbn-generate-csv":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -4553,6 +4561,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-plugin@link:x-pack/plugins/ml":
   version "0.0.0"
   uid ""
@@ -4738,6 +4750,10 @@
   uid ""
 
 "@kbn/repo-source-classifier@link:packages/kbn-repo-source-classifier":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-common@link:packages/kbn-reporting/common":
   version "0.0.0"
   uid ""
 
