@@ -27,16 +27,18 @@ import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
 import { ActionsExpressionsExample2 } from './actions_and_expressions2';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 interface Props {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   actions: UiActionsStart;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
 }
 
-const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings }: Props) => {
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
+const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings, settings }: Props) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings, settings });
   return (
     <KibanaReactContextProvider>
       <EuiPage>

@@ -45,6 +45,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -147,6 +148,7 @@ export interface LensAppServices {
   data: DataPublicPluginStart;
   inspector: LensInspector;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
   notifications: NotificationsStart;

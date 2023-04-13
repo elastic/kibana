@@ -37,6 +37,7 @@ export async function mountManagementSection(
     theme,
     savedObjects,
     uiSettings,
+    settings,
     notifications,
   } = core;
   const {
@@ -72,6 +73,7 @@ export async function mountManagementSection(
     savedObjects,
     storage: localStorage,
     uiSettings,
+    settings,
     history,
     savedObjectsPlugin: plugins.savedObjects,
     share,

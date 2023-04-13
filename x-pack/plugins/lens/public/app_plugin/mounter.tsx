@@ -123,6 +123,7 @@ export async function getLensServices(
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
     savedObjectsClient: coreStart.savedObjects.client,

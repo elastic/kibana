@@ -53,6 +53,7 @@ import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -136,6 +137,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
         get: getSetting,
         get$: setSetting$,
       },
+      globalClient: settingsServiceMock.createStartContract().globalClient,
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
