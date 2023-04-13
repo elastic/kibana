@@ -12,6 +12,7 @@ export const inventoryViewAttributesRT = rt.intersection([
   rt.strict({
     name: nonEmptyStringRt,
     isDefault: rt.boolean,
+    isStatic: rt.boolean,
   }),
   rt.UnknownRecord,
 ]);

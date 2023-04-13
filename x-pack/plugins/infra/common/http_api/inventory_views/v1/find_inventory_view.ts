@@ -11,6 +11,7 @@ import * as rt from 'io-ts';
 export const findInventoryViewAttributesResponseRT = rt.strict({
   name: nonEmptyStringRt,
   isDefault: rt.boolean,
+  isStatic: rt.boolean,
 });
 
 const findInventoryViewResponseRT = rt.exact(

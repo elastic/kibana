@@ -34,7 +34,8 @@ export const initCreateInventoryViewRoute = ({
       try {
         const inventoryView = await inventoryViewsClient.create(body.attributes);
 
-        return response.ok({
+        return response.custom({
+          statusCode: 201,
           body: inventoryViewResponsePayloadRT.encode({ data: inventoryView }),
         });
       } catch (error) {

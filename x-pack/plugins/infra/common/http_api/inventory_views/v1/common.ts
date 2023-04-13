@@ -28,6 +28,7 @@ const inventoryViewAttributesResponseRT = rt.intersection([
   rt.strict({
     name: nonEmptyStringRt,
     isDefault: rt.boolean,
+    isStatic: rt.boolean,
   }),
   rt.UnknownRecord,
 ]);

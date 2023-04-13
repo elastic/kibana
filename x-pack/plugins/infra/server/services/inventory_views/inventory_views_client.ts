@@ -146,6 +146,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       attributes: {
         ...inventoryViewSavedObject.attributes,
         isDefault: inventoryViewSavedObject.id === defaultViewId,
+        isStatic: false,
       },
     };
   }
