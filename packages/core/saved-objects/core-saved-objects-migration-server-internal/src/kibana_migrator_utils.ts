@@ -107,7 +107,7 @@ export async function getIndicesInvolvedInRelocation({
 
 export function indexMapToIndexTypesMap(indexMap: IndexMap): IndexTypesMap {
   return Object.entries(indexMap).reduce<IndexTypesMap>((acc, [indexAlias, { typeMappings }]) => {
-    acc[indexAlias] = Object.keys(typeMappings);
+    acc[indexAlias] = Object.keys(typeMappings).sort();
     return acc;
   }, {});
 }
