@@ -31,6 +31,7 @@ describe('counter_rate', () => {
           isBucketed: false,
           operationType: 'counter_rate',
           references: ['a'],
+          timeScale: 's',
         },
       },
     };
