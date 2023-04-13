@@ -133,11 +133,11 @@ export const useStyles = ({
       },
     };
 
-    const searchHighlight = `
-      color: ${colors.fullShade};
-      border-radius: '0px';
-      background-color: ${searchResColor};
-    `;
+    const searchHighlight: CSSObject = {
+      color: colors.fullShade,
+      borderRadius: '0px',
+      backgroundColor: searchResColor,
+    };
 
     const wrapper: CSSObject = {
       paddingLeft: size.s,

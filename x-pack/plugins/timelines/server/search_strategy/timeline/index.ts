@@ -23,6 +23,7 @@ import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/co
 import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
 import { Logger } from '@kbn/logging';
+import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/common';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -212,13 +213,13 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   };
 
   const collapse = {
-    field: 'process.entry_leader.entity_id',
+    field: ENTRY_SESSION_ENTITY_ID_PROPERTY,
   };
 
   const aggs = {
     total: {
       cardinality: {
-        field: 'process.entry_leader.entity_id',
+        field: ENTRY_SESSION_ENTITY_ID_PROPERTY,
       },
     },
   };

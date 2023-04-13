@@ -219,6 +219,19 @@ export function ProcessTreeNode({
 
   const children = process.getChildren(verboseMode);
 
+  const user = processDetails?.process?.user;
+  const userName = useMemo(() => {
+    if (user?.name) {
+      return user.name;
+    } else if (user?.id === '0') {
+      return 'root';
+    } else if (user?.id) {
+      return `uid: ${user?.id}`;
+    }
+
+    return '-';
+  }, [user?.id, user?.name]);
+
   if (!processDetails?.process) {
     return null;
   }
@@ -231,7 +244,6 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     start,
-    user,
   } = processDetails.process;
 
   const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
@@ -275,7 +287,8 @@ export function ProcessTreeNode({
               <Nbsp />
               <EuiIcon type="user" />
               <Nbsp />
-              <b css={styles.darkText}>{user?.name || 'ID: ' + user?.id}</b>
+              <b css={styles.darkText}>{userName}</b>
+              <Nbsp />
             </span>
           ) : (
             <>

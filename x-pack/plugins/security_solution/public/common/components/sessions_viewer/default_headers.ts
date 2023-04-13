@@ -34,7 +34,7 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'process.entry_leader.user.name',
+    id: 'process.entry_leader.user.id',
     display: COLUMN_ENTRY_USER,
   },
   {
