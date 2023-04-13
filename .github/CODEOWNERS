@@ -459,6 +459,7 @@ x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
+x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
@@ -474,6 +475,7 @@ packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability @elastic/actionable-observability
+x-pack/plugins/observability_shared @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
