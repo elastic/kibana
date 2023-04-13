@@ -41,11 +41,11 @@ export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplit
         splitHorizontally={splitColumnAccessor ? CHART_SPLIT_ID : undefined}
         style={{
           verticalPanelPadding: {
-            outer: 0.1,
+            outer: 0,
             inner: 0.1,
           },
           horizontalPanelPadding: {
-            outer: 0.1,
+            outer: 0,
             inner: 0.1,
           },
         }}
