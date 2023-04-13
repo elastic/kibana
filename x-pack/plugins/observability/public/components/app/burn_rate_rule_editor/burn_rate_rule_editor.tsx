@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -120,15 +120,8 @@ export function BurnRateRuleEditor(props: Props) {
             maxBurnRate={maxBurnRate}
             onChange={onBurnRateChange}
             errors={errors.burnRateThreshold}
+            helpText={getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -136,11 +129,10 @@ export function BurnRateRuleEditor(props: Props) {
   );
 }
 
-const getErrorBudgetExhaustionText = (formatedHours: string) =>
+const getErrorBudgetExhaustionText = (formattedHours: string) =>
   i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
-    defaultMessage:
-      "At this rate, the SLO's error budget will be exhausted after {formatedHours} hours.",
+    defaultMessage: '{formatedHours} hours until error budget exhaustion.',
     values: {
-      formatedHours,
+      formatedHours: formattedHours,
     },
   });

@@ -42,6 +42,7 @@ export type {
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  NotifyWhenSelectOptions,
 } from './types';
 
 export type {

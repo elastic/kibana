@@ -19,12 +19,12 @@ import type { ContentStorage, StorageContext } from './types';
 
 export interface GetResponse<T = unknown, M = void> {
   contentTypeId: string;
-  item: GetResult<T, M>;
+  result: GetResult<T, M>;
 }
 
 export interface BulkGetResponse<T = unknown, M = void> {
   contentTypeId: string;
-  items: BulkGetResult<T, M>;
+  result: BulkGetResult<T, M>;
 }
 
 export interface CreateItemResponse<T = unknown, M = void> {
@@ -89,7 +89,7 @@ export class ContentCrud<T = unknown> {
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, item };
+      return { contentTypeId: this.contentTypeId, result: item };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',
@@ -128,7 +128,7 @@ export class ContentCrud<T = unknown> {
 
       return {
         contentTypeId: this.contentTypeId,
-        items,
+        result: items,
       };
     } catch (e) {
       this.eventBus.emit({
