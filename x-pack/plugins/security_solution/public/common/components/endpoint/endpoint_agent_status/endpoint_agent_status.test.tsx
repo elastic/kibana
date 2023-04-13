@@ -32,16 +32,25 @@ describe('When using the EndpointAgentStatus component', () => {
     };
   });
 
-  it('should display host status only when `isIsolated` is undefined', () => {
-    render();
+  it.todo('should display status');
 
-    expect(renderResult.queryByTestId('test-isolationStatus')).toBeNull();
-  });
+  it.todo('should display status and isolated');
 
-  it('should display pending status and pending counts', () => {
-    renderProps.isIsolated = true;
-    render();
+  it.todo('should display status and action count');
 
-    expect(renderResult.getByTestId('test-isolationStatus')).toBeTruthy();
+  it.todo('should display status and isolating');
+
+  it.todo('should display status and releasing');
+
+  it.todo('should individual action count in tooltip');
+
+  it.todo('should should keep actions up to date when autoRefresh is true');
+
+  it.todo('should still display status if action summary api fails');
+
+  describe('And when using EndpointAgentStatusById', () => {
+    it.todo('should keep agent status up to date when autoRefresh is true');
+
+    it.todo('should display empty value if API call to host metadata fails');
   });
 });

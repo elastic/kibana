@@ -29,7 +29,7 @@ import { getAgentStatusText } from '../agent_status_text';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 
-const AUTO_REFRESH_INTERVAL = 10_000;
+const AUTO_REFRESH_INTERVAL = 10000;
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -40,8 +40,8 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 export interface EndpointAgentStatusProps {
   endpointHostInfo: HostInfo;
   /**
-   * If set to `true` (Default), then the endpoint status will be kept up to date
-   * by querying the API periodically
+   * If set to `true` (Default), then the endpoint isolation state and response actions count
+   * will be kept up to date by querying the API periodically
    */
   autoFresh?: boolean;
   'data-test-subj'?: string;
@@ -110,8 +110,8 @@ EndpointAgentStatus.displayName = 'EndpointAgentStatus';
 export interface EndpointAgentStatusByIdProps {
   endpointAgentId: string;
   /**
-   * If set to `true` (Default), then the endpoint status will be kept up to date
-   * by querying the API periodically
+   * If set to `true` (Default), then the endpoint status and isolation/action counts will
+   * be kept up to date by querying the API periodically
    */
   autoFresh?: boolean;
   'data-test-subj'?: string;
