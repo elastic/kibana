@@ -176,6 +176,7 @@ export function DashboardEditingToolbar() {
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
+      size="s"
       data-test-subj="dashboardAddPanelButton"
     />,
   ];
@@ -195,13 +196,18 @@ export function DashboardEditingToolbar() {
             <ToolbarButton
               type="primary"
               iconType="lensApp"
+              size="s"
               onClick={createNewVisType(lensAlias)}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />
           ),
           iconButtonGroup: (
-            <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />
+            <IconButtonGroup
+              buttons={quickButtons}
+              legend={getQuickCreateButtonGroupLegend()}
+              buttonSize="s"
+            />
           ),
           extraButtons,
         }}
