@@ -78,7 +78,7 @@ export const useAdHocDataViews = ({
       return currentDataView;
     }
 
-    const createdDataView = await openConfirmSavePrompt(currentDataView);
+    const createdDataView = currentDataView; // await openConfirmSavePrompt(currentDataView);
     if (!createdDataView) {
       return currentDataView; // persistance cancelled
     }

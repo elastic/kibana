@@ -9,9 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { relativeToAbsolute } from '@kbn/core-application-browser-internal';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -163,13 +163,28 @@ export const getTopNavLinks = ({
       if (!services.share || !updatedDataView) {
         return;
       }
-      const sharingData = await getSharingData(searchSource, state.appState.getState(), services);
+
+      const appState = state.appState.getState();
+      const { timefilter } = services.data.query.timefilter;
+      const timeRange = timefilter.getTime();
+      const refreshInterval = timefilter.getRefreshInterval();
+      const { grid, ...otherState } = appState;
+      const relativeUrl = services.locator.getRedirectUrl({
+        ...otherState,
+        ...(dataView?.isPersisted()
+          ? { dataViewId: dataView?.id }
+          : { dataViewSpec: dataView?.toSpec() }),
+        timeRange,
+        refreshInterval,
+      });
+      const shareableUrl = relativeToAbsolute(relativeUrl);
+      const sharingData = await getSharingData(searchSource, appState, services);
 
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
+        shareableUrl,
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
