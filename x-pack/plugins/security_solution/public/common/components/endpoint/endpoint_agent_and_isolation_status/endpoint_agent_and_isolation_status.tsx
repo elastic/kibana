@@ -37,22 +37,24 @@ export interface EndpointAgentAndIsolationStatusProps {
 export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationStatusProps>(
   ({ endpointHostInfo, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data: endpointPendingActions, isFetching: isFetchingPendingActions } =
-      useGetEndpointPendingActionsSummary([endpointHostInfo.metadata.agent.id], {
+    const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
+      [endpointHostInfo.metadata.agent.id],
+      {
         refetchInterval: 10000,
-      });
+      }
+    );
 
     const [hasPendingActions, hostPendingActions] = useMemo<
       [boolean, EndpointPendingActions['pending_actions']]
     >(() => {
-      if (isFetchingPendingActions || !endpointPendingActions) {
+      if (!endpointPendingActions) {
         return [false, {}];
       }
 
       const pendingActions = endpointPendingActions.data[0].pending_actions ?? {};
 
       return [Object.keys(pendingActions).length > 0, pendingActions];
-    }, [endpointPendingActions, isFetchingPendingActions]);
+    }, [endpointPendingActions]);
 
     const status = endpointHostInfo.host_status;
     const isIsolated = Boolean(endpointHostInfo.metadata.Endpoint.state?.isolation);
@@ -199,7 +201,7 @@ export const EndpointHostResponseActionsStatus = memo<EndpointHostResponseAction
                 </div>
                 {actionList.map(({ count, label }) => {
                   return (
-                    <EuiFlexGroup gutterSize="none">
+                    <EuiFlexGroup gutterSize="none" key={label}>
                       <EuiFlexItem>{label}</EuiFlexItem>
                       <EuiFlexItem grow={false}>{count}</EuiFlexItem>
                     </EuiFlexGroup>
