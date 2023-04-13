@@ -8,7 +8,11 @@
 
 import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsType,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import {
   readLog,
   startElasticsearch,
@@ -28,6 +32,9 @@ const RELOCATE_TYPES: Record<string, string> = {
   visualization: '.kibana_so_ui',
   'canvas-workpad': '.kibana_so_ui',
   search: '.kibana_so_search',
+  task: '.kibana_task_manager',
+  // the remaining types will be forced to go to '.kibana',
+  // overriding `indexPattern: foo` defined in the registry
 };
 
 describe('split .kibana index into multiple system indices', () => {
@@ -54,7 +61,7 @@ describe('split .kibana index into multiple system indices', () => {
         (type: SavedObjectsType<any>) => {
           return {
             ...type,
-            indexPattern: RELOCATE_TYPES[type.name] ?? type.indexPattern,
+            indexPattern: RELOCATE_TYPES[type.name] ?? MAIN_SAVED_OBJECT_INDEX,
           };
         }
       );
@@ -157,8 +164,8 @@ describe('split .kibana index into multiple system indices', () => {
         .toMatchInlineSnapshot(`
         Object {
           ".kibana": Array [
-            "action_task_params",
             "action",
+            "action_task_params",
             "alert",
             "api_key_pending_invalidation",
             "apm-indices",
@@ -170,27 +177,27 @@ describe('split .kibana index into multiple system indices', () => {
             "application_usage_totals",
             "canvas-element",
             "canvas-workpad-template",
+            "cases",
             "cases-comments",
             "cases-configure",
             "cases-connector-mappings",
             "cases-telemetry",
             "cases-user-actions",
-            "cases",
-            "config-global",
             "config",
+            "config-global",
             "connector_token",
             "core-usage-stats",
             "csp-rule-template",
-            "endpoint:user-artifact-manifest",
             "endpoint:user-artifact",
+            "endpoint:user-artifact-manifest",
             "enterprise_search_telemetry",
-            "epm-packages-assets",
             "epm-packages",
+            "epm-packages-assets",
             "event_loop_delays_daily",
-            "exception-list-agnostic",
             "exception-list",
-            "file-upload-usage-collection-telemetry",
+            "exception-list-agnostic",
             "file",
+            "file-upload-usage-collection-telemetry",
             "fileShare",
             "fleet-fleet-server-host",
             "fleet-message-signing-keys",
@@ -202,16 +209,16 @@ describe('split .kibana index into multiple system indices', () => {
             "index-pattern",
             "infrastructure-monitoring-log-view",
             "infrastructure-ui-source",
-            "ingest_manager_settings",
             "ingest-agent-policies",
             "ingest-download-sources",
             "ingest-outputs",
             "ingest-package-policies",
+            "ingest_manager_settings",
             "inventory-view",
             "kql-telemetry",
             "legacy-url-alias",
-            "lens-ui-telemetry",
             "lens",
+            "lens-ui-telemetry",
             "map",
             "metrics-explorer-view",
             "ml-job",
@@ -219,8 +226,8 @@ describe('split .kibana index into multiple system indices', () => {
             "ml-trained-model",
             "monitoring-telemetry",
             "osquery-manager-usage-metric",
-            "osquery-pack-asset",
             "osquery-pack",
+            "osquery-pack-asset",
             "osquery-saved-query",
             "query",
             "rules-settings",
@@ -230,9 +237,9 @@ describe('split .kibana index into multiple system indices', () => {
             "security-rule",
             "security-solution-signals-migration",
             "siem-detection-engine-rule-actions",
+            "siem-ui-timeline",
             "siem-ui-timeline-note",
             "siem-ui-timeline-pinned-event",
-            "siem-ui-timeline",
             "slo",
             "space",
             "spaces-usage-stats",
@@ -254,9 +261,9 @@ describe('split .kibana index into multiple system indices', () => {
             "search",
           ],
           ".kibana_so_ui": Array [
-            "visualization",
             "canvas-workpad",
             "dashboard",
+            "visualization",
           ],
           ".kibana_task_manager": Array [
             "task",
