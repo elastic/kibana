@@ -123,6 +123,10 @@ describe('RPC -> mSearch()', () => {
       const mSearchService = new MSearchService({
         getSavedObjectsClient: async () => savedObjectsClient,
         contentRegistry,
+        getConfig: {
+          listingLimit: async () => 100,
+          perPage: async () => 10,
+        },
       });
 
       const mSearchSpy = jest.spyOn(mSearchService, 'search');
