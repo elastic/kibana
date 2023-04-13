@@ -42,7 +42,7 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
   }
 
   return (
-    <Chart size={{ height: 28, width: 80 }}>
+    <Chart size={{ height: 28, width: 60 }}>
       <Settings
         baseTheme={baseTheme}
         showLegend={false}

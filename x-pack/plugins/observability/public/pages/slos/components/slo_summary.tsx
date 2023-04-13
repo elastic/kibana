@@ -30,10 +30,16 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">
-      <EuiFlexItem grow={false} style={{ width: 220 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 140 }}>
+    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l">
+      <EuiFlexItem grow style={{ width: 220 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
@@ -44,6 +50,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                   ? NOT_AVAILABLE_LABEL
                   : numeral(slo.summary.sliValue).format(percentFormat)
               }
+              textAlign="right"
               titleColor={titleColor}
               titleSize="m"
               reverse
@@ -61,13 +68,20 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 260 }}>
-        <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 180 }}>
+      <EuiFlexItem grow style={{ width: 260 }}>
+        <EuiFlexGroup
+          direction="row"
+          responsive={false}
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
+              textAlign="right"
               title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
               titleColor={titleColor}
               titleSize="m"
