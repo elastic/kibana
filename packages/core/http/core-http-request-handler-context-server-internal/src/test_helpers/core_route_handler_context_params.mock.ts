@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Env } from '@kbn/config';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -17,5 +18,6 @@ export const createCoreRouteHandlerContextParamsMock = () => {
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createInternalStartContract(),
+    env: { mode: { name: 'production', prod: true, dev: false } } as Env,
   };
 };
