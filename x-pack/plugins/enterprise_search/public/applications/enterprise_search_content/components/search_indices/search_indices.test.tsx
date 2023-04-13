@@ -17,7 +17,6 @@ import { shallow } from 'enzyme';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
-import { DEFAULT_META } from '../../../shared/constants';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 
@@ -27,7 +26,10 @@ import { SearchIndices } from './search_indices';
 
 const mockValues = {
   indices,
-  meta: DEFAULT_META,
+  searchParams: {
+    from: 0,
+    size: 20,
+  },
 };
 
 const mockActions = {

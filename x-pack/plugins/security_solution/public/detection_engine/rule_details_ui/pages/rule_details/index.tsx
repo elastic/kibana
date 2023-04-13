@@ -891,7 +891,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>
       </StyledFullHeightContainer>
-      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
+      <SpyRoute
+        pageName={SecurityPageName.rules}
+        state={{ ruleName: rule?.name, isExistingRule }}
+      />
     </>
   );
 };

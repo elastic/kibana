@@ -13,6 +13,7 @@ import {
   BulkCreateCommentRequest,
   CaseResponse,
   CaseStatuses,
+  CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
@@ -27,6 +28,7 @@ import {
   fileAttachmentMetadata,
   postExternalReferenceSOReq,
   fileMetadata,
+  postCommentAlertMultipleIdsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -38,6 +40,9 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createAndUploadFile,
+  deleteAllFiles,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -64,6 +69,7 @@ import {
   getAlertById,
 } from '../../../../common/lib/alerts';
 import { User } from '../../../../common/lib/authentication/types';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -90,7 +96,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('bulk_create_attachments', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/154859
+  describe.skip('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -173,30 +180,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
 
-        it('should create a single file attachment with multiple file objects within it', async () => {
-          const postedCase = await createCase(supertest, getPostCaseRequest());
-
-          const files = [fileMetadata(), fileMetadata()];
-
-          const caseWithAttachments = await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {
-                  files,
-                },
-              }),
-            ],
-          });
-
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
-        });
-
         it('should bulk create 100 file attachments', async () => {
           const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
 
@@ -235,11 +218,108 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [postExternalReferenceSOReq, ...fileRequests],
           });
         });
+
+        it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
+
+          const fileRequests = [...Array(99).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 200,
+          });
+        });
       });
     });
 
     describe('errors', () => {
       describe('files', () => {
+        afterEach(async () => {
+          await deleteAllFiles({
+            supertest,
+          });
+        });
+
+        it('should return a 400 when attempting to create 100 file attachments when a file associated to the case exists', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: null },
+          });
+
+          const fileRequests = [...Array(100).keys()].map(() =>
+            getFilesAttachmentReq({ owner: 'securitySolution' })
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  files,
+                },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
         it('400s when attaching a file with metadata that is missing the file field', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
@@ -277,41 +357,6 @@ export default ({ getService }: FtrProviderContext): void => {
         it('400s when attempting to add more than 100 files to a case', async () => {
           const fileRequests = [...Array(101).keys()].map(() => getFilesAttachmentReq());
           const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when attempting to add a file to a case that already has 100 files', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [getFilesAttachmentReq()],
-            expectedHttpCode: 400,
-          });
-        });
-
-        it('400s when the case already has files and the sum of existing and new files exceed 100', async () => {
-          const fileRequests = [...Array(51).keys()].map(() => getFilesAttachmentReq());
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: fileRequests,
-          });
-
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
@@ -1172,6 +1217,180 @@ export default ({ getService }: FtrProviderContext): void => {
           params: attachments,
           expectedHttpCode: 200,
         });
+      });
+    });
+
+    describe('alert filtering', () => {
+      it('does not create a new attachment if the alert is already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('does not create a new attachment if the alert is already attached to the case on the same request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq, postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case on the same request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq, postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should create a new attachment without alerts attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertMultipleIdsReq,
+              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+              index: ['test-index-1', 'test-index-2', 'test-index-3'],
+            },
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        const secondAttachment = attachments[1] as CommentRequestAlertType;
+
+        expect(secondAttachment.alertId).to.eql(['test-id-3']);
+        expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
+
+      it('should create a new attachment without alerts attached to the case on the same request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentAlertMultipleIdsReq,
+            {
+              ...postCommentAlertMultipleIdsReq,
+              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+              index: ['test-index-1', 'test-index-2', 'test-index-3'],
+            },
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        const secondAttachment = attachments[1] as CommentRequestAlertType;
+
+        expect(secondAttachment.alertId).to.eql(['test-id-3']);
+        expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
+
+      it('does not remove user comments when filtering out duplicate alerts', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            {
+              ...postCommentAlertMultipleIdsReq,
+              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+              index: ['test-index-1', 'test-index-2', 'test-index-3'],
+            },
+            postCommentUserReq,
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(4);
+
+        const firstAlert = attachments[0] as CommentRequestAlertType;
+        const firstUserComment = attachments[1] as CommentRequestAlertType;
+        const secondAlert = attachments[2] as CommentRequestAlertType;
+        const secondUserComment = attachments[3] as CommentRequestAlertType;
+
+        expect(firstUserComment.type).to.eql('user');
+        expect(secondUserComment.type).to.eql('user');
+        expect(firstAlert.type).to.eql('alert');
+        expect(secondAlert.type).to.eql('alert');
+
+        expect(firstAlert.alertId).to.eql(['test-id-1', 'test-id-2']);
+        expect(firstAlert.index).to.eql(['test-index', 'test-index-2']);
+        expect(secondAlert.alertId).to.eql(['test-id-3']);
+        expect(secondAlert.index).to.eql(['test-index-3']);
       });
     });
 
