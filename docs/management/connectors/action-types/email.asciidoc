@@ -238,6 +238,8 @@ is considered `false`.  Typically, `port: 465` uses `secure: true`, and
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from 
 Elastic Cloud.
 
+NOTE: For more information on the preconfigured email connector, see link:{cloud}/ec-watcher.html#ec-cloud-email-service-limits[Elastic Cloud email service limits].
+
 [float]
 [[gmail]]
 ==== Sending email from Gmail
