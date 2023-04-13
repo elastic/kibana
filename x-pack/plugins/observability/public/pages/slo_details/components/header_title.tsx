@@ -9,7 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
+import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
+import { SloActiveAlertsBadge } from '../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -18,6 +20,11 @@ export interface Props {
 
 export function HeaderTitle(props: Props) {
   const { isLoading, slo } = props;
+
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIds: !!slo ? [slo.id] : [],
+  });
+
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loadingTitle" />;
   }
@@ -27,9 +34,12 @@ export function HeaderTitle(props: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
-      <SloStatusBadge slo={slo} />
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+        <SloStatusBadge slo={slo} />
+        <SloActiveAlertsBadge activeAlerts={activeAlerts[slo.id]} />
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

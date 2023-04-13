@@ -307,10 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/152477
-  // FLAKY: https://github.com/elastic/kibana/issues/152478
-  // FLAKY: https://github.com/elastic/kibana/issues/152479
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 

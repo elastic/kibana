@@ -4211,7 +4211,7 @@
               "\nFile metadata values. These values are governed by the consumer."
             ],
             "signature": [
-              "Record<string, string> | undefined"
+              "Record<string, string | string[]> | undefined"
             ],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
