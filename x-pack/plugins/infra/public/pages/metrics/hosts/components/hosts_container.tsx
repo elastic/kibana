@@ -16,6 +16,7 @@ import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { KPICharts } from './kpi_charts/kpi_charts';
 import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
+import { KPILensCharts } from './kpi_charts/kpi_lens_charts';
 
 export const HostContainer = () => {
   const { dataView, loading, hasError } = useMetricsDataViewContext();
@@ -41,6 +42,7 @@ export const HostContainer = () => {
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <KPICharts />
+            <KPILensCharts />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HostsTable />

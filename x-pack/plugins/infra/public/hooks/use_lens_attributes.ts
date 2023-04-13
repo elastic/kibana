@@ -12,25 +12,45 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { InfraClientSetupDeps, LensAttributes, LensOptions } from '../types';
+import { InfraClientSetupDeps } from '../types';
 import {
   buildLensAttributes,
-  HostLensAttributesTypes,
-  hostMetricsLensAttributes,
+  HostsLensFormulas,
+  HostsLensMetricChartFormulas,
+  HostsLensLineChartFormulas,
+  LineChartOptions,
+  MetricChartOptions,
+  LensAttributes,
+  hostLensFormulas,
+  visualizationTypes,
 } from '../common/visualizations';
 
-interface UseLensAttributesParams {
-  type: HostLensAttributesTypes;
+type Options = LineChartOptions | MetricChartOptions;
+interface UseLensAttributesBaseParams<T extends HostsLensFormulas, O extends Options> {
   dataView: DataView | undefined;
-  options?: LensOptions;
+  type: T;
+  options?: O;
 }
+
+interface UseLensAttributesLineChartParams
+  extends UseLensAttributesBaseParams<HostsLensLineChartFormulas, LineChartOptions> {
+  visualizationType: 'lineChart';
+}
+
+interface UseLensAttributesMetricChartParams
+  extends UseLensAttributesBaseParams<HostsLensMetricChartFormulas, MetricChartOptions> {
+  visualizationType: 'metricChart';
+}
+
+type UseLensAttributesParams =
+  | UseLensAttributesLineChartParams
+  | UseLensAttributesMetricChartParams;
 
 export const useLensAttributes = ({
   type,
   dataView,
-  options = {
-    breakdownSize: 10,
-  },
+  options,
+  visualizationType,
 }: UseLensAttributesParams) => {
   const {
     services: { lens },
@@ -39,31 +59,27 @@ export const useLensAttributes = ({
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
-  const attributes: LensAttributes | null = useMemo(() => {
+  const attributes = useMemo(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
 
-    const VisualizationClass = hostMetricsLensAttributes[type];
+    const lensChartConfig = hostLensFormulas[type];
+    const VisualizationType = visualizationTypes[visualizationType];
+
     const visualizationAttributes = buildLensAttributes(
-      new VisualizationClass(dataView, options, formulaAPI)
+      new VisualizationType(lensChartConfig, dataView, formulaAPI, options)
     );
 
     return visualizationAttributes;
-  }, [dataView, formulaAPI, options, type]);
+  }, [dataView, formulaAPI, options, type, visualizationType]);
 
-  const injectData = (data: {
-    filters: Filter[];
-    query: Query;
-    title?: string;
-  }): LensAttributes | null => {
+  const injectFilters = (data: { filters: Filter[]; query: Query }): LensAttributes | null => {
     if (!attributes) {
       return null;
     }
-
     return {
       ...attributes,
-      ...(!!data.title ? { title: data.title } : {}),
       state: {
         ...attributes.state,
         query: data.query,
@@ -111,5 +127,5 @@ export const useLensAttributes = ({
     };
   };
 
-  return { attributes, injectData, getExtraActions, error };
+  return { attributes, injectFilters, getExtraActions, error };
 };

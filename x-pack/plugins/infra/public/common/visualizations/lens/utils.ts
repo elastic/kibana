@@ -8,7 +8,6 @@ import {
   DateHistogramIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
-  XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
@@ -63,47 +62,6 @@ export const getBreakdownColumn = (
     } as TermsIndexPatternColumn,
   };
 };
-
-export const getXYVisualizationState = (
-  custom: Omit<Partial<XYState>, 'layers'> & { layers: XYState['layers'] }
-): XYState => ({
-  legend: {
-    isVisible: false,
-    position: 'right',
-    showSingleSeries: false,
-  },
-  valueLabels: 'show',
-  fittingFunction: 'Zero',
-  curveType: 'LINEAR',
-  yLeftScale: 'linear',
-  axisTitlesVisibilitySettings: {
-    x: false,
-    yLeft: false,
-    yRight: true,
-  },
-  tickLabelsVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  labelsOrientation: {
-    x: 0,
-    yLeft: 0,
-    yRight: 0,
-  },
-  gridlinesVisibilitySettings: {
-    x: true,
-    yLeft: true,
-    yRight: true,
-  },
-  preferredSeriesType: 'line',
-  valuesInLegend: false,
-  emphasizeFitting: true,
-  yTitle: '',
-  xTitle: '',
-  hideEndzones: true,
-  ...custom,
-});
 
 export const getDefaultReferences = (
   dataView: DataView,
