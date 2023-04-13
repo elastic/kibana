@@ -65,7 +65,7 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
       field,
     });
 
-    expect(wrapper!.text()).toBe('Categorize');
+    expect(wrapper!.text()).toBe('Run pattern analysis');
     wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).simulate('click');
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
