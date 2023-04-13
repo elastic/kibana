@@ -852,6 +852,12 @@ export class AlertsClient {
   }
 
   public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
     try {
       if (alerts.length === 0) {
         return;
@@ -891,6 +897,12 @@ export class AlertsClient {
   }
 
   public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
     try {
       if (caseIds.length === 0) {
         return;

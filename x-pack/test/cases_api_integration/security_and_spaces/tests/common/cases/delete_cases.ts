@@ -301,11 +301,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
-          /**
-           * The alerts client throws an expectation failed error (471) when
-           * the user is unauthorized to find alerts for any rule types
-           */
-
           await createCaseAttachAlertAndDeleteCase({
             supertest: supertestWithoutAuth,
             totalCases: 1,
