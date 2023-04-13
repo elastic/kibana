@@ -37,7 +37,7 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 import {
   runClone,
   runSaveAs,
-  showOptions,
+  showSettings,
   runQuickSave,
   replacePanel,
   addFromLibrary,
@@ -96,7 +96,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   // Dashboard State
-  private onDestroyControlGroup?: () => void;
+  public onDestroyControlGroup?: () => void;
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -120,6 +120,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private dashboardSavedObjectService: DashboardSavedObjectService;
   private theme$;
   private chrome;
+  private customBranding;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -152,6 +153,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         theme: { theme$: this.theme$ },
       },
       chrome: this.chrome,
+      customBranding: this.customBranding,
     } = pluginServices.getServices());
 
     this.initialSavedDashboardId = dashboardContainerInputIsByValue(this.input)
@@ -309,13 +311,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // update input so the redux embeddable tools get the unwrapped, initial input
     this.updateInput({ ...initialInput });
 
-    // now that the input with the initial panel state has been set, we can tell the container class it's time to start loading children.
-    readyToInitializeChildren$.next(initialInput);
-
     // build Control Group
     if (creationOptions?.useControlGroupIntegration) {
       this.controlGroup = await startControlGroupIntegration.bind(this)(initialInput);
     }
+
+    // now that the input with the initial panel state has been set and the control group is ready, we can tell the container class it's time to start loading children.
+    readyToInitializeChildren$.next(initialInput);
 
     // start diffing dashboard state
     const diffingMiddleware = startDiffingDashboardState.bind(this)({
@@ -417,10 +419,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     this.domNode = dom;
 
+    this.domNode.className = 'dashboardContainer';
+
     const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>
-        <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
+        <ExitFullScreenButtonKibanaProvider
+          coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
+        >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardReduxWrapper>
               <DashboardViewport />
@@ -515,20 +521,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public runSaveAs = runSaveAs;
   public runQuickSave = runQuickSave;
 
-  public showOptions = showOptions;
+  public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
   public showPlaceholderUntil = showPlaceholderUntil;
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
-  public forceRefresh() {
+  public forceRefresh(refreshControlGroup: boolean = true) {
     const {
       dispatch,
       actions: { setLastReloadRequestTimeToNow },
     } = this.getReduxEmbeddableTools();
     dispatch(setLastReloadRequestTimeToNow({}));
-    this.controlGroup?.reload();
+    if (refreshControlGroup) this.controlGroup?.reload();
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();

@@ -201,7 +201,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
+              "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
             ],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,

@@ -43,9 +43,16 @@ export interface MlInferenceError {
   timestamp: string | undefined; // Date string
 }
 
-export interface CreateMlInferencePipelineResponse {
-  addedToParentPipeline?: boolean;
-  created?: boolean;
+export interface PreparePipelineAndIndexForMlInferenceResult {
+  added_to_parent_pipeline?: boolean;
+  created_pipeline?: boolean;
+  pipeline_id: string;
+
+  mapping_updated: boolean;
+}
+
+export interface CreatePipelineResult {
+  created: boolean;
   id: string;
 }
 
@@ -71,6 +78,11 @@ export interface CreateMlInferencePipelineParameters {
   model_id: string;
   pipeline_name: string;
   source_field: string;
+}
+
+export interface CreateMLInferencePipelineDefinition {
+  pipeline_definition: MlInferencePipeline;
+  pipeline_name: string;
 }
 
 export type InferencePipelineInferenceConfig = IngestInferenceConfig & {

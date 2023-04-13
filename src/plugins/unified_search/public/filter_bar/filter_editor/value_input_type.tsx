@@ -50,6 +50,7 @@ class ValueInputTypeUI extends Component<Props> {
             disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
+            aria-label={this.props.placeholder}
             value={value}
             onChange={this.onChange}
             isInvalid={!validateParams(value, this.props.field)}
@@ -67,6 +68,7 @@ class ValueInputTypeUI extends Component<Props> {
             disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
+            aria-label={this.props.placeholder}
             value={this.getValueForNumberField(value)}
             onChange={this.onChange}
             controlOnly={this.props.controlOnly}
@@ -83,6 +85,7 @@ class ValueInputTypeUI extends Component<Props> {
             disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
+            aria-label={this.props.placeholder}
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
@@ -100,6 +103,7 @@ class ValueInputTypeUI extends Component<Props> {
             fullWidth={this.props.fullWidth}
             disabled={this.props.disabled}
             placeholder={this.props.placeholder}
+            aria-label={this.props.placeholder}
             value={value}
             onChange={this.onChange}
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
@@ -132,6 +136,7 @@ class ValueInputTypeUI extends Component<Props> {
             ]}
             value={value}
             onChange={this.onBoolChange}
+            aria-label={this.props.placeholder}
             className={this.props.className}
             fullWidth={this.props.fullWidth}
             compressed={this.props.compressed}

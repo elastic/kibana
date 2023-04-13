@@ -17,6 +17,6 @@ describe('MoveData', () => {
     const component = shallowWithIntl(<MoveData addBasePath={addBasePathMock} />);
 
     const $button = component.find('EuiButton');
-    expect($button.props().href).toBe('/app/management/data/migrate_data');
+    expect($button.props().href).toBe('https://ela.st/cloud-migration');
   });
 });

@@ -24,7 +24,9 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
             "value": 1,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 2,
           },
           Object {
@@ -63,11 +65,15 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
             "value": 1,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 2,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 3,
           },
           Object {
@@ -106,11 +112,15 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
             "value": 1,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 2,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 3,
           },
           Object {
@@ -149,11 +159,15 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
             "value": 1,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 2,
           },
           Object {
-            "label": "",
+            "label": <span>
+               
+            </span>,
             "value": 3,
           },
           Object {

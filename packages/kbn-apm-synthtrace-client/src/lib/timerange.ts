@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import datemath from '@kbn/datemath';
+import type { Moment } from 'moment';
 import { Interval } from './interval';
 
 export class Timerange {
@@ -20,9 +21,24 @@ export class Timerange {
   }
 }
 
-export function timerange(from: Date | number, to: Date | number) {
-  return new Timerange(
-    from instanceof Date ? from : new Date(from),
-    to instanceof Date ? to : new Date(to)
-  );
+type DateLike = Date | number | Moment | string;
+
+function getDateFrom(date: DateLike, now: Date): Date {
+  if (date instanceof Date) return date;
+
+  if (typeof date === 'string') {
+    const parsed = datemath.parse(date, { forceNow: now });
+    if (parsed && parsed.isValid()) {
+      return parsed.toDate();
+    }
+  }
+
+  if (typeof date === 'number' || typeof date === 'string') return new Date(date);
+
+  return date.toDate();
+}
+
+export function timerange(from: DateLike, to: DateLike) {
+  const now = new Date();
+  return new Timerange(getDateFrom(from, now), getDateFrom(to, now));
 }

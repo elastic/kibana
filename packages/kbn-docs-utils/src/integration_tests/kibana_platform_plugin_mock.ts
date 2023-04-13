@@ -12,6 +12,7 @@ import { PluginOrPackage } from '../types';
 export function getKibanaPlatformPlugin(id: string, dir?: string): PluginOrPackage {
   const directory = dir ?? Path.resolve(__dirname, '__fixtures__/src/plugin_a');
   return {
+    id,
     manifest: {
       id,
       owner: {
@@ -28,6 +29,7 @@ export function getKibanaPlatformPlugin(id: string, dir?: string): PluginOrPacka
 export function getKibanaPlatformPackage(id: string, importPath?: string): PluginOrPackage {
   const directory = Path.resolve(__dirname, '__fixtures__/src/plugin_a');
   return {
+    id,
     manifest: {
       id,
       owner: {

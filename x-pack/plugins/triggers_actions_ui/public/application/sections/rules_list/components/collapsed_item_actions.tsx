@@ -33,7 +33,7 @@ import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
-} from './rules_list_notify_badge';
+} from './notify_badge';
 
 export type ComponentOpts = {
   item: RuleTableItem;

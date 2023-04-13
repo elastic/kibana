@@ -82,6 +82,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
           excludeExceptions,
           listClient,
           lists: exceptionItems,
+          startedAt: new Date(),
         });
 
         return response.ok({ body: { filter } ?? {} });

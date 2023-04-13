@@ -4,17 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
+import type {
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  Installable,
+} from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -34,6 +40,8 @@ import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+
+import { auditLoggingService } from '../../audit_logging';
 
 import { createInstallableFrom } from '.';
 
@@ -68,6 +76,36 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const MAX_PKGS_TO_LOAD_TITLE = 10;
+
+  const packagesNotInRegistry = packageSavedObjects.saved_objects.filter(
+    (pkg) => !registryItems.some((item) => item.name === pkg.id)
+  );
+
+  const uploadedPackagesNotInRegistry = await pMap(
+    packagesNotInRegistry.entries(),
+    async ([i, pkg]) => {
+      // fetching info of uploaded packages to populate title, description
+      // limit to 10 for performance
+      if (i < MAX_PKGS_TO_LOAD_TITLE) {
+        const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+          getPackageInfo({
+            savedObjectsClient,
+            pkgName: pkg.id,
+            pkgVersion: pkg.attributes.version,
+          })
+        );
+        return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+      } else {
+        return createInstallableFrom(
+          { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+          pkg
+        );
+      }
+    },
+    { concurrency: 10 }
+  );
+
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -75,7 +113,16 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
+    .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
+
+  for (const pkg of packageList) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -117,17 +164,39 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  const packages = installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  for (const pkg of installedPackages) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return packages;
 }
 
 export async function getPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
-  return savedObjectsClient.find<Installation>({
+  const result = await savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return result;
 }
 
 export const getInstallations = getPackageSavedObjects;
@@ -228,6 +297,14 @@ export const getPackageUsageStats = async ({
       page: page++,
       filter,
     });
+
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
 
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
       agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
@@ -337,10 +414,24 @@ export async function getInstallationObject(options: {
   logger?: Logger;
 }) {
   const { savedObjectsClient, pkgName, logger } = options;
-  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
-    logger?.error(e);
-    return undefined;
+  const installation = await savedObjectsClient
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+    .catch((e) => {
+      logger?.error(e);
+      return undefined;
+    });
+
+  if (!installation) {
+    return;
+  }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'find',
+    id: installation.id,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
+
+  return installation;
 }
 
 export async function getInstallationObjects(options: {
@@ -352,7 +443,17 @@ export async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  return res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter((so) => so?.attributes);
+
+  for (const installation of installations) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: installation.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return installations;
 }
 
 export async function getInstallation(options: {

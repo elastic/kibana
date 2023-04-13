@@ -7,11 +7,18 @@
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
+import { appContextService } from '../app_context';
+import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
 import { getInstallation } from '../epm/packages';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
+
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+  typeof updateCurrentWriteIndices
+>;
 
 jest.mock('../epm/packages', () => {
   return {
@@ -26,6 +33,14 @@ jest.mock('../epm/packages', () => {
     }),
   };
 });
+
+jest.mock('../app_context');
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+jest.mock('../epm/elasticsearch/template/template');
 
 const mockGetInstallation = getInstallation as jest.Mock;
 
@@ -140,6 +155,7 @@ function getExistingTestPackagePolicy({
 describe('experimental_datastream_features', () => {
   beforeEach(() => {
     soClient.get.mockClear();
+    mockedUpdateCurrentWriteIndices.mockReset();
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
 
@@ -173,6 +189,24 @@ describe('experimental_datastream_features', () => {
         },
       ],
     });
+
+    esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [
+        {
+          name: 'metrics-test.test',
+          index_template: {
+            template: {
+              settings: {},
+              mappings: {},
+            },
+            composed_of: [],
+            index_patterns: '',
+          },
+        },
+      ],
+    });
+
+    esClient.indices.getIndexTemplate.mockClear();
   });
 
   const soClient = savedObjectsClientMock.create();
@@ -212,6 +246,7 @@ describe('experimental_datastream_features', () => {
               mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -241,6 +276,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -270,6 +306,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -298,6 +335,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -308,22 +346,6 @@ describe('experimental_datastream_features', () => {
         isTSDBEnabled: true,
         isDocValueOnlyNumeric: false,
         isDocValueOnlyOther: false,
-      });
-
-      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
-        index_templates: [
-          {
-            name: 'metrics-test.test',
-            index_template: {
-              template: {
-                settings: {},
-                mappings: {},
-              },
-              composed_of: [],
-              index_patterns: '',
-            },
-          },
-        ],
       });
 
       await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
@@ -338,6 +360,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -371,6 +394,33 @@ describe('experimental_datastream_features', () => {
 
         expect(esClient.cluster.getComponentTemplate).not.toHaveBeenCalled();
         expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+      });
+
+      it('does not update write indices', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: true,
+          isTSDBEnabled: false,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        mockGetInstallation.mockResolvedValueOnce({
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.test',
+              features: {
+                synthetic_source: true,
+                tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).not.toHaveBeenCalled();
       });
     });
 
@@ -408,6 +458,7 @@ describe('experimental_datastream_features', () => {
                 mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
       });
@@ -437,6 +488,7 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
       });
@@ -466,6 +518,7 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: false },
           })
         );
       });
@@ -506,8 +559,41 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
+      });
+
+      it('should update existing write indices', async () => {
+        const packagePolicy = getExistingTestPackagePolicy({
+          isSyntheticSourceEnabled: false,
+          isTSDBEnabled: true,
+          isDocValueOnlyNumeric: false,
+          isDocValueOnlyOther: false,
+        });
+
+        esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+          index_templates: [
+            {
+              name: 'metrics-test.test',
+              index_template: {
+                template: {
+                  settings: {},
+                  mappings: {},
+                },
+                composed_of: [],
+                index_patterns: '',
+              },
+            },
+          ],
+        });
+
+        await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+        expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledTimes(1);
+        expect(
+          mockedUpdateCurrentWriteIndices.mock.calls[0][2].map(({ templateName }) => templateName)
+        ).toEqual(['metrics-test.test']);
       });
     });
   });

@@ -117,7 +117,7 @@ const termsSchema = s.object({
   exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
   include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
   execution_hint: s.maybe(s.string()),
-  missing: s.maybe(s.number()),
+  missing: s.maybe(s.oneOf([s.number(), s.string(), s.boolean()])),
   min_doc_count: s.maybe(s.number({ min: 1 })),
   size: s.maybe(s.number()),
   show_term_doc_count_error: s.maybe(s.boolean()),
@@ -162,6 +162,8 @@ const histogramSchema = s.object({
 });
 
 const compositeSchema = s.object({
+  size: s.maybe(s.number()),
+  after: s.maybe(s.recordOf(s.string(), s.nullable(s.oneOf([s.string(), s.number()])))),
   sources: s.arrayOf(
     s.recordOf(
       s.string(),

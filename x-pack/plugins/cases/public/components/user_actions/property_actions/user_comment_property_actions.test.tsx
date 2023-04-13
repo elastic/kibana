@@ -35,28 +35,28 @@ describe('UserCommentPropertyActions', () => {
   it('renders the correct number of actions', async () => {
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-group').children.length).toBe(3);
-    expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
-    expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
-    expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(3);
+    expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
   });
 
   it('edits the comment correctly', async () => {
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-pencil'));
+    userEvent.click(result.getByTestId('property-actions-user-action-pencil'));
 
     expect(props.onEdit).toHaveBeenCalled();
   });
@@ -64,14 +64,14 @@ describe('UserCommentPropertyActions', () => {
   it('quotes the comment correctly', async () => {
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-quote'));
+    userEvent.click(result.getByTestId('property-actions-user-action-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
   });
@@ -79,14 +79,14 @@ describe('UserCommentPropertyActions', () => {
   it('deletes the comment correctly', async () => {
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-trash'));
+    userEvent.click(result.getByTestId('property-actions-user-action-trash'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -100,13 +100,13 @@ describe('UserCommentPropertyActions', () => {
     appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does show the property actions with only delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
     const result = appMock.render(<UserCommentPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
   });
 });

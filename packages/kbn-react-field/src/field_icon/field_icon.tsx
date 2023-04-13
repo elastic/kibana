@@ -49,7 +49,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   binary: { iconType: 'tokenBinary' },
   boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
-  conflict: { iconType: 'alert', color: 'euiColorVis9', shape: 'square' },
+  conflict: { iconType: 'warning', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
   dense_vector: { iconType: 'tokenDenseVector' },

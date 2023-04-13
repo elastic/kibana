@@ -26,16 +26,14 @@ paths:
    '/s/{spaceId}/api/actions/connector/{connectorId}/_execute':
     $ref: paths/s@{spaceid}@api@actions@connector@{connectorid}@_execute.yaml
 # Deprecated endpoints:
-#  '/s/{spaceId}/api/actions/action/{actionId}':
-#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
-#  '/s/{spaceId}/api/actions':
-#   $ref: 'paths/s@{spaceid}@api@actions.yaml'
-#  '/s/{spaceId}/api/actions/list_action_types':
-#    $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
-#  '/s/{spaceId}/api/actions/action':
-#    $ref: 'paths/s@{spaceid}@api@actions@action.yaml'
-#  '/s/{spaceId}/api/actions/action/{actionId}/_execute':
-#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
+   '/s/{spaceId}/api/actions/action/{actionId}':
+    $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
+   '/s/{spaceId}/api/actions':
+    $ref: 'paths/s@{spaceid}@api@actions.yaml'
+   '/s/{spaceId}/api/actions/list_action_types':
+    $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
+   '/s/{spaceId}/api/actions/action/{actionId}/_execute':
+    $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
 components:
   securitySchemes:
     basicAuth:

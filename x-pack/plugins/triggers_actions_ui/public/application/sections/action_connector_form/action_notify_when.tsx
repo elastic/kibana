@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiPopover,
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -28,96 +27,105 @@ import {
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType, RuleAction } from '../../../types';
-import {
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
-  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
-} from '../../../common/constants';
+import { RuleNotifyWhenType, RuleAction, NotifyWhenSelectOptions } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
-export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
+export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
-    value: 'onActionGroupChange',
-    inputDisplay: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.display',
-      {
-        defaultMessage: 'On status changes',
-      }
-    ),
-    'data-test-subj': 'onActionGroupChange',
-    dropdownDisplay: (
-      <>
-        <strong>
-          <FormattedMessage
-            defaultMessage="On status changes"
-            id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.label"
-          />
-        </strong>
-        <EuiText size="s" color="subdued">
-          <p>
+    isSummaryOption: false,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActionGroupChange',
+      inputDisplay: i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.display',
+        {
+          defaultMessage: 'On status changes',
+        }
+      ),
+      'data-test-subj': 'onActionGroupChange',
+      dropdownDisplay: (
+        <>
+          <strong>
             <FormattedMessage
-              defaultMessage="Actions run if the alert status changes."
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
+              defaultMessage="On status changes"
+              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.label"
             />
-          </p>
-        </EuiText>
-      </>
-    ),
+          </strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                defaultMessage="Actions run if the alert status changes."
+                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
   },
   {
-    value: 'onActiveAlert',
-    inputDisplay: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
-      {
-        defaultMessage: 'On check intervals',
-      }
-    ),
-    'data-test-subj': 'onActiveAlert',
-    dropdownDisplay: (
-      <>
-        <strong>
-          <FormattedMessage
-            defaultMessage="On check intervals"
-            id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
-          />
-        </strong>
-        <EuiText size="s" color="subdued">
-          <p>
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActiveAlert',
+      inputDisplay: i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
+        {
+          defaultMessage: 'On check intervals',
+        }
+      ),
+      'data-test-subj': 'onActiveAlert',
+      dropdownDisplay: (
+        <>
+          <strong>
             <FormattedMessage
-              defaultMessage="Actions run if rule conditions are met."
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
+              defaultMessage="On check intervals"
+              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
             />
-          </p>
-        </EuiText>
-      </>
-    ),
+          </strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                defaultMessage="Actions run if rule conditions are met."
+                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
   },
   {
-    value: 'onThrottleInterval',
-    inputDisplay: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.display',
-      {
-        defaultMessage: 'On custom action intervals',
-      }
-    ),
-    'data-test-subj': 'onThrottleInterval',
-    dropdownDisplay: (
-      <>
-        <strong>
-          <FormattedMessage
-            defaultMessage="On custom action intervals"
-            id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.label"
-          />
-        </strong>
-        <EuiText size="s" color="subdued">
-          <p>
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onThrottleInterval',
+      inputDisplay: i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.display',
+        {
+          defaultMessage: 'On custom action intervals',
+        }
+      ),
+      'data-test-subj': 'onThrottleInterval',
+      dropdownDisplay: (
+        <>
+          <strong>
             <FormattedMessage
-              defaultMessage="Actions run if rule conditions are met."
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
+              defaultMessage="On custom action intervals"
+              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.label"
             />
-          </p>
-        </EuiText>
-      </>
-    ),
+          </strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                defaultMessage="Actions run if rule conditions are met."
+                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
   },
 ];
 
@@ -131,11 +139,13 @@ interface ActionNotifyWhenProps {
   hasSummary?: boolean;
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
 }
 
 export const ActionNotifyWhen = ({
   hasSummary,
-  frequency = hasSummary ? DEFAULT_FREQUENCY_WITH_SUMMARY : DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+  frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
   onNotifyWhenChange,
@@ -143,36 +153,12 @@ export const ActionNotifyWhen = ({
   onSummaryChange,
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
+  notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
+  defaultNotifyWhenValue = DEFAULT_FREQUENCY.notifyWhen,
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
-  const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
-    hasSummary
-      ? DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
-      : DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
-  );
-
-  // Track whether the user has changed the notify when value from default. This is necessary because the
-  // "default" notifyWhen value for summary: true is the second menu item for summary: false. We want the UX to be:
-  // Case A
-  // - User opens the form with summary: false, notifyWhen: CHANGE
-  // - User switches to summary: true, necessitating a switch to notifyWhen: ACTIVE
-  // - User doesn't touch notifyWhen: ACTIVE, switches back to summary: false. notifyWhen should switch to CHANGE, the 1st menu option
-  // Case B
-  // - User opens the form with summary: false, notifyWhen: ACTIVE (not the "default")
-  // - User switches to summary: true
-  // - User switches back to summary: false. notifyWhen stays ACTIVE
-  // Case C
-  // - User opens the form with summary: true, notifyWhen: ACTIVE (the "default")
-  // - User doesn't change notifyWhen, just sets summary: false. notifyWhen should switch to CHANGE
-  // Case D
-  // - User opens the form with summary: true, notifyWhen: THROTTLE, or summary: false, notifyWhen: !CHANGE
-  // - When user changes summary, leave notifyWhen unchanged
-  const [notifyWhenValueChangedFromDefault, setNotifyWhenValueChangedFromDefault] = useState(
-    // Check if the initial notifyWhen value is different from the default value for its summary type
-    frequency.summary
-      ? frequency.notifyWhen !== DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
-      : frequency.notifyWhen !== DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
-  );
+  const [notifyWhenValue, setNotifyWhenValue] =
+    useState<RuleNotifyWhenType>(defaultNotifyWhenValue);
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
@@ -193,7 +179,6 @@ export const ActionNotifyWhen = ({
     (newValue: RuleNotifyWhenType) => {
       onNotifyWhenChange(newValue);
       setNotifyWhenValue(newValue);
-      setNotifyWhenValueChangedFromDefault(true);
       // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
       // so wait for onNotifyWhenChange to process before calling onThrottleChange
       setTimeout(
@@ -208,29 +193,53 @@ export const ActionNotifyWhen = ({
     [onNotifyWhenChange, onThrottleChange, throttle, throttleUnit]
   );
 
+  const summaryNotifyWhenOptions = useMemo(
+    () => notifyWhenSelectOptions.filter((o) => o.isSummaryOption).map((o) => o.value),
+    [notifyWhenSelectOptions]
+  );
+
+  const forEachAlertNotifyWhenOptions = useMemo(
+    () => notifyWhenSelectOptions.filter((o) => o.isForEachAlertOption).map((o) => o.value),
+    [notifyWhenSelectOptions]
+  );
+
+  const notifyWhenOptions = useMemo(
+    () => (frequency.summary ? summaryNotifyWhenOptions : forEachAlertNotifyWhenOptions),
+    [forEachAlertNotifyWhenOptions, frequency.summary, summaryNotifyWhenOptions]
+  );
+
+  const selectedOptionDoesNotExist = useCallback(
+    (summary: boolean) =>
+      (summary &&
+        !summaryNotifyWhenOptions.filter((o) => o.value === frequency.notifyWhen).length) ||
+      (!summary &&
+        !forEachAlertNotifyWhenOptions.filter((o) => o.value === frequency.notifyWhen).length),
+    [forEachAlertNotifyWhenOptions, frequency.notifyWhen, summaryNotifyWhenOptions]
+  );
+
+  const getDefaultNotifyWhenOption = useCallback(
+    (summary: boolean) => {
+      if (summary) {
+        return summaryNotifyWhenOptions.length
+          ? summaryNotifyWhenOptions[0].value
+          : RuleNotifyWhen.ACTIVE;
+      }
+      return forEachAlertNotifyWhenOptions.length
+        ? forEachAlertNotifyWhenOptions[0].value
+        : RuleNotifyWhen.ACTIVE;
+    },
+    [forEachAlertNotifyWhenOptions, summaryNotifyWhenOptions]
+  );
+
   const selectSummaryOption = useCallback(
     (summary: boolean) => {
       onSummaryChange(summary);
       setSummaryMenuOpen(false);
-      if (summary && frequency.notifyWhen === RuleNotifyWhen.CHANGE) {
-        // Call onNotifyWhenChange DIRECTLY to bypass setNotifyWhenValueChangedFromDefault
-        onNotifyWhenChange(RuleNotifyWhen.ACTIVE);
-        // In cases like this:
-        // 1. User opens form with notifyWhen: THROTTLE
-        // 2. User sets notifyWhen: CHANGE, notifyWhenValueChangedFromDefault is now true
-        // 3. User sets summary: true, notifyWhen gets set to CHANGE
-        // 4. User sets summary: false, notifyWhen should probably get set back to CHANGE
-        // To make step 4 possible, we have to reset notifyWhenValueChangedFromDefault:
-        setNotifyWhenValueChangedFromDefault(false);
-      } else if (
-        !summary &&
-        frequency.notifyWhen === RuleNotifyWhen.ACTIVE &&
-        !notifyWhenValueChangedFromDefault
-      ) {
-        onNotifyWhenChange(RuleNotifyWhen.CHANGE);
+      if (selectedOptionDoesNotExist(summary)) {
+        onNotifyWhenChange(getDefaultNotifyWhenOption(summary));
       }
     },
-    [onSummaryChange, frequency.notifyWhen, onNotifyWhenChange, notifyWhenValueChangedFromDefault]
+    [onSummaryChange, selectedOptionDoesNotExist, onNotifyWhenChange, getDefaultNotifyWhenOption]
   );
 
   const summaryOptions = useMemo(
@@ -241,6 +250,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
+        data-test-subj="actionNotifyWhen-option-summary"
       >
         {SUMMARY_OF_ALERTS}
       </SummaryContextMenuOption>,
@@ -250,6 +260,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
+        data-test-subj="actionNotifyWhen-option-for_each"
       >
         {FOR_EACH_ALERT}
       </SummaryContextMenuOption>,
@@ -283,14 +294,6 @@ export const ActionNotifyWhen = ({
     >
       <EuiContextMenuPanel items={summaryOptions} />
     </EuiPopover>
-  );
-
-  const notifyWhenOptions = useMemo(
-    () =>
-      frequency.summary
-        ? NOTIFY_WHEN_OPTIONS.filter((o) => o.value !== RuleNotifyWhen.CHANGE)
-        : NOTIFY_WHEN_OPTIONS,
-    [frequency.summary]
   );
 
   return (

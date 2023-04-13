@@ -29,7 +29,7 @@ export function getPluginApi(
   const server = getDeclarations(project, plugin, ApiScope.SERVER, plugins, log, captureReferences);
   const common = getDeclarations(project, plugin, ApiScope.COMMON, plugins, log, captureReferences);
   return {
-    id: plugin.manifest.id,
+    id: plugin.id,
     client,
     server,
     common,
@@ -58,7 +58,7 @@ function getDeclarations(
     const apiDec = buildApiDeclarationTopNode(node, {
       plugins,
       log,
-      currentPluginId: plugin.manifest.id,
+      currentPluginId: plugin.id,
       scope,
       captureReferences,
     });

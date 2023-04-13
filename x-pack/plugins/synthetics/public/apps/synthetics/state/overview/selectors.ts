@@ -16,6 +16,3 @@ export const selectErrorPopoverState = createSelector(
   selectOverviewState,
   (state) => state.isErrorPopoverOpen
 );
-export const selectOverviewStatus = ({
-  overview: { status, statusError },
-}: SyntheticsAppState) => ({ status, statusError });

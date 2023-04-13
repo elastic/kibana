@@ -17,10 +17,8 @@ jest.mock('../../../containers/authentications');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
-});
+jest.mock('../../../../common/components/visualization_actions/actions');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
 describe('Authentications query tab body', () => {
   const mockUseAuthentications = useAuthentications as jest.Mock;

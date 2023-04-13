@@ -25,6 +25,10 @@ export class BundleMetricsPlugin {
   constructor(private readonly bundle: Bundle) {}
 
   public apply(compiler: webpack.Compiler) {
+    if (this.bundle.ignoreMetrics) {
+      return;
+    }
+
     const { bundle } = this;
 
     compiler.hooks.emit.tap('BundleMetricsPlugin', (compilation) => {

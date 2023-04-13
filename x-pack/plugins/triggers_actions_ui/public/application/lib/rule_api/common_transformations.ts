@@ -9,11 +9,13 @@ import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
+  uuid,
   group,
   id,
   connector_type_id: actionTypeId,
   params,
   frequency,
+  alerts_filter: alertsFilter,
 }) => ({
   group,
   id,
@@ -28,6 +30,8 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
         },
       }
     : {}),
+  ...(alertsFilter ? { alertsFilter } : {}),
+  ...(uuid && { uuid }),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
@@ -42,10 +46,12 @@ const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
 
 const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
   outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
   alerts_count: alertsCount,
   ...rest
 }) => ({
   outcomeMsg,
+  outcomeOrder,
   alertsCount,
   ...rest,
 });

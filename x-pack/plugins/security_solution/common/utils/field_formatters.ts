@@ -6,7 +6,7 @@
  */
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { isEmpty } from 'lodash/fp';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
@@ -76,7 +76,7 @@ export const getDataFromFieldsHits = (
     // return simple field value (non-esc object, non-array)
     if (
       !isObjectArray ||
-      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
+      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...legacyExperimentalFieldMap }).find(
         (ecsField) => ecsField === field
       ) === undefined
     ) {

@@ -11,7 +11,6 @@ const LOCAL_STORAGE_KEY = 'fleet.lastSeenInactiveAgentsCount';
 
 export const useLastSeenInactiveAgentsCount = (): [number, (val: number) => void] => {
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] = useState(0);
-
   useEffect(() => {
     const storageValue = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storageValue) {

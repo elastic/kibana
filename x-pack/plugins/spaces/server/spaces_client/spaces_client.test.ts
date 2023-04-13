@@ -16,7 +16,7 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-const createMockConfig = (mockConfig: ConfigType = { maxSpaces: 1000 }) => {
+const createMockConfig = (mockConfig: ConfigType = { enabled: true, maxSpaces: 1000 }) => {
   return ConfigSchema.validate(mockConfig);
 };
 
@@ -75,7 +75,7 @@ describe('#getAll', () => {
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
     } as any);
-    const mockConfig = createMockConfig({ maxSpaces: 1234 });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces: 1234 });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const actualSpaces = await client.getAll();
@@ -182,7 +182,7 @@ describe('#create', () => {
       total: maxSpaces - 1,
     } as any);
 
-    const mockConfig = createMockConfig({ maxSpaces });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
@@ -208,7 +208,7 @@ describe('#create', () => {
       total: maxSpaces,
     } as any);
 
-    const mockConfig = createMockConfig({ maxSpaces });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 

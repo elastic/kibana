@@ -63,7 +63,7 @@ import {
   selectStagedActiveData,
   selectFrameDatasourceAPI,
 } from '../../state_management';
-import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -77,7 +77,7 @@ const configurationsValid = (
 ): boolean => {
   try {
     return (
-      filterUserMessages(
+      filterAndSortUserMessages(
         [
           ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
             frame,
@@ -118,7 +118,7 @@ const PreviewRenderer = ({
       <EuiIconTip
         size="xl"
         color="danger"
-        type="alert"
+        type="warning"
         aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
           defaultMessage: 'Preview rendering failed',
         })}
@@ -184,6 +184,8 @@ const SuggestionPreview = ({
           onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
+          element="div"
+          role="listitem"
         >
           {preview.expression || preview.error ? (
             <PreviewRenderer
@@ -481,7 +483,12 @@ export function SuggestionPanel({
           )
         }
       >
-        <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+        <div
+          className="lnsSuggestionPanel__suggestions"
+          data-test-subj="lnsSuggestionsPanel"
+          role="list"
+          tabIndex={0}
+        >
           {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>

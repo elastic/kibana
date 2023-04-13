@@ -6,7 +6,6 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import merge from 'lodash/merge';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
@@ -42,7 +41,7 @@ export class UpdateSLO {
 
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
-    const updatedSlo: SLO = merge({}, originalSlo, params, { updatedAt: new Date() });
+    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updatedAt: new Date() });
     validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {

@@ -13,10 +13,11 @@ import { getFlattenedObject } from '@kbn/std';
 import type {
   KibanaRequest,
   ElasticsearchClient,
-  RequestHandlerContext,
   SavedObjectsClientContract,
   Logger,
+  RequestHandlerContext,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
@@ -42,6 +43,7 @@ import {
   FLEET_APM_PACKAGE,
   outputType,
   PACKAGES_SAVED_OBJECT_TYPE,
+  DATASET_VAR_NAME,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -70,6 +72,7 @@ import {
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
   FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -102,6 +105,7 @@ import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { auditLoggingService } from './audit_logging';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -123,7 +127,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: {
+    options: {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -133,64 +137,85 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-    }
+    } = {},
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy> {
-    const logger = appContextService.getLogger();
-    const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
 
-    if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
+    const logger = appContextService.getLogger();
+
+    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyCreate',
+      packagePolicy,
+      soClient,
+      esClient,
+      context,
+      request
+    );
+
+    const agentPolicy = await agentPolicyService.get(
+      soClient,
+      enrichedPackagePolicy.policy_id,
+      true
+    );
+
+    if (agentPolicy && enrichedPackagePolicy.package?.name === FLEET_APM_PACKAGE) {
       const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
       if (dataOutput.type === outputType.Logstash) {
         throw new FleetError('You cannot add APM to a policy using a logstash output');
       }
     }
-    await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id, options?.force);
+    await validateIsNotHostedPolicy(soClient, enrichedPackagePolicy.policy_id, options?.force);
 
     // trailing whitespace causes issues creating API keys
-    packagePolicy.name = packagePolicy.name.trim();
+    enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
-      });
-
-      // Check that the name does not exist already
-      if (existingPoliciesWithName.items.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+      await requireUniqueName(soClient, enrichedPackagePolicy);
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuidv4();
-    let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
+    let inputs: PackagePolicyInput[] = enrichedPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(packagePolicyId, input)
     );
 
     // Make sure the associated package is installed
-    if (packagePolicy.package?.name) {
+    if (enrichedPackagePolicy.package?.name) {
       if (!options?.skipEnsureInstalled) {
         await ensureInstalledPackage({
           esClient,
           spaceId: options?.spaceId || DEFAULT_SPACE_ID,
           savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
+          pkgName: enrichedPackagePolicy.package.name,
+          pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
         });
       }
 
       // Handle component template/mappings updates for experimental features, e.g. synthetic source
-      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+      await handleExperimentalDatastreamFeatureOptIn({
+        soClient,
+        esClient,
+        packagePolicy: enrichedPackagePolicy,
+      });
 
       const pkgInfo =
         options?.packageInfo ??
         (await getPackageInfo({
           savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
+          pkgName: enrichedPackagePolicy.package.name,
+          pkgVersion: enrichedPackagePolicy.package.version,
           prerelease: true,
         }));
 
@@ -203,9 +228,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
       }
-      validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+      validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
 
-      inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -214,7 +239,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           soClient,
           esClient,
           pkgInfo,
-          packagePolicy,
+          packagePolicy: enrichedPackagePolicy,
           force: !!options?.force,
           logger,
         });
@@ -225,9 +250,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const newSo = await soClient.create<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
-        ...packagePolicy,
-        ...(packagePolicy.package
-          ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+        ...enrichedPackagePolicy,
+        ...(enrichedPackagePolicy.package
+          ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
         ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
@@ -242,16 +267,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     if (options?.bumpRevision ?? true) {
-      await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
+      await agentPolicyService.bumpRevision(soClient, esClient, enrichedPackagePolicy.policy_id, {
         user: options?.user,
       });
     }
 
-    return {
-      id: newSo.id,
-      version: newSo.version,
-      ...newSo.attributes,
-    };
+    const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
+
+    return packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostCreate',
+      createdPackagePolicy,
+      soClient,
+      esClient
+    );
   }
 
   public async bulkCreate(
@@ -264,6 +292,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: true;
     }
   ): Promise<PackagePolicy[]> {
+    for (const packagePolicy of packagePolicies) {
+      if (!packagePolicy.id) {
+        packagePolicy.id = SavedObjectsUtils.generateId();
+      }
+
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'create',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
@@ -376,6 +416,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     return response;
   }
 
@@ -392,11 +438,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return [];
     }
 
-    return packagePolicySO.saved_objects.map((so) => ({
+    const packagePolicies = packagePolicySO.saved_objects.map((so) => ({
       id: so.id,
       version: so.version,
       ...so.attributes,
     }));
+
+    for (const packagePolicy of packagePolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async getByIDs(
@@ -414,7 +470,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return null;
     }
 
-    return packagePolicySO.saved_objects
+    const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
         if (so.error) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
@@ -433,6 +489,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         };
       })
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
+
+    for (const packagePolicy of packagePolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async list(
@@ -449,6 +515,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
+
+    for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
 
     return {
       items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
@@ -478,6 +552,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
       total: packagePolicies.total,
@@ -491,10 +573,31 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
-    currentVersion?: string
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
-    const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
+    let enrichedPackagePolicy: UpdatePackagePolicy;
+
+    try {
+      enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+        'packagePolicyUpdate',
+        packagePolicyUpdate,
+        soClient,
+        esClient
+      );
+    } catch (error) {
+      const logger = appContextService.getLogger();
+      logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
+      logger.error(error);
+      enrichedPackagePolicy = packagePolicyUpdate;
+    }
+
+    const packagePolicy = { ...enrichedPackagePolicy, name: enrichedPackagePolicy.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
@@ -505,18 +608,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new Error('Package policy not found');
     }
 
-    if (!options?.skipUniqueNameVerification) {
-      // Check that the name does not exist already but exclude the current package policy
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: SO_SEARCH_LIMIT,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
-      });
-      const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
-      if (filtered.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+    if (
+      packagePolicy.name &&
+      packagePolicy.name !== oldPackagePolicy.name &&
+      !options?.skipUniqueNameVerification
+    ) {
+      await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -525,8 +622,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    let pkgInfo;
     if (packagePolicy.package?.name) {
-      const pkgInfo = await getPackageInfo({
+      pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
@@ -567,6 +665,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
+    // if we have moved to an input package we need to create the index templates
+    // for the package policy as input packages create index templates per package policy
+    if (
+      pkgInfo &&
+      pkgInfo.type === 'input' &&
+      oldPackagePolicy.package &&
+      oldPackagePolicy.package?.version !== pkgInfo.version
+    ) {
+      if (oldPackagePolicy.package) {
+        const oldPackage = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: oldPackagePolicy.package?.name,
+          pkgVersion: oldPackagePolicy.package?.version,
+          prerelease: true,
+        });
+
+        if (oldPackage.type === 'integration') {
+          await installAssetsForInputPackagePolicy({
+            logger: appContextService.getLogger(),
+            soClient,
+            esClient,
+            pkgInfo,
+            packagePolicy: newPolicy,
+            force: true,
+          });
+        }
+      }
+    }
     // Bump revision of associated agent policy
     const bumpPromise = agentPolicyService.bumpRevision(
       soClient,
@@ -595,6 +721,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy[] | null> {
+    for (const packagePolicy of packagePolicyUpdates) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'update',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
     const oldPackagePolicies = await this.getByIDs(
       soClient,
       packagePolicyUpdates.map((p) => p.id)
@@ -710,13 +843,41 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      skipUnassignFromAgentPolicies?: boolean;
+      force?: boolean;
+    },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
+    for (const id of ids) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'delete',
+        id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     const result: PostDeletePackagePoliciesResponse = [];
+    const logger = appContextService.getLogger();
 
     const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
     if (!packagePolicies) {
       return [];
+    }
+
+    try {
+      await packagePolicyService.runDeleteExternalCallbacks(
+        packagePolicies,
+        soClient,
+        esClient,
+        context,
+        request
+      );
+    } catch (error) {
+      logger.error(`An error occurred executing "packagePolicyDelete" callback: ${error}`);
+      logger.error(error);
     }
 
     const uniqueAgentPolicyIds = [
@@ -817,6 +978,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       }
+    }
+
+    try {
+      await packagePolicyService.runPostDeleteExternalCallbacks(
+        result,
+        soClient,
+        esClient,
+        context,
+        request
+      );
+    } catch (error) {
+      logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
+      logger.error(error);
     }
 
     return result;
@@ -1001,14 +1175,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ...options,
     };
 
-    await this.update(
-      soClient,
-      esClient,
-      id,
-      updatePackagePolicy,
-      updateOptions,
-      packagePolicy.package!.version
-    );
+    await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
 
     // Persist any experimental feature opt-ins that come through the upgrade process to the Installation SO
     await updateDatastreamExperimentalFeatures(
@@ -1231,9 +1398,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? PostDeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
-      : NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
+      : A extends 'packagePolicyCreate'
+      ? NewPackagePolicy
+      : never,
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<
     A extends 'packagePolicyDelete'
       ? void
@@ -1241,7 +1412,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
-      : NewPackagePolicy
+      : A extends 'packagePolicyCreate'
+      ? NewPackagePolicy
+      : never
   >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
@@ -1250,53 +1423,95 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       | NewPackagePolicy
       | PostDeletePackagePoliciesResponse
       | DeletePackagePoliciesResponse,
-    context: RequestHandlerContext,
-    request: KibanaRequest
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy | NewPackagePolicy | void> {
-    if (externalCallbackType === 'packagePolicyPostDelete') {
-      return await this.runPostDeleteExternalCallbacks(
-        packagePolicy as PostDeletePackagePoliciesResponse
-      );
-    } else if (externalCallbackType === 'packagePolicyDelete') {
-      return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
-    } else {
-      if (!Array.isArray(packagePolicy)) {
-        let newData = packagePolicy;
-        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-        if (externalCallbacks && externalCallbacks.size > 0) {
-          let updatedNewData = newData;
-          for (const callback of externalCallbacks) {
-            let result;
-            if (externalCallbackType === 'packagePolicyPostCreate') {
-              result = await (callback as PostPackagePolicyPostCreateCallback)(
-                updatedNewData as PackagePolicy,
-                context,
-                request
-              );
-              updatedNewData = PackagePolicySchema.validate(result);
-            } else {
-              result = await (callback as PostPackagePolicyCreateCallback)(
-                updatedNewData as NewPackagePolicy,
-                context,
-                request
-              );
-            }
-            if (externalCallbackType === 'packagePolicyCreate') {
-              updatedNewData = NewPackagePolicySchema.validate(result);
-            } else if (externalCallbackType === 'packagePolicyUpdate') {
-              updatedNewData = UpdatePackagePolicySchema.validate(result);
-            }
-          }
+    const logger = appContextService.getLogger();
+    const numberOfCallbacks = appContextService.getExternalCallbacks(externalCallbackType)?.size;
+    logger.debug(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
+    try {
+      if (externalCallbackType === 'packagePolicyPostDelete') {
+        return await this.runPostDeleteExternalCallbacks(
+          packagePolicy as PostDeletePackagePoliciesResponse,
+          soClient,
+          esClient,
+          context,
+          request
+        );
+      } else if (externalCallbackType === 'packagePolicyDelete') {
+        return await this.runDeleteExternalCallbacks(
+          packagePolicy as DeletePackagePoliciesResponse,
+          soClient,
+          esClient
+        );
+      } else {
+        if (!Array.isArray(packagePolicy)) {
+          let newData = packagePolicy;
+          const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+          if (externalCallbacks && externalCallbacks.size > 0) {
+            let updatedNewData = newData;
+            for (const callback of externalCallbacks) {
+              let result;
+              if (externalCallbackType === 'packagePolicyPostCreate') {
+                result = await (callback as PostPackagePolicyPostCreateCallback)(
+                  updatedNewData as PackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+                updatedNewData = PackagePolicySchema.validate(result);
+              } else {
+                result = await (callback as PostPackagePolicyCreateCallback)(
+                  updatedNewData as NewPackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+              }
 
-          newData = updatedNewData;
+              if (externalCallbackType === 'packagePolicyCreate') {
+                updatedNewData = NewPackagePolicySchema.validate(result);
+              } else if (externalCallbackType === 'packagePolicyUpdate') {
+                const omitted = {
+                  ...omit(result, [
+                    'id',
+                    'version',
+                    'revision',
+                    'updated_at',
+                    'updated_by',
+                    'created_at',
+                    'created_by',
+                    'elasticsearch',
+                  ]),
+                  inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
+                };
+
+                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+              }
+            }
+
+            newData = updatedNewData;
+          }
+          return newData;
         }
-        return newData;
       }
+    } catch (error) {
+      logger.error(`Error running external callbacks for ${externalCallbackType}:`);
+      logger.error(error);
+      throw error;
     }
   }
 
   public async runPostDeleteExternalCallbacks(
-    deletedPackagePolicies: PostDeletePackagePoliciesResponse
+    deletedPackagePolicies: PostDeletePackagePoliciesResponse,
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<void> {
     const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyPostDelete');
     const errorsThrown: Error[] = [];
@@ -1306,7 +1521,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Failures from an external callback should not prevent other external callbacks from being
         // executed. Errors (if any) will be collected and `throw`n after processing the entire set
         try {
-          await callback(deletedPackagePolicies);
+          await callback(deletedPackagePolicies, soClient, esClient, context, request);
         } catch (error) {
           errorsThrown.push(error);
         }
@@ -1322,7 +1537,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   }
 
   public async runDeleteExternalCallbacks(
-    deletedPackagePolices: DeletePackagePoliciesResponse
+    deletedPackagePolices: DeletePackagePoliciesResponse,
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
   ): Promise<void> {
     const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyDelete');
     const errorsThrown: Error[] = [];
@@ -1332,7 +1549,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Failures from an external callback should not prevent other external callbacks from being
         // executed. Errors (if any) will be collected and `throw`n after processing the entire set
         try {
-          await callback(deletedPackagePolices);
+          await callback(deletedPackagePolices, soClient, esClient);
         } catch (error) {
           errorsThrown.push(error);
         }
@@ -1398,7 +1615,9 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-    }
+    },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -1406,7 +1625,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.create(soClient, esClient, packagePolicy, options);
+    return super.create(soClient, esClient, packagePolicy, options, context, request);
   }
 }
 
@@ -1999,10 +2218,17 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           );
           if (
             oldStream &&
-            oldStream?.vars?.['data_stream.dataset'] &&
-            oldStream?.vars['data_stream.dataset']?.value !==
-              stream?.vars?.['data_stream.dataset']?.value
+            oldStream?.vars?.[DATASET_VAR_NAME] &&
+            oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value
           ) {
+            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
+            appContextService
+              .getLogger()
+              .debug(
+                `Rejecting package policy update due to dataset change, old val '${
+                  oldStream?.vars[DATASET_VAR_NAME]?.value
+                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+              );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
@@ -2094,4 +2320,26 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+async function requireUniqueName(
+  soClient: SavedObjectsClientContract,
+  packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
+  id?: string
+) {
+  const existingPoliciesWithName = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
+  });
+
+  const policiesToCheck = id
+    ? // Check that the name does not exist already but exclude the current package policy
+      (existingPoliciesWithName?.items || []).filter((p) => p.id !== id)
+    : existingPoliciesWithName?.items;
+
+  if (policiesToCheck.length > 0) {
+    throw new PackagePolicyNameExistsError(
+      `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+    );
+  }
 }

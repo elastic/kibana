@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
+import { SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
 import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
 import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
@@ -43,6 +43,7 @@ export class FieldParamType extends BaseParamType {
     this.scriptable = config.scriptable !== false;
     this.filterField = config.filterField;
 
+    // TODO - are there any custom write methods that do a missing check?
     if (!config.write) {
       this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
         const field = aggConfig.getField();
@@ -59,24 +60,10 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
-        if (field.type === KBN_FIELD_TYPES.MISSING) {
-          throw new SavedFieldNotFound(
-            i18n.translate(
-              'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
-              {
-                defaultMessage:
-                  'The field "{fieldParameter}" associated with this object no longer exists in the data view. Please use another field.',
-                values: {
-                  fieldParameter: field.name,
-                },
-              }
-            )
-          );
-        }
-
-        const validField = this.getAvailableFields(aggConfig).find(
-          (f: any) => f.name === field.name
-        );
+        const validField =
+          field.type === KBN_FIELD_TYPES.MISSING // missing fields are always valid
+            ? field
+            : this.getAvailableFields(aggConfig).find((f: any) => f.name === field.name);
 
         if (!validField) {
           throw new SavedFieldTypeInvalidForAgg(

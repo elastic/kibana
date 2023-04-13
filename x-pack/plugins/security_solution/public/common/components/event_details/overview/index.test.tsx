@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { Overview } from '.';
 import { TestProviders } from '../../../mock';
 
@@ -23,55 +23,63 @@ jest.mock(
 );
 
 describe('Event Details Overview Cards', () => {
-  it('renders all cards', () => {
-    const { getByText } = render(
-      <TestProviders>
-        <Overview {...props} />
-      </TestProviders>
-    );
+  it('renders all cards', async () => {
+    await act(async () => {
+      const { getByText } = render(
+        <TestProviders>
+          <Overview {...props} />
+        </TestProviders>
+      );
 
-    getByText('Status');
-    getByText('Severity');
-    getByText('Risk Score');
-    getByText('Rule');
+      getByText('Status');
+      getByText('Severity');
+      getByText('Risk Score');
+      getByText('Rule');
+    });
   });
 
-  it('renders only readOnly cards', () => {
-    const { getByText, queryByText } = render(
-      <TestProviders>
-        <Overview {...propsWithReadOnly} />
-      </TestProviders>
-    );
+  it('renders only readOnly cards', async () => {
+    await act(async () => {
+      const { getByText, queryByText } = render(
+        <TestProviders>
+          <Overview {...propsWithReadOnly} />
+        </TestProviders>
+      );
 
-    getByText('Severity');
-    getByText('Risk Score');
+      getByText('Severity');
+      getByText('Risk Score');
 
-    expect(queryByText('Status')).not.toBeInTheDocument();
-    expect(queryByText('Rule')).not.toBeInTheDocument();
+      expect(queryByText('Status')).not.toBeInTheDocument();
+      expect(queryByText('Rule')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders all cards it has data for', () => {
-    const { getByText, queryByText } = render(
-      <TestProviders>
-        <Overview {...propsWithoutSeverity} />
-      </TestProviders>
-    );
+  it('renders all cards it has data for', async () => {
+    await act(async () => {
+      const { getByText, queryByText } = render(
+        <TestProviders>
+          <Overview {...propsWithoutSeverity} />
+        </TestProviders>
+      );
 
-    getByText('Status');
-    getByText('Risk Score');
-    getByText('Rule');
+      getByText('Status');
+      getByText('Risk Score');
+      getByText('Rule');
 
-    expect(queryByText('Severity')).not.toBeInTheDocument();
+      expect(queryByText('Severity')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders rows and spacers correctly', () => {
-    const { asFragment } = render(
-      <TestProviders>
-        <Overview {...propsWithoutSeverity} />
-      </TestProviders>
-    );
+  it('renders rows and spacers correctly', async () => {
+    await act(async () => {
+      const { asFragment } = render(
+        <TestProviders>
+          <Overview {...propsWithoutSeverity} />
+        </TestProviders>
+      );
 
-    expect(asFragment()).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
+    });
   });
 });
 

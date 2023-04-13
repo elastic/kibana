@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -94,6 +95,7 @@ describe('#getSavedObjectFromSource', () => {
   const references = [{ type: 'ref-type', id: 'ref-id', name: 'ref-name' }];
   const migrationVersion = { foo: 'migrationVersion' };
   const coreMigrationVersion = 'coreMigrationVersion';
+  const typeMigrationVersion = 'typeMigrationVersion';
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
@@ -112,6 +114,7 @@ describe('#getSavedObjectFromSource', () => {
         references,
         migrationVersion,
         coreMigrationVersion,
+        typeMigrationVersion,
         originId,
         updated_at,
         ...namespaceAttrs,
@@ -127,6 +130,7 @@ describe('#getSavedObjectFromSource', () => {
     expect(result).toEqual({
       attributes,
       coreMigrationVersion,
+      typeMigrationVersion,
       id,
       migrationVersion,
       namespaces: expect.anything(), // see specific test cases below
@@ -166,6 +170,49 @@ describe('#getSavedObjectFromSource', () => {
     const result2 = getSavedObjectFromSource(registry, type, id, doc2);
     expect(result1).toEqual(expect.objectContaining({ namespaces: ['default'] }));
     expect(result2).toEqual(expect.objectContaining({ namespaces: ['foo-ns'] }));
+  });
+
+  it('keeps original `migrationVersion` in compatibility mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = createRawDoc(type);
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', migrationVersion);
+  });
+
+  it('derives `migrationVersion` in compatibility mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(createRawDoc(type), '_source.migrationVersion');
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', { [type]: typeMigrationVersion });
+  });
+
+  it('does not derive `migrationVersion` in compatibility mode if there is no type version', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(
+      createRawDoc(type),
+      '_source.migrationVersion',
+      '_source.typeMigrationVersion'
+    );
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', undefined);
+  });
+
+  it('does not derive `migrationVersion` in raw mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(createRawDoc(type), '_source.migrationVersion');
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'raw',
+    });
+    expect(result).toHaveProperty('migrationVersion', undefined);
   });
 });
 

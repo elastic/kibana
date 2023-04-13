@@ -16,7 +16,7 @@ import {
   createConfiguration,
   getConfigurationRequest,
   ensureSavedObjectIsAuthorized,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   obsOnly,
   secOnly,

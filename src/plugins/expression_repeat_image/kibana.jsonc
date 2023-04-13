@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-repeat-image-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds 'repeatImage' function and renderer to expressions",
+  "plugin": {
+    "id": "expressionRepeatImage",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

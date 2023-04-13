@@ -8,5 +8,3 @@
 export * from './api/get_prebuilt_rules_and_timelines_status/response_schema';
 export * from './api/install_prebuilt_rules_and_timelines/response_schema';
 export * from './api/urls';
-
-export * from './model/prebuilt_rule';

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseCallOut } from './callout';
 import {
   getLicenseError,
   getKibanaConfigError,
@@ -17,47 +15,48 @@ import {
   getDeletedConnectorError,
   getCaseClosedInfo,
 } from './helpers';
-import * as i18n from './translations';
-import type { CaseConnector, ActionConnector } from '../../../common/api';
+import type { CaseConnector } from '../../../common/api';
 import { CaseStatuses } from '../../../common/api';
-import type { CaseServices } from '../../containers/use_find_case_user_actions';
 import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CaseConnectors } from '../../containers/types';
 
 export interface UsePushToService {
+  caseConnectors: CaseConnectors;
   caseId: string;
-  caseServices: CaseServices;
   caseStatus: string;
   connector: CaseConnector;
-  connectors: ActionConnector[];
-  hasDataToPush: boolean;
   isValidConnector: boolean;
-  onEditClick: () => void;
 }
 
 export interface ReturnUsePushToService {
-  pushButton: JSX.Element;
-  pushCallouts: JSX.Element | null;
+  errorsMsg: ErrorMessage[];
+  hasBeenPushed: boolean;
+  needsToBePushed: boolean;
+  hasPushPermissions: boolean;
+  isLoading: boolean;
+  hasErrorMessages: boolean;
+  hasLicenseError: boolean;
+  handlePushToService: () => Promise<void>;
 }
 
 export const usePushToService = ({
   caseId,
-  caseServices,
   caseStatus,
+  caseConnectors,
   connector,
-  connectors,
-  hasDataToPush,
   isValidConnector,
-  onEditClick,
 }: UsePushToService): ReturnUsePushToService => {
   const { permissions } = useCasesContext();
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
-
-  const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
-  const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
   const refreshCaseViewPage = useRefreshCaseViewPage();
+
+  const { isLoading: isLoadingLicense, data: actionLicense = null } = useGetActionLicense();
+  const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
+  const needsToBePushed = !!caseConnectors[connector.id]?.push.needsToBePushed;
+  const hasBeenPushed = !!caseConnectors[connector.id]?.push.hasBeenPushed;
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -88,7 +87,7 @@ export const usePushToService = ({
      * By priority of importance:
      * 1. Show license error.
      * 2. Show configuration error.
-     * 3. Show connector configuration error if the connector is set to none or no connectors have been created.
+     * 3. Show connector missing information if the connector is set to none.
      * 4. Show an error message if the connector has been deleted or the user does not have access to it.
      * 5. Show case closed message.
      */
@@ -101,11 +100,11 @@ export const usePushToService = ({
       return [getKibanaConfigError()];
     }
 
-    if (connector.id === 'none' && !loadingLicense && !hasLicenseError) {
+    if (connector.id === 'none' && !isLoadingLicense && !hasLicenseError) {
       return [getConnectorMissingInfo()];
     }
 
-    if (!isValidConnector && !loadingLicense && !hasLicenseError) {
+    if (!isValidConnector && !isLoadingLicense && !hasLicenseError) {
       return [getDeletedConnectorError()];
     }
 
@@ -114,79 +113,24 @@ export const usePushToService = ({
     }
 
     return errors;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.update]);
-
-  const pushToServiceButton = useMemo(
-    () => (
-      <EuiButtonEmpty
-        data-test-subj="push-to-external-service"
-        iconType="importAction"
-        onClick={handlePushToService}
-        disabled={
-          isLoading ||
-          loadingLicense ||
-          errorsMsg.length > 0 ||
-          !permissions.push ||
-          !isValidConnector ||
-          !hasDataToPush
-        }
-        isLoading={isLoading}
-      >
-        {caseServices[connector.id]
-          ? i18n.UPDATE_THIRD(connector.name)
-          : i18n.PUSH_THIRD(connector.name)}
-      </EuiButtonEmpty>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      connector,
-      connectors,
-      errorsMsg,
-      handlePushToService,
-      hasDataToPush,
-      isLoading,
-      loadingLicense,
-      permissions.push,
-      isValidConnector,
-    ]
-  );
-
-  const objToReturn = useMemo(() => {
-    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.push;
-
-    return {
-      pushButton: hidePushButton ? (
-        <EuiToolTip
-          position="top"
-          title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)}
-          content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
-        >
-          {pushToServiceButton}
-        </EuiToolTip>
-      ) : (
-        <>{pushToServiceButton}</>
-      ),
-      pushCallouts:
-        errorsMsg.length > 0 ? (
-          <CaseCallOut
-            hasConnectors={connectors.length > 0}
-            hasLicenseError={hasLicenseError}
-            messages={errorsMsg}
-            onEditClick={onEditClick}
-          />
-        ) : null,
-    };
   }, [
-    connector.name,
-    connectors.length,
-    errorsMsg,
-    hasDataToPush,
+    actionLicense,
+    caseStatus,
+    connector.id,
     hasLicenseError,
-    onEditClick,
-    pushToServiceButton,
-    permissions.push,
+    isValidConnector,
+    isLoadingLicense,
+    permissions.update,
   ]);
 
-  return objToReturn;
+  return {
+    errorsMsg,
+    hasErrorMessages: errorsMsg.length > 0,
+    needsToBePushed,
+    hasBeenPushed,
+    isLoading: isLoading || isLoadingLicense,
+    hasPushPermissions: permissions.push,
+    hasLicenseError,
+    handlePushToService,
+  };
 };

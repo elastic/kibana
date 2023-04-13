@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { unzip as unzipAsyncCallback } from 'zlib';
 import pRetry from 'p-retry';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
+import { promisify } from 'util';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+
+const unzip = promisify(unzipAsyncCallback);
 
 const SAMPLE_SOURCEMAP = {
   version: 3,
@@ -118,9 +123,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('source maps', { config: 'basic', archives: [] }, () => {
+    // ensure clean state before starting
     before(async () => {
       await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
     });
+
+    async function getDecodedSourceMapContent(
+      encodedContent?: string
+    ): Promise<SourceMap | undefined> {
+      if (encodedContent) {
+        return JSON.parse((await unzip(Buffer.from(encodedContent, 'base64'))).toString());
+      }
+    }
 
     let resp: APIReturnType<'POST /api/apm/sourcemaps'>;
     describe('upload source map', () => {
@@ -158,20 +172,74 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('is added to .apm-source-map index', async () => {
-        const res = await esClient.search({
+        const res = await esClient.search<ApmSourceMap>({
           index: '.apm-source-map',
         });
 
-        const doc = res.hits.hits[0]._source as ApmSourceMap;
-        expect(doc.content).to.be(
-          'eJyrVipLLSrOzM9TsjI0MtZRKs4vLUpOLVayilZSitVRyk0sKMjMSwfylZRqAURLDgo='
+        const source = res.hits.hits[0]._source;
+        const decodedSourceMap = await getDecodedSourceMapContent(source?.content);
+        expect(decodedSourceMap).to.eql(SAMPLE_SOURCEMAP);
+        expect(source?.content_sha256).to.be(
+          'bfc4a5793a604af28edb8536f7f9b56658a4ccab3db74676c77f850f0b9e2c28'
         );
-        expect(doc.content_sha256).to.be(
-          '02dd950aa88a66183d312a7a5f44d72fc9e3914cdbbe5e3a04f1509a8a3d7d83'
-        );
-        expect(doc.file.path).to.be('bar');
-        expect(doc.service.name).to.be('uploading-test');
-        expect(doc.service.version).to.be('1.0.0');
+        expect(source?.file.path).to.be('bar');
+        expect(source?.service.name).to.be('uploading-test');
+        expect(source?.service.version).to.be('1.0.0');
+      });
+
+      describe('when uploading a new source map with the same service.name, service.version and path', () => {
+        let resBefore: GetResponse<ApmSourceMap>;
+        let resAfter: GetResponse<ApmSourceMap>;
+
+        before(async () => {
+          async function getSourceMapDocFromApmIndex() {
+            await esClient.indices.refresh({ index: '.apm-source-map' });
+            return await esClient.get<ApmSourceMap>({
+              index: '.apm-source-map',
+              id: 'uploading-test-1.0.0-bar',
+            });
+          }
+
+          resBefore = await getSourceMapDocFromApmIndex();
+
+          await uploadSourcemap({
+            serviceName: 'uploading-test',
+            serviceVersion: '1.0.0',
+            bundleFilePath: 'bar',
+            sourcemap: { ...SAMPLE_SOURCEMAP, sourceRoot: 'changed-source-root' },
+          });
+
+          resAfter = await getSourceMapDocFromApmIndex();
+        });
+
+        after(async () => {
+          await deleteAllApmSourceMaps();
+          await deleteAllFleetSourceMaps();
+        });
+
+        it('creates one document in the .apm-source-map index', async () => {
+          const res = await esClient.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
+
+          // @ts-expect-error
+          expect(res.hits.total.value).to.be(1);
+        });
+
+        it('creates two documents in the .fleet-artifacts index', async () => {
+          const res = await listSourcemaps({ page: 1, perPage: 10 });
+          expect(res.total).to.be(2);
+        });
+
+        it('updates the content', async () => {
+          const contentBefore = await getDecodedSourceMapContent(resBefore._source?.content);
+          const contentAfter = await getDecodedSourceMapContent(resAfter._source?.content);
+
+          expect(contentBefore?.sourceRoot).to.be('');
+          expect(contentAfter?.sourceRoot).to.be('changed-source-root');
+        });
+
+        it('updates the content hash', async () => {
+          expect(resBefore._source?.content_sha256).to.not.be(resAfter._source?.content_sha256);
+        });
       });
     });
 

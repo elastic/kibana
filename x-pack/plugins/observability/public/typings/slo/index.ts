@@ -22,4 +22,9 @@ interface BurnRateRuleParams extends RuleTypeParams {
   shortWindow: Duration;
 }
 
-export type { BurnRateRuleParams, Duration, DurationUnit };
+interface ChartData {
+  key: number;
+  value: number | undefined;
+}
+
+export type { BurnRateRuleParams, ChartData, Duration, DurationUnit };

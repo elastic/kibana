@@ -15,5 +15,4 @@ require('@babel/register')({
 // If we import the package (require('@kbn/apm-synthtrace')) the program will be executed on the compiled files, and thus we need to
 // compile scenarios with `yarn kbn bootstrap` every time scenario changes.
 
-// eslint-disable-next-line @kbn/imports/uniform_imports
-require('../packages/kbn-apm-synthtrace/src/cli').runSynthtrace();
+require('@kbn/apm-synthtrace/src/cli').runSynthtrace();

@@ -133,7 +133,7 @@ export class FollowerIndexEdit extends PureComponent {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage

@@ -19,10 +19,11 @@ import {
   pipelineSimulateBody,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import { modelsProvider } from '../models/data_frame_analytics';
+
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
+import { modelsProvider } from '../models/model_management';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -68,7 +69,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               )
             );
 
-            const pipelinesResponse = await modelsProvider(client, mlClient).getModelsPipelines(
+            const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
               modelIdsAndAliases
             );
             for (const model of result) {
@@ -178,9 +179,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
       try {
         const { modelId } = request.params;
-        const result = await modelsProvider(client, mlClient).getModelsPipelines(
-          modelId.split(',')
-        );
+        const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
@@ -253,38 +252,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         });
         return response.ok({
           body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /api/ml/trained_models/nodes_overview Get node overview about the models allocation
-   * @apiName GetTrainedModelsNodesOverview
-   * @apiDescription Retrieves the list of ML nodes with memory breakdown and allocated models info
-   */
-  router.get(
-    {
-      path: '/api/ml/trained_models/nodes_overview',
-      validate: {},
-      options: {
-        tags: [
-          'access:ml:canViewMlNodes',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetJobs',
-          'access:ml:canGetTrainedModels',
-        ],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      try {
-        const result = await modelsProvider(client, mlClient).getNodesOverview();
-        return response.ok({
-          body: result,
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -57,6 +57,7 @@ export const removePolicyFromArtifacts = async (
         namespaceType: artifact.namespace_type,
         osTypes: artifact.os_types,
         tags: artifact.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
+        expireTime: artifact.expire_time,
       }),
     {
       /** Number of concurrent executions till the end of the artifacts array */

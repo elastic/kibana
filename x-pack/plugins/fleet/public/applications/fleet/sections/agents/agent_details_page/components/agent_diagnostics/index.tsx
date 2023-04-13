@@ -15,15 +15,20 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiText,
+  EuiSkeletonText,
   formatDate,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import {
+  isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
+} from '../../../../../../../../common/services';
 
 import {
   sendGetAgentUploads,
@@ -129,7 +134,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
-  const errorIcon = <MarginedIcon type="alert" color="red" />;
+  const errorIcon = <MarginedIcon type="warning" color="red" />;
   const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
 
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
@@ -215,11 +220,25 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }
 
+  const requestDiagnosticsButton = (
+    <EuiButton
+      fill
+      size="m"
+      onClick={onSubmit}
+      disabled={isSubmitting || !isAgentRequestDiagnosticsSupported(agent)}
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentList.diagnosticsOneButton"
+        defaultMessage="Request diagnostics .zip"
+      />
+    </EuiButton>
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           title={
             <FormattedMessage
@@ -230,21 +249,30 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         >
           <FormattedMessage
             id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. Fleet will automatically remove old diagnostics files after 30 days."
+            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
           />
         </EuiCallOut>
       </EuiFlexItem>
       <FlexStartEuiFlexItem>
-        <EuiButton fill size="m" onClick={onSubmit} disabled={isSubmitting}>
-          <FormattedMessage
-            id="xpack.fleet.agentList.diagnosticsOneButton"
-            defaultMessage="Request diagnostics .zip"
-          />
-        </EuiButton>
+        {isAgentRequestDiagnosticsSupported(agent) ? (
+          requestDiagnosticsButton
+        ) : (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
+                defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
+                values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
+              />
+            }
+          >
+            {requestDiagnosticsButton}
+          </EuiToolTip>
+        )}
       </FlexStartEuiFlexItem>
       <EuiFlexItem>
         {isLoading ? (
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         ) : (
           <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
         )}

@@ -23,6 +23,8 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

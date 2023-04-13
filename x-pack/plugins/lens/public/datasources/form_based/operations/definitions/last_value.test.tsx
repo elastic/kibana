@@ -917,9 +917,42 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+              id="xpack.lens.indexPattern.fieldsNotFound"
+              values={
+                Object {
+                  "count": 1,
+                  "missingFields": <React.Fragment>
+                    <React.Fragment>
+                      <strong>
+                        notExisting
+                      </strong>
+                      
+                    </React.Fragment>
+                  </React.Fragment>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
 
     it('shows error message if the sortField does not exist in index pattern', () => {
@@ -935,10 +968,55 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="Sort field {sortField} was not found."
+              id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+              values={
+                Object {
+                  "sortField": <strong>
+                    notExisting
+                  </strong>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
+
+    it('shows both messages if neither field exists in index pattern', () => {
+      errorLayer = {
+        ...errorLayer,
+        columns: {
+          col1: {
+            ...errorLayer.columns.col1,
+            sourceField: 'notExisting1',
+            params: {
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
+              sortField: 'notExisting2',
+            },
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toHaveLength(2);
+    });
+
     it('shows error message if the sourceField is of unsupported type', () => {
       indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';
       errorLayer = {

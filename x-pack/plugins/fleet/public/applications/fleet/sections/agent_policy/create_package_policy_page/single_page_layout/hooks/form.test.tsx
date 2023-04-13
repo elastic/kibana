@@ -10,7 +10,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
-import type { PackageInfo } from '../../../../../types';
+import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
 import { sendGetPackagePolicies } from '../../../../../hooks';
 
@@ -91,6 +91,43 @@ describe('useOnSubmit', () => {
     beforeEach(() => {
       act(() => {
         render();
+      });
+    });
+
+    it('should set package policy id and namespace when agent policy changes', () => {
+      act(() => {
+        renderResult.result.current.updateAgentPolicy({
+          id: 'some-id',
+          namespace: 'default',
+        } as AgentPolicy);
+      });
+
+      expect(renderResult.result.current.packagePolicy).toEqual({
+        policy_id: 'some-id',
+        namespace: 'default',
+        description: '',
+        enabled: true,
+        inputs: [],
+        name: 'apache-1',
+        package: {
+          name: 'apache',
+          title: 'Apache',
+          version: '1.0.0',
+        },
+        vars: {
+          'Advanced var': {
+            type: 'bool',
+            value: true,
+          },
+          'Required var': {
+            type: 'bool',
+            value: undefined,
+          },
+          'Show user var': {
+            type: 'string',
+            value: 'showUserVarVal',
+          },
+        },
       });
     });
 

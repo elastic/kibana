@@ -44,6 +44,7 @@ export const createEndpointList = async ({
         created_by: user,
         description: ENDPOINT_LIST_DESCRIPTION,
         entries: undefined,
+        expire_time: undefined,
         immutable: false,
         item_id: undefined,
         list_id: ENDPOINT_LIST_ID,

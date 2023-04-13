@@ -7,6 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../../../contexts';
 
 const isSyntheticsDefaultDateRange = (dateRangeStart: string, dateRangeEnd: string) => {
-  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
+  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
   return dateRangeStart === DATE_RANGE_START && dateRangeEnd === DATE_RANGE_END;
 };
@@ -31,12 +32,7 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
   // read time from state and update the url
   const sharedTimeState = data?.query.timefilter.timefilter.getTime();
 
-  const {
-    autorefreshInterval,
-    autorefreshIsPaused,
-    dateRangeStart: start,
-    dateRangeEnd: end,
-  } = getUrlParams();
+  const { dateRangeStart: start, dateRangeEnd: end } = getUrlParams();
 
   useEffect(() => {
     const { from, to } = sharedTimeState ?? {};
@@ -70,8 +66,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       start={start}
       end={end}
       commonlyUsedRanges={euiCommonlyUsedRanges}
-      isPaused={autorefreshIsPaused}
-      refreshInterval={autorefreshInterval}
       onTimeChange={({ start: startN, end: endN }) => {
         if (data?.query?.timefilter?.timefilter) {
           data?.query.timefilter.timefilter.setTime({ from: startN, to: endN });
@@ -81,13 +75,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval }) => {
-        updateUrl({
-          autorefreshInterval:
-            refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshIsPaused: isPaused,
-        });
-      }}
     />
   );
 };

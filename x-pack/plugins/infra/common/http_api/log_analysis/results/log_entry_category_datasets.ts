@@ -13,7 +13,7 @@ import {
   timeRangeRT,
   routeTimingMetadataRT,
 } from '../../shared';
-
+import { persistedLogViewReferenceRT } from '../../../log_views';
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH =
   '/api/infra/log_analysis/results/log_entry_category_datasets';
 
@@ -23,8 +23,8 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH =
 
 export const getLogEntryCategoryDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
-    // the id of the source configuration
-    sourceId: rt.string,
+    // log view
+    logView: persistedLogViewReferenceRT,
     // the time range to fetch the category datasets from
     timeRange: timeRangeRT,
   }),

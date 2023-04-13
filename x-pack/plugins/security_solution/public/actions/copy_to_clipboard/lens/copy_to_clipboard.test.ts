@@ -8,7 +8,7 @@
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { createCopyToClipboardAction } from './copy_to_clipboard';
+import { createCopyToClipboardLensAction } from './copy_to_clipboard';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
@@ -46,8 +46,8 @@ const context = {
   embeddable: lensEmbeddable,
 } as unknown as ActionExecutionContext<CellValueContext>;
 
-describe('Lens createCopyToClipboardAction', () => {
-  const copyToClipboardAction = createCopyToClipboardAction({ order: 1 });
+describe('createCopyToClipboardLensAction', () => {
+  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 1 });
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);
@@ -134,6 +134,25 @@ describe('Lens createCopyToClipboardAction', () => {
     it('should execute normally', async () => {
       await copyToClipboardAction.execute(context);
       expect(mockCopy).toHaveBeenCalledWith('user.name: "the value"');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should handle number coming from value count', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            columnMeta: {
+              ...columnMeta,
+              type: 'number',
+              sourceParams: {
+                type: 'value_count',
+              },
+            },
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: *');
       expect(mockSuccessToast).toHaveBeenCalled();
     });
 

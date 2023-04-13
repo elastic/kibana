@@ -34,7 +34,10 @@ export function setupLensChoroplethChart(
     try {
       emsFileLayers = await getEmsFileLayers();
     } catch (error) {
-      // ignore error, lack of EMS file layers will be surfaced in dimension editor
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Lens region map setup is unable to access administrative boundaries from Elastic Maps Service (EMS). To avoid unnecessary EMS requests, set 'map.includeElasticMapsService: false' in 'kibana.yml'. For more details please visit ${coreStart.docLinks.links.maps.connectToEms}`
+      );
     }
 
     return getVisualization({

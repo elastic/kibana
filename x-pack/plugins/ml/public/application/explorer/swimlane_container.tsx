@@ -286,12 +286,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     if (!showSwimlane) return {};
 
     const theme: PartialTheme = {
+      background: {
+        color: euiTheme.euiPanelBackgroundColorModifiers.plain,
+      },
       heatmap: {
         grid: {
-          cellHeight: {
-            min: CELL_HEIGHT,
-            max: CELL_HEIGHT,
-          },
           stroke: {
             width: BORDER_WIDTH,
             color: euiTheme.euiBorderColor,

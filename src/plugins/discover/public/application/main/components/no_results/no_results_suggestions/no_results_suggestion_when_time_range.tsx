@@ -8,27 +8,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
-export function NoResultsSuggestionWhenTimeRange() {
+export const NoResultsSuggestionWhenTimeRange: React.FC = () => {
   return (
-    <EuiDescriptionList compressed>
-      <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
-        <FormattedMessage
-          id="discover.noResults.expandYourTimeRangeTitle"
-          defaultMessage="Expand your time range"
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        <FormattedMessage
-          id="discover.noResults.queryMayNotMatchTitle"
-          defaultMessage="Try searching over a longer period of time."
-        />
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
+    <EuiText data-test-subj="discoverNoResultsTimefilter">
+      <FormattedMessage
+        id="discover.noResults.suggestion.expandTimeRangeText"
+        defaultMessage="Expand the time range"
+      />
+    </EuiText>
   );
-}
+};

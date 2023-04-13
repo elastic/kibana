@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
+import { getTestRunDetailLink } from '../common/links/test_details_link';
+import { useLocations } from '../../hooks';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { JourneyStep, Ping } from '../../../../../common/runtime_types';
 import { formatDuration } from '../../utils/formatting';
@@ -45,6 +47,8 @@ export function TestResultHeader({
     });
   }
 
+  const { getLocationByLabel } = useLocations();
+
   const summaryDoc = summaryDocs?.[0] as Ping;
 
   return (
@@ -58,7 +62,10 @@ export function TestResultHeader({
         {isCompleted ? (
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color={summaryDoc?.summary?.down! > 0 ? 'danger' : 'success'}>
+              <EuiBadge
+                color={summaryDoc?.summary?.down! > 0 ? 'danger' : 'success'}
+                css={{ maxWidth: 'max-content' }}
+              >
                 {summaryDoc?.summary?.down! > 0 ? FAILED_LABEL : COMPLETED_LABEL}
               </EuiBadge>
             </EuiFlexItem>
@@ -84,11 +91,16 @@ export function TestResultHeader({
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
-      {checkGroupId && (
+      {checkGroupId && configId && isCompleted && (
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroupId}`}
-            target="_blank"
+            data-test-subj="syntheticsTestResultHeaderLink"
+            href={getTestRunDetailLink({
+              basePath,
+              monitorId: configId,
+              checkGroup: checkGroupId,
+              locationId: getLocationByLabel(summaryDoc?.observer?.geo?.name!)?.id,
+            })}
           >
             {VIEW_DETAILS}
           </EuiLink>

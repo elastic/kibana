@@ -97,7 +97,7 @@ export const ResponseActionsForm = ({
               data-test-subj="response-actions-error"
               title={FORM_ERRORS_TITLE}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
             </EuiCallOut>

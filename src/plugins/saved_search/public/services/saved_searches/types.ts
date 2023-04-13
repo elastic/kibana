@@ -7,81 +7,14 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-}
-
-export interface DiscoverGridSettings {
-  columns?: Record<string, DiscoverGridSettingsColumn>;
-}
-
-export interface DiscoverGridSettingsColumn {
-  width?: number;
-}
-
-/** @internal **/
-export interface SavedSearchAttributes {
-  title: string;
-  sort: Array<[string, string]>;
-  columns: string[];
-  description: string;
-  grid: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
-  hideChart: boolean;
-  isTextBasedQuery: boolean;
-  usesAdHocDataView?: boolean;
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-  breakdownField?: string;
-}
-
-/** @internal **/
-export type SortOrder = [string, string];
+import { SavedSearch as SavedSearchCommon } from '../../../common';
 
 /** @public **/
-export interface SavedSearch {
-  searchSource: ISearchSource;
-  id?: string;
-  title?: string;
-  sort?: SortOrder[];
-  columns?: string[];
-  description?: string;
-  tags?: string[] | undefined;
-  grid?: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
-  hideChart?: boolean;
+export interface SavedSearch extends SavedSearchCommon {
   sharingSavedObjectProps?: {
     outcome?: ResolvedSimpleSavedObject['outcome'];
     aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
     aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
     errorJSON?: string;
   };
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-
-  // for restoring time range with a saved search
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-  breakdownField?: string;
 }

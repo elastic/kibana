@@ -7,6 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
 import { CliLog } from './log';
@@ -25,6 +26,7 @@ export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides 
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
+    repoPackages: getPackages(REPO_ROOT),
   });
 
   const config = await loadConfig({

@@ -16,7 +16,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should return a warning header', async () => {
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -108,11 +108,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutput();
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
+        outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
@@ -166,9 +166,10 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         body.forEach((response) => {
+          const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.version = 2;
+          outputRule.revision = 2;
           outputRule.actions = [
             {
               action_type_id: '.slack',
@@ -178,10 +179,11 @@ export default ({ getService }: FtrProviderContext) => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
+              uuid: bodyToCompare.actions[0].uuid,
             },
           ];
           outputRule.throttle = '1d';
-          const bodyToCompare = removeServerGeneratedProperties(response);
+
           expect(bodyToCompare).to.eql(outputRule);
         });
       });
@@ -230,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         body.forEach((response) => {
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.version = 2;
+          outputRule.revision = 2;
           outputRule.actions = [];
           outputRule.throttle = 'no_actions';
           const bodyToCompare = removeServerGeneratedProperties(response);
@@ -255,7 +257,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -283,11 +285,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutput('rule-1');
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
+        outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
@@ -312,12 +314,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it updates enabled and another property', async () => {
+      it('should change the revision of a rule when it updates enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
@@ -334,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -366,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -433,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
@@ -470,7 +472,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([

@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { ControlSelector, ControlSelectorCondition, ControlSelectorOperation } from '../../types';
+import { Selector } from '../../types';
+import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
@@ -21,22 +22,24 @@ describe('<ControlGeneralViewSelector />', () => {
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();
 
-  const mockSelector: ControlSelector = {
+  const mockSelector: Selector = {
+    type: 'file',
     name: 'mock',
-    operation: [ControlSelectorOperation.createExecutable],
+    operation: ['createExecutable'],
   };
 
-  const mockSelector2: ControlSelector = {
+  const mockSelector2: Selector = {
+    type: 'file',
     name: 'mock2',
-    operation: [ControlSelectorOperation.modifyExecutable],
+    operation: ['createExecutable', 'modifyExecutable'],
   };
 
   const WrappedComponent = ({
     selector = { ...mockSelector },
     selectors,
   }: {
-    selector?: ControlSelector;
-    selectors?: ControlSelector[];
+    selector?: Selector;
+    selectors?: Selector[];
   }) => {
     return (
       <TestProvider params={params}>
@@ -68,62 +71,79 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to add a limited set of operations', () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-selectorcondition-operation'));
-
+    getByTestId('cloud-defend-selectorcondition-operation').click();
     getByTestId('comboBoxSearchInput').focus();
 
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(options).toHaveLength(2);
-    expect(options[0].textContent).toBe(ControlSelectorOperation.modifyExecutable);
-    expect(options[1].textContent).toBe(ControlSelectorOperation.execMemFd);
+    expect(options).toHaveLength(4);
+    expect(options[0].textContent).toBe('modifyExecutable');
+    expect(options[1].textContent).toBe('createFile');
+    expect(options[2].textContent).toBe('modifyFile');
+    expect(options[3].textContent).toBe('deleteFile');
 
-    userEvent.click(options[1]); // select execMemFd
+    act(() => {
+      userEvent.click(options[3]); // select deleteFile
+    });
 
-    const updatedSelector: ControlSelector = onChange.mock.calls[0][0];
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
 
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    expect(updatedSelector.operation).toContain(ControlSelectorOperation.execMemFd);
+    expect(updatedSelector.operation).toContain('deleteFile');
 
-    // test that only 1 option is remaining
+    // test that only 3 option is remaining
     const updatedOptions = getByTestId(
       'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
     ).querySelectorAll('.euiComboBoxOption__content');
-    expect(updatedOptions).toHaveLength(1);
-    expect(updatedOptions[0].textContent).toBe(ControlSelectorOperation.modifyExecutable);
+    expect(updatedOptions).toHaveLength(3);
   });
 
   it('allows the user add additional conditions', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
-
-    userEvent.click(addConditionBtn);
+    addConditionBtn.click();
 
     const options = document.querySelectorAll('.euiContextMenuItem');
-    expect(options).toHaveLength(Object.values(ControlSelectorCondition).length - 1); // since operation is already present
+    const conditions = getSelectorConditions('file');
+    expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => userEvent.click(options[0])); // add first option "containerImageName"
+    await waitFor(() => userEvent.click(options[1])); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
-    const updatedSelector: ControlSelector = { ...onChange.mock.calls[0][0] };
+    const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(updatedSelector.containerImageName).toHaveLength(0);
 
-    userEvent.click(addConditionBtn);
+    addConditionBtn.click();
 
     const updatedOptions = document.querySelectorAll('.euiContextMenuItem');
-    expect(updatedOptions).toHaveLength(Object.values(ControlSelectorCondition).length - 2); // since operation and containerImageName are already selected
+    expect(updatedOptions).toHaveLength(conditions.length - 2); // since operation and containerImageName are already selected
     expect(updatedOptions[0]).not.toHaveTextContent('containerImageName');
+  });
+
+  it('allows the user add boolean type conditions', async () => {
+    const { getByTestId, rerender } = render(<WrappedComponent />);
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+
+    addConditionBtn.click();
+
+    const addIgnoreVolumeMounts = getByTestId('cloud-defend-addmenu-ignoreVolumeMounts');
+
+    await waitFor(() => addIgnoreVolumeMounts.click());
+
+    const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(updatedSelector.ignoreVolumeMounts).toBeTruthy();
   });
 
   it('shows an error if no conditions are added', async () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnremovecondition-operation'));
+    getByTestId('cloud-defend-btnremovecondition-operation').click();
 
-    const updatedSelector: ControlSelector = { ...onChange.mock.calls[0][0] };
+    const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
 
     rerender(<WrappedComponent selector={updatedSelector} />);
 
@@ -136,10 +156,10 @@ describe('<ControlGeneralViewSelector />', () => {
     const { getByText, getByTestId } = render(<WrappedComponent />);
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
 
-    userEvent.click(getByTestId('cloud-defend-btnremovecondition-operation'));
-    userEvent.click(addConditionBtn);
+    getByTestId('cloud-defend-btnremovecondition-operation').click();
+    addConditionBtn.click();
 
-    await waitFor(() => userEvent.click(getByText('Container image name'))); // add containerImageName
+    await waitFor(() => getByText('Container image name').click()); // add containerImageName
 
     expect(onChange.mock.calls).toHaveLength(2);
     expect(onChange.mock.calls[1][0]).toHaveProperty('containerImageName');
@@ -151,11 +171,11 @@ describe('<ControlGeneralViewSelector />', () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
-    userEvent.click(addConditionBtn);
+    addConditionBtn.click();
 
-    await waitFor(() => userEvent.click(getByText('Container image name'))); // add containerImageName
+    await waitFor(() => getByText('Container image name').click()); // add containerImageName
 
-    const updatedSelector: ControlSelector = onChange.mock.calls[0][0];
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
 
     rerender(<WrappedComponent selector={updatedSelector} />);
 
@@ -169,18 +189,18 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+    expect(getByText('"containerImageName" values cannot exceed 511 bytes')).toBeTruthy();
   });
 
   it('prevents targetFilePath conditions from having values that exceed MAX_FILE_PATH_VALUE_LENGTH_BYTES', async () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
-    userEvent.click(addConditionBtn);
+    addConditionBtn.click();
 
-    await waitFor(() => userEvent.click(getByText('Target file path')));
+    await waitFor(() => getByText('Target file path').click());
 
-    const updatedSelector: ControlSelector = onChange.mock.calls[0][0];
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
 
     rerender(<WrappedComponent selector={updatedSelector} />);
 
@@ -192,19 +212,47 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+    expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
+  });
+
+  it('shows an error if condition values fail their pattern regex', async () => {
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Container image name').click()); // add containerImageName
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-containerImageName').querySelector(
+      'input'
+    );
+
+    if (el) {
+      userEvent.type(el, 'bad*imagename{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+
+    expect(getByText(expectedError)).toBeTruthy();
   });
 
   it('allows the user to remove conditions', async () => {
-    const selector: ControlSelector = {
+    const selector: Selector = {
+      type: 'file',
       name: 'mock3',
-      operation: [ControlSelectorOperation.createExecutable],
+      operation: ['createExecutable'],
       containerImageTag: ['test'],
     };
 
     const { getByTestId } = render(<WrappedComponent selector={selector} />);
 
-    userEvent.click(getByTestId('cloud-defend-btnremovecondition-operation'));
+    getByTestId('cloud-defend-btnremovecondition-operation').click();
     expect(onChange.mock.calls).toHaveLength(1);
     expect(onChange.mock.calls[0][0]).not.toHaveProperty('operation');
   });
@@ -212,9 +260,9 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to remove the selector (unless its the last one)', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
     const btnSelectorPopover = getByTestId('cloud-defend-btnselectorpopover');
-    userEvent.click(btnSelectorPopover);
+    btnSelectorPopover.click();
 
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btndeleteselector')));
+    await waitFor(() => getByTestId('cloud-defend-btndeleteselector').click());
 
     expect(onRemove.mock.calls).toHaveLength(1);
     expect(onRemove.mock.calls[0][0]).toEqual(0);
@@ -224,17 +272,17 @@ describe('<ControlGeneralViewSelector />', () => {
     rerender(<WrappedComponent selector={mockSelector} selectors={[mockSelector]} />);
 
     // try and delete again, and ensure the last selector can't be deleted.
-    userEvent.click(btnSelectorPopover);
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btndeleteselector')));
+    btnSelectorPopover.click();
+    await waitFor(() => getByTestId('cloud-defend-btndeleteselector').click());
     expect(onRemove.mock.calls).toHaveLength(0);
   });
 
   it('allows the user to duplicate the selector', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const btnSelectorPopover = getByTestId('cloud-defend-btnselectorpopover');
-    userEvent.click(btnSelectorPopover);
+    btnSelectorPopover.click();
 
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnduplicateselector')));
+    await waitFor(() => getByTestId('cloud-defend-btnduplicateselector').click());
 
     expect(onDuplicate.mock.calls).toHaveLength(1);
     expect(onDuplicate.mock.calls[0][0]).toEqual(mockSelector);

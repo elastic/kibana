@@ -62,6 +62,8 @@
   @include kbnAffordForHeader($kbnHeaderOffset);
 
   &.kbnBody--hasHeaderBanner {
+    padding-top: $kbnHeaderBannerHeight;
+
     @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
 
     // Prevents banners from covering full screen data grids

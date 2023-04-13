@@ -38,8 +38,11 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./user_profiles/get_current'));
 
     // Internal routes
+    loadTestFile(require.resolve('./internal/get_user_action_stats'));
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
     loadTestFile(require.resolve('./internal/get_connectors'));
+    loadTestFile(require.resolve('./internal/user_actions_get_users'));
+    loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
 
     // Common
     loadTestFile(require.resolve('../common'));

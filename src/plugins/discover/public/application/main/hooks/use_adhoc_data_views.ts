@@ -63,7 +63,7 @@ export const useAdHocDataViews = ({
       updateFiltersReferences(prevDataView, newDataView);
 
       stateContainer.actions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-      await stateContainer.replaceUrlAppState({ index: newDataView.id });
+      await stateContainer.appState.update({ index: newDataView.id }, true);
 
       setUrlTracking(newDataView);
       return newDataView;

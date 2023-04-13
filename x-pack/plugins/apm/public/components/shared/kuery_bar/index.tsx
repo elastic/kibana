@@ -151,7 +151,7 @@ export function KueryBar(props: {
         return;
       }
 
-      if (typeof props.onSubmit === 'function') {
+      if (props.onSubmit) {
         props.onSubmit(inputValue.trim());
         return;
       }

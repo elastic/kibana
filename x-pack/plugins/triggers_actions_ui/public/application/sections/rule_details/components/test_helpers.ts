@@ -54,6 +54,7 @@ export function mockRule(overloads: Partial<Rule> = {}): Rule {
     notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
+    revision: 0,
     executionStatus: {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),

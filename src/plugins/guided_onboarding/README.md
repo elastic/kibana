@@ -2,9 +2,11 @@
 
 This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. 
 
-The guided onboarding plugin includes a client-side code for the UI and the server-side code for the internal API. The server-side code is not intended for external use. 
+The guided onboarding plugin includes a client-side code for the UI and the server-side code for the internal API.  
 
-The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins.
+The client-side code registers a button in the Kibana header that controls the guided onboarding panel (checklist) depending on the current state. There is also an API service exposed from the client-side start contract. The API service is intended for external use by other plugins that need to react to the guided onboarding state, for example hide or display UI elements if a guide step is active.
+
+Besides the internal API routes, the server-side code also exposes a function to register guide configs from the server-side setup start contract. This function is intended for external use by any plugin that need to add a new guide or modify an existing one. 
 
 ---
 ## Current functionality
@@ -106,3 +108,13 @@ The guided onboarding exposes a function `registerGuideConfig(guideId: GuideId, 
 - observability: `x-pack/plugins/observability/server/plugin.ts`
 - security solution: `x-pack/plugins/security_solution/server/plugin.ts`
 
+
+## Adding a new guide
+Follow these simple steps to add a new guide to the guided onboarding framework. For more detailed information about framework functionality and architecture and about API services exposed by the plugin, please read the full readme.
+
+1.  Declare the `guidedOnboarding` plugin as a dependency in your plugin's `kibana.json` file. Add the guided onboarding plugin's client-side start contract to your plugin's client-side start dependencies and the guided onboarding plugin's server-side setup contract to your plugin's server-side dependencies.
+2.  Define the configuration for your guide. At a high level, this includes a title, description, and list of steps. See this [example config](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/common/test_guide_config.ts) or consult the `GuideConfig` interface.
+3. Register your guide during your plugin's server-side setup by calling a function exposed by the guided onboarding plugin: `registerGuideConfig(guideId: GuideId, guideConfig: GuideConfig)`. For an example, see this [example plugin](https://github.com/elastic/kibana/blob/main/examples/guided_onboarding_example/server/plugin.ts).
+4. Update the cards on the landing page to include your guide in the use case selection. Make sure that the card doesn't have the property `navigateTo` because that is only used for cards that redirect to Kibana pages and don't start a guide. Also add the same value to the property `guideId` as used in the guide config. Landing page cards are configured in this [kbn-guided-onboarding package](https://github.com/elastic/kibana/blob/main/packages/kbn-guided-onboarding/src/components/landing_page/guide_cards.constants.tsx).
+5. Integrate the new guide into your Kibana pages by using the guided onboarding client-side API service. Make sure your Kibana pages correctly display UI elements depending on the active guide step and the UI flow is straight forward to complete the guide. See existing guides for an example and read more about the API service in this file, the section "Client-side: API service".
+6. Optionally, update the example plugin's [form](https://github.com/elastic/kibana/blob/main/examples/guided_onboarding_example/public/components/main.tsx#L38) to be able to start your guide from that page and activate any step in your guide (useful to test your guide steps). 

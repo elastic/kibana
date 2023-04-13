@@ -10,10 +10,12 @@
         "names": ["*"],
         "privileges": ["read"]
       }
-    ]
+    ],
+    "run_as": []
   },
   "kibana": [
     {
+      "base": [],
       "feature": {
         "discover": ["all"],
         "infrastructure": ["read"],

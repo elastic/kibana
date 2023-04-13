@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           type: 'shard_failure',
           message: '2 of 4 shards failed',
           reason: { reason: shardFailureReason, type: shardFailureType },
-          text: 'The data you are seeing might be incomplete or wrong.',
+          text: 'The data might be incomplete or wrong.',
         },
       ]);
     });

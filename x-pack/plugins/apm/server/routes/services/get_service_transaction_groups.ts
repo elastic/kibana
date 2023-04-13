@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
-import { APMConfig } from '../..';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '../../lib/helpers/transaction_error_rate';
 
 const txGroupsDroppedBucketName = '_other';
 
@@ -39,37 +37,53 @@ export type ServiceOverviewTransactionGroupSortField =
   | 'errorRate'
   | 'impact';
 
+export interface ServiceTransactionGroupsResponse {
+  transactionGroups: Array<{
+    transactionType: string;
+    name: string;
+    latency: number | null;
+    throughput: number;
+    errorRate: number;
+    impact: number;
+  }>;
+  maxTransactionGroupsExceeded: boolean;
+  transactionOverflowCount: number;
+}
+
 export async function getServiceTransactionGroups({
   environment,
   kuery,
   serviceName,
-  config,
   apmEventClient,
-  searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
   start,
   end,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  config: APMConfig;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
-}) {
-  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
+  documentType: ApmTransactionDocumentType;
+  rollupInterval: RollupInterval;
+}): Promise<ServiceTransactionGroupsResponse> {
+  const field = getDurationFieldForTransactions(documentType);
 
   const response = await apmEventClient.search(
     'get_service_transaction_groups',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
@@ -87,9 +101,6 @@ export async function getServiceTransactionGroups({
                   ],
                 },
               },
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -114,12 +125,7 @@ export async function getServiceTransactionGroups({
                 sum: { field },
               },
               ...getLatencyAggregation(latencyAggregationType, field),
-              [EVENT_OUTCOME]: {
-                terms: {
-                  field: EVENT_OUTCOME,
-                  include: [EventOutcome.failure, EventOutcome.success],
-                },
-              },
+              ...getOutcomeAggregation(documentType),
             },
           },
         },
@@ -131,7 +137,7 @@ export async function getServiceTransactionGroups({
 
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateFailedTransactionRate(bucket[EVENT_OUTCOME]);
+      const errorRate = calculateFailedTransactionRate(bucket);
 
       const transactionGroupTotalDuration =
         bucket.transaction_group_total_duration.value || 0;

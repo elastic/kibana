@@ -13,6 +13,7 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 
 import type { RawBucket } from '../types';
 
@@ -28,7 +29,10 @@ export const getMaxRiskSubAggregations = (
   buckets: RawBucket[]
 ): Record<string, number | undefined> =>
   buckets.reduce<Record<string, number | undefined>>(
-    (acc, x) => ({ ...acc, [x.key]: x.maxRiskSubAggregation?.value ?? undefined }),
+    (acc, x) => ({
+      ...acc,
+      [firstNonNullValue(x.key) ?? '']: x.maxRiskSubAggregation?.value ?? undefined,
+    }),
     {}
   );
 

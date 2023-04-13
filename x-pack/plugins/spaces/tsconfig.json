@@ -27,6 +27,10 @@
     "@kbn/test",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-saved-objects-common",
+    "@kbn/shared-ux-router",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-common",
   ],
   "exclude": [
     "target/**/*",

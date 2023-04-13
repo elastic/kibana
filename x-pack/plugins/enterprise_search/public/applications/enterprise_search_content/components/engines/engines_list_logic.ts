@@ -11,8 +11,10 @@ import { Status } from '../../../../../common/types/api';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
+import { Page } from '../../../../../common/types/pagination';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
@@ -26,13 +28,13 @@ import {
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
+import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';
 
 interface EuiBasicTableOnChange {
   page: { index: number };
 }
 
-type EnginesListActions = Pick<
+export type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
@@ -45,27 +47,43 @@ type EnginesListActions = Pick<
   fetchEngines(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
+    engine: EnterpriseSearchEngine;
+  };
   openEngineCreate(): void;
+  setIsFirstRequest(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
+
 interface EngineListValues {
   createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
   deleteStatus: typeof DeleteEngineAPILogic.values.status;
+  hasNoEngines: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
+  isFirstRequest: boolean;
   isLoading: boolean;
-  meta: Meta;
-  parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  meta: Page;
+  parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
+  actions: {
+    closeDeleteEngineModal: true,
+    closeEngineCreate: true,
+    fetchEngines: true,
+    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
+    openDeleteEngineModal: (engine) => ({ engine }),
+    openEngineCreate: true,
+    setIsFirstRequest: true,
+    setSearchQuery: (searchQuery: string) => ({ searchQuery }),
+  },
   connect: {
     actions: [
       FetchEnginesAPILogic,
@@ -80,16 +98,18 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       ['status as deleteStatus'],
     ],
   },
-  actions: {
-    closeDeleteEngineModal: true,
-    closeEngineCreate: true,
-    fetchEngines: true,
-    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
-    openDeleteEngineModal: (engine) => ({ engine }),
-    openEngineCreate: true,
-    setSearchQuery: (searchQuery: string) => ({ searchQuery }),
-  },
+  listeners: ({ actions, values }) => ({
+    deleteSuccess: () => {
+      actions.closeDeleteEngineModal();
+      actions.fetchEngines();
+    },
+    fetchEngines: async () => {
+      actions.makeRequest(values.parameters);
+    },
+  }),
+
   path: ['enterprise_search', 'content', 'engine_list_logic'],
+
   reducers: ({}) => ({
     createEngineFlyoutOpen: [
       false,
@@ -113,12 +133,22 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: () => true,
       },
     ],
+    isFirstRequest: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+        setIsFirstRequest: () => true,
+      },
+    ],
 
     parameters: [
-      { meta: DEFAULT_META },
+      { count: 0, meta: DEFAULT_META },
       {
-        apiSuccess: (_, { meta }) => ({
-          meta,
+        apiSuccess: (state, { count }) => ({
+          ...state,
+          count,
+          meta: updateMetaTotalState(state.meta, count), // update total count from response
         }),
         onPaginate: (state, { pageNumber }) => ({
           ...state,
@@ -139,25 +169,22 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   }),
   selectors: ({ selectors }) => ({
     deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+    hasNoEngines: [
+      () => [selectors.data, selectors.results],
+      (data: EngineListValues['data'], results: EngineListValues['results']) =>
+        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+    ],
 
     isDeleteLoading: [
       () => [selectors.deleteStatus],
       (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
     ],
     isLoading: [
-      () => [selectors.status],
-      (status: EngineListValues['status']) => [Status.LOADING, Status.IDLE].includes(status),
+      () => [selectors.status, selectors.isFirstRequest],
+      (status: EngineListValues['status'], isFirstRequest: EngineListValues['isFirstRequest']) =>
+        [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
-    results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
-  }),
-  listeners: ({ actions, values }) => ({
-    deleteSuccess: () => {
-      actions.closeDeleteEngineModal();
-      actions.fetchEngines();
-    },
-    fetchEngines: async () => {
-      actions.makeRequest(values.parameters);
-    },
+    results: [() => [selectors.data], (data) => data?.results ?? []],
   }),
 });

@@ -25,15 +25,11 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
 import { OperationDefinition } from '..';
-import {
-  FieldBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-  IncompleteColumn,
-} from '../column_types';
+import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -187,10 +183,7 @@ export const termsOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
     const messages = [
-      ...(getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumn,
-        indexPattern
-      ) || []),
+      ...(getInvalidFieldMessage(layer, columnId, indexPattern) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean);

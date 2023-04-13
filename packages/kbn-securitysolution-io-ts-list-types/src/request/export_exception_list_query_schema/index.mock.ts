@@ -14,4 +14,5 @@ export const getExportExceptionListQuerySchemaMock = (): ExportExceptionListQuer
   id: ID,
   list_id: LIST_ID,
   namespace_type: NAMESPACE_TYPE,
+  include_expired_exceptions: 'true',
 });

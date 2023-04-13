@@ -8,22 +8,18 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
   onCancel: () => void;
-  onDeleting: () => void;
-  onDeleted: () => void;
 }
 
 export function SloDeleteConfirmationModal({
   slo: { id, name },
   onCancel,
-  onDeleting,
-  onDeleted,
 }: SloDeleteConfirmationModalProps) {
   const {
     notifications: { toasts },
@@ -31,24 +27,19 @@ export function SloDeleteConfirmationModal({
 
   const [isVisible, setIsVisible] = useState(true);
 
-  const { deleteSlo, success, loading, error } = useDeleteSlo();
+  const { mutate: deleteSlo, isSuccess, isError } = useDeleteSlo(id);
 
-  if (loading) {
-    onDeleting();
-  }
-
-  if (success) {
+  if (isSuccess) {
     toasts.addSuccess(getDeleteSuccesfulMessage(name));
-    onDeleted();
   }
 
-  if (error) {
+  if (isError) {
     toasts.addDanger(getDeleteFailMessage(name));
   }
 
   const handleConfirm = () => {
     setIsVisible(false);
-    deleteSlo(id);
+    deleteSlo({ id });
   };
 
   return isVisible ? (
@@ -61,7 +52,7 @@ export function SloDeleteConfirmationModal({
       onCancel={onCancel}
       onConfirm={handleConfirm}
     >
-      {i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.descriptionText', {
+      {i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.descriptionText', {
         defaultMessage: "You can't recover {name} after deleting.",
         values: { name },
       })}
@@ -70,24 +61,24 @@ export function SloDeleteConfirmationModal({
 }
 
 const getTitle = () =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.title', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.title', {
     defaultMessage: 'Are you sure?',
   });
 
 const getCancelButtonText = () =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.cancelButtonLabel', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   });
 
 const getConfirmButtonText = (name: string) =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.deleteButtonLabel', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.deleteButtonLabel', {
     defaultMessage: 'Delete {name}',
     values: { name },
   });
 
 const getDeleteSuccesfulMessage = (name: string) =>
   i18n.translate(
-    'xpack.observability.slos.slo.deleteConfirmationModal.successNotification.descriptionText',
+    'xpack.observability.slo.slo.deleteConfirmationModal.successNotification.descriptionText',
     {
       defaultMessage: 'Deleted {name}',
       values: { name },
@@ -96,7 +87,7 @@ const getDeleteSuccesfulMessage = (name: string) =>
 
 const getDeleteFailMessage = (name: string) =>
   i18n.translate(
-    'xpack.observability.slos.slo.deleteConfirmationModal.errorNotification.descriptionText',
+    'xpack.observability.slo.slo.deleteConfirmationModal.errorNotification.descriptionText',
     {
       defaultMessage: 'Failed to delete {name}',
       values: { name },

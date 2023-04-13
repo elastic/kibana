@@ -54,12 +54,41 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          summary: {
+            properties: {
+              new: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              ongoing: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              recovered: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
       alert: {
         properties: {
           flapping: {
             type: 'boolean',
+          },
+          uuid: {
+            type: 'keyword',
+            ignore_above: 1024,
           },
           rule: {
             properties: {
@@ -202,6 +231,10 @@ exports.EcsCustomPropertyMappings = {
           },
           execution: {
             properties: {
+              source: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
               uuid: {
                 ignore_above: 1024,
                 type: 'keyword',

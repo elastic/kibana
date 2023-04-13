@@ -43,8 +43,14 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       await this.waitForMonitorManagementLoadingToFinish();
     },
 
-    async navigateToOverview(doLogin = false) {
-      await page.goto(overview, { waitUntil: 'networkidle' });
+    async navigateToOverview(doLogin = false, refreshInterval?: number) {
+      if (refreshInterval) {
+        await page.goto(`${overview}?refreshInterval=${refreshInterval}`, {
+          waitUntil: 'networkidle',
+        });
+      } else {
+        await page.goto(overview, { waitUntil: 'networkidle' });
+      }
       if (doLogin) {
         await this.loginToKibana();
       }
@@ -86,6 +92,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       if (doLogin) {
         await this.loginToKibana();
       }
+      await page.waitForSelector('h1:has-text("Settings")');
     },
 
     async navigateToAddMonitor() {
@@ -98,10 +105,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       await page.isVisible('[data-test-subj=monitorSettingsSection]');
     },
 
-    async confirmAndSave() {
+    async confirmAndSave(isUpdate: boolean = false) {
       await this.ensureIsOnMonitorConfigPage();
       await this.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-      return await this.findByText('Monitor added successfully.');
+      return await this.findByText(
+        isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.'
+      );
     },
 
     async deleteMonitors() {

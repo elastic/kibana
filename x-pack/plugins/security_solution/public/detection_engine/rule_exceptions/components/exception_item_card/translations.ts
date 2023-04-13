@@ -49,6 +49,20 @@ export const EXCEPTION_ITEM_UPDATED_LABEL = i18n.translate(
   }
 );
 
+export const EXCEPTION_ITEM_EXPIRES_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.expiresLabel',
+  {
+    defaultMessage: 'Expires at',
+  }
+);
+
+export const EXCEPTION_ITEM_EXPIRED_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.expiredLabel',
+  {
+    defaultMessage: 'Expired at',
+  }
+);
+
 export const EXCEPTION_ITEM_META_BY = i18n.translate(
   'xpack.securitySolution.ruleExceptions.exceptionItem.metaDetailsBy',
   {

@@ -28,6 +28,7 @@ interface Props {
   value?: string | null;
   placeholder?: string;
   curryLoadSuggestions?: CurryLoadSuggestionsType;
+  compressed?: boolean;
 }
 
 function validateQuery(query: string) {
@@ -46,6 +47,7 @@ export const MetricsExplorerKueryBar = ({
   value,
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
+  compressed,
 }: Props) => {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
@@ -81,6 +83,7 @@ export const MetricsExplorerKueryBar = ({
     <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
+          compressed={compressed}
           aria-label={placeholder}
           isLoadingSuggestions={isLoadingSuggestions}
           isValid={isValid}

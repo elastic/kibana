@@ -79,3 +79,4 @@ export type {
   IndexPatternLoadExpressionFunctionDefinition,
 } from './expressions';
 export { getIndexPatternLoadMeta } from './expressions';
+export { DataViewMissingIndices } from './lib/errors';

@@ -8,7 +8,8 @@
 
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
-import { Route, Switch, useLocation } from 'react-router-dom';
+import { Switch, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';

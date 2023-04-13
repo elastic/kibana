@@ -22,12 +22,11 @@ interface ProfilingStackTraces {
   [key: string]: ProfilingStackTrace;
 }
 
-interface ProfilingStackFrame {
-  ['file_name']: string | undefined;
-  ['function_name']: string;
-  ['function_offset']: number | undefined;
-  ['line_number']: number | undefined;
-  ['source_type']: number | undefined;
+export interface ProfilingStackFrame {
+  ['file_name']: string[];
+  ['function_name']: string[];
+  ['function_offset']: number[];
+  ['line_number']: number[];
 }
 
 interface ProfilingStackFrames {

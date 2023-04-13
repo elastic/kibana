@@ -28,6 +28,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('APMSection', () => {
+  const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
+
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
@@ -46,7 +48,6 @@ describe('APMSection', () => {
     const config = {
       unsafe: {
         alertDetails: {
-          apm: { enabled: false },
           logs: { enabled: false },
           metrics: { enabled: false },
           uptime: { enabled: false },
@@ -81,7 +82,7 @@ describe('APMSection', () => {
       refetch: jest.fn(),
     });
     const { getByRole, getByText, queryAllByTestId } = render(
-      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+      <APMSection bucketSize={bucketSize} />
     );
 
     expect(getByRole('heading')).toHaveTextContent('Services');
@@ -98,7 +99,7 @@ describe('APMSection', () => {
       refetch: jest.fn(),
     });
     const { getByRole, getByText, queryAllByTestId } = render(
-      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+      <APMSection bucketSize={bucketSize} />
     );
 
     expect(getByRole('heading')).toHaveTextContent('Services');
@@ -114,7 +115,7 @@ describe('APMSection', () => {
       refetch: jest.fn(),
     });
     const { getByRole, queryAllByText, getByTestId } = render(
-      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+      <APMSection bucketSize={bucketSize} />
     );
 
     expect(getByRole('heading')).toHaveTextContent('Services');

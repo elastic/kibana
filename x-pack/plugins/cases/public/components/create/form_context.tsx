@@ -22,7 +22,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
@@ -43,7 +43,7 @@ interface Props {
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
-  onSuccess?: (theCase: Case) => Promise<void>;
+  onSuccess?: (theCase: Case) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
@@ -55,10 +55,11 @@ export const FormContext: React.FC<Props> = ({
   attachments,
   initialValue,
 }) => {
-  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
+  const { data: connectors = [], isLoading: isLoadingConnectors } =
+    useGetSupportedActionConnectors();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
-  const { postCase } = usePostCase();
+  const { mutateAsync: postCase } = usePostCase();
   const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
@@ -83,48 +84,50 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        const updatedCase = await postCase({
-          ...userFormData,
-          connector: connectorToUpdate,
-          settings: { syncAlerts },
-          owner: selectedOwner ?? owner[0],
+        const theCase = await postCase({
+          request: {
+            ...userFormData,
+            connector: connectorToUpdate,
+            settings: { syncAlerts },
+            owner: selectedOwner ?? owner[0],
+          },
         });
 
         // add attachments to the case
-        if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
+        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
-            caseId: updatedCase.id,
-            caseOwner: updatedCase.owner,
+            caseId: theCase.id,
+            caseOwner: theCase.owner,
             data: attachments,
           });
         }
 
-        if (afterCaseCreated && updatedCase) {
-          await afterCaseCreated(updatedCase, createAttachments);
+        if (afterCaseCreated && theCase) {
+          await afterCaseCreated(theCase, createAttachments);
         }
 
-        if (updatedCase?.id && connectorToUpdate.id !== 'none') {
+        if (theCase?.id && connectorToUpdate.id !== 'none') {
           await pushCaseToExternalService({
-            caseId: updatedCase.id,
+            caseId: theCase.id,
             connector: connectorToUpdate,
           });
         }
 
-        if (onSuccess && updatedCase) {
-          await onSuccess(updatedCase);
+        if (onSuccess && theCase) {
+          onSuccess(theCase);
         }
       }
     },
     [
-      appId,
-      startTransaction,
       isSyncAlertsEnabled,
       connectors,
+      startTransaction,
+      appId,
+      attachments,
       postCase,
       owner,
       afterCaseCreated,
       onSuccess,
-      attachments,
       createAttachments,
       pushCaseToExternalService,
     ]

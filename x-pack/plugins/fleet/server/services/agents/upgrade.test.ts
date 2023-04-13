@@ -8,12 +8,22 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { appContextService } from '../app_context';
-
+import type { Agent } from '../../types';
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { sendUpgradeAgentsActions } from './upgrade';
 import { createClientMock } from './action.mock';
-import { getRollingUpgradeOptions } from './upgrade_action_runner';
+import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner';
+
+jest.mock('./action_status', () => {
+  return {
+    getCancelledActions: jest.fn().mockResolvedValue([
+      {
+        actionId: 'cancelled-action',
+      },
+    ]),
+  };
+});
 
 describe('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
@@ -101,6 +111,14 @@ describe('sendUpgradeAgentsActions (plural)', () => {
       expect(doc).toHaveProperty('upgrade_started_at');
       expect(doc.upgraded_at).toEqual(null);
     }
+  });
+
+  it('skip upgrade if action id is cancelled', async () => {
+    const { soClient, esClient, agentInRegularDoc } = createClientMock();
+    const agents = [{ id: agentInRegularDoc._id } as Agent];
+    await upgradeBatch(soClient, esClient, agents, {}, {
+      actionId: 'cancelled-action',
+    } as any);
   });
 });
 

@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
@@ -28,8 +29,8 @@ export const getLogEntryCategoryExamplesRequestPayloadRT = rt.type({
     categoryId: rt.number,
     // the number of examples to fetch
     exampleCount: rt.number,
-    // the id of the source configuration
-    sourceId: rt.string,
+    // log view
+    logView: persistedLogViewReferenceRT,
     // the time range to fetch the category examples from
     timeRange: timeRangeRT,
   }),

@@ -111,7 +111,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 defaultMessage="This user is deprecated."
               />
             }
-            iconType="alert"
+            iconType="warning"
             color="warning"
           >
             {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'")}

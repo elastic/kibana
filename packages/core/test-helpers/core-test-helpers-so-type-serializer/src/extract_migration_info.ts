@@ -20,6 +20,15 @@ export interface SavedObjectTypeMigrationInfo {
   schemaVersions: string[];
   mappings: Record<string, unknown>;
   hasExcludeOnUpgrade: boolean;
+  modelVersions: ModelVersionSummary[];
+  switchToModelVersionAt?: string;
+}
+
+export interface ModelVersionSummary {
+  version: string;
+  changeType: string;
+  hasMigration: boolean;
+  newMappings: string[];
 }
 
 /**
@@ -37,6 +46,21 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   const schemaVersions = Object.keys(schemaMap ?? {});
   schemaVersions.sort(semverCompare);
 
+  const modelVersionMap =
+    typeof soType.modelVersions === 'function'
+      ? soType.modelVersions()
+      : soType.modelVersions ?? {};
+  const modelVersionIds = Object.keys(modelVersionMap);
+  const modelVersions = modelVersionIds.map((version) => {
+    const entry = modelVersionMap[version];
+    return {
+      version,
+      changeType: entry.modelChange.type,
+      hasMigration: !!entry.modelChange.transformation,
+      newMappings: Object.keys(getFlattenedObject(entry.modelChange.addedMappings ?? {})),
+    };
+  });
+
   return {
     name: soType.name,
     namespaceType: soType.namespaceType,
@@ -46,5 +70,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     schemaVersions,
     mappings: getFlattenedObject(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
+    modelVersions,
+    switchToModelVersionAt: soType.switchToModelVersionAt,
   };
 };

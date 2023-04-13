@@ -109,6 +109,7 @@ describe('loadRule', () => {
             "params": Object {
               "message": "alert 37: {{context.message}}",
             },
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": ".index-threshold",
@@ -131,6 +132,7 @@ describe('loadRule', () => {
         "params": Object {
           "x": 42,
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },
@@ -267,6 +269,7 @@ function getApiRule() {
     updated_by: '2889684073',
     mute_all: false,
     muted_alert_ids: [],
+    revision: 0,
     schedule: {
       interval: '1s',
     },
@@ -278,6 +281,7 @@ function getApiRule() {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        uuid: '123-456',
       },
     ],
     params: { x: 42 },
@@ -319,6 +323,7 @@ function getRule(): Rule<{ x: number }> {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        uuid: '123-456',
       },
     ],
     params: { x: 42 },
@@ -330,5 +335,6 @@ function getRule(): Rule<{ x: number }> {
       lastExecutionDate: RuleExecuteDate,
       lastDuration: 1194,
     },
+    revision: 0,
   };
 }

@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 import React, { FunctionComponent, useState, useEffect } from 'react';
-import { buildPhrasesFilter, PhraseFilter } from '@kbn/es-query';
+import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -81,7 +81,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
       const dataView = await getDeprecationDataView(dataService);
       const field = dataView.getFieldByName(DEPRECATION_LOGS_ORIGIN_FIELD);
 
-      let filters: PhraseFilter[] = [];
+      let filters: PhrasesFilter[] = [];
 
       if (field !== undefined) {
         const filter = buildPhrasesFilter(field!, [...APPS_WITH_DEPRECATION_LOGS], dataView);

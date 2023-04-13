@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-markdown-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds a markdown visualization type",
+  "plugin": {
+    "id": "visTypeMarkdown",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "visualizations"
+    ],
+    "requiredBundles": [
+      "expressions",
+      "kibanaReact",
+      "visDefaultEditor",
+      "visualizations"
+    ]
+  }
+}

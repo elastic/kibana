@@ -11,13 +11,14 @@ import { JourneyStepScreenshotContainer } from './journey_step_screenshot_contai
 import { render } from '../../../utils/testing';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 
 jest.mock('@kbn/observability-plugin/public');
 
 jest.setTimeout(10 * 1000);
 
-const imgPath1 = '/internal/uptime/journey/screenshot/test-check-group/1';
-const imgPath2 = '/internal/uptime/journey/screenshot/test-check-group/2';
+const imgPath1 = getScreenshotUrl({ basePath: '', checkGroup: 'test-check-group', stepNumber: 1 });
+const imgPath2 = getScreenshotUrl({ basePath: '', checkGroup: 'test-check-group', stepNumber: 2 });
 const testImageDataResult = {
   [imgPath1]: {
     attempts: 1,
@@ -83,7 +84,8 @@ describe('JourneyStepScreenshotContainer', () => {
     );
 
     const img = getByAltText('First step');
-    const euiPopoverMessage = 'You are in a dialog. To close this dialog, hit escape.';
+    const euiPopoverMessage =
+      'You are in a dialog. Press Escape, or tap/click outside the dialog to close.';
     expect(queryByText(euiPopoverMessage)).toBeNull();
     fireEvent.mouseEnter(img);
     await waitFor(() => getByText(euiPopoverMessage));

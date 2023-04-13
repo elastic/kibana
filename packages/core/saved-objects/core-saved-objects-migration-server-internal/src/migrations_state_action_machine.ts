@@ -8,72 +8,18 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Option from 'fp-ts/lib/Option';
-import type { Logger, LogMeta } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
-
-interface StateTransitionLogMeta extends LogMeta {
-  kibana: {
-    migrations: {
-      state: State;
-      duration: number;
-    };
-  };
-}
-
-const logStateTransition = (
-  logger: Logger,
-  logMessagePrefix: string,
-  prevState: State,
-  currState: State,
-  tookMs: number
-) => {
-  if (currState.logs.length > prevState.logs.length) {
-    currState.logs.slice(prevState.logs.length).forEach(({ message, level }) => {
-      switch (level) {
-        case 'error':
-          return logger.error(logMessagePrefix + message);
-        case 'warning':
-          return logger.warn(logMessagePrefix + message);
-        case 'info':
-          return logger.info(logMessagePrefix + message);
-        default:
-          throw new Error(`unexpected log level ${level}`);
-      }
-    });
-  }
-
-  logger.info(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`
-  );
-  logger.debug<StateTransitionLogMeta>(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`,
-    {
-      kibana: {
-        migrations: {
-          state: currState,
-          duration: tookMs,
-        },
-      },
-    }
-  );
-};
-
-const logActionResponse = (
-  logger: Logger,
-  logMessagePrefix: string,
-  state: State,
-  res: unknown
-) => {
-  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
-};
+import { redactBulkOperationBatches } from './common/redact_state';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -128,9 +74,9 @@ export async function migrationStateActionMachine({
             ),
           },
           ...{
-            transformedDocBatches: (
-              (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
-            ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
+            bulkOperationBatches: redactBulkOperationBatches(
+              (newState as ReindexSourceToTempIndexBulk).bulkOperationBatches ?? [[]]
+            ),
           },
         };
 

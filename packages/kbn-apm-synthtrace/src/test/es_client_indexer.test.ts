@@ -72,7 +72,7 @@ describe('Synthtrace ES Client indexer', () => {
 
     const events = await toArray(datasource);
 
-    expect(events.length).toBe(24);
+    expect(events.length).toMatchInlineSnapshot(`33`);
 
     const mapped = events.map((event) =>
       pick(event, '@timestamp', 'processor.event', 'metricset.name')

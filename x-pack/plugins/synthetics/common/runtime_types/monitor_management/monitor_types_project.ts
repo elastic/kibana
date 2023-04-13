@@ -46,6 +46,7 @@ export const ProjectMonitorCodec = t.intersection([
     max_redirects: t.string,
     wait: t.string,
     hash: t.string,
+    namespace: t.string,
   }),
 ]);
 

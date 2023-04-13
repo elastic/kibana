@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { random } from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -143,15 +144,13 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleOneTimeTaskTimingOut: {
-        title: 'Sample One-Time Task that Times Out',
-        description: 'A sample task that times out each run.',
+      sampleOneTimeTaskThrowingError: {
+        title: 'Sample One-Time Task that throws an error',
+        description: 'A sample task that throws an error each run.',
         maxAttempts: 3,
-        timeout: '1s',
-        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            throwRetryableError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
           },
         }),
       },

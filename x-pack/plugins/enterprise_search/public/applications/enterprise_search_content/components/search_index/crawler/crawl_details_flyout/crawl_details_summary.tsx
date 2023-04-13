@@ -14,12 +14,17 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { CrawlRequestStats } from '../../../../api/crawler/types';
 
@@ -39,10 +44,11 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
   const duration = () => {
     if (stats?.status?.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');
+      const days = milliseconds.days();
       const hours = milliseconds.hours();
       const minutes = milliseconds.minutes();
       const seconds = milliseconds.seconds();
-      return `${hours}h ${minutes}m ${seconds}s`;
+      return `${days ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
     } else {
       return '--';
     }
@@ -236,13 +242,20 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
         <EuiText size="xs" textAlign="center" data-test-subj="logsDisabledMessage">
           <EuiSpacer size="m" />
           <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
-              {
-                defaultMessage:
-                  'Enable Web Crawler logs in settings for more detailed crawl statistics.',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage"
+              defaultMessage="{configLink} in your enterprise-search.yml or user settings for more detailed crawl statistics."
+              values={{
+                configLink: (
+                  <EuiLink href={docLinks.enterpriseSearchConfig} external>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.configLink',
+                      { defaultMessage: 'Enable web crawler logs' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
       )}

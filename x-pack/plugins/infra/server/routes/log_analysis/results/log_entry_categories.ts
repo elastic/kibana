@@ -31,7 +31,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
         data: {
           categoryCount,
           histograms,
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
           datasets,
           sort,
@@ -43,7 +43,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
 
         const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
           { infra: await infraMlContext.infra },
-          sourceId,
+          logView,
           startTime,
           endTime,
           categoryCount,

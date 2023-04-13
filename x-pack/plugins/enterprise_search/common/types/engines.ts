@@ -8,31 +8,48 @@
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
-  meta: {
-    from: number;
-    size: number;
-    total: number;
-  };
+  count: number;
+  params: { from: number; q?: string; size: number };
   results: EnterpriseSearchEngine[];
 }
 
 export interface EnterpriseSearchEngine {
-  created: string;
   indices: string[];
   name: string;
-  updated: string;
+  updated_at_millis: number;
 }
 
 export interface EnterpriseSearchEngineDetails {
-  created: string;
   indices: EnterpriseSearchEngineIndex[];
   name: string;
-  updated: string;
+  updated_at_millis: number;
 }
 
 export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';
   name: string;
-  source: 'api' | 'connector' | 'crawler';
+}
+
+export interface EnterpriseSearchEngineFieldCapabilities {
+  fields: SchemaField[];
+  name: string;
+  updated_at_millis: number;
+}
+
+export interface EnterpriseSearchEngineUpsertResponse {
+  result: string;
+}
+export interface SchemaFieldIndex {
+  name: string;
+  type: string;
+}
+
+export interface SchemaField {
+  aggregatable: boolean;
+  indices: SchemaFieldIndex[];
+  metadata_field?: boolean;
+  name: string;
+  searchable: boolean;
+  type: string;
 }

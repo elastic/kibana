@@ -56,14 +56,15 @@ import { BulkOperationPopover } from '../../common/components/bulk_operation_pop
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
-import {
-  snoozeRule,
-  unsnoozeRule,
-  bulkUpdateAPIKey,
-  bulkDisableRules,
-  bulkEnableRules,
-  cloneRule,
-} from '../../../lib/rule_api';
+
+import { snoozeRule } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { cloneRule } from '../../../lib/rule_api/clone';
+
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -81,7 +82,6 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
-import { bulkDeleteRules } from '../../../lib/rule_api';
 
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
@@ -105,24 +105,22 @@ import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
-interface RulesPageContainerState {
-  lastResponse: string[];
-  status: RuleStatus[];
-}
-
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
-  showCreateRuleButton?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
+  onStatusFilterChange?: (status: RuleStatus[]) => void;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  onLastResponseFilterChange?: (lastResponse: string[]) => void;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
+  typeFilter?: string[];
+  onTypeFilterChange?: (type: string[]) => void;
+  searchFilter?: string;
+  onSearchFilterChange?: (search: string) => void;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -146,7 +144,6 @@ export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
   ruleDetailsRoute,
-  showCreateRuleButton = true,
   showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
@@ -154,6 +151,10 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  searchFilter = '',
+  onSearchFilterChange,
+  typeFilter,
+  onTypeFilterChange,
   setHeaderActions,
   refresh,
   rulesListKey,
@@ -171,11 +172,11 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: '',
-    types: [],
+    searchText: searchFilter || '',
+    types: typeFilter || [],
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
@@ -271,14 +272,7 @@ export const RulesList = ({
     refresh,
   });
 
-  const {
-    showSpinner,
-    showRulesList,
-    showNoAuthPrompt,
-    showCreateFirstRulePrompt,
-    showHeaderWithCreateButton,
-    showHeaderWithoutCreateButton,
-  } = useUiState({
+  const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
@@ -363,6 +357,12 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'searchText':
+          onSearchFilterChange?.(value as string);
+          break;
+        case 'types':
+          onTypeFilterChange?.(value as string[]);
+          break;
         default:
           break;
       }
@@ -371,6 +371,8 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onSearchFilterChange,
+      onTypeFilterChange,
       onClearSelection,
     ]
   );
@@ -403,7 +405,19 @@ export const RulesList = ({
     if (lastRunOutcomeFilter) {
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
-  }, [lastResponseFilter]);
+  }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (typeof searchFilter === 'string') {
+      updateFilters({ filter: 'searchText', value: searchFilter });
+    }
+  }, [searchFilter]);
+
+  useEffect(() => {
+    if (typeFilter) {
+      updateFilters({ filter: 'types', value: typeFilter });
+    }
+  }, [typeFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {
@@ -612,22 +626,12 @@ export const RulesList = ({
   }, []);
 
   useEffect(() => {
-    if (!setHeaderActions) return;
-
-    if (showHeaderWithoutCreateButton) {
-      setHeaderActions([<RulesListDocLink />, <RulesSettingsLink />]);
-      return;
-    }
-    if (showHeaderWithCreateButton) {
-      setHeaderActions([
-        <CreateRuleButton openFlyout={openFlyout} />,
-        <RulesSettingsLink />,
-        <RulesListDocLink />,
-      ]);
-      return;
-    }
-    setHeaderActions();
-  }, [showHeaderWithCreateButton, showHeaderWithoutCreateButton]);
+    setHeaderActions?.([
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openFlyout} />] : []),
+      <RulesSettingsLink />,
+      <RulesListDocLink />,
+    ]);
+  }, [authorizedToCreateAnyRules]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
@@ -694,6 +698,7 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+
   return (
     <>
       <RulesListPrompts
@@ -789,11 +794,8 @@ export const RulesList = ({
               tags={tags}
               filterOptions={filterOptions}
               actionTypes={actionTypes}
-              authorizedToCreateAnyRules={authorizedToCreateAnyRules}
-              showCreateRuleButton={showCreateRuleButton}
               lastUpdate={lastUpdate}
               showErrors={showErrors}
-              openFlyout={openFlyout}
               updateFilters={updateFilters}
               setInputText={setInputText}
               onClearSelection={onClearSelection}

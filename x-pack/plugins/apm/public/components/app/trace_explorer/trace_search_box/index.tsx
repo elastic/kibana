@@ -162,6 +162,7 @@ export function TraceSearchBox({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  data-test-subj="apmTraceSearchBoxSelect"
                   id="select-query-language"
                   value={query.type}
                   onChange={(e) => {
@@ -189,6 +190,7 @@ export function TraceSearchBox({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="apmTraceSearchBoxSearchButton"
                   isLoading={loading}
                   onClick={() => {
                     onQueryCommit();

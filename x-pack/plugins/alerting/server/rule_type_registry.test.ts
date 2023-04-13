@@ -31,6 +31,7 @@ beforeEach(() => {
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
+    alertsService: null,
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
@@ -472,13 +473,13 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         alerts: {
           context: 'test',
-          fieldMap: { field: { type: 'keyword', required: false } },
+          mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         },
       });
 
       expect(alertsService.register).toHaveBeenCalledWith({
         context: 'test',
-        fieldMap: { field: { type: 'keyword', required: false } },
+        mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
       });
     });
 

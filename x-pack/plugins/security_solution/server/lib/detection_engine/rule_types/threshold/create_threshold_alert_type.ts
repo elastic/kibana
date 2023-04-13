@@ -11,8 +11,8 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { ThresholdRuleParams } from '../../rule_schema';
 import { thresholdRuleParams } from '../../rule_schema';
-import { thresholdExecutor } from '../../signals/executors/threshold';
-import type { ThresholdAlertState } from '../../signals/types';
+import { thresholdExecutor } from './threshold';
+import type { ThresholdAlertState } from './types';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 

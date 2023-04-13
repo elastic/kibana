@@ -83,7 +83,6 @@ export type ColumnHeaderOptions = Pick<
   | 'isResizable'
 > & {
   aggregatable?: boolean;
-  dataTableCellActions?: DataTableCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;

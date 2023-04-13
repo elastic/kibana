@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InferSearchResponseOf, AggregateOf as AggregationResultOf, SearchHit } from './search';
+import {
+  InferSearchResponseOf,
+  AggregateOf as AggregationResultOf,
+  AggregateOfMap as AggregationResultOfMap,
+  SearchHit,
+} from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
@@ -29,4 +34,4 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
-export type { InferSearchResponseOf, AggregationResultOf, SearchHit };
+export type { InferSearchResponseOf, AggregationResultOf, AggregationResultOfMap, SearchHit };

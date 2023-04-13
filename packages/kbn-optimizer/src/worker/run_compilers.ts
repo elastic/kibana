@@ -13,7 +13,14 @@ import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, BundleRefs } from '../common';
+import {
+  CompilerMsgs,
+  CompilerMsg,
+  maybeMap,
+  Bundle,
+  WorkerConfig,
+  BundleRemotes,
+} from '../common';
 import { getWebpackConfig } from './webpack.config';
 
 const PLUGIN_NAME = '@kbn/optimizer';
@@ -97,10 +104,10 @@ const observeCompiler = (
 export const runCompilers = (
   workerConfig: WorkerConfig,
   bundles: Bundle[],
-  bundleRefs: BundleRefs
+  bundleRemotes: BundleRemotes
 ) => {
   const multiCompiler = webpack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+    bundles.map((def) => getWebpackConfig(def, bundleRemotes, workerConfig))
   );
 
   return Rx.merge(

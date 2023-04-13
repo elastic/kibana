@@ -326,11 +326,18 @@ export const performBulkActionRoute = (
           'alerting',
           'licensing',
           'lists',
+          'actions',
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
         const exceptionsClient = ctx.lists?.getExceptionListClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const actionsClient = (await ctx.actions)?.getActionsClient();
+
+        const { getExporter, getClient } = (await ctx.core).savedObjects;
+        const client = getClient({ includedHiddenTypes: ['action'] });
+
+        const exporter = getExporter(client);
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -538,6 +545,7 @@ export const performBulkActionRoute = (
                       exceptionsList: exceptions,
                     },
                   },
+                  shouldIncrementRevision: () => false,
                 });
 
                 // TODO: figureout why types can't return just updatedRule
@@ -556,10 +564,13 @@ export const performBulkActionRoute = (
               exceptionsClient,
               savedObjectsClient,
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
-              logger
+              logger,
+              exporter,
+              request,
+              actionsClient
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
 
             return response.ok({
               headers: {

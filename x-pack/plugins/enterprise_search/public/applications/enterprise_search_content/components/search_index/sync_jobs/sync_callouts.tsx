@@ -11,9 +11,11 @@ import { EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncStatus, TriggerMethod } from '../../../../../../common/types/connectors';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { dateToString } from '../../../utils/date_to_string';
+import { SyncStatus, TriggerMethod } from '../../../../../../common/types/connectors';
+import { FormattedDateTime } from '../../../../shared/formatted_date_time';
+
 import { durationToText } from '../../../utils/duration_to_text';
 
 import { SyncJobView } from './sync_jobs_view_logic';
@@ -34,12 +36,13 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
               defaultMessage: 'Sync complete',
             })}
           >
-            {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription', {
-              defaultMessage: 'Completed at {date}',
-              values: {
-                date: dateToString(syncJob.completed_at),
-              },
-            })}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.syncJobs.flyout.completedDescription"
+              defaultMessage="Completed at {date}"
+              values={{
+                date: <FormattedDateTime date={new Date(syncJob.completed_at)} />,
+              }}
+            />
           </EuiCallOut>
         </EuiFlexItem>
       )}
@@ -70,12 +73,15 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
               defaultMessage: 'Sync canceled',
             })}
           >
-            {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.canceledDescription', {
-              defaultMessage: 'Sync canceled at {date}.',
-              values: {
-                date: dateToString(syncJob.canceled_at ?? ''),
-              },
-            })}
+            {!!syncJob.canceled_at && (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.syncJobs.flyout.canceledDescription"
+                defaultMessage="Sync canceled at {date}"
+                values={{
+                  date: <FormattedDateTime date={new Date(syncJob.canceled_at)} />,
+                }}
+              />
+            )}
           </EuiCallOut>
         </EuiFlexItem>
       )}
@@ -124,12 +130,13 @@ export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => 
                   )
             }
           >
-            {i18n.translate('xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription', {
-              defaultMessage: 'Started at {date}.',
-              values: {
-                date: dateToString(syncJob.started_at),
-              },
-            })}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.syncJobs.flyout.startedAtDescription"
+              defaultMessage="Started at {date}"
+              values={{
+                date: <FormattedDateTime date={new Date(syncJob.started_at)} />,
+              }}
+            />
           </EuiCallOut>
         </EuiFlexItem>
       )}

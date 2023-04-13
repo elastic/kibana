@@ -7,17 +7,19 @@
 
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common/model';
-import { getStateAndNonce } from '../../fixtures/oidc/oidc_tools';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../fixtures/kerberos/kerberos_tools';
-import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
+} from '@kbn/security-api-integration-helpers/kerberos/kerberos_tools';
+import {
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,7 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
   const validPassword = kibanaServerConfig.password;
 
   const CA_CERT = readFileSync(CA_CERT_PATH);
-  const CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
+  const CLIENT_CERT = readFileSync(
+    require.resolve('@kbn/security-api-integration-helpers/pki/first_client.p12')
+  );
 
   async function checkSessionCookie(
     sessionCookie: Cookie,

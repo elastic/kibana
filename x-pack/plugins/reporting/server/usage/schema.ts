@@ -49,6 +49,7 @@ const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
 const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
   csv_searchsource: appCountsSchema,
   csv_searchsource_immediate: appCountsSchema,
+  csv_v2: appCountsSchema,
   PNG: appCountsSchema,
   PNGV2: appCountsSchema,
   printable_pdf: appCountsSchema,
@@ -134,6 +135,11 @@ const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
     error_codes: errorCodesSchemaCsv,
   },
   csv_searchsource_immediate: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
+  csv_v2: {
     ...availableTotalSchema,
     metrics: metricsSchemaCsv,
     error_codes: errorCodesSchemaCsv,

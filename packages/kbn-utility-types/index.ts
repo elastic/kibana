@@ -140,3 +140,14 @@ export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 export type { DotObject, DedotObject } from './src/dot';
 
 export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
+
+/**
+ * Takes a type and makes selected properties required.
+ *
+ * @example
+ * interface Foo { bar?: string }
+ * const foo: WithRequiredProperty<Foo, 'bar'> = { bar: 'baz' }
+ */
+export type WithRequiredProperty<Type, Key extends keyof Type> = Omit<Type, Key> & {
+  [Property in Key]-?: Type[Property];
+};

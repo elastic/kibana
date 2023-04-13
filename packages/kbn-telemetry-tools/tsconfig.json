@@ -17,6 +17,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/import-resolver",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": [
     "target/**/*",

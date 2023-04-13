@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import { flatten } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -120,11 +120,11 @@ export const ActionsPanel: FC<Props> = ({
     discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
 
   const dvActionsPanel = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+    [useEuiBreakpoint(['xl', 'xxl'])]: {
       width: ACTIONS_PANEL_WIDTH,
     },
+    width: '100%',
   });
-
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
@@ -164,16 +164,17 @@ export const ActionsPanel: FC<Props> = ({
 
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
-          <>
+          <Fragment key={`dv-action-card-${link.title}`}>
             <LinkCard
               href={link.href}
               icon={link.icon}
               description={link.description}
               title={link.title}
               data-test-subj={link['data-test-subj']}
+              key={link.href}
             />
             <EuiSpacer size="m" />
-          </>
+          </Fragment>
         ))}
     </div>
   ) : null;

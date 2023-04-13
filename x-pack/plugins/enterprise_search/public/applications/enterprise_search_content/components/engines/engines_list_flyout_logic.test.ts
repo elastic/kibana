@@ -16,31 +16,28 @@ import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 import { EngineListFlyoutValues, EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
 const DEFAULT_VALUES: EngineListFlyoutValues = {
+  fetchEngineApiError: undefined,
+  fetchEngineApiStatus: Status.IDLE,
   fetchEngineData: undefined,
   fetchEngineName: null,
   isFetchEngineFlyoutVisible: false,
-  fetchEngineApiStatus: Status.IDLE,
-  fetchEngineApiError: undefined,
   isFetchEngineLoading: false,
 };
 const mockEngineData: EnterpriseSearchEngineDetails = {
-  created: '1999-12-31T23:59:59Z',
   indices: [
     {
       count: 10,
       health: 'green',
       name: 'search-001',
-      source: 'api',
     },
     {
       count: 1000,
       health: 'yellow',
       name: 'search-002',
-      source: 'crawler',
     },
   ],
   name: 'my-test-engine',
-  updated: '1999-12-31T23:59:59Z',
+  updated_at_millis: 1679337823167,
 };
 
 describe('EngineListFlyoutLogic', () => {
@@ -69,10 +66,10 @@ describe('EngineListFlyoutLogic', () => {
         EnginesListFlyoutLogic.actions.openFetchEngineFlyout('my-test-engine');
         expect(EnginesListFlyoutLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isFetchEngineFlyoutVisible: true,
-          fetchEngineName: 'my-test-engine',
-          isFetchEngineLoading: true,
           fetchEngineApiStatus: Status.LOADING,
+          fetchEngineName: 'my-test-engine',
+          isFetchEngineFlyoutVisible: true,
+          isFetchEngineLoading: true,
         });
       });
     });

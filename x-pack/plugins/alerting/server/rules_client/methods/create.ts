@@ -11,16 +11,20 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
-import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../../types';
+import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions } from '../lib';
+import {
+  createRuleSavedObject,
+  extractReferences,
+  validateActions,
+  addGeneratedActionValues,
+} from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
 
-type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 interface SavedObjectOptions {
   id?: string;
   migrationVersion?: Record<string, string>;
@@ -36,6 +40,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'updatedAt'
     | 'apiKey'
     | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
@@ -44,14 +49,18 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
+    | 'revision'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data, options }: CreateOptions<Params>
+  { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
+  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -83,11 +92,20 @@ export async function create<Params extends RuleTypeParams = never>(
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = data.enabled
-      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-        )
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await withSpan(
+            {
+              name: 'createAPIKey',
+              type: 'rules',
+            },
+            () => context.createAPIKey(name)
+          )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
@@ -104,10 +122,10 @@ export async function create<Params extends RuleTypeParams = never>(
     }
   }
 
-  await validateActions(context, ruleType, data);
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
-    validateActions(context, ruleType, data)
+    validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
+
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (
@@ -136,7 +154,7 @@ export async function create<Params extends RuleTypeParams = never>(
 
   const rawRule: RawRule = {
     ...data,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     legacyId,
     actions,
     createdBy: username,
@@ -151,6 +169,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throttle,
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    revision: 0,
     running: false,
   };
 

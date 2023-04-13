@@ -7,9 +7,21 @@
  */
 
 import { ContentManagementPlugin } from './plugin';
+export type { CrudClient } from './crud_client';
+export {
+  ContentClientProvider,
+  ContentClient,
+  useCreateContentMutation,
+  useUpdateContentMutation,
+  useDeleteContentMutation,
+  useSearchContentQuery,
+  useGetContentQuery,
+  useContentClient,
+  type QueryOptions,
+} from './content_client';
 
 export function plugin() {
   return new ContentManagementPlugin();
 }
 
-export type { ContentManagementPublicStart } from './types';
+export type { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';

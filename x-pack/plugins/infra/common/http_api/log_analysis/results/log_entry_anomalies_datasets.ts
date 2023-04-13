@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 
 import {
   badRequestErrorRT,
@@ -23,8 +24,8 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH =
 
 export const getLogEntryAnomaliesDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
-    // the id of the source configuration
-    sourceId: rt.string,
+    // log view
+    logView: persistedLogViewReferenceRT,
     // the time range to fetch the anomalies datasets from
     timeRange: timeRangeRT,
   }),

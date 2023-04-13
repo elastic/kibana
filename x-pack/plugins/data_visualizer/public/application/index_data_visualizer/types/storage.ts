@@ -16,7 +16,7 @@ export const DV_RANDOM_SAMPLER_P_VALUE = 'dataVisualizer.randomSamplerPValue';
 export type DV = Partial<{
   [DV_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [DV_RANDOM_SAMPLER_PREFERENCE]: RandomSamplerOption;
-  [DV_RANDOM_SAMPLER_P_VALUE]: number;
+  [DV_RANDOM_SAMPLER_P_VALUE]: null | number;
 }> | null;
 
 export type DVKey = keyof Exclude<DV, null>;

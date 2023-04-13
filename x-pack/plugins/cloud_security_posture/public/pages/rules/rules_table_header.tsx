@@ -5,40 +5,38 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFieldSearch, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface RulesTableToolbarProps {
   search(value: string): void;
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
+  pageSize: number;
 }
 
-interface CounterProps {
-  count: number;
+interface RuleTableCount {
+  pageSize: number;
+  total: number;
 }
 
 export const RulesTableHeader = ({
   search,
-  totalRulesCount,
   searchValue,
   isSearching,
+  totalRulesCount,
+  pageSize,
 }: RulesTableToolbarProps) => (
-  <div>
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-      <Counters total={totalRulesCount} />
-      <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
-    </EuiFlexGroup>
-  </div>
-);
-
-const Counters = ({ total }: { total: number }) => (
-  <EuiFlexItem grow={false} style={{ flexDirection: 'row', fontVariantNumeric: 'tabular-nums' }}>
-    <TotalRulesCount count={total} />
-  </EuiFlexItem>
+  <SearchField
+    isSearching={isSearching}
+    searchValue={searchValue}
+    search={search}
+    totalRulesCount={totalRulesCount}
+    pageSize={pageSize}
+  />
 );
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -47,42 +45,44 @@ const SearchField = ({
   search,
   isSearching,
   searchValue,
-}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
+  totalRulesCount,
+  pageSize,
+}: Pick<
+  RulesTableToolbarProps,
+  'isSearching' | 'searchValue' | 'search' | 'totalRulesCount' | 'pageSize'
+>) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
   useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
-    <EuiFlexItem grow={true} style={{ alignItems: 'flex-end', maxWidth: 500 }}>
-      <EuiFieldSearch
-        isLoading={isSearching}
-        placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
-          defaultMessage: 'Search by rule name',
-        })}
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
-        style={{ minWidth: 150 }}
-        fullWidth
-      />
-    </EuiFlexItem>
+    <div>
+      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+        <EuiFieldSearch
+          isLoading={isSearching}
+          placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
+            defaultMessage: 'Search by Rule Name',
+          })}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          style={{ minWidth: 150 }}
+          fullWidth
+        />
+      </EuiFlexItem>
+      <CurrentPageOfTotal pageSize={pageSize} total={totalRulesCount} />
+    </div>
   );
 };
 
-const TotalRulesCount = ({ count }: CounterProps) => (
-  <FormattedMessage
-    id="xpack.csp.rules.header.totalRulesCount"
-    defaultMessage="Showing {rules}"
-    values={{ rules: <RulesCountBold count={count} /> }}
-  />
-);
-
-const RulesCountBold = ({ count }: CounterProps) => (
-  <>
-    <strong style={{ margin: '0 4px' }}>{count}</strong>
-    <FormattedMessage
-      id="xpack.csp.rules.header.rulesCountLabel"
-      defaultMessage="{count, plural, one { rule} other { rules}}"
-      values={{ count }}
-    />
-  </>
+const CurrentPageOfTotal = ({ pageSize, total }: RuleTableCount) => (
+  <EuiFlexItem grow={true}>
+    <EuiSpacer size="xl" />
+    <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+      <FormattedMessage
+        id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
+        defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
+        values={{ pageSize, total }}
+      />
+    </EuiText>
+  </EuiFlexItem>
 );

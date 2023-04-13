@@ -33,7 +33,7 @@ WARNING: Once you delete a saved query, _it cannot be recovered_.
 `200`::
   Indicates the saved query is deleted. Returns an empty response body. 
 
-
+[[osquery-manager-saved-queries-api-delete-example]]
 ==== Example
 
 Delete a saved query object with the `42ba9c50-0cc5-11ed-aa1d-2b27890bc90d` ID:

@@ -14,10 +14,11 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
@@ -52,6 +53,8 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       showNewVisModal,
     },
   } = pluginServices.getServices();
+
+  const { euiTheme } = useEuiTheme();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),
@@ -261,13 +264,13 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
     ];
   };
   return (
-    <SolutionToolbarPopover
+    <ToolbarPopover
+      zIndex={Number(euiTheme.levels.header) - 1}
+      repositionOnScroll
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Select type',
       })}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
@@ -279,6 +282,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
           data-test-subj="dashboardEditorContextMenu"
         />
       )}
-    </SolutionToolbarPopover>
+    </ToolbarPopover>
   );
 };

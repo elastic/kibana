@@ -21,7 +21,7 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       color="warning"
       title={
         <FormattedMessage

@@ -54,18 +54,10 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "savedSearch",
             "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
           },
@@ -80,22 +72,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/services.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/new_vis_modal.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/new_vis_modal.tsx"
           },
           {
             "plugin": "dashboard",
@@ -114,20 +90,20 @@
             "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
           },
           {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/types.ts"
           },
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/types.ts"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "canvas",
@@ -170,7 +146,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
           }
         ],

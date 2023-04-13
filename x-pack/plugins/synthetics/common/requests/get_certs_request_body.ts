@@ -40,6 +40,7 @@ export const getCertsRequestBody = ({
   from = DEFAULT_FROM,
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
+  filters,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
@@ -77,6 +78,7 @@ export const getCertsRequestBody = ({
               }
             : {}),
           filter: [
+            ...(filters ? [filters] : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',
@@ -138,7 +140,7 @@ export const getCertsRequestBody = ({
         field: 'tls.server.hash.sha256',
         inner_hits: {
           _source: {
-            includes: ['monitor.id', 'monitor.name', 'url.full'],
+            includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
           },
           collapse: {
             field: 'monitor.id',
@@ -178,6 +180,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       return {
         name: monitorPing?.monitor.name,
         id: monitorPing?.monitor.id,
+        configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
       };
     });

@@ -37,6 +37,8 @@ import {
 } from '../../screens/case_details';
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../screens/timeline';
 
+import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../screens/overview';
+
 import { goToCaseDetails, goToCreateNewCase } from '../../tasks/all_cases';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../tasks/case_details';
@@ -50,7 +52,7 @@ import {
 } from '../../tasks/create_new_case';
 import { loginWithUser, visitWithoutDateRange } from '../../tasks/login';
 
-import { CASES_URL } from '../../urls/navigation';
+import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
 
 describe('Cases', () => {
   before(() => {
@@ -120,5 +122,12 @@ describe('Cases', () => {
     cy.get(TIMELINE_TITLE).contains(this.mycase.timeline.title);
     cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
     cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
+
+    cy.visit(OVERVIEW_URL);
+    cy.get(OVERVIEW_CASE_NAME).should('have.text', this.mycase.name);
+    cy.get(OVERVIEW_CASE_DESCRIPTION).should(
+      'have.text',
+      `${this.mycase.description} ${this.mycase.timeline.title}`
+    );
   });
 });

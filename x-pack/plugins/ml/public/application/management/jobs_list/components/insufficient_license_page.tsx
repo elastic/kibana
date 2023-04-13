@@ -25,7 +25,7 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
       data-test-subj="mlPageInsufficientLicense"
     >
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage

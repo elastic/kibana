@@ -81,7 +81,13 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={<EuiLink href={href} {...rest} />}
+        content={
+          <EuiLink
+            data-test-subj="apmTransactionDetailLinkLink"
+            href={href}
+            {...rest}
+          />
+        }
       />
     );
   }
@@ -98,15 +104,12 @@ export function TransactionDetailLink({
           ariaLabel={i18n.translate('xpack.apm.transactionDetail.tooltip', {
             defaultMessage: 'Max transaction groups reached tooltip',
           })}
-          iconType="alert"
+          iconType="warning"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
             <FormattedMessage
-              defaultMessage="Current APM server capacity for handling unique transaction groups has been reached. There are at least {overflowCount, plural, one {1 transaction} other {# transactions}} missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server."
-              id="xpack.apm.transactionDetail.maxGroups.message"
-              values={{
-                overflowCount,
-              }}
+              defaultMessage="The APM server has reached the maximum capacity that it can currently handle in terms of showing individual transaction groups. Please consider scaling-up your APM server capacity and/or tuning the application instrumentation in order to view all of the data."
+              id="xpack.apm.transactionDetail.maxGroup.message"
             />
           </EuiText>
         </PopoverTooltip>

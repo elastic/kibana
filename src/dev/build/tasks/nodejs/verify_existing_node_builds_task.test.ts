@@ -50,6 +50,9 @@ async function setup(actualShaSums?: Record<string, string>) {
     dockerPush: false,
     dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   getNodeShasums.mockReturnValue(

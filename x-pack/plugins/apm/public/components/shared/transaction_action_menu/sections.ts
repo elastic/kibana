@@ -12,12 +12,13 @@ import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
+import { TRACE_ID } from '../../../../common/es_fields/apm';
+import { ApmRouter } from '../../routing/apm_route_config';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -33,12 +34,12 @@ export const getSections = ({
   transaction,
   basePath,
   location,
-  urlParams,
+  apmRouter,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
-  urlParams: ApmUrlParams;
+  apmRouter: ApmRouter;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
@@ -48,13 +49,19 @@ export const getSections = ({
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
+  const routeParams = apmRouter.getParams(
+    '/services/{serviceName}/transactions/view',
+    location
+  );
+  const { rangeFrom, rangeTo, environment } = routeParams.query;
+
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
     search: `?${fromQuery(
       pickBy(
         {
-          dateRangeStart: urlParams.rangeFrom,
-          dateRangeEnd: urlParams.rangeTo,
+          dateRangeStart: rangeFrom,
+          dateRangeEnd: rangeTo,
           search: `url.domain:"${transaction.url?.domain}"`,
         },
         (val) => !isEmpty(val)
@@ -204,6 +211,28 @@ export const getSections = ({
     },
   ];
 
+  const serviceMapHref = apmRouter.link('/service-map', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery: `${TRACE_ID} : "${transaction.trace.id}"`,
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+  });
+  const serviceMapActions: Action[] = [
+    {
+      key: 'serviceMap',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showInServiceMapLinkLabel',
+        { defaultMessage: 'Show in service map' }
+      ),
+      href: serviceMapHref,
+      condition: true,
+    },
+  ];
+
   const sectionRecord: SectionRecord = {
     observability: [
       {
@@ -276,6 +305,22 @@ export const getSections = ({
           }
         ),
         actions: uptimeActions,
+      },
+      {
+        key: 'serviceMap',
+        title: i18n.translate(
+          'xpack.apm.transactionActionMenu.serviceMap.title',
+          {
+            defaultMessage: 'Service map',
+          }
+        ),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.serviceMap.subtitle',
+          {
+            defaultMessage: 'View service map filtered by this trace.',
+          }
+        ),
+        actions: serviceMapActions,
       },
     ],
     kibana: [{ key: 'kibana', actions: kibanaActions }],

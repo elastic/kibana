@@ -16,7 +16,6 @@ import {
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 
@@ -26,6 +25,7 @@ import {
   CachedFetchIndexApiLogicActions,
 } from '../../api/index/cached_fetch_index_api_logic';
 
+import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {
   getIngestionMethod,
@@ -70,6 +70,7 @@ export interface IndexViewValues {
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasFilteringFeature: boolean;
+  htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
@@ -214,6 +215,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
     ],
+    htmlExtraction: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) =>
+        connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
     index: [
       () => [selectors.indexData],
       (data: IndexViewValues['indexData']) => (data ? indexToViewIndex(data) : undefined),
@@ -226,11 +232,12 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     isConnectorIndex: [
       () => [selectors.indexData],
-      (data: ElasticsearchIndexWithIngestion | undefined) => isConnectorIndex(data),
+      (data: FetchIndexApiResponse | undefined) => isConnectorIndex(data),
     ],
     isSyncing: [
-      () => [selectors.syncStatus],
-      (syncStatus: SyncStatus) => syncStatus === SyncStatus.IN_PROGRESS,
+      () => [selectors.indexData, selectors.syncStatus],
+      (indexData: FetchIndexApiResponse | null, syncStatus: SyncStatus) =>
+        indexData?.has_in_progress_syncs || syncStatus === SyncStatus.IN_PROGRESS,
     ],
     isWaitingForSync: [
       () => [selectors.fetchIndexApiData, selectors.localSyncNowValue],

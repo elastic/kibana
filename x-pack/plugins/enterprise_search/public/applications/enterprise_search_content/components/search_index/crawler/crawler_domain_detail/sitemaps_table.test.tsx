@@ -35,6 +35,7 @@ describe('SitemapsTable', () => {
     url: 'https://www.elastic.co',
     crawlRules: [],
     entryPoints: [],
+    extractionRules: [],
     sitemaps,
     deduplicationEnabled: true,
     deduplicationFields: ['title'],

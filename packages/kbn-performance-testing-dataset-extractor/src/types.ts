@@ -40,6 +40,7 @@ export interface TestData {
 export interface CLIParams {
   param: {
     journeyName: string;
+    configPath: string;
     scalabilitySetup?: ScalabilitySetup;
     testData: TestData;
     buildId: string;

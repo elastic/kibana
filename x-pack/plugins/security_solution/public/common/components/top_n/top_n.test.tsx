@@ -18,6 +18,8 @@ import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
 import { InputsModelId } from '../../store/inputs/constants';
 
+jest.mock('../visualization_actions/visualization_embeddable');
+
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -32,9 +34,7 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../visualization_actions/actions');
 
 jest.mock('uuid', () => {
   return {

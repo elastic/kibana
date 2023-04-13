@@ -13,7 +13,7 @@
       "DELETE"
     ],
     "patterns": [
-      "_data_stream/{data_stream}"
+      "_data_stream/{name}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html"
   }

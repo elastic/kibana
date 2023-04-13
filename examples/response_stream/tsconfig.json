@@ -21,5 +21,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/aiops-utils",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
   ]
 }

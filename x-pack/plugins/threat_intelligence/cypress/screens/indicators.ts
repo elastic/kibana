@@ -191,9 +191,9 @@ export const CASE_COMMENT_EXTERNAL_REFERENCE = `[data-test-subj="comment-externa
 
 export const CASE_ACTION_WRAPPER = `[data-test-subj="case-action-bar-wrapper"]`;
 
-export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-ellipses"]`;
+export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-case-ellipses"]`;
 
-export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-trash"]`;
+export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-case-trash"]`;
 
 export const CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON = `[data-test-subj="confirmModalConfirmButton"]`;
 
@@ -205,13 +205,18 @@ export const NEW_CASE_CREATE_BUTTON = `[data-test-subj="create-case-submit"]`;
 
 /* Block list */
 
-export const BLOCK_LIST_NAME = '[data-test-subj="blocklist-form-name-input"]';
+export const BLOCK_LIST_NAME = `[data-test-subj="blocklist-form-name-input"]`;
 
-export const BLOCK_LIST_DESCRIPTION = '[data-test-subj="blocklist-form-description-input"]';
+export const BLOCK_LIST_DESCRIPTION = `[data-test-subj="blocklist-form-description-input"]`;
 
-export const BLOCK_LIST_ADD_BUTTON = '[class="eui-textTruncate"]';
+export const BLOCK_LIST_ADD_BUTTON = `[class="eui-textTruncate"]`;
 
-export const BLOCK_LIST_TOAST_LIST = '[data-test-subj="globalToastList"]';
+export const BLOCK_LIST_FLYOUT_CLOSE_BUTTON = `[data-test-subj="euiFlyoutCloseButton"]`;
+
+export const BLOCK_LIST_TOAST_LIST = `[data-test-subj="globalToastList"]`;
+
+export const BLOCK_LIST_VALUE_INPUT = (iocId: string) =>
+  `[data-test-subj="blocklist-form-values-input-${iocId}"]`;
 
 /* Miscellaneous */
 

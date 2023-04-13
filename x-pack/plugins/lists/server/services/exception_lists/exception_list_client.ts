@@ -97,6 +97,7 @@ import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_i
 import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
+import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -300,6 +301,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime: undefined, // Not currently used with endpoint exceptions
       itemId,
       listId: ENDPOINT_LIST_ID,
       meta,
@@ -371,6 +373,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime: undefined, // Not currently used with endpoint exceptions
       id,
       itemId,
       meta,
@@ -526,6 +529,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     itemId,
     listId,
     meta,
@@ -540,6 +544,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       itemId,
       listId,
       meta,
@@ -573,6 +578,11 @@ export class ExceptionListClient {
 
   /**
    * Update an existing exception list item
+   *
+   * NOTE: This method will PATCH the targeted exception list item, not fully overwrite it.
+   * Any undefined fields passed in will not be changed in the existing record. To unset any
+   * fields use the `updateOverwriteExceptionListItem` method
+   *
    * @param options
    * @param options._version document version
    * @param options.comments user comments attached to item
@@ -593,6 +603,7 @@ export class ExceptionListClient {
     comments,
     description,
     entries,
+    expireTime,
     id,
     itemId,
     meta,
@@ -608,6 +619,7 @@ export class ExceptionListClient {
       comments,
       description,
       entries,
+      expireTime,
       id,
       itemId,
       meta,
@@ -633,6 +645,81 @@ export class ExceptionListClient {
     }
 
     return updateExceptionListItem({
+      ...updatedItem,
+      savedObjectsClient,
+      user,
+    });
+  };
+
+  /**
+   * Update an existing exception list item using the overwrite method in order to behave
+   * more like a PUT request rather than a PATCH request.
+   *
+   * This was done in order to correctly unset types via update which cannot be accomplished
+   * using the regular `updateExceptionItem` method. All other results of the methods are identical
+   *
+   * @param options
+   * @param options._version document version
+   * @param options.comments user comments attached to item
+   * @param options.entries item exception entries logic
+   * @param options.id the "id" of the exception list item
+   * @param options.description a description of the exception list
+   * @param options.itemId the "item_id" of the exception list item
+   * @param options.meta Optional meta data about the exception list item
+   * @param options.name the "name" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.osTypes item os types to apply
+   * @param options.tags user assigned tags of exception list
+   * @param options.type container type
+   * @returns the updated exception list item or null if none exists
+   */
+  public updateOverwriteExceptionListItem = async ({
+    _version,
+    comments,
+    description,
+    entries,
+    expireTime,
+    id,
+    itemId,
+    meta,
+    name,
+    namespaceType,
+    osTypes,
+    tags,
+    type,
+  }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    let updatedItem: UpdateExceptionListItemOptions = {
+      _version,
+      comments,
+      description,
+      entries,
+      expireTime,
+      id,
+      itemId,
+      meta,
+      name,
+      namespaceType,
+      osTypes,
+      tags,
+      type,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      updatedItem = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreUpdateItem',
+        updatedItem,
+        this.getServerExtensionCallbackContext(),
+        (data) => {
+          return validateData(
+            updateExceptionListItemSchema,
+            transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return updateOverwriteExceptionListItem({
       ...updatedItem,
       savedObjectsClient,
       user,
@@ -970,6 +1057,7 @@ export class ExceptionListClient {
     listId,
     id,
     namespaceType,
+    includeExpiredExceptions,
   }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
@@ -978,6 +1066,7 @@ export class ExceptionListClient {
         'exceptionsListPreExport',
         {
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
         },
@@ -987,6 +1076,7 @@ export class ExceptionListClient {
 
     return exportExceptionListAndItems({
       id,
+      includeExpiredExceptions,
       listId,
       namespaceType,
       savedObjectsClient,

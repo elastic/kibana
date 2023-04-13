@@ -15,5 +15,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/management-plugin",
+    "@kbn/shared-ux-router",
   ]
 }

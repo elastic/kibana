@@ -7,15 +7,28 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string | null;
+  order?: number | null;
+  value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+  extract_full_html?: { label: string; value: boolean };
+};
 
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
 }
+
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
 export enum ConnectorStatus {
   CREATED = 'created',
@@ -125,6 +138,7 @@ export type ConnectorFeatures = Partial<{
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
   features: ConnectorFeatures;
@@ -135,6 +149,7 @@ export interface Connector {
   language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
+  last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
@@ -156,12 +171,12 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
-    language: string;
+    language: string | null;
     pipeline: IngestPipelineParams | null;
-    service_type: string;
+    service_type: string | null;
   };
   created_at: string;
   deleted_document_count: number;
@@ -169,12 +184,12 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
-  last_seen: string;
+  last_seen: string | null;
   metadata: Record<string, unknown>;
-  started_at: string;
+  started_at: string | null;
   status: SyncStatus;
   trigger_method: TriggerMethod;
-  worker_hostname: string;
+  worker_hostname: string | null;
 }
 
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;

@@ -6,19 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  set,
-  unset,
-  has,
-  difference,
-  filter,
-  find,
-  map,
-  mapKeys,
-  uniq,
-  some,
-  isEmpty,
-} from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -201,7 +190,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
-        return response.ok({ body: updatedPackSO });
+        return response.ok({ body: { data: updatedPackSO } });
       }
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {

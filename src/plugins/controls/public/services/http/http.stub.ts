@@ -13,5 +13,6 @@ import { ControlsHTTPService } from './types';
 type HttpServiceFactory = PluginServiceFactory<ControlsHTTPService>;
 
 export const httpServiceFactory: HttpServiceFactory = () => ({
+  get: async () => ({} as unknown as HttpResponse),
   fetch: async () => ({} as unknown as HttpResponse),
 });

@@ -60,7 +60,7 @@ export const ValidationStepDetails: FC<{
               <EuiText size="s">{validationSummary.warning}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" />
+              <EuiIcon type="warning" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

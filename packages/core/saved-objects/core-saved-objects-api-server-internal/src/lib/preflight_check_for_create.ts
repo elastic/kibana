@@ -8,15 +8,13 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   getObjectKey,

@@ -150,3 +150,17 @@ export const ADD_TO_DETECTIONS_LIST = i18n.translate(
     defaultMessage: 'Add rule exception',
   }
 );
+
+export const ACTIVE_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.allExceptionItems.activeDetectionsLabel',
+  {
+    defaultMessage: 'Active exceptions',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.allExceptionItems.expiredDetectionsLabel',
+  {
+    defaultMessage: 'Expired exceptions',
+  }
+);

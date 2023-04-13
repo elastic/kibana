@@ -54,7 +54,7 @@ describe('configureClient', () => {
     config = createFakeConfig();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
-    agentFactoryProvider = new AgentManager();
+    agentFactoryProvider = new AgentManager(logger);
   });
 
   afterEach(() => {
@@ -212,6 +212,7 @@ describe('configureClient', () => {
       logger,
       client,
       type: 'test',
+      apisToRedactInLogs: [],
     });
   });
 });

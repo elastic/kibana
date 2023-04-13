@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../helpers/record_video';
 import { FormMonitorType } from '../../../common/runtime_types';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
@@ -147,6 +147,7 @@ const createMonitorJourney = ({
   journey(
     `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
+      page.setDefaultTimeout(60 * 1000);
       recordVideo(page);
 
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });

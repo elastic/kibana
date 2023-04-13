@@ -84,6 +84,14 @@ export class JoinExpression extends Component<Props, State> {
     this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
   };
 
+  _onRightFieldChange = (term?: string) => {
+    if (!term || term.length === 0) {
+      return;
+    }
+
+    this.props.onRightFieldChange(term);
+  };
+
   _renderLeftFieldSelect() {
     const { leftValue, leftFields } = this.props;
 
@@ -167,7 +175,7 @@ export class JoinExpression extends Component<Props, State> {
         <SingleFieldSelect
           placeholder={getSelectFieldPlaceholder()}
           value={this.props.rightValue}
-          onChange={this.props.onRightFieldChange}
+          onChange={this._onRightFieldChange}
           fields={getTermsFields(this.props.rightFields)}
           isClearable={false}
         />

@@ -46,31 +46,36 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     ({ http }) => {
       return fetchTopNFunctions({
         http,
-        timeFrom: new Date(timeRange.start).getTime() / 1000,
-        timeTo: new Date(timeRange.end).getTime() / 1000,
+        timeFrom: timeRange.inSeconds.start,
+        timeTo: timeRange.inSeconds.end,
         startIndex: 0,
         endIndex: 100000,
         kuery,
       });
     },
-    [timeRange.start, timeRange.end, kuery, fetchTopNFunctions]
+    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchTopNFunctions]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
+      if (!comparisonTimeRange.inSeconds.start || !comparisonTimeRange.inSeconds.end) {
         return undefined;
       }
       return fetchTopNFunctions({
         http,
-        timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
-        timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+        timeFrom: comparisonTimeRange.inSeconds.start,
+        timeTo: comparisonTimeRange.inSeconds.end,
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
       });
     },
-    [comparisonTimeRange.start, comparisonTimeRange.end, comparisonKuery, fetchTopNFunctions]
+    [
+      comparisonTimeRange.inSeconds.start,
+      comparisonTimeRange.inSeconds.end,
+      comparisonKuery,
+      fetchTopNFunctions,
+    ]
   );
 
   const routePath = useProfilingRoutePath() as
@@ -114,11 +119,11 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       <>
         <EuiFlexGroup direction="column">
-          {isDifferentialView ? (
-            <EuiFlexItem>
+          {isDifferentialView && (
+            <EuiFlexItem grow={false}>
               <PrimaryAndComparisonSearchBar />
             </EuiFlexItem>
-          ) : null}
+          )}
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem>
@@ -137,10 +142,14 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                         },
                       });
                     }}
+                    totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                    isDifferentialView={isDifferentialView}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
-              {isDifferentialView && comparisonTimeRange.start && comparisonTimeRange.end ? (
+              {isDifferentialView &&
+              comparisonTimeRange.inSeconds.start &&
+              comparisonTimeRange.inSeconds.end ? (
                 <EuiFlexItem>
                   <AsyncComponent {...comparisonState} size="xl" alignTop>
                     <TopNFunctionsTable
@@ -161,6 +170,10 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                       }}
                       topNFunctions={comparisonState.data}
                       comparisonTopNFunctions={state.data}
+                      totalSeconds={
+                        comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
+                      }
+                      isDifferentialView={isDifferentialView}
                     />
                   </AsyncComponent>
                 </EuiFlexItem>

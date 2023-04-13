@@ -17,7 +17,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
-import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -28,7 +27,7 @@ const localStorage = new Storage(window.localStorage);
 
 export interface LogCategorizationAppStateProps {
   dataView: DataView;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   appDependencies: AiopsAppDependencies;
 }
 

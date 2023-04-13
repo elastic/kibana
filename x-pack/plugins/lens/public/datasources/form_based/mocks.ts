@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DragContextState } from '../../drag_drop';
+import { DragContextState } from '@kbn/dom-drag-drop';
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../../types';
 
@@ -216,6 +216,7 @@ export const createMockedIndexPatternWithoutType = (
 
 export function createMockedDragDropContext(): jest.Mocked<DragContextState> {
   return {
+    dataTestSubjPrefix: 'lnsDragDrop',
     dragging: undefined,
     setDragging: jest.fn(),
     activeDropTarget: undefined,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { uniqBy, pick, omit } from 'lodash';
 import {
   getResolvedModuleSourceFile,

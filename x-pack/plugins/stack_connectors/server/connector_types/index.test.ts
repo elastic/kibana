@@ -18,6 +18,7 @@ const ACTION_TYPE_IDS = [
   '.teams',
   '.webhook',
   '.xmatters',
+  '.torq',
 ];
 
 const mockedActions = actionsMock.createSetup();

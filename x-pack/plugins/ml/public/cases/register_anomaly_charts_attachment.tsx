@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, getEmbeddableComponent } from '../embeddables';
+import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
+import { getEmbeddableComponent } from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
 
@@ -20,13 +21,13 @@ export function registerAnomalyChartsCasesAttachment(
   pluginStart: MlStartDependencies
 ) {
   const EmbeddableComponent = getEmbeddableComponent(
-    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
     coreStart,
     pluginStart
   );
 
   cases.attachmentFramework.registerPersistableState({
-    id: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
     icon: PLUGIN_ICON,
     displayName: i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
       defaultMessage: 'Anomaly charts',

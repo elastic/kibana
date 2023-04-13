@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/app-link-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "appLinkTest",
+    "server": false,
+    "browser": true,
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

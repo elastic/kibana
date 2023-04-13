@@ -221,9 +221,10 @@ describe('useItemsAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          'My toaster title'
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: 'My toaster title',
+          className: 'eui-textBreakWord',
+        });
       });
     });
 

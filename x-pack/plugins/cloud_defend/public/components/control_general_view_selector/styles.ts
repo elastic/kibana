@@ -11,17 +11,34 @@ import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const { colors, size, border } = euiTheme;
+  const { size, border } = euiTheme;
 
   return useMemo(() => {
     const accordion: CSSObject = {
-      borderRadius: border.radius.small,
-      backgroundColor: colors.lightestShade,
+      borderRadius: border.radius.medium,
+      border: border.thin,
       '> .euiAccordion__triggerWrapper': {
         padding: size.m,
       },
     };
 
-    return { accordion };
-  }, [border.radius.small, colors.lightestShade, size.m]);
+    const conditionsBadge: CSSObject = {
+      display: 'inline',
+    };
+
+    const verticalDivider: CSSObject = {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      width: '1px',
+      height: '20px',
+      border: border.thin,
+      borderRight: 0,
+      borderTop: 0,
+      borderBottom: 0,
+      marginLeft: size.base,
+      marginRight: size.base,
+    };
+
+    return { accordion, conditionsBadge, verticalDivider };
+  }, [border.radius.medium, border.thin, size.base, size.m]);
 };

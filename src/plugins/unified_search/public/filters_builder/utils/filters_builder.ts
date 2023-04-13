@@ -19,8 +19,14 @@ const PATH_SEPARATOR = '.';
 
 export const getPathInArray = (path: Path) => path.split(PATH_SEPARATOR).map(Number);
 
-const getGroupedFilters = (filter: Filter): Filter[] =>
-  Array.isArray(filter) ? filter : filter?.meta?.params ?? [];
+export const getGroupedFilters = (filter: Filter): Filter[] => {
+  const isCombined = isCombinedFilter(filter);
+  if (isCombined) {
+    return filter?.meta?.params ?? [];
+  } else {
+    return [];
+  }
+};
 
 const doForFilterByPath = <T>(filters: Filter[], path: Path, action: (filter: Filter) => T) => {
   const [first, ...restPath] = getPathInArray(path);

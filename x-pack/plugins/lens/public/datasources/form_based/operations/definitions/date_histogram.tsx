@@ -86,10 +86,7 @@ export const dateHistogramOperation: OperationDefinition<
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
     [
-      ...(getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumn,
-        indexPattern
-      ) || []),
+      ...(getInvalidFieldMessage(layer, columnId, indexPattern) || []),
       getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
     ].filter(Boolean),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {

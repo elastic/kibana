@@ -8,6 +8,8 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { RouterProvider } from '@kbn/typed-react-router-config';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -24,6 +26,7 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
+import { apmRouter } from '../../routing/apm_route_config';
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
   return {
@@ -35,11 +38,18 @@ function getMockAPMContext({ canSave }: { canSave: boolean }) {
   } as unknown as ApmPluginContextValue;
 }
 
+const history = createMemoryHistory();
+history.replace(
+  '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi'
+);
+
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
-        {children}
+        <RouterProvider history={history} router={apmRouter as any}>
+          {children}
+        </RouterProvider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -249,7 +259,7 @@ describe('TransactionActionMenu component', () => {
       expect(
         (getByText('Status').parentElement as HTMLAnchorElement).href
       ).toEqual(
-        'http://localhost/basepath/app/uptime?search=url.domain:%22example.com%22'
+        'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
       );
     });
   });

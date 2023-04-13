@@ -82,6 +82,7 @@ describe('ServiceList', () => {
           } as Breakpoints,
           showAlertsColumn: true,
           link: apmRouter.link,
+          serviceOverflowCount: 0,
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
@@ -122,6 +123,7 @@ describe('ServiceList', () => {
           } as Breakpoints,
           showAlertsColumn: true,
           link: apmRouter.link,
+          serviceOverflowCount: 0,
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
@@ -151,6 +153,7 @@ describe('ServiceList', () => {
             } as Breakpoints,
             showAlertsColumn: true,
             link: apmRouter.link,
+            serviceOverflowCount: 0,
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
@@ -190,6 +193,7 @@ describe('ServiceList', () => {
             } as Breakpoints,
             showAlertsColumn: true,
             link: apmRouter.link,
+            serviceOverflowCount: 0,
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
@@ -232,6 +236,7 @@ describe('ServiceList', () => {
         } as Breakpoints,
         showAlertsColumn: true,
         link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
@@ -251,6 +256,7 @@ describe('ServiceList', () => {
         } as Breakpoints,
         showAlertsColumn: true,
         link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeTruthy();
     });
@@ -270,6 +276,7 @@ describe('ServiceList', () => {
         } as Breakpoints,
         showAlertsColumn: false,
         link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('alertsCount')).toBeFalsy();
     });
@@ -289,6 +296,7 @@ describe('ServiceList', () => {
         } as Breakpoints,
         showAlertsColumn: true,
         link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('alertsCount')).toBeTruthy();
     });

@@ -1,5 +1,5 @@
 {
-  "name": "task_manager_fixture",
+  "name": "@kbn/task-manager-fixture-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

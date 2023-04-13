@@ -7,17 +7,21 @@
  */
 
 const Path = require('path');
+const Crypto = require('crypto');
+const startOfDay = /** @type {import('date-fns/startOfDay').default} */ (
+  /** @type {unknown} */ (require('date-fns/startOfDay'))
+);
 
 const chalk = require('chalk');
 const LmdbStore = require('lmdb');
 
-const GLOBAL_ATIME = `${Date.now()}`;
+const GLOBAL_ATIME = startOfDay(new Date()).valueOf();
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 /** @typedef {import('./types').Cache} CacheInterface */
-/** @typedef {import('lmdb').Database<string, string>} Db */
+/** @typedef {import('lmdb').Database<import('./types').CacheEntry, string>} Db */
 
 /**
  * @param {Db} db
@@ -31,63 +35,29 @@ const dbName = (db) =>
  * @implements {CacheInterface}
  */
 class LmdbCache {
-  /** @type {import('lmdb').RootDatabase<string, string>} */
-  #codes;
-  /** @type {Db} */
-  #atimes;
-  /** @type {Db} */
-  #mtimes;
-  /** @type {Db} */
-  #sourceMaps;
-  /** @type {string} */
-  #pathRoot;
-  /** @type {string} */
-  #prefix;
+  /** @type {import('lmdb').RootDatabase<import('./types').CacheEntry, string>} */
+  #db;
   /** @type {import('stream').Writable | undefined} */
   #log;
-  /** @type {ReturnType<typeof setTimeout>} */
-  #timer;
+  /** @type {string} */
+  #prefix;
 
   /**
    * @param {import('./types').CacheConfig} config
    */
   constructor(config) {
-    if (!Path.isAbsolute(config.pathRoot)) {
-      throw new Error('cache requires an absolute path to resolve paths relative to');
-    }
-
-    this.#pathRoot = config.pathRoot;
-    this.#prefix = config.prefix;
     this.#log = config.log;
-
-    this.#codes = LmdbStore.open(config.dir, {
-      name: 'codes',
-      encoding: 'string',
-      maxReaders: 500,
+    this.#prefix = config.prefix;
+    this.#db = LmdbStore.open(Path.resolve(config.dir, 'v5'), {
+      name: 'db',
+      encoding: 'json',
     });
 
-    // TODO: redundant 'name' syntax is necessary because of a bug that I have yet to fix
-    this.#atimes = this.#codes.openDB('atimes', {
-      name: 'atimes',
-      encoding: 'string',
-    });
-
-    this.#mtimes = this.#codes.openDB('mtimes', {
-      name: 'mtimes',
-      encoding: 'string',
-    });
-
-    this.#sourceMaps = this.#codes.openDB('sourceMaps', {
-      name: 'sourceMaps',
-      encoding: 'string',
-    });
-
-    // after the process has been running for 30 minutes prune the
-    // keys which haven't been used in 30 days. We use `unref()` to
-    // make sure this timer doesn't hold other processes open
-    // unexpectedly
-    this.#timer = setTimeout(() => {
-      this.#pruneOldKeys().catch((error) => {
+    const lastClean = this.#db.get('@last clean');
+    if (!lastClean || lastClean[0] < GLOBAL_ATIME - 7 * DAY) {
+      try {
+        this.#pruneOldKeys();
+      } catch (error) {
         process.stderr.write(`
 Failed to cleanup @kbn/babel-register cache:
 
@@ -95,83 +65,60 @@ Failed to cleanup @kbn/babel-register cache:
 
 To eliminate this problem you may want to delete the "${Path.relative(process.cwd(), config.dir)}"
 directory and report this error to the Operations team.\n`);
-      });
-    }, 30 * MINUTE);
-
-    // timer.unref is not defined in jest which emulates the dom by default
-    if (typeof this.#timer.unref === 'function') {
-      this.#timer.unref();
+      } finally {
+        this.#db.putSync('@last clean', [GLOBAL_ATIME, '', {}]);
+      }
     }
   }
 
   /**
+   * Get the cache key of the path and source from disk of a file
    * @param {string} path
+   * @param {string} source
+   * @returns {string}
    */
-  getMtime(path) {
-    return this.#safeGet(this.#mtimes, this.#getKey(path));
+  getKey(path, source) {
+    return `${this.#prefix}:${Crypto.createHash('sha1').update(path).update(source).digest('hex')}`;
   }
 
   /**
-   * @param {string} path
+   * @param {string} key
+   * @returns {string|undefined}
    */
-  getCode(path) {
-    const key = this.#getKey(path);
-    const code = this.#safeGet(this.#codes, key);
+  getCode(key) {
+    const entry = this.#safeGet(this.#db, key);
 
-    if (code !== undefined) {
+    if (entry !== undefined && entry[0] !== GLOBAL_ATIME) {
       // when we use a file from the cache set the "atime" of that cache entry
       // so that we know which cache items we use and which haven't been
-      // touched in a long time (currently 30 days)
-      this.#safePut(this.#atimes, key, GLOBAL_ATIME);
+      // used in a long time (currently 30 days)
+      this.#safePut(this.#db, key, [GLOBAL_ATIME, entry[1], entry[2]]);
     }
 
-    return code;
+    return entry?.[1];
   }
 
   /**
-   * @param {string} path
+   * @param {string} key
+   * @returns {object|undefined}
    */
-  getSourceMap(path) {
-    const map = this.#safeGet(this.#sourceMaps, this.#getKey(path));
-    if (typeof map === 'string') {
-      return JSON.parse(map);
-    }
-  }
-
-  close() {
-    clearTimeout(this.#timer);
-  }
-
-  /**
-   * @param {string} path
-   * @param {{ mtime: string; code: string; map?: any }} file
-   */
-  async update(path, file) {
-    const key = this.#getKey(path);
-
-    this.#safePut(this.#atimes, key, GLOBAL_ATIME);
-    this.#safePut(this.#mtimes, key, file.mtime);
-    this.#safePut(this.#codes, key, file.code);
-
-    if (file.map) {
-      this.#safePut(this.#sourceMaps, key, JSON.stringify(file.map));
+  getSourceMap(key) {
+    const entry = this.#safeGet(this.#db, key);
+    if (entry) {
+      return entry[2];
     }
   }
 
   /**
-   * @param {string} path
+   * @param {string} key
+   * @param {{ code: string, map: object }} entry
    */
-  #getKey(path) {
-    const normalizedPath =
-      Path.sep !== '/'
-        ? Path.relative(this.#pathRoot, path).split(Path.sep).join('/')
-        : Path.relative(this.#pathRoot, path);
-
-    return `${this.#prefix}:${normalizedPath}`;
+  async update(key, entry) {
+    this.#safePut(this.#db, key, [GLOBAL_ATIME, entry.code, entry.map]);
   }
 
   /**
-   * @param {LmdbStore.Database<string, string>} db
+   * @param {Db} db
    * @param {string} key
    */
   #safeGet(db, key) {
@@ -190,9 +137,9 @@ directory and report this error to the Operations team.\n`);
   }
 
   /**
-   * @param {LmdbStore.Database<string, string>} db
+   * @param {Db} db
    * @param {string} key
-   * @param {string} value
+   * @param {import('./types').CacheEntry} value
    */
   #safePut(db, key, value) {
     try {
@@ -205,7 +152,7 @@ directory and report this error to the Operations team.\n`);
 
   /**
    * @param {string} type
-   * @param {LmdbStore.Database<string, string>} db
+   * @param {Db} db
    * @param {string} key
    */
   #debug(type, db, key) {
@@ -214,7 +161,7 @@ directory and report this error to the Operations team.\n`);
 
   /**
    * @param {'GET' | 'PUT'} type
-   * @param {LmdbStore.Database<string, string>} db
+   * @param {Db} db
    * @param {string} key
    * @param {Error} error
    */
@@ -227,51 +174,36 @@ directory and report this error to the Operations team.\n`);
     );
   }
 
-  async #pruneOldKeys() {
-    try {
-      const ATIME_LIMIT = Date.now() - 30 * DAY;
-      const BATCH_SIZE = 1000;
+  #pruneOldKeys() {
+    const ATIME_LIMIT = Date.now() - 30 * DAY;
 
-      /** @type {string[]} */
-      const validKeys = [];
-      /** @type {string[]} */
-      const invalidKeys = [];
+    /** @type {string[]} */
+    const toDelete = [];
+    const flushDeletes = () => {
+      if (!toDelete.length) {
+        return;
+      }
 
-      for (const { key, value } of this.#atimes.getRange()) {
-        const atime = parseInt(`${value}`, 10);
-        if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
-          invalidKeys.push(key);
-        } else {
-          validKeys.push(key);
+      this.#db.transactionSync(() => {
+        for (const key of toDelete) {
+          this.#db.removeSync(key);
         }
+      });
+    };
 
-        if (validKeys.length + invalidKeys.length >= BATCH_SIZE) {
-          const promises = new Set();
+    for (const { key, value } of this.#db.getRange()) {
+      if (Number.isNaN(value[0]) || value[0] < ATIME_LIMIT) {
+        toDelete.push(key);
 
-          if (invalidKeys.length) {
-            for (const k of invalidKeys) {
-              // all these promises are the same currently, so Set() will
-              // optimise this to a single promise, but I wouldn't be shocked
-              // if a future version starts returning independent promises so
-              // this is just for some future-proofing
-              promises.add(this.#atimes.remove(k));
-              promises.add(this.#mtimes.remove(k));
-              promises.add(this.#codes.remove(k));
-              promises.add(this.#sourceMaps.remove(k));
-            }
-          } else {
-            // delay a smidge to allow other things to happen before the next batch of checks
-            promises.add(new Promise((resolve) => setTimeout(resolve, 1)));
-          }
-
-          invalidKeys.length = 0;
-          validKeys.length = 0;
-          await Promise.all(Array.from(promises));
+        // flush deletes early if there are many deleted
+        if (toDelete.length > 10_000) {
+          flushDeletes();
         }
       }
-    } catch {
-      // ignore errors, the cache is totally disposable and will rebuild if there is some sort of corruption
     }
+
+    // delete all the old keys
+    flushDeletes();
   }
 }
 

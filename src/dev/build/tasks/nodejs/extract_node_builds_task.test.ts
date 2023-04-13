@@ -45,6 +45,9 @@ async function setup() {
     dockerPush: false,
     dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   return { config };

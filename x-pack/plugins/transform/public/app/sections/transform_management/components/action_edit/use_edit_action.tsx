@@ -17,6 +17,7 @@ import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
+export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 

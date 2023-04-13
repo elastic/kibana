@@ -78,7 +78,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
   public render() {
     const { uiCapabilities } = this.props;
 
-    if (!uiCapabilities.spaces.manage) {
+    if (!uiCapabilities.spaces?.manage) {
       return (
         <EuiCallOut
           title={
@@ -87,7 +87,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
               defaultMessage="Insufficient Privileges"
             />
           }
-          iconType="alert"
+          iconType="warning"
           color="danger"
           data-test-subj="userCannotManageSpacesCallout"
         >

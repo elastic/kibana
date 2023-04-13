@@ -6,6 +6,36 @@ The `management/cypress` directory contains functional UI tests that execute usi
 
 There are currently three ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
 
+### Environment Variables
+
+The test suites are setup with defaults for Kibana and Elasticsearch. The following environment variables can be set to changes those defaults and target a run against different instances of the stack:
+
+```
+CYPRESS_KIBANA_URL
+CYPRESS_ELASTICSEARCH_URL
+CYPRESS_ELASTICSEARCH_USERNAME
+CYPRESS_ELASTICSEARCH_PASSWORD
+CYPRESS_BASE_URL
+```
+
+Some notes:
+
+- The `ELASTICSEARCH_USERNAME` and `ELASTICSEARCH_PASSWORD` will be used for both Elasticsearch and Kibana access.
+- Both URL variables should not include credentials in the url
+- `KIBANA_URL` and `BASE_URL` will almost always be the same
+
+Example:
+
+```shell
+cd /x-pack/plugins/security_solution
+CYPRESS_BASE_URL=http://localhost:5601 \
+CYPRESS_KIBANA_URL=http://localhost:5601 \
+CYPRESS_ELASTICSEARCH_USERNAME=elastic \
+CYPRESS_ELASTICSEARCH_PASSWORD=changeme \
+CYPRESS_ELASTICSEARCH_URL=http://localhost:9200 yarn cypress:dw:open
+```
+
+
 ### Execution modes
 
 #### Interactive mode
@@ -67,9 +97,10 @@ Cypress convention. Contains the specs that are going to be executed.
 
 Cypress convention. Fixtures are used as external pieces of static data when we stub responses.
 
-### plugins/
+### support/
 
 Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
+Directory also holds Cypress Plugins that are then initialized via `setupNodeEvents()` in the Cypress configuration.
 
 ### screens/
 

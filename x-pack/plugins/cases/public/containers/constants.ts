@@ -15,6 +15,7 @@ export const casesQueriesKeys = {
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
+  userActions: ['user-actions'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -24,8 +25,15 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
-  userActions: (id: string, connectorId: string) =>
-    [...casesQueriesKeys.case(id), 'user-actions', connectorId] as const,
+  caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
+  caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
+  caseUserActions: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
+  caseUserActionsStats: (id: string) => [
+    ...casesQueriesKeys.case(id),
+    ...casesQueriesKeys.userActions,
+    'stats',
+  ],
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
   userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
   currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,
@@ -38,6 +46,7 @@ export const casesQueriesKeys = {
 };
 
 export const casesMutationsKeys = {
+  createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
   updateCases: ['update-cases'] as const,
   deleteComment: ['delete-comment'] as const,

@@ -26,6 +26,7 @@ export const getExceptionListItemSchemaMock = (
     },
     { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
   ],
+  expire_time: undefined,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list_id',

@@ -116,7 +116,7 @@ export function getTextBasedDatasource({
         };
       });
 
-      const index = context.dataViewSpec.title;
+      const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
       const updatedState = {
         ...state,
@@ -127,6 +127,7 @@ export function getTextBasedDatasource({
             query,
             columns: newColumns ?? [],
             allColumns: newColumns ?? [],
+            timeField: context.dataViewSpec.timeFieldName,
           },
         },
       };
@@ -232,13 +233,6 @@ export function getTextBasedDatasource({
         }
       });
       return { state: { layers }, savedObjectReferences };
-    },
-    isValidColumn(state, indexPatterns, layerId, columnId) {
-      const layer = state.layers[layerId];
-      const column = layer.columns.find((c) => c.columnId === columnId);
-      const indexPattern = indexPatterns[layer.index];
-      if (!column || !indexPattern) return false;
-      return true;
     },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];

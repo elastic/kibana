@@ -13,11 +13,11 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   deleteSignalsIndex,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   getRuleForSignalTesting,
   createRule,
   waitForSignalsToBePresent,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../../../detection_engine_api_integration/utils';
 import {
   obsOnlySpacesAllEsRead,
@@ -122,13 +122,13 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id: createdId } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, createdId);
+        await waitForRuleSuccess({ supertest, log, id: createdId });
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
       });
 
       after(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });

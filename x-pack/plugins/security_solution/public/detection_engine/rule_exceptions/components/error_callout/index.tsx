@@ -114,7 +114,7 @@ const ErrorCalloutComponent = ({
       data-test-subj="errorCalloutContainer"
       title={`${i18n.ERROR}: ${errorTitle}`}
       color="danger"
-      iconType="alert"
+      iconType="warning"
     >
       <EuiText size="s">
         <p data-test-subj="errorCalloutMessage">{errorMessage}</p>

@@ -20,25 +20,29 @@ import {
   mockCheckTimelinesStatusAfterInstallResult,
 } from '../../../../timeline/__mocks__/import_timelines';
 
-jest.mock('../../logic/get_latest_prebuilt_rules', () => {
+jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
-    getLatestPrebuiltRules: async () => {
-      return [
-        {
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          version: 2, // set one higher than the mocks which is set to 1 to trigger updates
+    createPrebuiltRuleAssetsClient: () => {
+      return {
+        fetchLatestAssets: async () => {
+          return [
+            {
+              rule_id: 'rule-1',
+              output_index: '.siem-signals',
+              risk_score: 50,
+              description: 'some description',
+              from: 'now-5m',
+              to: 'now',
+              index: ['index-1'],
+              name: 'some-name',
+              severity: 'low',
+              interval: '5m',
+              type: 'query',
+              version: 2, // set one higher than the mocks which is set to 1 to trigger updates
+            },
+          ];
         },
-      ];
+      };
     },
   };
 });

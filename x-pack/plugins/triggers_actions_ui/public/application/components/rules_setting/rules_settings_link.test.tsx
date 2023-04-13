@@ -14,8 +14,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
-import { getFlappingSettings } from '../../lib/rule_api';
-import { updateFlappingSettings } from '../../lib/rule_api';
+import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
+import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/get_flapping_settings', () => ({

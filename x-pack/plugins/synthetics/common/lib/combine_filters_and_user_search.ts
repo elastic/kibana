@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const combineFiltersAndUserSearch = (filters: string, search: string) => {
+export const combineFiltersAndUserSearch = (filters: string, search?: string) => {
   if (!filters && !search) {
     return '';
   }

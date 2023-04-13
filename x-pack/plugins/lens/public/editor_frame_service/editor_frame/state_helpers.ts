@@ -239,8 +239,10 @@ export function initializeVisualization({
 }) {
   if (visualizationState?.activeId) {
     return (
-      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+      visualizationMap[visualizationState.activeId]?.initialize(
+        () => '',
         visualizationState.state,
+        undefined,
         references,
         initialContext
       ) ?? visualizationState.state
@@ -401,11 +403,15 @@ export async function persistedStateToExpression(
 }
 
 export function getMissingIndexPattern(
-  currentDatasource: Datasource | null,
-  currentDatasourceState: { state: unknown } | null,
+  currentDatasource: Datasource | null | undefined,
+  currentDatasourceState: { isLoading: boolean; state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState?.state == null || currentDatasource == null) {
+  if (
+    currentDatasourceState?.isLoading ||
+    currentDatasourceState?.state == null ||
+    currentDatasource == null
+  ) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);

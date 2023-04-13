@@ -9,11 +9,13 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { SLOResponse } from '@kbn/slo-schema';
 
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloSelector as Component } from './slo_selector';
 
 export default {
   component: Component,
   title: 'app/SLO/BurnRateRule',
+  decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = () => (

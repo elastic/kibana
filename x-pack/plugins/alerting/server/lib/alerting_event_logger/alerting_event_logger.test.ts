@@ -59,6 +59,7 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
+  uuid: 'u-u-i-d',
   message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
   state: {
@@ -860,6 +861,45 @@ describe('AlertingEventLogger', () => {
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
       expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
     });
+
+    test('overwrites the message when the final status is error', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setExecutionSucceeded('success message');
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('success message');
+
+      alertingEventLogger.done({
+        status: {
+          status: 'error',
+          lastExecutionDate: new Date(),
+          error: { reason: RuleExecutionStatusErrorReasons.Execute, message: 'failed execution' },
+        },
+      });
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('test:123: execution failed');
+    });
+
+    test('does not overwrites the message when there is already a failure message', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setExecutionFailed('first failure message', 'failure error message');
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
+
+      alertingEventLogger.done({
+        status: {
+          status: 'error',
+          lastExecutionDate: new Date(),
+          error: {
+            reason: RuleExecutionStatusErrorReasons.Execute,
+            message: 'second failure execution',
+          },
+        },
+      });
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
+    });
   });
 });
 
@@ -1050,6 +1090,7 @@ describe('createAlertRecord', () => {
     expect(record.event?.provider).toBeUndefined();
     expect(record.event?.outcome).toBeUndefined();
     expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+    expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
     expect(record.kibana?.server_uuid).toBeUndefined();
     expect(record.kibana?.task).toBeUndefined();
     expect(record.kibana?.version).toBeUndefined();

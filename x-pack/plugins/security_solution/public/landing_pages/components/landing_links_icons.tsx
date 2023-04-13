@@ -14,6 +14,7 @@ import {
   withSecuritySolutionLink,
 } from '../../common/components/links';
 import type { NavLinkItem } from '../../common/components/navigation/types';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
@@ -53,7 +54,12 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
             <StyledEuiTitle size="xxs">
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkAnchor deepLinkId={id}>
+                  <SecuritySolutionLinkAnchor
+                    deepLinkId={id}
+                    onClick={() => {
+                      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+                    }}
+                  >
                     <h2>{title}</h2>
                   </SecuritySolutionLinkAnchor>
                 </EuiFlexItem>

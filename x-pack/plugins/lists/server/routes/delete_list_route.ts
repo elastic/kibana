@@ -217,6 +217,7 @@ const updateExceptionListItems = async (
     comments: listItem.comments,
     description: listItem.description,
     entries: remainingEntries,
+    expireTime: listItem.expire_time,
     id: listItem.id,
     itemId: listItem.item_id,
     meta: listItem.meta,

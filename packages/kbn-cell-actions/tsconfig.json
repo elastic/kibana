@@ -15,6 +15,9 @@
   "kbn_references": [
     "@kbn/ui-theme",
     "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/es-query",
     "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]

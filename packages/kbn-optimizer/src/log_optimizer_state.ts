@@ -29,7 +29,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           log.warning(`worker`, event.stream, event.line);
         }
 
-        if (event?.type === 'bundle not cached') {
+        if (event?.type === 'bundle not cached' && event.reason !== 'cache disabled') {
           log.debug(
             `[${event.bundle.id}] bundle not cached because [${event.reason}]${
               event.diff ? `, diff:\n${event.diff}` : ''
@@ -42,19 +42,24 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (event?.type === 'worker started') {
-          let moduleCount = 0;
-          let workUnits = 0;
-          for (const bundle of event.bundles) {
-            moduleCount += bundle.cache.getModuleCount() ?? NaN;
-            workUnits += bundle.cache.getWorkUnits() ?? NaN;
-          }
+          const moduleCount = event.bundles.reduce(
+            (acc, b) => acc + (b.cache.getModuleCount() ?? NaN),
+            0
+          );
+          const workUnits = event.bundles.reduce(
+            (acc, b) => acc + (b.cache.getWorkUnits() ?? NaN),
+            0
+          );
 
           log.info(
             `starting worker [${event.bundles.length} ${
               event.bundles.length === 1 ? 'bundle' : 'bundles'
             }]`
           );
-          log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
+
+          if (moduleCount || workUnits) {
+            log.debug(`modules [${moduleCount || '?'}] work units [${workUnits || '?'}]`);
+          }
         }
 
         if (state.phase === 'reallocating') {
@@ -65,7 +70,15 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            if (config.cache) {
+              log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            } else {
+              log.info('initialized');
+              log.warning(
+                'cache disabled, new caches will still be written but existing caches are ignored'
+              );
+            }
+
             if (config.themeTags.length !== ALL_THEMES.length) {
               log.warning(
                 `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`

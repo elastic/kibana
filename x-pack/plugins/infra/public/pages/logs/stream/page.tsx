@@ -31,7 +31,11 @@ export const StreamPage = () => {
   const {
     services: {
       data: {
-        query: { queryString: queryStringService, filterManager: filterManagerService },
+        query: {
+          queryString: queryStringService,
+          filterManager: filterManagerService,
+          timefilter: { timefilter: timeFilterService },
+        },
       },
       notifications: { toasts: toastsService },
     },
@@ -49,6 +53,7 @@ export const StreamPage = () => {
         toastsService={toastsService}
         filterManagerService={filterManagerService}
         urlStateStorage={urlStateStorage}
+        timeFilterService={timeFilterService}
       >
         <ConnectedStreamPageContentMemo />
       </LogStreamPageStateProvider>

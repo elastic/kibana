@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiDraggable,
   EuiDroppable,
@@ -33,6 +33,7 @@ import { FilterGroup } from '../filter_group';
 import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
 import { Operator } from '../../filter_bar/filter_editor';
+import { getGroupedFilters } from '../utils/filters_builder';
 import {
   cursorAddCss,
   cursorOrCss,
@@ -95,13 +96,14 @@ export function FilterItem({
     dropTarget,
     globalParams: { hideOr },
     timeRangeForSuggestionsOverride,
+    filtersForSuggestions,
     disabled,
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
-  let params: Filter['meta']['params'] | undefined;
+  let params: Filter['meta']['params'];
   const isMaxNesting = isMaxFilterNesting(path);
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter, dataView!);
@@ -110,6 +112,9 @@ export function FilterItem({
       params = getFilterParams(filter);
     }
   }
+  const [multiValueFilterParams, setMultiValueFilterParams] = useState<
+    Array<Filter | boolean | string | number>
+  >([]);
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
@@ -132,7 +137,10 @@ export function FilterItem({
   );
 
   const onHandleParamsChange = useCallback(
-    (selectedParams: unknown) => {
+    (selectedParams: Filter['meta']['params']) => {
+      if (Array.isArray(selectedParams)) {
+        setMultiValueFilterParams(selectedParams);
+      }
       dispatch({
         type: 'updateFilter',
         payload: { dest: { path, index }, field, operator, params: selectedParams },
@@ -142,14 +150,27 @@ export function FilterItem({
   );
 
   const onHandleParamsUpdate = useCallback(
-    (value: Filter['meta']['params']) => {
-      const paramsValues = Array.isArray(params) ? params : [];
+    (value: Filter | boolean | string | number) => {
+      const paramsValues: Array<Filter | boolean | string | number> = Array.isArray(
+        multiValueFilterParams
+      )
+        ? multiValueFilterParams
+        : [];
+      if (value) {
+        paramsValues.push(value);
+        setMultiValueFilterParams(paramsValues);
+      }
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, field, operator, params: [...paramsValues, value] },
+        payload: {
+          dest: { path, index },
+          field,
+          operator,
+          params: paramsValues as Filter['meta']['params'],
+        },
       });
     },
-    [dispatch, path, index, field, operator, params]
+    [dispatch, path, index, field, operator, multiValueFilterParams]
   );
 
   const onRemoveFilter = useCallback(() => {
@@ -192,7 +213,7 @@ export function FilterItem({
         <FilterGroup
           path={path}
           booleanRelation={conditionalOperationType}
-          filters={Array.isArray(filter) ? filter : filter.meta?.params}
+          filters={getGroupedFilters(filter)}
           reverseBackground={!reverseBackground}
           renderedLevel={renderedLevel + 1}
         />
@@ -234,6 +255,7 @@ export function FilterItem({
                       })}
                     >
                       <EuiFlexItem
+                        role="button"
                         grow={false}
                         aria-label={strings.getDragFilterAriaLabel()}
                         {...provided.dragHandleProps}
@@ -288,6 +310,7 @@ export function FilterItem({
                                   onHandleParamsChange={onHandleParamsChange}
                                   onHandleParamsUpdate={onHandleParamsUpdate}
                                   timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                                  filtersForSuggestions={filtersForSuggestions}
                                 />
                               </div>
                             </EuiFormRow>

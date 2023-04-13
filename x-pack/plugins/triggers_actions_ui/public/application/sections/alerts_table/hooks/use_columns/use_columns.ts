@@ -8,8 +8,9 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -20,7 +21,10 @@ interface UseColumnsArgs {
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
   defaultColumns: EuiDataGridColumn[];
+  initialBrowserFields?: BrowserFields;
 }
+
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
@@ -140,20 +144,40 @@ export const useColumns = ({
   storage,
   id,
   defaultColumns,
+  initialBrowserFields,
 }: UseColumnsArgs) => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
+    initialBrowserFields,
   });
+
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
+
+  const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
+
+  const didDefaultColumnChange = useMemo(
+    () => !isEqual(defaultColumns, defaultColumnsRef.current),
+    [defaultColumns]
+  );
+
+  useEffect(() => {
+    // if defaultColumns have changed, populate again
+    if (didDefaultColumnChange) {
+      defaultColumnsRef.current = defaultColumns;
+      setColumns(storageAlertsTable.current.columns);
+      return;
+    }
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
+
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-  }, [browserFields, columns, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated]);
+  }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[]) => {
@@ -196,6 +220,19 @@ export const useColumns = ({
     setColumnsAndSave(populatedDefaultColumns);
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 
+  /*
+   * In some case such security, we need some special fields such as threat.enrichments which are
+   * not fetched when passing only EMPTY_FIELDS. Hence, we will fetch all the fields that user has added to the table.
+   *
+   * Additionaly, system such as o11y needs fields which are not even added in the table such as rule_type_id and hence we
+   * additionly pass EMPTY_FIELDS so that it brings all fields apart from special fields
+   *
+   * */
+  const fieldsToFetch = useMemo(
+    () => [...columns.map((col) => ({ field: col.id, include_unmapped: true })), ...EMPTY_FIELDS],
+    [columns]
+  );
+
   return {
     columns,
     visibleColumns: getColumnIds(columns),
@@ -205,5 +242,6 @@ export const useColumns = ({
     onToggleColumn,
     onResetColumns,
     onChangeVisibleColumns: setColumnsByColumnIds,
+    fields: fieldsToFetch,
   };
 };

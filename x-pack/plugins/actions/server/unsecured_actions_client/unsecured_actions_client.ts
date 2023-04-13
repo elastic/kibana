@@ -10,11 +10,14 @@ import {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
 } from '../create_unsecured_execute_function';
+import { asNotificationExecutionSource } from '../lib';
+
+const NOTIFICATION_REQUESTER_ID = 'notifications';
 
 // allowlist for features wanting access to the unsecured actions client
 // which allows actions to be enqueued for execution without a user request
 const ALLOWED_REQUESTER_IDS = [
-  'notifications',
+  NOTIFICATION_REQUESTER_ID,
   // For functional testing
   'functional_tester',
 ];
@@ -47,6 +50,25 @@ export class UnsecuredActionsClient {
         `"${requesterId}" feature is not allow-listed for UnsecuredActionsClient access.`
       );
     }
-    return this.executionEnqueuer(this.internalSavedObjectsRepository, actionsToExecute);
+    // Inject source based on requesterId
+    return this.executionEnqueuer(
+      this.internalSavedObjectsRepository,
+      this.injectSource(requesterId, actionsToExecute)
+    );
+  }
+
+  private injectSource(requesterId: string, actionsToExecute: ExecuteOptions[]): ExecuteOptions[] {
+    switch (requesterId) {
+      case NOTIFICATION_REQUESTER_ID:
+        return actionsToExecute.map((actionToExecute) => ({
+          ...actionToExecute,
+          source: asNotificationExecutionSource({
+            requesterId,
+            connectorId: actionToExecute.id,
+          }),
+        }));
+      default:
+        return actionsToExecute;
+    }
   }
 }

@@ -63,10 +63,16 @@ function transformMonitoring(input: RuleMonitoring): RuleMonitoring {
 }
 
 function transformLastRun(input: AsApiContract<RuleLastRun>): RuleLastRun {
-  const { outcome_msg: outcomeMsg, alerts_count: alertsCount, ...rest } = input;
+  const {
+    outcome_msg: outcomeMsg,
+    alerts_count: alertsCount,
+    outcome_order: outcomeOrder,
+    ...rest
+  } = input;
   return {
     outcomeMsg,
     alertsCount,
+    outcomeOrder,
     ...rest,
   };
 }
@@ -103,6 +109,7 @@ export function transformRule(input: ApiRule): Rule {
     updated_at: updatedAt,
     api_key: apiKey,
     api_key_owner: apiKeyOwner,
+    api_key_created_by_user: apiKeyCreatedByUser,
     notify_when: notifyWhen,
     mute_all: muteAll,
     muted_alert_ids: mutedInstanceIds,
@@ -112,6 +119,7 @@ export function transformRule(input: ApiRule): Rule {
     next_run: nextRun,
     last_run: lastRun,
     monitoring: monitoring,
+    view_in_app_relative_url: viewInAppRelativeUrl,
     ...rest
   } = input;
 
@@ -129,9 +137,12 @@ export function transformRule(input: ApiRule): Rule {
     executionStatus: transformExecutionStatus(executionStatusAPI),
     actions: actionsAPI ? actionsAPI.map((action) => transformAction(action)) : [],
     scheduledTaskId,
+    ...(viewInAppRelativeUrl ? { viewInAppRelativeUrl } : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(monitoring ? { monitoring: transformMonitoring(monitoring) } : {}),
     ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+    ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+
     ...rest,
   };
 }

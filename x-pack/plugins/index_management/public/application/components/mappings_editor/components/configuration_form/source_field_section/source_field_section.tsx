@@ -21,7 +21,7 @@ export const SourceFieldSection = () => {
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle', {
         defaultMessage: 'Use caution when disabling the _source field',
       })}
-      iconType="alert"
+      iconType="warning"
       color="warning"
     >
       <p>
@@ -44,7 +44,11 @@ export const SourceFieldSection = () => {
       </p>
 
       <p>
-        <a href={documentationService.getDisablingMappingSourceFieldLink()} target="_blank">
+        <a
+          href={documentationService.getDisablingMappingSourceFieldLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
             defaultMessage="Learn more about alternatives to disabling the {source} field."

@@ -48,6 +48,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 setGlobalDate();
@@ -375,7 +377,7 @@ describe('enable()', () => {
     });
     await expect(
       async () => await rulesClient.enable({ id: '1' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: no"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule - no"`);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
@@ -512,6 +514,53 @@ describe('enable()', () => {
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    expect(taskManager.schedule).toHaveBeenCalledWith({
+      id: '1',
+      taskType: `alerting:myType`,
+      params: {
+        alertId: '1',
+        spaceId: 'default',
+        consumer: 'myApp',
+      },
+      schedule: {
+        interval: '10s',
+      },
+      enabled: true,
+      state: {
+        alertInstances: {},
+        alertTypeState: {},
+        previousStartedAt: null,
+      },
+      scope: ['alerting'],
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenNthCalledWith(2, 'alert', '1', {
+      scheduledTaskId: '1',
+    });
+  });
+
+  test('schedules task when task with scheduledTaskId exists but is unrecognized', async () => {
+    taskManager.schedule.mockResolvedValueOnce({
+      id: '1',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    taskManager.get.mockResolvedValue({ ...mockTask, status: TaskStatus.Unrecognized });
+    await rulesClient.enable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(taskManager.schedule).toHaveBeenCalledWith({
       id: '1',
       taskType: `alerting:myType`,

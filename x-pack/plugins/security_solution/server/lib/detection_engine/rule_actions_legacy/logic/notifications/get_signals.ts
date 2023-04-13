@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SignalSearchResponse, SignalSource } from '../../../signals/types';
+import type { SignalSearchResponse, SignalSource } from '../../../rule_types/types';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsParams {

@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { SyncStatus } from '../../../../../../common/types/connectors';
 
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
+import { pageToPagination } from '../../../../shared/pagination/page_to_pagination';
 import { durationToText } from '../../../utils/duration_to_text';
 
 import { syncStatusToColor, syncStatusToText } from '../../../utils/sync_status_to_text';
@@ -35,8 +36,8 @@ export const SyncJobs: React.FC = () => {
     if (connectorId) {
       fetchSyncJobs({
         connectorId,
-        page: syncJobsPagination.pageIndex ?? 0,
-        size: syncJobsPagination.pageSize ?? 10,
+        from: syncJobsPagination.from ?? 0,
+        size: syncJobsPagination.size ?? 10,
       });
     }
   }, [connectorId]);
@@ -119,13 +120,10 @@ export const SyncJobs: React.FC = () => {
         hasActions
         onChange={({ page: { index, size } }: { page: { index: number; size: number } }) => {
           if (connectorId) {
-            fetchSyncJobs({ connectorId, page: index, size });
+            fetchSyncJobs({ connectorId, from: index * size, size });
           }
         }}
-        pagination={{
-          ...syncJobsPagination,
-          totalItemCount: syncJobsPagination.total,
-        }}
+        pagination={pageToPagination(syncJobsPagination)}
         tableLayout="fixed"
         loading={syncJobsLoading}
       />

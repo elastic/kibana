@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 
-import { getPivotQuery } from '../../../../../common';
+import { getTransformConfigQuery } from '../../../../../common';
 
 import {
   ErrorMessage,
@@ -65,7 +65,7 @@ export const useSearchBar = (
     }
   };
 
-  const pivotQuery = getPivotQuery(searchQuery);
+  const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
   return {
     actions: {
@@ -79,7 +79,7 @@ export const useSearchBar = (
     },
     state: {
       errorMessage,
-      pivotQuery,
+      transformConfigQuery,
       searchInput,
       searchLanguage,
       searchQuery,

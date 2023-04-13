@@ -83,9 +83,10 @@ describe('useCopyIDAction', () => {
 
     await waitFor(() => {
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Copied Case ID to clipboard'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Copied Case ID to clipboard',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 });

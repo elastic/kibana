@@ -4,10 +4,9 @@
 @import './component/panel/index';
 @import './component/viewport/index';
 
-.dashboardViewport {
-  flex: 1;
+.dashboardContainer, .dashboardViewport {
+  flex: auto;
   display: flex;
-  flex-direction: column;
 }
 
 .dashboardViewport--loading {

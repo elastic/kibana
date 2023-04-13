@@ -150,7 +150,7 @@ export function getInspectResponse({
 
   return {
     id,
-    json: esRequestParams.body,
+    json: esRequestParams.body ?? esRequestParams,
     name: id,
     response: {
       json: esError ? esError.originalError : esResponse,

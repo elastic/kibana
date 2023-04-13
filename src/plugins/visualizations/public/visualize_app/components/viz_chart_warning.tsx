@@ -166,7 +166,7 @@ export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }
           mode={mode}
         />
       }
-      iconType="alert"
+      iconType="warning"
       color="warning"
       size="s"
     />

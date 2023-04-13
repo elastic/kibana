@@ -6,35 +6,81 @@
  */
 
 import { createMockedIndexPattern } from '../../mocks';
+import type { FormBasedLayer } from '../../types';
+import type { GenericIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage } from './helpers';
 import type { TermsIndexPatternColumn } from './terms';
 
 describe('helpers', () => {
+  const columnId = 'column_id';
+  const getLayerWithColumn = (column: GenericIndexPatternColumn) =>
+    ({
+      columnOrder: [columnId],
+      indexPatternId: '',
+      columns: {
+        [columnId]: column,
+      },
+    } as FormBasedLayer);
+
   describe('getInvalidFieldMessage', () => {
     it('return an error if a field was removed', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
           operationType: 'count',
           sourceField: 'NoBytes', // <= invalid
-        },
+        }),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field NoBytes was not found');
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 1,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <strong>
+                      NoBytes
+                    </strong>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if a field is the wrong type', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
           operationType: 'average',
           sourceField: 'timestamp', // <= invalid type for average
-        },
+        }),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
@@ -43,7 +89,7 @@ describe('helpers', () => {
 
     it('returns an error if one field amongst multiples does not exist', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
@@ -52,16 +98,49 @@ describe('helpers', () => {
           params: {
             secondaryFields: ['NoBytes'], // <= field does not exist
           },
-        } as TermsIndexPatternColumn,
+        } as TermsIndexPatternColumn),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field NoBytes was not found');
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 1,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <strong>
+                      NoBytes
+                    </strong>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if multiple fields do not exist', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
@@ -70,16 +149,55 @@ describe('helpers', () => {
           params: {
             secondaryFields: ['NoBytes'], // <= field does not exist
           },
-        } as TermsIndexPatternColumn,
+        } as TermsIndexPatternColumn),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Fields NotExisting, NoBytes were not found');
+      expect(messages![0]).toMatchInlineSnapshot(`
+        Object {
+          "displayLocations": Array [
+            Object {
+              "id": "toolbar",
+            },
+            Object {
+              "dimensionId": "column_id",
+              "id": "dimensionButton",
+            },
+            Object {
+              "id": "embeddableBadge",
+            },
+          ],
+          "message": <FormattedMessage
+            defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+            id="xpack.lens.indexPattern.fieldsNotFound"
+            values={
+              Object {
+                "count": 2,
+                "missingFields": <React.Fragment>
+                  <React.Fragment>
+                    <strong>
+                      NotExisting
+                    </strong>
+                    , 
+                  </React.Fragment>
+                  <React.Fragment>
+                    <strong>
+                      NoBytes
+                    </strong>
+                    
+                  </React.Fragment>
+                </React.Fragment>,
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('returns an error if one field amongst multiples has the wrong type', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
@@ -88,7 +206,8 @@ describe('helpers', () => {
           params: {
             secondaryFields: ['timestamp'], // <= invalid type
           },
-        } as TermsIndexPatternColumn,
+        } as TermsIndexPatternColumn),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
@@ -97,7 +216,7 @@ describe('helpers', () => {
 
     it('returns an error if multiple fields are of the wrong type', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
@@ -106,7 +225,8 @@ describe('helpers', () => {
           params: {
             secondaryFields: ['timestamp'], // <= invalid type
           },
-        } as TermsIndexPatternColumn,
+        } as TermsIndexPatternColumn),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
@@ -115,13 +235,14 @@ describe('helpers', () => {
 
     it('returns no message if all fields are matching', () => {
       const messages = getInvalidFieldMessage(
-        {
+        getLayerWithColumn({
           dataType: 'number',
           isBucketed: false,
           label: 'Foo',
           operationType: 'average',
           sourceField: 'bytes',
-        },
+        }),
+        columnId,
         createMockedIndexPattern()
       );
       expect(messages).toBeUndefined();

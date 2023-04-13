@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import fetch from 'node-fetch';
 import { sha256 } from 'js-sha256';
+import { CLOUD_USER_ID } from '@kbn/cloud-integration-saml-provider-plugin/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { CLOUD_USER_ID } from '../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');

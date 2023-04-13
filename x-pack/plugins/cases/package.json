@@ -1,7 +1,7 @@
 {
   "author": "Elastic",
-  "name": "cases",
-  "version": "8.0.0",
+  "name": "@kbn/cases-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License"
+  "license": "Elastic License 2.0"
 }

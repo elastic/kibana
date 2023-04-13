@@ -14,6 +14,10 @@ import {
   TaskTypeDictionary,
 } from './task_type_dictionary';
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+}));
+
 interface Opts {
   numTasks: number;
 }
@@ -182,7 +186,6 @@ describe('taskTypeDictionary', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          maxConcurrency: 2,
           createTaskRunner: jest.fn(),
         },
       });
@@ -207,6 +210,20 @@ describe('taskTypeDictionary', () => {
         });
       }).toThrowErrorMatchingInlineSnapshot(
         `"Task sampleTaskRemovedType has been removed from registration!"`
+      );
+    });
+
+    it(`throws error when setting maxConcurrency to a task type that isn't allowed to set it`, () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo2: {
+            title: 'foo2',
+            maxConcurrency: 2,
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"maxConcurrency setting isn't allowed for task type: foo2"`
       );
     });
   });

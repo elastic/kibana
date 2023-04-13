@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetPackageInfoByKey, useKibanaLink, useLink } from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useKibanaLink, useLink } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -18,7 +18,7 @@ import {
 } from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKey(FLEET_ELASTIC_AGENT_PACKAGE);
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
 
   const isInstalled = data?.item.status === 'installed';
 
@@ -52,6 +52,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const button = (
     <EuiButtonCompressed {...buttonArgs} isLoading={isLoading} color="primary">
       <FormattedMessage
+        data-test-subj="agentDetails.viewMoreMetricsButton"
         id="xpack.fleet.agentDetails.viewDashboardButtonLabel"
         defaultMessage="View more agent metrics"
       />
@@ -69,9 +70,11 @@ export const AgentDashboardLink: React.FunctionComponent<{
         }
       >
         <EuiButtonCompressed
+          data-test-subj="agentDetails.enableLogsAndMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
+          disabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
             id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"

@@ -9,9 +9,10 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { AllSeries, createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { useSyntheticsStartPlugins } from '../../../contexts';
 
@@ -35,9 +36,9 @@ export function StepFieldTrend({
   field: string;
   step: JourneyStep;
 }) {
-  const { observability } = useSyntheticsStartPlugins();
+  const { exploratoryView } = useSyntheticsStartPlugins();
 
-  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
+  const EmbeddableExpView = exploratoryView!.ExploratoryViewEmbeddable;
 
   const basePath = useKibana().services.http?.basePath?.get();
 
@@ -69,7 +70,13 @@ export function StepFieldTrend({
       <EmbeddableExpView
         title={title}
         appendTitle={
-          <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
+          <EuiButton
+            data-test-subj="syntheticsStepFieldTrendButton"
+            iconType={'visArea'}
+            href={href}
+            target="_blank"
+            size="s"
+          >
             {EXPLORE_LABEL}
           </EuiButton>
         }
@@ -78,7 +85,7 @@ export function StepFieldTrend({
         axisTitlesVisibility={{ x: false, yLeft: false, yRight: false }}
         legendIsVisible={false}
         dataTypesIndexPatterns={{
-          synthetics: 'synthetics-*',
+          synthetics: SYNTHETICS_INDEX_PATTERN,
         }}
         withActions={false}
       />

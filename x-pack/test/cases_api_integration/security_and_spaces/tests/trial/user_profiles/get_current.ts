@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { CaseStatuses, CommentType } from '@kbn/cases-plugin/common';
 import { CreateCaseUserAction, User } from '@kbn/cases-plugin/common/api';
-import { setupSuperUserProfile } from '../../../../common/lib/user_profiles';
+import { setupSuperUserProfile } from '../../../../common/lib/api/user_profiles';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
 import {
@@ -21,8 +21,8 @@ import {
   updateComment,
   getConfigurationRequest,
   updateConfiguration,
-} from '../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../common/lib/user_actions';
+} from '../../../../common/lib/api';
+import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

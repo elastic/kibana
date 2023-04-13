@@ -24,6 +24,7 @@ import type {
 import { createFilterAction } from './actions/apply_filter_action';
 import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+import { FiltersBuilderLazy } from './filters_builder';
 
 import './index.scss';
 
@@ -92,6 +93,7 @@ export class UnifiedSearchPublicPlugin
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
         AggregateQuerySearchBar: SearchBar,
+        FiltersBuilderLazy,
       },
       autocomplete: autocompleteStart,
     };

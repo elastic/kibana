@@ -8,6 +8,7 @@
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',
@@ -41,6 +42,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     actions: {
+      dynamic: false,
       type: 'nested',
       properties: {
         group: {
@@ -53,8 +55,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'keyword',
         },
         params: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         frequency: {
           properties: {
@@ -196,6 +198,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
+    },
+    revision: {
+      index: true, // Explicitly setting to `true` as there is need to query for a rule by a specific revision
+      type: 'long',
     },
     snoozeSchedule: {
       type: 'nested',

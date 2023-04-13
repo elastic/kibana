@@ -13,17 +13,9 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
-jest.mock('../../../common/components/visualization_actions', () => {
-  return {
-    VisualizationActions: () => <div data-test-subj="visualizationActions" />,
-  };
-});
+jest.mock('../../../common/components/visualization_actions/actions');
 
-jest.mock('../../../common/components/visualization_actions/lens_embeddable', () => {
-  return {
-    LensEmbeddable: () => <div data-test-subj="embeddable-metric" />,
-  };
-});
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('MetricEmbeddable', () => {
   const testProps = {
@@ -62,7 +54,7 @@ describe('MetricEmbeddable', () => {
   });
 
   it('render embeddables', () => {
-    expect(res.getAllByTestId('embeddable-metric')).toHaveLength(2);
+    expect(res.getAllByTestId('visualization-embeddable')).toHaveLength(2);
   });
 
   it('render titles', () => {

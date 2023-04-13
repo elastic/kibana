@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
 import * as t from 'io-ts';
 import { values } from 'lodash';
 import createContainer from 'constate';
+import type { TimeRange } from '@kbn/es-query';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { Color } from '../../../../../common/color_palette';
@@ -76,6 +78,13 @@ export const metricExplorerOptionsRT = t.intersection([
 ]);
 
 export type MetricsExplorerOptions = t.TypeOf<typeof metricExplorerOptionsRT>;
+
+export const metricsExplorerTimestampsRT = t.type({
+  fromTimestamp: t.number,
+  toTimestamp: t.number,
+  interval: t.string,
+});
+export type MetricsExplorerTimestampsRT = t.TypeOf<typeof metricsExplorerTimestampsRT>;
 
 export const metricsExplorerTimeOptionsRT = t.type({
   from: t.string,
@@ -149,25 +158,37 @@ function useStateWithLocalStorage<State>(
   return [state, setState];
 }
 
+const getDefaultTimeRange = ({ from, to }: TimeRange) => {
+  const fromTimestamp = DateMath.parse(from)!.valueOf();
+  const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+  return {
+    fromTimestamp,
+    toTimestamp,
+    interval: DEFAULT_TIMERANGE.interval,
+  };
+};
+
 export const useMetricsExplorerOptions = () => {
   const TIME_DEFAULTS = { from: 'now-1h', to: 'now' };
   const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from, to } = getTime();
-  const defaultTimeRange = {
-    from,
-    to,
-    interval: DEFAULT_TIMERANGE.interval,
-  };
 
   const [options, setOptions] = useStateWithLocalStorage<MetricsExplorerOptions>(
     'MetricsExplorerOptions',
     DEFAULT_OPTIONS
   );
-  const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(defaultTimeRange);
+  const [timeRange, setTimeRange] = useState<MetricsExplorerTimeOptions>({
+    from,
+    to,
+    interval: DEFAULT_TIMERANGE.interval,
+  });
+  const [timestamps, setTimestamps] = useState<MetricsExplorerTimestampsRT>(
+    getDefaultTimeRange({ from, to })
+  );
 
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
-    from: currentTimerange.from,
-    to: currentTimerange.to,
+    from: timeRange.from,
+    to: timeRange.to,
   });
 
   const [chartOptions, setChartOptions] = useStateWithLocalStorage<MetricsExplorerChartOptions>(
@@ -194,17 +215,19 @@ export const useMetricsExplorerOptions = () => {
     defaultViewState: {
       options: DEFAULT_OPTIONS,
       chartOptions: DEFAULT_CHART_OPTIONS,
-      currentTimerange: defaultTimeRange,
+      currentTimerange: timeRange,
     },
     options,
     chartOptions,
     setChartOptions,
-    currentTimerange,
+    timeRange,
     isAutoReloading,
     setOptions,
     setTimeRange,
     startAutoReload: () => setAutoReloading(true),
     stopAutoReload: () => setAutoReloading(false),
+    timestamps,
+    setTimestamps,
   };
 };
 

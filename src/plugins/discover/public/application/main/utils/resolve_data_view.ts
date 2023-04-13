@@ -64,10 +64,10 @@ export async function loadDataView(
     fetchId = dataViewSpec.id!;
   }
 
-  let fetchedDataView: DataView | undefined;
+  let fetchedDataView: DataView | null = null;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId, false) : null;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -82,13 +82,20 @@ export async function loadDataView(
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
+  let defaultDataView: DataView | null = null;
+  if (!fetchedDataView) {
+    try {
+      defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
+    } catch (e) {
+      //
+    }
+  }
+
   // fetch persisted data view
   return {
     list: dataViewList || [],
-    loaded: fetchedDataView
-      ? fetchedDataView
-      : // we can be certain that the data view exists due to an earlier hasData check
-        ((await dataViews.getDefaultDataView()) as DataView),
+    // we can be certain that the data view exists due to an earlier hasData check
+    loaded: fetchedDataView || defaultDataView!,
     stateVal: fetchId,
     stateValFound: !!fetchId && !!fetchedDataView,
   };

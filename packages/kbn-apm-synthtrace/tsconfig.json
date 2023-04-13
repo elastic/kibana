@@ -7,7 +7,7 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/datemath",
-    "@kbn/apm-synthtrace-client"
+    "@kbn/apm-synthtrace-client",
   ],
   "exclude": [
     "target/**/*",

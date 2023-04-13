@@ -32,6 +32,7 @@ export const convertRulesFilterToKQL = ({
   filter,
   tags,
   excludeRuleTypes = [],
+  enabled,
 }: FilterOptions): string => {
   const filters: string[] = [];
 
@@ -41,6 +42,10 @@ export const convertRulesFilterToKQL = ({
     filters.push('alert.attributes.params.immutable: true');
   } else if (showCustomRules) {
     filters.push('alert.attributes.params.immutable: false');
+  }
+
+  if (enabled !== undefined) {
+    filters.push(`alert.attributes.enabled: ${enabled ? 'true' : 'false'}`);
   }
 
   if (tags.length > 0) {

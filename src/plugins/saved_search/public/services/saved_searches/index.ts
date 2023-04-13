@@ -16,4 +16,4 @@ export {
 export type { SaveSavedSearchOptions } from './save_saved_searches';
 export { saveSavedSearch } from './save_saved_searches';
 export { SAVED_SEARCH_TYPE } from './constants';
-export type { SavedSearch, SortOrder } from './types';
+export type { SavedSearch } from './types';

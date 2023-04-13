@@ -34,9 +34,9 @@ export const useActions = ({
   const { navigateToPrefilledEditor } = lens;
   const [defaultActions, setDefaultActions] = useState([
     'inspect',
-    'openInLens',
     'addToNewCase',
     'addToExistingCase',
+    'openInLens',
   ]);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const useActions = ({
 
   const actions = useMemo(
     () =>
-      defaultActions.reduce<Action[]>((acc, action) => {
+      defaultActions?.reduce<Action[]>((acc, action) => {
         if (action === 'inspect' && inspectActionProps != null) {
           return [
             ...acc,
@@ -141,7 +141,7 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 3,
+    order: 1,
   };
 };
 
@@ -168,7 +168,7 @@ const getAddToNewCaseAction = ({
       callback();
     },
     disabled,
-    order: 2,
+    order: 3,
   };
 };
 
@@ -222,6 +222,6 @@ const getAddToExistingCaseAction = ({
       callback();
     },
     disabled,
-    order: 1,
+    order: 2,
   };
 };

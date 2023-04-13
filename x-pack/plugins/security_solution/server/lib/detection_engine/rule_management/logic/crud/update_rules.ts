@@ -66,12 +66,7 @@ export const updateRules = async ({
       references: ruleUpdate.references ?? [],
       namespace: ruleUpdate.namespace,
       note: ruleUpdate.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version:
-        ruleUpdate.version ?? existingRule.params.immutable
-          ? existingRule.params.version
-          : existingRule.params.version + 1,
+      version: ruleUpdate.version ?? existingRule.params.version,
       exceptionsList: ruleUpdate.exceptions_list ?? [],
       ...typeSpecificParams,
     },

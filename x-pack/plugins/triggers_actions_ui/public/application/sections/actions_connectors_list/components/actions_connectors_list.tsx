@@ -69,7 +69,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
           })}
           aria-label="Warning"
           size="m"
-          type="alert"
+          type="warning"
           color="warning"
           content={connectorDeprecatedMessage}
           position="right"
@@ -243,7 +243,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             {item.isMissingSecrets ? (
               <EuiIconTip
                 iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
-                type="alert"
+                type="warning"
                 color="warning"
                 content={i18n.translate(
                   'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',

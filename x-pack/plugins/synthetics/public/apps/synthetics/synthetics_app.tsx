@@ -17,7 +17,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-plugin/public';
-import { SyntheticsAppProps, SyntheticsDataViewContextProvider } from './contexts';
+import { SyntheticsAppProps } from './contexts';
 
 import {
   SyntheticsRefreshContextProvider,
@@ -91,6 +91,7 @@ const Application = (props: SyntheticsAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
                 fleet: startPlugins.fleet,
@@ -100,24 +101,22 @@ const Application = (props: SyntheticsAppProps) => {
                 <EuiThemeProvider darkMode={darkMode}>
                   <SyntheticsRefreshContextProvider>
                     <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                        <SyntheticsThemeContextProvider darkMode={darkMode}>
-                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                              <RedirectAppLinks
-                                className={APP_WRAPPER_CLASS}
-                                application={core.application}
-                              >
-                                <InspectorContextProvider>
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                  <TestNowModeFlyoutContainer />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </SyntheticsStartupPluginsContextProvider>
-                        </SyntheticsThemeContextProvider>
-                      </SyntheticsDataViewContextProvider>
+                      <SyntheticsThemeContextProvider darkMode={darkMode}>
+                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                            <RedirectAppLinks
+                              className={APP_WRAPPER_CLASS}
+                              application={core.application}
+                            >
+                              <InspectorContextProvider>
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                                <TestNowModeFlyoutContainer />
+                              </InspectorContextProvider>
+                            </RedirectAppLinks>
+                          </div>
+                        </SyntheticsStartupPluginsContextProvider>
+                      </SyntheticsThemeContextProvider>
                     </SyntheticsSettingsContextProvider>
                   </SyntheticsRefreshContextProvider>
                 </EuiThemeProvider>

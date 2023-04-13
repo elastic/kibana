@@ -19,7 +19,7 @@ import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
@@ -55,6 +55,7 @@ export const useDashboardMenuItems = ({
   const dispatch = useEmbeddableDispatch();
 
   const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
+  const hasOverlays = select((state) => state.componentState.hasOverlays);
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const dashboardTitle = select((state) => state.explicitInput.title);
 
@@ -156,7 +157,10 @@ export const useDashboardMenuItems = ({
         iconType: 'pencil',
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
-        run: () => dispatch(setViewMode(ViewMode.EDIT)),
+        run: () => {
+          dashboardContainer.clearOverlays();
+          dispatch(setViewMode(ViewMode.EDIT));
+        },
       } as TopNavMenuData,
 
       quickSave: {
@@ -166,13 +170,13 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: !hasUnsavedChanges || isSaveInProgress,
+        disableButton: !hasUnsavedChanges || isSaveInProgress || hasOverlays,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
       saveAs: {
         description: topNavStrings.saveAs.description,
-        disableButton: isSaveInProgress,
+        disableButton: isSaveInProgress || hasOverlays,
         id: 'save',
         emphasize: !Boolean(lastSavedId),
         testId: 'dashboardSaveMenuItem',
@@ -184,7 +188,7 @@ export const useDashboardMenuItems = ({
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
-        disableButton: isSaveInProgress || !lastSavedId,
+        disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
         run: () => returnToViewMode(),
       } as TopNavMenuData,
@@ -193,16 +197,16 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.share,
         id: 'share',
         testId: 'shareTopNavButton',
-        disableButton: isSaveInProgress,
+        disableButton: isSaveInProgress || hasOverlays,
         run: showShare,
       } as TopNavMenuData,
 
-      options: {
-        ...topNavStrings.options,
-        id: 'options',
-        testId: 'dashboardOptionsButton',
-        disableButton: isSaveInProgress,
-        run: (anchor) => dashboardContainer.showOptions(anchor),
+      settings: {
+        ...topNavStrings.settings,
+        id: 'settings',
+        testId: 'dashboardSettingsButton',
+        disableButton: isSaveInProgress || hasOverlays,
+        run: () => dashboardContainer.showSettings(),
       } as TopNavMenuData,
 
       clone: {
@@ -217,6 +221,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     dashboardContainer,
     hasUnsavedChanges,
+    hasOverlays,
     setFullScreenMode,
     isSaveInProgress,
     returnToViewMode,
@@ -249,7 +254,7 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
     }
-    return [...labsMenuItem, menuItems.options, ...shareMenuItem, ...editModeItems];
+    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
   }, [lastSavedId, menuItems, share, isLabsEnabled]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

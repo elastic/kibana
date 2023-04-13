@@ -144,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_zip_url_tls_enabled: false,
               script_source: {
                 file_name: '',
                 is_generated_script: false,
@@ -189,11 +188,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             screenshots: 'on',
             'service.name': '',
-            'source.zip_url.folder': '',
-            'source.zip_url.proxy_url': '',
-            'source.zip_url.url': '',
-            'source.zip_url.password': '',
-            'source.zip_url.username': '',
             synthetics_args: [],
             tags: [],
             'throttling.config': '5d/3u/20l',
@@ -758,6 +752,225 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - browser - handles custom namespace', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const customNamespace = 'custom.namespace';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
+          .expect(200);
+        // expect monitor not to have been deleted
+        const getResponse = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(customNamespace);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - lightweight - handles custom namespace', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const customNamespace = 'custom.namespace';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
+          .expect(200);
+
+        // expect monitor not to have been deleted
+        const getResponse = await supertestWithoutAuth
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(customNamespace);
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project, SPACE_ID);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - browser - handles custom namespace errors', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const customNamespace = 'custom-namespace';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const { body } = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
+          .expect(200);
+        // expect monitor not to have been deleted
+        expect(body).to.eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details: 'Namespace contains invalid characters',
+              id: projectMonitors.monitors[0].id,
+              reason: 'Invalid namespace',
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - lightweight - handles custom namespace errors', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      const customNamespace = 'custom-namespace';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const { body } = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
+          .expect(200);
+        // expect monitor not to have been deleted
+        expect(body).to.eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details: 'Namespace contains invalid characters',
+              id: httpProjectMonitors.monitors[1].id,
+              reason: 'Invalid namespace',
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
       }
@@ -1594,6 +1807,43 @@ export default function ({ getService }: FtrProviderContext) {
             return deleteMonitor(monitor.id, project);
           }),
         ]);
+      }
+    });
+
+    it('project monitors - handles alert config without adding arbitrary fields', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const testAlert = {
+        status: { enabled: false, doesnotexit: true },
+      };
+      try {
+        await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                alert: testAlert,
+              },
+            ],
+          })
+          .expect(200);
+        const getResponse = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}`)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.ALERT_CONFIG]).eql({
+          status: {
+            enabled: testAlert.status.enabled,
+          },
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
       }
     });
   });

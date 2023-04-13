@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export interface AlertListItemStatus {
-  label: string;
-  healthColor: string;
-  actionGroup?: string;
-}
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 
 export interface AlertListItem {
   alert: string;
-  status: AlertListItemStatus;
+  status: AlertStatusValues;
   start?: Date;
   duration: number;
   isMuted: boolean;
   sortPriority: number;
+  flapping: boolean;
 }

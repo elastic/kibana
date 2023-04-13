@@ -34,7 +34,11 @@ function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   }
 
   return fields.filter((field) => {
-    return field.aggregatable && metricAggFieldTypes.includes(field.type);
+    return (
+      field.aggregatable &&
+      metricAggFieldTypes.includes(field.type) &&
+      (field.timeSeriesMetric !== 'counter' || ['min', 'max'].includes(aggType))
+    );
   });
 }
 

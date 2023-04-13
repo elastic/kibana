@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 
@@ -15,23 +15,25 @@ interface MonitorErrorsCountProps {
   from: string;
   to: string;
   locationLabel?: string;
-  monitorId: string[];
+  monitorIds: string[];
+  locations?: string[];
 }
 
 export const OverviewErrorsCount = ({
-  monitorId,
+  monitorIds,
   from,
   to,
-  locationLabel,
+  locations,
 }: MonitorErrorsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
   return (
     <ExploratoryViewEmbeddable
+      id="overviewErrorsCount"
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
@@ -39,8 +41,8 @@ export const OverviewErrorsCount = ({
         {
           time,
           reportDefinitions: {
-            'monitor.id': monitorId,
-            ...(locationLabel ? { 'observer.geo.name': [locationLabel] } : {}),
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
+            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

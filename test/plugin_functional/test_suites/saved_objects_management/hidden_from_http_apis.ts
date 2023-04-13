@@ -107,9 +107,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       describe('find', () => {
         it('returns saved objects registered as hidden from the http Apis', async () => {
           await supertest
-            .get(
-              `/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}&fields=title`
-            )
+            .get(`/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}`)
             .set('kbn-xsrf', 'true')
             .expect(200)
             .then((resp) => {

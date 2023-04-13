@@ -955,7 +955,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"optional\" | \"none\" | \"required\">; }>"
+          "<\"none\" | \"optional\" | \"required\">; }>"
         ],
         "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
         "deprecated": false,

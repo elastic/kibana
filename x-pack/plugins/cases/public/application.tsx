@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiErrorBoundary } from '@elastic/eui';
 

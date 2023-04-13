@@ -35,7 +35,7 @@ import {
 } from '../../../../integrations/hooks';
 import {
   Loading,
-  Error,
+  Error as ErrorComponent,
   ExtensionWrapper,
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
@@ -53,9 +53,8 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
-import { useHistoryBlock } from './hooks';
 import { UpgradeStatusCallout } from './components';
-import { usePackagePolicyWithRelatedData } from './hooks/use_package_policy';
+import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -163,7 +162,6 @@ export const EditPackagePolicyForm = memo<{
     }
     return '/';
   }, [from, getHref, packageInfo, policyId]);
-
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
@@ -240,10 +238,21 @@ export const EditPackagePolicyForm = memo<{
   };
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
   const extensionTabsView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
   );
+
+  if (replaceDefineStepView && extensionView) {
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
+    );
+  }
+
   const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -339,6 +348,20 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
+  const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        policy={originalPackagePolicy}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        isEditPage={true}
+      />
+    </ExtensionWrapper>
+  );
+
   const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
     ExperimentalFeaturesService.get();
 
@@ -361,7 +384,7 @@ export const EditPackagePolicyForm = memo<{
         {isLoadingData ? (
           <Loading />
         ) : loadingError || !agentPolicy || !packageInfo ? (
-          <Error
+          <ErrorComponent
             title={
               <FormattedMessage
                 id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
@@ -399,7 +422,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {configurePackage}
+            {replaceConfigurePackage || configurePackage}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />

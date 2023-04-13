@@ -12,8 +12,8 @@ import getPort from 'get-port';
 import http from 'http';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
+import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getServiceNowServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowITSMTest({ getService }: FtrProviderContext) {

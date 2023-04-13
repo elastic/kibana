@@ -47,8 +47,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         .set('kbn-xsrf', 'foo')
         .send({
           enabled: true,
-          lookBackWindow: 10,
-          statusChangeThreshold: 10,
+          look_back_window: 10,
+          status_change_threshold: 10,
         })
         .expect(200);
     });

@@ -89,7 +89,6 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    symlinks: false,
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,

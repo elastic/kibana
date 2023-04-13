@@ -21,6 +21,7 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -53,7 +54,7 @@ export const createDefaultAlertExecutorOptions = <
   rule: {
     id: alertId,
     updatedBy: null,
-    tags: [],
+    tags: ['rule-tag1', 'rule-tag2'],
     name: ruleName,
     createdBy: 'CREATED_BY',
     actions: [],
@@ -65,8 +66,11 @@ export const createDefaultAlertExecutorOptions = <
     createdAt,
     updatedAt,
     notifyWhen: null,
+    revision: 0,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
+    muteAll: false,
+    snoozeSchedule: [],
   },
   params,
   spaceId: 'SPACE_ID',
@@ -87,4 +91,5 @@ export const createDefaultAlertExecutorOptions = <
   namespace: undefined,
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
 });

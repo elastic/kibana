@@ -39,6 +39,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -51,6 +52,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -68,6 +70,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
 
@@ -86,6 +89,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -101,6 +105,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
 
@@ -121,6 +126,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {
@@ -134,6 +140,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {

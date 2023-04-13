@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { CONNECTORS_JOBS_INDEX } from '../..';
@@ -14,75 +13,56 @@ import { Paginate } from '../../../common/types/pagination';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
+import { fetchWithPagination } from '../../utils/fetch_with_pagination';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+
+const defaultResult: Paginate<ConnectorSyncJob> = {
+  _meta: {
+    page: {
+      from: 0,
+      has_more_hits_than_total: false,
+      size: 10,
+      total: 0,
+    },
+  },
+  data: [],
+};
 
 export const fetchSyncJobsByConnectorId = async (
   client: IScopedClusterClient,
   connectorId: string,
-  pageIndex: number,
+  from: number,
   size: number
 ): Promise<Paginate<ConnectorSyncJob>> => {
   try {
-    if (size === 0) {
-      // prevent some divide by zero errors below
-      return {
-        data: [],
-        has_more_hits_than_total: false,
-        pageIndex: 0,
-        pageSize: size,
-        size: 0,
-        total: 0,
-      };
-    }
-    const result = await client.asCurrentUser.search<ConnectorSyncJob>({
-      from: pageIndex * size,
-      index: CONNECTORS_JOBS_INDEX,
-      query: {
-        term: {
-          'connector.id': connectorId,
-        },
-      },
-      size,
-      // @ts-ignore Elasticsearch-js has the wrong internal typing for this field
-      sort: { created_at: { order: 'desc' } },
-    });
-    const total = totalToPaginateTotal(result.hits.total);
-    // If we get fewer results than the target page, make sure we return correct page we're on
-    const resultPageIndex = Math.min(pageIndex, Math.trunc(total.total / size));
-    const data =
-      result.hits.hits
-        .map((hit) => (hit._source ? { ...hit._source, id: hit._id } : null))
-        .filter(isNotNullish) ?? [];
+    const result = await fetchWithPagination(
+      async () =>
+        await client.asCurrentUser.search<ConnectorSyncJob>({
+          from,
+          index: CONNECTORS_JOBS_INDEX,
+          query: {
+            term: {
+              'connector.id': connectorId,
+            },
+          },
+          size,
+          sort: { created_at: { order: 'desc' } },
+        }),
+      from,
+      size
+    );
     return {
-      data,
-      pageIndex: resultPageIndex,
-      pageSize: size,
-      size: data.length,
-      ...total,
+      ...result,
+      data: result.data
+        .map((hit) => (hit._source ? { ...hit._source, id: hit._id } : null))
+        .filter(isNotNullish),
     };
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       await setupConnectorsIndices(client.asCurrentUser);
+      return defaultResult;
+    } else {
+      throw error;
     }
-    return {
-      data: [],
-      has_more_hits_than_total: false,
-      pageIndex: 0,
-      pageSize: size,
-      size: 0,
-      total: 0,
-    };
   }
 };
-
-function totalToPaginateTotal(input: number | SearchTotalHits | undefined): {
-  has_more_hits_than_total: boolean;
-  total: number;
-} {
-  if (typeof input === 'number') {
-    return { has_more_hits_than_total: false, total: input };
-  }
-  return input
-    ? { has_more_hits_than_total: input.relation === 'gte' ? true : false, total: input.value }
-    : { has_more_hits_than_total: false, total: 0 };
-}

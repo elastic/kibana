@@ -49,11 +49,11 @@ const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
       path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
     },
     {
-      id: 'mlNodesOverviewDeepLink',
-      title: i18n.translate('xpack.ml.deepLink.nodesOverview', {
-        defaultMessage: 'Nodes',
+      id: 'mlMemoryUsageDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
+        defaultMessage: 'Memory usage',
       }),
-      path: `/${ML_PAGES.TRAINED_MODELS_NODES}`,
+      path: `/${ML_PAGES.MEMORY_USAGE}`,
     },
   ],
 };

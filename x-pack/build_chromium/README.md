@@ -119,6 +119,48 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
 - All functional and API tests that generate PDF and PNG files should pass.
 - Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.
 
+## Testing Chromium upgrades on a Windows Machine
+
+Directions on creating a build of Kibana off an existing PR can be found here: 
+https://www.elastic.co/guide/en/kibana/current/building-kibana.html 
+You will need this build to install on your windows device to test the in progress PR. 
+
+The default extractor for Windows might give `Path too long errors`. 
+- Install the zipped file onto your C:\ directory in case the path actually is too long. 
+- Use 7Zip or WinZip to extract the contents of the kibana build.
+Reference: This article can be helpful:
+https://www.partitionwizard.com/disk-recovery/error-0x80010135-path-too-long.html  
+
+For an elasticsearch cluster to base the latest kibana build with, you can use a snapshot.sh bash script to generate the latest build. Create a file called snapshot.sh and put the following into the file: 
+
+```
+runQuery() {
+  curl --silent -XGET https://artifacts-api.elastic.co${1}
+}
+BUILD_HASH=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds | jq -r '.builds[0]')
+echo "Latest build hash :: $BUILD_HASH"
+KBN_DOWNLOAD=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds/$BUILD_HASH/projects/elasticsearch/packages/elasticsearch-${VERSION}-SNAPSHOT-windows-x86_64.zip)
+echo $KBN_DOWNLOAD | jq -r '.package.url'
+```
+
+In the terminal once you have the snapshot.sh file written run: 
+chmod a+x snapshot.sh to make the file executable
+Then set the version variable within the script to what you need by typing the following (in this example 8.8.0):
+VERSION=8.8.0 ./snapshot.sh
+
+In the terminal you should see a web address that will give you a download of elasticsearch. 
+
+You may need to disable xpack security in the elasticsearch.yml 
+xpack.security.enabled: false
+
+Make sure nothing is set in the kibana.yml
+
+Run `.\bin\elasticsearch.bat` in the elasticsearch directory first and then once it's up run `.\bin\kibana.bat`
+
+Navigate to localhost:5601 and there shouldn't be any prompts to set up security etc. To test PNG reporting, you may need to upload a license. Navigate to https://wiki.elastic.co/display/PM/Internal+License+-+X-Pack+and+Endgame and download the license.json from Internal Licenses. 
+
+Navigate to Stack Management in Kibana and you can upload the license.json from internal licenses. You won't need to restart the cluster and should be able to test the Kibana feature as needed at this point. 
+
 ## Resources
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:

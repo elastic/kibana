@@ -63,11 +63,11 @@ export const strings = {
     }),
   getLoadOtherFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-      defaultMessage: 'Load other saved query',
+      defaultMessage: 'Load a different query',
     }),
   getLoadCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-      defaultMessage: 'Load saved query',
+      defaultMessage: 'Load query',
     }),
   getSaveAsNewFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
@@ -75,15 +75,11 @@ export const strings = {
     }),
   getSaveFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-      defaultMessage: 'Save saved query',
+      defaultMessage: 'Save query',
     }),
   getClearllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
       defaultMessage: 'Clear all',
-    }),
-  getSavedQueryLabel: () =>
-    i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
-      defaultMessage: 'Saved query',
     }),
   getSavedQueryPopoverSaveChangesButtonAriaLabel: (title?: string) =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel', {
@@ -96,7 +92,7 @@ export const strings = {
     }),
   getSavedQueryPopoverSaveAsNewButtonAriaLabel: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel', {
-      defaultMessage: 'Save as new saved query',
+      defaultMessage: 'Save as new query',
     }),
   getSavedQueryPopoverSaveAsNewButtonText: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
@@ -104,7 +100,7 @@ export const strings = {
     }),
   getSaveCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-      defaultMessage: 'Save current saved query',
+      defaultMessage: 'Save current query',
     }),
   getApplyAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
@@ -371,7 +367,7 @@ export function QueryBarMenuPanels({
       {
         name: strings.getClearllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-        icon: 'crossInACircleFilled',
+        icon: 'cross',
         'data-test-subj': 'filter-sets-removeAllFilters',
         onClick: () => {
           closePopover();
@@ -403,7 +399,7 @@ export function QueryBarMenuPanels({
   let panels = [
     {
       id: 0,
-      title: (
+      title: savedQuery?.attributes.title ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -412,9 +408,7 @@ export function QueryBarMenuPanels({
                 size="s"
                 data-test-subj="savedQueryTitle"
               >
-                <strong>
-                  {savedQuery ? savedQuery.attributes.title : strings.getSavedQueryLabel()}
-                </strong>
+                <strong>{savedQuery.attributes.title}</strong>
               </EuiText>
             </EuiFlexItem>
             {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
@@ -455,7 +449,7 @@ export function QueryBarMenuPanels({
             )}
           </EuiFlexGroup>
         </>
-      ),
+      ) : undefined,
       items,
     },
     {

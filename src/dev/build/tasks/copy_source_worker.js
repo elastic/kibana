@@ -12,8 +12,6 @@ const { resolve, extname, dirname } = require('path');
 const { optimize } = require('svgo');
 const { transformCode } = require('@kbn/babel-transform');
 
-const { ignoredPkgIds } = require('piscina').workerData;
-
 const { REPO_ROOT } = require('@kbn/repo-info');
 const BUILD_ROOT = resolve(REPO_ROOT, 'build', 'kibana');
 
@@ -34,7 +32,6 @@ module.exports = async ({ source }) => {
     case '.tsx':
       const output = transformCode(absoluteSource, undefined, {
         disableSourceMaps: true,
-        ignoredPkgIds,
       });
 
       if (output.code) {

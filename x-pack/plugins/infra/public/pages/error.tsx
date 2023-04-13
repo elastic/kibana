@@ -56,7 +56,7 @@ export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageContent>
-          <EuiCallOut color="danger" title={message} iconType={'alert'}>
+          <EuiCallOut color="danger" title={message} iconType="error">
             <p>
               <FormattedMessage
                 id="xpack.infra.errorPage.tryAgainDescription "

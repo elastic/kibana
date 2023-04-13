@@ -54,7 +54,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
+import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { useLicense } from '../../../common/hooks/use_license';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
@@ -97,6 +97,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
+    const hostNameExistsFilter = fieldNameExistsFilter(SecurityPageName.hosts);
     if (tabName === HostsTableType.events) {
       return [...globalFilters, ...hostNameExistsFilter];
     }

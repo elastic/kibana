@@ -21,6 +21,8 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RawEventData } from './types';
+import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -30,7 +32,6 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -74,6 +75,7 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
+  endpointView = 'endpoint-results-view',
 }
 
 interface Props {
@@ -132,7 +134,9 @@ const RendererContainer = styled.div`
 `;
 
 const ThreatTacticContainer = styled(EuiFlexGroup)`
+  flex-grow: 0;
   flex-wrap: nowrap;
+
   & .euiFlexGroup {
     flex-wrap: nowrap;
   }
@@ -232,8 +236,13 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
-                  {threatDetails && threatDetails[0] && (
+                {threatDetails && threatDetails[0] && (
+                  <ThreatTacticContainer
+                    alignItems="flexStart"
+                    direction="column"
+                    wrap={false}
+                    gutterSize="none"
+                  >
                     <>
                       <EuiTitle size="xxs">
                         <h5>{threatDetails[0].title}</h5>
@@ -242,8 +251,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                         {threatDetails[0].description}
                       </ThreatTacticDescription>
                     </>
-                  )}
-                </ThreatTacticContainer>
+                  </ThreatTacticContainer>
+                )}
                 <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>
@@ -419,15 +428,24 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useOsqueryTab({
-    rawEventData: rawEventData as AlertRawEventData,
+    rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
+  const endpointResponseActionsTab = useEndpointResponseActionsTab({
+    rawEventData: rawEventData as RawEventData,
+  });
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
-      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
-    );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
+    return [
+      summaryTab,
+      threatIntelTab,
+      tableTab,
+      jsonTab,
+      osqueryTab,
+      endpointResponseActionsTab,
+    ].filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, endpointResponseActionsTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

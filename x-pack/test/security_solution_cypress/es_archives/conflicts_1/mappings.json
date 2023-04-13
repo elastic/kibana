@@ -1,0 +1,27 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "conflicts-0001",
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp":{
+          "type":"date"
+        },
+        "doc_id": {
+          "type": "long"
+        },
+        "my_field": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "title": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

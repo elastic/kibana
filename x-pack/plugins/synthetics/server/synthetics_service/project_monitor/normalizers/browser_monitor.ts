@@ -29,7 +29,7 @@ export const getNormalizeBrowserFields = ({
 }: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -86,6 +86,6 @@ export const getNormalizeBrowserFields = ({
       ...normalizedFields,
     },
     unsupportedKeys: [],
-    errors: [],
+    errors,
   };
 };

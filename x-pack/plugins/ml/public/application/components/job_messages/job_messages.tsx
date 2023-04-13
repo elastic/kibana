@@ -137,7 +137,6 @@ export const JobMessages: FC<JobMessagesProps> = ({
     <>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
-        className="job-messages-table"
         items={messages}
         columns={columns}
         sorting={defaultSorting}

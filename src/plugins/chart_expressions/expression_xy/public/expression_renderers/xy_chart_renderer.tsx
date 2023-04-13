@@ -278,7 +278,7 @@ export const getXyChartRenderer = ({
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
             />
-          </div>{' '}
+          </div>
         </I18nProvider>
       </KibanaThemeProvider>,
       domNode

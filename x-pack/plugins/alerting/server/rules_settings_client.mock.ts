@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { RulesSettingsClientApi, RulesSettingsFlappingClientApi } from './types';
+import {
+  RulesSettingsClientApi,
+  RulesSettingsFlappingClientApi,
+  DEFAULT_FLAPPING_SETTINGS,
+} from './types';
 
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
 export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingClientApi>;
@@ -14,7 +18,7 @@ export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingC
 // the mock return value on the flapping
 const createRulesSettingsClientMock = () => {
   const flappingMocked: RulesSettingsFlappingClientMock = {
-    get: jest.fn(),
+    get: jest.fn().mockReturnValue(DEFAULT_FLAPPING_SETTINGS),
     update: jest.fn(),
   };
   const mocked: RulesSettingsClientMock = {

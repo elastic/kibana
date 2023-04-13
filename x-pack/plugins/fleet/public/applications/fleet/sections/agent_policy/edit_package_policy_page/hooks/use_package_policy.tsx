@@ -36,6 +36,7 @@ import {
 } from '../../create_package_policy_page/services';
 import type { PackagePolicyFormState } from '../../create_package_policy_page/types';
 import { fixApmDurationVars, hasUpgradeAvailable } from '../utils';
+import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 
 function mergeVars(
   packageVars?: PackagePolicyConfigRecord,
@@ -94,7 +95,9 @@ export function usePackagePolicyWithRelatedData(
 
   const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
+    const {
+      policy: { elasticsearch, ...restPackagePolicy },
+    } = await prepareInputPackagePolicyDataset(packagePolicy);
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
     return result;

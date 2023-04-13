@@ -129,7 +129,7 @@ describe('removeReferences()', () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"kbn_references\\": [ \\"baz\\"]
+        \\"kbn_references\\": [\\"baz\\"]
       }"
     `);
     expect(

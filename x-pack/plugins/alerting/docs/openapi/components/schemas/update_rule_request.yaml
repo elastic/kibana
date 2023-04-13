@@ -4,7 +4,6 @@ description: >-
 type: object
 required:
       - name
-      - notify_when
       - params
       - schedule
 properties:

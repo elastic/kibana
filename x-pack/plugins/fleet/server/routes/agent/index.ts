@@ -21,7 +21,8 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
@@ -31,6 +32,7 @@ import {
   PostBulkRequestDiagnosticsActionRequestSchema,
   ListAgentUploadsRequestSchema,
   GetAgentUploadFileRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -46,7 +48,7 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandler,
+  putAgentsReassignHandlerDeprecated,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
@@ -54,6 +56,8 @@ import {
   getActionStatusHandler,
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
+  postAgentsReassignHandler,
+  postRetrieveAgentsByActionsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -166,6 +170,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgentActions: AgentService.getAgentActions,
     })
   );
+  // Get agents by Action_Ids
+  router.post(
+    {
+      path: AGENT_API_ROUTES.LIST_PATTERN,
+      validate: PostRetrieveAgentsByActionsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true }, // Authorizations?
+      },
+    },
+    postRetrieveAgentsByActionsHandler
+  );
 
   router.post(
     {
@@ -178,15 +193,27 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     postAgentUnenrollHandler
   );
 
+  // mark as deprecated
   router.put(
     {
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      validate: PutAgentReassignRequestSchema,
+      validate: PutAgentReassignRequestSchemaDeprecated,
       fleetAuthz: {
         fleet: { all: true },
       },
     },
-    putAgentsReassignHandler
+    putAgentsReassignHandlerDeprecated
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
+      validate: PostAgentReassignRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postAgentsReassignHandler
   );
 
   router.post(

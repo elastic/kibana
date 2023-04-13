@@ -6,323 +6,353 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getVisualizeInformation, useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import {
+  UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramInputMessage,
+  UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
-import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
+import { isEqual } from 'lodash';
+import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { Subject } from 'rxjs';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { getUiActions } from '../../../../kibana_services';
+import type { Suggestion } from '@kbn/lens-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useDataState } from '../../hooks/use_data_state';
-import type { DataFetch$, SavedSearchData } from '../../services/discover_data_state_container';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
-import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
+import { useDataState } from '../../hooks/use_data_state';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
+import type { DataDocuments$ } from '../../services/discover_data_state_container';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-
-export const CHART_HIDDEN_KEY = 'discover:chartHidden';
-export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
-export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'discover:histogramBreakdownField';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
+import type { DiscoverStateContainer } from '../../services/discover_state';
+import { addLog } from '../../../../utils/add_log';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
-  savedSearchData$: SavedSearchData;
-  dataView: DataView;
-  savedSearch: SavedSearch;
-  isTimeBased: boolean;
-  isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
-  searchSessionManager: DiscoverSearchSessionManager;
-  savedSearchFetch$: DataFetch$;
+  hideChart: boolean | undefined;
+  isPlainRecord: boolean;
 }
 
 export const useDiscoverHistogram = ({
   stateContainer,
-  savedSearchData$,
-  dataView,
-  savedSearch,
-  isTimeBased,
-  isPlainRecord,
   inspectorAdapters,
-  searchSessionManager,
-  savedSearchFetch$,
+  hideChart,
+  isPlainRecord,
 }: UseDiscoverHistogramProps) => {
-  const { storage, data, lens } = useDiscoverServices();
-  const [hideChart, interval, breakdownField] = useAppStateSelector((state) => [
-    state.hideChart,
-    state.interval,
-    state.breakdownField,
-  ]);
+  const services = useDiscoverServices();
+  const savedSearchData$ = stateContainer.dataState.data$;
 
   /**
-   * Visualize
+   * API initialization
    */
 
-  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
-  const [canVisualize, setCanVisualize] = useState(false);
+  const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+
+  const getCreationOptions = useCallback(() => {
+    const {
+      hideChart: chartHidden,
+      interval: timeInterval,
+      breakdownField,
+    } = stateContainer.appState.getState();
+
+    const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
+      savedSearchData$.totalHits$.getValue();
+
+    return {
+      localStorageKeyPrefix: 'discover',
+      disableAutoFetching: true,
+      initialState: {
+        chartHidden,
+        timeInterval,
+        breakdownField,
+        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
+        totalHitsResult,
+      },
+    };
+  }, [savedSearchData$.totalHits$, stateContainer.appState]);
+
+  /**
+   * Sync Unified Histogram state with Discover state
+   */
 
   useEffect(() => {
-    if (!timeField) {
-      return;
-    }
-    getVisualizeInformation(
-      getUiActions(),
-      timeField,
-      dataView,
-      savedSearch.columns || [],
-      []
-    ).then((info) => {
-      setCanVisualize(Boolean(info));
-    });
-  }, [dataView, savedSearch.columns, timeField]);
+    const subscription = createStateSyncObservable(unifiedHistogram?.state$)?.subscribe((state) => {
+      inspectorAdapters.lensRequests = state.lensRequestAdapter;
 
-  const onEditVisualization = useCallback(
-    (lensAttributes: TypedLensByValueInput['attributes']) => {
-      if (!timeField) {
-        return;
+      const appState = stateContainer.appState.getState();
+      const oldState = {
+        hideChart: appState.hideChart,
+        interval: appState.interval,
+        breakdownField: appState.breakdownField,
+      };
+      const newState = {
+        hideChart: state.chartHidden,
+        interval: state.timeInterval,
+        breakdownField: state.breakdownField,
+      };
+
+      if (!isEqual(oldState, newState)) {
+        stateContainer.appState.update(newState);
       }
-      lens.navigateToPrefilledEditor({
-        id: '',
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        attributes: lensAttributes,
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram?.state$]);
+
+  /**
+   * Override Unified Histgoram total hits with Discover partial results
+   */
+
+  const firstLoadComplete = useRef(false);
+
+  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
+    savedSearchData$.totalHits$
+  );
+
+  useEffect(() => {
+    // We only want to show the partial results on the first load,
+    // or there will be a flickering effect as the loading spinner
+    // is quickly shown and hidden again on fetches
+    if (!firstLoadComplete.current) {
+      unifiedHistogram?.setTotalHits({
+        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
+        totalHitsResult,
       });
-    },
-    [data.query.timefilter.timefilter, lens, timeField]
-  );
+    }
+  }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
 
   /**
-   * Height
+   * Sync URL query params with Unified Histogram
    */
 
-  const [topPanelHeight, setTopPanelHeight] = useState(() => {
-    const storedHeight = storage.get(HISTOGRAM_HEIGHT_KEY);
-    return storedHeight ? Number(storedHeight) : undefined;
-  });
+  useEffect(() => {
+    if (typeof hideChart === 'boolean') {
+      unifiedHistogram?.setChartHidden(hideChart);
+    }
+  }, [hideChart, unifiedHistogram]);
 
-  const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number | undefined) => {
-      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      setTopPanelHeight(newTopPanelHeight);
-    },
-    [storage]
-  );
+  const timeInterval = useAppStateSelector((state) => state.interval);
+
+  useEffect(() => {
+    if (timeInterval) {
+      unifiedHistogram?.setTimeInterval(timeInterval);
+    }
+  }, [timeInterval, unifiedHistogram]);
+
+  const breakdownField = useAppStateSelector((state) => state.breakdownField);
+
+  useEffect(() => {
+    unifiedHistogram?.setBreakdownField(breakdownField);
+  }, [breakdownField, unifiedHistogram]);
 
   /**
-   * Time interval
+   * Columns
    */
 
-  const onTimeIntervalChange = useCallback(
-    (newInterval: string) => {
-      stateContainer.setAppState({ interval: newInterval });
-    },
-    [stateContainer]
+  // Update the columns only when documents are fetched so the Lens suggestions
+  // don't constantly change when the user modifies the table columns
+  const columnsObservable = useMemo(
+    () => createColumnsObservable(savedSearchData$.documents$),
+    [savedSearchData$.documents$]
+  );
+
+  const columns = useObservable(
+    columnsObservable,
+    savedSearchData$.documents$.getValue().textBasedQueryColumns?.map(({ name }) => name) ?? []
   );
 
   /**
    * Total hits
    */
 
-  const [localHitsContext, setLocalHitsContext] = useState<UnifiedHistogramHitsContext>();
-
-  const onTotalHitsChange = useCallback(
-    (status: UnifiedHistogramFetchStatus, result?: number | Error) => {
-      if (result instanceof Error) {
-        // Display the error and set totalHits$ to an error state
-        sendErrorTo(data, savedSearchData$.totalHits$)(result);
-        return;
-      }
-
-      const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
-
-      // If we have a partial result already, we don't want to update the total hits back to loading
-      if (fetchStatus === FetchStatus.PARTIAL && status === UnifiedHistogramFetchStatus.loading) {
-        return;
-      }
-
-      // Set a local copy of the hits context to pass to unified histogram
-      setLocalHitsContext({ status, total: result });
-
-      // Sync the totalHits$ observable with the unified histogram state
-      savedSearchData$.totalHits$.next({
-        fetchStatus: status.toString() as FetchStatus,
-        result,
-        recordRawType,
-      });
-
-      // Check the hits count to set a partial or no results state
-      if (status === UnifiedHistogramFetchStatus.complete && typeof result === 'number') {
-        checkHitCount(savedSearchData$.main$, result);
-      }
-    },
-    [data, savedSearchData$.main$, savedSearchData$.totalHits$]
+  const setTotalHitsError = useMemo(
+    () => sendErrorTo(savedSearchData$.totalHits$),
+    [savedSearchData$.totalHits$]
   );
 
-  // We only rely on the totalHits$ observable if we don't have a local hits context yet,
-  // since we only want to show the partial results on the first load, or there will be
-  // a flickering effect as the loading spinner is quickly shown and hidden again on fetches
-  const { fetchStatus: hitsFetchStatus, result: hitsTotal } = useDataState(
-    savedSearchData$.totalHits$
-  );
-
-  const hits = useMemo(
-    () =>
-      isPlainRecord
-        ? undefined
-        : localHitsContext ?? {
-            status: hitsFetchStatus.toString() as UnifiedHistogramFetchStatus,
-            total: hitsTotal,
-          },
-    [hitsFetchStatus, hitsTotal, isPlainRecord, localHitsContext]
-  );
-
-  /**
-   * Chart
-   */
-
-  const onChartHiddenChange = useCallback(
-    (chartHidden: boolean) => {
-      storage.set(CHART_HIDDEN_KEY, chartHidden);
-      stateContainer.setAppState({ hideChart: chartHidden });
-    },
-    [stateContainer, storage]
-  );
-
-  const onChartLoad = useCallback(
-    (event: UnifiedHistogramChartLoadEvent) => {
-      // We need to store the Lens request adapter in order to inspect its requests
-      inspectorAdapters.lensRequests = event.adapters.requests;
-    },
-    [inspectorAdapters]
-  );
-
-  const chart = useMemo(
-    () =>
-      isPlainRecord || !isTimeBased
-        ? undefined
-        : {
-            hidden: hideChart,
-            timeInterval: interval,
-          },
-    [hideChart, interval, isPlainRecord, isTimeBased]
-  );
-
-  // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {
-    if (hideChart || !chart) {
-      inspectorAdapters.lensRequests = undefined;
-    }
-  }, [chart, hideChart, inspectorAdapters]);
+    const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
+      ({ status, result }) => {
+        if (result instanceof Error) {
+          // Set totalHits$ to an error state
+          setTotalHitsError(result);
+          return;
+        }
+
+        const { recordRawType } = savedSearchData$.totalHits$.getValue();
+
+        // Sync the totalHits$ observable with the unified histogram state
+        savedSearchData$.totalHits$.next({
+          fetchStatus: status.toString() as FetchStatus,
+          result,
+          recordRawType,
+        });
+
+        if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
+          return;
+        }
+
+        // Check the hits count to set a partial or no results state
+        checkHitCount(savedSearchData$.main$, result);
+
+        // Indicate the first load has completed so we don't show
+        // partial results on subsequent fetches
+        firstLoadComplete.current = true;
+      }
+    );
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [
+    savedSearchData$.main$,
+    savedSearchData$.totalHits$,
+    setTotalHitsError,
+    unifiedHistogram?.state$,
+  ]);
 
   /**
-   * Breakdown
+   * Request params
    */
-
-  const onBreakdownFieldChange = useCallback(
-    (newBreakdownField: DataViewField | undefined) => {
-      stateContainer.setAppState({ breakdownField: newBreakdownField?.name });
-    },
-    [stateContainer]
-  );
-
-  const field = useMemo(
-    () => (breakdownField ? dataView.getFieldByName(breakdownField) : undefined),
-    [dataView, breakdownField]
-  );
-
-  const breakdown = useMemo(
-    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
-    [field, isPlainRecord, isTimeBased]
-  );
-
-  /**
-   * Search params
-   */
-
-  const { query, filters, fromDate: from, toDate: to } = useQuerySubscriber({ data });
-  const timeRange = useMemo(
-    () => (from && to ? { from, to } : data.query.timefilter.timefilter.getTimeDefaults()),
-    [data.query.timefilter.timefilter, from, to]
-  );
-
-  /**
-   * Request
-   */
-
-  // The searchSessionId will be updated whenever a new search is started
-  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
-  const request = useMemo(
-    () => ({
-      searchSessionId,
-      adapter: inspectorAdapters.requests,
-    }),
-    [inspectorAdapters.requests, searchSessionId]
+  const { query, filters } = useQuerySubscriber({ data: services.data });
+  const timefilter = services.data.query.timefilter.timefilter;
+  const timeRange = timefilter.getAbsoluteTime();
+  const relativeTimeRange = useObservable(
+    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
+    timefilter.getTime()
   );
 
   /**
    * Data fetching
    */
 
-  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
-
-  // Initialized when the first search has been requested or
-  // when in SQL mode since search sessions are not supported
-  const isInitialized = Boolean(searchSessionId) || isPlainRecord;
-  const skipRefetch = useRef<boolean>();
+  const savedSearchFetch$ = stateContainer.dataState.fetch$;
+  const skipDiscoverRefetch = useRef<boolean>();
+  const skipLensSuggestionRefetch = useRef<boolean>();
+  const usingLensSuggestion = useLatest(isPlainRecord && !hideChart);
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
   useEffect(() => {
-    if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
+    if (skipDiscoverRefetch.current === undefined) {
+      skipDiscoverRefetch.current = false;
     } else {
-      skipRefetch.current = !hideChart;
+      skipDiscoverRefetch.current = !hideChart;
     }
   }, [hideChart]);
 
   // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
-      if (isInitialized && !skipRefetch.current) {
-        input$.next({ type: 'refetch' });
+      if (!skipDiscoverRefetch.current) {
+        addLog('Unified Histogram - Discover refetch');
+        unifiedHistogram?.refetch();
       }
-      skipRefetch.current = false;
+
+      skipDiscoverRefetch.current = false;
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [input$, isInitialized, savedSearchFetch$]);
+  }, [savedSearchFetch$, unifiedHistogram, usingLensSuggestion]);
 
-  // Don't render the unified histogram layout until initialized
-  return isInitialized
-    ? {
-        query,
-        filters,
-        timeRange,
-        topPanelHeight,
-        request,
-        hits,
-        chart,
-        breakdown,
-        disableAutoFetching: true,
-        input$,
-        onEditVisualization: canVisualize ? onEditVisualization : undefined,
-        onTopPanelHeightChange,
-        onChartHiddenChange,
-        onTimeIntervalChange,
-        onBreakdownFieldChange,
-        onTotalHitsChange,
-        onChartLoad,
-      }
-    : undefined;
+  // Reload the chart when the current suggestion changes
+  const [currentSuggestion, setCurrentSuggestion] = useState<Suggestion>();
+
+  useEffect(() => {
+    if (!skipLensSuggestionRefetch.current && currentSuggestion && usingLensSuggestion.current) {
+      addLog('Unified Histogram - Lens suggestion refetch');
+      unifiedHistogram?.refetch();
+    }
+
+    skipLensSuggestionRefetch.current = false;
+  }, [currentSuggestion, unifiedHistogram, usingLensSuggestion]);
+
+  useEffect(() => {
+    const subscription = createCurrentSuggestionObservable(unifiedHistogram?.state$)?.subscribe(
+      setCurrentSuggestion
+    );
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [unifiedHistogram]);
+
+  // When the data view or query changes, which will trigger a current suggestion change,
+  // skip the next refetch since we want to wait for the columns to update first, which
+  // doesn't happen until after the documents are fetched
+  const dataViewId = useInternalStateSelector((state) => state.dataView?.id);
+  const skipFetchParams = useRef({ dataViewId, query });
+
+  useEffect(() => {
+    const newSkipFetchParams = { dataViewId, query };
+
+    if (isEqual(skipFetchParams.current, newSkipFetchParams)) {
+      return;
+    }
+
+    skipFetchParams.current = newSkipFetchParams;
+
+    if (usingLensSuggestion.current) {
+      skipLensSuggestionRefetch.current = true;
+      skipDiscoverRefetch.current = true;
+    }
+  }, [dataViewId, query, usingLensSuggestion]);
+
+  return {
+    ref,
+    getCreationOptions,
+    services: { ...services, uiActions: getUiActions() },
+    query,
+    filters,
+    timeRange,
+    relativeTimeRange,
+    columns,
+  };
+};
+
+const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map(({ lensRequestAdapter, chartHidden, timeInterval, breakdownField }) => ({
+      lensRequestAdapter,
+      chartHidden,
+      timeInterval,
+      breakdownField,
+    })),
+    distinctUntilChanged((prev, curr) => {
+      const { lensRequestAdapter: prevLensRequestAdapter, ...prevRest } = prev;
+      const { lensRequestAdapter: currLensRequestAdapter, ...currRest } = curr;
+
+      return prevLensRequestAdapter === currLensRequestAdapter && isEqual(prevRest, currRest);
+    })
+  );
+};
+
+const createColumnsObservable = (documents$: DataDocuments$) => {
+  return documents$.pipe(
+    distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
+    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
+    map(({ textBasedQueryColumns }) => textBasedQueryColumns?.map(({ name }) => name) ?? [])
+  );
+};
+
+const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult })),
+    distinctUntilChanged((prev, curr) => prev.status === curr.status && prev.result === curr.result)
+  );
+};
+
+const createCurrentSuggestionObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map((state) => state.currentSuggestion),
+    distinctUntilChanged(isEqual)
+  );
 };

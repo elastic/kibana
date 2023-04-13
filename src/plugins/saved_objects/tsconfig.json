@@ -14,7 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/utility-types",
-    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

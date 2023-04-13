@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'abc',
           tags: ['foo'],
           rule_type_id: 'test.executionContext',
-          consumer: 'alertsFixture',
+          consumer: 'fecAlertsTestPlugin',
           schedule: { interval: '3s' },
           throttle: '20s',
           actions: [],

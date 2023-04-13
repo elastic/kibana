@@ -71,10 +71,19 @@ export async function getApmIndices({
   }
 }
 
+export type ApmIndexSettingsResponse = Array<{
+  configurationName: 'transaction' | 'span' | 'error' | 'metric' | 'onboarding';
+  defaultValue: string; // value defined in kibana[.dev].yml
+  savedValue: string | undefined;
+}>;
+
 export async function getApmIndexSettings({
   context,
   config,
-}: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
+}: Pick<
+  APMRouteHandlerResources,
+  'context' | 'config'
+>): Promise<ApmIndexSettingsResponse> {
   let apmIndicesSavedObject: Awaited<
     ReturnType<typeof getApmIndicesSavedObject>
   >;

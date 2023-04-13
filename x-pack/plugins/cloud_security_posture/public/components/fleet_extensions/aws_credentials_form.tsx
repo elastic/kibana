@@ -12,32 +12,60 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { PosturePolicyTemplate } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
-const DocsLink = (
-  <EuiText color={'subdued'} size="s">
-    <FormattedMessage
-      id="xpack.csp.awsIntegration.docsLink"
-      defaultMessage="Read the {docs} for more details"
-      values={{
-        docs: (
-          <EuiLink
-            href="https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
-            external
-          >
-            documentation
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiText>
-);
+interface AWSSetupInfoContentProps {
+  policyTemplate: PosturePolicyTemplate | undefined;
+}
+
+const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
+  const { cspm, kspm } = cspIntegrationDocsNavigation;
+  const integrationLink =
+    !policyTemplate || policyTemplate === CSPM_POLICY_TEMPLATE
+      ? cspm.getStartedPath
+      : kspm.getStartedPath;
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.awsIntegration.setupInfoContentTitle"
+            defaultMessage="Setup Access"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiText color={'subdued'} size="s">
+        <FormattedMessage
+          id="xpack.csp.awsIntegration.setupInfoContent"
+          defaultMessage="The integration will require certain read-only AWS permissions to detect security misconfigurations. Select your preferred method of providing the AWS credentials this integration will use. You can follow these {stepByStepInstructionsLink} to generate the necessary credentials."
+          values={{
+            stepByStepInstructionsLink: (
+              <EuiLink href={integrationLink} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.awsIntegration.setupInfoContentLink"
+                  defaultMessage="step-by-step instructions"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    </>
+  );
+};
 
 const AssumeRoleDescription = (
   <div>
@@ -49,7 +77,6 @@ const AssumeRoleDescription = (
       standard long-term credentials such as passwords or access keys."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -61,7 +88,6 @@ const DirectAccessKeysDescription = (
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -75,7 +101,6 @@ const TemporaryKeysDescription = (
       found using GetSessionToken."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -88,7 +113,6 @@ const SharedCredentialsDescription = (
       to define multiple access keys in the same configuration file."
       />
     </EuiText>
-    <EuiSpacer />
   </div>
 );
 
@@ -170,6 +194,7 @@ const options: AwsOptions = {
 };
 
 export type AwsCredentialsType = keyof typeof options;
+export const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -209,6 +234,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
 
   return (
     <>
+      <AWSSetupInfoContent policyTemplate={input.policy_template} />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
@@ -222,8 +248,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       />
       <EuiSpacer size="m" />
       {group.info}
-      {DocsLink}
-      <EuiSpacer />
+      <EuiSpacer size="l" />
       <AwsInputVarFields
         fields={fields}
         onChange={(key, value) =>
@@ -249,6 +274,7 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
+
 const AwsInputVarFields = ({
   fields,
   onChange,

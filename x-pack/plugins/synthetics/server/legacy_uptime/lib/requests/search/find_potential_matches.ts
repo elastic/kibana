@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { getQueryStringFilter } from './get_query_string_filter';
 import { QueryContext } from './query_context';
 import {

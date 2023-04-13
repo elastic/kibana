@@ -11,6 +11,7 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
@@ -213,17 +214,7 @@ export class KibanaFramework {
   }
 
   public getSpaceId(request: KibanaRequest): string {
-    const spacesPlugin = this.plugins.spaces;
-
-    if (
-      spacesPlugin &&
-      spacesPlugin.spacesService &&
-      typeof spacesPlugin.spacesService.getSpaceId === 'function'
-    ) {
-      return spacesPlugin.spacesService.getSpaceId(request);
-    } else {
-      return 'default';
-    }
+    return this.plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   }
 
   public async makeTSVBRequest(

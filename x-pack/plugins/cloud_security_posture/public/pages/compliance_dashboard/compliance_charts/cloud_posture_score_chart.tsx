@@ -53,7 +53,13 @@ const PercentageInfo = ({
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiTitle css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}>
+    <EuiTitle
+      css={{
+        fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl,
+        paddingLeft: compact ? euiTheme.size.s : euiTheme.size.xs,
+        marginBottom: compact ? euiTheme.size.s : 'none',
+      }}
+    >
       <h3>{percentage}</h3>
     </EuiTitle>
   );
@@ -158,7 +164,7 @@ export const CloudPostureScoreChart = ({
             <EuiFlexGroup
               justifyContent="flexEnd"
               gutterSize="none"
-              alignItems={'baseline'}
+              alignItems="flexStart"
               style={{ paddingRight: euiTheme.size.xl }}
             >
               <CounterLink
@@ -171,7 +177,7 @@ export const CloudPostureScoreChart = ({
                   { defaultMessage: 'Passed findings' }
                 )}
               />
-              &nbsp;{`-`}&nbsp;
+              <EuiText size="s">&nbsp;-&nbsp;</EuiText>
               <CounterLink
                 text="failed"
                 count={data.totalFailed}

@@ -6,19 +6,79 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type {
+  ActionVariables,
+  NotifyWhenSelectOptions,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FORM_ERRORS_TITLE } from './translations';
+import {
+  FORM_CUSTOM_FREQUENCY_OPTION,
+  FORM_ERRORS_TITLE,
+  FORM_ON_ACTIVE_ALERT_OPTION,
+} from './translations';
+
+const DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.ACTIVE,
+  throttle: null,
+  summary: true,
+};
+
+const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActiveAlert',
+      inputDisplay: FORM_ON_ACTIVE_ALERT_OPTION,
+      'data-test-subj': 'onActiveAlert',
+      dropdownDisplay: (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              defaultMessage="Per rule run"
+              id="xpack.securitySolution.detectionEngine.ruleNotifyWhen.onActiveAlert.label"
+            />
+          </p>
+        </EuiText>
+      ),
+    },
+  },
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: false,
+    value: {
+      value: 'onThrottleInterval',
+      inputDisplay: FORM_CUSTOM_FREQUENCY_OPTION,
+      'data-test-subj': 'onThrottleInterval',
+      dropdownDisplay: (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              defaultMessage="Custom frequency"
+              id="xpack.securitySolution.detectionEngine.ruleNotifyWhen.onThrottleInterval.label"
+            />
+          </p>
+        </EuiText>
+      ),
+    },
+  },
+];
 
 interface Props {
   field: FieldHook;
@@ -64,6 +124,10 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
+  // Workaround for setAlertActionsProperty being fired with prevProps when followed by setActionIdByIndex
+  // For details see: https://github.com/elastic/kibana/issues/142217
+  const [isInitializingAction, setIsInitializingAction] = useState(false);
+
   const actions: RuleAction[] = useMemo(
     () => (!isEmpty(field.value) ? (field.value as RuleAction[]) : []),
     [field.value]
@@ -83,6 +147,9 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
+      if (isEmpty(updatedActions[index].params)) {
+        setIsInitializingAction(true);
+      }
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
@@ -98,22 +165,45 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     (key: string, value: RuleActionParam, index: number) => {
       // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
-      // and triggers validation after params have been updated
-      setTimeout(
-        () =>
-          field.setValue((prevValue: RuleAction[]) => {
-            const updatedActions = [...prevValue];
-            updatedActions[index] = {
-              ...updatedActions[index],
-              params: {
-                ...updatedActions[index].params,
-                [key]: value,
-              },
-            };
-            return updatedActions;
-          }),
-        0
-      );
+      // and triggers validation after params have been updated, however it introduced a new issue where any additional input
+      // would result in the cursor jumping to the end of the text area (https://github.com/elastic/kibana/issues/149885)
+      const updateValue = () => {
+        field.setValue((prevValue: RuleAction[]) => {
+          const updatedActions = [...prevValue];
+          updatedActions[index] = {
+            ...updatedActions[index],
+            params: {
+              ...updatedActions[index].params,
+              [key]: value,
+            },
+          };
+          return updatedActions;
+        });
+      };
+
+      if (isInitializingAction) {
+        setTimeout(updateValue, 0);
+        setIsInitializingAction(false);
+      } else {
+        updateValue();
+      }
+    },
+    [field, isInitializingAction]
+  );
+
+  const setActionAlertsFilterProperty = useCallback(
+    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          alertsFilter: {
+            ...(updatedActions[index].alertsFilter ?? { query: null, timeframe: null }),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
     },
     [field]
   );
@@ -128,10 +218,16 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
         setActionFrequencyProperty: () => {},
+        setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
         hideNotifyWhen: true,
+        hasSummary: true,
+        notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
+        defaultRuleFrequency: DEFAULT_FREQUENCY,
+        showActionAlertsFilter: true,
       }),
     [
       actions,
@@ -140,6 +236,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
+      setActionAlertsFilterProperty,
     ]
   );
 
@@ -158,7 +255,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       {fieldErrors ? (
         <>
           <FieldErrorsContainer>
-            <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
+            <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="warning">
               <ReactMarkdown>{fieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>

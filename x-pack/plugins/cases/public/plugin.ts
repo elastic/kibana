@@ -27,6 +27,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { registerCaseFileKinds } from './files';
 
 /**
  * @public
@@ -51,6 +52,9 @@ export class CasesUiPlugin
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
+
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    registerCaseFileKinds(config.files, plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -103,7 +107,13 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaVersion: this.kibanaVersion,
+      config,
+    });
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
@@ -130,14 +140,14 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
+        // @deprecated Please use the hook useCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
           getCreateCaseFlyoutLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
+        // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
@@ -146,8 +156,8 @@ export class CasesUiPlugin
           }),
       },
       hooks: {
-        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
-        getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+        useCasesAddToNewCaseFlyout,
+        useCasesAddToExistingCaseModal,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

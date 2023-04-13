@@ -28,7 +28,7 @@ export const LogViewErrorPage: React.FC<{
   return (
     <LogsPageTemplate isEmptyState={true}>
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <h2>
@@ -55,13 +55,22 @@ export const LogViewErrorPage: React.FC<{
           </>
         }
         actions={[
-          <EuiButton onClick={onRetry} iconType="refresh" fill>
+          <EuiButton
+            data-test-subj="infraLogViewErrorPageTryAgainButton"
+            onClick={onRetry}
+            iconType="refresh"
+            fill
+          >
             <FormattedMessage
               id="xpack.infra.logSourceErrorPage.tryAgainButtonLabel"
               defaultMessage="Try again"
             />
           </EuiButton>,
-          <EuiButtonEmpty iconType="gear" {...settingsLinkProps}>
+          <EuiButtonEmpty
+            data-test-subj="infraLogViewErrorPageChangeConfigurationButton"
+            iconType="gear"
+            {...settingsLinkProps}
+          >
             <FormattedMessage
               id="xpack.infra.logSourceErrorPage.navigateToSettingsButtonLabel"
               defaultMessage="Change configuration"
@@ -153,7 +162,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
 };
 
 const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
-  <EuiCallOut className="eui-textLeft" color="danger" iconType="alert" title={title}>
+  <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
     <p>{children}</p>
   </EuiCallOut>
 );

@@ -32,7 +32,7 @@ export interface ErrorProps {
 export const Error: React.FC<ErrorProps> = ({ title = defaultTitle, error }) => {
   return (
     <EuiEmptyPrompt
-      iconType={'alert'}
+      iconType={'error'}
       iconColor={'danger'}
       title={<h2>{title}</h2>}
       body={

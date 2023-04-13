@@ -1404,7 +1404,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404], meta: true }
@@ -1415,7 +1415,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [], meta: true }
@@ -1460,7 +1460,7 @@ describe('Session index', () => {
           id: sid,
           index: aliasName,
           body: sessionValue,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { meta: true, ignore: [404] }
@@ -1533,7 +1533,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1575,7 +1575,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1630,7 +1630,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [404, 409], meta: true }
@@ -1643,7 +1643,7 @@ describe('Session index', () => {
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
-          refresh: 'wait_for',
+          refresh: false,
           require_alias: true,
         },
         { ignore: [409], meta: true }
@@ -1672,7 +1672,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
-        { id: 'some-long-sid', index: aliasName, refresh: 'wait_for' },
+        { id: 'some-long-sid', index: aliasName, refresh: false },
         { ignore: [404], meta: true }
       );
     });
@@ -1692,7 +1692,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: { query: { match_all: {} } },
       });
     });
@@ -1716,7 +1716,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
       });
     });
@@ -1732,7 +1732,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {
@@ -1757,7 +1757,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {
@@ -1782,7 +1782,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
-        refresh: true,
+        refresh: false,
         body: {
           query: {
             bool: {

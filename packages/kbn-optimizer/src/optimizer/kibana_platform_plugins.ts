@@ -6,42 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
+import Path from 'path';
+import { type PluginPackage, getPluginPackagesFilter } from '@kbn/repo-packages';
+
+const isDefaultPlugin = getPluginPackagesFilter();
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly manifestPath: string;
   readonly id: string;
+  readonly pkgId: string;
   readonly isUiPlugin: boolean;
   readonly extraPublicDirs: string[];
+  readonly ignoreMetrics: boolean;
 }
-
-const isArrayOfStrings = (input: any): input is string[] =>
-  Array.isArray(input) && input.every((p) => typeof p === 'string');
 
 /**
  * Helper to find the new platform plugins.
  */
-export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
-  return simpleKibanaPlatformPluginDiscovery(scanDirs, paths).map(
-    ({ directory, manifestPath, manifest }): KibanaPlatformPlugin => {
-      let extraPublicDirs: string[] | undefined;
-      if (manifest.extraPublicDirs) {
-        if (!isArrayOfStrings(manifest.extraPublicDirs)) {
-          throw new TypeError(
-            'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
-          );
-        }
-        extraPublicDirs = manifest.extraPublicDirs;
-      }
-
-      return {
-        directory,
-        manifestPath,
-        id: manifest.id,
-        isUiPlugin: manifest.ui,
-        extraPublicDirs: extraPublicDirs || [],
-      };
-    }
-  );
+export function toKibanaPlatformPlugin(repoRoot: string, pkg: PluginPackage): KibanaPlatformPlugin {
+  const directory = Path.resolve(repoRoot, pkg.normalizedRepoRelativeDir);
+  return {
+    directory,
+    manifestPath: Path.resolve(directory, 'kibana.jsonc'),
+    id: pkg.manifest.plugin.id,
+    pkgId: pkg.manifest.id,
+    isUiPlugin: pkg.isPlugin() && pkg.manifest.plugin.browser,
+    extraPublicDirs: (pkg.isPlugin() && pkg.manifest.plugin.extraPublicDirs) || [],
+    ignoreMetrics: !isDefaultPlugin(pkg),
+  };
 }

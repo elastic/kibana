@@ -169,7 +169,10 @@ export function StorageDetailsPerService({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={serviceOverviewLink}>
+              <EuiLink
+                data-test-subj="apmStorageDetailsPerServiceGoToServiceOverviewLink"
+                href={serviceOverviewLink}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
@@ -216,7 +219,8 @@ export function StorageDetailsPerService({
                       {
                         groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
-                          fillColor: (d) => groupedPalette[d.sortIndex],
+                          fillColor: (dataName, sortIndex) =>
+                            groupedPalette[sortIndex],
                         },
                       },
                     ]}

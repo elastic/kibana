@@ -36,7 +36,13 @@
             "text": "DeeplyMockedKeys"
           },
           "<",
-          "BaseFilesClient",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.BaseFilesClient",
+            "text": "BaseFilesClient"
+          },
           "<unknown>>"
         ],
         "path": "packages/shared-ux/file/mocks/index.ts",

@@ -6,7 +6,7 @@
  */
 
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
+import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 
@@ -16,7 +16,7 @@ describe('getSimpleHierarchicalTree', () => {
     // and make it comparable against a static representation.
     expect(
       JSON.parse(
-        JSON.stringify(getSimpleHierarchicalTree(filteredFrequentItems, true, false, fields))
+        JSON.stringify(getSimpleHierarchicalTree(filteredFrequentItemSets, true, false, fields))
       )
     ).toEqual({
       root: {
@@ -28,8 +28,18 @@ describe('getSimpleHierarchicalTree', () => {
           {
             name: "792/1505 500 home.php '*'",
             set: [
-              { fieldName: 'response_code', fieldValue: '500' },
-              { fieldName: 'url', fieldValue: 'home.php' },
+              {
+                fieldName: 'response_code',
+                fieldValue: '500',
+                docCount: 792,
+                pValue: 0.010770456205312423,
+              },
+              {
+                fieldName: 'url',
+                fieldValue: 'home.php',
+                docCount: 792,
+                pValue: 0.010770456205312423,
+              },
             ],
             docCount: 792,
             pValue: 0.010770456205312423,
@@ -37,12 +47,71 @@ describe('getSimpleHierarchicalTree', () => {
               {
                 name: "792/1505 500 home.php '*'",
                 set: [
-                  { fieldName: 'response_code', fieldValue: '500' },
-                  { fieldName: 'url', fieldValue: 'home.php' },
+                  {
+                    fieldName: 'response_code',
+                    fieldValue: '500',
+                    docCount: 792,
+                    pValue: 0.010770456205312423,
+                  },
+                  {
+                    fieldName: 'url',
+                    fieldValue: 'home.php',
+                    docCount: 792,
+                    pValue: 0.010770456205312423,
+                  },
                 ],
                 docCount: 792,
                 pValue: 0.010770456205312423,
                 children: [],
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                children: [],
+                docCount: 634,
+                name: '634/1505 home.php Peter',
+                pValue: 0.010770456205312423,
+                set: [
+                  {
+                    docCount: 792,
+                    fieldName: 'url',
+                    fieldValue: 'home.php',
+                    pValue: 0.010770456205312423,
+                  },
+                  {
+                    docCount: 634,
+                    fieldName: 'user',
+                    fieldValue: 'Peter',
+                    pValue: 0.010770456205312423,
+                  },
+                ],
+              },
+            ],
+            docCount: 792,
+            name: '792/1505 home.php',
+            pValue: 0.010770456205312423,
+            set: [
+              {
+                docCount: 792,
+                fieldName: 'url',
+                fieldValue: 'home.php',
+                pValue: 0.010770456205312423,
+              },
+            ],
+          },
+          {
+            children: [],
+            docCount: 634,
+            name: '634/1505 Peter',
+            pValue: 0.010770456205312423,
+            set: [
+              {
+                docCount: 634,
+                fieldName: 'user',
+                fieldValue: 'Peter',
+                pValue: 0.010770456205312423,
               },
             ],
           },

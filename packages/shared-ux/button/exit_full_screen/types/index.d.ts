@@ -7,6 +7,8 @@
  */
 
 import { MouseEventHandler, HTMLAttributes } from 'react';
+import { Observable } from 'rxjs';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /**
  * Abstract external services for this component.
@@ -14,6 +16,8 @@ import { MouseEventHandler, HTMLAttributes } from 'react';
 export interface Services {
   /** Function to invoke to set the application to full-screen mode */
   setIsFullscreen: (isFullscreen: boolean) => void;
+  /** Observable that emits the value of custom branding, if set*/
+  customBranding$: Observable<CustomBranding>;
 }
 
 /**
@@ -28,6 +32,9 @@ export interface KibanaDependencies {
   coreStart: {
     chrome: {
       setIsVisible: (isVisible: boolean) => void;
+    };
+    customBranding: {
+      customBranding$: Observable<CustomBranding>;
     };
   };
 }
@@ -55,4 +62,6 @@ export interface ExitFullScreenButtonComponentProps
   extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
   /** Handler to invoke when one clicks the button. */
   onClick: MouseEventHandler<HTMLButtonElement>;
+  /** If set, custom logo is displayed instead of Elastic logo */
+  customLogo?: string;
 }

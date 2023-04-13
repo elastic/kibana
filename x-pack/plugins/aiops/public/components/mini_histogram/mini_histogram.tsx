@@ -12,13 +12,13 @@ import { Chart, BarSeries, PartialTheme, ScaleType, Settings } from '@elastic/ch
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangePointHistogramItem } from '@kbn/ml-agg-utils';
+import type { SignificantTermHistogramItem } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 interface MiniHistogramProps {
-  chartData?: ChangePointHistogramItem[];
+  chartData?: SignificantTermHistogramItem[];
   isLoading: boolean;
   label: string;
 }
@@ -102,7 +102,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}
-          yAccessors={['doc_count_change_point']}
+          yAccessors={['doc_count_significant_term']}
           data={chartData}
           stackAccessors={[0]}
           color={['orange']}

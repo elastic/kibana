@@ -7,11 +7,9 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { parse } from 'query-string';
 import {
   EuiButton,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
@@ -22,13 +20,13 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId, GuideCardUseCase } from '@kbn/guided-onboarding';
-import { GuideCard, InfrastructureLinkCard } from '@kbn/guided-onboarding';
+import type { GuideFilterValues, GuideId, GuideState } from '@kbn/guided-onboarding';
 
+import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -40,18 +38,37 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: 'Select a guide to help you make the most of your data.',
+  defaultMessage: `Select an option and we'll help you get started.`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I’d like to do something else (skip)`,
+  defaultMessage: `I’d like to do something else.`,
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
-    getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  const { search } = useLocation();
+  const query = parse(search);
+
+  const isTypeOfGuideFilterValue = (useCase: string | string[] | null) => {
+    const filterValues: string[] = ['search', 'observability', 'security', 'all']; // list of GuideFilterValues types
+
+    if (!useCase) {
+      return false;
+    }
+
+    if (useCase instanceof Array) {
+      return filterValues.includes(useCase[0]);
+    }
+
+    return filterValues.includes(useCase);
+  };
+
+  const [filter, setFilter] = useState<GuideFilterValues>(
+    isTypeOfGuideFilterValue(query.useCase) ? (query.useCase as GuideFilterValues) : 'all'
+  );
   const history = useHistory();
 
   useEffect(() => {
@@ -114,11 +131,10 @@ export const GettingStarted = () => {
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
 
-  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = useCallback(
-    async (useCase: GuideCardUseCase, guideState?: GuideState) => {
+    async (guideId: GuideId, guideState?: GuideState) => {
       try {
-        await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+        await guidedOnboardingService?.activateGuide(guideId, guideState);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -150,7 +166,7 @@ export const GettingStarted = () => {
   if (isError) {
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="alert"
+        iconType="warning"
         color="danger"
         title={
           <h2>
@@ -189,7 +205,7 @@ export const GettingStarted = () => {
       <EuiPageTemplate.Section
         alignment="center"
         css={paddingCss}
-        data-test-subj="onboarding--landing-page"
+        data-test-subj="guided-onboarding--landing-page"
       >
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>
@@ -200,34 +216,19 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
-        <EuiFlexGrid columns={4} gutterSize="l">
-          {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
-            if (useCase === 'infrastructure') {
-              return (
-                <EuiFlexItem key={`linkCard-${useCase}`}>
-                  <InfrastructureLinkCard
-                    navigateToApp={application.navigateToApp}
-                    isDarkTheme={isDarkTheme}
-                    addBasePath={http.basePath.prepend}
-                  />
-                </EuiFlexItem>
-              );
-            }
-            return (
-              <EuiFlexItem key={`guideCard-${useCase}`}>
-                <GuideCard
-                  useCase={useCase as GuideCardUseCase}
-                  guides={guidesState}
-                  activateGuide={activateGuide}
-                  isDarkTheme={isDarkTheme}
-                  addBasePath={http.basePath.prepend}
-                />
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGrid>
-        <EuiSpacer />
-        <EuiHorizontalRule />
+        <GuideFilters
+          application={application}
+          activeFilter={filter}
+          setActiveFilter={setFilter}
+          data-test-subj="onboarding--guideFilters"
+        />
+        <EuiSpacer size="xxl" />
+        <GuideCards
+          activateGuide={activateGuide}
+          navigateToApp={application.navigateToApp}
+          activeFilter={filter}
+          guidesState={guidesState}
+        />
         <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}

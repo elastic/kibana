@@ -131,6 +131,7 @@ export class SavedSearchEmbeddable
       initialInput,
       {
         defaultTitle: savedSearch.title,
+        defaultDescription: savedSearch.description,
         editUrl,
         editPath,
         editApp: 'discover',
@@ -175,10 +176,11 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
-    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
+
+    const currentAbortController = new AbortController();
+    this.abortController = currentAbortController;
 
     updateSearchSource(
       searchSource,
@@ -252,7 +254,7 @@ export class SavedSearchEmbeddable
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
-          abortSignal: this.abortController.signal,
+          abortSignal: currentAbortController.signal,
           sessionId: searchSessionId,
           inspector: {
             adapter: this.inspectorAdapters.requests,
@@ -279,7 +281,7 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      const cancelled = !!prevAbortController?.signal.aborted;
+      const cancelled = !!currentAbortController?.signal.aborted;
       if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
@@ -593,10 +595,6 @@ export class SavedSearchEmbeddable
 
   public getInspectorAdapters() {
     return this.inspectorAdapters;
-  }
-
-  public getDescription() {
-    return this.savedSearch.description;
   }
 
   /**

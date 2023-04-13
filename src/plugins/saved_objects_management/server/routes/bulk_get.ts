@@ -7,9 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { injectMetaAttributes } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import type { IRouter } from '@kbn/core/server';
+import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import type { v1 } from '../../common';
+import type { ISavedObjectsManagement } from '../services';
 
 export const registerBulkGetRoute = (
   router: IRouter,
@@ -39,14 +40,16 @@ export const registerBulkGetRoute = (
 
       const client = getClient({ includedHiddenTypes });
       const response = await client.bulkGet<unknown>(objects);
-      const enhancedObjects = response.saved_objects.map((obj) => {
-        if (!obj.error) {
+
+      const body: v1.BulkGetResponseHTTP = response.saved_objects.map((obj) => {
+        const so = toSavedObjectWithMeta(obj);
+        if (!so.error) {
           return injectMetaAttributes(obj, managementService);
         }
-        return obj;
+        return so;
       });
 
-      return res.ok({ body: enhancedObjects });
+      return res.ok({ body });
     })
   );
 };

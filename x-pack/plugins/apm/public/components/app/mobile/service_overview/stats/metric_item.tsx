@@ -7,30 +7,31 @@
 import React from 'react';
 import { Chart, Metric, MetricDatum } from '@elastic/charts';
 import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
-import { FETCH_STATUS, isPending } from '../../../../../hooks/use_fetcher';
+import { isEmpty } from 'lodash';
 
 export function MetricItem({
   data,
   id,
-  status,
-  hasData,
+  isLoading,
+  height = '124px',
 }: {
   data: MetricDatum[];
   id: number;
-  status: FETCH_STATUS;
-  hasData: boolean;
+  isLoading: boolean;
+  height?: string;
 }) {
+  const hasData = !isEmpty(data);
   return (
     <div
       style={{
         resize: 'none',
         padding: '0px',
         overflow: 'auto',
-        height: '120px',
+        height,
         borderRadius: '6px',
       }}
     >
-      {!hasData && isPending(status) ? (
+      {!hasData && isLoading ? (
         <EuiPanel hasBorder={true}>
           <EuiLoadingContent lines={3} />
         </EuiPanel>

@@ -7,20 +7,37 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
-export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardMultiMetricProvider(
+  { getService }: FtrProviderContext,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   return {
     async assertSplitFieldInputExists() {
-      await testSubjects.existOrFail('mlMultiMetricSplitFieldSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlSplitFieldSelect > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromSplitFieldInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValues?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlSplitFieldSelect',
+        fieldName,
+        fieldType,
+        expectedTopValues
+      );
     },
 
     async assertSplitFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlMultiMetricSplitFieldSelect > comboBoxInput'
+        'mlSplitFieldSelect > comboBoxInput'
       );
       expect(comboBoxSelectedOptions).to.eql(
         expectedIdentifier,
@@ -29,12 +46,12 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
     },
 
     async selectSplitField(identifier: string) {
-      await comboBox.set('mlMultiMetricSplitFieldSelect > comboBoxInput', identifier);
+      await comboBox.set('mlSplitFieldSelect > comboBoxInput', identifier);
       await this.assertSplitFieldSelection([identifier]);
     },
 
     async scrollSplitFieldIntoView() {
-      await testSubjects.scrollIntoView('mlMultiMetricSplitFieldSelect');
+      await testSubjects.scrollIntoView('mlSplitFieldSelect');
     },
 
     async assertDetectorSplitExists(splitField: string) {

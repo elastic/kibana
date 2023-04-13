@@ -38,7 +38,6 @@ interface Props {
   autoBounds: boolean;
   formatter: InfraFormatter;
   bottomMargin: number;
-  topMargin: number;
   showLoading: boolean;
 }
 
@@ -55,7 +54,6 @@ export const NodesOverview = ({
   formatter,
   onDrilldown,
   bottomMargin,
-  topMargin,
   showLoading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
@@ -121,7 +119,7 @@ export const NodesOverview = ({
     );
   }
   return (
-    <MapContainer top={topMargin} positionStatic={isStatic}>
+    <MapContainer positionStatic={isStatic}>
       <Map
         nodeType={nodeType}
         nodes={nodes}
@@ -148,10 +146,10 @@ const TableContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.euiSizeL};
 `;
 
-const MapContainer = euiStyled.div<{ top: number; positionStatic: boolean }>`
+const MapContainer = euiStyled.div<{ positionStatic: boolean }>`
   position: ${(props) => (props.positionStatic ? 'static' : 'absolute')};
   display: flex;
-  top: ${(props) => props.top}px;
+  top: 0;
   right: 0;
   bottom: 0;
   left: 0;

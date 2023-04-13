@@ -26,6 +26,7 @@ describe('updateRule', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
+      revision: 0,
     };
     const resolvedValue: Rule = {
       ...ruleToUpdate,
@@ -40,6 +41,7 @@ describe('updateRule', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 1,
     };
     http.put.mockResolvedValueOnce(resolvedValue);
 
