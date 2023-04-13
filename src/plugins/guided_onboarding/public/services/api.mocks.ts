@@ -144,3 +144,8 @@ export const mockPluginStateInProgress: PluginState = {
   isActivePeriod: true,
   activeGuide: testGuideStep1ActiveState,
 };
+
+export const testGuideParams = {
+  param1: 'test1',
+  param2: 'test2',
+};

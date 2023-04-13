@@ -51,8 +51,7 @@ export const testGuideConfig: GuideConfig = {
       ],
       location: {
         appID: 'guidedOnboardingExample',
-        path: 'stepTwo/{indexName}',
-        params: ['indexName'],
+        path: 'stepTwo',
       },
       manualCompletion: {
         title: 'Manual completion step title',
@@ -74,6 +73,16 @@ export const testGuideConfig: GuideConfig = {
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepThree',
+      },
+    },
+    {
+      id: 'step4',
+      title: 'Step 4 (dynamic url)',
+      description: 'This step navigates to a dynamic URL with a param indexName passed in step 1.',
+      location: {
+        appID: 'guidedOnboardingExample',
+        path: 'stepFour/{indexName}',
+        params: ['indexName'],
       },
     },
   ],

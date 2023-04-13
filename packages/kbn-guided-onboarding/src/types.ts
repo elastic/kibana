@@ -17,7 +17,7 @@ export type GuideId =
 type KubernetesStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
 type SiemStepIds = 'add_data' | 'rules' | 'alertsCases';
 type SearchStepIds = 'add_data' | 'search_experience';
-type TestGuideIds = 'step1' | 'step2' | 'step3';
+type TestGuideIds = 'step1' | 'step2' | 'step3' | 'step4';
 
 export type GuideStepIds = KubernetesStepIds | SiemStepIds | SearchStepIds | TestGuideIds;
 
