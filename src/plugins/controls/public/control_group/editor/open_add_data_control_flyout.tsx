@@ -69,7 +69,6 @@ export function openAddDataControlFlyout(
             updateTitle={(newTitle) => (controlInput.title = newTitle)}
             updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
             updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-            filterPredicate={(f) => f.type !== 'number'}
             onSave={(type) => {
               this.closeAllFlyouts();
               if (!type) {
