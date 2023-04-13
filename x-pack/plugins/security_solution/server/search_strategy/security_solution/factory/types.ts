@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -21,10 +20,7 @@ import type {
 import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
-  buildDsl: (
-    options: StrategyRequestType<T>,
-    experimentalFeatures?: ExperimentalFeatures
-  ) => ISearchRequestParams;
+  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,

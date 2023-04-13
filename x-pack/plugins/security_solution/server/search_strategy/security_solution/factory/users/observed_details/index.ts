@@ -17,29 +17,17 @@ import type {
   ObservedUserDetailsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/observed_details';
 import { formatUserItem } from './helpers';
-import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
-  buildDsl: (
-    options: ObservedUserDetailsRequestOptions,
-    experimentalFeatures?: ExperimentalFeatures
-  ) => buildObservedUserDetailsQuery(options, experimentalFeatures),
+  buildDsl: (options: ObservedUserDetailsRequestOptions) => buildObservedUserDetailsQuery(options),
   parse: async (
     options: ObservedUserDetailsRequestOptions,
-    response: IEsSearchResponse<unknown>,
-    deps?: {
-      endpointContext: EndpointAppContext;
-    }
+    response: IEsSearchResponse<unknown>
   ): Promise<ObservedUserDetailsStrategyResponse> => {
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {
-      dsl: [
-        inspectStringifyObject(
-          buildObservedUserDetailsQuery(options, deps?.endpointContext.experimentalFeatures)
-        ),
-      ],
+      dsl: [inspectStringifyObject(buildObservedUserDetailsQuery(options))],
     };
 
     if (aggregations == null) {

@@ -45,7 +45,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
 
       const queryFactory: SecuritySolutionFactory<T> =
         securitySolutionFactory[request.factoryQueryType];
-      const dsl = queryFactory.buildDsl(request, endpointContext.experimentalFeatures);
+      const dsl = queryFactory.buildDsl(request);
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {

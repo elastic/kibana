@@ -34,7 +34,7 @@ jest.mock(
   })
 );
 
-describe('RiskScoreField', () => {
+describe('useManagedUser', () => {
   it('returns isIntegrationEnabled:true when it finds an enabled integration with the given name', () => {
     mockUseInstalledIntegrations.mockReturnValue({
       data: [makeInstalledIntegration(MANAGED_USER_PACKAGE_NAME, true)],
