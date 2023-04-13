@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SecurityLicense } from '../../../../../../common/licensing';
@@ -17,8 +19,9 @@ import type { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 
 interface Props {
+  indexType: 'indices' | 'remote_indices';
+  indexPatterns?: string[];
   role: Role;
-  indexPatterns: string[];
   availableIndexPrivileges: string[];
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   license: SecurityLicense;
@@ -46,12 +49,13 @@ export class IndexPrivileges extends Component<Props, State> {
   }
 
   public render() {
-    const { indices = [] } = this.props.role.elasticsearch;
+    const indices = this.props.role.elasticsearch[this.props.indexType] ?? [];
 
-    const { indexPatterns, license, availableIndexPrivileges, indicesAPIClient } = this.props;
+    const { indexPatterns = [], license, availableIndexPrivileges, indicesAPIClient } = this.props;
     const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } = license.getFeatures();
 
     const props = {
+      indexType: this.props.indexType,
       indexPatterns,
       indicesAPIClient,
       // If editing an existing role while that has been disabled, always show the FLS/DLS fields because currently
@@ -62,27 +66,48 @@ export class IndexPrivileges extends Component<Props, State> {
       isRoleReadOnly: !this.props.editable || isRoleReadOnly(this.props.role),
     };
 
-    const forms = indices.map((indexPrivilege: RoleIndexPrivilege, idx) => (
-      <IndexPrivilegeForm
-        key={idx}
-        {...props}
-        formIndex={idx}
-        validator={this.props.validator}
-        availableIndexPrivileges={availableIndexPrivileges}
-        indexPrivilege={indexPrivilege}
-        onChange={this.onIndexPrivilegeChange(idx)}
-        onDelete={this.onIndexPrivilegeDelete(idx)}
-      />
-    ));
-
-    return <Fragment>{forms}</Fragment>;
+    return (
+      <Fragment>
+        {indices.map((indexPrivilege, i) => (
+          <IndexPrivilegeForm
+            key={i}
+            {...props}
+            formIndex={i}
+            validator={this.props.validator}
+            availableIndexPrivileges={availableIndexPrivileges}
+            indexPrivilege={indexPrivilege}
+            onChange={this.onIndexPrivilegeChange(i)}
+            onDelete={this.onIndexPrivilegeDelete(i)}
+          />
+        ))}
+        {this.props.editable && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton iconType="plusInCircle" onClick={this.addIndexPrivilege}>
+              {this.props.indexType === 'remote_indices' ? (
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteIndexPrivilegesButtonLabel"
+                  defaultMessage="Add remote index privilege"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+                  defaultMessage="Add index privilege"
+                />
+              )}
+            </EuiButton>
+          </>
+        )}
+      </Fragment>
+    );
   }
 
   public addIndexPrivilege = () => {
-    const { role } = this.props;
+    const { role, indexType } = this.props;
+    const indices = role.elasticsearch[indexType] ?? [];
 
     const newIndices = [
-      ...role.elasticsearch.indices,
+      ...indices,
       {
         names: [],
         privileges: [],
@@ -96,15 +121,15 @@ export class IndexPrivileges extends Component<Props, State> {
       ...this.props.role,
       elasticsearch: {
         ...this.props.role.elasticsearch,
-        indices: newIndices,
+        [indexType]: newIndices,
       },
     });
   };
 
   public onIndexPrivilegeChange = (privilegeIndex: number) => {
     return (updatedPrivilege: RoleIndexPrivilege) => {
-      const { role } = this.props;
-      const { indices } = role.elasticsearch;
+      const { role, indexType } = this.props;
+      const indices = role.elasticsearch[indexType] ?? [];
 
       const newIndices = [...indices];
       newIndices[privilegeIndex] = updatedPrivilege;
@@ -113,7 +138,7 @@ export class IndexPrivileges extends Component<Props, State> {
         ...this.props.role,
         elasticsearch: {
           ...this.props.role.elasticsearch,
-          indices: newIndices,
+          [indexType]: newIndices,
         },
       });
     };
@@ -121,16 +146,17 @@ export class IndexPrivileges extends Component<Props, State> {
 
   public onIndexPrivilegeDelete = (privilegeIndex: number) => {
     return () => {
-      const { role } = this.props;
+      const { role, indexType } = this.props;
 
-      const newIndices = [...role.elasticsearch.indices];
+      const indices = role.elasticsearch[indexType] ?? [];
+      const newIndices = [...indices];
       newIndices.splice(privilegeIndex, 1);
 
       this.props.onChange({
         ...this.props.role,
         elasticsearch: {
           ...this.props.role.elasticsearch,
-          indices: newIndices,
+          [indexType]: newIndices,
         },
       });
     };
