@@ -6,7 +6,7 @@
  */
 
 import { Moment } from 'moment';
-import { RRule, RRuleFrequencyMap } from '../types';
+import { RRule, RRuleFrequency, RRuleFrequencyMap } from '../types';
 import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
@@ -15,7 +15,7 @@ import { getPresets } from './get_presets';
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
-  form?: RecurringScheduleFormProps
+  recurringForm?: RecurringScheduleFormProps
 ): RRule => {
   const presets = getPresets(startDate);
 
@@ -24,9 +24,19 @@ export const convertToRRule = (
     tzid: timezone,
   };
 
-  if (form) {
-    if (form.frequency !== 'CUSTOM') {
-      form = { ...form, ...presets[form.frequency] };
+  if (!recurringForm)
+    return {
+      ...rRule,
+      // default to yearly and a count of 1
+      // if the maintenance window is not recurring
+      freq: RRuleFrequency.YEARLY,
+      count: 1,
+    };
+
+  if (recurringForm) {
+    let form = recurringForm;
+    if (recurringForm.frequency !== 'CUSTOM') {
+      form = { ...recurringForm, ...presets[recurringForm.frequency] };
     }
 
     const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);

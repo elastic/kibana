@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import { HttpSetup } from '@kbn/core/public';
+import { useEffect, useRef } from 'react';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   ALERT_DURATION,
   ALERT_RULE_UUID,
@@ -18,6 +17,9 @@ import {
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { estypes } from '@elastic/elasticsearch';
+import { InfraClientCoreStart } from '../types';
 
 interface Props {
   featureIds: ValidFeatureId[];
@@ -29,95 +31,62 @@ interface Props {
 }
 interface FetchAlertsHistory {
   totalTriggeredAlerts: number;
-  histogramTriggeredAlerts: Array<{
-    key_as_string: string;
-    key: number;
-    doc_count: number;
-  }>;
+  histogramTriggeredAlerts: estypes.AggregationsDateHistogramBucketKeys[];
   error?: string;
   avgTimeToRecoverUS: number;
 }
 
-interface AlertsHistory {
-  isLoadingAlertsHistory: boolean;
-  errorAlertHistory?: string;
-  alertsHistory?: FetchAlertsHistory;
-}
 export function useAlertsHistory({ featureIds, ruleId, dateRange }: Props) {
-  const { http } = useKibana().services;
-  const [triggeredAlertsHistory, setTriggeredAlertsHistory] = useState<AlertsHistory>({
-    isLoadingAlertsHistory: true,
-  });
-  const isCancelledRef = useRef(false);
+  const { http } = useKibana<InfraClientCoreStart>().services;
   const abortCtrlRef = useRef(new AbortController());
-  const loadRuleAlertsAgg = useCallback(async () => {
-    isCancelledRef.current = false;
-    abortCtrlRef.current.abort();
-    abortCtrlRef.current = new AbortController();
 
-    try {
-      if (!http) throw new Error('No http client');
-      if (!featureIds || !featureIds.length) throw new Error('No featureIds');
+  const [state, refetch] = useAsyncFn(
+    () => {
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+      return fetchTriggeredAlertsHistory({
+        featureIds,
+        http,
+        ruleId,
+        dateRange,
+        signal: abortCtrlRef.current.signal,
+      });
+    },
+    [ruleId],
+    { loading: true }
+  );
 
-      const { totalTriggeredAlerts, histogramTriggeredAlerts, error, avgTimeToRecoverUS } =
-        await fetchTriggeredAlertsHistory({
-          featureIds,
-          http,
-          ruleId,
-          signal: abortCtrlRef.current.signal,
-          dateRange,
-        });
-
-      if (error) throw error;
-      if (!isCancelledRef.current) {
-        setTriggeredAlertsHistory((oldState: AlertsHistory) => ({
-          ...oldState,
-          alertsHistory: {
-            totalTriggeredAlerts,
-            histogramTriggeredAlerts,
-            avgTimeToRecoverUS,
-          },
-          isLoadingAlertsHistory: false,
-        }));
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          setTriggeredAlertsHistory((oldState: AlertsHistory) => ({
-            ...oldState,
-            isLoadingAlertsHistory: false,
-            errorAlertHistory: error,
-            alertsHistory: undefined,
-          }));
-        }
-      }
-    }
-  }, [dateRange, featureIds, http, ruleId]);
   useEffect(() => {
-    loadRuleAlertsAgg();
-  }, [loadRuleAlertsAgg]);
+    refetch();
+  }, [refetch]);
 
-  return triggeredAlertsHistory;
+  const { value, error, loading } = state;
+  return {
+    ...value,
+    error,
+    loading,
+    refetch,
+  };
 }
 
-export async function fetchTriggeredAlertsHistory({
+async function fetchTriggeredAlertsHistory({
   featureIds,
   http,
   ruleId,
-  signal,
   dateRange,
+  signal,
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
   ruleId: string;
-  signal: AbortSignal;
   dateRange: {
     from: string;
     to: string;
   };
+  signal: AbortSignal;
 }): Promise<FetchAlertsHistory> {
-  try {
-    const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+  return http
+    .post<estypes.SearchResponse<Record<string, unknown>>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       signal,
       body: JSON.stringify({
         size: 0,
@@ -165,22 +134,25 @@ export async function fetchTriggeredAlertsHistory({
           },
         },
       }),
-    });
-    const totalTriggeredAlerts = res?.hits.total.value;
-    const histogramTriggeredAlerts = res?.aggregations?.histogramTriggeredAlerts.buckets;
-    const avgTimeToRecoverUS = res?.aggregations?.avgTimeToRecoverUS.recoveryTime.value;
-
-    return {
-      totalTriggeredAlerts,
-      histogramTriggeredAlerts,
-      avgTimeToRecoverUS,
-    };
-  } catch (error) {
-    return {
-      error,
-      totalTriggeredAlerts: 0,
-      histogramTriggeredAlerts: [],
-      avgTimeToRecoverUS: 0,
-    };
-  }
+    })
+    .then(extractAlertsHistory);
 }
+
+const extractAlertsHistory = (response: estypes.SearchResponse<Record<string, unknown>>) => {
+  const totalTriggeredAlerts = (response.hits.total as estypes.SearchTotalHits).value || 0;
+
+  const histogramAgg = response?.aggregations
+    ?.histogramTriggeredAlerts as estypes.AggregationsMultiBucketAggregateBase;
+  const histogramTriggeredAlerts =
+    histogramAgg.buckets as unknown as estypes.AggregationsDateHistogramBucketKeys[];
+
+  const avgTimeToRecoverAgg = response?.aggregations
+    ?.avgTimeToRecoverUS as estypes.AggregationsAvgAggregate;
+  const avgTimeToRecoverUS = avgTimeToRecoverAgg.value || 0;
+
+  return {
+    totalTriggeredAlerts,
+    histogramTriggeredAlerts,
+    avgTimeToRecoverUS,
+  };
+};

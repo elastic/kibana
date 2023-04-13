@@ -9,6 +9,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
 import {
@@ -34,7 +35,7 @@ export interface ErrorMessage {
 
 export interface Field {
   name: EsFieldName;
-  type: KBN_FIELD_TYPES;
+  type: KBN_FIELD_TYPES | TIME_SERIES_METRIC_TYPES.COUNTER;
 }
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
