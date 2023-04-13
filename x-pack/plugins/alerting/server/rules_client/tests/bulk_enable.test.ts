@@ -87,6 +87,11 @@ beforeEach(() => {
       } as unknown as BulkUpdateTaskResult)
   );
   (auditLogger.log as jest.Mock).mockClear();
+  (migrateLegacyActions as jest.Mock).mockResolvedValue({
+    hasLegacyActions: false,
+    resultedActions: [],
+    resultedReferences: [],
+  });
 });
 
 setGlobalDate();
@@ -790,7 +795,7 @@ describe('bulkEnableRules', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+    test('should call migrateLegacyActions', async () => {
       encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
         .fn()
         .mockResolvedValueOnce({
@@ -806,7 +811,13 @@ describe('bulkEnableRules', () => {
 
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: disabledRule1.attributes,
+        ruleId: disabledRule1.id,
+        actions: [],
+        references: [],
+      });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRule1.id,

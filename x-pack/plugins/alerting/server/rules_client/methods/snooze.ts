@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObjectReference } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { RawRule, RuleSnoozeSchedule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -92,33 +90,24 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
-  let resultedActions: RawRule['actions'] = [];
-  let resultedReferences: SavedObjectReference[] = [];
-  let hasLegacyActions = false;
-
-  // migrate legacy actions only for SIEM rules
-  if (attributes.consumer === AlertConsumers.SIEM) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
-
-    resultedActions = migratedActions.actions;
-    resultedReferences = migratedActions.references;
-    hasLegacyActions = migratedActions.hasLegacyActions;
-  }
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    actions: attributes.actions,
+    references,
+    attributes,
+  });
 
   const updateAttributes = updateMeta(context, {
     ...newAttrs,
-    ...(hasLegacyActions ? { actions: resultedActions } : {}),
+    ...(migratedActions.hasLegacyActions
+      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+      : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
   const updateOptions = {
     version,
-    ...(hasLegacyActions ? { references: resultedReferences } : {}),
+    ...(migratedActions.hasLegacyActions ? { references: migratedActions.resultedReferences } : {}),
   };
 
   await partiallyUpdateAlert(

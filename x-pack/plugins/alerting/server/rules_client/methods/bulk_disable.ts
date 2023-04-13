@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject, SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import { Logger } from '@kbn/core/server';
@@ -120,27 +119,22 @@ const bulkDisableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
-            let resultedActions: RawRule['actions'] = [];
-            let resultedReferences: SavedObjectReference[] = [];
-            let hasLegacyActions = false;
-
-            // migrate legacy actions only for SIEM rules
-            if (rule.attributes.consumer === AlertConsumers.SIEM) {
-              const migratedActions = await migrateLegacyActions(context, {
-                ruleId: rule.id,
-                actions: rule.attributes.actions,
-                references: rule.references,
-                attributes: rule.attributes,
-              });
-
-              resultedActions = migratedActions.actions;
-              resultedReferences = migratedActions.references;
-              hasLegacyActions = migratedActions.hasLegacyActions;
-            }
+            const migratedActions = await migrateLegacyActions(context, {
+              ruleId: rule.id,
+              actions: rule.attributes.actions,
+              references: rule.references,
+              attributes: rule.attributes,
+            });
 
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
-              ...(hasLegacyActions ? { actions: resultedActions } : {}),
+              ...(migratedActions.hasLegacyActions
+                ? {
+                    actions: migratedActions.resultedActions,
+                    throttle: undefined,
+                    notifyWhen: undefined,
+                  }
+                : {}),
               enabled: false,
               scheduledTaskId:
                 rule.attributes.scheduledTaskId === rule.id
@@ -155,7 +149,9 @@ const bulkDisableRulesWithOCC = async (
               attributes: {
                 ...updatedAttributes,
               },
-              ...(hasLegacyActions ? { references: resultedReferences } : {}),
+              ...(migratedActions.hasLegacyActions
+                ? { references: migratedActions.resultedReferences }
+                : {}),
             });
 
             context.auditLogger?.log(

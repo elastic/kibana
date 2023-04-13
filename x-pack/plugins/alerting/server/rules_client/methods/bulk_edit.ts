@@ -452,18 +452,16 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
     // migrate legacy actions only for SIEM rules
-    if (rule.attributes.consumer === AlertConsumers.SIEM) {
-      const migratedActions = await migrateLegacyActions(context, {
-        ruleId: rule.id,
-        actions: rule.attributes.actions,
-        references: rule.references,
-        attributes: rule.attributes,
-      });
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: rule.id,
+      actions: rule.attributes.actions,
+      references: rule.references,
+      attributes: rule.attributes,
+    });
 
-      if (migratedActions.hasLegacyActions) {
-        rule.attributes.actions = migratedActions.actions;
-        rule.references = migratedActions.references;
-      }
+    if (migratedActions.hasLegacyActions) {
+      rule.attributes.actions = migratedActions.resultedActions;
+      rule.references = migratedActions.resultedReferences;
     }
 
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =

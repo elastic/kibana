@@ -116,17 +116,24 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  // migrate legacy actions only for SIEM rules
-  if (alertSavedObject.attributes.consumer === AlertConsumers.SIEM) {
-    await migrateLegacyActions(context, {
-      ruleId: id,
-    });
-  }
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    attributes: alertSavedObject.attributes,
+  });
 
   const updateResult = await updateAlert<Params>(
     context,
     { id, data, allowMissingConnectorSecrets, shouldIncrementRevision },
-    alertSavedObject
+    migratedActions.hasLegacyActions
+      ? {
+          ...alertSavedObject,
+          attributes: {
+            ...alertSavedObject.attributes,
+            notifyWhen: undefined,
+            throttle: undefined,
+          },
+        }
+      : alertSavedObject
   );
 
   await Promise.all([

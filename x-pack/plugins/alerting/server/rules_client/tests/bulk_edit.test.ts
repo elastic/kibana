@@ -31,6 +31,11 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
     migrateLegacyActions: jest.fn(),
   };
 });
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -2505,7 +2510,7 @@ describe('bulkEdit()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+    test('should call migrateLegacyActions', async () => {
       encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
         .fn()
         .mockResolvedValueOnce({
@@ -2525,7 +2530,19 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule1.attributes,
+        ruleId: enabledRule1.id,
+        actions: [],
+        references: [],
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: enabledRule2.attributes,
+        ruleId: enabledRule2.id,
+        actions: [],
+        references: [],
+      });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRule1.id,

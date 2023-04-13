@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import { RawRule } from '../../types';
@@ -88,30 +87,21 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     errorMessage: 'Error updating API key for rule: could not create API key',
   });
 
-  let resultedActions: RawRule['actions'] = [];
-  let resultedReferences: SavedObjectReference[] = [];
-  let hasLegacyActions = false;
-
-  // migrate legacy actions only for SIEM rules
-  if (attributes.consumer === AlertConsumers.SIEM) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
-
-    resultedActions = migratedActions.actions;
-    resultedReferences = migratedActions.references;
-    hasLegacyActions = migratedActions.hasLegacyActions;
-  }
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    actions: attributes.actions,
+    references,
+    attributes,
+  });
 
   const updateAttributes = updateMeta(context, {
     ...attributes,
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
-    ...(hasLegacyActions ? { actions: resultedActions } : {}),
+    ...(migratedActions.hasLegacyActions
+      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+      : {}),
   });
 
   context.auditLogger?.log(
@@ -127,7 +117,9 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   try {
     await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
       version,
-      ...(hasLegacyActions ? { references: resultedReferences } : {}),
+      ...(migratedActions.hasLegacyActions
+        ? { references: migratedActions.resultedReferences }
+        : {}),
     });
   } catch (e) {
     // Avoid unused API key

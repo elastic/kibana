@@ -26,6 +26,11 @@ jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
     migrateLegacyActions: jest.fn(),
   };
 });
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -225,7 +230,7 @@ describe('delete()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemAlert = {
         ...existingDecryptedAlert,
         attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
@@ -239,13 +244,9 @@ describe('delete()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: '1',
+        skipActionsValidation: true,
+        attributes: existingDecryptedSiemAlert.attributes,
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      await rulesClient.delete({ id: '1' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 

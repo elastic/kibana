@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import omit from 'lodash/omit';
+
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
@@ -19,11 +20,12 @@ type MigrateLegacyActions = (
     ruleId: string;
     references?: SavedObjectReference[];
     actions?: RawRuleAction[];
-    attributes?: RawRule;
+    attributes: RawRule;
+    skipActionsValidation?: boolean;
   }
 ) => Promise<{
-  actions: RawRuleAction[];
-  references: SavedObjectReference[];
+  resultedActions: RawRuleAction[];
+  resultedReferences: SavedObjectReference[];
   hasLegacyActions: boolean;
 }>;
 
@@ -36,29 +38,29 @@ type MigrateLegacyActions = (
  */
 export const migrateLegacyActions: MigrateLegacyActions = async (
   context: RulesClientContext,
-  { ruleId, actions = [], references = [], attributes }
+  { ruleId, actions = [], references = [], attributes, skipActionsValidation }
 ) => {
+  if (attributes.consumer !== AlertConsumers.SIEM) {
+    return {
+      resultedActions: [],
+      hasLegacyActions: false,
+      resultedReferences: [],
+    };
+  }
+
   const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(context, {
     ruleId,
   });
 
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  // we put frequency into legacy action already. Once https://github.com/elastic/kibana/pull/153113 is merged, we should get rid of this code
-  const legacyActionsWithoutFrequencies = legacyActions.map(
-    (action) => omit(action, 'frequency') as RawRuleAction
-  );
-
   // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
-  if (attributes) {
+  if (skipActionsValidation !== true) {
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
     await validateActions(context, ruleType, {
       ...attributes,
-      actions: injectReferencesIntoActions(
-        ruleId,
-        legacyActionsWithoutFrequencies,
-        legacyActionsReferences
-      ),
+      // set to undefined to avoid both per-actin and rule level values clashing
+      throttle: undefined,
+      notifyWhen: undefined,
+      actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
     });
   }
 
@@ -76,9 +78,21 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     });
   }
 
+  // put frequencies into existing actions
+  // the situation when both action in rule nad legacy exist should be rare one
+  // but if it happens, we put frequency in existing actions per-action level
+  const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
+    ...action,
+    frequency: {
+      summary: true,
+      notifyWhen: attributes.notifyWhen ?? 'onActiveAlert',
+      throttle: attributes.throttle ?? null,
+    },
+  }));
+
   return {
-    actions: [...actions, ...legacyActions],
+    resultedActions: [...existingActionsWithFrequencies, ...legacyActions],
     hasLegacyActions: legacyActions.length > 0,
-    references: [...references, ...legacyActionsReferences],
+    resultedReferences: [...references, ...legacyActionsReferences],
   };
 };

@@ -107,6 +107,11 @@ describe('updateApiKey()', () => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   test('updates the API key for the alert', async () => {
@@ -432,7 +437,7 @@ describe('updateApiKey()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         ...existingEncryptedAlert,
         attributes: { ...existingEncryptedAlert.attributes, consumer: AlertConsumers.SIEM },
@@ -461,16 +466,6 @@ describe('updateApiKey()', () => {
         ],
         references: [],
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      rulesClientParams.createAPIKey.mockResolvedValueOnce({
-        apiKeysEnabled: true,
-        result: { id: '234', name: '123', api_key: 'abc' },
-      });
-      await rulesClient.updateApiKey({ id: '1' });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

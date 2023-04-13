@@ -172,6 +172,11 @@ describe('update()', () => {
       },
       producer: 'alerts',
     });
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
+    });
   });
 
   test('updates given parameters', async () => {
@@ -2763,7 +2768,7 @@ describe('update()', () => {
       });
     });
 
-    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+    test('should call migrateLegacyActions', async () => {
       const existingDecryptedSiemAlert = {
         ...existingDecryptedAlert,
         attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
@@ -2795,31 +2800,8 @@ describe('update()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: '1',
+        attributes: existingDecryptedSiemAlert.attributes,
       });
-    });
-
-    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
-      actionsClient.getBulk.mockReset();
-      actionsClient.isPreconfigured.mockReset();
-
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-            risk_score: 40,
-            severity: 'low',
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-        },
-      });
-
-      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 

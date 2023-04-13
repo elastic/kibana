@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import { migrateLegacyActions } from './migrate_legacy_actions';
@@ -54,6 +56,7 @@ const ruleId = 'rule_id_1';
 
 const attributes = {
   alertTypeId: 'siem.query',
+  consumer: AlertConsumers.SIEM,
 } as unknown as RawRule;
 
 (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValue({
@@ -111,18 +114,41 @@ const referencesMock: SavedObjectReference[] = [
 ];
 
 describe('migrateLegacyActions', () => {
-  it('should call retrieveMigratedLegacyActions with correct rule if', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should return earley empty migratedActions when consumer is not SIEM', async () => {
     (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValue({
       legacyActions: [],
       legacyActionsReferences: [],
     });
-    await migrateLegacyActions(context, { ruleId });
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId,
+      attributes: { ...attributes, consumer: 'mine' },
+    });
+
+    expect(migratedActions).toEqual({
+      resultedActions: [],
+      hasLegacyActions: false,
+      resultedReferences: [],
+    });
+    expect(retrieveMigratedLegacyActions).not.toHaveBeenCalled();
+    expect(validateActions).not.toHaveBeenCalled();
+    expect(injectReferencesIntoActions).not.toHaveBeenCalled();
+  });
+
+  it('should call retrieveMigratedLegacyActions with correct rule id', async () => {
+    (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValue({
+      legacyActions: [],
+      legacyActionsReferences: [],
+    });
+    await migrateLegacyActions(context, { ruleId, attributes });
 
     expect(retrieveMigratedLegacyActions).toHaveBeenCalledWith(context, { ruleId });
   });
 
-  it('should not call validateActions and injectReferencesIntoActions if attributes not provided', async () => {
-    await migrateLegacyActions(context, { ruleId });
+  it('should not call validateActions and injectReferencesIntoActions if skipActionsValidation=true', async () => {
+    await migrateLegacyActions(context, { ruleId, attributes, skipActionsValidation: true });
 
     expect(validateActions).not.toHaveBeenCalled();
     expect(injectReferencesIntoActions).not.toHaveBeenCalled();
@@ -155,10 +181,41 @@ describe('migrateLegacyActions', () => {
             to: ['test@test.com'],
           },
           uuid: '11403909-ca9b-49ba-9d7a-7e5320e68d05',
+          frequency: {
+            notifyWhen: 'onThrottleInterval',
+            summary: true,
+            throttle: '1d',
+          },
         },
       ],
       [{ id: 'cc85da20-d480-11ed-8e69-1df522116c28', name: 'action_0', type: 'action' }]
     );
+  });
+
+  it('should set frequency props from rule level to existing actions', async () => {
+    const result = await migrateLegacyActions(context, {
+      ruleId,
+      actions: existingActionsMock,
+      references: referencesMock,
+      attributes: { ...attributes, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+    });
+
+    expect(result).toHaveProperty('hasLegacyActions', false);
+    expect(result).toHaveProperty('resultedReferences', referencesMock);
+    expect(result).toHaveProperty('resultedActions', [
+      {
+        actionRef: 'action_0',
+        actionTypeId: '.webhook',
+        group: 'default',
+        params: { body: { test_web_hook: 'alert.id - {{alert.id}}' } },
+        uuid: '6e253775-693c-4dcb-a4f5-ad37d9524ecf',
+        frequency: {
+          notifyWhen: 'onThrottleInterval',
+          summary: true,
+          throttle: '1h',
+        },
+      },
+    ]);
   });
 
   it('should return correct response when legacy actions empty and existing empty', async () => {
@@ -166,21 +223,36 @@ describe('migrateLegacyActions', () => {
       ruleId,
       actions: existingActionsMock,
       references: referencesMock,
+      attributes,
     });
 
     expect(result).toHaveProperty('hasLegacyActions', false);
-    expect(result).toHaveProperty('references', referencesMock);
-    expect(result).toHaveProperty('actions', existingActionsMock);
+    expect(result).toHaveProperty('resultedReferences', referencesMock);
+    expect(result).toHaveProperty('resultedActions', [
+      {
+        actionRef: 'action_0',
+        actionTypeId: '.webhook',
+        group: 'default',
+        params: { body: { test_web_hook: 'alert.id - {{alert.id}}' } },
+        uuid: '6e253775-693c-4dcb-a4f5-ad37d9524ecf',
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: true,
+          throttle: null,
+        },
+      },
+    ]);
   });
 
   it('should return correct response when legacy actions empty and existing actions empty', async () => {
     const result = await migrateLegacyActions(context, {
       ruleId,
+      attributes,
     });
 
     expect(result).toHaveProperty('hasLegacyActions', false);
-    expect(result).toHaveProperty('references', []);
-    expect(result).toHaveProperty('actions', []);
+    expect(result).toHaveProperty('resultedReferences', []);
+    expect(result).toHaveProperty('resultedActions', []);
   });
   it('should return correct response when existing actions empty and legacy present', async () => {
     (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValueOnce({
@@ -190,11 +262,12 @@ describe('migrateLegacyActions', () => {
 
     const result = await migrateLegacyActions(context, {
       ruleId,
+      attributes,
     });
 
     expect(result).toHaveProperty('hasLegacyActions', true);
-    expect(result).toHaveProperty('references', legacyReferencesMock);
-    expect(result).toHaveProperty('actions', legacyActionsMock);
+    expect(result).toHaveProperty('resultedReferences', legacyReferencesMock);
+    expect(result).toHaveProperty('resultedActions', legacyActionsMock);
   });
   it('should merge actions and references correctly when existing and legacy actions both present', async () => {
     (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValueOnce({
@@ -206,17 +279,18 @@ describe('migrateLegacyActions', () => {
       ruleId,
       actions: existingActionsMock,
       references: referencesMock,
+      attributes,
     });
 
-    expect(result.references[0].name).toBe('action_0');
-    expect(result.references[1].name).toBe('action_1');
+    expect(result.resultedReferences[0].name).toBe('action_0');
+    expect(result.resultedReferences[1].name).toBe('action_1');
 
     expect(result).toHaveProperty('hasLegacyActions', true);
 
     // ensure references are correct
-    expect(result.references[0].name).toBe('action_0');
-    expect(result.references[1].name).toBe('action_1');
-    expect(result).toHaveProperty('references', [
+    expect(result.resultedReferences[0].name).toBe('action_0');
+    expect(result.resultedReferences[1].name).toBe('action_1');
+    expect(result).toHaveProperty('resultedReferences', [
       {
         id: 'b2fd3f90-cd81-11ed-9f6d-a746729ca213',
         name: 'action_0',
@@ -230,15 +304,20 @@ describe('migrateLegacyActions', () => {
     ]);
 
     // ensure actionsRefs are correct
-    expect(result.actions[0].actionRef).toBe('action_0');
-    expect(result.actions[1].actionRef).toBe('action_1');
-    expect(result).toHaveProperty('actions', [
+    expect(result.resultedActions[0].actionRef).toBe('action_0');
+    expect(result.resultedActions[1].actionRef).toBe('action_1');
+    expect(result).toHaveProperty('resultedActions', [
       {
         actionRef: 'action_0',
         actionTypeId: '.webhook',
         group: 'default',
         params: { body: { test_web_hook: 'alert.id - {{alert.id}}' } },
         uuid: '6e253775-693c-4dcb-a4f5-ad37d9524ecf',
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: true,
+          throttle: null,
+        },
       },
       {
         actionRef: 'action_1',
