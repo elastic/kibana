@@ -177,9 +177,9 @@ describe('validateMonitor', () => {
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
       [ConfigKey.THROTTLING_CONFIG]: {
         value: {
-          download: 5,
-          upload: 3,
-          latency: 20,
+          download: '5',
+          upload: '3',
+          latency: '20',
         },
         id: 'test',
         label: 'test',

@@ -75,9 +75,9 @@ const testBrowserConfig: Partial<MonitorFields> = {
   ignore_https_errors: false,
   throttling: {
     value: {
-      download: 5,
-      latency: 20,
-      upload: 3,
+      download: '5',
+      latency: '20',
+      upload: '3',
     },
     id: 'default',
     label: 'default',
@@ -212,7 +212,7 @@ describe('browser fields', () => {
       {
         ...testBrowserConfig,
         throttling: {
-          value: { download: 0, upload: 0, latency: 0 },
+          value: null,
           label: 'no-throttling',
           id: 'no-throttling',
         },

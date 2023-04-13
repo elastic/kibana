@@ -21,6 +21,7 @@ export const useConnectionProfiles = (initialValue?: ThrottlingConfig) => {
             throttling={initialValue?.id === 'custom' ? initialValue : undefined}
           />
         ),
+        'data-test-subj': 'syntheticsThrottlingSelectCustom',
       },
     ];
   }, [initialValue]);

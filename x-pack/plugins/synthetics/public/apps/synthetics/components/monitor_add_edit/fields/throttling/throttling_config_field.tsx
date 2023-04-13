@@ -63,4 +63,5 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
 export const PROFILE_OPTIONS = PROFILE_VALUES.map(({ id }) => ({
   value: id,
   inputDisplay: <ConnectionProfile throttling={PROFILES_MAP[id]} />,
+  'data-test-subj': `syntheticsThrottlingSelect-${id}`,
 }));

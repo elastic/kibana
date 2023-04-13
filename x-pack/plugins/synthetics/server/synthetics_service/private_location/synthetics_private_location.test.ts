@@ -311,7 +311,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  throttling: { value: { download: 5, upload: 3, latency: 20 }, label: 'test', id: 'test' },
+  throttling: { value: { download: '5', upload: '3', latency: '20' }, label: 'test', id: 'test' },
   id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   config_id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   fields: { config_id: '75cdd125-5b62-4459-870c-46f59bf37e89', run_once: true },
