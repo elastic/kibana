@@ -235,6 +235,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   ]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+  const extraVisualizationOptions = useMemo(
+    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
+    [isPtrIncluded]
+  );
   if (hideHistogram) {
     return null;
   }
@@ -276,6 +280,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"
+                    extraOptions={extraVisualizationOptions}
                     getLensAttributes={getLensAttributes}
                     isInspectButtonDisabled={filterQuery === undefined}
                     lensAttributes={lensAttributes}
@@ -303,6 +308,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
+                extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
                 height={CHART_HEIGHT}
                 id={`${id}-embeddable`}
