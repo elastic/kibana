@@ -74,15 +74,16 @@ describe('Spaces plugin', () => {
     it('can start with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const coreSetup = coreMock.createSetup() as CoreSetup<PluginsStart>;
-      const features = featuresPluginMock.createSetup();
+      const featuresSetup = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
 
       const plugin = new SpacesPlugin(initializerContext);
-      plugin.setup(coreSetup, { features, licensing });
+      plugin.setup(coreSetup, { features: featuresSetup, licensing });
 
       const coreStart = coreMock.createStart();
+      const featuresStart = featuresPluginMock.createStart();
 
-      const spacesStart = plugin.start(coreStart);
+      const spacesStart = plugin.start(coreStart, { features: featuresStart });
       expect(spacesStart).toMatchInlineSnapshot(`
         Object {
           "spacesService": Object {

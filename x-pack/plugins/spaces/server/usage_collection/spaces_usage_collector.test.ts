@@ -12,7 +12,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import type { PluginsSetup } from '../plugin';
+import type { PluginsStart } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
@@ -69,7 +69,7 @@ function setup({
 
   const featuresSetup = {
     getKibanaFeatures: jest.fn().mockReturnValue(features),
-  } as unknown as PluginsSetup['features'];
+  } as unknown as PluginsStart['features'];
 
   const usageStatsClient = usageStatsClientMock.create();
   usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);
@@ -123,7 +123,7 @@ describe('error handling', () => {
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndex,
-      features,
+      getFeatureStartContract: () => features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
@@ -147,7 +147,7 @@ describe('with a basic license', () => {
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndex,
-      features,
+      getFeatureStartContract: () => features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
@@ -206,7 +206,7 @@ describe('with no license', () => {
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndex,
-      features,
+      getFeatureStartContract: () => features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
@@ -247,7 +247,7 @@ describe('with platinum license', () => {
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndex,
-      features,
+      getFeatureStartContract: () => features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
