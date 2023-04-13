@@ -56,8 +56,14 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
         <h3>{i18n.EXCEPTION_EXPIRE_TIME_HEADER}</h3>
       </SectionHeader>
       <EuiSpacer size="s" />
-      <EuiFormRow error={errors} isInvalid={isInvalid} label={i18n.EXPIRE_TIME_LABEL}>
+      <EuiFormRow
+        data-test-subj="exceptionExpireTimeInputRow"
+        error={errors}
+        isInvalid={isInvalid}
+        label={i18n.EXPIRE_TIME_LABEL}
+      >
         <EuiDatePicker
+          placeholder="Select an expiration date"
           showTimeSelect
           selected={dateTime}
           isInvalid={isInvalid}

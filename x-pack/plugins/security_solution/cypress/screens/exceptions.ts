@@ -111,6 +111,9 @@ export const EXCEPTION_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeade
 export const EXCEPTION_CARD_ITEM_CONDITIONS =
   '[data-test-subj="exceptionItemCardConditions-condition"]';
 
+export const EXCEPTION_CARD_ITEM_META_INFO =
+  '[data-test-subj="exceptionItemCardMetaInfo-expireTime-value1"]';
+
 // Exception flyout components
 export const EXCEPTION_ITEM_NAME_INPUT = 'input[data-test-subj="exceptionFlyoutNameInput"]';
 
@@ -127,6 +130,9 @@ export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToR
 export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
+
+export const EXCEPTION_ITEM_EXPIRE_TIME_INPUT =
+  '[data-test-subj="exceptionExpireTimeInputRow"] input.euiDatePicker';
 
 // Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =

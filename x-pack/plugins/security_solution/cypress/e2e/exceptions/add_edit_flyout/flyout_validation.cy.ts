@@ -30,6 +30,7 @@ import {
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   closeExceptionBuilderFlyout,
+  editExceptionFlyoutExpireTime,
   searchExceptionEntryFieldWithPrefix,
   selectCurrentEntryField,
   showFieldConflictsWarningTooltipWithMessage,
@@ -339,6 +340,26 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     showMappingConflictsWarningMessage(warningMessage);
   });
 
+  it('Validates expire time field correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.name', 0);
+    addExceptionEntryFieldValueValue('test', 0);
+
+    // set an expiration date in the past
+    editExceptionFlyoutExpireTime(new Date(Date.now() - 1000000).toISOString());
+    cy.get(CONFIRM_BTN).should('be.disabled');
+
+    // set an expiration date in the future
+    editExceptionFlyoutExpireTime(new Date(Date.now() + 1000000).toISOString());
+    cy.get(CONFIRM_BTN).should('be.enabled');
+  });
+
   // TODO - Add back in error states into modal
   describe.skip('flyout errors', () => {
     beforeEach(() => {
@@ -359,6 +380,7 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
             value: ['some host', 'another host'],
           },
         ],
+        expire_time: undefined,
       });
 
       reload();

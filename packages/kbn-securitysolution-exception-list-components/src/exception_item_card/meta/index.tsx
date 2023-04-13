@@ -85,7 +85,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             </EuiFlexItem>
             {item.expire_time != null && (
               <>
-                <EuiFlexItem css={itemCss} grow={false}>
+                <EuiFlexItem css={itemCss} grow={false} data-test-subj="metaInfoExpireTime">
                   <MetaInfoDetails
                     label={
                       isExpired
