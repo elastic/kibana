@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const inventoryViewSavedObjectAttributesRT = rt.intersection([
   rt.strict({
-    name: rt.string,
+    name: nonEmptyStringRt,
   }),
   rt.UnknownRecord,
 ]);
