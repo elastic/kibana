@@ -46,9 +46,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     // traceparent: {
     //   type: 'text',
     // },
-    params: {
-      type: 'text',
-    },
+    // params: {
+    //   type: 'text',
+    // },
     state: {
       type: 'text',
     },
