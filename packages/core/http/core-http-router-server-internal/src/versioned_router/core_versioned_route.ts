@@ -19,6 +19,8 @@ import type {
   VersionedRouteConfig,
   IKibanaResponse,
 } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
@@ -148,7 +150,8 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.router.validateResponses && validation?.response?.[response.status]) {
+    const core = (await (ctx as RequestHandlerContext).core) as CoreRouteHandlerContext;
+    if (core.env.mode.dev && validation?.response?.[response.status]) {
       const responseValidation = validation.response[response.status];
       try {
         validate(
