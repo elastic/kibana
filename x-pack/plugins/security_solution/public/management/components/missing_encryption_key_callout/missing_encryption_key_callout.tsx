@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetFleetStatus } from '../../hooks';
@@ -27,29 +27,32 @@ export const MissingEncryptionKeyCallout = memo(() => {
       <>
         <EuiCallOut
           color="warning"
-          iconType="gear"
+          iconType="iInCircle"
           data-test-subj="missingEncryptionKeyCallout"
           title={i18n.translate(
             'xpack.securitySolution.responder.missingEncryptionKey.callout.title',
             {
-              defaultMessage: 'Encryption Key not set',
+              defaultMessage: 'Set up encryption key',
             }
           )}
         >
           <p>
             <FormattedMessage
               id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
-              defaultMessage="The encryptionKey is not set in your kibana.yml config file and response actions might have unexpected behaviour"
+              defaultMessage="Encryption key will make your environment more secure"
             />
           </p>
-          <EuiSpacer size="s" />
-          <EuiButton
+
+          <EuiButtonEmpty
             onClick={() => setCalloutDismiss(true)}
             color="warning"
             data-test-subj="dismissEncryptionKeyCallout"
           >
-            {'Dismiss'}
-          </EuiButton>
+            <FormattedMessage
+              id="xpack.securitySolution.responder.missingEncryptionKey.callout.dismissButton.label"
+              defaultMessage="Dismiss"
+            />
+          </EuiButtonEmpty>
         </EuiCallOut>
         <EuiSpacer size="m" />
       </>
