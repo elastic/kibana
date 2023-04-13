@@ -1145,12 +1145,28 @@
             "label": "forceRefresh",
             "description": [],
             "signature": [
-              "() => void"
+              "(refreshControlGroup?: boolean) => void"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.forceRefresh.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "refreshControlGroup",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
