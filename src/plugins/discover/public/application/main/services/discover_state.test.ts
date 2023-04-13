@@ -450,6 +450,27 @@ describe('actions', () => {
     expect(state.internalState.getState().adHocDataViews.length).toBe(1);
   });
 
+  test('loadSavedSearch resetting query & filters of data service', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    expect(discoverServiceMock.data.query.queryString.clearQuery()).toHaveBeenCalled();
+    expect(discoverServiceMock.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
+  test('loadSavedSearch setting query & filters of data service if query and filters are persisted', async () => {
+    const savedSearchWithQueryAndFilters = copySavedSearch(savedSearchMock);
+    const query = { query: "foo: 'bar'", language: 'kql' };
+    const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
+    savedSearchWithQueryAndFilters.searchSource.setField('query', query);
+    savedSearchWithQueryAndFilters.searchSource.setField('filter', filters);
+    const { state } = await getState('/', savedSearchWithQueryAndFilters);
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    expect(discoverServiceMock.data.query.queryString.setQuery).toHaveBeenCalledWith(query);
+    expect(discoverServiceMock.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
+      filters
+    );
+  });
+
   test('onChangeDataView', async () => {
     const { state, getCurrentUrl } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });

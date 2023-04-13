@@ -227,8 +227,11 @@ export function getSavedSearchContainer({
   };
 }
 
+/**
+ * Copies a saved search object, due to the stateful nature of searchSource it has to be copied with a dedicated function
+ * @param savedSearch
+ */
 export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
-  // due to the stateful nature of searchSource it has to be copied separately
   return {
     ...savedSearch,
     ...{ searchSource: savedSearch.searchSource.createCopy() },

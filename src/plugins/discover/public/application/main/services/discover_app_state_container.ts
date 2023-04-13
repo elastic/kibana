@@ -21,11 +21,10 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
-import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -189,26 +188,14 @@ export const getDiscoverAppStateContainer = ({
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
-    const { filterManager, data } = services;
-
-    // searchsource is the source of truth
+    const { data } = services;
     const dataView = currentSavedSearch.searchSource.getField('index');
-    const filters = currentSavedSearch.searchSource.getField('filter');
-    const query = currentSavedSearch.searchSource.getField('query');
+
     if (appStateContainer.getState().index !== dataView?.id) {
       // used data view is different from the given by url/state which is invalid
       setState(appStateContainer, { index: dataView?.id });
     }
-    // sync initial app filters from state to filterManager
-    if (Array.isArray(filters) && filters.length) {
-      filterManager.setAppFilters(cloneDeep(filters));
-    } else {
-      filterManager.setAppFilters([]);
-    }
-    if (query) {
-      data.query.queryString.setQuery(query);
-    }
-
+    // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
       appStateContainer,
@@ -223,14 +210,6 @@ export const getDiscoverAppStateContainer = ({
       data.query,
       stateStorage
     );
-
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = filterManager.getFilters();
-    const validFilters = getValidFilters(dataView!, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      filterManager.setFilters(validFilters);
-    }
 
     const { start, stop } = startAppStateUrlSync();
     // current state need to be pushed to url
