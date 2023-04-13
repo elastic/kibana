@@ -7,6 +7,7 @@
 
 import Path from 'path';
 import expect from '@kbn/expect';
+// import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from './file_wrapper';
 
@@ -16,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   // FLAKY: https://github.com/elastic/kibana/issues/119267
-  describe.skip('Audit Log', function () {
+  describe('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
     const logFile = new FileWrapper(logFilePath, retry);
 
@@ -27,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      // await setTimeoutAsync(500);
 
       const content = await logFile.readJSON();
 
@@ -65,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      // await setTimeoutAsync(500);
 
       const content = await logFile.readJSON();
 
@@ -90,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(401);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
+      // await setTimeoutAsync(500);
 
       const content = await logFile.readJSON();
 
