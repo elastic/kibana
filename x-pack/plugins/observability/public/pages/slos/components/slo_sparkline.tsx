@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Axis, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
@@ -36,6 +36,18 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
+  const LineAxisComponent =
+    chart === 'line' ? (
+      <Axis
+        id="axis"
+        hide
+        domain={{
+          min: 0,
+          max: 1,
+        }}
+        showGridLines={false}
+      />
+    ) : null;
 
   if (isLoading) {
     return <EuiLoadingChart size="m" mono />;
@@ -49,15 +61,13 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
         theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
         tooltip="none"
       />
+      {LineAxisComponent}
       <ChartComponent
         color={color}
         data={data}
         fit={Fit.Nearest}
         id={id}
         lineSeriesStyle={{
-          line: {
-            strokeWidth: 1,
-          },
           point: { visible: false },
         }}
         xAccessor={'key'}
