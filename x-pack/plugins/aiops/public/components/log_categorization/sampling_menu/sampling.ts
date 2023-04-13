@@ -12,14 +12,18 @@ import { RandomSamplerOption, RANDOM_SAMPLER_OPTION } from './random_sampler';
 const DEFAULT_PROBABILITY = 0.001;
 
 export class Sampling {
-  private docCount: number = 0;
+  private docCount$ = new BehaviorSubject<number>(0);
   private mode$ = new BehaviorSubject<RandomSamplerOption>(RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
   private probability$ = new BehaviorSubject<number | null>(DEFAULT_PROBABILITY);
 
   constructor() {}
 
   setDocCount(docCount: number) {
-    this.docCount = docCount;
+    return this.docCount$.next(docCount);
+  }
+
+  getDocCount() {
+    return this.docCount$.getValue();
   }
 
   public setMode(mode: RandomSamplerOption) {
@@ -59,7 +63,7 @@ export class Sampling {
 
     const wrapper = createRandomSamplerWrapper({
       ...prob,
-      totalNumDocs: this.docCount,
+      totalNumDocs: this.getDocCount(),
     });
     this.setProbability(wrapper.probability);
     return wrapper;
