@@ -15,6 +15,13 @@ import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
 jest.mock('../kibana_services', () => {
   return {
+    getExecutionContextService() {
+      return {
+        get: () => {
+          return {};
+        },
+      };
+    },
     getHttp() {
       return {
         basePath: {

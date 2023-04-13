@@ -19,7 +19,7 @@ import {
   HTTPMethod,
   Validation,
 } from '../types';
-import { validate as centralValidation } from '../validation';
+import { validate as centralValidation } from '../../monitor_management/validation';
 import { HTTPAdvancedFields } from './advanced_fields';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({

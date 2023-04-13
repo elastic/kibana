@@ -9,7 +9,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { paths } from '../../config';
+import { paths } from '../../config/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -38,7 +38,7 @@ export function SloEditPage() {
     },
   ]);
 
-  const { slo, isLoading } = useFetchSloDetails(sloId || '');
+  const { slo, isLoading } = useFetchSloDetails(sloId);
 
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));

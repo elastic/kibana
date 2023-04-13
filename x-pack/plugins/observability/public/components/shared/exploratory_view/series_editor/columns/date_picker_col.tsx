@@ -27,7 +27,8 @@ interface Props {
 const AddDataComponents: Record<AppDataType, React.FC | null> = {
   mobile: MobileAddData,
   ux: UXAddData,
-  synthetics: SyntheticsAddData,
+  uptime: SyntheticsAddData,
+  synthetics: null,
   apm: null,
   infra_logs: null,
   infra_metrics: null,

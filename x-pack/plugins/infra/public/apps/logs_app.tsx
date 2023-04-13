@@ -14,7 +14,6 @@ import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
-import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -78,7 +77,6 @@ const LogsApp: React.FC<{
             <Switch>
               <Route path="/link-to" component={LinkToLogsPage} />
               {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
-              <Route component={NotFoundPage} />
             </Switch>
           </KbnUrlStateStorageFromRouterProvider>
         </Router>

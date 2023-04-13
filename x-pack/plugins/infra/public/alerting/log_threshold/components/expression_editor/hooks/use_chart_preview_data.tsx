@@ -8,6 +8,8 @@
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PersistedLogViewReference } from '../../../../../../common/log_views';
+import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -19,14 +21,19 @@ import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts';
 
 interface Options {
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
-export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) => {
+export const useChartPreviewData = ({
+  logViewReference,
+  ruleParams,
+  buckets,
+  executionTimeRange,
+}: Options) => {
   const { http } = useKibana().services;
-
   const [chartPreviewData, setChartPreviewData] = useState<
     GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series']
   >([]);
@@ -36,7 +43,13 @@ export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) 
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, ruleParams, buckets);
+        return await callGetChartPreviewDataAPI(
+          logViewReference,
+          http!.fetch,
+          ruleParams,
+          buckets,
+          executionTimeRange
+        );
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -46,7 +59,7 @@ export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) 
         setHasError(true);
       },
     },
-    [sourceId, http, ruleParams, buckets]
+    [logViewReference, http, ruleParams, buckets]
   );
 
   const isLoading = useMemo(
@@ -63,19 +76,21 @@ export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) 
 };
 
 export const callGetChartPreviewDataAPI = async (
-  sourceId: string,
+  logViewReference: PersistedLogViewReference,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const response = await fetch(LOG_ALERTS_CHART_PREVIEW_DATA_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogAlertsChartPreviewDataRequestPayloadRT.encode({
         data: {
-          logView: { type: 'log-view-reference', logViewId: sourceId },
+          logView: logViewReference,
           alertParams,
           buckets,
+          executionTimeRange,
         },
       })
     ),

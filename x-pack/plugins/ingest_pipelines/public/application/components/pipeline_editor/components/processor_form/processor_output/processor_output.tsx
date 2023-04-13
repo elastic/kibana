@@ -94,7 +94,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   }
 
   if (!processorOutput) {
-    return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="alert" />;
+    return <EuiCallOut title={i18nTexts.noOutputCalloutTitle} color="danger" iconType="warning" />;
   }
 
   const {

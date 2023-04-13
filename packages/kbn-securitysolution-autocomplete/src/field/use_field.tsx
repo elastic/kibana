@@ -236,7 +236,7 @@ export const useField = ({
             <EuiIcon
               data-test-subj="mappingConflictsWarningIcon"
               tabIndex={0}
-              type="alert"
+              type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"
               css={{ marginLeft: `${sPaddingSize}` }}

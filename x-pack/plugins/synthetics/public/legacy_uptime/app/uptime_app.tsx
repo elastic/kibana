@@ -124,6 +124,7 @@ const Application = (props: UptimeAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
               }}
             >

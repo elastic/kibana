@@ -24,7 +24,7 @@ export const UpgradeWarning: FC = () => {
             />
           }
           color="warning"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

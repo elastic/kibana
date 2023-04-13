@@ -66,6 +66,30 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
+export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
+  'activeSnoozes',
+  'alertTypeId',
+  'apiKey',
+  'apiKeyOwner',
+  'consumer',
+  'createdAt',
+  'createdBy',
+  'enabled',
+  'executionStatus',
+  'id',
+  'isSnoozedUntil',
+  'lastRun',
+  'monitoring',
+  'muteAll',
+  'mutedInstanceIds',
+  'nextRun',
+  'revision',
+  'running',
+  'snoozeSchedule',
+  'updatedBy',
+  'updatedAt',
+]);
+
 export class RulesClient {
   private readonly context: RulesClientContext;
 
@@ -147,6 +171,7 @@ export class RulesClient {
       params.references,
       params.includeLegacyId,
       params.excludeFromPublicApi,
-      params.includeSnoozeData
+      params.includeSnoozeData,
+      params.omitGeneratedValues
     );
 }

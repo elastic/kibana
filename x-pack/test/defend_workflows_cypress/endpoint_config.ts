@@ -25,6 +25,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,
+        // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
+        '--xpack.securitySolution.packagerTaskInterval=5s',
       ],
     },
     testRunner: DefendWorkflowsCypressEndpointTestRunner,

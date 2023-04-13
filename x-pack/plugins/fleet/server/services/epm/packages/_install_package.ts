@@ -48,6 +48,8 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import {
   createInstallation,
   restartInstallation,
@@ -288,6 +290,12 @@ export async function _installPackage({
         type: ASSETS_SAVED_OBJECT_TYPE,
       })
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {

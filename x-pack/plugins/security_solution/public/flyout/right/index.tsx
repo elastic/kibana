@@ -18,6 +18,7 @@ import { tabs } from './tabs';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
 export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
+export const RightPanelTableTabPath: RightPanelProps['path'] = ['table'];
 
 export interface RightPanelProps extends FlyoutPanel {
   key: 'document-details-right';

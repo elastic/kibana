@@ -105,11 +105,6 @@ import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
-interface RulesPageContainerState {
-  lastResponse: string[];
-  status: RuleStatus[];
-}
-
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
@@ -117,11 +112,15 @@ export interface RulesListProps {
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
+  onStatusFilterChange?: (status: RuleStatus[]) => void;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  onLastResponseFilterChange?: (lastResponse: string[]) => void;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
+  typeFilter?: string[];
+  onTypeFilterChange?: (type: string[]) => void;
+  searchFilter?: string;
+  onSearchFilterChange?: (search: string) => void;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -152,6 +151,10 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  searchFilter = '',
+  onSearchFilterChange,
+  typeFilter,
+  onTypeFilterChange,
   setHeaderActions,
   refresh,
   rulesListKey,
@@ -169,11 +172,11 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: '',
-    types: [],
+    searchText: searchFilter || '',
+    types: typeFilter || [],
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
@@ -354,6 +357,12 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'searchText':
+          onSearchFilterChange?.(value as string);
+          break;
+        case 'types':
+          onTypeFilterChange?.(value as string[]);
+          break;
         default:
           break;
       }
@@ -362,6 +371,8 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onSearchFilterChange,
+      onTypeFilterChange,
       onClearSelection,
     ]
   );
@@ -394,7 +405,19 @@ export const RulesList = ({
     if (lastRunOutcomeFilter) {
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
-  }, [lastResponseFilter]);
+  }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (typeof searchFilter === 'string') {
+      updateFilters({ filter: 'searchText', value: searchFilter });
+    }
+  }, [searchFilter]);
+
+  useEffect(() => {
+    if (typeFilter) {
+      updateFilters({ filter: 'types', value: typeFilter });
+    }
+  }, [typeFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {
@@ -675,6 +698,7 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+
   return (
     <>
       <RulesListPrompts

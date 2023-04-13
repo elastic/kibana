@@ -168,6 +168,7 @@ export const CustomFields = memo<Props>(
                       agent: <EuiCode>elastic-agent-complete</EuiCode>,
                       link: (
                         <EuiLink
+                          data-test-subj="syntheticsCustomFieldsSyntheticsDocumentationLink"
                           target="_blank"
                           href="https://www.elastic.co/guide/en/observability/current/synthetics-quickstart-fleet.html"
                           external

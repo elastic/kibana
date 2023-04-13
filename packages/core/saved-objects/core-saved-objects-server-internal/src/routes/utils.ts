@@ -16,13 +16,14 @@ import {
   createConcatStream,
 } from '@kbn/utils';
 import Boom from '@hapi/boom';
-import type { RequestHandlerWrapper } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestHandlerWrapper } from '@kbn/core-http-server';
 import {
   SavedObject,
   ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import { Logger } from '@kbn/logging';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -151,4 +152,28 @@ export interface BulkGetItem {
   id: string;
   fields?: string[];
   namespaces?: string[];
+}
+
+export function isKibanaRequest({ headers }: KibanaRequest) {
+  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // We can't be 100% certain, but this is a reasonable attempt.
+  return headers && headers['kbn-version'] && headers.referer;
+}
+
+export interface LogWarnOnExternalRequest {
+  method: string;
+  path: string;
+  req: KibanaRequest;
+  logger: Logger;
+}
+/**
+ * Only log a warning when the request is internal
+ * Allows us to silence the logs for development
+ *  @internal
+ */
+export function logWarnOnExternalRequest(params: LogWarnOnExternalRequest) {
+  const { method, path, req, logger } = params;
+  if (!isKibanaRequest(req)) {
+    logger.warn(`The ${method} saved object API ${path} is deprecated.`);
+  }
 }

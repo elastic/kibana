@@ -399,7 +399,7 @@ describe('bulkDisableRules', () => {
         ],
       });
 
-      taskManager.bulkRemoveIfExist.mockResolvedValue({
+      taskManager.bulkRemove.mockResolvedValue({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
           { id: 'id2', type: 'alert', success: false },
@@ -408,8 +408,8 @@ describe('bulkDisableRules', () => {
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['taskId1', 'taskId2']);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['taskId1', 'taskId2']);
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
@@ -477,7 +477,7 @@ describe('bulkDisableRules', () => {
       );
     });
 
-    test('should not throw an error if taskManager.bulkRemoveIfExist throw an error', async () => {
+    test('should not throw an error if taskManager.bulkRemove throw an error', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -490,15 +490,15 @@ describe('bulkDisableRules', () => {
         ],
       });
 
-      taskManager.bulkRemoveIfExist.mockImplementation(() => {
-        throw new Error('Something happend during bulkRemoveIfExist');
+      taskManager.bulkRemove.mockImplementation(() => {
+        throw new Error('Something happend during bulkRemove');
       });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
-        'Failure to delete schedules for underlying tasks: taskId1. TaskManager bulkRemoveIfExist failed with Error: Something happend during bulkRemoveIfExist'
+        'Failure to delete schedules for underlying tasks: taskId1. TaskManager bulkRemove failed with Error: Something happend during bulkRemove'
       );
     });
   });

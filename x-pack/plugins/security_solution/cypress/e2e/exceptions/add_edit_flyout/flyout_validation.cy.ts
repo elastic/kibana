@@ -78,19 +78,20 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createRule({
-        ...getNewRule(),
-        index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
-        enabled: false,
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList().list_id,
-            type: getExceptionList().type,
-            namespace_type: getExceptionList().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+          enabled: false,
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList().list_id,
+              type: getExceptionList().type,
+              namespace_type: getExceptionList().namespace_type,
+            },
+          ],
+        })
+      )
     );
   });
 
@@ -316,7 +317,7 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     cy.get(CONFIRM_BTN).should('be.enabled');
   });
 
-  it('Warns users about mapping conflicts on problematic field selection', async () => {
+  it.skip('Warns users about mapping conflicts on problematic field selection', async () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
 

@@ -27,7 +27,7 @@ import {
   defaultBrowserAdvancedFields as defaultConfig,
   defaultBrowserSimpleFields,
 } from '../contexts';
-import { validate as centralValidation } from '../validation';
+import { validate as centralValidation } from '../../monitor_management/validation';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const defaultValidation = centralValidation[DataStream.BROWSER];

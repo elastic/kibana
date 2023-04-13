@@ -15,6 +15,7 @@ import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
+import { EditControlGroupButton } from './edit_control_group_button';
 
 export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
   return (
@@ -27,9 +28,21 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            <AddDataControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            <AddTimeSliderControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            controlGroup.getEditControlGroupButton(closePopover),
+            <AddDataControlButton
+              key="addControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <AddTimeSliderControlButton
+              key="addTimeSliderControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <EditControlGroupButton
+              key="manageControls"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
           ]}
         />
       )}

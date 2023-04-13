@@ -79,6 +79,7 @@ function startDefendWorkflowsCypress(
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
+        // TODO:PT Delete baseUrl + protocol + hostname + hostname and use "standard" env. variables
         // eslint-disable-next-line @typescript-eslint/naming-convention
         CYPRESS_baseUrl: Url.format({
           protocol: config.get('servers.kibana.protocol'),

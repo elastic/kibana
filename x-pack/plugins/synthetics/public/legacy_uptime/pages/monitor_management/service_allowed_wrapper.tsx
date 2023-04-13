@@ -20,7 +20,13 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}
         body={<p>{PUBLIC_BETA_DESCRIPTION}</p>}
         actions={[
-          <EuiButton color="primary" fill isDisabled={!signupUrl} href={signupUrl ?? undefined}>
+          <EuiButton
+            data-test-subj="syntheticsServiceAllowedWrapperButton"
+            color="primary"
+            fill
+            isDisabled={!signupUrl}
+            href={signupUrl ?? undefined}
+          >
             {REQUEST_ACCESS_LABEL}
           </EuiButton>,
         ]}

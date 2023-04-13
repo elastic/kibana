@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 import { DataStream } from '../../../common/runtime_types/monitor_management';
 

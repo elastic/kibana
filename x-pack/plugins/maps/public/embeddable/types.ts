@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
   Embeddable,
@@ -47,6 +48,6 @@ export type MapEmbeddableOutput = EmbeddableOutput & {
 };
 
 export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {
-  setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void;
+  getOnRenderComplete$(): Observable<void>;
   setIsSharable(isSharable: boolean): void;
 };

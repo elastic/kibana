@@ -25,6 +25,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -47,6 +48,7 @@ interface StartPlugins {
   core: CoreStart;
   appName: string;
   lens: LensPublicStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

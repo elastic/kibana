@@ -359,8 +359,9 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      // ID removed for options dropdown here:
+      // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
     });

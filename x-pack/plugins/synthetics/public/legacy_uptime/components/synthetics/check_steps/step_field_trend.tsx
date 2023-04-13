@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import { AllSeries, createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JourneyStep } from '../../../../../common/runtime_types';
@@ -37,11 +37,10 @@ export function StepFieldTrend({
   field: string;
   step: JourneyStep;
 }) {
-  const { observability } = useUptimeStartPlugins();
+  const { exploratoryView } = useUptimeStartPlugins();
+  const ExploratoryViewEmbeddable = exploratoryView?.ExploratoryViewEmbeddable;
 
   const indexSettings = useSelector(selectDynamicSettings);
-
-  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
   const basePath = useKibana().services.http?.basePath?.get();
 
@@ -51,7 +50,7 @@ export function StepFieldTrend({
       selectedMetricField: field,
       time: getLast48Intervals(activeStep),
       seriesType: 'area',
-      dataType: 'synthetics',
+      dataType: 'uptime',
       reportDefinitions: {
         'monitor.name': [activeStep.monitor.name!],
         'synthetics.step.name.keyword': [activeStep.synthetics.step?.name!],
@@ -68,12 +67,18 @@ export function StepFieldTrend({
     basePath
   );
 
-  return (
+  return ExploratoryViewEmbeddable ? (
     <Wrapper>
-      <EmbeddableExpView
+      <ExploratoryViewEmbeddable
         title={title}
         appendTitle={
-          <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
+          <EuiButton
+            data-test-subj="syntheticsStepFieldTrendButton"
+            iconType={'visArea'}
+            href={href}
+            target="_blank"
+            size="s"
+          >
             {EXPLORE_LABEL}
           </EuiButton>
         }
@@ -91,7 +96,7 @@ export function StepFieldTrend({
         withActions={false}
       />
     </Wrapper>
-  );
+  ) : null;
 }
 
 export const EXPLORE_LABEL = i18n.translate('xpack.synthetics.synthetics.markers.explore', {

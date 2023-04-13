@@ -179,10 +179,14 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
   }
 
-  public async expectOnDashboard(dashboardTitle: string) {
+  public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      'last breadcrumb to have dashboard title',
-      async () => (await this.globalNav.getLastBreadcrumb()) === dashboardTitle
+      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      async () => {
+        const actualTitle = await this.globalNav.getLastBreadcrumb();
+        this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
+        return actualTitle === expectedTitle;
+      }
     );
   }
 
@@ -389,16 +393,16 @@ export class DashboardPageObject extends FtrService {
     return this.testSubjects.exists('emptyListPrompt');
   }
 
-  public async isOptionsOpen() {
-    this.log.debug('isOptionsOpen');
-    return await this.testSubjects.exists('dashboardOptionsMenu');
+  public async isSettingsOpen() {
+    this.log.debug('isSettingsOpen');
+    return await this.testSubjects.exists('dashboardSettingsMenu');
   }
 
-  public async openOptions() {
-    this.log.debug('openOptions');
-    const isOpen = await this.isOptionsOpen();
+  public async openSettingsFlyout() {
+    this.log.debug('openSettingsFlyout');
+    const isOpen = await this.isSettingsOpen();
     if (!isOpen) {
-      return await this.testSubjects.click('dashboardOptionsButton');
+      return await this.testSubjects.click('dashboardSettingsButton');
     }
   }
 
@@ -408,34 +412,6 @@ export class DashboardPageObject extends FtrService {
     await this.visualize.gotoLandingPage();
     await this.header.clickDashboard();
     await this.gotoDashboardLandingPage();
-  }
-
-  public async isMarginsOn() {
-    this.log.debug('isMarginsOn');
-    await this.openOptions();
-    return await this.testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
-  }
-
-  public async useMargins(on = true) {
-    await this.openOptions();
-    const isMarginsOn = await this.isMarginsOn();
-    if (isMarginsOn !== 'on') {
-      return await this.testSubjects.click('dashboardMarginsCheckbox');
-    }
-  }
-
-  public async isColorSyncOn() {
-    this.log.debug('isColorSyncOn');
-    await this.openOptions();
-    return await this.testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
-  }
-
-  public async useColorSync(on = true) {
-    await this.openOptions();
-    const isColorSyncOn = await this.isColorSyncOn();
-    if (isColorSyncOn !== 'on') {
-      return await this.testSubjects.click('dashboardSyncColorsCheckbox');
-    }
   }
 
   public async gotoDashboardEditMode(dashboardName: string) {
@@ -747,12 +723,6 @@ export class DashboardPageObject extends FtrService {
       });
   }
 
-  public async checkHideTitle() {
-    this.log.debug('ensure that you can click on hide title checkbox');
-    await this.openOptions();
-    return await this.testSubjects.click('dashboardPanelTitlesCheckbox');
-  }
-
   public async expectMissingSaveOption() {
     await this.testSubjects.missingOrFail('dashboardSaveMenuItem');
   }
@@ -770,6 +740,15 @@ export class DashboardPageObject extends FtrService {
     const isDisabled = await quickSaveButton.getAttribute('disabled');
     if (isDisabled) {
       throw new Error('Quick save button disabled');
+    }
+  }
+
+  public async expectQuickSaveButtonDisabled() {
+    this.log.debug('expectQuickSaveButtonDisabled');
+    const quickSaveButton = await this.testSubjects.find('dashboardQuickSaveMenuItem');
+    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    if (!isDisabled) {
+      throw new Error('Quick save button not disabled');
     }
   }
 

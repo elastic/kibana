@@ -8,6 +8,7 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
@@ -44,7 +45,6 @@ import {
   ESTermSourceDescriptor,
   JoinDescriptor,
   StyleMetaDescriptor,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
@@ -94,7 +94,10 @@ export interface IVectorLayer extends ILayer {
   getSource(): IVectorSource;
   getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
-  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
@@ -466,6 +469,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
         inspectorAdapters,
+        executionContext: dataFilters.executionContext,
       });
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
@@ -561,14 +565,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
-    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+    const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
       joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,
       isFeatureEditorOpenForLayer
-    ) as VectorJoinSourceRequestMeta;
+    );
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = await canSkipSourceUpdate({
@@ -931,13 +935,19 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async getPropertiesForTooltip(properties: GeoJsonProperties) {
+  async getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
     const vectorSource = this.getSource();
-    let allProperties = await vectorSource.getTooltipProperties(properties);
+    let allProperties = await vectorSource.getTooltipProperties(properties, executionContext);
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties);
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(
+        properties,
+        executionContext
+      );
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;

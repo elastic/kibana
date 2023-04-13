@@ -22,6 +22,7 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -32,7 +33,7 @@ import {
   removeServerGeneratedProperties,
   downgradeImmutableRule,
   createRule,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   installMockPrebuiltRules,
   getRule,
   createExceptionList,
@@ -53,10 +54,7 @@ import {
   importFile,
 } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import {
-  ELASTIC_SECURITY_RULE_ID,
-  SAMPLE_PREBUILT_RULES,
-} from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
+import { SAMPLE_PREBUILT_RULES } from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -147,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const rule = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+          await waitForRuleSuccess({ supertest, log, id: rule.id });
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
           const expected = {
@@ -570,7 +568,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const { id: createdId } = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, createdId);
+          await waitForRuleSuccess({ supertest, log, id: createdId });
           await waitForSignalsToBePresent(supertest, log, 10, [createdId]);
           const signalsOpen = await getSignalsByIds(supertest, log, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);

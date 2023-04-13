@@ -15,9 +15,11 @@ import { Status } from '../../../../../common/types/api';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { LicensingCallout } from '../shared/licensing_callout/licensing_callout';
+
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
-import { EnginesList } from './engines_list';
+import { EnginesList, CreateEngineButton } from './engines_list';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
@@ -27,6 +29,10 @@ const DEFAULT_VALUES = {
   parameters: { meta: DEFAULT_META },
   results: [],
   status: Status.IDLE,
+  // LicensingLogic
+  hasPlatinumLicense: true,
+  // KibanaLogic
+  isCloud: false,
 };
 const mockValues = {
   ...DEFAULT_VALUES,
@@ -68,6 +74,8 @@ describe('EnginesList', () => {
 
     expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(1);
     expect(wrapper.find(EnginesListTable)).toHaveLength(0);
+    expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
+    expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeFalsy();
   });
 
   it('renders with Engines data ', async () => {
@@ -78,5 +86,34 @@ describe('EnginesList', () => {
 
     expect(wrapper.find(EnginesListTable)).toHaveLength(1);
     expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(0);
+    expect(wrapper.find(CreateEngineButton)).toHaveLength(0);
+  });
+
+  it('renders Platinum license callout when not Cloud or Platinum', async () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      hasPlatinumLicense: false,
+      isCloud: false,
+    });
+    setMockActions(mockActions);
+    const wrapper = shallow(<EnginesList />);
+
+    expect(wrapper.find(EnginesListTable)).toHaveLength(0);
+    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(1);
+    expect(wrapper.find(LicensingCallout)).toHaveLength(1);
+    expect(wrapper.find(CreateEngineButton)).toHaveLength(1);
+    expect(wrapper.find(CreateEngineButton).prop('disabled')).toBeTruthy();
+  });
+
+  it('Does not render Platinum license callout when Cloud', async () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      hasPlatinumLicense: false,
+      isCloud: true,
+    });
+    setMockActions(mockActions);
+    const wrapper = shallow(<EnginesList />);
+
+    expect(wrapper.find(LicensingCallout)).toHaveLength(0);
   });
 });

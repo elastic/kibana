@@ -74,6 +74,7 @@ export function AddSeriesButton() {
       }
     >
       <EuiButton
+        data-test-subj="o11yAddSeriesButtonAddSeriesButton"
         onClick={() => addSeries()}
         isDisabled={isAddDisabled}
         iconType="plusInCircle"

@@ -116,6 +116,7 @@ export type ApmFields = Fields<{
     'kubernetes.pod.name': string;
     'kubernetes.pod.uid': string;
     'labels.name': string;
+    'labels.telemetry_auto_version': string;
     'metricset.name': string;
     'network.carrier.icc': string;
     'network.carrier.mcc': string;

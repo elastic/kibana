@@ -51,7 +51,12 @@ const MONITOR_DETAILS_STEP = (readOnly: boolean = false): Step => ({
 const SCRIPT_RECORDER_BTNS = (
   <EuiFlexGroup justifyContent="flexStart">
     <EuiFlexItem grow={false}>
-      <EuiButton href={`elastic-synthetics-recorder://`} iconType="popout" iconSide="right">
+      <EuiButton
+        data-test-subj="syntheticsLaunchSyntheticsRecorderButton"
+        href={`elastic-synthetics-recorder://`}
+        iconType="popout"
+        iconSide="right"
+      >
         {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.launch', {
           defaultMessage: 'Launch Synthetics Recorder',
         })}
@@ -59,6 +64,7 @@ const SCRIPT_RECORDER_BTNS = (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
+        data-test-subj="syntheticsDownloadSyntheticsRecorderButton"
         href="https://github.com/elastic/synthetics-recorder/releases/"
         iconType="download"
       >
@@ -87,7 +93,12 @@ const MONITOR_SCRIPT_STEP: Step = {
               defaultMessage="Use Elastic Synthetics Recorder to generate a script and then upload it. Alternatively, you can write your own {playwright} script and paste it in the script editor."
               values={{
                 playwright: (
-                  <EuiLink href="https://playwright.dev/" target="_blank" external>
+                  <EuiLink
+                    data-test-subj="syntheticsPlaywrightLink"
+                    href="https://playwright.dev/"
+                    target="_blank"
+                    external
+                  >
                     <FormattedMessage
                       id="xpack.synthetics.monitorConfig.monitorScriptStep.playwrightLink"
                       defaultMessage="Playwright"
@@ -125,7 +136,12 @@ const MONITOR_SCRIPT_STEP_EDIT = (readOnly: boolean = false): Step => ({
                 defaultMessage="Use Elastic Synthetics Recorder to generate and upload a script. Alternatively, you can edit the existing {playwright} script (or paste a new one) in the script editor."
                 values={{
                   playwright: (
-                    <EuiLink href="https://playwright.dev/" target="_blank" external>
+                    <EuiLink
+                      data-test-subj="syntheticsMONITOR_SCRIPT_STEP_EDITPlaywrightLink"
+                      href="https://playwright.dev/"
+                      target="_blank"
+                      external
+                    >
                       <FormattedMessage
                         id="xpack.synthetics.monitorConfig.monitorScriptEditStep.playwrightLink"
                         defaultMessage="Playwright"

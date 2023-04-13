@@ -20,7 +20,7 @@ export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
  * for use in the Ingest app create / edit package policy
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
+  ({ newPolicy }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
 

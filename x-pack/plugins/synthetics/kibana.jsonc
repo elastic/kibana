@@ -19,6 +19,7 @@
       "discover",
       "dataViews",
       "encryptedSavedObjects",
+      "exploratoryView",
       "features",
       "inspector",
       "licensing",
@@ -30,7 +31,6 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
-      "spaces",
       "bfetch"
     ],
     "optionalPlugins": [
@@ -39,6 +39,7 @@
       "fleet",
       "home",
       "ml",
+      "spaces",
       "telemetry"
     ],
     "requiredBundles": [
@@ -49,6 +50,7 @@
       "kibanaUtils",
       "ml",
       "observability",
+      "spaces",
       "indexLifecycleManagement"
     ]
   }

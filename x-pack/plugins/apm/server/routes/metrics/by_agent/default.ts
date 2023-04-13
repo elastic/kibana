@@ -18,6 +18,7 @@ export function getDefaultMetricsCharts({
   apmEventClient,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -26,6 +27,7 @@ export function getDefaultMetricsCharts({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  isOpenTelemetry: boolean;
 }) {
   return Promise.all([
     getCPUChartData({
@@ -36,6 +38,7 @@ export function getDefaultMetricsCharts({
       serviceName,
       start,
       end,
+      isOpenTelemetry,
     }),
     getMemoryChartData({
       environment,
@@ -45,6 +48,7 @@ export function getDefaultMetricsCharts({
       serviceName,
       start,
       end,
+      isOpenTelemetry,
     }),
   ]);
 }

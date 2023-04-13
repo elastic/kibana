@@ -11,9 +11,12 @@ import { configMock } from '../../../__mocks__/config';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewsMock } from '../../../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
-import { AppState } from '../../../application/main/services/discover_app_state_container';
+import { DiscoverAppState } from '../../../application/main/services/discover_app_state_container';
 
-function getStateColumnAction(state: AppState, setAppState: (state: Partial<AppState>) => void) {
+function getStateColumnAction(
+  state: DiscoverAppState,
+  setAppState: (state: Partial<DiscoverAppState>) => void
+) {
   return getStateColumnActions({
     capabilities: {
       discover: {

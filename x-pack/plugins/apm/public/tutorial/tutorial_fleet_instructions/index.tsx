@@ -88,6 +88,7 @@ function TutorialFleetInstructions({
   if (hasApmIntegrations) {
     return (
       <EuiButton
+        data-test-subj="apmTutorialFleetInstructionsManageApmIntegrationInFleetButton"
         iconType="gear"
         fill
         href={`${basePath}/app/integrations/detail/apm/policies`}
@@ -122,6 +123,7 @@ function TutorialFleetInstructions({
             footer={
               <>
                 <EuiButton
+                  data-test-subj="apmTutorialFleetInstructionsApmIntegrationButton"
                   iconType="analyzeEvent"
                   color="success"
                   href={apmIntegrationHref}

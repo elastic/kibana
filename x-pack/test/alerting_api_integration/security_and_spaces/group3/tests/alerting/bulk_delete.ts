@@ -35,6 +35,7 @@ const getDefaultRules = (response: any) => ({
   scheduledTaskId: response.body.rules[0].scheduledTaskId,
   executionStatus: response.body.rules[0].executionStatus,
   monitoring: response.body.rules[0].monitoring,
+  revision: 0,
   ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
   ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
 });
@@ -67,6 +68,7 @@ const getThreeRules = (response: any) => {
       scheduledTaskId: response.body.rules[i].scheduledTaskId,
       executionStatus: response.body.rules[i].executionStatus,
       monitoring: response.body.rules[i].monitoring,
+      revision: 0,
       ...(response.body.rules[i].nextRun ? { nextRun: response.body.rules[i].nextRun } : {}),
       ...(response.body.rules[i].lastRun ? { lastRun: response.body.rules[i].lastRun } : {}),
     });

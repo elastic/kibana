@@ -27,6 +27,7 @@ import {
   openAlerts,
   openFirstAlert,
   selectCountTable,
+  waitForPageFilters,
   sumAlertCountFromAlertCountTable,
   parseAlertsCountToInt,
 } from '../../tasks/alerts';
@@ -56,6 +57,7 @@ describe('Changing alert status', () => {
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+      waitForPageFilters();
       selectCountTable();
     });
 
@@ -155,7 +157,7 @@ describe('Changing alert status', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
+      createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();

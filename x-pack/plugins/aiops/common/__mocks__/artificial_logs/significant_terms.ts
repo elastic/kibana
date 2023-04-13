@@ -9,7 +9,7 @@ export const significantTerms = [
   {
     fieldName: 'response_code',
     fieldValue: '500',
-    doc_count: 1821,
+    doc_count: 1819,
     bg_count: 553,
     total_doc_count: 4671,
     total_bg_count: 1975,
@@ -20,7 +20,7 @@ export const significantTerms = [
   {
     fieldName: 'url',
     fieldValue: 'home.php',
-    doc_count: 1742,
+    doc_count: 1744,
     bg_count: 632,
     total_doc_count: 4671,
     total_bg_count: 1975,
@@ -31,7 +31,7 @@ export const significantTerms = [
   {
     fieldName: 'url',
     fieldValue: 'login.php',
-    doc_count: 1742,
+    doc_count: 1738,
     bg_count: 632,
     total_doc_count: 4671,
     total_bg_count: 1975,

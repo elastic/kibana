@@ -405,7 +405,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
           data-share-url={this.state.url}
           data-test-subj="copyShareUrlButton"
           size="s"
-          iconType={this.state.showWarningButton ? 'alert' : undefined}
+          iconType={this.state.showWarningButton ? 'warning' : undefined}
           color={this.state.showWarningButton ? 'warning' : 'primary'}
         >
           {this.props.isEmbedded ? (

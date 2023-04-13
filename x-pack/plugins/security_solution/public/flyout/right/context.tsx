@@ -5,8 +5,21 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { css } from '@emotion/react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { SearchHit } from '@kbn/es-types';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useTimelineEventsDetails } from '../../timelines/containers/details';
+import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
+import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { SecurityPageName } from '../../../common/constants';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
+import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 
 export interface RightPanelContext {
   /**
@@ -17,6 +30,26 @@ export interface RightPanelContext {
    * Name of the index used in the parent's page
    */
   indexName: string;
+  /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields | null;
+  /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs | null;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit<object> | undefined;
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: (field: string) => unknown | unknown[];
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -29,10 +62,59 @@ export type RightPanelProviderProps = {
 } & Partial<RightPanelProps['params']>;
 
 export const RightPanelProvider = ({ id, indexName, children }: RightPanelProviderProps) => {
-  const contextValue = {
-    eventId: id as string,
-    indexName: indexName as string,
-  };
+  const currentSpaceId = useSpaceId();
+  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
+  const [{ pageName }] = useRouteSpy();
+  const sourcererScope =
+    pageName === SecurityPageName.detections
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
+  const sourcererDataView = useSourcererDataView(sourcererScope);
+  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
+    useTimelineEventsDetails({
+      indexName: eventIndex,
+      eventId: id ?? '',
+      runtimeMappings: sourcererDataView.runtimeMappings,
+      skip: !id,
+    });
+  const getFieldsData = useGetFieldsData(searchHit?.fields);
+
+  const contextValue = useMemo(
+    () =>
+      id && indexName
+        ? {
+            eventId: id,
+            indexName,
+            browserFields: sourcererDataView.browserFields,
+            dataAsNestedObject: dataAsNestedObject as unknown as Ecs,
+            dataFormattedForFieldBrowser,
+            searchHit: searchHit as SearchHit<object>,
+            getFieldsData,
+          }
+        : undefined,
+    [
+      id,
+      indexName,
+      sourcererDataView.browserFields,
+      dataAsNestedObject,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+    ]
+  );
+
+  if (loading) {
+    return (
+      <EuiFlexItem
+        css={css`
+          align-items: center;
+          justify-content: center;
+        `}
+      >
+        <EuiLoadingSpinner size="xxl" />
+      </EuiFlexItem>
+    );
+  }
 
   return <RightPanelContext.Provider value={contextValue}>{children}</RightPanelContext.Provider>;
 };

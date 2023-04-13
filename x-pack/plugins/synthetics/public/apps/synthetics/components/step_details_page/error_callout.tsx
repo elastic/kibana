@@ -21,7 +21,7 @@ export const ErrorCallOut = ({ step }: { step?: JourneyStep }) => {
 
   return (
     <>
-      <EuiCallOut title={error} color="danger" iconType="alert" />
+      <EuiCallOut title={error} color="danger" iconType="warning" />
       <EuiSpacer />
     </>
   );

@@ -84,7 +84,11 @@ export function TestResultHeader({
       </EuiFlexItem>
       {checkGroupId && (
         <EuiFlexItem grow={false}>
-          <EuiLink href={`${basePath}/app/uptime/journey/${checkGroupId}/steps`} target="_blank">
+          <EuiLink
+            data-test-subj="syntheticsTestResultHeaderLink"
+            href={`${basePath}/app/uptime/journey/${checkGroupId}/steps`}
+            target="_blank"
+          >
             {VIEW_DETAILS}
           </EuiLink>
         </EuiFlexItem>

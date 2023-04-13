@@ -533,23 +533,14 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
-  async selectEMSBoundariesSource() {
-    this.log.debug(`Select Elastic Maps Service boundaries source`);
-    await this.testSubjects.click('emsBoundaries');
+  async selectLayerGroupCard() {
+    this.log.debug(`Click layer group card`);
+    await this.testSubjects.click('layerGroup');
   }
 
   async selectFileUploadCard() {
     this.log.debug(`Select upload file card`);
     await this.testSubjects.click('uploadFile');
-  }
-
-  async selectVectorLayer(vectorLayerName: string) {
-    this.log.debug(`Select EMS vector layer ${vectorLayerName}`);
-    if (!vectorLayerName) {
-      throw new Error(`You did not provide the EMS layer to select`);
-    }
-    await this.comboBox.set('emsVectorComboBox', vectorLayerName);
-    await this.waitForLayersToLoad();
   }
 
   async removeLayer(layerName: string) {

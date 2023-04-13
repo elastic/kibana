@@ -724,7 +724,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

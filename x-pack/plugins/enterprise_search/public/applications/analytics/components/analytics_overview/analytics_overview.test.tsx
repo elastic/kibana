@@ -22,8 +22,7 @@ import { AnalyticsOverview } from './analytics_overview';
 const mockValues = {
   analyticsCollections: [
     {
-      event_retention_day_length: 180,
-      id: '1',
+      events_datastream: 'analytics-events-1',
       name: 'Analytics Collection 1',
     },
   ] as AnalyticsCollection[],

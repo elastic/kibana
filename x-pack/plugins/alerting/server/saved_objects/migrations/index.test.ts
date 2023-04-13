@@ -2652,6 +2652,22 @@ describe('successful migrations', () => {
         },
       ]);
     });
+
+    test('migrates rule to include revision and defaults revision to 0', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData();
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(0);
+    });
+
+    test('migrates security rule version to revision', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(2);
+    });
   });
 
   describe('Metrics Inventory Threshold rule', () => {

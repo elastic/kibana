@@ -99,6 +99,7 @@ export const MonitorListTabs = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="syntheticsMonitorListTabsButton"
           size="s"
           iconType="refresh"
           aria-label={REFRESH_LABEL}

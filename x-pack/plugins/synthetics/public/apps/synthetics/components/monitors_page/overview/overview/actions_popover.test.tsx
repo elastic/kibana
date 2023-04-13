@@ -45,6 +45,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={false}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     expect(getByLabelText('Open actions menu'));
@@ -60,6 +61,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     const popoverButton = getByLabelText('Open actions menu');
@@ -79,6 +81,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     const popoverButton = getByLabelText('Open actions menu');
@@ -99,6 +102,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={true}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/edit/url');
@@ -114,6 +118,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={true}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/detail/url');
@@ -132,6 +137,7 @@ describe('ActionsPopover', () => {
         position="relative"
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
+        locationId={testMonitor.location.id}
       />
     );
     const enableButton = getByText('Disable monitor');
@@ -153,6 +159,7 @@ describe('ActionsPopover', () => {
         setIsPopoverOpen={jest.fn()}
         monitor={{ ...testMonitor, isEnabled: false }}
         position="relative"
+        locationId={testMonitor.location.id}
       />
     );
     const enableButton = getByText('Enable monitor');

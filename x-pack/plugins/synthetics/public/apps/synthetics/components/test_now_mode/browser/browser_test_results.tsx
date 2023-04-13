@@ -92,7 +92,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 title={ERROR_RUNNING_TEST}
                 size="s"
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
               </EuiCallOut>

@@ -78,7 +78,7 @@ export class TOCEntryButton extends Component<Props, State> {
               defaultMessage: 'Load warning',
             })}
             size="m"
-            type="alert"
+            type="warning"
             color="warning"
           />
         ),

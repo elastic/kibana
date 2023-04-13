@@ -32,14 +32,12 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
 
   const {
     enableTLS: isTLSEnabled,
-    enableZipUrlTLS: isZipUrlTLSEnabled,
     fullConfig: fullDefaultConfig,
     monitorTypeConfig: defaultConfig,
     monitorType,
     tlsConfig: defaultTLSConfig,
   } = useMemo(() => {
     let enableTLS = false;
-    let enableZipUrlTLS = false;
     const getDefaultConfig = () => {
       const type: DataStream = monitor[ConfigKey.MONITOR_TYPE] as DataStream;
 
@@ -53,7 +51,6 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
       };
 
       enableTLS = Boolean(monitor[ConfigKey.METADATA]?.is_tls_enabled);
-      enableZipUrlTLS = Boolean(monitor[ConfigKey.METADATA]?.is_zip_url_tls_enabled);
 
       const formattedDefaultConfig: Partial<PolicyConfig> = {
         [type]: monitor,
@@ -65,7 +62,6 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
         tlsConfig,
         monitorType: type,
         enableTLS,
-        enableZipUrlTLS,
       };
     };
 
@@ -77,13 +73,11 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
       policyDefaultValues={{
         throttling,
         defaultIsTLSEnabled: isTLSEnabled,
-        defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
         defaultName: defaultConfig?.[ConfigKey.NAME] || '', // TODO - figure out typing concerns for name
         defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || DEFAULT_NAMESPACE_STRING,
         defaultLocations: defaultConfig[ConfigKey.LOCATIONS],
         isEditable: true,
-        isZipUrlSourceEnabled: false,
         allowedScheduleUnits: [ScheduleUnit.MINUTES],
         runsOnService: true,
         sourceType: monitor[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

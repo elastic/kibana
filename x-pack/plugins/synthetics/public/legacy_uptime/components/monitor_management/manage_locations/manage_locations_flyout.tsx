@@ -27,7 +27,7 @@ import { AddLocationFlyout } from './add_location_flyout';
 import { ClientPluginsStart } from '../../../../plugin';
 import { getServiceLocations } from '../../../state/actions';
 import { PrivateLocationsList } from './locations_list';
-import { useLocationsAPI } from './hooks/use_locations_api';
+import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
@@ -49,7 +49,7 @@ export const ManageLocationsFlyout = () => {
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({
+  const { onSubmit, loading, privateLocations, onDelete } = usePrivateLocationsAPI({
     isOpen,
   });
 
@@ -103,7 +103,12 @@ export const ManageLocationsFlyout = () => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="syntheticsManageLocationsFlyoutButton"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               {CLOSE_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -127,7 +132,12 @@ export const ManageLocationsFlyout = () => {
   return (
     <div>
       {isEnabled && (
-        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{PRIVATE_LOCATIONS}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="syntheticsManageLocationsFlyoutButton"
+          onClick={() => setIsOpen(true)}
+        >
+          {PRIVATE_LOCATIONS}
+        </EuiButtonEmpty>
       )}
       {isOpen && !isAddingNew ? flyout : null}
       {isAddingNew ? (

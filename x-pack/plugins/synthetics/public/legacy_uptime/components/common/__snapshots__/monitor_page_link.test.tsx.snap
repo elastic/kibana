@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MonitorPageLink component renders a help link when link parameters present 1`] = `
-<EuiLink>
+<EuiLink
+  data-test-subj="syntheticsMonitorPageLinkLink"
+>
   <Link
     data-test-subj="monitor-page-link-bad-ssl"
     to="/monitor/YmFkLXNzbA==/selectedPingStatus=down"
@@ -10,7 +12,9 @@ exports[`MonitorPageLink component renders a help link when link parameters pres
 `;
 
 exports[`MonitorPageLink component renders the link properly 1`] = `
-<EuiLink>
+<EuiLink
+  data-test-subj="syntheticsMonitorPageLinkLink"
+>
   <Link
     data-test-subj="monitor-page-link-bad-ssl"
     to="/monitor/YmFkLXNzbA=="

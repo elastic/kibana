@@ -15,7 +15,7 @@ export const getNodeLabel = (
   column: Partial<BucketColumns>,
   formatters: Record<string, FieldFormat | undefined>,
   defaultFormatFactory: FormatFactory
-) => {
+): string => {
   const formatter = getAvailableFormatter(column, formatters, defaultFormatFactory);
   if (formatter) {
     return formatter.convert(nodeName) ?? '';

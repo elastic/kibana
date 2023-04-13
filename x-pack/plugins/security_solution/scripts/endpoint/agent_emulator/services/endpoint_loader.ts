@@ -22,7 +22,7 @@ import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/
 import { enableFleetServerIfNecessary } from '../../../../common/endpoint/data_loaders/index_fleet_server';
 import { METADATA_DATASTREAM } from '../../../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { getEndpointPackageInfo } from '../../../../common/endpoint/index_data';
+import { getEndpointPackageInfo } from '../../../../common/endpoint/utils/package';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/constants';
 
 let WAS_FLEET_SETUP_DONE = false;

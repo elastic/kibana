@@ -59,6 +59,6 @@ export function auditdLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['os_system'],
+    integrationBrowserCategories: ['security', 'auditd'],
   };
 }

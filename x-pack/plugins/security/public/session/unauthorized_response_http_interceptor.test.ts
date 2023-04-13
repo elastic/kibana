@@ -12,6 +12,7 @@ import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
 
@@ -38,9 +39,15 @@ afterEach(() => {
   fetchMock.restore();
 });
 
-for (const reason of ['AUTHENTICATION_ERROR', 'SESSION_EXPIRED']) {
+for (const reason of [
+  LogoutReason.AUTHENTICATION_ERROR,
+  LogoutReason.SESSION_EXPIRED,
+  LogoutReason.CONCURRENCY_LIMIT,
+]) {
   const headers =
-    reason === 'SESSION_EXPIRED' ? { [SESSION_ERROR_REASON_HEADER]: reason } : undefined;
+    reason === LogoutReason.SESSION_EXPIRED || reason === LogoutReason.CONCURRENCY_LIMIT
+      ? { [SESSION_ERROR_REASON_HEADER]: reason }
+      : undefined;
 
   it(`logs out 401 responses (reason: ${reason})`, async () => {
     const http = setupHttp('/foo');

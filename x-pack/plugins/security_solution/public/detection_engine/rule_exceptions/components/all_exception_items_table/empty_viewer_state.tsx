@@ -40,7 +40,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
         return (
           <EuiEmptyPrompt
             color={'danger'}
-            iconType={'alert'}
+            iconType={'error'}
             title={<h2>{i18n.EXCEPTION_ERROR_TITLE}</h2>}
             body={<p>{i18n.EXCEPTION_ERROR_DESCRIPTION}</p>}
             data-test-subj={'exceptionItemViewerEmptyPrompts-error'}

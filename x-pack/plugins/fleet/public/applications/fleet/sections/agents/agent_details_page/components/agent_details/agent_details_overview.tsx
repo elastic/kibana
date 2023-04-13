@@ -181,7 +181,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage: 'Upgrade available',
                           })}
                         >
-                          <EuiIcon type="alert" color="warning" />
+                          <EuiIcon type="warning" color="warning" />
                         </EuiToolTip>
                       </EuiFlexItem>
                     ) : null}

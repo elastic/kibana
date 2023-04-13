@@ -156,7 +156,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
             <EuiCallOut
               title={strings.getEditWarning()}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               size="s"
             />
             <EuiSpacer size="m" />

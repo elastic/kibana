@@ -13,7 +13,7 @@ export const Error: React.FunctionComponent<{
   error: Error | string;
 }> = ({ title, error }) => {
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert">
+    <EuiCallOut title={title} color="danger" iconType="warning">
       <p>{typeof error === 'string' ? error : error.message}</p>
     </EuiCallOut>
   );

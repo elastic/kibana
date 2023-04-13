@@ -56,7 +56,7 @@ export const LogRetentionCallout: React.FC<Props> = ({ type }) => {
   return hasLogRetentionDisabled ? (
     <>
       <EuiCallOut
-        iconType="alert"
+        iconType="warning"
         color="primary"
         title={
           logRetentionSettings?.disabledAt ? (

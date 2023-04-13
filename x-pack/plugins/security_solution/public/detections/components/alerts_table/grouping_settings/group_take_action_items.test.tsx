@@ -25,6 +25,11 @@ describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );
+  const getActionItemsParams = {
+    tableId: 'mock-id',
+    groupNumber: 0,
+    selectedGroup: 'test',
+  };
   it('returns array take actions items available for alerts table if showAlertStatusActions is true', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
@@ -38,7 +43,7 @@ describe('useGroupTakeActionsItems', () => {
         }
       );
       await waitForNextUpdate();
-      expect(result.current().length).toEqual(3);
+      expect(result.current(getActionItemsParams).length).toEqual(3);
     });
   });
 
@@ -55,7 +60,7 @@ describe('useGroupTakeActionsItems', () => {
         }
       );
       await waitForNextUpdate();
-      expect(result.current().length).toEqual(0);
+      expect(result.current(getActionItemsParams).length).toEqual(0);
     });
   });
 });

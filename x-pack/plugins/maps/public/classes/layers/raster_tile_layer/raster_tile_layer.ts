@@ -65,11 +65,21 @@ export class RasterTileLayer extends AbstractLayer {
     return this._style;
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }: DataRequestContext) {
+  async syncData({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    dataFilters,
+    isForceRefresh,
+  }: DataRequestContext) {
     const source = this.getSource();
     const nextMeta = {
       ...dataFilters,
+      applyGlobalQuery: source.getApplyGlobalQuery(),
       applyGlobalTime: source.getApplyGlobalTime(),
+      applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
+      sourceQuery: this.getQuery() || undefined,
+      isForceRefresh,
     };
     const prevDataRequest = this.getSourceDataRequest();
     if (prevDataRequest) {
@@ -80,7 +90,7 @@ export class RasterTileLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
       const data: RasterTileSourceData = {
-        url: await source.getUrlTemplate(dataFilters),
+        url: await source.getUrlTemplate(nextMeta),
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, {});
     } catch (error) {

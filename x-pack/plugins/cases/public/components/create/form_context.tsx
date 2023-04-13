@@ -43,7 +43,7 @@ interface Props {
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
-  onSuccess?: (theCase: Case) => Promise<void>;
+  onSuccess?: (theCase: Case) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
@@ -112,7 +112,7 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (onSuccess && updatedCase) {
-          await onSuccess(updatedCase);
+          onSuccess(updatedCase);
         }
       }
     },

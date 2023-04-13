@@ -10,6 +10,9 @@ import type { ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import type { RightPanelProps } from './right';
 import { RightPanel, RightPanelKey } from './right';
 import { RightPanelProvider } from './right/context';
+import type { LeftPanelProps } from './left';
+import { LeftPanel, LeftPanelKey } from './left';
+import { LeftPanelProvider } from './left/context';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -18,11 +21,18 @@ import { RightPanelProvider } from './right/context';
 export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
   {
     key: RightPanelKey,
-    width: 500,
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
       </RightPanelProvider>
+    ),
+  },
+  {
+    key: LeftPanelKey,
+    component: (props) => (
+      <LeftPanelProvider {...(props as LeftPanelProps).params}>
+        <LeftPanel path={props.path as LeftPanelProps['path']} />
+      </LeftPanelProvider>
     ),
   },
 ];

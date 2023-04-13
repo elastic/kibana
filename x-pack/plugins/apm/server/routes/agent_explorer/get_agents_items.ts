@@ -14,6 +14,7 @@ import {
 import {
   AGENT_NAME,
   AGENT_VERSION,
+  LABEL_TELEMETRY_AUTO_VERSION,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
@@ -91,6 +92,11 @@ export async function getAgentsItems({
                     field: SERVICE_NODE_NAME,
                   },
                 },
+                agentTelemetryAutoVersions: {
+                  terms: {
+                    field: LABEL_TELEMETRY_AUTO_VERSION,
+                  },
+                },
                 agentVersions: {
                   terms: {
                     field: AGENT_VERSION,
@@ -128,6 +134,10 @@ export async function getAgentsItems({
         agentVersion: bucket.agentVersions.buckets.map(
           (version) => version.key as string
         ),
+        agentTelemetryAutoVersion:
+          bucket.agentTelemetryAutoVersions.buckets.map(
+            (version) => version.key as string
+          ),
         // service.node.name is set by the server only if a container.id or host.name are set. Otherwise should be explicitly set by agents.
         instances: (bucket.instances.value as number) || 1,
       };

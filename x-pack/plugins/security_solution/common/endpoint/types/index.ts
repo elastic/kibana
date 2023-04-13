@@ -920,6 +920,9 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
+  meta: {
+    license: string;
+  };
   windows: {
     advanced?: {
       [key: string]: unknown;

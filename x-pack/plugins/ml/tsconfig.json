@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "__mocks__/**/*",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -15,10 +16,11 @@
   ],
   "exclude": [
     "target/**/*",
-    "server/routes/apidoc_scripts/**",
   ],
   "kbn_references": [
     "@kbn/core",
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    // add references to other TypeScript projects the plugin depends on
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/cloud-plugin",
@@ -44,6 +46,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/ml-string-hash",
+    "@kbn/ml-trained-models-utils",
     "@kbn/core-http-browser",
     "@kbn/home-plugin",
     "@kbn/management-plugin",
@@ -65,7 +68,6 @@
     "@kbn/field-types",
     "@kbn/es-ui-shared-plugin",
     "@kbn/ace",
-    "@kbn/saved-objects-plugin",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
@@ -81,5 +83,11 @@
     "@kbn/unified-field-list-plugin",
     "@kbn/shared-ux-router",
     "@kbn/saved-search-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/monaco",
+    "@kbn/repo-info",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/ml-route-utils",
   ],
 }

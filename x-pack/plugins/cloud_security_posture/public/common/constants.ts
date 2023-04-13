@@ -18,6 +18,8 @@ import {
   KSPM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
+  CLOUDBEAT_VULN_MGMT_GCP,
+  CLOUDBEAT_VULN_MGMT_AZURE,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
@@ -143,8 +145,34 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     options: [
       {
         type: CLOUDBEAT_VULN_MGMT_AWS,
-        name: 'Amazon Web Services', // TODO: we should use i18n and fix this
+        name: i18n.translate('xpack.csp.vulnMgmtIntegration.awsOption.nameTitle', {
+          defaultMessage: 'Amazon Web Services',
+        }),
         icon: 'logoAWS',
+        benchmark: 'N/A', // TODO: change benchmark to be optional
+      },
+      {
+        type: CLOUDBEAT_VULN_MGMT_GCP,
+        name: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.nameTitle', {
+          defaultMessage: 'GCP',
+        }),
+        disabled: true,
+        icon: 'logoGCP',
+        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
+        }),
+        benchmark: 'N/A', // TODO: change benchmark to be optional
+      },
+      {
+        type: CLOUDBEAT_VULN_MGMT_AZURE,
+        name: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.nameTitle', {
+          defaultMessage: 'Azure',
+        }),
+        disabled: true,
+        icon: 'logoAzure',
+        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
+        }),
         benchmark: 'N/A', // TODO: change benchmark to be optional
       },
     ],

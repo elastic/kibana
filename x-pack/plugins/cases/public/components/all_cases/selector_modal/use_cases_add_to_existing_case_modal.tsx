@@ -17,19 +17,18 @@ import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 
-type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
+type AddToExistingFlyoutProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
   toastTitle?: string;
   toastContent?: string;
+  onSuccess?: (theCase: Case) => void;
 };
 
 export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose: props.onClose,
-    // TODO there's no need for onSuccess to be async. This will be fixed
-    // in a follow up clean up
-    onSuccess: async (theCase?: Case) => {
-      if (props.onRowClick) {
-        return props.onRowClick(theCase);
+    onSuccess: (theCase?: Case) => {
+      if (props.onSuccess && theCase) {
+        return props.onSuccess(theCase);
       }
     },
     toastTitle: props.toastTitle,
@@ -74,6 +73,10 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
             throwOnError: true,
           });
 
+          if (props.onSuccess) {
+            props.onSuccess(theCase);
+          }
+
           casesToasts.showSuccessAttach({
             theCase,
             attachments,
@@ -84,10 +87,6 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
       } catch (error) {
         // error toast is handled
         // inside the createAttachments method
-      }
-
-      if (props.onRowClick) {
-        props.onRowClick(theCase);
       }
     },
     [
@@ -114,6 +113,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
           },
           onClose: () => {
             closeModal();
+
             if (props.onClose) {
               return props.onClose();
             }

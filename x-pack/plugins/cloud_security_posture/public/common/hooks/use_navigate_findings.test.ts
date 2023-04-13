@@ -42,7 +42,7 @@ describe('useNavigateFindings', () => {
     });
 
     expect(push).toHaveBeenCalledWith({
-      pathname: '/cloud_security_posture/findings/default',
+      pathname: '/cloud_security_posture/findings/configurations',
       search:
         "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
@@ -60,7 +60,7 @@ describe('useNavigateFindings', () => {
     });
 
     expect(push).toHaveBeenCalledWith({
-      pathname: '/cloud_security_posture/findings/default',
+      pathname: '/cloud_security_posture/findings/configurations',
       search:
         "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });

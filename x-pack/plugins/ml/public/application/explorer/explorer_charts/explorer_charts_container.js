@@ -43,7 +43,7 @@ import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
@@ -238,7 +238,9 @@ function ExplorerChartContainer({
       {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
-          <Settings noResults={<div />} />
+          <Settings noResults={<div />} width={0} height={0} />
+          {/* Just need an empty chart to access cursor service */}
+          <BarSeries id={'count'} xAccessor="x" yAccessors={['y']} data={[]} />
         </Chart>
       </div>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -262,7 +264,7 @@ function ExplorerChartContainer({
                 content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
                 position="top"
                 size="s"
-                type="alert"
+                type="warning"
                 color="warning"
               />
             )}

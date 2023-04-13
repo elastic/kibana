@@ -29,24 +29,9 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
     [setFields]
   );
   const onChangeSourceField = useCallback(
-    ({
-      zipUrl,
-      folder,
-      username,
-      password,
-      inlineScript,
-      params,
-      proxyUrl,
-      isGeneratedScript,
-      fileName,
-    }) => {
+    ({ inlineScript, params, isGeneratedScript, fileName }) => {
       setFields((prevFields) => ({
         ...prevFields,
-        [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-        [ConfigKey.SOURCE_ZIP_PROXY_URL]: proxyUrl,
-        [ConfigKey.SOURCE_ZIP_FOLDER]: folder,
-        [ConfigKey.SOURCE_ZIP_USERNAME]: username,
-        [ConfigKey.SOURCE_ZIP_PASSWORD]: password,
         [ConfigKey.SOURCE_INLINE]: inlineScript,
         [ConfigKey.PARAMS]: params,
         [ConfigKey.METADATA]: {
@@ -110,11 +95,6 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
           onFieldBlur={onFieldBlur}
           defaultConfig={useMemo(
             () => ({
-              zipUrl: defaultValues[ConfigKey.SOURCE_ZIP_URL],
-              proxyUrl: defaultValues[ConfigKey.SOURCE_ZIP_PROXY_URL],
-              folder: defaultValues[ConfigKey.SOURCE_ZIP_FOLDER],
-              username: defaultValues[ConfigKey.SOURCE_ZIP_USERNAME],
-              password: defaultValues[ConfigKey.SOURCE_ZIP_PASSWORD],
               inlineScript: defaultValues[ConfigKey.SOURCE_INLINE],
               params: defaultValues[ConfigKey.PARAMS],
               isGeneratedScript:

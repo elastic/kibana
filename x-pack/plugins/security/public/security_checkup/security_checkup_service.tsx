@@ -85,7 +85,7 @@ export class SecurityCheckupService {
               text: insecureClusterAlertText(docLinks, (persist: boolean) =>
                 this.setAlertVisibility(false, persist)
               ),
-              iconType: 'alert',
+              iconType: 'warning',
             },
             {
               toastLifeTimeMs: tenDays,

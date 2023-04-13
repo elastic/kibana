@@ -16,7 +16,11 @@ export const CreateJobButton: React.FunctionComponent<
   } & PropsOf<typeof EuiButton>
 > = ({ hasSetupCapabilities = true, children, ...buttonProps }) => {
   const button = (
-    <EuiButton isDisabled={!hasSetupCapabilities} {...buttonProps}>
+    <EuiButton
+      data-test-subj="infraCreateJobButtonButton"
+      isDisabled={!hasSetupCapabilities}
+      {...buttonProps}
+    >
       {children ?? (
         <FormattedMessage
           id="xpack.infra.logs.analysis.createJobButtonLabel"

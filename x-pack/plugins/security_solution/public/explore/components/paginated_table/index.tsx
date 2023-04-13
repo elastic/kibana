@@ -205,7 +205,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         id: 'PaginationWarningMsg',
         title: headerTitle + i18n.TOAST_TITLE,
         color: 'warning',
-        iconType: 'alert',
+        iconType: 'warning',
         toastLifeTimeMs: 10000,
         text: i18n.TOAST_TEXT,
       };

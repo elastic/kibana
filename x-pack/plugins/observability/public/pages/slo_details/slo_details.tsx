@@ -21,10 +21,10 @@ import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
-import { paths } from '../../config';
+import { HeaderControl } from './components/header_control';
+import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
-import { HeaderControl } from './components/header_control';
 
 export function SloDetailsPage() {
   const {

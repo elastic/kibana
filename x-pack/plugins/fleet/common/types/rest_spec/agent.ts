@@ -233,3 +233,13 @@ export interface GetActionStatusResponse {
 export interface GetAvailableVersionsResponse {
   items: string[];
 }
+
+export interface PostRetrieveAgentsByActionsRequest {
+  body: {
+    actionIds: string[];
+  };
+}
+
+export interface PostRetrieveAgentsByActionsResponse {
+  items: string[];
+}

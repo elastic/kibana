@@ -21,7 +21,11 @@ import type { CommentResponse } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
-import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
+import {
+  ATTACHMENT_NOT_REGISTERED_ERROR,
+  DEFAULT_EVENT_ATTACHMENT_TITLE,
+  DELETE_REGISTERED_ATTACHMENT,
+} from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
@@ -97,7 +101,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
           'data-test-subj': `comment-${comment.type}-not-found`,
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
           children: (
-            <EuiCallOut title={ATTACHMENT_NOT_REGISTERED_ERROR} color="danger" iconType="alert" />
+            <EuiCallOut title={ATTACHMENT_NOT_REGISTERED_ERROR} color="danger" iconType="warning" />
           ),
         },
       ];
@@ -127,7 +131,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             {attachmentViewObject.actions}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(comment.id)}
+              onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
             />
           </UserActionContentToolbar>
         ),

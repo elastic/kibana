@@ -64,7 +64,6 @@ export const OptionsListPopoverActionBar = ({
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
               placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
-              autoFocus={true}
             />
           </EuiFlexItem>
           {!hideSort && (

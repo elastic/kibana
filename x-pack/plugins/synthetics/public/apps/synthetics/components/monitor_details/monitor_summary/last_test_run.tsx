@@ -97,7 +97,7 @@ export const LastTestRunComponent = ({
           title={latestPing?.error.message}
           size="s"
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           {isErrorDetails ? (
             <></>

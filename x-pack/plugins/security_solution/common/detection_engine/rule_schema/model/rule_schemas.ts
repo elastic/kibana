@@ -36,6 +36,7 @@ import {
   updated_by,
   created_at,
   created_by,
+  revision,
 } from '../../schemas/common';
 
 import {
@@ -154,6 +155,7 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+  revision,
 
   // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
   // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them

@@ -82,6 +82,7 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: k8s-gitops-update-image-tag
+    async: true
     label: ":argo: Update image tag for Kibana"
     branches: main
     build:

@@ -37,6 +37,7 @@ export class LogTextScaleControls extends React.PureComponent<LogTextScaleContro
         }
       >
         <EuiRadioGroup
+          data-test-subj="infraRadioGroup"
           options={availableTextScales.map((availableTextScale: TextScale) => ({
             id: availableTextScale.toString(),
             label: (

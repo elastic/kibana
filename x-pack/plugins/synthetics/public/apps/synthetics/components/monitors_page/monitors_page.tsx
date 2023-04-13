@@ -65,6 +65,7 @@ const MonitorManagementPage: React.FC = () => {
               <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
               {canEnable ? (
                 <EuiButton
+                  data-test-subj="syntheticsMonitorManagementPageButton"
                   fill
                   color="primary"
                   onClick={() => {
@@ -76,7 +77,11 @@ const MonitorManagementPage: React.FC = () => {
               ) : (
                 <p>
                   {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-                  <EuiLink href="#" target="_blank">
+                  <EuiLink
+                    data-test-subj="syntheticsMonitorManagementPageLink"
+                    href="#"
+                    target="_blank"
+                  >
                     {labels.LEARN_MORE_LABEL}
                   </EuiLink>
                 </p>

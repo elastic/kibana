@@ -1824,6 +1824,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+            "id": "def-common.SavedObjectsRepository.getCurrentNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentNamespace",
+            "description": [
+              "\n{@inheritDoc ISavedObjectsRepository.getCurrentNamespace}"
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-common.SavedObjectsRepository.getCurrentNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -6,21 +6,101 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 
+import {
+  Field,
+  useFetchIndexPatternFields,
+} from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { IndexSelection } from './index_selection';
 import { QueryBuilder } from '../common/query_builder';
 
+interface Option {
+  label: string;
+  value: string;
+}
+
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch } = useFormContext<CreateSLOInput>();
+
+  const { isLoading, data: indexFields } = useFetchIndexPatternFields(
+    watch('indicator.params.index')
+  );
+  const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem>
-        <IndexSelection control={control} />
-      </EuiFlexItem>
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <EuiFlexItem>
+          <IndexSelection control={control} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
+              { defaultMessage: 'Timestamp field' }
+            )}
+          >
+            <Controller
+              name="indicator.params.timestampField"
+              shouldUnregister
+              defaultValue=""
+              rules={{ required: true }}
+              control={control}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <EuiComboBox
+                  {...field}
+                  async
+                  placeholder={i18n.translate(
+                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    { defaultMessage: 'Select a timestamp field' }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    { defaultMessage: 'Select a timestamp field' }
+                  )}
+                  data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
+                  isClearable={true}
+                  isDisabled={!watch('indicator.params.index')}
+                  isInvalid={!!fieldState.error}
+                  isLoading={!!watch('indicator.params.index') && isLoading}
+                  onChange={(selected: EuiComboBoxOptionOption[]) => {
+                    if (selected.length) {
+                      return field.onChange(selected[0].value);
+                    }
+
+                    field.onChange('');
+                  }}
+                  options={createOptions(timestampFields)}
+                  selectedOptions={
+                    !!watch('indicator.params.index') &&
+                    !!field.value &&
+                    timestampFields.some((timestampField) => timestampField.name === field.value)
+                      ? [
+                          {
+                            value: field.value,
+                            label: field.value,
+                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
+                          },
+                        ]
+                      : []
+                  }
+                  singleSelection={{ asPlainText: true }}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiFlexItem>
         <QueryBuilder
@@ -77,4 +157,10 @@ export function CustomKqlIndicatorTypeForm() {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function createOptions(fields: Field[]): Option[] {
+  return fields
+    .map((field) => ({ label: field.name, value: field.name }))
+    .sort((a, b) => String(a.label).localeCompare(b.label));
 }

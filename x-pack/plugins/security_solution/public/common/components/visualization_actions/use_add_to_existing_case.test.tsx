@@ -30,7 +30,7 @@ jest.mock('../../lib/kibana', () => {
         ...mockedUseKibana.services,
         cases: {
           hooks: {
-            getUseCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
+            useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
           },
         },
       },
@@ -49,7 +49,7 @@ describe('useAddToExistingCase', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
-  it('getUseCasesAddToExistingCaseModal with attachments', () => {
+  it('useCasesAddToExistingCaseModal with attachments', () => {
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,

@@ -85,7 +85,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
           values: { dataViewTitle: dataView.getName() },
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           {i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription', {

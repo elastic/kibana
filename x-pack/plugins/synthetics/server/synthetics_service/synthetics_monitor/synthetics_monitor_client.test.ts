@@ -44,7 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -177,7 +177,15 @@ describe('SyntheticsMonitorClient', () => {
     );
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith(deletePayload);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
+      {
+        monitor,
+        configId: id,
+        params: {
+          username: 'elastic',
+        },
+      },
+    ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
@@ -200,45 +208,3 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);
   });
 });
-
-const deletePayload = [
-  {
-    enabled: true,
-    fields: {
-      config_id: 'test-id-1',
-      'monitor.project.id': undefined,
-      'monitor.project.name': undefined,
-      run_once: undefined,
-      test_run_id: undefined,
-    },
-    fields_under_root: true,
-    id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-    locations: [
-      {
-        geo: { lat: 0, lon: 0 },
-        id: 'loc-1',
-        isServiceManaged: false,
-        label: 'Location 1',
-        status: 'ga',
-        url: 'https://example.com/1',
-      },
-      {
-        geo: { lat: 0, lon: 0 },
-        id: 'loc-2',
-        isServiceManaged: true,
-        label: 'Location 2',
-        status: 'ga',
-        url: 'https://example.com/2',
-      },
-    ],
-    max_redirects: '0',
-    name: 'my mon',
-    params: '',
-    password: '',
-    proxy_url: '',
-    schedule: { number: '3', unit: 'm' },
-    secrets: '{}',
-    type: 'http',
-    urls: 'http://google.com',
-  },
-];

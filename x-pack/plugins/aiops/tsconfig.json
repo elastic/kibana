@@ -48,6 +48,7 @@
     "@kbn/ml-local-storage",
     "@kbn/ml-query-utils",
     "@kbn/ml-is-defined",
+    "@kbn/ml-route-utils",
   ],
   "exclude": [
     "target/**/*",

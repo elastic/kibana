@@ -20,7 +20,12 @@ export const AgentPolicyNeeded = () => {
       title={<h2>{AGENT_POLICY_NEEDED}</h2>}
       body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
       actions={
-        <EuiButton fill href={`${basePath}/app/fleet/policies?create`} color="primary">
+        <EuiButton
+          data-test-subj="syntheticsAgentPolicyNeededButton"
+          fill
+          href={`${basePath}/app/fleet/policies?create`}
+          color="primary"
+        >
           {CREATE_AGENT_POLICY}
         </EuiButton>
       }
@@ -30,6 +35,7 @@ export const AgentPolicyNeeded = () => {
             <h3>{LEARN_MORE}</h3>
           </EuiTitle>
           <EuiLink
+            data-test-subj="syntheticsAgentPolicyNeededLink"
             target="_blank"
             href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
           >

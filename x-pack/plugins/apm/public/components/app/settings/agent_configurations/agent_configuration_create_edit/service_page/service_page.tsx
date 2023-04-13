@@ -142,7 +142,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       {isAllOptionSelected && (
         <EuiCallOut
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate(
             'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
             {
@@ -188,7 +188,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
           <LegacyAPMLink path="/settings/agent-configuration">
-            <EuiButtonEmpty color="primary">
+            <EuiButtonEmpty
+              data-test-subj="apmServicePageCancelButton"
+              color="primary"
+            >
               {i18n.translate(
                 'xpack.apm.agentConfig.servicePage.cancelButton',
                 { defaultMessage: 'Cancel' }
@@ -200,6 +203,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         {/* Next button */}
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="apmServicePageNextStepButton"
             type="submit"
             fill
             onClick={onClickNext}

@@ -59,6 +59,8 @@ export {
   LazyControlGroupRenderer,
   useControlGroupContainerContext,
   type ControlGroupRendererProps,
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
 } from './control_group';
 
 export function plugin() {

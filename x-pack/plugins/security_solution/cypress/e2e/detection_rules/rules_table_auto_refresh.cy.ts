@@ -38,7 +38,7 @@ describe('Alerts detection rules table auto-refresh', () => {
     cleanKibana();
     login();
     for (let i = 1; i < 7; i += 1) {
-      createRule({ ...getNewRule(), name: `Test rule ${i}`, rule_id: `${i}` });
+      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
     }
   });
 

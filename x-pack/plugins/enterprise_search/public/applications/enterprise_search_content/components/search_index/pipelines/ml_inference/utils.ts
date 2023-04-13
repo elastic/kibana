@@ -45,6 +45,14 @@ export const validateInferencePipelineConfiguration = (
   if (config.modelID.trim().length === 0) {
     errors.modelID = FIELD_REQUIRED_ERROR;
   }
+
+  return errors;
+};
+
+export const validateInferencePipelineFields = (
+  config: InferencePipelineConfiguration
+): AddInferencePipelineFormErrors => {
+  const errors: AddInferencePipelineFormErrors = {};
   if (config.sourceField.trim().length === 0) {
     errors.sourceField = FIELD_REQUIRED_ERROR;
   }

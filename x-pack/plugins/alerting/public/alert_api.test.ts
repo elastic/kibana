@@ -132,6 +132,7 @@ describe('loadRule', () => {
         "params": Object {
           "x": 42,
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },
@@ -268,6 +269,7 @@ function getApiRule() {
     updated_by: '2889684073',
     mute_all: false,
     muted_alert_ids: [],
+    revision: 0,
     schedule: {
       interval: '1s',
     },
@@ -333,5 +335,6 @@ function getRule(): Rule<{ x: number }> {
       lastExecutionDate: RuleExecuteDate,
       lastDuration: 1194,
     },
+    revision: 0,
   };
 }

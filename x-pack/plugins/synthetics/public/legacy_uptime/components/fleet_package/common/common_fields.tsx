@@ -99,6 +99,7 @@ export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props)
           }
         >
           <EuiFieldNumber
+            data-test-subj="syntheticsCommonFieldsFieldNumber"
             min={0}
             value={fields[ConfigKey.TIMEOUT] || ''}
             onChange={(event) =>

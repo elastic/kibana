@@ -13,3 +13,5 @@ export const ACTIONS_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.actions`;
 export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
+
+export const CASE_ATTACHMENT_TYPE_ID = 'osquery';

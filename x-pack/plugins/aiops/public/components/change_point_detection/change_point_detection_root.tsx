@@ -57,7 +57,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
           values: { dataViewTitle: dataView.getName() },
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           {i18n.translate('xpack.aiops.index.changePointTimeSeriesNotificationDescription', {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
@@ -13,23 +13,13 @@ import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export const CreateAlert = ({
-  triggersActionsUi,
+  triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
-  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
 
   const onCloseAlertFlyout = useCallback(
-    () => setAlertFlyoutVisibility(false),
-    [setAlertFlyoutVisibility]
-  );
-
-  const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUi.getAddAlertFlyout({
-        consumer: ALERTING_EXAMPLE_APP_ID,
-        onClose: onCloseAlertFlyout,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onCloseAlertFlyout]
+    () => setRuleFlyoutVisibility(false),
+    [setRuleFlyoutVisibility]
   );
 
   return (
@@ -39,10 +29,14 @@ export const CreateAlert = ({
           icon={<EuiIcon size="xxl" type={`bell`} />}
           title={`Create Rule`}
           description="Create a new Rule based on one of our example Rule Types ."
-          onClick={() => setAlertFlyoutVisibility(true)}
+          onClick={() => setRuleFlyoutVisibility(true)}
         />
       </EuiFlexItem>
-      <EuiFlexItem>{alertFlyoutVisible && AddAlertFlyout}</EuiFlexItem>
+      <EuiFlexItem>
+        {ruleFlyoutVisible ? (
+          <AddRuleFlyout consumer={ALERTING_EXAMPLE_APP_ID} onClose={onCloseAlertFlyout} />
+        ) : null}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

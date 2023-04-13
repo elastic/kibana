@@ -8,6 +8,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     >
       <button
         class="euiLink emotion-euiLink-primary"
+        data-test-subj="syntheticsMonitorPageLinkLink"
         type="button"
       >
         <a
@@ -26,6 +27,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     >
       <button
         class="euiLink emotion-euiLink-primary"
+        data-test-subj="syntheticsMonitorPageLinkLink"
         type="button"
       >
         <a
@@ -44,6 +46,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     >
       <button
         class="euiLink emotion-euiLink-primary"
+        data-test-subj="syntheticsMonitorPageLinkLink"
         type="button"
       >
         <a

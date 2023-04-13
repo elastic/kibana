@@ -338,7 +338,7 @@ export class SessionIndex {
         // We don't specify primary term and sequence number as delete should always take precedence
         // over any updates that could happen in the meantime.
         const { statusCode } = await this.options.elasticsearchClient.delete(
-          { id: filter.sid, index: this.aliasName, refresh: 'wait_for' },
+          { id: filter.sid, index: this.aliasName, refresh: false },
           { ignore: [404], meta: true }
         );
 
@@ -374,7 +374,7 @@ export class SessionIndex {
     try {
       const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.aliasName,
-        refresh: true,
+        refresh: false,
         body: { query: deleteQuery },
       });
       return response.deleted as number;
@@ -720,7 +720,7 @@ export class SessionIndex {
         // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
         index: this.aliasName,
         body: sessionValueToStore,
-        refresh: 'wait_for',
+        refresh: false,
         require_alias: true,
       } as CreateRequest,
       { meta: true, ignore: ignore404 ? [404] : [] }
@@ -742,7 +742,7 @@ export class SessionIndex {
         body: sessionValueToStore,
         if_seq_no: metadata.sequenceNumber,
         if_primary_term: metadata.primaryTerm,
-        refresh: 'wait_for',
+        refresh: false,
         require_alias: true,
       },
       { ignore: ignore404 ? [404, 409] : [409], meta: true }

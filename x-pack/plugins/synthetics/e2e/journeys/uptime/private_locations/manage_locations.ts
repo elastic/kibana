@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { journey, step, expect } from '@elastic/synthetics';
-import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId, TIMEOUT_60_SEC } from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {

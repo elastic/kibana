@@ -47,6 +47,8 @@ post:
               - item
     '400':
       $ref: ../components/responses/error.yaml
+    '409':
+      $ref: ../components/responses/error.yaml
   requestBody:
     description: You should use inputs as an object and not use the deprecated inputs array.
     content:

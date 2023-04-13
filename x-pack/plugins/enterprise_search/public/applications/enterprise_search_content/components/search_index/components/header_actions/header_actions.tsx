@@ -15,15 +15,22 @@ import { SearchEnginesPopover } from './search_engines_popover';
 import { SyncsContextMenu } from './syncs_context_menu';
 
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
-export const getHeaderActions = (indexData?: ElasticsearchIndexWithIngestion) => {
+export const getHeaderActions = (
+  indexData: ElasticsearchIndexWithIngestion | undefined,
+  hasAppSearchAccess: boolean
+) => {
   const ingestionMethod = getIngestionMethod(indexData);
   return [
     ...(isCrawlerIndex(indexData) && indexData.connector ? [<CrawlerStatusIndicator />] : []),
     ...(isConnectorIndex(indexData) ? [<SyncsContextMenu />] : []),
-    <SearchEnginesPopover
-      indexName={indexData?.name}
-      ingestionMethod={ingestionMethod}
-      isHiddenIndex={indexData?.hidden}
-    />,
+    ...(hasAppSearchAccess
+      ? [
+          <SearchEnginesPopover
+            indexName={indexData?.name}
+            ingestionMethod={ingestionMethod}
+            isHiddenIndex={indexData?.hidden}
+          />,
+        ]
+      : []),
   ];
 };

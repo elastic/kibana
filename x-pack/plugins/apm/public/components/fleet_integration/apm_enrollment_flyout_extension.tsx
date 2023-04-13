@@ -32,7 +32,11 @@ function StepComponent() {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <EuiButton fill href={installApmAgentLink}>
+      <EuiButton
+        data-test-subj="apmStepComponentInstallApmAgentButton"
+        fill
+        href={installApmAgentLink}
+      >
         {i18n.translate(
           'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText',
           { defaultMessage: 'Install APM Agent' }

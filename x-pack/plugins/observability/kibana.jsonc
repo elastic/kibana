@@ -6,10 +6,7 @@
     "id": "observability",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "alerting",
       "cases",
@@ -25,7 +22,7 @@
       "unifiedSearch",
       "security",
       "guidedOnboarding",
-      "share",
+      "share"
     ],
     "optionalPlugins": [
       "discover",
@@ -44,11 +41,8 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "usageCollection",
       "visualizations"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

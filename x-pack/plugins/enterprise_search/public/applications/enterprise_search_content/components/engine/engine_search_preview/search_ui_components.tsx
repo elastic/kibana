@@ -42,7 +42,9 @@ import { indexHealthToHealthColor } from '../../../../shared/constants/health_co
 
 import { EngineViewLogic } from '../engine_view_logic';
 
+import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
 import { useSelectedDocument } from './document_context';
+import { FieldValueCell } from './field_value_cell';
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
@@ -54,43 +56,29 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const { engineData } = useValues(EngineViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
-  const fields = Object.entries(result)
-    .filter(([key]) => !key.startsWith('_') && key !== 'id')
-    .map(([key, value]) => {
-      return {
-        name: key,
-        value: value.raw,
-      };
-    });
+  const { fields, index } = convertResultToFieldsAndIndex(result);
+
+  const id = result._meta.rawHit.__id;
 
   const truncatedFields = fields.slice(0, RESULT_FIELDS_TRUNCATE_AT);
   const hiddenFields = fields.length - truncatedFields.length;
-
-  const {
-    _meta: {
-      id: encodedId,
-      rawHit: { _index: index },
-    },
-  } = result;
-
-  const [, id] = JSON.parse(atob(encodedId));
 
   const indexHealth = engineData?.indices.find((i) => i.name === index)?.health;
   const badgeColor =
     !indexHealth || indexHealth === 'unknown' ? 'hollow' : indexHealthToHealthColor(indexHealth);
 
-  const columns: Array<EuiBasicTableColumn<{ name: string; value: string }>> = [
+  const columns: Array<EuiBasicTableColumn<ConvertedResult>> = [
     {
-      field: 'name',
+      field: 'field',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.engine.searchPreview.result.nameColumn',
         { defaultMessage: 'Field' }
       ),
-      render: (name: string) => {
+      render: (field: string) => {
         return (
           <EuiText>
             <EuiTextColor color="subdued">
-              <code>&quot;{name}&quot;</code>
+              <code>&quot;{field}&quot;</code>
             </EuiTextColor>
           </EuiText>
         );
@@ -104,9 +92,11 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         'xpack.enterpriseSearch.content.engine.searchPreview.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
-      render: (value: string) => (
+      render: (value: FieldValue) => (
         <EuiText>
-          <code>{value}</code>
+          <code>
+            <FieldValueCell value={value} />
+          </code>
         </EuiText>
       ),
     },

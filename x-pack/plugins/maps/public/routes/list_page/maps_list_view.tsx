@@ -17,7 +17,7 @@ import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../c
 import {
   getMapsCapabilities,
   getCoreChrome,
-  getExecutionContext,
+  getExecutionContextService,
   getNavigateToApp,
   getSavedObjectsClient,
   getUiSettings,
@@ -104,10 +104,10 @@ interface Props {
 }
 
 export function MapsListView(props: Props) {
-  getExecutionContext().set({
+  getExecutionContextService().set({
     type: 'application',
+    name: APP_ID,
     page: 'list',
-    id: '',
   });
 
   const isReadOnly = !getMapsCapabilities().save;

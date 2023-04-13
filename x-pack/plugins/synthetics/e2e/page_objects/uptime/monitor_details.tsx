@@ -6,7 +6,7 @@
  */
 
 import { Page } from '@elastic/synthetics';
-import { byTestId, delay } from '@kbn/observability-plugin/e2e/utils';
+import { byTestId, delay } from '../../helpers/utils';
 import { monitorManagementPageProvider } from './monitor_management';
 
 interface AlertType {

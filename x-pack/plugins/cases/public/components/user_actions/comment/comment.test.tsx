@@ -201,7 +201,10 @@ describe('createCommentUserActionBuilder', () => {
       await deleteAttachment(result, 'trash', 'Delete');
 
       await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('basic-comment-id');
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'basic-comment-id',
+          'Deleted comment'
+        );
       });
     });
 
@@ -319,7 +322,10 @@ describe('createCommentUserActionBuilder', () => {
       await deleteAttachment(res, 'minusInCircle', 'Remove');
 
       await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('alert-comment-id');
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'alert-comment-id',
+          'Deleted one alert'
+        );
       });
     });
 
@@ -414,7 +420,10 @@ describe('createCommentUserActionBuilder', () => {
       await deleteAttachment(res, 'minusInCircle', 'Remove');
 
       await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('alert-comment-id');
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+          'alert-comment-id',
+          'Deleted 2 alerts'
+        );
       });
     });
 
@@ -590,7 +599,8 @@ describe('createCommentUserActionBuilder', () => {
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'external-reference-comment-id'
+          'external-reference-comment-id',
+          'Deleted attachment'
         );
       });
     });
@@ -761,7 +771,8 @@ describe('createCommentUserActionBuilder', () => {
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'persistable-state-comment-id'
+          'persistable-state-comment-id',
+          'Deleted attachment'
         );
       });
     });

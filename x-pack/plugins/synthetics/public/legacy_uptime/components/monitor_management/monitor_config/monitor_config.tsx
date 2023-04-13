@@ -87,7 +87,12 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
         <TestNowMode testRun={testRun} isMonitorSaved={isEdit} onDone={handleTestDone} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={handleFlyoutClose} flush="left">
+        <EuiButtonEmpty
+          data-test-subj="syntheticsMonitorConfigButton"
+          iconType="cross"
+          onClick={handleFlyoutClose}
+          flush="left"
+        >
           {CLOSE_LABEL}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>

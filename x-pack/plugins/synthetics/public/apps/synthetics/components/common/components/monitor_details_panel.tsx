@@ -95,6 +95,7 @@ export const MonitorDetailsPanel = ({
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
             <EuiLink
+              data-test-subj="syntheticsMonitorDetailsPanelLink"
               href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
               external
             >

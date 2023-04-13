@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey(

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
@@ -153,4 +154,19 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
   run_ml_inference: false,
+};
+
+export enum INGESTION_METHOD_IDS {
+  api = 'api',
+  connector = 'connector',
+  crawler = 'crawler',
+  native_connector = 'native_connector',
+}
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasNativeConnectors: true,
+  hasSearchApplications: false,
+  hasWebCrawler: true,
 };

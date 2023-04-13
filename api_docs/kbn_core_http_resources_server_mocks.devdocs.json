@@ -295,19 +295,19 @@
               },
               "<any>, [options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               "]> & ((options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -327,19 +327,19 @@
               },
               "<any>, [options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               "]> & ((options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -359,19 +359,19 @@
               },
               "<any>, [options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               "]> & ((options: ",
               {
-                "pluginId": "@kbn/core-http-server",
+                "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
+                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
+                "section": "def-common.HttpResourcesResponseOptions",
+                "text": "HttpResourcesResponseOptions"
               },
               ") => ",
               {
@@ -389,6 +389,130 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined>, [options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined> | undefined]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<T> | undefined) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<T>); accepted: jest.MockInstance<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined>, [options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined> | undefined]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<T> | undefined) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<T>); noContent: jest.MockInstance<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
               "<any>, [options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
@@ -397,7 +521,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              "<any> | undefined]> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -405,71 +529,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
-              "<any>); accepted: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
-              "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              " | undefined]> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
-              "<any>); noContent: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
-              "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              " | undefined]> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              " | undefined) => ",
+              "<any> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

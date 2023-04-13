@@ -54,7 +54,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
       case ViewerStatus.ERROR: {
         return {
           color: 'danger' as ExpressionColor,
-          iconType: 'alert',
+          iconType: 'error',
           title: (
             <h2 data-test-subj="errorTitle">{title || i18n.EMPTY_VIEWER_STATE_ERROR_TITLE}</h2>
           ),
