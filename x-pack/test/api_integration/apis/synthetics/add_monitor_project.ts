@@ -1867,7 +1867,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'Invalid location "does not exist" supplied to field "locations". Please select a valid location.',
+                'Invalid location: "does not exist". Remove it or replace it with a valid location.',
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
