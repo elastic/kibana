@@ -203,7 +203,7 @@ const EMPTY_LOCATION_ERROR = i18n.translate(
 const INVALID_PRIVATE_LOCATION_ERROR = (location: string) =>
   i18n.translate('xpack.synthetics.server.projectMonitors.invalidPrivateLocationError', {
     defaultMessage:
-      'Invalid private location "{location}" supplied to field "privateLocations". Please select a valid private location.',
+      'Invalid private location: "{location}". Remove it or replace it with a valid private location.',
     values: {
       location,
     },
