@@ -47,6 +47,9 @@ export const listError = (state: Immutable<EndpointState>) => state.error;
 export const detailsData = (state: Immutable<EndpointState>) =>
   state.endpointDetails.hostDetails.details;
 
+export const fullDetailsHostInfo = (state: Immutable<EndpointState>) =>
+  state.endpointDetails.hostInfo;
+
 export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
   state.endpointDetails.hostDetails.detailsLoading;
 

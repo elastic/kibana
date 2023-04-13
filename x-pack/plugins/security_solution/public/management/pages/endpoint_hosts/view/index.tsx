@@ -29,6 +29,7 @@ import type {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -60,7 +61,6 @@ import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
-import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
@@ -370,7 +370,10 @@ export const EndpointList = () => {
         }),
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
+            <EndpointAgentStatus
+              endpointHostInfo={endpointInfo}
+              data-test-subj="rowIsolationStatus"
+            />
           );
         },
       },
