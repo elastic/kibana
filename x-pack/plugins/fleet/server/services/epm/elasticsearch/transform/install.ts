@@ -224,6 +224,11 @@ const processTransformAssetsPerModule = (
         id: versionedIndexName,
         type: ElasticsearchAssetType.index,
       });
+
+      // If run_as_kibana_system is not set, or is set to true, then run as kibana_system user
+      // else, run with user's secondary credentials
+      const runAsKibanaSystem = content._meta?.run_as_kibana_system !== false;
+
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
       transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
       transformsSpecifications.get(transformModuleId)?.set('transform', content);
@@ -232,6 +237,7 @@ const processTransformAssetsPerModule = (
         ...(content._meta ?? {}),
         ...getESAssetMetadata({ packageName: installablePackage.name }),
         ...(username ? { installed_by: username } : {}),
+        run_as_kibana_system: runAsKibanaSystem,
       };
 
       const installationName = getTransformAssetNameForInstallation(
@@ -368,6 +374,11 @@ const processTransformAssetsPerModule = (
     aliasesRefs,
     transformsToRemove,
     transformsToRemoveWithDestIndex,
+    // There might be multiple transforms in package, with only one set with run_as_kibana_system: false,
+    // in which case, we need to force all transforms in package to have runAsKibanaSystem: false
+    runAsKibanaSystem: !sortedTransforms.some(
+      (t) => t.content._meta?.run_as_kibana_system === false
+    ),
   };
 };
 
@@ -397,6 +408,7 @@ const installTransformsAssets = async (
       aliasesRefs,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
+      runAsKibanaSystem,
     } = processTransformAssetsPerModule(
       installablePackage,
       installNameSuffix,
@@ -404,13 +416,20 @@ const installTransformsAssets = async (
       previousInstalledTransformEsAssets,
       username
     );
-    const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-      authorizationHeader,
-      logger,
-      pkgName: installablePackage.name,
-      pkgVersion: installablePackage.version,
-      username,
-    });
+
+    // By default, for internal Elastic packages that touch system indices, we want to run as internal user
+    // so we set runAsKibanaSystem: true by default (e.g. when run_as_kibana_system set to true/not defined in yml file).
+    // If package should be installed as the logged in user, set run_as_kibana_system: false,
+    // and pass es-secondary-authorization in header when creating the transforms.
+    const secondaryAuth = runAsKibanaSystem
+      ? undefined
+      : await generateTransformSecondaryAuthHeaders({
+          authorizationHeader,
+          logger,
+          pkgName: installablePackage.name,
+          pkgVersion: installablePackage.version,
+          username,
+        });
 
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices

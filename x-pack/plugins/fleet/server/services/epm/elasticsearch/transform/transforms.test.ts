@@ -150,7 +150,7 @@ _meta:
               field: 'updated_at',
             },
           },
-          _meta: { fleet_transform_version: transformVersion, ...meta },
+          _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
         },
       },
     };
