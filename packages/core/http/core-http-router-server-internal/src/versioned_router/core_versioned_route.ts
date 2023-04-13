@@ -68,7 +68,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.isPublic = this.options?.access === 'public';
+    this.isPublic = this.options.access === 'public';
     this.router.router[this.method](
       {
         path: this.path,
