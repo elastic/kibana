@@ -908,6 +908,8 @@
       "@kbn/ml-local-storage/*": ["x-pack/packages/ml/local_storage/*"],
       "@kbn/ml-nested-property": ["x-pack/packages/ml/nested_property"],
       "@kbn/ml-nested-property/*": ["x-pack/packages/ml/nested_property/*"],
+      "@kbn/ml-number-utils": ["x-pack/packages/ml/number_utils"],
+      "@kbn/ml-number-utils/*": ["x-pack/packages/ml/number_utils/*"],
       "@kbn/ml-plugin": ["x-pack/plugins/ml"],
       "@kbn/ml-plugin/*": ["x-pack/plugins/ml/*"],
       "@kbn/ml-query-utils": ["x-pack/packages/ml/query_utils"],
