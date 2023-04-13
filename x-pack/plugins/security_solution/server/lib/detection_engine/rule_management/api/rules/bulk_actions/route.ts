@@ -23,6 +23,7 @@ import type { BulkActionsDryRunErrCode } from '../../../../../../../common/const
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import {
@@ -526,6 +527,11 @@ export const performBulkActionRoute = (
                 const createdRule = await rulesClient.create({
                   data: duplicateRuleToCreate,
                 });
+
+                // Mute the rule if it is created with the explicit no actions
+                if (rule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+                  await rulesClient.muteAll({ id: createdRule.id });
+                }
 
                 // we try to create exceptions after rule created, and then update rule
                 const exceptions = shouldDuplicateExceptions

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleActionFrequency,
+  RuleNotifyWhenType,
+} from '@kbn/alerting-plugin/common';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -17,6 +21,46 @@ import { transformAlertToRuleAction } from '../../../../../common/detection_engi
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
+
+export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
+  return {
+    summary: true,
+    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
+    throttle: transformToAlertThrottle(throttle),
+  };
+};
+
+interface ActionWithFrequency {
+  frequency?: RuleActionFrequency;
+}
+
+export const transformToActionFrequency = <T extends ActionWithFrequency>(
+  actions: T[],
+  throttle: string | null | undefined
+): T[] => {
+  const transformedActions: T[] = [];
+  const frequency = transformToFrequency(throttle);
+  if (throttle == null) {
+    // When throttle is not set or set to "no actions" then we don't override existing frequencies
+    // Instead we only add default frequency to the actions without frequency field set
+    actions.forEach((action) => {
+      transformedActions.push({
+        ...action,
+        ...{ frequency: action.frequency ?? frequency },
+      });
+    });
+  } else {
+    // We should prioritize rule level frequency for back compatibility
+    // Thus here we override action level frequency
+    actions.forEach((action) => {
+      transformedActions.push({
+        ...action,
+        ...{ frequency },
+      });
+    });
+  }
+  return transformedActions;
+};
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen

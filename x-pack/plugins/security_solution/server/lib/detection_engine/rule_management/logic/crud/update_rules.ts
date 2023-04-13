@@ -12,7 +12,11 @@ import type { RuleUpdateProps } from '../../../../../../common/detection_engine/
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
+import {
+  transformToActionFrequency,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
 import { maybeMute } from '../rule_actions/muting';
 
@@ -31,15 +35,8 @@ export const updateRules = async ({
     return null;
   }
 
-  const actions =
-    ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [];
-  const throttleAndNotifyWhen =
-    !actions.length || !actions[0].frequency
-      ? {
-          throttle: transformToAlertThrottle(ruleUpdate.throttle),
-          notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
-        }
-      : {};
+  const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
@@ -81,8 +78,13 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    ...throttleAndNotifyWhen,
+    actions,
+    ...(!actions.length
+      ? {
+          throttle: transformToAlertThrottle(ruleUpdate.throttle),
+          notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+        }
+      : {}),
   };
 
   const update = await rulesClient.update({

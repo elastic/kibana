@@ -7,8 +7,12 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { omit } from 'lodash';
 import { useCallback } from 'react';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../../common/constants';
 import { transformInput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import type { Rule } from '../../logic';
 import { fetchRuleById } from '../api';
@@ -30,7 +34,23 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
     async ({ signal }) => {
       const response = await fetchRuleById({ signal, id });
 
-      return transformInput(response);
+      const rule = transformInput(response);
+
+      // TODO https://github.com/elastic/kibana/pull/154637
+      // If any action-level frequencies get pushed into a rule, strip their frequencies
+      if (rule.actions.length) {
+        const firstFrequency = rule.actions[0]?.frequency;
+        if (firstFrequency) {
+          rule.actions = rule.actions.map((action) => omit(action, 'frequency'));
+          if (firstFrequency.notifyWhen === 'onActiveAlert') {
+            rule.throttle = NOTIFICATION_THROTTLE_RULE;
+          } else {
+            rule.throttle = firstFrequency.throttle;
+          }
+        }
+      }
+
+      return rule;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

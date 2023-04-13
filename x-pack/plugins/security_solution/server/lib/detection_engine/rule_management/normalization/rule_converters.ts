@@ -77,6 +77,7 @@ import type {
 import {
   transformActions,
   transformFromAlertThrottle,
+  transformToActionFrequency,
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from './rule_actions';
@@ -402,20 +403,14 @@ export const convertPatchAPIToInternalSchema = (
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
 
-  const actions = nextParams.actions
-    ? nextParams.actions.map(transformRuleToAlertAction)
-    : existingRule.actions;
-  const throttleAndNotifyWhen =
-    !actions.length || !actions[0].frequency
-      ? {
-          throttle: nextParams.throttle
-            ? transformToAlertThrottle(nextParams.throttle)
-            : existingRule.throttle ?? null,
-          notifyWhen: nextParams.throttle
-            ? transformToNotifyWhen(nextParams.throttle)
-            : existingRule.notifyWhen ?? null,
-        }
-      : {};
+  const existingThrottle = transformFromAlertThrottle(existingRule, null);
+  const alertActions = nextParams.actions?.map(transformRuleToAlertAction) ?? existingRule.actions;
+
+  let actions = transformToActionFrequency(alertActions, nextParams.throttle);
+  if (nextParams.throttle == null && existingRule.notifyWhen != null) {
+    // If existing rule has notification settings set then transform them into action level frequencies
+    actions = transformToActionFrequency(alertActions, existingThrottle);
+  }
 
   return {
     name: nextParams.name ?? existingRule.name,
@@ -456,8 +451,22 @@ export const convertPatchAPIToInternalSchema = (
       ...typeSpecificParams,
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
+
+    // Alert framework does not allow us to pass both rule level notification and action level frequencies to be set at the same time.
+    // Thus we first convert existing rule level settings into per-action frequencies and then pass only actions.
+    // For back compatibility, we also handle the case where user can change rule level settings without having actions.
+    // In this case, we gonna preserve rule level settings and use those for the new actions.
     actions,
-    ...throttleAndNotifyWhen,
+    ...(!actions.length
+      ? {
+          throttle: nextParams.throttle
+            ? transformToAlertThrottle(nextParams.throttle)
+            : existingRule.throttle ?? null,
+          notifyWhen: nextParams.throttle
+            ? transformToNotifyWhen(nextParams.throttle)
+            : existingRule.notifyWhen ?? null,
+        }
+      : {}),
   };
 };
 
@@ -474,13 +483,8 @@ export const convertCreateAPIToInternalSchema = (
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 
-  const throttleAndNotifyWhen =
-    !input.actions?.length || !input.actions[0].frequency
-      ? {
-          throttle: transformToAlertThrottle(input.throttle),
-          notifyWhen: transformToNotifyWhen(input.throttle),
-        }
-      : {};
+  const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
+  const actions = transformToActionFrequency(alertActions, input.throttle);
 
   return {
     name: input.name,
@@ -522,8 +526,18 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    ...throttleAndNotifyWhen,
+
+    // Alert framework does not allow us to pass both rule level notification and action level frequencies to be set at the same time.
+    // Thus we first convert existing rule level settings into per-action frequencies and then pass only actions.
+    // For back compatibility, we also handle the case where user can create rule level settings without having actions.
+    // In this case, we gonna preserve rule level settings and use those for the new actions.
+    actions,
+    ...(!actions.length
+      ? {
+          throttle: transformToAlertThrottle(input.throttle),
+          notifyWhen: transformToNotifyWhen(input.throttle),
+        }
+      : {}),
   };
 };
 
@@ -671,6 +685,11 @@ export const internalRuleToAPIResponse = (
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
 
+  // Convert rule level notification settings into action frequencies
+  const throttle = transformFromAlertThrottle(rule, legacyRuleActions);
+  const transformedActions = transformActions(rule.actions, legacyRuleActions);
+  const actions = transformToActionFrequency(transformedActions, throttle);
+
   return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
@@ -692,8 +711,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    throttle: undefined,
+    actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
