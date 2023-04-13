@@ -9,13 +9,13 @@ import React, { memo, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../common/endpoint/service/response_actions/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useGetEndpointPendingActionsSummary } from '../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import type { HostInfo, EndpointPendingActions } from '../../../../common/endpoint/types';
-import { AgentStatus } from '../../../common/components/endpoint/agent_status';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
+import type { HostInfo, EndpointPendingActions } from '../../../../../common/endpoint/types';
+import { AgentStatus } from '../agent_status';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
 
