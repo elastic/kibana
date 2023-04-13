@@ -133,7 +133,15 @@ export function ProcessTreeNode({
 
   const alertTypeCounts = useMemo(() => {
     const alertCounts: AlertTypeCount[] = chain(alerts)
-      .groupBy((alert) => alert.event?.category?.[0])
+      .groupBy((alert) => {
+        const category = alert.event?.category;
+
+        if (Array.isArray(category)) {
+          return category?.[0];
+        }
+
+        return category;
+      })
       .map((processAlerts, alertCategory) => ({
         category: alertCategory as ProcessEventAlertCategory,
         count: processAlerts.length,
