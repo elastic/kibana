@@ -5,12 +5,8 @@
  * 2.0.
  */
 
+import { Direction } from '@kbn/timelines-plugin/common';
 import * as runtimeTypes from 'io-ts';
-
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
 
 export type SortDirectionTable = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTable {
