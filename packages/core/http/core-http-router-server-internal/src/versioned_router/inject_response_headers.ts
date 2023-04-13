@@ -10,9 +10,7 @@ import type { Mutable } from 'utility-types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 
 /**
- * We "copy" to inject our headers without mutating the original response.
- *
- * @note mutates the response object passed in
+ * @note mutates the response object
  * @internal
  */
 export function injectResponseHeaders(headers: object, response: IKibanaResponse): IKibanaResponse {
