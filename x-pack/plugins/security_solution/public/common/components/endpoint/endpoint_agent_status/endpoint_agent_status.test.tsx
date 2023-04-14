@@ -7,8 +7,11 @@
 
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
-import type { EndpointAgentStatusProps } from './endpoint_agent_status';
-import { EndpointAgentStatus } from './endpoint_agent_status';
+import type {
+  EndpointAgentStatusByIdProps,
+  EndpointAgentStatusProps,
+} from './endpoint_agent_status';
+import { EndpointAgentStatus, EndpointAgentStatusById } from './endpoint_agent_status';
 import type {
   EndpointPendingActions,
   HostInfoInterface,
@@ -22,7 +25,9 @@ import type { EndpointMetadataHttpMocksInterface } from '../../../../management/
 import { endpointMetadataHttpMocks } from '../../../../management/pages/endpoint_hosts/mocks';
 import type { ResponseActionsHttpMocksInterface } from '../../../../management/mocks/response_actions_http_mocks';
 import { responseActionsHttpMocks } from '../../../../management/mocks/response_actions_http_mocks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, within, fireEvent } from '@testing-library/react';
+import { getEmptyValue } from '../../empty_value';
+import { clone, set } from 'lodash';
 
 type AgentStatusApiMocksInterface = EndpointMetadataHttpMocksInterface &
   ResponseActionsHttpMocksInterface;
@@ -34,6 +39,8 @@ const agentStatusApiMocks = composeHttpHandlerMocks<AgentStatusApiMocksInterface
 ]);
 
 describe('When showing Endpoint Agent Status', () => {
+  const ENDPOINT_ISOLATION_OBJ_PATH = 'metadata.Endpoint.state.isolation';
+
   let appTestContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -86,7 +93,7 @@ describe('When showing Endpoint Agent Status', () => {
     });
 
     it('should display status and isolated', () => {
-      endpointDetails.metadata.Endpoint.state = { isolation: true };
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
       const { getByTestId } = render();
 
       expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
@@ -123,7 +130,7 @@ describe('When showing Endpoint Agent Status', () => {
       actionsSummary.pending_actions = {
         unisolate: 1,
       };
-      endpointDetails.metadata.Endpoint.state = { isolation: true };
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
       const { getByTestId } = render();
 
       await waitFor(() => {
@@ -133,18 +140,151 @@ describe('When showing Endpoint Agent Status', () => {
       expect(getByTestId('test').textContent).toEqual('HealthyReleasing');
     });
 
-    it.todo('should show individual action count in tooltip');
+    it('should show individual action count in tooltip (including unknown actions)', async () => {
+      actionsSummary.pending_actions = {
+        'get-file': 2,
+        execute: 6,
+        'kill-process': 1,
+        foo: 2,
+      };
+      const { getByTestId } = render();
 
-    it.todo('should should keep actions up to date when autoRefresh is true');
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+      });
 
-    it.todo('should still display status if action summary api fails');
+      expect(getByTestId('test').textContent).toEqual('Healthy11 actions pending');
+
+      fireEvent.mouseOver(getByTestId('test-actionStatuses-tooltipTrigger'));
+
+      await waitFor(() => {
+        expect(
+          within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
+            .textContent
+        ).toEqual('Pending actions:get-file2execute6kill-process1foo2');
+      });
+    });
+
+    it('should still display status and isolation state if action summary api fails', async () => {
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
+      apiMocks.responseProvider.agentPendingActionsSummary.mockImplementation(() => {
+        throw new Error('test error');
+      });
+
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
+    });
+
+    describe('and `autoRefresh` prop is set to true', () => {
+      beforeEach(() => {
+        renderProps.autoFresh = true;
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should keep actions up to date when autoRefresh is true', async () => {
+        apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValueOnce({
+          data: [actionsSummary],
+        });
+
+        const { getByTestId } = render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+        });
+
+        expect(getByTestId('test').textContent).toEqual('Healthy');
+
+        apiMocks.responseProvider.agentPendingActionsSummary.mockReturnValueOnce({
+          data: [
+            {
+              ...actionsSummary,
+              pending_actions: {
+                'kill-process': 2,
+                'running-processes': 2,
+              },
+            },
+          ],
+        });
+
+        jest.runOnlyPendingTimers();
+
+        await waitFor(() => {
+          expect(getByTestId('test').textContent).toEqual('Healthy4 actions pending');
+        });
+      });
+    });
   });
 
   describe('And when using EndpointAgentStatusById', () => {
-    it.todo('should display status and isolated');
+    let renderProps: EndpointAgentStatusByIdProps;
 
-    it.todo('should keep agent status up to date when autoRefresh is true');
+    beforeEach(() => {
+      jest.useFakeTimers();
 
-    it.todo('should display empty value if API call to host metadata fails');
+      renderProps = {
+        'data-test-subj': 'test',
+        endpointAgentId: '123',
+      };
+
+      render = () => {
+        renderResult = appTestContext.render(<EndpointAgentStatusById {...renderProps} />);
+        return renderResult;
+      };
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should display status and isolated', async () => {
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
+      });
+    });
+
+    it('should display empty value if API call to host metadata fails', async () => {
+      apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
+        throw new Error('test error');
+      });
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('test').textContent).toEqual(getEmptyValue());
+    });
+
+    it('should keep agent status up to date when autoRefresh is true', async () => {
+      renderProps.autoFresh = true;
+      apiMocks.responseProvider.metadataDetails.mockReturnValueOnce(endpointDetails);
+
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(getByTestId('test').textContent).toEqual('Healthy');
+      });
+
+      apiMocks.responseProvider.metadataDetails.mockReturnValueOnce(
+        set(clone(endpointDetails), 'metadata.Endpoint.state.isolation', true)
+      );
+      jest.runOnlyPendingTimers();
+
+      await waitFor(() => {
+        expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
+      });
+    });
   });
 });

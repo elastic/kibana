@@ -95,7 +95,7 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
         {(isIsolated || hasPendingActions) && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
             <EndpointHostResponseActionsStatus
-              data-test-subj={getTestId('isolationStatus')}
+              data-test-subj={getTestId('actionStatuses')}
               isIsolated={isIsolated}
               pendingActions={hostPendingActions}
             />
@@ -258,6 +258,7 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
           <EuiToolTip
             display="block"
             anchorClassName="eui-textTruncate"
+            anchorProps={{ 'data-test-subj': getTestId('tooltipTrigger') }}
             content={
               <div style={TOOLTIP_CONTENT_STYLES} data-test-subj={`${dataTestSubj}-tooltipContent`}>
                 <div>
