@@ -5,16 +5,38 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // GET-FILE CODES
   // -----------------------------------------------------------------
   /** file not found */
-  'ra_get-file_error_not-found': i18n.translate(
-    'xpack.securitySolution.endpointActionResponseCodes.getFile.notFound',
-    { defaultMessage: 'The file specified was not found' }
+  'ra_get-file_error_not-found': (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpointActionResponseCodes.getFile.notFound"
+        defaultMessage="The file specified was not found."
+      />
+      <EuiSpacer size="s" />
+      <FormattedMessage
+        id="xpack.securitySolution.endpointActionResponseCodes.getFile.quarantineHint"
+        defaultMessage="Note: the requested file may be quarantined. To retrieve a quarantined file, { quarantinedDocsLink }."
+        values={{
+          quarantinedDocsLink: (
+            <EuiLink>
+              <FormattedMessage
+                id="xpack.securitySolution.endpointActionResponseCodes.getFile.quarantineDocsLink"
+                defaultMessage="read here"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </>
   ),
 
   /** path is reachable but does not point to a file */
@@ -128,5 +150,6 @@ const CODES = Object.freeze({
 /**
  * A map of possible code's that can be returned from the endpoint for response actions
  */
-export const endpointActionResponseCodes: Readonly<Record<string | keyof typeof CODES, string>> =
-  CODES;
+export const endpointActionResponseCodes: Readonly<
+  Record<string | keyof typeof CODES, React.ReactNode>
+> = CODES;
