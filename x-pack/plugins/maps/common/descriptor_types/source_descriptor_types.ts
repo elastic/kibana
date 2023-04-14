@@ -13,6 +13,7 @@ import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
+  MASK_OPERATOR,
   RENDER_AS,
   SCALING_TYPES,
   MVT_FIELD_TYPE,
@@ -72,7 +73,12 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
   percentile?: number;
 };
 
-export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor & {
+  mask?: {
+    operator: MASK_OPERATOR;
+    value: number;
+  }
+};
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];

@@ -11,11 +11,12 @@ import { DataView } from '@kbn/data-plugin/common';
 import type { IESAggSource } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
-import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getAggDisplayName } from './get_agg_display_name';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
@@ -83,14 +84,14 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
     switch (aggType) {
       case AGG_TYPE.COUNT:
-        return COUNT_PROP_LABEL;
+        return getAggDisplayName(aggType);
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldLabel}`,
+          defaultMessage: `top {fieldLabel}`,
           values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldLabel}`;
+        return `${getAggDisplayName(aggType)} ${fieldLabel}`;
     }
   }
 

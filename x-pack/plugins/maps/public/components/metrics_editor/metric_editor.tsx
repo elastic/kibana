@@ -8,7 +8,7 @@
 import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow, EuiPopover, EuiExpression } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -18,6 +18,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
+import { MaskEditor } from './mask_editor';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -223,6 +224,9 @@ export function MetricEditor({
       {fieldSelect}
       {percentileSelect}
       {labelInput}
+      
+        <MaskEditor metric={metric} onChange={onChange} />
+      
       {removeButton}
     </Fragment>
   );
