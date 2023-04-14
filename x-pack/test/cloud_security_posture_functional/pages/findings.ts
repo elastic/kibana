@@ -188,8 +188,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       };
 
       const sleep = (num: number) => {
-        return new Promise((res) => setTimeout(res, num))
-      }
+        return new Promise((res) => setTimeout(res, num));
+      };
 
       it('sorts by a column CIS Selection, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
@@ -199,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(5000)
+          await sleep(5000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -207,7 +207,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-            values.forEach((value, i) => {expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`); console.log(`Checking Row number ${i+1}Comparing ${value} with ${sorted[i]}`)})
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
+          });
         }
       });
 
@@ -219,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(5000)
+          await sleep(5000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -227,9 +233,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-            console.log('sorted array: ', sorted)
-            console.log('values array: ', values)
-            values.forEach((value, i) => {expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`); console.log(`Checking Row number ${i+1}Comparing ${value} with ${sorted[i]}`)})
+          console.log('sorted array: ', sorted);
+          console.log('values array: ', values);
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
+          });
         }
       });
 
@@ -241,7 +253,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(5000)
+          await sleep(5000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -249,7 +261,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-            values.forEach((value, i) => {expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`); console.log(`Checking Row number ${i+1}Comparing ${value} with ${sorted[i]}`)})
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
+          });
         }
       });
 
@@ -261,7 +279,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(5000)
+          await sleep(5000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -269,7 +287,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => {expect(value).to.be.eql(sorted[i], `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`); console.log(`Checking Row number ${i+1}Comparing ${value} with ${sorted[i]}`)})
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
+          });
         }
       });
     });
