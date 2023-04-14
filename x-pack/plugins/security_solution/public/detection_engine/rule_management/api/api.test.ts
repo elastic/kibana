@@ -793,7 +793,7 @@ describe('Detections Rules API', () => {
       fetchMock.mockClear();
     });
 
-    test('requests rules by its ids', () => {
+    test('requests snooze settings of multiple rules by their IDs', () => {
       fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
 
       expect(fetchMock).toHaveBeenCalledWith(
@@ -814,6 +814,24 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             per_page: 2,
+          }),
+        })
+      );
+    });
+
+    test('requests only snooze settings fields', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            fields: JSON.stringify([
+              'muteAll',
+              'activeSnoozes',
+              'isSnoozedUntil',
+              'snoozeSchedule',
+            ]),
           }),
         })
       );
