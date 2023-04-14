@@ -33,7 +33,7 @@ import { ListExceptionItems } from '../list_exception_items';
 import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 import { ManageRules } from '../manage_rules';
-import { ExportExceptionsListModal } from '../export_exceptions_list_modal';
+import { IncludeExpiredExceptionsModal } from '../expired_exceptions_list_items_modal';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -257,7 +257,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
           />
         ) : null}
         {showExportModal ? (
-          <ExportExceptionsListModal
+          <IncludeExpiredExceptionsModal
             handleCloseModal={handleCancelExportModal}
             onModalConfirm={handleConfirmExportModal}
           />

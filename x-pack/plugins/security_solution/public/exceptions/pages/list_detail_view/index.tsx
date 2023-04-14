@@ -25,7 +25,7 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
-import { ExportExceptionsListModal } from '../../components/export_exceptions_list_modal';
+import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
 export const ListsDetailViewComponent: FC = () => {
   const { detailName: exceptionListId } = useParams<{
@@ -126,7 +126,7 @@ export const ListsDetailViewComponent: FC = () => {
           />
         ) : null}
         {showExportModal && (
-          <ExportExceptionsListModal
+          <IncludeExpiredExceptionsModal
             onModalConfirm={onExportList}
             handleCloseModal={onModalClose}
           />

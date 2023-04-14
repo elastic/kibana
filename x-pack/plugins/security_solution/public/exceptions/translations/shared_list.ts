@@ -371,30 +371,38 @@ export const SORT_BY_CREATE_AT = i18n.translate(
   }
 );
 
-export const EXPORT_MODAL_CANCEL_BUTTON = i18n.translate(
-  'xpack.securitySolution.exceptions.exportModalCancelButton',
+export const EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalCancelButton',
   {
     defaultMessage: 'Cancel',
   }
 );
 
-export const EXPORT_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.exportModalTitle',
+export const EXPIRED_EXCEPTIONS_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalTitle',
   {
-    defaultMessage: 'Export exception list',
+    defaultMessage: 'Include expired exception items?',
   }
 );
 
-export const EXPORT_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.exportModalIncludeSwitchLabel',
+export const EXPIRED_EXCEPTIONS_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeDescription',
+  {
+    defaultMessage:
+      'Exception items may contain expiration dates - select whether you would like expired items to be included.',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeSwitchLabel',
   {
     defaultMessage: 'Include expired exceptions',
   }
 );
 
-export const EXPORT_MODAL_CONFIRM_BUTTON = i18n.translate(
-  'xpack.securitySolution.exceptions.exportModalConfirmButton',
+export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmButton',
   {
-    defaultMessage: 'Export',
+    defaultMessage: 'Continue',
   }
 );
