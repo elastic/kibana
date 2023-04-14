@@ -10,10 +10,11 @@ import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { MaintenanceWindowResponse } from '../../pages/maintenance_windows/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 
-const rewriteBodyRes = (
-  results: Array<AsApiContract<MaintenanceWindowResponse>>
-): MaintenanceWindowResponse[] => {
-  return results.map((item) => transform(item));
+const rewriteBodyRes = (results: {
+  data: Array<AsApiContract<MaintenanceWindowResponse>>;
+  total: number;
+}): MaintenanceWindowResponse[] => {
+  return results.data.map((item) => transform(item));
 };
 
 const transform: RewriteRequestCase<MaintenanceWindowResponse> = ({
@@ -43,8 +44,9 @@ export async function getMaintenanceWindowsList({
 }: {
   http: HttpSetup;
 }): Promise<MaintenanceWindowResponse[]> {
-  const res = await http.get<Array<AsApiContract<MaintenanceWindowResponse>>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`
-  );
+  const res = await http.get<{
+    data: Array<AsApiContract<MaintenanceWindowResponse>>;
+    total: number;
+  }>(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`);
   return rewriteBodyRes(res);
 }

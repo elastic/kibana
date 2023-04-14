@@ -374,6 +374,17 @@ export const CANCEL = i18n.translate('xpack.alerting.maintenanceWindows.createFo
   defaultMessage: 'Cancel',
 });
 
+export const TABLE_ALERTS = i18n.translate('xpack.alerting.maintenanceWindows.table.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const TABLE_ALERTS_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.alertsTooltip',
+  {
+    defaultMessage: 'The total number of alerts created in the maintenance window.',
+  }
+);
+
 export const TABLE_STATUS = i18n.translate('xpack.alerting.maintenanceWindows.table.status', {
   defaultMessage: 'Status',
 });

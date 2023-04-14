@@ -20,28 +20,26 @@ export const useGetMaintenanceWindowsList = () => {
     return getMaintenanceWindowsList({ http });
   };
 
-  const onErrorFn = () => {
-    toasts.addDanger(
-      i18n.translate('xpack.alerting.maintenanceWindowsListFailure', {
-        defaultMessage: 'Unable to load maintenance windows.',
-      })
-    );
+  const onErrorFn = (error: Error) => {
+    if (error) {
+      toasts.addDanger(
+        i18n.translate('xpack.alerting.maintenanceWindowsListFailure', {
+          defaultMessage: 'Unable to load maintenance windows.',
+        })
+      );
+    }
   };
 
-  const {
-    isInitialLoading,
-    isLoading,
-    data = [],
-  } = useQuery({
+  const { isLoading, data = [] } = useQuery({
     queryKey: ['getMaintenanceWindowsList'],
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {
     maintenanceWindows: data,
     isLoading,
-    isInitialLoading,
   };
 };
