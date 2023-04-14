@@ -16,7 +16,6 @@ import type {
   ActionVariables,
   NotifyWhenSelectOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type {
   RuleAction,
   RuleActionAlertsFilterProperty,
@@ -24,6 +23,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -32,12 +32,6 @@ import {
   FORM_ERRORS_TITLE,
   FORM_ON_ACTIVE_ALERT_OPTION,
 } from './translations';
-
-const DEFAULT_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.ACTIVE,
-  throttle: null,
-  summary: true,
-};
 
 const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -217,7 +211,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         updatedActions[index] = {
           ...updatedActions[index],
           frequency: {
-            ...(updatedActions[index].frequency ?? DEFAULT_FREQUENCY),
+            ...(updatedActions[index].frequency ?? NOTIFICATION_DEFAULT_FREQUENCY),
             [key]: value,
           },
         };
@@ -245,7 +239,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         hideNotifyWhen: false,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
-        defaultRuleFrequency: DEFAULT_FREQUENCY,
+        defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
         showActionAlertsFilter: true,
       }),
     [
