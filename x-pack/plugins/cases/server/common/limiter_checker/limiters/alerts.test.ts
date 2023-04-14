@@ -10,7 +10,20 @@ import { AlertLimiter } from './alerts';
 import { createAlertRequests, createUserRequests } from '../test_utils';
 
 describe('AlertLimiter', () => {
-  const alert = new AlertLimiter();
+  const attachmentService = createAttachmentServiceMock();
+  attachmentService.executeCaseAggregations.mockImplementation(async () => {
+    return {
+      limiter: {
+        value: 5,
+      },
+    };
+  });
+
+  const alert = new AlertLimiter(attachmentService);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('public fields', () => {
     it('sets the errorMessage to the 1k limit', () => {
@@ -62,21 +75,8 @@ describe('AlertLimiter', () => {
   });
 
   describe('countOfItemsWithinCase', () => {
-    const attachmentService = createAttachmentServiceMock();
-    attachmentService.executeCaseAggregations.mockImplementation(async () => {
-      return {
-        limiter: {
-          value: 5,
-        },
-      };
-    });
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('calls the aggregation function with the correct arguments', async () => {
-      await alert.countOfItemsWithinCase(attachmentService, 'id');
+      await alert.countOfItemsWithinCase('id');
 
       expect(attachmentService.executeCaseAggregations.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -90,14 +90,13 @@ describe('AlertLimiter', () => {
             },
             "attachmentType": "alert",
             "caseId": "id",
-            "filter": undefined,
           },
         ]
       `);
     });
 
     it('returns 5', async () => {
-      expect(await alert.countOfItemsWithinCase(attachmentService, 'id')).toBe(5);
+      expect(await alert.countOfItemsWithinCase('id')).toBe(5);
     });
   });
 });

@@ -11,6 +11,7 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
@@ -37,6 +38,14 @@ import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+
+interface AlertIdsAggsResult {
+  alertIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -141,6 +150,44 @@ export class AttachmentGetter {
       return result;
     } catch (error) {
       this.context.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves all the alerts attached to a case.
+   */
+  public async getAllAlertIds({ caseId }: { caseId: string }): Promise<Set<string>> {
+    try {
+      this.context.log.debug(`Attempting to GET all alerts ids for case id ${caseId}`);
+      const alertsFilter = buildFilter({
+        filters: [CommentType.alert],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AlertIdsAggsResult>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: alertsFilter,
+        perPage: 0,
+        aggs: {
+          alertIds: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+              size: MAX_ALERTS_PER_CASE,
+            },
+          },
+        },
+      });
+
+      const alertIds = res.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
+      return new Set(alertIds);
+    } catch (error) {
+      this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
       throw error;
     }
   }
