@@ -80,7 +80,8 @@ interface Props {
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE =
+const DEFAULT_ACTION_MESSAGE = 'Rule {{rule.name}} generated alert {{alert.id}}';
+const DEFAULT_SUMMARY_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
@@ -234,7 +235,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
-        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
+        defaultSummaryMessage: DEFAULT_SUMMARY_ACTION_MESSAGE,
         hideActionHeader: true,
         hideNotifyWhen: false,
         hasSummary: true,

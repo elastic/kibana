@@ -56,7 +56,7 @@ const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) =>
 };
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
-  ({ logger, ruleDataClient }) =>
+  ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
     return {
       ...type,
@@ -160,17 +160,23 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return { createdAlerts: [], errors: {}, alertsWereTruncated };
                 }
 
+                const createdAlerts = augmentedAlerts
+                  .map((alert, idx) => {
+                    const responseItem = response.body.items[idx].create;
+                    return {
+                      _id: responseItem?._id ?? '',
+                      _index: responseItem?._index ?? '',
+                      ...alert._source,
+                    };
+                  })
+                  .filter((_, idx) => response.body.items[idx].create?.status === 201);
+
+                createdAlerts.forEach((alert) =>
+                  options.services.alertFactory.create(alert._id).scheduleActions('default', {})
+                );
+
                 return {
-                  createdAlerts: augmentedAlerts
-                    .map((alert, idx) => {
-                      const responseItem = response.body.items[idx].create;
-                      return {
-                        _id: responseItem?._id ?? '',
-                        _index: responseItem?._index ?? '',
-                        ...alert._source,
-                      };
-                    })
-                    .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                  createdAlerts,
                   errors: errorAggregator(response.body, [409]),
                   alertsWereTruncated,
                 };
@@ -356,6 +362,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
         ruleDataClient,
         useNamespace: true,
         isLifecycleAlert: false,
+        formatAlert,
       })(),
     };
   };
