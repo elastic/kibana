@@ -35,6 +35,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {
