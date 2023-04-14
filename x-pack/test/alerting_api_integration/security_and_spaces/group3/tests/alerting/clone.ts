@@ -161,6 +161,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 notify_when: 'onThrottleInterval',
                 updated_by: user.username,
+                api_key_created_by_user: false,
                 api_key_owner: user.username,
                 mute_all: false,
                 muted_alert_ids: [],

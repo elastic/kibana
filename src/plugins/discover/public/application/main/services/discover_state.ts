@@ -24,6 +24,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { cloneDeep, isEqual } from 'lodash';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -357,11 +359,13 @@ export function getDiscoverStateContainer({
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
     const { savedSearchId, dataView, dataViewSpec, useAppState } = params ?? {};
     const appState = useAppState ? appStateContainer.getState() : undefined;
+    // First let's clean up the previous state
+    services.filterManager.setAppFilters([]);
+    services.data.query.queryString.clearQuery();
     if (!useAppState) {
       appStateContainer.set({});
-      services.filterManager.setAppFilters([]);
-      services.data.query.queryString.clearQuery();
     }
+    // Then, take care of data view and saved search loading, deriving the next state
     const actualDataView = dataView
       ? dataView
       : (await loadAndResolveDataView(appState?.index, dataViewSpec)).dataView;
@@ -384,8 +388,28 @@ export function getDiscoverStateContainer({
         internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
       }
     }
-
+    // Finally notify dataStateContainer, data.query and filterManager about new derived state
     dataStateContainer.reset(nextSavedSearch);
+
+    // set data service filters
+    const filters = nextSavedSearch.searchSource.getField('filter');
+
+    if (Array.isArray(filters) && filters.length) {
+      services.data.query.filterManager.setAppFilters(cloneDeep(filters));
+    }
+    // some filters may not be valid for this context, so update
+    // the filter manager with a modified list of valid filters
+    const currentFilters = services.filterManager.getFilters();
+    const validFilters = getValidFilters(actualDataView, currentFilters);
+    if (!isEqual(currentFilters, validFilters)) {
+      services.filterManager.setFilters(validFilters);
+    }
+    // set data service query
+    const query = nextSavedSearch.searchSource.getField('query');
+    if (query) {
+      services.data.query.queryString.setQuery(query);
+    }
+
     return nextSavedSearch;
   };
 
@@ -393,10 +417,10 @@ export function getDiscoverStateContainer({
     /**
      * state containers initializing and starting to notify each other about changes
      */
-    const unsubscribeData = dataStateContainer.subscribe();
     const appStateInitAndSyncUnsubscribe = await appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
+    const unsubscribeData = dataStateContainer.subscribe();
     // updates saved search when app state changes, triggers data fetching if required
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({

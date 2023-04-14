@@ -6,18 +6,14 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
-      <button
+      <a
         class="euiLink emotion-euiLink-primary"
-        data-test-subj="syntheticsMonitorPageLinkLink"
-        type="button"
+        data-test-subj="monitor-page-link-bad-ssl-dashboard"
+        href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
+        rel="noreferrer"
       >
-        <a
-          data-test-subj="monitor-page-link-bad-ssl-dashboard"
-          href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
-        >
-          bad-ssl-dashboard
-        </a>
-      </button>
+        bad-ssl-dashboard
+      </a>
     </span>
   </span>
   <span>
@@ -25,18 +21,14 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
-      <button
+      <a
         class="euiLink emotion-euiLink-primary"
-        data-test-subj="syntheticsMonitorPageLinkLink"
-        type="button"
+        data-test-subj="monitor-page-link-elastic-co"
+        href="/monitor/ZWxhc3RpYy1jbw=="
+        rel="noreferrer"
       >
-        <a
-          data-test-subj="monitor-page-link-elastic-co"
-          href="/monitor/ZWxhc3RpYy1jbw=="
-        >
-          elastic
-        </a>
-      </button>
+        elastic
+      </a>
     </span>
   </span>
   <span>
@@ -44,18 +36,14 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
-      <button
+      <a
         class="euiLink emotion-euiLink-primary"
-        data-test-subj="syntheticsMonitorPageLinkLink"
-        type="button"
+        data-test-subj="monitor-page-link-extended-validation"
+        href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
+        rel="noreferrer"
       >
-        <a
-          data-test-subj="monitor-page-link-extended-validation"
-          href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
-        >
-          extended-validation
-        </a>
-      </button>
+        extended-validation
+      </a>
     </span>
   </span>
 </span>
