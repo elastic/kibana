@@ -86,7 +86,7 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
         <EuiFlexItem grow={false}>
           <EuiBadge
             color={status != null ? HOST_STATUS_TO_BADGE_COLOR[status] : 'warning'}
-            data-test-subj="rowHostStatus"
+            data-test-subj={getTestId('agentStatus')}
             className="eui-textTruncate"
           >
             {getAgentStatusText(status)}
