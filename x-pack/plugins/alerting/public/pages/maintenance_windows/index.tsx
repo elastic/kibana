@@ -21,7 +21,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isInitialLoading, isLoading, maintenanceWindows } = useGetMaintenanceWindowsList();
+  const { isLoading, maintenanceWindows } = useGetMaintenanceWindowsList();
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -31,7 +31,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
 
   const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
 
-  if (isInitialLoading) {
+  if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
 

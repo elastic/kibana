@@ -13,6 +13,8 @@ import {
   EuiButton,
   formatNumber,
   useEuiBackgroundColor,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse } from '../types';
@@ -59,7 +61,14 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       },
       {
         field: 'total',
-        name: 'Alerts',
+        name: (
+          <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
+            <span>
+              {i18n.TABLE_ALERTS}{' '}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         render: (alerts: number) => formatNumber(alerts, 'integer'),
       },
       {
@@ -84,14 +93,14 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         field: 'eventStartTime',
         name: i18n.TABLE_START_TIME,
         dataType: 'date',
-        render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:MM A'),
+        render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
         sortable: true,
       },
       {
         field: 'eventEndTime',
         name: i18n.TABLE_END_TIME,
         dataType: 'date',
-        render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:MM A'),
+        render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:mm A'),
       },
       {
         name: '',

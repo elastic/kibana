@@ -15,32 +15,35 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('getMaintenanceWindowsList', () => {
   test('should call list maintenance windows api', async () => {
-    const apiResponse = [
-      {
-        id: '1',
-        title: 'test',
-        enabled: true,
-        duration: 1,
-        expiration_date: '2023-03-23T19:16:21.293Z',
-        events: [],
-        r_rule: {
-          dtstart: '2023-03-23T19:16:21.293Z',
-          tzid: 'America/New_York',
-          freq: 3,
-          interval: 1,
-          byweekday: ['TH'],
+    const apiResponse = {
+      data: [
+        {
+          id: '1',
+          title: 'test',
+          enabled: true,
+          duration: 1,
+          expiration_date: '2023-03-23T19:16:21.293Z',
+          events: [],
+          r_rule: {
+            dtstart: '2023-03-23T19:16:21.293Z',
+            tzid: 'America/New_York',
+            freq: 3,
+            interval: 1,
+            byweekday: ['TH'],
+          },
+          status: 'upcoming',
+          event_start_time: '2023-03-23T19:16:21.293Z',
+          event_end_time: '2023-03-23T19:16:21.293Z',
+          created_by: null,
+          updated_by: null,
+          created_at: '2023-03-23T19:16:21.293Z',
+          updated_at: '2023-03-23T19:16:21.293Z',
+          total: 1000,
         },
-        status: 'upcoming',
-        event_start_time: '2023-03-23T19:16:21.293Z',
-        event_end_time: '2023-03-23T19:16:21.293Z',
-        created_by: null,
-        updated_by: null,
-        created_at: '2023-03-23T19:16:21.293Z',
-        updated_at: '2023-03-23T19:16:21.293Z',
-        total: 1000,
-      },
-    ];
-    http.post.mockResolvedValueOnce(apiResponse);
+      ],
+      total: 1,
+    };
+    http.get.mockResolvedValueOnce(apiResponse);
 
     const maintenanceWindow: MaintenanceWindowResponse[] = [
       {
@@ -70,12 +73,9 @@ describe('getMaintenanceWindowsList', () => {
 
     const result = await getMaintenanceWindowsList({ http });
     expect(result).toEqual(maintenanceWindow);
-    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/maintenance_window/_find",
-        Object {
-          "body": "{}",
-        },
       ]
     `);
   });

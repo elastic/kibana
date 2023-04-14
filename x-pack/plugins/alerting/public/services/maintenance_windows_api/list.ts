@@ -10,10 +10,11 @@ import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { MaintenanceWindowResponse } from '../../pages/maintenance_windows/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 
-const rewriteBodyRes = (
-  results: Array<AsApiContract<MaintenanceWindowResponse>>
-): MaintenanceWindowResponse[] => {
-  return results.map((item) => transform(item));
+const rewriteBodyRes = (results: {
+  data: Array<AsApiContract<MaintenanceWindowResponse>>;
+  total: number;
+}): MaintenanceWindowResponse[] => {
+  return results.data.map((item) => transform(item));
 };
 
 const transform: RewriteRequestCase<MaintenanceWindowResponse> = ({
@@ -40,14 +41,12 @@ const transform: RewriteRequestCase<MaintenanceWindowResponse> = ({
 
 export async function getMaintenanceWindowsList({
   http,
-  filter,
 }: {
   http: HttpSetup;
-  filter?: string;
 }): Promise<MaintenanceWindowResponse[]> {
-  const res = await http.post<Array<AsApiContract<MaintenanceWindowResponse>>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`,
-    { body: JSON.stringify({ filter }) }
-  );
+  const res = await http.get<{
+    data: Array<AsApiContract<MaintenanceWindowResponse>>;
+    total: number;
+  }>(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`);
   return rewriteBodyRes(res);
 }
