@@ -15,6 +15,7 @@ import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
   SERVER_APP_ID,
 } from '../../../../../common/constants';
 
@@ -711,7 +712,13 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: undefined,
+    // TODO https://github.com/elastic/kibana/pull/154637
+    // With the new changes we not going to have "no actions" option anymore.
+    // We will need to indicate it in the UI differently.
+    throttle:
+      rule.muteAll || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+        ? NOTIFICATION_THROTTLE_NO_ACTIONS
+        : undefined,
     actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,

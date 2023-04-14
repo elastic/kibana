@@ -244,11 +244,15 @@ export default ({ getService }: FtrProviderContext) => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: bodyToCompare.actions![0].uuid,
+            frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
           },
         ];
-        outputRule.throttle = '1d';
 
-        expect(bodyToCompare).to.eql(outputRule);
+        // It looks like SuperTest strips out undefined attributes,
+        // that is why we need to omit undefined attribute in the expected output.
+        // In this case throttle will be undefined in the response and will be removed by SuperTest.
+        const { throttle, ...restOfTheRule } = outputRule;
+        expect(bodyToCompare).to.eql(restOfTheRule);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {

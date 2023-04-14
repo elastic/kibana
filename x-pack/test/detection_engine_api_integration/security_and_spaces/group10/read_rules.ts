@@ -135,10 +135,19 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(body);
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput(),
-          actions: [{ ...action, uuid: bodyToCompare.actions[0].uuid }],
-          throttle: 'rule',
+          actions: [
+            {
+              ...action,
+              uuid: bodyToCompare.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
         };
-        expect(bodyToCompare).to.eql(ruleWithActions);
+        // It looks like SuperTest strips out undefined attributes,
+        // that is why we need to omit undefined attribute in the expected output.
+        // In this case throttle will be undefined in the response and will be removed by SuperTest.
+        const { throttle, ...restOfTheRule } = ruleWithActions;
+        expect(bodyToCompare).to.eql(restOfTheRule);
       });
 
       it('should be able to a read a scheduled action correctly', async () => {
@@ -174,10 +183,19 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(body);
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput(),
-          actions: [{ ...action, uuid: bodyToCompare.actions[0].uuid }],
-          throttle: '1h', // <-- throttle makes this a scheduled action
+          actions: [
+            {
+              ...action,
+              uuid: bodyToCompare.actions[0].uuid,
+              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+            },
+          ],
         };
-        expect(bodyToCompare).to.eql(ruleWithActions);
+        // It looks like SuperTest strips out undefined attributes,
+        // that is why we need to omit undefined attribute in the expected output.
+        // In this case throttle will be undefined in the response and will be removed by SuperTest.
+        const { throttle, ...restOfTheRule } = ruleWithActions;
+        expect(bodyToCompare).to.eql(restOfTheRule);
       });
 
       /**
@@ -236,11 +254,15 @@ export default ({ getService }: FtrProviderContext) => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
                 action_type_id: hookAction.actionTypeId,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
-          expect(bodyToCompare).to.eql(ruleWithActions);
+          // It looks like SuperTest strips out undefined attributes,
+          // that is why we need to omit undefined attribute in the expected output.
+          // In this case throttle will be undefined in the response and will be removed by SuperTest.
+          const { throttle, ...restOfTheRule } = ruleWithActions;
+          expect(bodyToCompare).to.eql(restOfTheRule);
         });
       });
     });

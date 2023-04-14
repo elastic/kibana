@@ -42,10 +42,12 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
         const firstFrequency = rule.actions[0]?.frequency;
         if (firstFrequency) {
           rule.actions = rule.actions.map((action) => omit(action, 'frequency'));
-          if (firstFrequency.notifyWhen === 'onActiveAlert') {
-            rule.throttle = NOTIFICATION_THROTTLE_RULE;
-          } else {
-            rule.throttle = firstFrequency.throttle;
+          if (!rule.throttle) {
+            if (firstFrequency.notifyWhen === 'onActiveAlert') {
+              rule.throttle = NOTIFICATION_THROTTLE_RULE;
+            } else {
+              rule.throttle = firstFrequency.throttle;
+            }
           }
         }
       }

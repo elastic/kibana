@@ -70,11 +70,16 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
+        // It looks like SuperTest strips out undefined attributes,
+        // that is why we need to omit undefined attribute in the expected output.
+        // In this case throttle will be undefined in the response and will be removed by SuperTest.
+        const { throttle, ...simpleRuleOutput } = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare.actions?.[0].id}`,
+          `${bodyToCompare.actions?.[0].uuid}`
+        );
+
         const expected = {
-          ...getSimpleRuleOutputWithWebHookAction(
-            `${bodyToCompare.actions?.[0].id}`,
-            `${bodyToCompare.actions?.[0].uuid}`
-          ),
+          ...simpleRuleOutput,
           revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);

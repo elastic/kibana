@@ -284,6 +284,7 @@ describe('get_export_by_object_ids', () => {
               message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             action_type_id: '.slack',
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
         ],
         building_block_type: 'default',
@@ -322,7 +323,6 @@ describe('get_export_by_object_ids', () => {
         to: 'now',
         type: 'query',
         threat: getThreatMock(),
-        throttle: 'rule',
         note: '# Investigative notes',
         version: 1,
         revision: 0,
@@ -426,6 +426,7 @@ describe('get_export_by_object_ids', () => {
                 message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               action_type_id: '.email',
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
         })

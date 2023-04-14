@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '@kbn/security-solution-plugin/common/constants';
 import { getSimpleRuleOutput } from './get_simple_rule_output';
 import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
@@ -13,7 +14,7 @@ export const getSimpleRuleOutputWithWebHookAction = (
   uuid: string
 ): RuleWithoutServerGeneratedProperties => ({
   ...getSimpleRuleOutput(),
-  throttle: 'rule',
+  throttle: undefined,
   actions: [
     {
       action_type_id: '.webhook',
@@ -23,6 +24,7 @@ export const getSimpleRuleOutputWithWebHookAction = (
         body: '{}',
       },
       uuid,
+      frequency: NOTIFICATION_DEFAULT_FREQUENCY,
     },
   ],
 });
