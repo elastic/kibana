@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
-import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-finder-plugin/common';
 import { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
 import { MSearchService } from '../../core/msearch';
@@ -17,6 +16,9 @@ import type { RpcService } from '../rpc_service';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import type { Context as RpcContext } from '../types';
 import { wrapError } from './error_wrapper';
+
+const PER_PAGE_SETTING = 'savedObjects:perPage';
+const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
 
 interface RouteContext {
   rpc: RpcService<RpcContext, ProcedureName>;
