@@ -60,6 +60,22 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.stopTrainedModelDeployment(params);
             });
         },
+        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.inferTrainedModel(params);
+            });
+        },
+        async deleteTrainedModel(params: estypes.MlDeleteTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canDeleteTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.deleteTrainedModel(params);
+            });
+        },
       };
     },
   };
