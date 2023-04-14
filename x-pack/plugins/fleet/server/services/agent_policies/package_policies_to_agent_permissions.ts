@@ -102,7 +102,7 @@ export async function storedPackagePoliciesToAgentPermissions(
                   };
 
                   const pkgDefinedEs = dataStreams.find(
-                    (d) => d.type == ds.type && d.dataset == ds.dataset
+                    (d) => d.type === ds.type && d.dataset === ds.dataset
                   )?.elasticsearch;
 
                   if (pkgDefinedEs) {
@@ -139,7 +139,7 @@ export async function storedPackagePoliciesToAgentPermissions(
   return Object.fromEntries(await Promise.all(permissionEntries));
 }
 
-interface DataStreamMeta {
+export interface DataStreamMeta {
   type: string;
   dataset: string;
   dataset_is_prefix?: boolean;

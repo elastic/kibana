@@ -324,7 +324,7 @@ export function parseAndVerifyDataStreams(opts: {
       streams: manifestStreams,
       elasticsearch,
       ...restOfProps
-    } = manifest;
+    } = expandDottedObject(manifest);
 
     if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
