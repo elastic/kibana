@@ -21,10 +21,6 @@ export const duplicateExceptions = async ({
   exceptionLists,
   exceptionsClient,
 }: DuplicateExceptionsParams): Promise<RuleParams['exceptionsList']> => {
-  if (exceptionLists == null) {
-    return [];
-  }
-
   // Sort the shared lists and the rule_default lists.
   // Only a single rule_default list should exist per rule.
   const ruleDefaultList = exceptionLists.find(

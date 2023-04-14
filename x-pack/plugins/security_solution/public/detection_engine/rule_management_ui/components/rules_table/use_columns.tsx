@@ -56,7 +56,7 @@ interface ColumnsProps {
 }
 
 interface ActionColumnsProps {
-  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  showExceptionsDuplicateConfirmation: () => Promise<string | boolean>;
 }
 
 const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {

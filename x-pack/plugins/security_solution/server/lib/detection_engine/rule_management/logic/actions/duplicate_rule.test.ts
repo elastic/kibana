@@ -92,9 +92,9 @@ describe('duplicateRule', () => {
     jest.clearAllMocks();
   });
 
-  it('returns an object with fields copied from a given rule', async () => {
+  it('returns an object with fields copied from a given rule', () => {
     const rule = createTestRule();
-    const result = await duplicateRule({
+    const result = duplicateRule({
       rule,
     });
 
@@ -115,10 +115,10 @@ describe('duplicateRule', () => {
     });
   });
 
-  it('appends [Duplicate] to the name', async () => {
+  it('appends [Duplicate] to the name', () => {
     const rule = createTestRule();
     rule.name = 'PowerShell Keylogging Script';
-    const result = await duplicateRule({
+    const result = duplicateRule({
       rule,
     });
 
@@ -129,9 +129,9 @@ describe('duplicateRule', () => {
     );
   });
 
-  it('generates a new ruleId', async () => {
+  it('generates a new ruleId', () => {
     const rule = createTestRule();
-    const result = await duplicateRule({
+    const result = duplicateRule({
       rule,
     });
 
@@ -144,16 +144,40 @@ describe('duplicateRule', () => {
     );
   });
 
-  it('makes sure the duplicated rule is disabled', async () => {
+  it('makes sure the duplicated rule is disabled', () => {
     const rule = createTestRule();
     rule.enabled = true;
-    const result = await duplicateRule({
+    const result = duplicateRule({
       rule,
     });
 
     expect(result).toEqual(
       expect.objectContaining({
         enabled: false,
+      })
+    );
+  });
+
+  it('return empty exceptionsList', () => {
+    const rule = createTestRule();
+    rule.params = {
+      ...rule.params,
+      exceptionsList: [
+        {
+          id: '1',
+          list_id: '1',
+          type: 'detection',
+          namespace_type: 'single',
+        },
+      ],
+    };
+    const result = duplicateRule({
+      rule,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        params: expect.objectContaining({ exceptionsList: [] }),
       })
     );
   });
@@ -165,9 +189,9 @@ describe('duplicateRule', () => {
       return rule;
     };
 
-    it('transforms it to a custom (mutable) rule', async () => {
+    it('transforms it to a custom (mutable) rule', () => {
       const rule = createPrebuiltRule();
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -180,7 +204,7 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('resets related integrations to an empty array', async () => {
+    it('resets related integrations to an empty array', () => {
       const rule = createPrebuiltRule();
       rule.params.relatedIntegrations = [
         {
@@ -190,7 +214,7 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -203,7 +227,7 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('resets required fields to an empty array', async () => {
+    it('resets required fields to an empty array', () => {
       const rule = createPrebuiltRule();
       rule.params.requiredFields = [
         {
@@ -213,7 +237,7 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -226,10 +250,10 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('resets setup guide to an empty string', async () => {
+    it('resets setup guide to an empty string', () => {
       const rule = createPrebuiltRule();
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -250,9 +274,9 @@ describe('duplicateRule', () => {
       return rule;
     };
 
-    it('keeps it custom', async () => {
+    it('keeps it custom', () => {
       const rule = createCustomRule();
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -265,7 +289,7 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('copies related integrations as is', async () => {
+    it('copies related integrations as is', () => {
       const rule = createCustomRule();
       rule.params.relatedIntegrations = [
         {
@@ -275,7 +299,7 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -288,7 +312,7 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('copies required fields as is', async () => {
+    it('copies required fields as is', () => {
       const rule = createCustomRule();
       rule.params.requiredFields = [
         {
@@ -298,7 +322,7 @@ describe('duplicateRule', () => {
         },
       ];
 
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 
@@ -311,10 +335,10 @@ describe('duplicateRule', () => {
       );
     });
 
-    it('copies setup guide as is', async () => {
+    it('copies setup guide as is', () => {
       const rule = createCustomRule();
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
+      const result = duplicateRule({
         rule,
       });
 

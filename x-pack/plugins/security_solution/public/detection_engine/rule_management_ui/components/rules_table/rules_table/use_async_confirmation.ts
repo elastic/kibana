@@ -7,9 +7,9 @@
 
 import { useCallback, useRef } from 'react';
 
-type UseAsyncConfirmationReturn = [
-  initConfirmation: () => Promise<boolean>,
-  confirm: () => void,
+type UseAsyncConfirmationReturn<T> = [
+  initConfirmation: () => Promise<T | boolean>,
+  confirm: (value?: T) => void,
   cancel: () => void
 ];
 
@@ -19,14 +19,14 @@ interface UseAsyncConfirmationArgs {
 }
 
 // TODO move to common hooks
-export const useAsyncConfirmation = ({
+export const useAsyncConfirmation = <T = boolean>({
   onInit,
   onFinish,
-}: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn => {
-  const confirmationPromiseRef = useRef<(result: boolean) => void>();
+}: UseAsyncConfirmationArgs): UseAsyncConfirmationReturn<T> => {
+  const confirmationPromiseRef = useRef<(result: T | boolean) => void>();
 
-  const confirm = useCallback(() => {
-    confirmationPromiseRef.current?.(true);
+  const confirm = useCallback((value?: T) => {
+    confirmationPromiseRef.current?.(value ? value : true);
   }, []);
 
   const cancel = useCallback(() => {
@@ -36,7 +36,7 @@ export const useAsyncConfirmation = ({
   const initConfirmation = useCallback(() => {
     onInit();
 
-    return new Promise<boolean>((resolve) => {
+    return new Promise<T | boolean>((resolve) => {
       confirmationPromiseRef.current = resolve;
     }).finally(() => {
       onFinish();

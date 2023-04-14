@@ -96,6 +96,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     onFinish: hideDeleteConfirmation,
   });
 
+  const handleDeletionConfirmCallback = useCallback(
+    () => handleDeletionConfirm(),
+    [handleDeletionConfirm]
+  );
+
   const {
     bulkActionsDryRunResult,
     bulkAction,
@@ -254,7 +259,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <EuiConfirmModal
           title={i18n.DELETE_CONFIRMATION_TITLE}
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={handleDeletionConfirmCallback}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
