@@ -289,7 +289,6 @@ export class Plugin
               app: observabilityAppId,
               label: link.title,
               path: link.path ?? '',
-              isBetaFeature: link.id === 'slos' ? true : false,
             }));
 
           const sections = [

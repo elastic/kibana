@@ -8,7 +8,7 @@
 import { login } from '../../tasks/login';
 import { runEndpointLoaderScript } from '../../tasks/run_endpoint_loader';
 
-describe.skip('Endpoints page', () => {
+describe('Endpoints page', () => {
   before(() => {
     runEndpointLoaderScript();
   });
