@@ -22,26 +22,30 @@ export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const INSTALLED_RULES_TAB = (ruleCount?: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules', {
-    defaultMessage: `Installed Rules${ruleCount ? ' [{ruleCount}]' : ''}`,
-    values: { ruleCount },
-  });
+export const INSTALLED_RULES_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
+  {
+    defaultMessage: `Installed Rules`,
+  }
+);
 
-export const RULE_MONITORING_TAB = (ruleCount: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring', {
-    defaultMessage: 'Rule Monitoring [{ruleCount}]',
-    values: { ruleCount },
-  });
+export const RULE_MONITORING_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
+  {
+    defaultMessage: 'Rule Monitoring',
+  }
+);
 
-export const RULE_UPDATES_TAB = (ruleCount: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.updates', {
-    defaultMessage: 'Rule Updates [{ruleCount}]',
-    values: { ruleCount },
-  });
+export const RULE_UPDATES_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.updates',
+  {
+    defaultMessage: 'Rule Updates',
+  }
+);
 
-export const ADD_RULES_TAB = (ruleCount: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.addRules', {
-    defaultMessage: 'Add Rules [{ruleCount}]',
-    values: { ruleCount },
-  });
+export const ADD_RULES_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.addRules',
+  {
+    defaultMessage: 'Add Rules',
+  }
+);

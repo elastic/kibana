@@ -9,9 +9,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import { useFetchPrebuiltRulesStatusQuery } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
-import { mockReactQueryResponse } from '../../../../detection_engine/rule_management/api/hooks/__mocks__/mock_react_query_response';
-import { UpdatePrePackagedRulesCallOut } from './update_callout';
+import { useFetchPrebuiltRulesStatusQuery } from '../../../rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
+import { mockReactQueryResponse } from '../../../rule_management/api/hooks/__mocks__/mock_react_query_response';
+import { PrebuiltRulesInfoCallout } from './prebuilt_rules_info_callout';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock(
@@ -48,7 +48,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt ruleRelease notes'
@@ -70,7 +70,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt rule'
@@ -92,7 +92,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt timelineRelease notes'
@@ -114,7 +114,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt timeline'
@@ -136,7 +136,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout')).toHaveTextContent(
       'You can update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline. Note that this will reload deleted Elastic prebuilt rules.Release notes'
@@ -158,7 +158,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       })
     );
 
-    const { getByTestId } = render(<UpdatePrePackagedRulesCallOut />, { wrapper: TestProviders });
+    const { getByTestId } = render(<PrebuiltRulesInfoCallout />, { wrapper: TestProviders });
 
     expect(getByTestId('update-callout-button')).toHaveTextContent(
       'Update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline'

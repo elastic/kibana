@@ -197,6 +197,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     }
   }, selectedRuleIds);
 
+  const isTableSelectable =
+    hasPermissions &&
+    (selectedTab === AllRulesTabs.installed || selectedTab === AllRulesTabs.monitoring);
+
   const euiBasicTableSelectionProps = useMemo(
     () => ({
       selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
@@ -349,12 +353,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={currentRules}
-            isSelectable={hasPermissions}
+            isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}
             ref={tableRef}
-            selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
+            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
             sorting={{
               sort: {
                 // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

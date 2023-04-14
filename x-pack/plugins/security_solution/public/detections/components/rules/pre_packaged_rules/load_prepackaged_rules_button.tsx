@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { usePrePackagedRulesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
@@ -62,23 +62,32 @@ export const LoadPrePackagedRulesButton = ({
       prePackagedTimelineStatus === 'timelinesNotInstalled') &&
     prePackagedAssetsStatus !== 'someRuleUninstall';
 
-  if (showInstallButton) {
+  if (true) {
     // Without the outer div EuiStepTour crashes with Uncaught DOMException:
     // Failed to execute 'removeChild' on 'Node': The node to be removed is not
     // a child of this node.
     return (
       <div>
-        <EuiButton
+        <EuiButtonEmpty
           id={INSTALL_PREBUILT_RULES_ANCHOR}
-          fill={fill}
-          iconType="indexOpen"
+          iconType="plusInCircle"
           isLoading={isLoading}
           isDisabled={isDisabled}
+          color={'primary'}
           onClick={onClick}
           data-test-subj={dataTestSubj}
         >
-          {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}
-        </EuiButton>
+          {'Add Elastic Rules'}
+          <EuiBadge
+            color={'#E0E5EE'}
+            css={`
+              margin-left: 5px;
+            `}
+          >
+            {'3'}
+          </EuiBadge>
+          {/*{getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}*/}
+        </EuiButtonEmpty>
       </div>
     );
   }

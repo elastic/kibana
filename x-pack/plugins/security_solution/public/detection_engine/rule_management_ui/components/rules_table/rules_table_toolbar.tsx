@@ -28,27 +28,43 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
       () => ({
         [AllRulesTabs.installed]: {
           id: AllRulesTabs.installed,
-          name: i18n.INSTALLED_RULES_TAB(installedTotal),
+          name: i18n.INSTALLED_RULES_TAB,
           disabled: false,
           href: `/rules/${AllRulesTabs.installed}`,
+          isBeta: !!(installedTotal ?? 0 > 0),
+          betaOptions: {
+            text: `${installedTotal}`,
+          },
         },
         [AllRulesTabs.monitoring]: {
           id: AllRulesTabs.monitoring,
-          name: i18n.RULE_MONITORING_TAB(installedTotal ?? 0),
+          name: i18n.RULE_MONITORING_TAB,
           disabled: false,
           href: `/rules/${AllRulesTabs.monitoring}`,
+          isBeta: !!(installedTotal ?? 0 > 0),
+          betaOptions: {
+            text: `${installedTotal}`,
+          },
         },
         [AllRulesTabs.updates]: {
           id: AllRulesTabs.updates,
-          name: i18n.RULE_UPDATES_TAB(updateTotal ?? 0),
+          name: i18n.RULE_UPDATES_TAB,
           disabled: false,
           href: `/rules/${AllRulesTabs.updates}`,
+          isBeta: !!(updateTotal ?? 0 > 0),
+          betaOptions: {
+            text: `${updateTotal}`,
+          },
         },
         [AllRulesTabs.addRules]: {
           id: AllRulesTabs.addRules,
-          name: i18n.ADD_RULES_TAB(newTotal ?? 0),
+          name: i18n.ADD_RULES_TAB,
           disabled: false,
           href: `/rules/${AllRulesTabs.addRules}`,
+          isBeta: !!(newTotal ?? 0 > 0),
+          betaOptions: {
+            text: `${newTotal}`,
+          },
         },
       }),
       []

@@ -28,24 +28,39 @@ export const CREATE_RULE_ACTION = i18n.translate(
     defaultMessage: 'Create your own rules',
   }
 );
-export const RULE_UPDATES_LINK = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.ruleUpdatesLinkTitle',
-  {
-    defaultMessage: 'Rule Updates',
-  }
-);
 
-export const NEW_RULES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.newRulesCalloutTitle',
+export const UPDATE_PREPACKAGED_RULES_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesTitle',
   {
-    defaultMessage:
-      'New Elastic rules are available to be installed. Click on the “Add Elastic Rules” button to Review and install.',
+    defaultMessage: 'Updates available for installed rules. Review and update in Rule Updates.',
   }
 );
 
 export const DISMISS = i18n.translate('xpack.securitySolution.detectionEngine.rules.dismissTitle', {
   defaultMessage: 'Dismiss',
 });
+
+export const RULE_TYPE_STATUS_FILTER_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.dismissTitle',
+  {
+    defaultMessage: 'Rule type/status',
+  }
+);
+
+export const NEW_PREPACKAGED_RULES_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.newPrePackagedRulesTitle',
+  {
+    defaultMessage:
+      'New Elastic rules are available to be installed. Click on the “Add Elastic Rules” button to Review and install.',
+  }
+);
+
+export const UPDATE_PREPACKAGED_RULES = (updateRules: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesButton', {
+    values: { updateRules },
+    defaultMessage:
+      'Update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}}',
+  });
 
 export const UPDATE_PREPACKAGED_TIMELINES = (updateTimelines: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.updatePrePackagedTimelinesButton', {

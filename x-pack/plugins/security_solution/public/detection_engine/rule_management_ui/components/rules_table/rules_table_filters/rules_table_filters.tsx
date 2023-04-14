@@ -17,6 +17,7 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from '../../tags_filter/tags_filter';
 import { RuleSearchField } from './rule_search_field';
+import { TypeStatusFilterPopover } from '../../type_status_filter/type_status_filter';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -80,6 +81,16 @@ const RulesTableFiltersComponent = () => {
 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <TypeStatusFilterPopover
+            onSelectedTagsChanged={handleSelectedTags}
+            selectedTags={[]}
+            tags={[]}
+            data-test-subj="allRulesTagPopover"
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover

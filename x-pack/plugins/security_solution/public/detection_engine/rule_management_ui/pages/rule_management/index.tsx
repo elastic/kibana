@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
@@ -38,6 +38,8 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+import { PrebuiltRulesInfoCallout } from '../../components/info_callout/prebuilt_rules_info_callout';
+import { NewRulesCallout } from '../../components/new_rules_callout/new_rules_callout';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -151,10 +153,12 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexGroup>
             {/*  */}
           </HeaderPage>
-          {/* {(prePackagedRuleStatus === 'ruleNeedUpdate' ||*/}
+          {/*{(prePackagedRuleStatus === 'ruleNeedUpdate' ||*/}
           {/*  prePackagedTimelineStatus === 'timelineNeedUpdate') && (*/}
-          {/*  <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />*/}
-          {/* )}*/}
+          <PrebuiltRulesInfoCallout data-test-subj="update-callout-button" />
+          <EuiSpacer size={'s'} />
+          <NewRulesCallout data-test-subj="new-callout-button" />
+          {/*)}*/}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
