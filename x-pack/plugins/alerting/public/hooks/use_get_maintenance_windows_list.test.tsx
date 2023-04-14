@@ -43,7 +43,7 @@ describe('useGetMaintenanceWindowsList', () => {
   });
 
   it('should call onError if api fails', async () => {
-    getMaintenanceWindowsList.mockRejectedValue('');
+    getMaintenanceWindowsList.mockRejectedValue('This is an error.');
 
     renderHook(() => useGetMaintenanceWindowsList(), {
       wrapper: appMockRenderer.AppWrapper,
