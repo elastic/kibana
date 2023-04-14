@@ -92,7 +92,10 @@ export function getNewCustomUrlDefaults(
   // which matches the indices configured in the job datafeed.
   let query: estypes.QueryDslQueryContainer = {};
   let indicesName: string | undefined;
+  let backupIndicesName: string | undefined;
+  let backupDataViewId: string | undefined;
   let jobId;
+
   if (
     isAnomalyDetectionJob(job) &&
     dataViews !== undefined &&
@@ -106,12 +109,16 @@ export function getNewCustomUrlDefaults(
     jobId = job.job_id;
   } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
     indicesName = job.dest.index;
+    backupIndicesName = job.source.index[0];
     query = job.source?.query ?? {};
     jobId = job.id;
   }
 
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
-  kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+  if (defaultDataViewId === undefined && backupIndicesName !== undefined) {
+    backupDataViewId = dataViews.find((dv) => dv.title === backupIndicesName)?.id;
+  }
+  kibanaSettings.discoverIndexPatternId = defaultDataViewId ?? backupDataViewId ?? '';
   kibanaSettings.filters =
     defaultDataViewId === null ? [] : getFiltersForDSLQuery(query, defaultDataViewId, jobId);
 
