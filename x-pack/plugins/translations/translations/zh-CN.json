@@ -27456,7 +27456,6 @@
     "xpack.security.management.editRole.featureTable.featureVisibilityTitle": "定制功能权限",
     "xpack.security.management.editRole.featureTable.managementCategoryHelpText": "对堆栈管理的访问由 Elasticsearch 和 Kibana 权限共同决定，并且不能显式禁用。",
     "xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip": "功能已定制子功能权限。展开此行以了解更多信息。",
-    "xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel": "删除索引权限",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel": "已授权文档查询编辑器",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel": "已授权文档查询",
     "xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel": "授予特定文档的读取权限",
