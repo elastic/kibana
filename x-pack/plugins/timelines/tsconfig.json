@@ -34,7 +34,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/alerts-as-data-utils",
     "@kbn/logging",
-    "@kbn/session-view-plugin",
   ],
   "exclude": [
     "target/**/*",
