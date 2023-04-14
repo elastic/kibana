@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
