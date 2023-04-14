@@ -34,7 +34,7 @@ import './add_inference_pipeline_flyout.scss';
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {
-      configuration: { sourceField },
+      configuration: { sourceField, fieldMappings },
       indexName,
     },
     getDocumentsErr,
@@ -151,9 +151,18 @@ export const TestPipeline: React.FC = () => {
                     </strong>
                   </p>
                 </EuiText>
-                <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
-                  {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}
-                </EuiCodeBlock>
+                {fieldMappings && (
+                  <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
+                    {`[{"_index":"index","_id":"id","_source":{${fieldMappings
+                      .map((fieldMapping) => `"${fieldMapping.sourceField}": "REPLACE ME"`)
+                      .join(', ')}}}]`}
+                  </EuiCodeBlock>
+                )}
+                {sourceField && (
+                  <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
+                    {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"REPLACE ME"}}]`}
+                  </EuiCodeBlock>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
