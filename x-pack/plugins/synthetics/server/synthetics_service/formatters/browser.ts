@@ -27,9 +27,9 @@ const throttlingFormatter: Formatter = (fields) => {
   if (value?.label === 'no-throttling') return false;
 
   return {
-    download: thValue?.download ?? defaultThrottling.download,
-    upload: thValue?.upload ?? defaultThrottling.upload,
-    latency: thValue?.latency ?? defaultThrottling.latency,
+    download: Number(thValue?.download ?? defaultThrottling.download),
+    upload: Number(thValue?.upload ?? defaultThrottling.upload),
+    latency: Number(thValue?.latency ?? defaultThrottling.latency),
   };
 };
 
