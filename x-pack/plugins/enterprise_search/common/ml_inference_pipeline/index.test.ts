@@ -241,7 +241,9 @@ describe('generateMlInferencePipelineBody lib function', () => {
       description: 'my-description',
       model: mockTextClassificationModel,
       pipelineName: 'my-pipeline',
-      fieldMappings: [{ sourceField: 'my-source-field', targetField: 'ml.inference.my-source-field_expanded' }],
+      fieldMappings: [
+        { sourceField: 'my-source-field', targetField: 'ml.inference.my-source-field_expanded' },
+      ],
     });
 
     expect(actual).toEqual(
