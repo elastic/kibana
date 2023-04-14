@@ -15056,6 +15056,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.syntheticsSettingsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "syntheticsSettingsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SYNTHETICS_SETTINGS\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.TimeFormatter",
         "type": "Type",
         "tags": [],

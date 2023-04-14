@@ -1271,6 +1271,23 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingApiRequestHandlerContext.getMaintenanceWindowClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getMaintenanceWindowClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "MaintenanceWindowClient"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingApiRequestHandlerContext.listTypes",
             "type": "Function",
             "tags": [],
@@ -5783,6 +5800,42 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.DateRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRange",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DateRange.gte",
+            "type": "string",
+            "tags": [],
+            "label": "gte",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DateRange.lte",
+            "type": "string",
+            "tags": [],
+            "label": "lte",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.DefaultRuleAggregationResult",
         "type": "Interface",
         "tags": [],
@@ -6349,6 +6402,257 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowClientContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowClientContext",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowClientContext.getModificationMetadata",
+            "type": "Function",
+            "tags": [],
+            "label": "getModificationMetadata",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.MaintenanceWindowModificationMetadata",
+                "text": "MaintenanceWindowModificationMetadata"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowClientContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowClientContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowModificationMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowModificationMetadata",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowModificationMetadata.createdBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowModificationMetadata.updatedBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowModificationMetadata.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowModificationMetadata.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowSOProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowSOProperties",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.expirationDate",
+            "type": "string",
+            "tags": [],
+            "label": "expirationDate",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.DateRange",
+                "text": "DateRange"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MaintenanceWindowSOProperties.rRule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rRule",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              "> & Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RRuleRecord",
+                "text": "RRuleRecord"
+              },
+              ", \"dtstart\" | \"tzid\">"
+            ],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.MappedParamsProperties",
         "type": "Interface",
         "tags": [],
@@ -6396,7 +6700,7 @@
         "tags": [],
         "label": "RRuleRecord",
         "description": [],
-        "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+        "path": "x-pack/plugins/alerting/common/rrule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6407,7 +6711,7 @@
             "tags": [],
             "label": "dtstart",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6418,7 +6722,7 @@
             "tags": [],
             "label": "tzid",
             "description": [],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6432,7 +6736,7 @@
             "signature": [
               "0 | 2 | 6 | 5 | 4 | 3 | 1 | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6446,7 +6750,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6460,7 +6764,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6474,7 +6778,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6489,7 +6793,7 @@
               "WeekdayStr",
               " | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6503,7 +6807,7 @@
             "signature": [
               "(string | number)[] | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6517,7 +6821,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6531,7 +6835,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6545,7 +6849,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6559,7 +6863,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6573,7 +6877,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6587,7 +6891,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6601,7 +6905,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6615,7 +6919,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7206,7 +7510,14 @@
             "label": "frequency",
             "description": [],
             "signature": [
-              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleActionFrequency",
+                "text": "RuleActionFrequency"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -7228,6 +7539,76 @@
                 "text": "AlertsFilter"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleActionFrequency",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleActionFrequency",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleActionFrequency",
+            "text": "RuleActionFrequency"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleActionFrequency.summary",
+            "type": "boolean",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleActionFrequency.notifyWhen",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "notifyWhen",
+            "description": [],
+            "signature": [
+              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleActionFrequency.throttle",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "throttle",
+            "description": [],
+            "signature": [
+              "string | null"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -8532,6 +8913,18 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "MaintenanceWindowStatus",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleExecutionStatusErrorReasons",
         "type": "Enum",
         "tags": [],
@@ -8796,6 +9189,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ENABLE_MAINTENANCE_WINDOWS",
+        "type": "boolean",
+        "tags": [],
+        "label": "ENABLE_MAINTENANCE_WINDOWS",
+        "description": [],
+        "signature": [
+          "false"
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ExecutionLogSortFields",
         "type": "Type",
         "tags": [],
@@ -8880,6 +9288,103 @@
           "\"/api/alerts\""
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"maintenanceWindow\""
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"maintenance-window\""
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindow",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindow",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindowSOProperties",
+            "text": "MaintenanceWindowSOProperties"
+          },
+          " & ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindowModificationMetadata",
+            "text": "MaintenanceWindowModificationMetadata"
+          },
+          " & { status: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindowStatus",
+            "text": "MaintenanceWindowStatus"
+          },
+          "; eventStartTime: string | null; eventEndTime: string | null; id: string; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowSOAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowSOAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindowSOProperties",
+            "text": "MaintenanceWindowSOProperties"
+          },
+          " & ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.MaintenanceWindowModificationMetadata",
+            "text": "MaintenanceWindowModificationMetadata"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9089,6 +9594,37 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RRuleParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RRuleParams",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RRuleRecord",
+            "text": "RRuleRecord"
+          },
+          "> & Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RRuleRecord",
+            "text": "RRuleRecord"
+          },
+          ", \"dtstart\" | \"tzid\">"
+        ],
+        "path": "x-pack/plugins/alerting/common/rrule_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleActionAlertsFilterProperty",
         "type": "Type",
         "tags": [],
@@ -9280,7 +9816,15 @@
         "label": "RuleSnooze",
         "description": [],
         "signature": [
-          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
+          "{ duration: number; rRule: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RRuleParams",
+            "text": "RRuleParams"
+          },
+          "; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
         ],
         "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
         "deprecated": false,
@@ -9856,6 +10400,42 @@
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_API_PRIVILEGES",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW",
+            "type": "string",
+            "tags": [],
+            "label": "READ_MAINTENANCE_WINDOW",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW",
+            "type": "string",
+            "tags": [],
+            "label": "WRITE_MAINTENANCE_WINDOW",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
