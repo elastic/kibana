@@ -445,3 +445,7 @@ export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
     defaultMessage: 'Save maintenance window',
   }
 );
+
+export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
+  defaultMessage: 'UPCOMING',
+});

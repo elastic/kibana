@@ -15,12 +15,15 @@ import {
   useEuiBackgroundColor,
   EuiToolTip,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse } from '../types';
 import * as i18n from '../translations';
 import { Status, StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
+import { UpcomingEventsPopover } from './upcoming_events_popover';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
@@ -93,7 +96,18 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         field: 'eventStartTime',
         name: i18n.TABLE_START_TIME,
         dataType: 'date',
-        render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
+        render: (startDate: string, item: MaintenanceWindowResponse) => {
+          return (
+            <EuiFlexGroup responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
+              {item.events.length > 1 ? (
+                <EuiFlexItem grow={false}>
+                  <UpcomingEventsPopover maintenanceWindowResponse={item} />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        },
         sortable: true,
       },
       {
