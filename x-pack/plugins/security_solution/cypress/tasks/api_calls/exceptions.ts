@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExceptionList, ExceptionListItem } from '../../objects/exception';
+import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
 
 export const createEndpointExceptionList = () =>
   cy.request({
@@ -59,6 +59,17 @@ export const createExceptionListItem = (
           value: ['some host', 'another host'],
         },
       ],
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+
+export const createRuleExceptionItem = (ruleId: string, exceptionListItems: RuleExceptionItem[]) =>
+  cy.request({
+    method: 'POST',
+    url: `/api/detection_engine/rules/${ruleId}/exceptions`,
+    body: {
+      items: exceptionListItems,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,

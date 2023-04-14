@@ -10,6 +10,7 @@ import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
+  EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
 } from '../screens/exceptions';
@@ -29,6 +30,9 @@ import {
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
   BACK_TO_RULES_TABLE,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
+  EXCEPTIONS_ITEM_CONTAINER,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -103,6 +107,26 @@ export const goToAlertsTab = () => {
 export const goToExceptionsTab = () => {
   cy.get(EXCEPTIONS_TAB).should('exist');
   cy.get(EXCEPTIONS_TAB).click();
+};
+
+export const viewExpiredExceptionItems = () => {
+  cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
+  cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
+};
+
+export const expectToContainItem = (itemName: string) => {
+  cy.log(`Expecting exception items table to contain '${itemName}'`);
+  cy.get(EXCEPTION_CARD_ITEM_NAME).should('include.text', itemName);
+};
+
+export const assertExceptionItemsExists = (itemNames: string[]) => {
+  for (const itemName of itemNames) {
+    expectToContainItem(itemName);
+  }
+};
+
+export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
+  cy.get(EXCEPTIONS_ITEM_CONTAINER).should('have.length', numberOfItems);
 };
 
 export const goToEndpointExceptionsTab = () => {

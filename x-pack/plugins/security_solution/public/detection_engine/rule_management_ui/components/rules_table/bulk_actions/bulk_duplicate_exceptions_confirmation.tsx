@@ -57,10 +57,17 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
           {
             id: DuplicateOptions.withExceptions,
             label: i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount),
+            'data-test-subj': DuplicateOptions.withExceptions,
+          },
+          {
+            id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            label: i18n.DUPLICATE_EXCEPTIONS_EXCLUDE_EXPIRED_EXCEPTIONS_TEXT(rulesCount),
+            'data-test-subj': DuplicateOptions.withExceptionsExcludeExpiredExceptions,
           },
           {
             id: DuplicateOptions.withoutExceptions,
             label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
+            'data-test-subj': DuplicateOptions.withoutExceptions,
           },
         ]}
         idSelected={selectedDuplicateOption}

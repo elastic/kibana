@@ -33,6 +33,14 @@ export interface ExceptionListItem {
   entries: Array<{ field: string; operator: string; type: string; value: string[] }>;
 }
 
+export interface RuleExceptionItem {
+  description: string;
+  name: string;
+  type: 'simple';
+  entries: Array<{ field: string; operator: string; type: string; value: string[] | string }>;
+  expire_time: string | undefined;
+}
+
 export const getExceptionList = (): ExceptionList => ({
   description: 'Test exception list description',
   list_id: 'test_exception_list',
