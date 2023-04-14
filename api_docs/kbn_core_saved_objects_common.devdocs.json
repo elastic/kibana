@@ -3069,14 +3069,6 @@
             "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-          },
-          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },

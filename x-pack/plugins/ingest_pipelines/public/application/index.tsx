@@ -18,6 +18,7 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
+import { ILicense } from '../types';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -45,6 +46,7 @@ export interface AppServices {
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
   application: ApplicationStart;
+  license: ILicense | null;
 }
 
 export interface CoreServices {
