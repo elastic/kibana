@@ -149,6 +149,10 @@ export const UrlStateProvider: FC = ({ children }) => {
 
         if (oldLocationSearchString !== newLocationSearchString) {
           const newSearchString = stringify(parsedQueryString, { sort: false });
+          // Another `setUrlState` call could happen before the updated
+          // `searchString` gets propagated via `useLocation` therefore
+          // we update the ref right away too.
+          searchStringRef.current = newSearchString;
           if (replaceState) {
             history.replace({ search: newSearchString });
           } else {

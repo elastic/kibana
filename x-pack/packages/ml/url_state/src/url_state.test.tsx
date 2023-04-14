@@ -92,24 +92,20 @@ describe('useUrlState', () => {
       const [appState, setAppState] = useUrlState('_a');
 
       useEffect(() => {
-        setGlobalState(parseUrlState(mockHistoryInitialState)._g);
-        setAppState(parseUrlState(mockHistoryInitialState)._a);
+        setGlobalState({ time: 'initial time' });
+        setAppState({ query: 'initial query' });
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
       return (
         <>
-          <button onClick={() => setGlobalState({ time: { to: 'now-15m' } })}>
-            GlobalStateButton1
-          </button>
-          <button onClick={() => setGlobalState({ time: { to: 'now-5y' } })}>
-            GlobalStateButton2
-          </button>
-          <button onClick={() => setAppState({ query: { query_string: 'the updated query' } })}>
+          <button onClick={() => setGlobalState({ time: 'now-15m' })}>GlobalStateButton1</button>
+          <button onClick={() => setGlobalState({ time: 'now-5y' })}>GlobalStateButton2</button>
+          <button onClick={() => setAppState({ query: 'the updated query' })}>
             AppStateButton
           </button>
-          <div data-test-subj="globalState">{JSON.stringify(globalState?.time?.to)}</div>
-          <div data-test-subj="appState">{JSON.stringify(appState?.query)}</div>
+          <div data-test-subj="globalState">{globalState?.time}</div>
+          <div data-test-subj="appState">{appState?.query}</div>
         </>
       );
     };
@@ -122,20 +118,28 @@ describe('useUrlState', () => {
       </MemoryRouter>
     );
 
-    expect(getByTestId('globalState').innerHTML).toBe('"2019-08-30T11:55:07.000Z"');
-    expect(getByTestId('appState').innerHTML).toBe(
-      '{"query_string":{"analyze_wildcard":true,"query":"*"}}'
-    );
+    expect(getByTestId('globalState').innerHTML).toBe('initial time');
+    expect(getByTestId('appState').innerHTML).toBe('initial query');
 
     act(() => {
       getByText('GlobalStateButton1').click();
-      // getByText('AppStateButton').click();
-      // getByText('GlobalStateButton2').click();
     });
 
-    expect(getByTestId('globalState').innerHTML).toBe('"2019-08-30T11:55:07.000Z"');
-    expect(getByTestId('appState').innerHTML).toBe(
-      '{"query_string":{"analyze_wildcard":true,"query":"*"}}'
-    );
+    expect(getByTestId('globalState').innerHTML).toBe('now-15m');
+    expect(getByTestId('appState').innerHTML).toBe('initial query');
+
+    act(() => {
+      getByText('AppStateButton').click();
+    });
+
+    expect(getByTestId('globalState').innerHTML).toBe('now-15m');
+    expect(getByTestId('appState').innerHTML).toBe('the updated query');
+
+    act(() => {
+      getByText('GlobalStateButton2').click();
+    });
+
+    expect(getByTestId('globalState').innerHTML).toBe('now-5y');
+    expect(getByTestId('appState').innerHTML).toBe('the updated query');
   });
 });
