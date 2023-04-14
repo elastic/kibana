@@ -56,7 +56,9 @@ export const registerGetRoute = (
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
 
-      const object = await savedObjects.client.get(type, id);
+      const object = await savedObjects.client.get(type, id, {
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: object });
     })
   );
