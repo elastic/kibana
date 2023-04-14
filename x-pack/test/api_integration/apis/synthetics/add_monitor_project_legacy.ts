@@ -16,6 +16,10 @@ import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -175,15 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            throttling: {
-              value: {
-                download: 5,
-                latency: 20,
-                upload: 3,
-              },
-              isCustom: false,
-              label: 'default',
-            },
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
