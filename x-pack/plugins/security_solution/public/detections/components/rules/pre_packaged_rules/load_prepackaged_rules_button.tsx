@@ -86,7 +86,7 @@ export const LoadPrePackagedRulesButton = ({
           >
             {'3'}
           </EuiBadge>
-          {/*{getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}*/}
+          {/* {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}*/}
         </EuiButtonEmpty>
       </div>
     );

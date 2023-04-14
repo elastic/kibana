@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTextColor } from '@elastic/eui';
 import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../../../../detections/components/rules/pre_packaged_rules/translations';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface PrebuiltRulesInfoCalloutParams {}
 

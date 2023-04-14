@@ -14,9 +14,7 @@ import { mockReactQueryResponse } from '../../../rule_management/api/hooks/__moc
 import { PrebuiltRulesInfoCallout } from './prebuilt_rules_info_callout';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock(
-  '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query'
-);
+jest.mock('../../../rule_management/api/hooks/use_fetch_prebuilt_rules_status_query');
 
 describe('UpdatePrePackagedRulesCallOut', () => {
   beforeAll(() => {
