@@ -427,9 +427,9 @@ describe('#setManaged', () => {
   });
 
   it('overrides objectManaged with optionsManaged', () => {
-    expect(setManaged({ optionsManaged: false, objectManaged: true })).toEqual({ managed: false });
-    expect(setManaged({ optionsManaged: true, objectManaged: false })).toEqual({ managed: true });
-    expect(setManaged({ optionsManaged: false, objectManaged: false })).toEqual({ managed: false });
-    expect(setManaged({ optionsManaged: true, objectManaged: true })).toEqual({ managed: true });
+    expect(setManaged({ optionsManaged: false, objectManaged: true })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: false })).toEqual(true);
+    expect(setManaged({ optionsManaged: false, objectManaged: false })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: true })).toEqual(true);
   });
 });
