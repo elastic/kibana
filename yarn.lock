@@ -4561,6 +4561,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-plugin@link:x-pack/plugins/ml":
   version "0.0.0"
   uid ""
