@@ -49,9 +49,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     // params: {
     //   type: 'text',
     // },
-    state: {
-      type: 'text',
-    },
+    // state: {
+    //   type: 'text',
+    // },
     // NO NEED TO BE INDEXED
     // user: {
     //   type: 'keyword',
