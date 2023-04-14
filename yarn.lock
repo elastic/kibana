@@ -14267,7 +14267,7 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.44.0:
+elastic-apm-node@^3.44.1:
   version "3.44.1"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.44.1.tgz#8a6e88fa9f3401455dddb87f9d5559f6d894964d"
   integrity sha512-hSf+S6GtQ+Ff5ueyQ1n2BAgAdiDOZ+XmHKFurzpB5/rvRFz6JbXLq+pcI11HMlK3ImiMVG9LQxHWMN6gqkqzYQ==
