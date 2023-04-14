@@ -151,10 +151,10 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexGroup>
             {/*  */}
           </HeaderPage>
-          {/*{(prePackagedRuleStatus === 'ruleNeedUpdate' ||*/}
+          {/* {(prePackagedRuleStatus === 'ruleNeedUpdate' ||*/}
           {/*  prePackagedTimelineStatus === 'timelineNeedUpdate') && (*/}
           {/*  <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />*/}
-          {/*)}*/}
+          {/* )}*/}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
