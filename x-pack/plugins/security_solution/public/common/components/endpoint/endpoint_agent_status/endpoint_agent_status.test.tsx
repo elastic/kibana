@@ -142,6 +142,7 @@ describe('When showing Endpoint Agent Status', () => {
 
     it('should show individual action count in tooltip (including unknown actions)', async () => {
       actionsSummary.pending_actions = {
+        isolate: 1,
         'get-file': 2,
         execute: 6,
         'kill-process': 1,
@@ -153,7 +154,7 @@ describe('When showing Endpoint Agent Status', () => {
         expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
       });
 
-      expect(getByTestId('test').textContent).toEqual('Healthy11 actions pending');
+      expect(getByTestId('test').textContent).toEqual('Healthy12 actions pending');
 
       fireEvent.mouseOver(getByTestId('test-actionStatuses-tooltipTrigger'));
 
@@ -161,7 +162,7 @@ describe('When showing Endpoint Agent Status', () => {
         expect(
           within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
             .textContent
-        ).toEqual('Pending actions:get-file2execute6kill-process1foo2');
+        ).toEqual('Pending actions:isolate1get-file2execute6kill-process1foo2');
       });
     });
 
