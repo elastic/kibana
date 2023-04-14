@@ -20,7 +20,7 @@ import React, {
   RefObject,
   ReactElement,
 } from 'react';
-import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
@@ -61,6 +61,7 @@ export interface ProcessDeps {
   onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
+  handleCollapseProcessTree: () => void;
 }
 
 /**
@@ -83,6 +84,7 @@ export function ProcessTreeNode({
   onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
+  handleCollapseProcessTree,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
@@ -297,6 +299,12 @@ export function ProcessTreeNode({
               <Nbsp />
               <b css={styles.darkText}>{userName}</b>
               <Nbsp />
+              <EuiButtonIcon
+                size="xs"
+                iconType="fold"
+                onClick={handleCollapseProcessTree}
+                css={styles.jumpToTop}
+              />
             </span>
           ) : (
             <>
