@@ -44,6 +44,22 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.getTrainedModelsStats(params);
             });
         },
+        async startTrainedModelDeployment(params: estypes.MlStartTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.startTrainedModelDeployment(params);
+            });
+        },
+        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.stopTrainedModelDeployment(params);
+            });
+        },
       };
     },
   };
