@@ -36,7 +36,6 @@ interface UseProcessTreeDeps {
 
 export class ProcessImpl implements Process {
   id: string;
-  root: Process;
   events: ProcessEvent[];
   alerts: ProcessEvent[];
   children: Process[];
