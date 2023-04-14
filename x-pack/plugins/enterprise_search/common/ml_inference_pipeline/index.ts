@@ -224,7 +224,9 @@ export const parseMlInferenceParametersFromPipeline = (
     return null;
   }
   return {
-    destination_field: inferenceProcessor.target_field?.replace('ml.inference.', ''),
+    destination_field: inferenceProcessor.target_field
+      ? stripMlInferencePrefix(inferenceProcessor.target_field)
+      : inferenceProcessor.target_field,
     model_id: inferenceProcessor.model_id,
     pipeline_name: name,
     source_field: sourceField,
@@ -258,4 +260,7 @@ export const parseModelStateFromStats = (
 export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) =>
   trainedModelStats?.deployment_stats?.reason;
 
-export const getMlInferencePrefixedFieldName = (fieldName: string) => `ml.inference.${fieldName}`;
+export const getMlInferencePrefixedFieldName = (fieldName: string) =>
+  `ml.inference.${stripMlInferencePrefix(fieldName)}`; // Strip first, then prepend, to prevent against double-prepending
+
+const stripMlInferencePrefix = (fieldName: string) => fieldName.replace('ml.inference.', '');
