@@ -24,6 +24,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
+  GetVerificationKeyIdResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -58,6 +59,7 @@ import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -408,6 +410,22 @@ export const deletePackageHandler: FleetRequestHandler<
     });
     const body: DeletePackageResponse = {
       items: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getVerificationKeyIdHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
+    const body: GetVerificationKeyIdResponse = {
+      id: packageVerificationKeyId || null,
     };
     return response.ok({ body });
   } catch (error) {
