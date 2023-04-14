@@ -20,7 +20,6 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  INTERNAL_BASE_ALERTING_API_PATH,
   INTERNAL_ALERTING_API_FIND_RULES_PATH,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';

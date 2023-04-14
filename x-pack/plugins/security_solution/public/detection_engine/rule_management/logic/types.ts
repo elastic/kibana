@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 
-import { RuleSnooze } from '@kbn/alerting-plugin/common';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
   RiskScoreMapping,
