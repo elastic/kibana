@@ -27,6 +27,7 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const testTypes = [
   { name: 'index-pattern', hide: false },
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+  { name: 'something-managed', hide: false, managed: true },
 ];
 
 describe('POST /api/saved_objects/_bulk_create', () => {
@@ -186,5 +187,45 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       ])
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores managed option', async () => {
+    const doc = [
+      {
+        id: 'abc123',
+        type: 'index-pattern',
+        attributes: {
+          title: 'foo',
+        },
+        references: [],
+      },
+      {
+        id: 'man123',
+        type: 'something-managed',
+        attributes: {
+          title: 'managed1',
+        },
+        references: [],
+        managed: true,
+      },
+      {
+        id: 'man456',
+        type: 'something-managed',
+        attributes: {
+          title: 'managed2',
+        },
+        references: [],
+        managed: false,
+      },
+    ];
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send(doc)
+      .expect(200);
+
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    const args = savedObjectsClient.bulkCreate.mock.calls[0];
+    expect(args[0]).toEqual(doc.map(({ managed, ...rest }) => rest));
   });
 });
