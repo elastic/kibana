@@ -10,6 +10,9 @@ import * as t from 'io-ts';
 
 import { RuleActionThrottle } from '../throttle';
 
+/**
+ * Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+ */
 export type RuleActionSummary = t.TypeOf<typeof RuleActionSummary>;
 export const RuleActionSummary = t.boolean;
 
