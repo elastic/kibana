@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes, SearchOptions } from '@kbn/content-management-utils';
+export type { CreateOptions, UpdateOptions } from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
 export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
@@ -45,6 +46,7 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
+export type MapSearchOptions = SearchOptions;
 
 // Might be able to factor this out, otherwise it can be added to the abstract interface
 export type PartialMapItem = Omit<MapItem, 'attributes' | 'references'> & {
