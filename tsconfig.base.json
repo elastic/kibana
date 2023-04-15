@@ -170,6 +170,8 @@
       "@kbn/content-management-plugin/*": ["src/plugins/content_management/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
+      "@kbn/content-management-utils": ["packages/kbn-content-management-utils"],
+      "@kbn/content-management-utils/*": ["packages/kbn-content-management-utils/*"],
       "@kbn/controls-example-plugin": ["examples/controls_example"],
       "@kbn/controls-example-plugin/*": ["examples/controls_example/*"],
       "@kbn/controls-plugin": ["src/plugins/controls"],

@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import type {
-  GetIn,
-  GetResult,
-  CreateIn,
-  CreateResult,
-  SearchIn,
-  SearchResult,
-  UpdateIn,
-  UpdateResult,
-  DeleteIn,
-  DeleteResult,
-} from '@kbn/content-management-plugin/common';
+import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
-interface Reference {
-  type: string;
-  id: string;
-  name: string;
-}
+export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type MapAttributes = {
@@ -34,77 +19,41 @@ export type MapAttributes = {
   uiStateJSON?: string;
 };
 
-export interface MapItem {
-  id: string;
-  type: string;
-  version?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  error?: {
-    error: string;
-    message: string;
-    statusCode: number;
-    metadata?: Record<string, unknown>;
-  };
-  attributes: MapAttributes;
-  references: Reference[];
-  namespaces?: string[];
-  originId?: string;
-}
+export type MapItem = MapCrudTypes['Item'];
 
+// ----------- GET --------------
+
+export type MapGetIn = MapCrudTypes['GetIn'];
+export type MapGetOut = MapCrudTypes['GetOut'];
+
+// ----------- CREATE --------------
+
+export type MapCreateIn = MapCrudTypes['CreateIn'];
+export type MapCreateOut = MapCrudTypes['CreateOut'];
+
+// ----------- UPDATE --------------
+
+export type MapUpdateIn = MapCrudTypes['UpdateIn'];
+export type MapUpdateOut = MapCrudTypes['UpdateOut'];
+
+// ----------- DELETE --------------
+
+export type MapDeleteIn = MapCrudTypes['DeleteIn'];
+export type MapDeleteOut = MapCrudTypes['DeleteOut'];
+
+// ----------- SEARCH --------------
+
+export type MapSearchIn = MapCrudTypes['SearchIn'];
+export type MapSearchOut = MapCrudTypes['SearchOut'];
+
+// Might be able to factor this out, otherwise it can be added to the abstract interface
 export type PartialMapItem = Omit<MapItem, 'attributes' | 'references'> & {
   attributes: Partial<MapAttributes>;
   references: Reference[] | undefined;
 };
 
-// ----------- GET --------------
-
-export type MapGetIn = GetIn<MapContentType>;
-
-export type MapGetOut = GetResult<
-  MapItem,
-  {
-    outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    aliasTargetId?: string;
-    aliasPurpose?: 'savedObjectConversion' | 'savedObjectImport';
-  }
->;
-
-// ----------- CREATE --------------
-
-export interface CreateOptions {
-  /** Array of referenced saved objects. */
-  references?: Reference[];
+interface Reference {
+  type: string;
+  id: string;
+  name: string;
 }
-
-export type MapCreateIn = CreateIn<MapContentType, MapAttributes, CreateOptions>;
-
-export type MapCreateOut = CreateResult<MapItem>;
-
-// ----------- UPDATE --------------
-
-export interface UpdateOptions {
-  /** Array of referenced saved objects. */
-  references?: Reference[];
-}
-
-export type MapUpdateIn = UpdateIn<MapContentType, MapAttributes, UpdateOptions>;
-
-export type MapUpdateOut = UpdateResult<PartialMapItem>;
-
-// ----------- DELETE --------------
-
-export type MapDeleteIn = DeleteIn<MapContentType>;
-
-export type MapDeleteOut = DeleteResult;
-
-// ----------- SEARCH --------------
-
-export interface MapSearchOptions {
-  /** Flag to indicate to only search the text on the "title" field */
-  onlyTitle?: boolean;
-}
-
-export type MapSearchIn = SearchIn<MapContentType, MapSearchOptions>;
-
-export type MapSearchOut = SearchResult<MapItem>;
