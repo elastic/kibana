@@ -29,8 +29,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server",
     "@kbn/content-management-plugin",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-common",
+    "@kbn/content-management-utils",
   ],
   "exclude": [
     "target/**/*",
