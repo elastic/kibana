@@ -73,12 +73,15 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
   percentile?: number;
 };
 
-export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor & {
-  mask?: {
-    operator: MASK_OPERATOR;
-    value: number;
-  }
-};
+export type AggDescriptor =
+  | CountAggDescriptor
+  | FieldedAggDescriptor
+  | (PercentileAggDescriptor & {
+      mask?: {
+        operator: MASK_OPERATOR;
+        value: number;
+      };
+    });
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];

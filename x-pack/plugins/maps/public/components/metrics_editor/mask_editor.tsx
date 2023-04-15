@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { AGG_TYPE } from '../../../common/constants';
 import { AggDescriptor } from '../../../common/descriptor_types';
-import { getAggDisplayName } from '../../classes/sources/es_agg_source';
 
 interface Props {
   metric: AggDescriptor;
@@ -22,7 +21,6 @@ interface State {
 }
 
 export class MaskEditor extends Component<Props, State> {
-
   state: State = { isPopoverOpen: false };
 
   _togglePopover = () => {
@@ -43,7 +41,8 @@ export class MaskEditor extends Component<Props, State> {
       return null;
     }
 
-    const expressionValue = this.props.metric.mask !== undefined
+    const expressionValue =
+      this.props.metric.mask !== undefined
         ? 'less than 2'
         : i18n.translate('xpack.maps.maskEditor.expressionValuePlaceholder', {
             defaultMessage: '-- add mask --',
@@ -58,9 +57,9 @@ export class MaskEditor extends Component<Props, State> {
             description={i18n.translate('xpack.maps.maskEditor.maskDescription', {
               defaultMessage: 'hide {bucketsLabel} when {aggLabel} is ',
               values: {
-                bucketsLabel: 'clusters', 
-                aggLabel: 'count' 
-              }
+                bucketsLabel: 'clusters',
+                aggLabel: 'count',
+              },
             })}
             value={expressionValue}
             onClick={this._togglePopover}

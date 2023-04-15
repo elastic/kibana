@@ -8,7 +8,7 @@
 import React, { ChangeEvent, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow, EuiPopover, EuiExpression } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -224,9 +224,9 @@ export function MetricEditor({
       {fieldSelect}
       {percentileSelect}
       {labelInput}
-      
-        <MaskEditor metric={metric} onChange={onChange} />
-      
+
+      <MaskEditor metric={metric} onChange={onChange} />
+
       {removeButton}
     </Fragment>
   );

@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic
 import { AGG_TYPE } from '../../../common/constants';
 import { getAggDisplayName } from '../../classes/sources/es_agg_source';
 
-const AGG_OPTIONS = [ 
+const AGG_OPTIONS = [
   {
     label: getAggDisplayName(AGG_TYPE.AVG),
     value: AGG_TYPE.AVG,
