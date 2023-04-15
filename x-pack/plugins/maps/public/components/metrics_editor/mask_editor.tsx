@@ -42,10 +42,7 @@ export class MaskEditor extends Component<Props, State> {
       return null;
     }
 
-    const expressionValue =
-      this.props.metric.mask !== undefined
-        ? 'less than 2'
-        : '--';
+    const expressionValue = this.props.metric.mask !== undefined ? 'less than 2' : '--';
 
     return (
       <EuiPopover

@@ -8,12 +8,12 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-plugin/common';
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { MetricsEditor } from '../../../components/metrics_editor';
-import { getIndexPatternService } from '../../../kibana_services';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
+import { MetricsEditor } from '../../../components/metrics_editor';
+import { getIndexPatternService } from '../../../kibana_services';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
