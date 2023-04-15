@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -74,6 +75,14 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
             .hasMlCapabilities(['canDeleteTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.deleteTrainedModel(params);
+            });
+        },
+        async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.updateTrainedModelDeployment(params);
             });
         },
       };
