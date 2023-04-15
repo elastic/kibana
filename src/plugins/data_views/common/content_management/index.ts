@@ -9,12 +9,12 @@
 export { LATEST_VERSION } from './constants';
 
 export type {
-  DataViewSavedObject,
+  DataViewItem,
   DataViewGetIn,
   DataViewGetOut,
   DataViewCreateIn,
   DataViewCreateOut,
-  CreateOptions,
+  DataViewCreateOptions,
   DataViewUpdateIn,
   DataViewUpdateOut,
   DataViewUpdateOptions,
@@ -22,7 +22,7 @@ export type {
   DataViewDeleteOut,
   DataViewSearchIn,
   DataViewSearchOut,
-  DataViewSearchQuery,
+  DataViewSearchOptions,
 } from './types';
 
-export { DataViewContentType } from './constants';
+export type { DataViewContentType } from './constants';

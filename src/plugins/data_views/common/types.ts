@@ -116,7 +116,7 @@ export interface DataViewAttributes {
   /**
    * Fields as a serialized array of field specs
    */
-  fields: string;
+  fields?: string;
   /**
    * Data view title
    */

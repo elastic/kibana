@@ -28,6 +28,8 @@ interface Reference {
 export interface CreateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
+  overwrite?: boolean;
+  id?: string;
 }
 
 export interface SearchOptions {
@@ -67,12 +69,17 @@ export interface SOWithMetadata<Attributes extends object> {
   originId?: string;
 }
 
+export type PartialItem<Attributes extends object> = Omit<
+  SOWithMetadata<Attributes>,
+  'attributes' | 'references'
+> & {
+  attributes: Partial<Attributes>;
+  references: Reference[] | undefined;
+};
+
 export interface ContentManagementCrudTypes<ContentType extends string, Attributes extends object> {
   Item: SOWithMetadata<Attributes>;
-  PartialItem: Omit<SOWithMetadata<Attributes>, 'attributes' | 'references'> & {
-    attributes: Partial<Attributes>;
-    references: Reference[] | undefined;
-  };
+  PartialItem: PartialItem<Attributes>;
 
   GetIn: GetIn<ContentType>;
   GetOut: GetResultSO<SOWithMetadata<Attributes>>;
@@ -84,7 +91,7 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
   SearchOut: SearchResult<SOWithMetadata<Attributes>>;
 
   UpdateIn: UpdateIn<ContentType, Attributes, UpdateOptions>;
-  UpdateOut: UpdateResult<SOWithMetadata<Attributes>>;
+  UpdateOut: UpdateResult<PartialItem<Attributes>>;
 
   DeleteIn: DeleteIn<ContentType>;
 

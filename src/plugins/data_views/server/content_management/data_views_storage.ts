@@ -7,19 +7,20 @@
  */
 
 import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 
+import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { DataViewAttributes } from '../../common';
 import type {
   DataViewGetOut,
   DataViewCreateIn,
   DataViewCreateOut,
-  CreateOptions,
+  DataViewCreateOptions,
   DataViewUpdateIn,
   DataViewUpdateOut,
   DataViewUpdateOptions,
   DataViewDeleteOut,
   DataViewSearchOut,
-  DataViewSearchQuery,
 } from '../../common/content_management';
 import { DataViewSOType } from '../../common/content_management/constants';
 
@@ -45,31 +46,29 @@ export class DataViewsStorage implements ContentStorage {
       outcome,
     } = await soClient.resolve<DataViewAttributes>(DataViewSOType, id);
 
-    return { savedObject, aliasPurpose, aliasTargetId, outcome };
+    return { item: savedObject, meta: { aliasPurpose, aliasTargetId, outcome } };
   }
 
   async bulkGet(ctx: StorageContext, ids: string[], options: unknown): Promise<any> {
-    // TODO
     return {};
   }
 
   async create(
     ctx: StorageContext,
     data: DataViewCreateIn['data'],
-    options: CreateOptions
+    options: DataViewCreateOptions
   ): Promise<DataViewCreateOut> {
-    const { migrationVersion, coreMigrationVersion, references, overwrite, id } = options!;
+    const { references, overwrite, id } = options!;
 
     const createOptions = {
       id,
       overwrite,
-      migrationVersion,
-      coreMigrationVersion,
       references,
     };
 
     const soClient = await savedObjectClientFromRequest(ctx);
-    return soClient.create(DataViewSOType, data, createOptions);
+    const result = await soClient.create(DataViewSOType, data, createOptions);
+    return { item: result };
   }
 
   async update(
@@ -79,46 +78,58 @@ export class DataViewsStorage implements ContentStorage {
     options: DataViewUpdateOptions
   ): Promise<DataViewUpdateOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    return soClient.update(DataViewSOType, id, data, options);
+    const result = await soClient.update<DataViewUpdateIn['data']>(
+      DataViewSOType,
+      id,
+      data,
+      options
+    );
+    return { item: result };
   }
 
   async delete(ctx: StorageContext, id: string): Promise<DataViewDeleteOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
     await soClient.delete(DataViewSOType, id);
-    return { status: 'success' };
+    return { success: true };
   }
 
-  async search(ctx: StorageContext, query: DataViewSearchQuery): Promise<DataViewSearchOut> {
+  async search(ctx: StorageContext, query: SearchQuery): Promise<DataViewSearchOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
 
-    const {
-      page,
-      perPage,
-      searchFields,
-      search,
-      fields,
-      defaultSearchOperator,
-      hasNoReference,
-      hasReference,
-    } = query;
+    const { included, excluded } = query.tags ?? {};
+    const hasReference: SavedObjectsFindOptions['hasReference'] = included
+      ? included.map((id) => ({
+          id,
+          type: 'tag',
+        }))
+      : undefined;
 
-    const res = await soClient.find<DataViewAttributes>({
+    const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
+      ? excluded.map((id) => ({
+          id,
+          type: 'tag',
+        }))
+      : undefined;
+
+    const soQuery: SavedObjectsFindOptions = {
       type: DataViewSOType,
-      page,
-      perPage,
-      searchFields,
-      search,
-      fields,
-      defaultSearchOperator,
-      hasNoReference,
+      search: query.text,
+      perPage: query.limit,
+      page: query.cursor ? +query.cursor : undefined,
+      defaultSearchOperator: 'AND',
+      searchFields: ['title', 'name'],
+      fields: ['title', 'name', 'type', 'typeMeta'],
       hasReference,
-    });
+      hasNoReference,
+    };
+
+    const res = await soClient.find<DataViewAttributes>(soQuery);
 
     return {
-      page: res.page,
-      perPage: res.per_page,
-      savedObjects: res.saved_objects,
-      total: res.total,
+      hits: res.saved_objects,
+      pagination: {
+        total: res.total,
+      },
     };
   }
 }
