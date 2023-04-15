@@ -103,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.isArray(cert.monitors)).to.be(true);
         expect(cert.monitors[0]).to.eql({
           name: undefined,
+          configId: undefined,
           id: monitorId,
           url: 'http://localhost:5678/pattern?r=200x5,500x1',
         });

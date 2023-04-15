@@ -6169,6 +6169,10 @@
           },
           {
             "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
@@ -8043,6 +8047,24 @@
             ],
             "signature": [
               "\"strict\" | \"lax\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "\nOptional setting to allow compatible handling of the `migrationVersion` field.\nThis is needed to return the `migrationVersion` field in the same format as it was before migrating to the `typeMigrationVersion` property.\n"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
