@@ -6,112 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsResolveResponse,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-
-import type {
-  GetIn,
-  CreateIn,
-  SearchIn,
-  UpdateIn,
-  DeleteIn,
-} from '@kbn/content-management-plugin/common';
-
+import type { ContentManagementCrudTypes, SearchOptions } from '@kbn/content-management-utils';
 import { DataViewAttributes } from '../types';
 import { DataViewContentType } from './constants';
 
-interface Reference {
-  type: string;
-  id: string;
-}
+export type DataViewCrudTypes = ContentManagementCrudTypes<DataViewContentType, DataViewAttributes>;
 
-export type DataViewSavedObject = SavedObject<DataViewAttributes>;
-
+export type MapItem = DataViewCrudTypes['Item'];
+export type PartialMapItem = DataViewCrudTypes['PartialItem'];
 // ----------- GET --------------
-
-export type DataViewGetIn = GetIn<typeof DataViewContentType>;
-
-export interface DataViewGetOut {
-  savedObject: SavedObjectsResolveResponse<DataViewAttributes>['saved_object'];
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
-}
-
+export type MapGetIn = DataViewCrudTypes['GetIn'];
+export type MapGetOut = DataViewCrudTypes['GetOut'];
 // ----------- CREATE --------------
-
-export interface CreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  id?: string;
-  overwrite?: boolean;
-  migrationVersion?: SavedObjectsMigrationVersion;
-  /** A semver value that is used when upgrading objects between Kibana versions. */
-  coreMigrationVersion?: string;
-  /** Array of referenced saved objects. */
-  references?: SavedObjectReference[];
-}
-
-export type DataViewCreateIn = CreateIn<
-  typeof DataViewContentType,
-  DataViewAttributes,
-  CreateOptions
->;
-
-export type DataViewCreateOut = DataViewSavedObject;
-
+export type MapCreateIn = DataViewCrudTypes['CreateIn'];
+export type MapCreateOut = DataViewCrudTypes['CreateOut'];
 // ----------- UPDATE --------------
-
-export interface DataViewUpdateOptions {
-  /** Array of referenced saved objects. */
-  references?: SavedObjectReference[];
-  version?: string;
-}
-
-export type DataViewUpdateIn = UpdateIn<
-  typeof DataViewContentType,
-  DataViewAttributes,
-  DataViewUpdateOptions
->;
-
-export type DataViewUpdateOut = SavedObjectsUpdateResponse<DataViewAttributes>;
-
+export type MapUpdateIn = DataViewCrudTypes['UpdateIn'];
+export type MapUpdateOut = DataViewCrudTypes['UpdateOut'];
 // ----------- DELETE --------------
-
-export type DataViewDeleteIn = DeleteIn<typeof DataViewContentType>;
-
-export interface DataViewDeleteOut {
-  status: 'success';
-}
-
+export type MapDeleteIn = DataViewCrudTypes['DeleteIn'];
+export type MapDeleteOut = DataViewCrudTypes['DeleteOut'];
 // ----------- SEARCH --------------
-
-export interface DataViewSearchQuery {
-  search?: string;
-  fields?: string[];
-  searchFields?: string[];
-  perPage?: number;
-  page?: number;
-  defaultSearchOperator?: 'AND' | 'OR';
-  hasReference?: Reference | Reference[];
-  hasNoReference?: Reference | Reference[];
-}
-
-export type DataViewSearchIn = SearchIn<typeof DataViewContentType, DataViewSearchQuery>;
-
-export interface DataViewSearchOut {
-  /** current page in results*/
-  page: number;
-  /** number of results per page */
-  perPage: number;
-  /** total number of results */
-  total: number;
-  /** Array of simple saved objects */
-  savedObjects: DataViewSavedObject[];
-  /** aggregations from the search query */
-  aggregations?: unknown; // TODO: Check if used in Maps
-}
+export type MapSearchIn = DataViewCrudTypes['SearchIn'];
+export type MapSearchOut = DataViewCrudTypes['SearchOut'];
+export type MapSearchOptions = SearchOptions;

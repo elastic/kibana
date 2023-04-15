@@ -11,4 +11,6 @@
  */
 export const LATEST_VERSION = 1;
 
-export const DataViewContentType = 'index-pattern';
+export const DataViewSOType = 'index-pattern';
+
+export type DataViewContentType = typeof DataViewSOType;

@@ -21,7 +21,7 @@ import type {
   DataViewSearchOut,
   DataViewSearchQuery,
 } from '../../common/content_management';
-import { DataViewContentType } from '../../common/content_management';
+import { DataViewSOType } from '../../common/content_management/constants';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -43,7 +43,7 @@ export class DataViewsStorage implements ContentStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<DataViewAttributes>(DataViewContentType, id);
+    } = await soClient.resolve<DataViewAttributes>(DataViewSOType, id);
 
     return { savedObject, aliasPurpose, aliasTargetId, outcome };
   }
@@ -69,7 +69,7 @@ export class DataViewsStorage implements ContentStorage {
     };
 
     const soClient = await savedObjectClientFromRequest(ctx);
-    return soClient.create(DataViewContentType, data, createOptions);
+    return soClient.create(DataViewSOType, data, createOptions);
   }
 
   async update(
@@ -79,12 +79,12 @@ export class DataViewsStorage implements ContentStorage {
     options: DataViewUpdateOptions
   ): Promise<DataViewUpdateOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    return soClient.update(DataViewContentType, id, data, options);
+    return soClient.update(DataViewSOType, id, data, options);
   }
 
   async delete(ctx: StorageContext, id: string): Promise<DataViewDeleteOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(DataViewContentType, id);
+    await soClient.delete(DataViewSOType, id);
     return { status: 'success' };
   }
 
@@ -103,7 +103,7 @@ export class DataViewsStorage implements ContentStorage {
     } = query;
 
     const res = await soClient.find<DataViewAttributes>({
-      type: DataViewContentType,
+      type: DataViewSOType,
       page,
       perPage,
       searchFields,
