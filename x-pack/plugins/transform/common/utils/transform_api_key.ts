@@ -7,6 +7,7 @@
 
 import type { GrantAPIKeyResult } from '@kbn/security-plugin/server';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface TransformAPIKey extends GrantAPIKeyResult {
   /**
@@ -20,12 +21,7 @@ export interface SecondaryAuthorizationHeader {
 }
 
 export function isTransformApiKey(arg: any): arg is TransformAPIKey {
-  return (
-    arg &&
-    arg.hasOwnProperty('api_key') &&
-    arg.hasOwnProperty('encoded') &&
-    typeof arg.encoded === 'string'
-  );
+  return isPopulatedObject(arg, ['api_key', 'encoded']) && typeof arg.encoded === 'string';
 }
 
 export function generateTransformSecondaryAuthHeaders(

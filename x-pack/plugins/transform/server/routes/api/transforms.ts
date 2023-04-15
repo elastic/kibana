@@ -304,7 +304,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
 
   /**
-   * @apiGroup Reauthorize transforms with API key generated from currently logged in suer
+   * @apiGroup Reauthorize transforms with API key generated from currently logged in user
    * @api {post} /api/transform/reauthorize_transforms Post delete transforms
    * @apiName Reauthorize Transforms
    * @apiDescription Reauthorize transforms by generating an API Key for current user
