@@ -13,7 +13,7 @@ import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/tim
 import {
   COLUMN_SESSION_START,
   COLUMN_EXECUTABLE,
-  COLUMN_ENTRY_USER,
+  COLUMN_ENTRY_USER_ID,
   COLUMN_INTERACTIVE,
   COLUMN_HOST_NAME,
   COLUMN_ENTRY_TYPE,
@@ -35,7 +35,7 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'process.entry_leader.user.id',
-    display: COLUMN_ENTRY_USER,
+    display: COLUMN_ENTRY_USER_ID,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
