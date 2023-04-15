@@ -44,16 +44,14 @@ export class MaskEditor extends Component<Props, State> {
     const expressionValue =
       this.props.metric.mask !== undefined
         ? 'less than 2'
-        : i18n.translate('xpack.maps.maskEditor.expressionValuePlaceholder', {
-            defaultMessage: '-- add mask --',
-          });
+        : '--';
 
     return (
       <EuiPopover
         id="mask"
         button={
           <EuiExpression
-            color="accent"
+            color={this.props.metric.mask === undefined ? 'subdued' : 'warning'}
             description={i18n.translate('xpack.maps.maskEditor.maskDescription', {
               defaultMessage: 'hide {bucketsLabel} when {aggLabel} is ',
               values: {
@@ -69,7 +67,8 @@ export class MaskEditor extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="s"
-        anchorPosition="downLeft"
+        anchorPosition="downCenter"
+        repositionOnScroll={true}
       >
         operator select and value input go here
       </EuiPopover>

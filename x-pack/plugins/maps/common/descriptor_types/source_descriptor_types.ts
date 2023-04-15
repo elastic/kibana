@@ -50,6 +50,10 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
 type AbstractAggDescriptor = {
   type: AGG_TYPE;
   label?: string;
+  mask?: {
+    operator: MASK_OPERATOR;
+    value: number;
+  }
 };
 
 export type CountAggDescriptor = AbstractAggDescriptor & {
@@ -73,15 +77,7 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
   percentile?: number;
 };
 
-export type AggDescriptor =
-  | CountAggDescriptor
-  | FieldedAggDescriptor
-  | (PercentileAggDescriptor & {
-      mask?: {
-        operator: MASK_OPERATOR;
-        value: number;
-      };
-    });
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];

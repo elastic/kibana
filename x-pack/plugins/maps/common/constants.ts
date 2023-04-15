@@ -332,10 +332,8 @@ export enum WIZARD_ID {
 }
 
 export enum MASK_OPERATOR {
-  lt = 'lt',
-  lte = 'lte',
-  gt = 'gt',
-  gte = 'gte',
+  ABOVE = 'ABOVE',
+  BELOW = 'BELOW',
 }
 
 // Maplibre does not provide any feedback when rendering is complete.

@@ -225,7 +225,14 @@ export function MetricEditor({
       {percentileSelect}
       {labelInput}
 
-      <MaskEditor metric={metric} onChange={onChange} />
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.metricsEditor.maskLabel', {
+          defaultMessage: 'Mask',
+        })}
+        display="columnCompressed"
+      >
+        <MaskEditor metric={metric} onChange={onChange} />
+      </EuiFormRow>
 
       {removeButton}
     </Fragment>
