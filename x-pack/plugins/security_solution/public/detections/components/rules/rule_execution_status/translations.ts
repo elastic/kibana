@@ -48,3 +48,18 @@ export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Warning at',
   }
 );
+
+export const COPY_TEXT = i18n.translate('xpack.securitySolution.copyTextIconButton.copyText', {
+  defaultMessage: 'Copy text',
+});
+
+export const COPY_TEXT_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.copyTextIconButton.copyTextToClipboard',
+  {
+    defaultMessage: 'Copy text to clipboard',
+  }
+);
+
+export const TEXT_COPIED = i18n.translate('xpack.securitySolution.copyTextIconButton.textCopied', {
+  defaultMessage: 'Text copied',
+});
