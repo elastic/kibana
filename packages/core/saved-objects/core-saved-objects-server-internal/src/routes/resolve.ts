@@ -49,7 +49,9 @@ export const registerResolveRoute = (
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.resolve(type, id);
+      const result = await savedObjects.client.resolve(type, id, {
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );
