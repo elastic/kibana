@@ -116,14 +116,14 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         const abortCtrl = new AbortController();
 
         try {
-          await Api.duplicateExceptionList({
+          const newList = await Api.duplicateExceptionList({
             http,
             includeExpiredExceptions,
             listId,
             namespaceType,
             signal: abortCtrl.signal,
           });
-          onSuccess();
+          onSuccess(newList);
         } catch (error) {
           onError(error);
         }

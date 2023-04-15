@@ -52,6 +52,7 @@ export const ListsDetailViewComponent: FC = () => {
     refreshExceptions,
     disableManageButton,
     onEditListDetails,
+    onDuplicateList,
     onExportList,
     onManageRules,
     onSaveManageRules,
@@ -62,19 +63,34 @@ export const ListsDetailViewComponent: FC = () => {
     handleReferenceDelete,
   } = useListDetailsView(exceptionListId);
 
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
+    useState(false);
+  const [modalActionType, setActionType] = useState('export');
 
-  const onModalClose = useCallback(() => setShowExportModal(false), [setShowExportModal]);
+  const onModalClose = useCallback(
+    () => setShowIncludeExpiredExceptionItemsModal(false),
+    [setShowIncludeExpiredExceptionItemsModal]
+  );
 
-  const onModalOpen = useCallback(() => setShowExportModal(true), [setShowExportModal]);
+  const onModalOpen = useCallback(
+    (actionType: string) => {
+      setActionType(actionType);
+      setShowIncludeExpiredExceptionItemsModal(true);
+    },
+    [setShowIncludeExpiredExceptionItemsModal, setActionType]
+  );
 
   const handleExportList = useCallback(() => {
     if (list?.type === ExceptionListTypeEnum.ENDPOINT) {
       onExportList(true);
     } else {
-      onModalOpen();
+      onModalOpen('export');
     }
   }, [onModalOpen, list, onExportList]);
+
+  const handleDuplicateList = useCallback(() => {
+    onModalOpen('duplicate');
+  }, [onModalOpen]);
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
@@ -99,6 +115,7 @@ export const ListsDetailViewComponent: FC = () => {
           onExportList={handleExportList}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
+          onDuplicateList={handleDuplicateList}
           dataTestSubj="exceptionListManagement"
         />
 
@@ -125,47 +142,50 @@ export const ListsDetailViewComponent: FC = () => {
             onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
-        {showExportModal && (
+        {showIncludeExpiredExceptionItemsModal && (
           <IncludeExpiredExceptionsModal
-            onModalConfirm={onExportList}
+            onModalConfirm={modalActionType === 'export' ? onExportList : onDuplicateList}
             handleCloseModal={onModalClose}
           />
         )}
       </>
     );
   }, [
-    canUserEditList,
-    disableManageButton,
-    exportedList,
-    handleOnDownload,
-    headerBackOptions,
-    invalidListId,
-    isLoading,
+    viewerStatus,
     isReadOnly,
-    linkedRules,
+    isLoading,
+    invalidListId,
+    listName,
     list,
     listDescription,
     listId,
-    listName,
+    linkedRules,
+    canUserEditList,
+    headerBackOptions,
+    onEditListDetails,
+    handleExportList,
+    handleDelete,
+    onManageRules,
+    handleDuplicateList,
+    exportedList,
+    handleOnDownload,
+    refreshExceptions,
     referenceModalState.contentText,
     referenceModalState.rulesReferences,
-    refreshExceptions,
-    showManageButtonLoader,
-    showManageRulesFlyout,
-    showReferenceErrorModal,
-    showExportModal,
-    viewerStatus,
-    onCancelManageRules,
-    onEditListDetails,
-    onExportList,
-    onManageRules,
-    onRuleSelectionChange,
-    onSaveManageRules,
     handleCloseReferenceErrorModal,
-    handleDelete,
     handleReferenceDelete,
+    showReferenceErrorModal,
+    showManageRulesFlyout,
+    showManageButtonLoader,
+    disableManageButton,
+    onSaveManageRules,
+    onCancelManageRules,
+    onRuleSelectionChange,
+    showIncludeExpiredExceptionItemsModal,
+    modalActionType,
+    onExportList,
+    onDuplicateList,
     onModalClose,
-    handleExportList,
   ]);
   return (
     <>

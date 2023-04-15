@@ -199,8 +199,12 @@ export const useListDetailsView = (exceptionListId: string) => {
           includeExpiredExceptions,
           namespaceType: list.namespace_type,
           onError: (error: Error) => handleErrorStatus(error),
-          onSuccess: () => {
+          onSuccess: (newList: ExceptionListSchema) => {
             toasts?.addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(list.name));
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.exceptions,
+              path: `/details/${newList.list_id}`,
+            });
           },
         });
       } catch (error) {
@@ -212,7 +216,7 @@ export const useListDetailsView = (exceptionListId: string) => {
         );
       }
     },
-    [list, duplicateExceptionList, handleErrorStatus, toasts]
+    [list, duplicateExceptionList, handleErrorStatus, toasts, navigateToApp]
   );
 
   const handleOnDownload = useCallback(() => {

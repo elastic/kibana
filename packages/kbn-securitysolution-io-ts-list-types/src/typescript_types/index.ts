@@ -36,7 +36,7 @@ export interface DuplicateExceptionListProps extends BaseParams {
 export interface ApiListDuplicateProps
   extends Omit<DuplicateExceptionListProps, 'http' | 'signal'> {
   onError: (err: Error) => void;
-  onSuccess: () => void;
+  onSuccess: (newList: ExceptionListSchema) => void;
 }
 
 export interface ExceptionListFilter {
