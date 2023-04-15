@@ -191,89 +191,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         return new Promise((res) => setTimeout(res, num));
       };
 
-      it('sorts by a column CIS Selection, should be case sensitive/insensitive depending on the column', async () => {
+      it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
           ['CIS Section', 'asc', sortByAlphabeticalOrder],
           ['CIS Section', 'desc', sortByAlphabeticalOrder],
-        ];
-        for (const [columnName, dir, sortingMethod] of testCases) {
-          await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(1000);
-          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
-          expect(values).to.not.be.empty();
-          const test = await latestFindingsTable.getLoading();
-          expect(test).to.be.empty();
-          const sorted = values
-            .slice()
-            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => {
-            expect(value).to.be.eql(
-              sorted[i],
-              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
-            );
-            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
-          });
-        }
-      });
-
-      it('sorts by a column Resource ID, should be case sensitive/insensitive depending on the column', async () => {
-        type TestCase = [string, SortDirection, SortingMethod];
-        const testCases: TestCase[] = [
           ['Resource ID', 'asc', compareStringByLexicographicOrder],
           ['Resource ID', 'desc', compareStringByLexicographicOrder],
-        ];
-        for (const [columnName, dir, sortingMethod] of testCases) {
-          await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(1000);
-          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
-          expect(values).to.not.be.empty();
-          const test = await latestFindingsTable.getLoading();
-          expect(test).to.be.empty();
-          const sorted = values
-            .slice()
-            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          console.log('sorted array: ', sorted);
-          console.log('values array: ', values);
-          values.forEach((value, i) => {
-            expect(value).to.be.eql(
-              sorted[i],
-              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
-            );
-            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
-          });
-        }
-      });
-
-      it('sorts by a column Resource Name, should be case sensitive/insensitive depending on the column', async () => {
-        type TestCase = [string, SortDirection, SortingMethod];
-        const testCases: TestCase[] = [
           ['Resource Name', 'asc', sortByAlphabeticalOrder],
           ['Resource Name', 'desc', sortByAlphabeticalOrder],
-        ];
-        for (const [columnName, dir, sortingMethod] of testCases) {
-          await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(1000);
-          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
-          expect(values).to.not.be.empty();
-          const test = await latestFindingsTable.getLoading();
-          expect(test).to.be.empty();
-          const sorted = values
-            .slice()
-            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => {
-            expect(value).to.be.eql(
-              sorted[i],
-              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
-            );
-            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
-          });
-        }
-      });
-
-      it('sorts by a column Resource Type, should be case sensitive/insensitive depending on the column', async () => {
-        type TestCase = [string, SortDirection, SortingMethod];
-        const testCases: TestCase[] = [
           ['Resource Type', 'asc', sortByAlphabeticalOrder],
           ['Resource Type', 'desc', sortByAlphabeticalOrder],
         ];
