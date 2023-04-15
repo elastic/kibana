@@ -1758,7 +1758,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async update<T = unknown>(
     type: string,
     id: string,
-    attributes: Partial<T>,
+    attributes: T,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
