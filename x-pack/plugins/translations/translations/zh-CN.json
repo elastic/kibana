@@ -32048,7 +32048,6 @@
     "xpack.securitySolution.selector.summaryView.options.summaryView.description": "查看每个告警的事件渲染",
     "xpack.securitySolution.sessionsView.columnEntrySourceIp": "源 IP",
     "xpack.securitySolution.sessionsView.columnEntryType": "类型",
-    "xpack.securitySolution.sessionsView.columnEntryUser": "用户",
     "xpack.securitySolution.sessionsView.columnExecutable": "可执行",
     "xpack.securitySolution.sessionsView.columnHostName": "主机名",
     "xpack.securitySolution.sessionsView.columnInteractive": "交互",
