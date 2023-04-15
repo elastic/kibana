@@ -77,7 +77,10 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
           title: i18n.FLEET_AGENT_STATUS,
           description:
             data != null && data.hostInfo ? (
-              <EndpointAgentStatus endpointHostInfo={data.hostInfo} />
+              <EndpointAgentStatus
+                endpointHostInfo={data.hostInfo}
+                data-test-subj="endpointHostAgentStatus"
+              />
             ) : (
               getEmptyTagValue()
             ),

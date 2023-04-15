@@ -239,7 +239,12 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
-    return <EndpointAgentStatusById endpointAgentId={String(value ?? '')} />;
+    return (
+      <EndpointAgentStatusById
+        endpointAgentId={String(value ?? '')}
+        data-test-subj="endpointHostAgentStatus"
+      />
+    );
   } else if (
     [
       RULE_REFERENCE_FIELD_NAME,
