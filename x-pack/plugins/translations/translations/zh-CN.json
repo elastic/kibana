@@ -31380,7 +31380,6 @@
     "xpack.securitySolution.kpiUsers.totalUsers.title": "用户",
     "xpack.securitySolution.kubernetes.columnContainer": "容器",
     "xpack.securitySolution.kubernetes.columnEntryType": "条目类型",
-    "xpack.securitySolution.kubernetes.columnEntryUser": "会话条目用户",
     "xpack.securitySolution.kubernetes.columnExecutable": "会话 Leader",
     "xpack.securitySolution.kubernetes.columnInteractive": "交互性",
     "xpack.securitySolution.kubernetes.columnNode": "节点",
