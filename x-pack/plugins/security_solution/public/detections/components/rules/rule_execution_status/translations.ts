@@ -60,9 +60,6 @@ export const COPY_TEXT_TO_CLIPBOARD = i18n.translate(
   }
 );
 
-export const TEXT_COPIED_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.copyTextIconButton.textCopied',
-  {
-    defaultMessage: 'Text copied to clipboard',
-  }
-);
+export const TEXT_COPIED = i18n.translate('xpack.securitySolution.copyTextIconButton.textCopied', {
+  defaultMessage: 'Text copied',
+});

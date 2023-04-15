@@ -136,7 +136,6 @@ export const GET_MESSAGE_COLUMN = (width: string) => ({
     );
   },
   sortable: false,
-  truncateText: false,
   width,
 });
 

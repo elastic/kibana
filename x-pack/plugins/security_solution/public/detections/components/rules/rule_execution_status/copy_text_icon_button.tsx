@@ -36,7 +36,7 @@ export const CopyTextIconButton: React.FC<CopyTextIconButtonProps> = ({ textToCo
   };
 
   return (
-    <EuiToolTip content={isTextCopied ? i18n.TEXT_COPIED_TO_CLIPBOARD : i18n.COPY_TEXT}>
+    <EuiToolTip content={isTextCopied ? i18n.TEXT_COPIED : i18n.COPY_TEXT}>
       <EuiButtonIcon
         buttonRef={buttonRef}
         aria-label={i18n.COPY_TEXT_TO_CLIPBOARD}

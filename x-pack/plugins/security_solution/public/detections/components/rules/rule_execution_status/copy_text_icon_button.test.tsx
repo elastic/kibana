@@ -21,21 +21,21 @@ jest.mock('@elastic/eui', () => {
 
 describe('CopyTextIconButton', () => {
   it('clicking a button copies the text', () => {
-    const { getByRole } = render(<CopyTextIconButton textToCopy="test-message" />);
+    const { getByRole } = render(<CopyTextIconButton textToCopy="Test message" />);
 
     fireEvent.click(getByRole('button'));
 
-    expect(copyToClipboard).toBeCalledWith('test-message');
+    expect(copyToClipboard).toBeCalledWith('Test message');
   });
 
   it('tooltip text changes after clicking the button', async () => {
-    const { getByRole } = render(<CopyTextIconButton textToCopy="test-message" />);
+    const { getByRole } = render(<CopyTextIconButton textToCopy="Test message" />);
 
     fireEvent.mouseOver(getByRole('button'), { bubbles: true });
     expect(await screen.findByText('Copy text')).toBeInTheDocument();
 
     fireEvent.click(getByRole('button'), { bubbles: true });
-    expect(await screen.findByText('Text copied to clipboard')).toBeInTheDocument();
+    expect(await screen.findByText('Text copied')).toBeInTheDocument();
   });
 
   afterEach(() => {
