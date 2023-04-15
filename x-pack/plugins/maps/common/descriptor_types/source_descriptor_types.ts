@@ -53,7 +53,7 @@ type AbstractAggDescriptor = {
   mask?: {
     operator: MASK_OPERATOR;
     value: number;
-  }
+  };
 };
 
 export type CountAggDescriptor = AbstractAggDescriptor & {
