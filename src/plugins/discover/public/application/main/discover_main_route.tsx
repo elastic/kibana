@@ -28,6 +28,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
+import {
+  DiscoverExtensionProvider,
+  useDiscoverExtensionRegistry,
+} from '../../extensions/extension_provider';
+import type { RegisterExtensions } from '../../plugin';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -35,14 +40,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-interface Props {
+export interface MainRouteProps {
+  registerExtensions: RegisterExtensions[];
   isDev: boolean;
 }
 
-export function DiscoverMainRoute(props: Props) {
+export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
-  const { isDev } = props;
   const {
     core,
     chrome,
@@ -58,6 +63,7 @@ export function DiscoverMainRoute(props: Props) {
       services,
     })
   );
+  const extensionRegistry = useDiscoverExtensionRegistry({ registerExtensions, stateContainer });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -250,8 +256,10 @@ export function DiscoverMainRoute(props: Props) {
   }
 
   return (
-    <DiscoverMainProvider value={stateContainer}>
-      <DiscoverMainAppMemoized stateContainer={stateContainer} />
-    </DiscoverMainProvider>
+    <DiscoverExtensionProvider value={extensionRegistry}>
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+      </DiscoverMainProvider>
+    </DiscoverExtensionProvider>
   );
 }

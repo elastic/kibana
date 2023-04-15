@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -19,6 +18,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import { useDiscoverExtension } from '../../../../extensions/extension_provider';
 
 export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   onOpenInspector: () => void;
@@ -109,7 +109,7 @@ export const DiscoverTopNav = ({
     });
   }, [dataViewEditor, stateContainer]);
 
-  const topNavExtension = useObservable(services.extensions.get$('top_nav'));
+  const topNavExtension = useDiscoverExtension('top_nav');
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -123,13 +123,13 @@ export const DiscoverTopNav = ({
         topNavExtension,
       }),
     [
+      adHocDataViews,
       dataView,
+      isPlainRecord,
       navigateTo,
+      onOpenInspector,
       services,
       stateContainer,
-      onOpenInspector,
-      isPlainRecord,
-      adHocDataViews,
       topNavExtension,
     ]
   );
@@ -199,7 +199,7 @@ export const DiscoverTopNav = ({
     [navigateTo, services, stateContainer]
   );
 
-  const searchBarExtension = useObservable(services.extensions.get$('search_bar'));
+  const searchBarExtension = useDiscoverExtension('search_bar');
 
   return (
     <AggregateQueryTopNavMenu

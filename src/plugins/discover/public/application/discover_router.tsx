@@ -18,8 +18,21 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
+import type { RegisterExtensions } from '../plugin';
 
-export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
+export interface DiscoverRouterProps {
+  services: DiscoverServices;
+  registerExtensions: RegisterExtensions[];
+  history: History;
+  isDev: boolean;
+}
+
+export const discoverRouter = ({
+  services,
+  registerExtensions,
+  history,
+  isDev,
+}: DiscoverRouterProps) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
@@ -40,10 +53,10 @@ export const discoverRouter = (services: DiscoverServices, history: History, isD
             <ViewAlertRoute />
           </Route>
           <Route path="/view/:id">
-            <DiscoverMainRoute isDev={isDev} />
+            <DiscoverMainRoute registerExtensions={registerExtensions} isDev={isDev} />
           </Route>
           <Route path="/" exact>
-            <DiscoverMainRoute isDev={isDev} />
+            <DiscoverMainRoute registerExtensions={registerExtensions} isDev={isDev} />
           </Route>
           <NotFoundRoute />
         </Switch>

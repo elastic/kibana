@@ -22,10 +22,10 @@ import {
   FieldPopoverFooter,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
-import useObservable from 'react-use/lib/useObservable';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
+import { useDiscoverExtension } from '../../../../extensions/extension_provider';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -258,7 +258,7 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
-  const fieldPopoverExtension = useObservable(services.extensions.get$('field_popover'));
+  const fieldPopoverExtension = useDiscoverExtension('field_popover');
 
   const renderPopover = () => {
     return (
