@@ -66,6 +66,9 @@ export class MetricsExpression extends Component<Props, State> {
         metrics={this.props.metrics}
         onChange={this.props.onChange}
         allowMultipleMetrics={true}
+        bucketName={i18n.translate('xpack.maps.termJoin.bucketName', {
+          defaultMessage: 'term',
+        })}
       />
     );
   };

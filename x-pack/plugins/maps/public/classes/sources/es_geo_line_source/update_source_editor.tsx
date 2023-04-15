@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, Component } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
@@ -14,8 +14,8 @@ import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
-import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../source';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
   indexPatternId: string;
@@ -96,6 +96,9 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
+            bucketName={i18n.translate('xpack.maps.source.esGeoLine.bucketName', {
+              defaultMessage: 'track',
+            })}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}

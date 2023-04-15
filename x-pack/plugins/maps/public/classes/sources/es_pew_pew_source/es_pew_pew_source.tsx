@@ -73,7 +73,6 @@ export class ESPewPewSource extends AbstractESAggSource {
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }

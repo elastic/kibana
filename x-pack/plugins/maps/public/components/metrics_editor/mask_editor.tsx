@@ -12,6 +12,7 @@ import { AGG_TYPE } from '../../../common/constants';
 import { AggDescriptor } from '../../../common/descriptor_types';
 
 interface Props {
+  bucketName: string;
   metric: AggDescriptor;
   onChange: (metric: AggDescriptor) => void;
 }
@@ -53,9 +54,9 @@ export class MaskEditor extends Component<Props, State> {
           <EuiExpression
             color={this.props.metric.mask === undefined ? 'subdued' : 'warning'}
             description={i18n.translate('xpack.maps.maskEditor.maskDescription', {
-              defaultMessage: 'hide {bucketsLabel} when {aggLabel} is ',
+              defaultMessage: 'hide {bucketName} when {aggLabel} is ',
               values: {
-                bucketsLabel: 'clusters',
+                bucketName: this.props.bucketName,
                 aggLabel: 'count',
               },
             })}

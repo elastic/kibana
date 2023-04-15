@@ -44,6 +44,7 @@ function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
 }
 
 interface Props {
+  bucketName: string;
   metric: AggDescriptor;
   fields: DataViewField[];
   onChange: (metric: AggDescriptor) => void;
@@ -53,6 +54,7 @@ interface Props {
 }
 
 export function MetricEditor({
+  bucketName,
   fields,
   metricsFilter,
   metric,
@@ -231,7 +233,7 @@ export function MetricEditor({
         })}
         display="columnCompressed"
       >
-        <MaskEditor metric={metric} onChange={onChange} />
+        <MaskEditor bucketName={bucketName} metric={metric} onChange={onChange} />
       </EuiFormRow>
 
       {removeButton}
