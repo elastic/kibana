@@ -21,6 +21,7 @@ export type MapAttributes = {
 };
 
 export type MapItem = MapCrudTypes['Item'];
+export type PartialMapItem = MapCrudTypes['PartialItem'];
 
 // ----------- GET --------------
 
@@ -47,15 +48,3 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
 export type MapSearchOptions = SearchOptions;
-
-// Might be able to factor this out, otherwise it can be added to the abstract interface
-export type PartialMapItem = Omit<MapItem, 'attributes' | 'references'> & {
-  attributes: Partial<MapAttributes>;
-  references: Reference[] | undefined;
-};
-
-interface Reference {
-  type: string;
-  id: string;
-  name: string;
-}

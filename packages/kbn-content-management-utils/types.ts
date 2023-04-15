@@ -69,6 +69,10 @@ export interface SOWithMetadata<Attributes extends object> {
 
 export interface ContentManagementCrudTypes<ContentType extends string, Attributes extends object> {
   Item: SOWithMetadata<Attributes>;
+  PartialItem: Omit<SOWithMetadata<Attributes>, 'attributes' | 'references'> & {
+    attributes: Partial<Attributes>;
+    references: Reference[] | undefined;
+  };
 
   GetIn: GetIn<ContentType>;
   GetOut: GetResultSO<SOWithMetadata<Attributes>>;
