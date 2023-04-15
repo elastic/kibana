@@ -24,12 +24,8 @@ jest.mock('../../../../../../management/hooks', () => {
   const Generator = jest.requireActual(
     '../../../../../../../common/endpoint/data_generators/endpoint_metadata_generator'
   );
-  const actualModule = jest.requireActual(
-    '../../../../../../management/hooks/endpoint/use_get_endpoint_details'
-  );
 
   return {
-    ...actualModule,
     useGetEndpointDetails: jest.fn(() => {
       return {
         data: new Generator.EndpointMetadataGenerator('seed').generateHostInfo({
