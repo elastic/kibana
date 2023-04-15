@@ -211,6 +211,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   </ListHeaderContainer>
                 </EuiPanel>
               }
+              data-test-subj={`exceptionsManagementListCard-${listId}`}
             >
               <ExceptionPanel hasBorder>
                 <ListExceptionItems

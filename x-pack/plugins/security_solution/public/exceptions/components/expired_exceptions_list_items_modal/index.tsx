@@ -44,6 +44,7 @@ export const IncludeExpiredExceptionsModal = memo<IncludeExpiredExceptionsModalP
           label={i18n.EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL}
           checked={includeExpired}
           onChange={handleSwitchChange}
+          data-test-subj="includeExpiredExceptionsConfirmationModalSwitch"
         />
       </EuiConfirmModal>
     );

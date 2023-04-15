@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe.only('duplicate_exception_lists', () => {
+  describe('duplicate_exception_lists', () => {
     afterEach(async () => {
       await deleteAllExceptions(supertest, log);
     });

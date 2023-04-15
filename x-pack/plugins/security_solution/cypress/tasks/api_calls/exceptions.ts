@@ -59,6 +59,7 @@ export const createExceptionListItem = (
           value: ['some host', 'another host'],
         },
       ],
+      expire_time: exceptionListItem?.expire_time,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,

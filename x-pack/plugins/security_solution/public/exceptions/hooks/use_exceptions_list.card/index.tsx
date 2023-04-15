@@ -228,6 +228,7 @@ export const useExceptionsListCard = ({
 
   const handleCancelExpiredExceptionsModal = () => {
     setShowIncludeExpiredExceptionsModalExport(false);
+    setShowIncludeExpiredExceptionsModalDuplicate(false);
   };
 
   const handleConfirmExpiredExceptionsModal = useCallback(

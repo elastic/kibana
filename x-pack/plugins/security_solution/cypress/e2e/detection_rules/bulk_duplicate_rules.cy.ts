@@ -15,12 +15,7 @@ import {
   duplicateSelectedRulesWithNonExpiredExceptions,
 } from '../../tasks/alerts_detection_rules';
 
-import {
-  goToExceptionsTab,
-  viewExpiredExceptionItems,
-  assertNumberOfExceptionItemsExists,
-  assertExceptionItemsExists,
-} from '../../tasks/rule_details';
+import { goToExceptionsTab, viewExpiredExceptionItems } from '../../tasks/rule_details';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
@@ -32,6 +27,11 @@ import { getNewRule } from '../../objects/rule';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 import { createRuleExceptionItem } from '../../tasks/api_calls/exceptions';
+import { EXCEPTION_CARD_ITEM_NAME } from '../../screens/exceptions';
+import {
+  assertExceptionItemsExists,
+  assertNumberOfExceptionItemsExists,
+} from '../../tasks/exceptions';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -113,9 +113,9 @@ describe('Detection rules, bulk duplicate', () => {
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
       goToExceptionsTab();
-      assertExceptionItemsExists([NON_EXPIRED_EXCEPTION_ITEM_NAME]);
+      assertExceptionItemsExists(EXCEPTION_CARD_ITEM_NAME, [NON_EXPIRED_EXCEPTION_ITEM_NAME]);
       viewExpiredExceptionItems();
-      assertExceptionItemsExists([EXPIRED_EXCEPTION_ITEM_NAME]);
+      assertExceptionItemsExists(EXCEPTION_CARD_ITEM_NAME, [EXPIRED_EXCEPTION_ITEM_NAME]);
     });
 
     it('Duplicates rules with exceptions, excluding expired exceptions', () => {
@@ -124,7 +124,7 @@ describe('Detection rules, bulk duplicate', () => {
       expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
       goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
       goToExceptionsTab();
-      assertExceptionItemsExists([NON_EXPIRED_EXCEPTION_ITEM_NAME]);
+      assertExceptionItemsExists(EXCEPTION_CARD_ITEM_NAME, [NON_EXPIRED_EXCEPTION_ITEM_NAME]);
       viewExpiredExceptionItems();
       assertNumberOfExceptionItemsExists(0);
     });
