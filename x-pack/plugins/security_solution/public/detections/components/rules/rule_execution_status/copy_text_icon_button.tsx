@@ -12,17 +12,9 @@ import * as i18n from './translations';
 
 interface CopyTextIconButtonProps {
   textToCopy: string;
-  tooltipTextBeforeCopying?: string;
-  tooltipTextAfterCopying?: string;
-  ariaLabel?: string;
 }
 
-export const CopyTextIconButton: React.FC<CopyTextIconButtonProps> = ({
-  textToCopy,
-  tooltipTextBeforeCopying = i18n.COPY_TEXT,
-  tooltipTextAfterCopying = i18n.TEXT_COPIED_TO_CLIPBOARD,
-  ariaLabel = i18n.COPY_TEXT_TO_CLIPBOARD,
-}) => {
+export const CopyTextIconButton: React.FC<CopyTextIconButtonProps> = ({ textToCopy }) => {
   const buttonRef = useRef<HTMLAnchorElement | null>(null);
   const [isTextCopied, setTextCopied] = useState(false);
 
@@ -44,15 +36,16 @@ export const CopyTextIconButton: React.FC<CopyTextIconButtonProps> = ({
   };
 
   return (
-    <EuiToolTip content={isTextCopied ? tooltipTextAfterCopying : tooltipTextBeforeCopying}>
+    <EuiToolTip content={isTextCopied ? i18n.TEXT_COPIED_TO_CLIPBOARD : i18n.COPY_TEXT}>
       <EuiButtonIcon
         buttonRef={buttonRef}
-        aria-label={ariaLabel}
+        aria-label={i18n.COPY_TEXT_TO_CLIPBOARD}
         color="text"
         iconType="copy"
         onClick={onClick}
         onBlur={onBlur}
         data-test-subj="copyTextIconButton"
+        role={'button'}
       />
     </EuiToolTip>
   );
