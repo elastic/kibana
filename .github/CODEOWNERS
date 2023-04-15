@@ -431,7 +431,7 @@ src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/kibana-app-services
-x-pack/plugins/kubernetes_security @elastic/awp-viz
+x-pack/plugins/kubernetes_security @elastic/sec-cloudnative-integrations
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/platform-deployment-management
@@ -565,7 +565,7 @@ packages/kbn-securitysolution-utils @elastic/security-solution-platform
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
-x-pack/plugins/session_view @elastic/awp-viz
+x-pack/plugins/session_view @elastic/sec-cloudnative-integrations
 packages/kbn-set-map @elastic/kibana-operations
 examples/share_examples @elastic/kibana-app-services
 src/plugins/share @elastic/appex-sharedux
@@ -1174,8 +1174,8 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-viz
-x-pack/plugins/security_solution/public/kubernetes @elastic/awp-viz
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/sec-cloudnative-integrations
+x-pack/plugins/security_solution/public/kubernetes @elastic/sec-cloudnative-integrations
 
 ## Security Solution sub teams - Protections Experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
