@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ROLES } from '../../../common/test';
 
 import {
@@ -15,11 +16,14 @@ import {
 import { actionFormSelector } from '../../screens/common/rule_actions';
 
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
+import type { RuleActionFrequency } from '../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
   assertSlackRuleAction,
   addEmailConnectorAndRuleAction,
   assertEmailRuleAction,
+  assertSelectedActionFrequency,
+  pickActionFrequency,
 } from '../../tasks/common/rule_actions';
 import {
   waitForRulesTableToBeLoaded,
@@ -32,10 +36,8 @@ import {
   submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
-  pickActionFrequency,
   openBulkActionsMenu,
 } from '../../tasks/rules_bulk_edit';
-import { assertSelectedActionFrequency } from '../../tasks/edit_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
@@ -75,13 +77,18 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     esArchiverResetKibana();
 
     createSlackConnector().then(({ body }) => {
-      const actions = [
+      const actions: RuleActionArray = [
         {
           id: body.id,
           action_type_id: '.slack',
           group: 'default',
           params: {
             message: expectedExistingSlackMessage,
+          },
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
           },
         },
       ];
@@ -120,7 +127,11 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Add a rule action to rules (existing connector)', () => {
-      const expectedActionFrequency = 'Daily';
+      const expectedActionFrequency: RuleActionFrequency = {
+        customFrequency: 'Custom frequency',
+        throttle: 1,
+        throttleUnit: 'd',
+      };
 
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
@@ -131,8 +142,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // ensure rule actions info callout displayed on the form
       cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-      pickActionFrequency(expectedActionFrequency);
       addSlackRuleAction(expectedSlackMessage);
+      pickActionFrequency(expectedActionFrequency);
 
       submitBulkEditForm();
       waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
@@ -140,7 +151,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-      assertSelectedActionFrequency(expectedActionFrequency);
+      assertSelectedActionFrequency(expectedActionFrequency, 1);
       assertSlackRuleAction(expectedExistingSlackMessage, 0);
       assertSlackRuleAction(expectedSlackMessage, 1);
       // ensure there is no third action
@@ -148,7 +159,9 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Overwrite rule actions in rules', () => {
-      const expectedActionFrequency = 'On each rule execution';
+      const expectedActionFrequency: RuleActionFrequency = {
+        customFrequency: 'Per rule run',
+      };
 
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
@@ -156,8 +169,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       selectNumberOfRules(expectedNumberOfRulesToBeEdited);
       openBulkEditRuleActionsForm();
 
-      pickActionFrequency(expectedActionFrequency);
       addSlackRuleAction(expectedSlackMessage);
+      pickActionFrequency(expectedActionFrequency);
 
       // check overwrite box, ensure warning is displayed
       checkOverwriteRuleActionsCheckbox();
@@ -178,15 +191,19 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Add a rule action to rules (new connector)', () => {
-      const expectedActionFrequency = 'Hourly';
+      const expectedActionFrequency: RuleActionFrequency = {
+        customFrequency: 'Custom frequency',
+        throttle: 2,
+        throttleUnit: 'h',
+      };
       const expectedEmail = 'test@example.com';
       const expectedSubject = 'Subject';
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
       openBulkEditRuleActionsForm();
 
-      pickActionFrequency(expectedActionFrequency);
       addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
+      pickActionFrequency(expectedActionFrequency);
 
       submitBulkEditForm();
       waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
@@ -194,7 +211,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-      assertSelectedActionFrequency(expectedActionFrequency);
+      assertSelectedActionFrequency(expectedActionFrequency, 1);
       assertEmailRuleAction(expectedEmail, expectedSubject);
     });
   });

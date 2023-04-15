@@ -10,8 +10,11 @@ import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
+import {
+  transformToActionFrequency,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from '../../normalization/rule_actions';
 
 const getThrottleOperation = (throttle: string) =>
   ({
@@ -70,10 +73,14 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: action.value.actions,
+          value: transformToActionFrequency(action.value.actions, action.value.throttle),
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
+        ...(action.value.throttle
+          ? [
+              getThrottleOperation(action.value.throttle),
+              getNotifyWhenOperation(action.value.throttle),
+            ]
+          : []),
       ];
 
     case BulkActionEditType.set_rule_actions:
@@ -81,10 +88,14 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: action.value.actions,
+          value: transformToActionFrequency(action.value.actions, action.value.throttle),
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
+        ...(action.value.throttle
+          ? [
+              getThrottleOperation(action.value.throttle),
+              getNotifyWhenOperation(action.value.throttle),
+            ]
+          : []),
       ];
 
     // schedule actions

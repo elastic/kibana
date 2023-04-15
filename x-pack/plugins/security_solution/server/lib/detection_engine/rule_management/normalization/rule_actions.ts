@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction,
+  RuleActionFrequency,
+  RuleNotifyWhenType,
+} from '@kbn/alerting-plugin/common';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -17,6 +21,38 @@ import { transformAlertToRuleAction } from '../../../../../common/detection_engi
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
+
+export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
+  return {
+    summary: true,
+    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
+    throttle: transformToAlertThrottle(throttle),
+  };
+};
+
+interface ActionWithFrequency {
+  frequency?: RuleActionFrequency;
+}
+
+export const transformToActionFrequency = <T extends ActionWithFrequency>(
+  actions: T[],
+  throttle: string | null | undefined
+): T[] => {
+  const frequency = transformToFrequency(throttle);
+  const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+  if (!actionsWithoutFrequency.length) {
+    return actions;
+  }
+
+  const transformedActions: T[] = [];
+  actions.forEach((action) => {
+    transformedActions.push({
+      ...action,
+      ...{ frequency },
+    });
+  });
+  return transformedActions;
+};
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen

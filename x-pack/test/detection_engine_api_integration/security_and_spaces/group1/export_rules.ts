@@ -208,8 +208,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
           actions: [
-            { ...action1, uuid: firstRule.actions[0].uuid },
-            { ...action2, uuid: firstRule.actions[1].uuid },
+            {
+              ...action1,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+            {
+              ...action2,
+              uuid: firstRule.actions[1].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
           ],
           throttle: 'rule',
         };
@@ -258,12 +266,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-2'),
-          actions: [{ ...action, uuid: firstRule.actions[0].uuid }],
+          actions: [
+            {
+              ...action,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
           throttle: 'rule',
         };
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
-          actions: [{ ...action, uuid: secondRule.actions[0].uuid }],
+          actions: [
+            {
+              ...action,
+              uuid: secondRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
           throttle: 'rule',
         };
         expect(firstRule).toEqual(outputRule1);
@@ -437,6 +457,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
             throttle: '1h',
@@ -514,6 +535,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -523,6 +545,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
             throttle: '1h',
@@ -631,6 +654,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -640,6 +664,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
             throttle: '1h',
@@ -656,6 +681,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -665,6 +691,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
             throttle: '1h',
