@@ -49,7 +49,6 @@ export type GetResultSO<Item extends object> = GetResult<
   }
 >;
 
-// I'm not sure if this is correct
 export interface SOWithMetadata<Attributes extends object> {
   id: string;
   type: string;
