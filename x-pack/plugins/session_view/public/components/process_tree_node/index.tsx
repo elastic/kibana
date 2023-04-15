@@ -61,7 +61,7 @@ export interface ProcessDeps {
   onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
-  handleCollapseProcessTree: () => void;
+  handleCollapseProcessTree?: () => void;
 }
 
 /**
