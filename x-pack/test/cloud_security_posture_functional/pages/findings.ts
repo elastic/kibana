@@ -199,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(3000);
+          await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -225,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(3000);
+          await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -253,7 +253,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(3000);
+          await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
@@ -279,7 +279,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
-          await sleep(3000);
+          await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const test = await latestFindingsTable.getLoading();
