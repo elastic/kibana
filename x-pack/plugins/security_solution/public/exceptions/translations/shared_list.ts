@@ -125,6 +125,19 @@ export const EXCEPTION_EXPORT_ERROR = i18n.translate(
   }
 );
 
+export const EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.duplicate_success', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" duplicated successfully',
+  });
+
+export const EXCEPTION_DUPLICATE_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.duplicateError',
+  {
+    defaultMessage: 'Exception list duplication error',
+  }
+);
+
 export const EXCEPTION_DELETE_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.deleteError',
   {
