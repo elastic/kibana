@@ -138,7 +138,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async update<T = unknown>(
     type: string,
     id: string,
-    attributes: Partial<T>,
+    attributes: T,
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
