@@ -71,13 +71,21 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import { createExtensionRegistry, DiscoverExtensionRegistry } from './extensions';
+import { DiscoverExtensionRegistry } from './extensions';
+import type { DiscoverStateContainer } from './application/main/services/discover_state';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
 );
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
+
+export interface RegisterExtensionsContext {
+  extensions: DiscoverExtensionRegistry;
+  stateContainer: DiscoverStateContainer;
+}
+
+export type RegisterExtensions = (options: RegisterExtensionsContext) => void;
 
 /**
  * @public
@@ -156,7 +164,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly extensions: DiscoverExtensionRegistry;
+  readonly registerExtensions: (register: RegisterExtensions) => void;
 }
 
 /**
@@ -210,8 +218,8 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
-  private extensions = createExtensionRegistry();
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private registerExtensions: RegisterExtensions[] = [];
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -323,8 +331,7 @@ export class DiscoverPlugin
           this.initializerContext,
           this.locator!,
           this.contextLocator!,
-          this.singleDocLocator!,
-          this.extensions
+          this.singleDocLocator!
         );
 
         // make sure the data view list is up to date
@@ -334,7 +341,12 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, isDev);
+        const unmount = renderApp({
+          element: params.element,
+          services,
+          registerExtensions: this.registerExtensions,
+          isDev,
+        });
         return () => {
           unlistenParentHistory();
           unmount();
@@ -395,7 +407,9 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      extensions: this.extensions,
+      registerExtensions: (register: RegisterExtensions) => {
+        this.registerExtensions.push(register);
+      },
     };
   }
 
@@ -422,8 +436,7 @@ export class DiscoverPlugin
         this.initializerContext,
         this.locator!,
         this.contextLocator!,
-        this.singleDocLocator!,
-        this.extensions
+        this.singleDocLocator!
       );
     };
 

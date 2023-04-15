@@ -25,13 +25,13 @@ import {
   FieldVisualizeButton,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
-import useObservable from 'react-use/lib/useObservable';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { PLUGIN_ID, SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { type DataDocuments$ } from '../../services/discover_data_state_container';
+import { useDiscoverExtension } from '../../../../extensions/extension_provider';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -275,7 +275,7 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
-  const fieldPopoverExtension = useObservable(services.extensions.get$('field_popover'));
+  const fieldPopoverExtension = useDiscoverExtension('field_popover');
 
   const renderPopover = () => {
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);

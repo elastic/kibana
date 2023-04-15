@@ -52,7 +52,6 @@ import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
 import { DiscoverAppLocator } from '../common';
-import type { DiscoverExtensionRegistry } from './extensions';
 
 /**
  * Location state of internal Discover history instance
@@ -100,7 +99,6 @@ export interface DiscoverServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
-  extensions: DiscoverExtensionRegistry;
 }
 
 export const buildServices = memoize(function (
@@ -109,8 +107,7 @@ export const buildServices = memoize(function (
   context: PluginInitializerContext,
   locator: DiscoverAppLocator,
   contextLocator: DiscoverContextAppLocator,
-  singleDocLocator: DiscoverSingleDocLocator,
-  extensions: DiscoverExtensionRegistry
+  singleDocLocator: DiscoverSingleDocLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -156,6 +153,5 @@ export const buildServices = memoize(function (
     savedObjectsManagement: plugins.savedObjectsManagement,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
-    extensions,
   };
 });
