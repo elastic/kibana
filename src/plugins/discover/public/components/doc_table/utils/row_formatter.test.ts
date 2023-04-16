@@ -26,7 +26,7 @@ describe('Row formatter', () => {
     } = stubbedSavedObjectIndexPattern(id);
 
     return new DataView({
-      spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
+      spec: { id, type, version, timeFieldName, fields: JSON.parse(fields || '[]'), title },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,
       metaFields: ['_id', '_type', '_score'],
