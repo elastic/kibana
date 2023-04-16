@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -26,6 +28,11 @@ import {
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
   windowSize?: number;
@@ -33,6 +40,7 @@ export interface RuleParams {
   threshold?: number;
   serviceName?: string;
   environment?: string;
+  groupBy?: string | string[] | undefined;
 }
 
 interface Props {
@@ -91,6 +99,13 @@ export function ErrorCountRuleType(props: Props) {
     ]
   );
 
+  const onGroupByChange = useCallback(
+    (group: string[] | string | null) => {
+      setRuleParams('groupBy', group && group.length ? group : '');
+    },
+    [setRuleParams]
+  );
+
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
@@ -138,11 +153,38 @@ export function ErrorCountRuleType(props: Props) {
     />
   );
 
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.apm.ruleFlyout.createAlertPerText', {
+          defaultMessage: 'Group alerts by',
+        })}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       defaultParams={params}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}

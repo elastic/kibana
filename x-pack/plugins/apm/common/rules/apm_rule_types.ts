@@ -40,21 +40,25 @@ const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   }),
 };
 
+const formatGroup = (group: string) => (group ? ` for ${group}` : '');
+
 export function formatErrorCountReason({
   threshold,
   measured,
   serviceName,
   windowSize,
   windowUnit,
+  group,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
   windowSize: number;
   windowUnit: string;
+  group: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Error count is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
@@ -63,6 +67,7 @@ export function formatErrorCountReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroup(group),
     },
   });
 }
@@ -75,6 +80,7 @@ export function formatTransactionDurationReason({
   aggregationType,
   windowSize,
   windowUnit,
+  group,
 }: {
   threshold: number;
   measured: number;
@@ -83,6 +89,7 @@ export function formatTransactionDurationReason({
   aggregationType: string;
   windowSize: number;
   windowUnit: string;
+  group: string;
 }) {
   let aggregationTypeFormatted =
     aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
@@ -90,7 +97,7 @@ export function formatTransactionDurationReason({
     aggregationTypeFormatted = aggregationTypeFormatted + '.';
 
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
@@ -100,6 +107,7 @@ export function formatTransactionDurationReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroup(group),
     },
   });
 }
@@ -111,6 +119,7 @@ export function formatTransactionErrorRateReason({
   asPercent,
   windowSize,
   windowUnit,
+  group,
 }: {
   threshold: number;
   measured: number;
@@ -118,9 +127,10 @@ export function formatTransactionErrorRateReason({
   asPercent: AsPercent;
   windowSize: number;
   windowUnit: string;
+  group: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Failed transactions is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
@@ -129,6 +139,7 @@ export function formatTransactionErrorRateReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroup(group),
     },
   });
 }

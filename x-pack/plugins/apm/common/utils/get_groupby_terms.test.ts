@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getGroupByTerms } from './get_groupby_terms';
+
+describe('get terms fields based on group-by', () => {
+  it('returns single terms field', () => {
+    const ruleParams = { groupBy: 'service.name' };
+    const terms = getGroupByTerms(ruleParams.groupBy);
+    expect(terms).toEqual([
+      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
+    ]);
+  });
+
+  it('returns multiple terms fields', () => {
+    const ruleParams = {
+      groupBy: [
+        'service.name',
+        'service.environment',
+        'transaction.type',
+        'transaction.name',
+      ],
+    };
+    const terms = getGroupByTerms(ruleParams.groupBy);
+    expect(terms).toEqual([
+      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
+      {
+        field: 'service.environment',
+        missing: 'SERVICE_ENVIRONMENT_NOT_DEFINED',
+      },
+      { field: 'transaction.type', missing: 'TRANSACTION_TYPE_NOT_DEFINED' },
+      { field: 'transaction.name', missing: 'TRANSACTION_NAME_NOT_DEFINED' },
+    ]);
+  });
+
+  it('returns an empty array', () => {
+    const ruleParams = { groupBy: undefined };
+    const terms = getGroupByTerms(ruleParams.groupBy);
+    expect(terms).toEqual([]);
+  });
+});

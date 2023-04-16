@@ -8,13 +8,15 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -34,6 +36,12 @@ import {
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
   aggregationType: AggregationType;
@@ -43,6 +51,7 @@ export interface RuleParams {
   transactionType: string;
   windowSize: number;
   windowUnit: string;
+  groupBy?: string | string[] | undefined;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
@@ -142,6 +151,13 @@ export function TransactionDurationRuleType(props: Props) {
     />
   );
 
+  const onGroupByChange = useCallback(
+    (group: string[] | string | null) => {
+      setRuleParams('groupBy', group && group.length ? group : '');
+    },
+    [setRuleParams]
+  );
+
   const fields = [
     <ServiceField
       allowAll={false}
@@ -206,12 +222,43 @@ export function TransactionDurationRuleType(props: Props) {
     />,
   ];
 
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.apm.ruleFlyout.createAlertPerText', {
+          defaultMessage: 'Group alerts by',
+        })}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          preSelectedOptions={[
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            TRANSACTION_TYPE,
+          ]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       chartPreview={chartPreview}
       defaultParams={params}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
     />

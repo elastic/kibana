@@ -22,9 +22,9 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
+import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
-  ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
@@ -65,6 +65,7 @@ import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
+import { getGroupByActionVariables } from '../get_group_action_variables';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -159,14 +160,7 @@ export function registerTransactionDurationRuleType({
           aggs: {
             series: {
               multi_terms: {
-                terms: [
-                  { field: SERVICE_NAME },
-                  {
-                    field: SERVICE_ENVIRONMENT,
-                    missing: ENVIRONMENT_NOT_DEFINED.value,
-                  },
-                  { field: TRANSACTION_TYPE },
-                ],
+                terms: [...getGroupByTerms(ruleParams.groupBy)],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
               },
@@ -196,8 +190,25 @@ export function registerTransactionDurationRuleType({
 
       const triggeredBuckets = [];
 
+      const predefinedGroupby: string[] = [
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        TRANSACTION_TYPE,
+      ];
+
+      const allGroupbyFields: string[] = [ruleParams.groupBy ?? []].flat();
+
       for (const bucket of response.aggregations.series.buckets) {
+        const groupByFields: Record<string, string> = {};
+        bucket.key.forEach((key, keyIndex) => {
+          if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
+            groupByFields[allGroupbyFields[keyIndex]] = key;
+          }
+        });
+
         const [serviceName, environment, transactionType] = bucket.key;
+
+        const bucketKey = bucket.key;
 
         const transactionDuration =
           'avgLatency' in bucket // only true if ruleParams.aggregationType === 'avg'
@@ -214,6 +225,8 @@ export function registerTransactionDurationRuleType({
             sourceFields: getServiceGroupFields(bucket),
             transactionType,
             transactionDuration,
+            groupByFields,
+            bucketKey,
           });
         }
       }
@@ -224,6 +237,8 @@ export function registerTransactionDurationRuleType({
         transactionType,
         transactionDuration,
         sourceFields,
+        groupByFields,
+        bucketKey,
       } of triggeredBuckets) {
         const environmentLabel = getEnvironmentLabel(environment);
 
@@ -239,11 +254,12 @@ export function registerTransactionDurationRuleType({
           threshold: thresholdMicroseconds,
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
+          group: bucketKey
+            .filter((key) => !key.includes('NOT_DEFINED'))
+            .join(', '),
         });
 
-        const id = `${ApmRuleType.TransactionDuration}_${environmentLabel}`;
-
-        const alertUuid = getAlertUuid(id);
+        const alertUuid = getAlertUuid(bucketKey.join('_'));
 
         const alertDetailsUrl = getAlertDetailsUrl(
           basePath,
@@ -261,9 +277,11 @@ export function registerTransactionDurationRuleType({
           )
         );
 
+        const groupByActionVariables = getGroupByActionVariables(groupByFields);
+
         services
           .alertWithLifecycle({
-            id,
+            id: bucketKey.join('_'),
             fields: {
               [SERVICE_NAME]: serviceName,
               ...getEnvironmentEsField(environment),
@@ -273,6 +291,7 @@ export function registerTransactionDurationRuleType({
               [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
               [ALERT_REASON]: reason,
               ...sourceFields,
+              ...groupByFields,
             },
           })
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -288,6 +307,7 @@ export function registerTransactionDurationRuleType({
             transactionType,
             triggerValue: transactionDurationFormatted,
             viewInAppUrl,
+            ...groupByActionVariables,
           });
       }
 

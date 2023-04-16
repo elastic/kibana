@@ -20,7 +20,6 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import {
-  ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
@@ -49,6 +48,8 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
+import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
+import { getGroupByActionVariables } from '../get_group_action_variables';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -121,13 +122,7 @@ export function registerErrorCountRuleType({
             aggs: {
               error_counts: {
                 multi_terms: {
-                  terms: [
-                    { field: SERVICE_NAME },
-                    {
-                      field: SERVICE_ENVIRONMENT,
-                      missing: ENVIRONMENT_NOT_DEFINED.value,
-                    },
-                  ],
+                  terms: [...getGroupByTerms(ruleParams.groupBy)],
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -142,33 +137,58 @@ export function registerErrorCountRuleType({
           params: searchParams,
         });
 
+        const predefinedGroupby: string[] = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+
+        const allGroupbyFields: string[] = [ruleParams.groupBy ?? []].flat();
+
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
+            const groupByFields: Record<string, string> = {};
+            bucket.key.forEach((key, keyIndex) => {
+              if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
+                groupByFields[allGroupbyFields[keyIndex]] = key;
+              }
+            });
+
             const [serviceName, environment] = bucket.key;
+
+            const bucketKey = bucket.key;
+
             return {
               serviceName,
               environment,
               errorCount: bucket.doc_count,
               sourceFields: getServiceGroupFields(bucket),
+              groupByFields,
+              bucketKey,
             };
           }) ?? [];
 
         errorCountResults
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
-            const { serviceName, environment, errorCount, sourceFields } =
-              result;
+            const {
+              serviceName,
+              environment,
+              errorCount,
+              sourceFields,
+              groupByFields,
+              bucketKey,
+            } = result;
             const alertReason = formatErrorCountReason({
               serviceName,
               threshold: ruleParams.threshold,
               measured: errorCount,
               windowSize: ruleParams.windowSize,
               windowUnit: ruleParams.windowUnit,
+              group: bucketKey
+                .filter((key) => !key.includes('NOT_DEFINED'))
+                .join(', '),
             });
 
-            const id = [ApmRuleType.ErrorCount, serviceName, environment]
-              .filter((name) => name)
-              .join('_');
+            // const id = [ApmRuleType.ErrorCount, serviceName, environment]
+            //   .filter((name) => name)
+            //   .join('_');
 
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               serviceName,
@@ -181,9 +201,12 @@ export function registerErrorCountRuleType({
               relativeViewInAppUrl
             );
 
+            const groupByActionVariables =
+              getGroupByActionVariables(groupByFields);
+
             services
               .alertWithLifecycle({
-                id,
+                id: bucketKey.join('_'),
                 fields: {
                   [SERVICE_NAME]: serviceName,
                   ...getEnvironmentEsField(environment),
@@ -192,6 +215,7 @@ export function registerErrorCountRuleType({
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                   [ALERT_REASON]: alertReason,
                   ...sourceFields,
+                  ...groupByFields,
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -205,6 +229,7 @@ export function registerErrorCountRuleType({
                 threshold: ruleParams.threshold,
                 triggerValue: errorCount,
                 viewInAppUrl,
+                ...groupByActionVariables,
               });
           });
 

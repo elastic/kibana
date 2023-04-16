@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { errorCountMessage } from '@kbn/apm-plugin/common/rules/default_action_message';
+import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -28,11 +27,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
     let actionId: string | undefined;
 
-    const INDEX_NAME = 'error-count';
+    const INDEX_NAME = 'transaction-duration';
 
     before(async () => {
       const opbeansJava = apm
@@ -48,17 +47,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             opbeansJava
               .transaction({ transactionName: 'tx-java' })
               .timestamp(timestamp)
-              .duration(100)
-              .failure()
-              .errors(
-                opbeansJava
-                  .error({ message: '[ResponseError] index_not_found_exception' })
-                  .timestamp(timestamp + 50)
-              ),
+              .duration(5000)
+              .success(),
             opbeansNode
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
-              .duration(100)
+              .duration(4000)
               .success(),
           ];
         });
@@ -69,43 +63,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices(INDEX_NAME);
-      await es.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+      await esDeleteAllIndices([INDEX_NAME]);
+      await es.deleteByQuery({
+        index: '.alerts*',
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+      });
       await es.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
       });
     });
 
-    describe('create alert', () => {
+    describe('create alert with transaction.name group by', () => {
       before(async () => {
         actionId = await createIndexConnector({
           supertest,
-          name: 'Error count API test',
+          name: 'Transation duration API test',
           indexName: INDEX_NAME,
         });
         const createdRule = await createApmRule({
           supertest,
-          ruleTypeId: ApmRuleType.ErrorCount,
-          name: 'Apm error count',
+          ruleTypeId: ApmRuleType.TransactionDuration,
+          name: 'Apm transaction duration',
           params: {
+            threshold: 3000,
+            windowSize: 5,
+            windowUnit: 'm',
+            transactionType: 'request',
+            serviceName: 'opbeans-java',
             environment: 'production',
-            threshold: 1,
-            windowSize: 1,
-            windowUnit: 'h',
-            groupBy: ['service.name', 'service.environment', 'transaction.name'],
+            aggregationType: AggregationType.Avg,
+            groupBy: 'transaction.name',
           },
           actions: [
             {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [
-                  {
-                    message: `${errorCountMessage}
-- Transaction name: {{context.transactionName}}`,
-                  },
-                ],
+                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
@@ -134,15 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           indexName: INDEX_NAME,
         });
 
-        expect(resp.hits.hits[0]._source?.message).eql(
-          `Apm error count alert is firing because of the following conditions:
-
-- Service name: opbeans-java
-- Environment: production
-- Threshold: 1
-- Triggered value: 15 errors over the last 1 hr
-- Transaction name: tx-java`
-        );
+        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
