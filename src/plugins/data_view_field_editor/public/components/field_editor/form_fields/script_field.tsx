@@ -8,7 +8,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { first, firstValueFrom } from 'rxjs';
-// import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
@@ -60,7 +59,6 @@ const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadin
 
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  // const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
   const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
@@ -133,29 +131,6 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     return validationData!.error;
   }, [validationData$]);
 
-  /*
-  const onEditorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      monacoEditor.current = editor;
-
-      if (editorValidationSubscription.current) {
-        editorValidationSubscription.current.unsubscribe();
-      }
-
-      editorValidationSubscription.current = PainlessLang.validation$().subscribe(
-        ({ isValid, isValidating, errors }) => {
-          controller.setScriptEditorValidation({
-            isValid,
-            isValidating,
-            message: errors[0]?.message ?? null,
-          });
-        }
-      );
-    },
-    [controller]
-  );
-  */
-
   const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {
     const model = monacoEditor.current?.getModel();
     if (model) {
@@ -199,15 +174,19 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     }
   }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
 
-  /*
   useEffect(() => {
+    const sub = PainlessLang.validation$().subscribe(({ isValid, isValidating, errors }) => {
+      controller.setScriptEditorValidation({
+        isValid,
+        isValidating,
+        message: errors[0]?.message ?? null,
+      });
+    });
+
     return () => {
-      if (editorValidationSubscription.current) {
-        editorValidationSubscription.current.unsubscribe();
-      }
+      sub.unsubscribe();
     };
-  }, []);
-  */
+  }, [controller]);
 
   return (
     <UseField<string> path="script.source" validationDataProvider={validationDataProvider}>
@@ -262,7 +241,6 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
                 height="210px"
                 value={value}
                 onChange={setValue}
-                // editorDidMount={onEditorDidMount}
                 options={{
                   fontSize: 12,
                   minimap: {

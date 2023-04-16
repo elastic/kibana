@@ -83,20 +83,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
    * with the uiSettings passed down. Let's use a simple <input /> in our tests.
    */
   const CodeEditorMock = (props: any) => {
-    const { editorDidMount } = props;
-
-    mockUseEffect(() => {
-      // Forward our deterministic ID to the consumer
-      // We need below for the PainlessLang.getSyntaxErrors mock
-      editorDidMount({
-        getModel() {
-          return {
-            id: EDITOR_ID,
-          };
-        },
-      });
-    }, [editorDidMount]);
-
     return (
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
