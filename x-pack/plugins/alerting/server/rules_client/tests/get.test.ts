@@ -224,6 +224,9 @@ describe('get()', () => {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -346,6 +349,9 @@ describe('get()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const rulesClient = new RulesClient(rulesClientParams);

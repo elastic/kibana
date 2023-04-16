@@ -196,6 +196,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'myApp',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,

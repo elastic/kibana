@@ -114,7 +114,4 @@ export const registerMetricAnomalyRuleType = (
       },
     ],
   },
-  validate: {
-    params: { validate: (params) => params },
-  },
 });

@@ -488,11 +488,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     }
 
     // validate rule params
-    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate?.params);
+    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate.params);
     const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
       validatedAlertTypeParams,
       rule.attributes.params,
-      ruleType.validate?.params
+      ruleType.validate.params
     );
 
     const {

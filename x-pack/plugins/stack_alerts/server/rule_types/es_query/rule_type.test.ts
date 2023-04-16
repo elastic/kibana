@@ -116,11 +116,11 @@ describe('ruleType', () => {
         groupBy: 'all',
       };
 
-      expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
+      expect(ruleType.validate.params.validate(params)).toBeTruthy();
     });
 
     it('validator fails with invalid es query params - threshold', async () => {
-      const paramsSchema = ruleType.validate?.params;
+      const paramsSchema = ruleType.validate.params;
       if (!paramsSchema) throw new Error('params validator not set');
 
       const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
@@ -556,11 +556,11 @@ describe('ruleType', () => {
     });
 
     it('validator succeeds with valid search source params', async () => {
-      expect(ruleType.validate?.params?.validate(defaultParams)).toBeTruthy();
+      expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
     });
 
     it('validator fails with invalid search source params - esQuery provided', async () => {
-      const paramsSchema = ruleType.validate?.params!;
+      const paramsSchema = ruleType.validate.params;
       const params: Partial<Writable<EsQueryRuleParams>> = {
         size: 100,
         timeWindowSize: 5,
@@ -573,9 +573,9 @@ describe('ruleType', () => {
         groupBy: 'all',
       };
 
-      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-        `"[esQuery]: a value wasn't expected to be present"`
-      );
+      expect(() =>
+        paramsSchema.validate(params as EsQueryRuleParams)
+      ).toThrowErrorMatchingInlineSnapshot(`"[esQuery]: a value wasn't expected to be present"`);
     });
 
     it('rule executor handles no documents returned by ES', async () => {

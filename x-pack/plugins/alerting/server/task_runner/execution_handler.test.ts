@@ -69,6 +69,9 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   getSummarizedAlerts: getSummarizedAlertsMock,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 const rule = {
   id: '1',

@@ -161,6 +161,9 @@ describe('bulkDelete', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
   });
 

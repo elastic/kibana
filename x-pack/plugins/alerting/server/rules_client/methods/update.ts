@@ -183,7 +183,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   }
 
   // Validate
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it

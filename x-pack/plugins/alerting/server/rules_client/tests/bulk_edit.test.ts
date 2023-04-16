@@ -195,6 +195,9 @@ describe('bulkEdit()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
   });
 
@@ -669,6 +672,9 @@ describe('bulkEdit()', () => {
         },
         producer: 'alerts',
         getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const existingAction = {
         frequency: {

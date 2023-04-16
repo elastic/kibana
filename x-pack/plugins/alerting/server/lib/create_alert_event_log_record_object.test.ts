@@ -20,6 +20,9 @@ describe('createAlertEventLogRecordObject', () => {
     recoveryActionGroup: RecoveredActionGroup,
     executor: jest.fn(),
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
 
   test('created alert event "execute-start"', async () => {

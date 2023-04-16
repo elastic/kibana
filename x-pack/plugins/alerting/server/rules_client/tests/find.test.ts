@@ -362,6 +362,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -378,6 +381,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -562,6 +568,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -578,6 +587,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
