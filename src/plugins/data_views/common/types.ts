@@ -7,7 +7,6 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-// todo
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -280,8 +279,7 @@ export interface SavedObjectsClientCommon {
    * @param attributes - attributes to update
    * @param options - client options
    */
-  // todo fix type
-  getSavedSearch: (id: string) => Promise<SavedObject<DataViewAttributes>>;
+  getSavedSearch: (id: string) => Promise<SavedObject>;
   /**
    * Update a saved object by id
    * @param type - type of saved object

@@ -26,3 +26,5 @@ export type {
 } from './types';
 
 export type { DataViewContentType } from './constants';
+
+export { DataViewSOType } from './constants';

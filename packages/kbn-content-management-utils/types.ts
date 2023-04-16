@@ -40,6 +40,7 @@ export interface SearchOptions {
 export interface UpdateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
+  version?: string;
 }
 
 export type GetResultSO<Item extends object> = GetResult<

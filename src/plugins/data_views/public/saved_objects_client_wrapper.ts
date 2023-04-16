@@ -8,6 +8,7 @@
 
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -27,21 +28,26 @@ import type {
   DataViewDeleteOut,
   DataViewSearchIn,
   DataViewSearchOut,
-  // DataViewUpdateOptions,
+  DataViewUpdateOptions,
   DataViewCreateOptions,
-  // DataViewSearchQuery,
 } from '../common/content_management';
 
-export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
-  private contentManagemntClient: ContentClient;
+import { DataViewSOType } from '../common/content_management';
 
-  constructor(contentManagemntClient: ContentClient) {
-    this.contentManagemntClient = contentManagemntClient;
+type SOClient = Pick<SavedObjectsClientContract, 'resolve'>;
+
+export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
+  private contentManagementClient: ContentClient;
+  private savedObjectClient: SOClient;
+
+  constructor(contentManagementClient: ContentClient, savedObjectClient: SOClient) {
+    this.contentManagementClient = contentManagementClient;
+    this.savedObjectClient = savedObjectClient;
   }
 
   async find(options: SavedObjectsClientCommonFindArgs) {
-    const results = await this.contentManagemntClient.search<DataViewSearchIn, DataViewSearchOut>({
-      contentTypeId: 'index-pattern',
+    const results = await this.contentManagementClient.search<DataViewSearchIn, DataViewSearchOut>({
+      contentTypeId: DataViewSOType,
       query: {
         text: options.search,
         limit: options.perPage,
@@ -53,8 +59,8 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   async get(id: string) {
     let response: DataViewGetOut;
     try {
-      response = await this.contentManagemntClient.get<DataViewGetIn, DataViewGetOut>({
-        contentTypeId: 'index-pattern',
+      response = await this.contentManagementClient.get<DataViewGetIn, DataViewGetOut>({
+        contentTypeId: DataViewSOType,
         id,
       });
     } catch (e) {
@@ -72,34 +78,32 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async getSavedSearch(id: string) {
-    const response = await this.contentManagemntClient.get({
-      contentTypeId: 'search',
-      id,
-    });
+    const response = await this.savedObjectClient.resolve('search', id);
 
-    // todo
-    // @ts-ignore
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    // @ts-ignore
-    return response.savedObject;
+    return response.saved_object;
   }
 
   // SO update method took a `version` value via the options object.
   // This was used to make sure the update was based on the most recent version of the object.
-  async update(id: string, attributes: DataViewAttributes) {
-    const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
-      contentTypeId: 'index-pattern',
-      id,
-      data: attributes,
-    });
+  async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
+    const response = await this.contentManagementClient.update<DataViewUpdateIn, DataViewUpdateOut>(
+      {
+        contentTypeId: DataViewSOType,
+        id,
+        data: attributes,
+        options,
+      }
+    );
+
     return response.item as SavedObject<DataViewAttributes>;
   }
 
   async create(attributes: DataViewAttributes, options: DataViewCreateOptions) {
-    const result = await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
-      contentTypeId: 'index-pattern',
+    const result = await this.contentManagementClient.create<DataViewCreateIn, DataViewCreateOut>({
+      contentTypeId: DataViewSOType,
       data: attributes,
       options,
     });
@@ -108,8 +112,8 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async delete(id: string) {
-    await this.contentManagemntClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
-      contentTypeId: 'index-pattern',
+    await this.contentManagementClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
+      contentTypeId: DataViewSOType,
       id,
     });
   }
