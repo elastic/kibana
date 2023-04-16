@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { first, firstValueFrom } from 'rxjs';
-import type { Subscription } from 'rxjs';
+// import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
@@ -60,7 +60,7 @@ const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadin
 
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const editorValidationSubscription = useRef<Subscription>();
+  // const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
   const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
@@ -133,6 +133,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     return validationData!.error;
   }, [validationData$]);
 
+  /*
   const onEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       monacoEditor.current = editor;
@@ -153,6 +154,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     },
     [controller]
   );
+  */
 
   const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {
     const model = monacoEditor.current?.getModel();
@@ -197,6 +199,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     }
   }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
 
+  /*
   useEffect(() => {
     return () => {
       if (editorValidationSubscription.current) {
@@ -204,6 +207,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
       }
     };
   }, []);
+  */
 
   return (
     <UseField<string> path="script.source" validationDataProvider={validationDataProvider}>
@@ -258,7 +262,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
                 height="210px"
                 value={value}
                 onChange={setValue}
-                editorDidMount={onEditorDidMount}
+                // editorDidMount={onEditorDidMount}
                 options={{
                   fontSize: 12,
                   minimap: {
