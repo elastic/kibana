@@ -189,18 +189,20 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
       let actionTotal = 0;
       let actionTypesCount = 0;
 
-      Object.entries(pendingActions).forEach(([actionName, actionCount]) => {
-        actionTotal += actionCount;
-        actionTypesCount += 1;
+      Object.entries(pendingActions)
+        .sort()
+        .forEach(([actionName, actionCount]) => {
+          actionTotal += actionCount;
+          actionTypesCount += 1;
 
-        list.push({
-          count: actionCount,
-          label:
-            RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[
-              actionName as ResponseActionsApiCommandNames
-            ] ?? actionName,
+          list.push({
+            count: actionCount,
+            label:
+              RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[
+                actionName as ResponseActionsApiCommandNames
+              ] ?? actionName,
+          });
         });
-      });
 
       const pendingIsolate = pendingActions.isolate ?? 0;
       const pendingUnIsolate = pendingActions.unisolate ?? 0;

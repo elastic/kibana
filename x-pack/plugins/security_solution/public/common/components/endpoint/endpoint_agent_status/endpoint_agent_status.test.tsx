@@ -140,7 +140,7 @@ describe('When showing Endpoint Agent Status', () => {
       expect(getByTestId('test').textContent).toEqual('HealthyReleasing');
     });
 
-    it('should show individual action count in tooltip (including unknown actions)', async () => {
+    it('should show individual action count in tooltip (including unknown actions) sorted asc', async () => {
       actionsSummary.pending_actions = {
         isolate: 1,
         'get-file': 2,
@@ -162,7 +162,7 @@ describe('When showing Endpoint Agent Status', () => {
         expect(
           within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
             .textContent
-        ).toEqual('Pending actions:isolate1get-file2execute6kill-process1foo2');
+        ).toEqual('Pending actions:execute6foo2get-file2isolate1kill-process1');
       });
     });
 
