@@ -8,10 +8,12 @@
 
 import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { DataViewSavedObjectConflictError } from '../common';
 
 describe('SavedObjectsClientPublicToCommon', () => {
-  const soClient = {} as ContentClient;
+  const soClient = savedObjectsServiceMock.createStartContract().client;
+  const cmClient = {} as ContentClient;
 
   test('get saved object - exactMatch', async () => {
     const mockedSavedObject = {
@@ -20,7 +22,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.get = jest
       .fn()
       .mockResolvedValue({ meta: { outcome: 'exactMatch' }, item: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
     const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
@@ -32,7 +34,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.get = jest
       .fn()
       .mockResolvedValue({ meta: { outcome: 'aliasMatch' }, item: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
     const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
@@ -45,7 +47,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.get = jest
       .fn()
       .mockResolvedValue({ meta: { outcome: 'conflict' }, item: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
 
     await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
   });
