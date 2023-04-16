@@ -87,6 +87,12 @@ export function registerErrorCountRuleType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ params: ruleParams, services, spaceId }) => {
+        const predefinedGroupby: string[] = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+
+        const allGroupbyFields: string[] = [
+          ruleParams.groupBy ?? predefinedGroupby,
+        ].flat();
+
         const config = await firstValueFrom(config$);
 
         const { savedObjectsClient, scopedClusterClient } = services;
@@ -122,7 +128,7 @@ export function registerErrorCountRuleType({
             aggs: {
               error_counts: {
                 multi_terms: {
-                  terms: [...getGroupByTerms(ruleParams.groupBy)],
+                  terms: [...getGroupByTerms(allGroupbyFields)],
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -136,10 +142,6 @@ export function registerErrorCountRuleType({
           scopedClusterClient,
           params: searchParams,
         });
-
-        const predefinedGroupby: string[] = [SERVICE_NAME, SERVICE_ENVIRONMENT];
-
-        const allGroupbyFields: string[] = [ruleParams.groupBy ?? []].flat();
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
@@ -185,10 +187,6 @@ export function registerErrorCountRuleType({
                 .filter((key) => !key.includes('NOT_DEFINED'))
                 .join(', '),
             });
-
-            // const id = [ApmRuleType.ErrorCount, serviceName, environment]
-            //   .filter((name) => name)
-            //   .join('_');
 
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               serviceName,

@@ -59,7 +59,7 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'Not defined',
       interval: `5 mins`,
       reason:
         'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, request. Alert when > 3,000 ms.',
@@ -137,7 +137,7 @@ describe('registerTransactionDurationRuleType', () => {
       threshold: 3000,
       triggerValue: '5,500 ms',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
       transactionName: 'GET /products',
     });
   });
@@ -160,7 +160,7 @@ describe('registerTransactionDurationRuleType', () => {
         series: {
           buckets: [
             {
-              key: ['opbeans-java', 'ENVIRONMENT_NOT_DEFINED', 'request'],
+              key: ['opbeans-java', 'development', 'request'],
               avgLatency: {
                 value: 5500000,
               },
@@ -194,16 +194,16 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, request. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, development, request. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
       triggerValue: '5,500 ms',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
     });
   });
 
@@ -268,7 +268,7 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'Not defined',
       interval: `5 mins`,
       reason:
         'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, request, GET /orders. Alert when > 3,000 ms.',

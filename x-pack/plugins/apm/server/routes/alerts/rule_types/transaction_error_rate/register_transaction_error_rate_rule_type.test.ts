@@ -107,17 +107,21 @@ describe('Transaction error rate alert', () => {
       },
     });
 
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
 
     await executor({ params });
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'apm.transaction_error_rate_foo_type-foo_env-foo'
+      'foo_env-foo_type-foo'
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'apm.transaction_error_rate_bar_type-bar_env-bar'
+      'bar_env-bar_type-bar'
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -411,14 +415,14 @@ describe('Transaction error rate alert', () => {
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       transactionType: 'type-foo',
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'Not defined',
       reason:
         'Failed transactions is 10% in the last 5 mins for foo, type-foo. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5 mins',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
     });
   });
 });

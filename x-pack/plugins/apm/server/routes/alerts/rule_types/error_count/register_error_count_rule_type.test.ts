@@ -44,7 +44,11 @@ describe('Error count alert', () => {
 
     registerErrorCountRuleType(dependencies);
 
-    const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
@@ -127,11 +131,7 @@ describe('Error count alert', () => {
     });
 
     await executor({ params });
-    [
-      'apm.error_rate_foo_env-foo',
-      'apm.error_rate_foo_env-foo-2',
-      'apm.error_rate_bar_env-bar',
-    ].forEach((instanceName) =>
+    ['foo_env-foo', 'foo_env-foo-2', 'bar_env-bar'].forEach((instanceName) =>
       expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
     );
 
@@ -142,7 +142,8 @@ describe('Error count alert', () => {
       environment: 'env-foo',
       threshold: 2,
       triggerValue: 5,
-      reason: 'Error count is 5 in the last 5 mins for foo. Alert when > 2.',
+      reason:
+        'Error count is 5 in the last 5 mins for foo, env-foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
@@ -152,7 +153,8 @@ describe('Error count alert', () => {
       environment: 'env-foo-2',
       threshold: 2,
       triggerValue: 4,
-      reason: 'Error count is 4 in the last 5 mins for foo. Alert when > 2.',
+      reason:
+        'Error count is 4 in the last 5 mins for foo, env-foo-2. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
@@ -160,7 +162,8 @@ describe('Error count alert', () => {
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar',
-      reason: 'Error count is 3 in the last 5 mins for bar. Alert when > 2.',
+      reason:
+        'Error count is 3 in the last 5 mins for bar, env-bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5 mins',
@@ -372,7 +375,12 @@ describe('Error count alert', () => {
 
     registerErrorCountRuleType(dependencies);
 
-    const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+      groupBy: ['service.name', 'service.environment'],
+    };
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
@@ -427,23 +435,23 @@ describe('Error count alert', () => {
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'Not defined',
       threshold: 2,
       triggerValue: 5,
       reason: 'Error count is 5 in the last 5 mins for foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
-      environment: 'ENVIRONMENT_NOT_DEFINED',
+      environment: 'Not defined',
       threshold: 2,
       triggerValue: 4,
       reason: 'Error count is 4 in the last 5 mins for foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',

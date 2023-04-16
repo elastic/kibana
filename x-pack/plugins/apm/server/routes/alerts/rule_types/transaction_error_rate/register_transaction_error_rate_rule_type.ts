@@ -97,6 +97,16 @@ export function registerTransactionErrorRateRuleType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, spaceId, params: ruleParams }) => {
+        const predefinedGroupby: string[] = [
+          SERVICE_NAME,
+          SERVICE_ENVIRONMENT,
+          TRANSACTION_TYPE,
+        ];
+
+        const allGroupbyFields: string[] = [
+          ruleParams.groupBy ?? predefinedGroupby,
+        ].flat();
+
         const config = await firstValueFrom(config$);
 
         const { savedObjectsClient, scopedClusterClient } = services;
@@ -156,7 +166,7 @@ export function registerTransactionErrorRateRuleType({
             aggs: {
               series: {
                 multi_terms: {
-                  terms: [...getGroupByTerms(ruleParams.groupBy)],
+                  terms: [...getGroupByTerms(allGroupbyFields)],
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -183,14 +193,6 @@ export function registerTransactionErrorRateRuleType({
         }
 
         const results = [];
-
-        const predefinedGroupby: string[] = [
-          SERVICE_NAME,
-          SERVICE_ENVIRONMENT,
-          TRANSACTION_TYPE,
-        ];
-
-        const allGroupbyFields: string[] = [ruleParams.groupBy ?? []].flat();
 
         for (const bucket of response.aggregations.series.buckets) {
           const groupByFields: Record<string, string> = {};
@@ -249,15 +251,6 @@ export function registerTransactionErrorRateRuleType({
               .filter((key) => !key.includes('NOT_DEFINED'))
               .join(', '),
           });
-
-          // const id = [
-          //   ApmRuleType.TransactionErrorRate,
-          //   serviceName,
-          //   transactionType,
-          //   environment,
-          // ]
-          //   .filter((name) => name)
-          //   .join('_');
 
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,

@@ -104,6 +104,16 @@ export function registerTransactionDurationRuleType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {
+      const predefinedGroupby: string[] = [
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        TRANSACTION_TYPE,
+      ];
+
+      const allGroupbyFields: string[] = [
+        ruleParams.groupBy ?? predefinedGroupby,
+      ].flat();
+
       const config = await firstValueFrom(config$);
 
       const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
@@ -160,7 +170,7 @@ export function registerTransactionDurationRuleType({
           aggs: {
             series: {
               multi_terms: {
-                terms: [...getGroupByTerms(ruleParams.groupBy)],
+                terms: [...getGroupByTerms(allGroupbyFields)],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
               },
@@ -189,14 +199,6 @@ export function registerTransactionDurationRuleType({
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
       const triggeredBuckets = [];
-
-      const predefinedGroupby: string[] = [
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        TRANSACTION_TYPE,
-      ];
-
-      const allGroupbyFields: string[] = [ruleParams.groupBy ?? []].flat();
 
       for (const bucket of response.aggregations.series.buckets) {
         const groupByFields: Record<string, string> = {};
