@@ -265,7 +265,6 @@ describe('IndexPatterns', () => {
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      type: 'index-pattern',
       fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
@@ -374,7 +373,6 @@ describe('IndexPatterns', () => {
     await indexPatterns.find('kibana*', size);
 
     expect(savedObjectsClient.find).lastCalledWith({
-      type: 'index-pattern',
       fields: ['title'],
       search,
       searchFields: ['title'],

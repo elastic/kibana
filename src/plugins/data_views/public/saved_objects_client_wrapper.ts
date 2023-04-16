@@ -89,8 +89,6 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response.saved_object;
   }
 
-  // SO update method took a `version` value via the options object.
-  // This was used to make sure the update was based on the most recent version of the object.
   async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
     const response = await this.contentManagementClient.update<DataViewUpdateIn, DataViewUpdateOut>(
       {

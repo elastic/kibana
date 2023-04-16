@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**
- * Data view saved object version.
- */
-export const LATEST_VERSION = 1;
-
 export const DataViewSOType = 'index-pattern';
 
 export type DataViewContentType = typeof DataViewSOType;
