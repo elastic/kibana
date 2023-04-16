@@ -60,6 +60,7 @@ interface Props {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  filterSeriesByGroupName?: string[];
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -69,6 +70,7 @@ export const CriterionPreview: React.FC<Props> = ({
   showThreshold,
   executionTimeRange,
   annotations,
+  filterSeriesByGroupName,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -114,6 +116,7 @@ export const CriterionPreview: React.FC<Props> = ({
       showThreshold={showThreshold}
       executionTimeRange={executionTimeRange}
       annotations={annotations}
+      filterSeriesByGroupName={filterSeriesByGroupName}
     />
   );
 };
@@ -126,6 +129,7 @@ interface ChartProps {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  filterSeriesByGroupName?: string[];
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -136,6 +140,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   showThreshold,
   executionTimeRange,
   annotations,
+  filterSeriesByGroupName,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -184,7 +189,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     if (!isGrouped) {
       return series;
     }
-
+    if (filterSeriesByGroupName && filterSeriesByGroupName.length) {
+      return series.filter((item) => filterSeriesByGroupName.includes(item.id));
+    }
     const sortedByMax = series.sort((a, b) => {
       const aMax = Math.max(...a.points.map((point) => point.value));
       const bMax = Math.max(...b.points.map((point) => point.value));
@@ -192,7 +199,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     });
     const sortedSeries = (!isAbove && !isBelow) || isAbove ? sortedByMax : sortedByMax.reverse();
     return sortedSeries.slice(0, GROUP_LIMIT);
-  }, [series, isGrouped, isAbove, isBelow]);
+  }, [isGrouped, filterSeriesByGroupName, series, isAbove, isBelow]);
 
   const barSeries = useMemo(() => {
     return filteredSeries.reduce<Array<{ timestamp: number; value: number; groupBy: string }>>(
@@ -327,31 +334,33 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {groupByLabel != null ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
-              values={{
-                groupByLabel,
-                timeLabel,
-                lookback,
-                displayedGroups: filteredSeries.length,
-                totalGroups: series.length,
-              }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel} of data"
-              values={{ timeLabel, lookback }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {!executionTimeRange && (
+        <div style={{ textAlign: 'center' }}>
+          {groupByLabel != null ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
+                values={{
+                  groupByLabel,
+                  timeLabel,
+                  lookback,
+                  displayedGroups: filteredSeries.length,
+                  totalGroups: series.length,
+                }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel} of data"
+                values={{ timeLabel, lookback }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

@@ -68,6 +68,7 @@ export const MonitorDetailsPanel = ({
   return (
     <PanelWithTitle
       paddingSize="m"
+      margin="none"
       title={MONITOR_DETAILS_LABEL}
       titleLeftAlign
       hasBorder={hasBorder}
@@ -121,7 +122,7 @@ export const MonitorDetailsPanel = ({
             </>
           )}
           <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
+          <DescriptionLabel>{monitor.id}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
             <MonitorTypeBadge monitor={monitor} />

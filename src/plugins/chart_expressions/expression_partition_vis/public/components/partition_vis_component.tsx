@@ -18,6 +18,7 @@ import {
   TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
+  SettingsProps,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -34,13 +35,15 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
-  PartitionVisParams,
-  BucketColumns,
+  type BucketColumns,
   ValueFormats,
-  PieContainerDimensions,
+  type PieContainerDimensions,
+  type PartitionChartProps,
+  type PartitionVisParams,
 } from '../../common/types/expression_renderers';
 import {
   LegendColorPickerWrapper,
@@ -66,7 +69,6 @@ import {
   partitionVisContainerStyle,
   partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
-import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
 import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 
@@ -78,10 +80,11 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
-export interface PartitionVisComponentProps {
+export type PartitionVisComponentProps = Omit<
+  PartitionChartProps,
+  'navigateToLens' | 'visConfig'
+> & {
   visParams: PartitionVisParams;
-  visData: Datatable;
-  visType: ChartTypes;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
@@ -89,9 +92,8 @@ export interface PartitionVisComponentProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
-  syncColors: boolean;
   columnCellValueActions: ColumnCellValueActions;
-}
+};
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const {
@@ -102,6 +104,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     services,
     syncColors,
     interactive,
+    overrides,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -354,6 +357,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     return 1;
   }, [visData.rows, metricColumn]);
 
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
   const themeOverrides = useMemo(
     () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
     [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
@@ -489,11 +497,16 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                       },
                     },
                   },
+
+                  ...(Array.isArray(settingsThemeOverrides)
+                    ? settingsThemeOverrides
+                    : [settingsThemeOverrides]),
                 ]}
                 baseTheme={chartBaseTheme}
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                {...settingsOverrides}
               />
               <Partition
                 id={visType}
@@ -517,6 +530,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 }
                 layers={layers}
                 topGroove={!visParams.labels.show ? 0 : undefined}
+                {...getOverridesFor(overrides, 'partition')}
               />
             </Chart>
           </LegendColorPickerWrapperContext.Provider>

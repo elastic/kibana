@@ -9,8 +9,8 @@ import {
   TRAINED_MODEL_TYPE,
   DEPLOYMENT_STATE,
   SUPPORTED_PYTORCH_TASKS,
-} from '../../../../common/constants/trained_models';
-import type { SupportedPytorchTasksType } from '../../../../common/constants/trained_models';
+  type SupportedPytorchTasksType,
+} from '@kbn/ml-trained-models-utils';
 import type { ModelItem } from '../models_list';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);

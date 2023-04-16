@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
 import { analyticsEventsIndexExists } from '../../lib/analytics/analytics_events_index_exists';
+import { createApiKey } from '../../lib/analytics/create_api_key';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
 import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 import { RouteDependencies } from '../../plugin';
@@ -81,6 +82,32 @@ export function registerAnalyticsRoutes({
 
         throw error;
       }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/analytics/collections/{name}/api_key',
+      validate: {
+        body: schema.object({
+          keyName: schema.string(),
+        }),
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const collectionName = decodeURIComponent(request.params.name);
+      const { keyName } = request.body;
+      const { client } = (await context.core).elasticsearch;
+
+      const apiKey = await createApiKey(client, collectionName, keyName);
+
+      return response.ok({
+        body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 

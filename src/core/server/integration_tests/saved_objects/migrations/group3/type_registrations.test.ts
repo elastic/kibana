@@ -79,6 +79,7 @@ const previouslyRegisteredTypes = [
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',
+  'maintenance-window',
   'map',
   'maps-telemetry',
   'metrics-explorer-view',
@@ -132,8 +133,18 @@ const previouslyRegisteredTypes = [
 ].sort();
 
 describe('SO type registrations', () => {
+  let root: ReturnType<typeof createRoot>;
+
+  afterEach(() => {
+    try {
+      root?.shutdown();
+    } catch (e) {
+      /* trap */
+    }
+  });
+
   it('does not remove types from registrations without updating excludeOnUpgradeQuery', async () => {
-    const root = createRoot({}, { oss: false });
+    root = createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();
     const currentlyRegisteredTypes = setup.savedObjects

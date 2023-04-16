@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
 import { appContextService } from './app_context';
 import { getRequestStore } from './request_store';
@@ -14,8 +14,12 @@ class AuditLoggingService {
   /**
    * Write a custom audit log record. If a current request is available, the log will include
    * user/session data. If not, an unscoped audit logger will be used.
+   *
+   * Note: all Fleet audit logs written via this method will have a `labels.application` value
+   * of `elastic/fleet`. Consumers aren't able to override this value, and a custom `labels.application`
+   * value provided as an argument will be overwritten.
    */
-  public writeCustomAuditLog(...args: Parameters<AuditLogger['log']>) {
+  public writeCustomAuditLog(args: AuditEvent) {
     const securitySetup = appContextService.getSecuritySetup();
     let auditLogger: AuditLogger | undefined;
 
@@ -27,7 +31,7 @@ class AuditLoggingService {
       auditLogger = securitySetup.audit.withoutRequest;
     }
 
-    auditLogger.log(...args);
+    auditLogger.log({ ...args, labels: { ...args.labels, application: 'elastic/fleet' } });
   }
 
   /**

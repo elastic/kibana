@@ -26,8 +26,9 @@ import { ClientPluginsStart } from '../../../../../../plugin';
 export const OverviewAlerts = () => {
   const { from, to } = useRefreshedRange(12, 'hours');
 
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
 
