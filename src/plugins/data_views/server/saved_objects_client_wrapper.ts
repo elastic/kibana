@@ -22,7 +22,7 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     this.savedObjectClient = savedObjectClient;
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const result = await this.savedObjectClient.find<T>(options);
+    const result = await this.savedObjectClient.find<T>({ ...options, type: 'index-pattern' });
     return result.saved_objects;
   }
 

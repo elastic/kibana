@@ -11,7 +11,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
@@ -350,7 +349,6 @@ export class DataViewsService {
    */
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
@@ -393,7 +391,6 @@ export class DataViewsService {
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
     const savedObjects = await this.savedObjectsClient.find({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,
       searchFields: ['title'],
