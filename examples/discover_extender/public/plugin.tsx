@@ -9,12 +9,16 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiContextMenu,
   EuiDataGridCellValueElementProps,
+  EuiPopover,
   EuiScreenReaderOnly,
+  EuiWrappingPopover,
 } from '@elastic/eui';
-import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 export interface DiscoverExtenderStartPlugins {
@@ -24,8 +28,16 @@ export interface DiscoverExtenderStartPlugins {
 export class DiscoverExtenderPlugin implements Plugin {
   setup() {}
 
-  start(_: CoreStart, plugins: DiscoverExtenderStartPlugins) {
+  start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
     const { discover } = plugins;
+
+    let isOptionsOpen = false;
+    const optionsContainer = document.createElement('div');
+    const closeOptionsPopover = () => {
+      ReactDOM.unmountComponentAtNode(optionsContainer);
+      document.body.removeChild(optionsContainer);
+      isOptionsOpen = false;
+    };
 
     discover.registerExtensions(({ extensions, stateContainer }) => {
       extensions.set({
@@ -46,7 +58,54 @@ export class DiscoverExtenderPlugin implements Plugin {
               label: 'Options',
               iconType: 'arrowDown',
               iconSide: 'right',
-              run: () => alert('Options menu opened'),
+              run: (anchorElement: HTMLElement) => {
+                if (isOptionsOpen) {
+                  closeOptionsPopover();
+                  return;
+                }
+
+                isOptionsOpen = true;
+                document.body.appendChild(optionsContainer);
+
+                const element = (
+                  <EuiWrappingPopover
+                    ownFocus
+                    button={anchorElement}
+                    isOpen={true}
+                    panelPaddingSize="s"
+                    closePopover={closeOptionsPopover}
+                  >
+                    <EuiContextMenu
+                      size="s"
+                      initialPanelId={0}
+                      panels={[
+                        {
+                          id: 0,
+                          items: [
+                            {
+                              name: 'Create new',
+                              icon: 'plusInCircle',
+                              onClick: () => alert('Create new clicked'),
+                            },
+                            {
+                              name: 'Make a copy',
+                              icon: 'copy',
+                              onClick: () => alert('Make a copy clicked'),
+                            },
+                            {
+                              name: 'Manage saved searches',
+                              icon: 'gear',
+                              onClick: () => alert('Manage saved searches clicked'),
+                            },
+                          ],
+                        },
+                      ]}
+                    />
+                  </EuiWrappingPopover>
+                );
+
+                ReactDOM.render(element, optionsContainer);
+              },
             },
             order: 100,
           },
@@ -76,19 +135,49 @@ export class DiscoverExtenderPlugin implements Plugin {
       extensions.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
-          const dataView = useObservable(
-            stateContainer.internalState.state$,
-            stateContainer.internalState.get()
-          ).dataView;
+          const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+          const togglePopover = () => setIsPopoverOpen((open) => !open);
+          const closePopover = () => setIsPopoverOpen(false);
+          const [savedSearches, setSavedSearches] = useState<SimpleSavedObject[]>([]);
+
+          useEffect(() => {
+            core.savedObjects.client.find({ type: 'search' }).then((response) => {
+              setSavedSearches(response.savedObjects);
+            });
+          }, []);
+
+          const currentSavedSearch = useObservable(
+            stateContainer.savedSearchState.getCurrent$(),
+            stateContainer.savedSearchState.getState()
+          );
 
           return (
-            <EuiButton
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() => alert('Data view picker opened')}
+            <EuiPopover
+              button={
+                <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
+                  {currentSavedSearch.title ?? 'None selected'}
+                </EuiButton>
+              }
+              isOpen={isPopoverOpen}
+              panelPaddingSize="none"
+              closePopover={closePopover}
             >
-              {dataView?.name}
-            </EuiButton>
+              <EuiContextMenu
+                size="s"
+                initialPanelId={0}
+                panels={[
+                  {
+                    id: 0,
+                    title: 'Saved logs views',
+                    items: savedSearches.map((savedSearch) => ({
+                      name: savedSearch.get('title'),
+                      onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
+                      icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                    })),
+                  },
+                ]}
+              />
+            </EuiPopover>
           );
         },
       });
@@ -108,6 +197,10 @@ export class DiscoverExtenderPlugin implements Plugin {
       });
 
       const MoreMenuCell = ({ setCellProps }: EuiDataGridCellValueElementProps) => {
+        const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+        const togglePopover = () => setIsPopoverOpen((open) => !open);
+        const closePopover = () => setIsPopoverOpen(false);
+
         useEffect(() => {
           setCellProps({
             style: {
@@ -117,11 +210,39 @@ export class DiscoverExtenderPlugin implements Plugin {
         }, [setCellProps]);
 
         return (
-          <EuiButtonIcon
-            color="text"
-            iconType="boxesHorizontal"
-            onClick={() => alert('More menu opened')}
-          />
+          <EuiPopover
+            button={
+              <EuiButtonIcon color="text" iconType="boxesHorizontal" onClick={togglePopover} />
+            }
+            isOpen={isPopoverOpen}
+            anchorPosition="rightCenter"
+            panelPaddingSize="none"
+            closePopover={closePopover}
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={[
+                {
+                  id: 0,
+                  items: [
+                    {
+                      name: 'Show host details',
+                      onClick: () => alert('Show host details clicked'),
+                    },
+                    {
+                      name: 'Create rule',
+                      onClick: () => alert('Create rule clicked'),
+                    },
+                    {
+                      name: 'Create SLO',
+                      onClick: () => alert('Create SLO clicked'),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </EuiPopover>
         );
       };
 
