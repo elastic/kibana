@@ -14,7 +14,6 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('datastream privileges', () => {
