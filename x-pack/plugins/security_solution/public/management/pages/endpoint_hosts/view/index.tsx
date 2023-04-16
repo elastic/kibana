@@ -370,10 +370,7 @@ export const EndpointList = () => {
         }),
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EndpointAgentStatus
-              endpointHostInfo={endpointInfo}
-              data-test-subj="rowIsolationStatus"
-            />
+            <EndpointAgentStatus endpointHostInfo={endpointInfo} data-test-subj="rowHostStatus" />
           );
         },
       },
