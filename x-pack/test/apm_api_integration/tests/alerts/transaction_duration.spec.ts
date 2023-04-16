@@ -93,7 +93,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'opbeans-java',
             environment: 'production',
             aggregationType: AggregationType.Avg,
-            groupBy: 'transaction.name',
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
           },
           actions: [
             {
