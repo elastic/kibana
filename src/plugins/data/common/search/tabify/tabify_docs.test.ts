@@ -31,7 +31,7 @@ function create(id: string) {
       type,
       version,
       timeFieldName,
-      fields: JSON.parse(fields),
+      fields: JSON.parse(fields || '[]'),
       title,
       runtimeFieldMap: {},
     },
