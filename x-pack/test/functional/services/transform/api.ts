@@ -232,6 +232,27 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async createTransformWithHeaders(
+      transformId: string,
+      transformConfig: PutTransformsRequestSchema,
+      headers: object,
+      deferValidation?: boolean
+    ) {
+      log.debug(
+        `Creating transform with id '${transformId}' with headers ${JSON.stringify(headers)}...`
+      );
+      const { body, status } = await esSupertest
+        .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
+        .set(headers)
+        .send(transformConfig);
+      this.assertResponseStatusCode(200, status, body);
+
+      await this.waitForTransformToExist(
+        transformId,
+        `expected transform '${transformId}' to be created`
+      );
+    },
+
     async waitForTransformToExist(transformId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${transformId}' to exist`, 5 * 1000, async () => {
         if (await this.getTransform(transformId, 200)) {
