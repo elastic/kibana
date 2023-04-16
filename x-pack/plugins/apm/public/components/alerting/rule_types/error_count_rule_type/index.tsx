@@ -156,11 +156,14 @@ export function ErrorCountRuleType(props: Props) {
   const groupAlertsBy = (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.apm.ruleFlyout.createAlertPerText', {
-          defaultMessage: 'Group alerts by',
-        })}
+        label={i18n.translate(
+          'xpack.apm.ruleFlyout.errorCount.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by',
+          }
+        )}
         helpText={i18n.translate(
-          'xpack.apm.ruleFlyout.createAlertPerHelpText',
+          'xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText',
           {
             defaultMessage:
               'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',

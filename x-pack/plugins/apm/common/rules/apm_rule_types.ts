@@ -62,7 +62,6 @@ export function formatErrorCountReason({
     values: {
       threshold,
       measured,
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
@@ -101,7 +100,6 @@ export function formatTransactionDurationReason({
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
-      serviceName,
       aggregationType: aggregationTypeFormatted,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
@@ -134,7 +132,6 @@ export function formatTransactionErrorRateReason({
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
