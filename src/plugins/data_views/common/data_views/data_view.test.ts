@@ -54,7 +54,7 @@ function create(id: string, spec?: object) {
       type,
       version,
       timeFieldName,
-      fields: { ...JSON.parse(fields), runtime_field: runtimeField },
+      fields: { ...JSON.parse(fields || '[]'), runtime_field: runtimeField },
       title,
       name,
       runtimeFieldMap,

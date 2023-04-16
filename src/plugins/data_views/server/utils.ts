@@ -16,7 +16,7 @@ export const getFieldByName = (
   fieldName: string,
   indexPattern: SavedObject<DataViewAttributes>
 ): FieldSpec | undefined => {
-  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes?.fields || '[]');
   const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;

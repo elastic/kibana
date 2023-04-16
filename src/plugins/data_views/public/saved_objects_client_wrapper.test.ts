@@ -19,7 +19,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     };
     soClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'exactMatch', savedObject: mockedSavedObject });
+      .mockResolvedValue({ meta: { outcome: 'exactMatch' }, item: mockedSavedObject });
     const service = new SavedObjectsClientPublicToCommon(soClient);
     const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
@@ -31,7 +31,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     };
     soClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'aliasMatch', savedObject: mockedSavedObject });
+      .mockResolvedValue({ meta: { outcome: 'aliasMatch' }, item: mockedSavedObject });
     const service = new SavedObjectsClientPublicToCommon(soClient);
     const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
@@ -44,7 +44,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
 
     soClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'conflict', savedObject: mockedSavedObject });
+      .mockResolvedValue({ meta: { outcome: 'conflict' }, item: mockedSavedObject });
     const service = new SavedObjectsClientPublicToCommon(soClient);
 
     await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
