@@ -8,8 +8,6 @@
 
 import type { SavedObjectsClientCommon } from './types';
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
-
 /**
  * Returns an object matching a given name
  *
@@ -20,7 +18,6 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
 export async function findByName(client: SavedObjectsClientCommon, name: string) {
   if (name) {
     const savedObjects = await client.find({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       perPage: 10,
       search: `"${name}"`,
       searchFields: ['name.keyword'],

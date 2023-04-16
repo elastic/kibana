@@ -35,6 +35,7 @@ export interface CreateOptions {
 export interface SearchOptions {
   /** Flag to indicate to only search the text on the "title" field */
   onlyTitle?: boolean;
+  searchFields?: string[];
 }
 
 export interface UpdateOptions {

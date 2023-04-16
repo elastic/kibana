@@ -233,10 +233,6 @@ export interface UiSettingsCommon {
  */
 export interface SavedObjectsClientCommonFindArgs {
   /**
-   * Saved object type
-   */
-  type: string | string[];
-  /**
    * Saved object fields
    */
   fields?: string[];

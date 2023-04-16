@@ -52,6 +52,9 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
         text: options.search,
         limit: options.perPage,
       },
+      options: {
+        searchFields: options.searchFields,
+      },
     });
     return results.hits;
   }

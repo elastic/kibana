@@ -21,6 +21,7 @@ import type {
   DataViewUpdateOptions,
   DataViewDeleteOut,
   DataViewSearchOut,
+  DataViewSearchOptions,
 } from '../../common/content_management';
 import { DataViewSOType } from '../../common/content_management/constants';
 
@@ -93,7 +94,11 @@ export class DataViewsStorage implements ContentStorage {
     return { success: true };
   }
 
-  async search(ctx: StorageContext, query: SearchQuery): Promise<DataViewSearchOut> {
+  async search(
+    ctx: StorageContext,
+    query: SearchQuery,
+    options: DataViewSearchOptions
+  ): Promise<DataViewSearchOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
 
     const { included, excluded } = query.tags ?? {};
@@ -117,7 +122,7 @@ export class DataViewsStorage implements ContentStorage {
       perPage: query.limit,
       page: query.cursor ? +query.cursor : undefined,
       defaultSearchOperator: 'AND',
-      searchFields: ['title', 'name'],
+      searchFields: options.searchFields || ['title', 'name'],
       fields: ['title', 'name', 'type', 'typeMeta'],
       hasReference,
       hasNoReference,
