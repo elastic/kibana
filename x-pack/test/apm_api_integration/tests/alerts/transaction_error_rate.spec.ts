@@ -47,12 +47,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             opbeansJava
               .transaction({ transactionName: 'tx-java' })
               .timestamp(timestamp)
-              .duration(5000)
+              .duration(100)
               .failure(),
+            opbeansJava
+              .transaction({ transactionName: 'tx-java' })
+              .timestamp(timestamp)
+              .duration(200)
+              .success(),
             opbeansNode
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
-              .duration(4000)
+              .duration(400)
               .success(),
           ];
         });
@@ -86,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ruleTypeId: ApmRuleType.TransactionErrorRate,
           name: 'Apm error rate duration',
           params: {
-            threshold: 3000,
+            threshold: 50,
             windowSize: 5,
             windowUnit: 'm',
             transactionType: 'request',

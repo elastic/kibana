@@ -70,7 +70,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
       await esDeleteAllIndices(INDEX_NAME);
-      await es.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: '.alerts*',
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+      });
       await es.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
