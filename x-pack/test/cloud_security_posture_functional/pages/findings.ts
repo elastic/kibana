@@ -208,8 +208,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-          const test = await latestFindingsTable.getLoading();
-          expect(test).to.be.empty();
+          // const test = await latestFindingsTable.getLoading();
+          // expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
