@@ -196,7 +196,7 @@ function getCumulativeFiringAlertType() {
       };
     },
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
   return result;
@@ -870,7 +870,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -903,7 +903,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -921,7 +921,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -941,7 +941,7 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
   function getLongRunningRuleType() {
@@ -990,7 +990,7 @@ export function defineAlertTypes(
     },
     producer: 'alertsFixture',
     validate: {
-      params: { validate: () => ({}) },
+      params: { validate: (params) => params },
     },
   };
 
