@@ -31,6 +31,7 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { schema } from '@kbn/config-schema';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -58,7 +59,7 @@ const ruleType: UntypedNormalizedRuleType = {
   executor: jest.fn(),
   producer: 'alerts',
   validate: {
-    params: { validate: (params) => params },
+    params: schema.never(),
   },
 };
 let fakeTimer: sinon.SinonFakeTimers;

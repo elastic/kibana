@@ -19,6 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { schema } from '@kbn/config-schema';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -363,7 +364,7 @@ describe('find()', () => {
       },
       producer: 'myApp',
       validate: {
-        params: { validate: (params) => params },
+        params: schema.object({}),
       },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({

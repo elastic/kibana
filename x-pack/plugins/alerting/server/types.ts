@@ -136,7 +136,7 @@ export type ExecutorType<
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
-  validate: (object: Partial<Params>) => Partial<Params>;
+  validate: (object: Params) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 

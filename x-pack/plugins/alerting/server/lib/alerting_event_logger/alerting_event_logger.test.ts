@@ -27,6 +27,7 @@ import {
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
+import { schema } from '@kbn/config-schema';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -43,7 +44,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   ruleTaskTimeout: '1m',
   validate: {
-    params: { validate: (params) => params },
+    params: schema.object({}),
   },
 };
 

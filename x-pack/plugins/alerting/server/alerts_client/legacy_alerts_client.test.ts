@@ -15,6 +15,7 @@ import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { getAlertsForNotification, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { schema } from '@kbn/config-schema';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -87,7 +88,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   validate: {
-    params: { validate: (params) => params },
+    params: schema.object({}),
   },
 };
 

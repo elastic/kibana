@@ -9,15 +9,15 @@ import Boom from '@hapi/boom';
 import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
 export function validateRuleTypeParams<Params extends RuleTypeParams>(
-  params: Partial<Params>,
+  params: Record<string, unknown>,
   validator?: RuleTypeParamsValidator<Params>
-): Partial<Params> {
+): Params {
   if (!validator) {
     return params as Params;
   }
 
   try {
-    return validator.validate(params);
+    return validator.validate(params as Params);
   } catch (err) {
     throw Boom.badRequest(`params invalid: ${err.message}`);
   }

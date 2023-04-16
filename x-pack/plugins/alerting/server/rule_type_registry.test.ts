@@ -15,6 +15,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+import { schema } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -63,7 +64,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
       expect(registry.has('foo')).toEqual(true);
@@ -87,7 +88,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -123,7 +124,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -150,7 +151,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -180,7 +181,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -209,7 +210,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -238,7 +239,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry({
@@ -277,7 +278,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -309,7 +310,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -345,7 +346,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -385,7 +386,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -414,7 +415,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -449,7 +450,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
@@ -475,7 +476,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
       expect(() =>
@@ -494,7 +495,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           producer: 'alerts',
           validate: {
-            params: { validate: (params) => params },
+            params: schema.never(),
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
@@ -521,7 +522,7 @@ describe('Create Lifecycle', () => {
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         },
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
 
@@ -548,7 +549,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
 
@@ -649,7 +650,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
       const result = registry.list();
@@ -752,7 +753,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
       const result = registry.getAllTypes();
@@ -781,7 +782,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         validate: {
-          params: { validate: (params) => params },
+          params: schema.never(),
         },
       });
     });
@@ -819,7 +820,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     },
     producer: 'alerts',
     validate: {
-      params: { validate: (params) => params },
+      params: schema.never(),
     },
   };
 

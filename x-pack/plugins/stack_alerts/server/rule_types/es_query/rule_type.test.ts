@@ -116,7 +116,7 @@ describe('ruleType', () => {
         groupBy: 'all',
       };
 
-      expect(ruleType.validate.params.validate(params)).toBeTruthy();
+      expect(ruleType.validate.params.validate(params as EsQueryRuleParams)).toBeTruthy();
     });
 
     it('validator fails with invalid es query params - threshold', async () => {
@@ -137,7 +137,9 @@ describe('ruleType', () => {
         groupBy: 'all',
       };
 
-      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+      expect(() =>
+        paramsSchema.validate(params as EsQueryRuleParams)
+      ).toThrowErrorMatchingInlineSnapshot(
         `"[threshold]: must have two elements for the \\"between\\" comparator"`
       );
     });
@@ -556,7 +558,7 @@ describe('ruleType', () => {
     });
 
     it('validator succeeds with valid search source params', async () => {
-      expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
+      expect(ruleType.validate.params.validate(defaultParams as EsQueryRuleParams)).toBeTruthy();
     });
 
     it('validator fails with invalid search source params - esQuery provided', async () => {

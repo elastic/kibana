@@ -26,6 +26,7 @@ import {
   returnedRule1,
   returnedRule2,
 } from './test_helpers';
+import { schema } from '@kbn/config-schema';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -162,7 +163,7 @@ describe('bulkDelete', () => {
       },
       producer: 'alerts',
       validate: {
-        params: { validate: (params) => params },
+        params: schema.never(),
       },
     });
   });

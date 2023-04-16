@@ -8,6 +8,7 @@
 import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
+import { schema } from '@kbn/config-schema';
 
 describe('createAlertEventLogRecordObject', () => {
   const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -21,7 +22,7 @@ describe('createAlertEventLogRecordObject', () => {
     executor: jest.fn(),
     producer: 'alerts',
     validate: {
-      params: { validate: (params) => params },
+      params: schema.object({}),
     },
   };
 
