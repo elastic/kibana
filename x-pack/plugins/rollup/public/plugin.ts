@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
@@ -16,11 +17,13 @@ import { UIM_APP_NAME } from '../common';
 // @ts-ignore
 import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
+import { RollupManagementLocatorDefinition } from './locators';
 import { ClientConfigType } from './types';
 
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
   indexManagement?: IndexManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -30,7 +33,7 @@ export class RollupPlugin implements Plugin {
 
   setup(
     core: CoreSetup,
-    { home, management, indexManagement, usageCollection }: RollupPluginSetupDependencies
+    { home, management, share, indexManagement, usageCollection }: RollupPluginSetupDependencies
   ) {
     const {
       ui: { enabled: isRollupUiEnabled },
@@ -89,6 +92,8 @@ export class RollupPlugin implements Plugin {
           };
         },
       });
+
+      share.url.locators.create(new RollupManagementLocatorDefinition());
     }
   }
 

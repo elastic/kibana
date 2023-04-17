@@ -20,6 +20,8 @@ export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
 export const API_BASE_PATH = '/api/rollup';
 
+export const ROLLUP_MANAGEMENT_LOCATOR = 'ROLLUP_MANAGEMENT_LOCATOR';
+
 export {
   UIM_APP_NAME,
   UIM_APP_LOAD,
