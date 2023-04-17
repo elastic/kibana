@@ -25499,11 +25499,7 @@
     "xpack.observability.inspector.stats.queryTimeValue": "{queryTime}ms",
     "xpack.observability.overview.exploratoryView.missingReportDefinition": "缺少 {reportDefinition}",
     "xpack.observability.overview.exploratoryView.noDataAvailable": "没有可用的 {dataType} 数据。",
-<<<<<<< HEAD
-=======
     "xpack.observability.profilingElasticsearchPluginDescription": "{technicalPreviewLabel} 是否使用 Elasticsearch 分析器插件加载堆栈跟踪。",
-    "xpack.observability.ruleDetails.executionLogError": "无法加载规则执行日志。原因：{message}",
->>>>>>> 0985ef0fb6a3d235ac30cf2298601a0e845c5b10
     "xpack.observability.ruleDetails.ruleLoadError": "无法加载规则。原因：{message}",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel": "删除{numIdsToDelete, plural, one {{singleTitle}} other {# 个{multipleTitle}}}",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.descriptionText": "无法恢复{numIdsToDelete, plural, one {删除的{singleTitle}} other {删除的{multipleTitle}}}。",
