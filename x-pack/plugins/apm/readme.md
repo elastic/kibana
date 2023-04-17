@@ -1,6 +1,6 @@
 # APM
 
-This plugin provides access to App Monitoring features provided by Elastic.
+This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 ## Documentation for APM UI developers
 
