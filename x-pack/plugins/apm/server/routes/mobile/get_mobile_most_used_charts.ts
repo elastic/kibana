@@ -154,27 +154,3 @@ function calculateTotalCounts(
 
   return options;
 }
-// function calculatePercentage(
-//   buckets: Array<{ key: string | number; doc_count: number }> = [],
-//   otherCount: number = 0
-// ) {
-//   const total = buckets.reduce(
-//     (acc, { doc_count: docCount }) => acc + docCount,
-//     otherCount
-//   );
-//   const percentage = buckets.map(({ key, doc_count: docCount }) => ({
-//     key,
-//     docCount,
-//     percentage: ((docCount / total) * 100).toFixed(2),
-//   }));
-//
-//   if (otherCount > 0) {
-//     percentage.push({
-//       key: 'other',
-//       docCount: otherCount,
-//       percentage: ((otherCount / total) * 100).toFixed(2),
-//     });
-//   }
-//
-//   return percentage;
-// }
