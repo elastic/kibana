@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { ROUTES } from './routes';
-export { PLUGIN } from './plugin';
-export { EDITOR } from './editor';
-export { LOCATOR } from './locator';
+export const LOCATOR = {
+  APP: 'GROK_DEBUGGER_APP_LOCATOR',
+};

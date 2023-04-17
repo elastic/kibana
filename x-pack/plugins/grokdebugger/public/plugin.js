@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { firstValueFrom } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
+import { GrokDebuggerAppLocatorDefinition } from './locator';
 import { registerFeature } from './register_feature';
 
 export class GrokDebuggerUIPlugin {
@@ -29,6 +30,8 @@ export class GrokDebuggerUIPlugin {
         return renderApp(license, element, coreStart, theme$);
       },
     });
+
+    plugins.share.url.locators.register(new GrokDebuggerAppLocatorDefinition());
 
     plugins.licensing.license$.subscribe((license) => {
       if (!license.isActive && !devTool.isDisabled()) {
