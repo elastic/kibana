@@ -7,26 +7,26 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { Status } from '../../../../../../common/types/api';
+import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   AnalyticsEventsExistAPILogic,
   AnalyticsEventsExistApiLogicResponse,
-} from '../../api/check_analytics_events/check_analytics_events_exist_api_logic';
+} from '../../../api/check_analytics_events/check_analytics_events_exist_api_logic';
 
-export interface AnalyticsEventsExistActions {
+export interface AnalyticsCollectionNoEventsCalloutActions {
   apiSuccess: Actions<{}, AnalyticsEventsExistApiLogicResponse>['apiSuccess'];
   analyticsEventsExist(indexName: string): { indexName: string };
   makeRequest: Actions<{}, AnalyticsEventsExistApiLogicResponse>['makeRequest'];
 }
-export interface AnalyticsEventsExistValues {
+export interface AnalyticsCollectionNoEventsCalloutValues {
   hasEvents: boolean;
   status: Status;
   data: typeof AnalyticsEventsExistAPILogic.values.data;
 }
 
-export const AnalyticsEventsExistLogic = kea<
-  MakeLogicType<AnalyticsEventsExistValues, AnalyticsEventsExistActions>
+export const AnalyticsCollectionNoEventsCalloutLogic = kea<
+  MakeLogicType<AnalyticsCollectionNoEventsCalloutValues, AnalyticsCollectionNoEventsCalloutActions>
 >({
   actions: {
     analyticsEventsExist: (indexName) => ({ indexName }),

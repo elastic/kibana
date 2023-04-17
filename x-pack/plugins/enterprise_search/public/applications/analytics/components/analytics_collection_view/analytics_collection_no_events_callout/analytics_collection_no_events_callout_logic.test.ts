@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../../common/types/api';
 
-import { AnalyticsEventsExistLogic } from './analytics_events_exist_logic';
+import { AnalyticsCollectionNoEventsCalloutLogic } from './analytics_collection_no_events_callout_logic';
 
 describe('analyticsEventsExistLogic', () => {
-  const { mount } = new LogicMounter(AnalyticsEventsExistLogic);
+  const { mount } = new LogicMounter(AnalyticsCollectionNoEventsCalloutLogic);
   const indexName = true;
 
   beforeEach(() => {
@@ -28,14 +28,14 @@ describe('analyticsEventsExistLogic', () => {
   };
 
   it('has expected default values', () => {
-    expect(AnalyticsEventsExistLogic.values).toEqual(DEFAULT_VALUES);
+    expect(AnalyticsCollectionNoEventsCalloutLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('selectors', () => {
     it('updates when apiSuccess listener triggered', () => {
-      AnalyticsEventsExistLogic.actions.apiSuccess({ exist: indexName });
+      AnalyticsCollectionNoEventsCalloutLogic.actions.apiSuccess({ exist: indexName });
 
-      expect(AnalyticsEventsExistLogic.values).toEqual({
+      expect(AnalyticsCollectionNoEventsCalloutLogic.values).toEqual({
         ...DEFAULT_VALUES,
         hasEvents: true,
         status: Status.SUCCESS,

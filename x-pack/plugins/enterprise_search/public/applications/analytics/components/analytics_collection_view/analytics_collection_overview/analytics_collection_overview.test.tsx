@@ -18,6 +18,8 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
+import { AnalyticsCollectionNoEventsCallout } from '../analytics_collection_no_events_callout/analytics_collection_no_events_callout';
+
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 
 import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
@@ -33,7 +35,6 @@ const mockValues = {
     from: 'now-90d',
     to: 'now',
   },
-  hasEvents: true,
 };
 
 const mockActions = {
@@ -127,25 +128,14 @@ describe('AnalyticsOverView', () => {
     );
   });
 
-  it('renders no events Callout when the collection has no events', () => {
-    setMockValues({ ...mockValues, hasEvents: false });
-    setMockActions(mockActions);
-
+  it('renders no events AnalyticsCollectionNoEventsCallout with collection', () => {
     const wrapper = shallow(
       <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
     );
 
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
-  });
-
-  it('does not render events Callout when the collection has events', () => {
-    setMockValues(mockValues);
-    setMockActions(mockActions);
-
-    const wrapper = shallow(
-      <AnalyticsCollectionOverview analyticsCollection={mockValues.analyticsCollection} />
-    );
-
-    expect(wrapper.find('EuiCallOut')).toHaveLength(0);
+    expect(wrapper.find(AnalyticsCollectionNoEventsCallout)).toHaveLength(1);
+    expect(wrapper?.find(AnalyticsCollectionNoEventsCallout).props()).toEqual({
+      analyticsCollection: mockValues.analyticsCollection,
+    });
   });
 });
