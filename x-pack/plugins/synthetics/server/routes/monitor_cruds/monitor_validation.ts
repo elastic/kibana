@@ -153,6 +153,11 @@ export function validateLocation(
   if (hasPublicLocationsConfigured) {
     let invalidLocation = '';
     const hasValidPublicLocation = monitorFields.locations?.some((location) => {
+      if (publicLocations.length === 0) {
+        invalidLocation = location;
+        return false;
+      }
+
       return publicLocations.some((supportedLocation) => {
         const locationIsValid = supportedLocation.id === location;
         if (!locationIsValid) {
@@ -169,6 +174,11 @@ export function validateLocation(
   if (hasPrivateLocationsConfigured) {
     let invalidLocation = '';
     const hasValidPrivateLocation = monitorFields.privateLocations?.some((location) => {
+      if (privateLocations.length === 0) {
+        invalidLocation = location;
+        return false;
+      }
+
       return privateLocations.some((supportedLocation) => {
         const locationIsValid = supportedLocation.label === location;
         if (!locationIsValid) {
