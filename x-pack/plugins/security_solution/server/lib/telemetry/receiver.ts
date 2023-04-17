@@ -574,12 +574,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       body: {
         size: 1_000,
         _source: {
-          exclude: [
-            'message',
-            'kibana.alert.rule.note',
-            'kibana.alert.rule.parameters.note',
-            'powershell.file.script_block_text',
-          ],
+          exclude: ['message', 'kibana.alert.rule.note', 'kibana.alert.rule.parameters.note'],
         },
         query: {
           bool: {
