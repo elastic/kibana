@@ -27,15 +27,23 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 describe('Isolate command', () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
 
     before(() => {
       indexEndpointHosts({
-        count: 4,
-        disableEndpointActionsForHost: true,
-        endpointIsolated: false,
-        bothIsolatedAndNormalEndpoints: true,
+        count: 2,
+        withResponseActions: false,
+        isolation: false,
       }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
+      });
+
+      indexEndpointHosts({
+        count: 2,
+        withResponseActions: false,
+        isolation: true,
+      }).then((indexEndpoints) => {
+        isolatedEndpointData = indexEndpoints;
       });
     });
 
@@ -44,6 +52,12 @@ describe('Isolate command', () => {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
+      }
+
+      if (isolatedEndpointData) {
+        isolatedEndpointData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        isolatedEndpointData = undefined;
       }
     });
     beforeEach(() => {
@@ -71,7 +85,7 @@ describe('Isolate command', () => {
     let hostname: string;
 
     before(() => {
-      indexEndpointHosts({ disableEndpointActionsForHost: true, endpointIsolated: false })
+      indexEndpointHosts({ withResponseActions: false, isolation: false })
         .then((indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
@@ -196,7 +210,7 @@ describe('Isolate command', () => {
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
       });
 
-      indexEndpointHosts({ disableEndpointActionsForHost: true })
+      indexEndpointHosts({ withResponseActions: false, isolation: false })
         .then((indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
@@ -270,7 +284,7 @@ describe('Isolate command', () => {
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
 
-      cy.getByTestSubj('user-actions').within(() => {
+      cy.getByTestSubj('user-actions-list').within(() => {
         cy.contains(isolateComment);
         cy.get('[aria-label="lock"]').should('exist');
         cy.get('[aria-label="lockOpen"]').should('not.exist');
@@ -293,7 +307,7 @@ describe('Isolate command', () => {
       cy.contains(`Release on host ${hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
 
-      cy.getByTestSubj('user-actions').within(() => {
+      cy.getByTestSubj('user-actions-list').within(() => {
         cy.contains(releaseComment);
         cy.contains(isolateComment);
         cy.get('[aria-label="lock"]').should('exist');

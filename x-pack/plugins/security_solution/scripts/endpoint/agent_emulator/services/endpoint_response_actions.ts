@@ -40,6 +40,8 @@ const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
 export const fleetActionGenerator = new FleetActionGenerator();
 
+export const endpointActionGenerator = new EndpointActionGenerator();
+
 export const sleep = (ms: number = 1000) => new Promise((r) => setTimeout(r, ms));
 
 export const fetchEndpointActionList = async (
@@ -116,7 +118,6 @@ export const sendEndpointActionResponse = async (
   action: ActionDetails,
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
-  const endpointActionGenerator = new EndpointActionGenerator();
   const endpointResponse = endpointActionGenerator.generateResponse({
     agent: { id: action.agents[0] },
     EndpointActions: {

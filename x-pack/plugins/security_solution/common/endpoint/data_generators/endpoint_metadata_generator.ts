@@ -20,6 +20,7 @@ export interface GetCustomEndpointMetadataGeneratorOptions {
   version: string;
   /** OS type for the generated endpoint hosts */
   os: 'macOS' | 'windows' | 'linux';
+  isolation: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   static custom({
     version,
     os,
+    isolation,
   }: Partial<GetCustomEndpointMetadataGeneratorOptions> = {}): typeof EndpointMetadataGenerator {
     return class extends EndpointMetadataGenerator {
       generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
@@ -53,6 +55,9 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
             default:
               set(overrides, 'host.os', EndpointMetadataGenerator.windowsOSFields);
           }
+        }
+        if (isolation !== undefined) {
+          set(overrides, 'Endpoint.state.isolation', isolation);
         }
 
         return super.generate(overrides);

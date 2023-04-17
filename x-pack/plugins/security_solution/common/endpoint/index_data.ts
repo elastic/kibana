@@ -48,9 +48,7 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param fleet
  * @param options
  * @param DocGenerator
- * @param disableEndpointActionsForHost
- * @param bothIsolatedAndNormalEndpoints
- * @param endpointIsolated
+ * @param withResponseActions
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -66,9 +64,7 @@ export async function indexHostsAndAlerts(
   fleet: boolean,
   options: TreeOptions = {},
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
-  disableEndpointActionsForHost = false,
-  bothIsolatedAndNormalEndpoints = false,
-  endpointIsolated?: boolean
+  withResponseActions = true
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
@@ -109,8 +105,7 @@ export async function indexHostsAndAlerts(
   }
 
   for (let i = 0; i < numHosts; i++) {
-    const isolateHost = bothIsolatedAndNormalEndpoints && i % 2 === 0;
-    const generator = new DocGenerator(random, undefined, isolateHost ? true : endpointIsolated);
+    const generator = new DocGenerator(random, undefined);
     const indexedHosts = await indexEndpointHostDocs({
       numDocs,
       client,
@@ -121,7 +116,7 @@ export async function indexHostsAndAlerts(
       policyResponseIndex,
       enrollFleet: fleet,
       generator,
-      disableEndpointActionsForHost,
+      withResponseActions,
     });
 
     mergeAndAppendArrays(response, indexedHosts);
