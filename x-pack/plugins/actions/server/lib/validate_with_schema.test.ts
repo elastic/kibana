@@ -35,38 +35,17 @@ test('should validate when there are no validators', () => {
     name: 'bar',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ any: schema.arrayOf(schema.string()) }) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor,
   };
   const testValue = { any: ['old', 'thing'] };
 
   const result = validateConfig(actionType, testValue, { configurationUtilities });
   expect(result).toEqual(testValue);
-});
-
-test('should validate when there are no individual validators', () => {
-  const actionType: ActionType = {
-    id: 'foo',
-    name: 'bar',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor,
-    validate: {},
-  };
-
-  let result;
-  const testValue = { any: ['old', 'thing'] };
-
-  result = validateParams(actionType, testValue, { configurationUtilities });
-  expect(result).toEqual(testValue);
-
-  result = validateConfig(actionType, testValue, { configurationUtilities });
-  expect(result).toEqual(testValue);
-
-  result = validateSecrets(actionType, testValue, { configurationUtilities });
-  expect(result).toEqual(testValue);
-
-  result = validateConnector(actionType, { config: testValue });
-  expect(result).toBeNull();
 });
 
 test('should validate when validators return incoming value', () => {
