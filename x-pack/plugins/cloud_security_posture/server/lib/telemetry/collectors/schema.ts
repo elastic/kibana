@@ -38,6 +38,34 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'date',
       },
     },
+    findings_vuln_mgmt: {
+      doc_count: {
+        type: 'long',
+      },
+      deleted: {
+        type: 'long',
+      },
+      size_in_bytes: {
+        type: 'long',
+      },
+      last_doc_timestamp: {
+        type: 'date',
+      },
+    },
+    latest_findings_vuln_mgmt: {
+      doc_count: {
+        type: 'long',
+      },
+      deleted: {
+        type: 'long',
+      },
+      size_in_bytes: {
+        type: 'long',
+      },
+      last_doc_timestamp: {
+        type: 'date',
+      },
+    },
     score: {
       doc_count: {
         type: 'long',

@@ -17,6 +17,8 @@ export interface CspmUsage {
 export interface CspmIndicesStats {
   findings: IndexStats | {};
   latest_findings: IndexStats | {};
+  findings_vuln_mgmt: IndexStats | {};
+  latest_findings_vuln_mgmt: IndexStats | {};
   score: IndexStats | {};
   latestPackageVersion: string;
   cspm: BaseCspSetupBothPolicy;
