@@ -40,7 +40,6 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
-import type { Rule } from './rules_table/rules_table_context';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
