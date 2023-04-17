@@ -62,7 +62,7 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
 }
 
 /**
@@ -196,13 +196,6 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.licenseService;
-  }
-
-  public getCloud(): CloudSetup {
-    if (!this.startDependencies?.cloud) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-    return this.startDependencies.cloud;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
