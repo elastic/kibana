@@ -224,6 +224,7 @@ export interface ViewDeps extends SettingsDeps {
 export interface ControlGeneralViewSelectorDeps {
   selector: Selector;
   selectors: Selector[];
+  usedByResponse: boolean;
   index: number;
   onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;
