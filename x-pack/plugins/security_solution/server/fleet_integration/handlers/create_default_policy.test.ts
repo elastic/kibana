@@ -19,13 +19,14 @@ import type {
 } from '../types';
 
 describe('Create Default Policy tests ', () => {
+  const cloudMock = { isCloudEnabled: 'true', cloudId: 'fakeCloudId', apm: {} };
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
 
   const createDefaultPolicyCallback = (config: AnyPolicyCreateConfig | undefined): PolicyConfig => {
-    return createDefaultPolicy(licenseService, config);
+    return createDefaultPolicy(licenseService, config, cloudMock);
   };
 
   beforeEach(() => {
@@ -169,8 +170,9 @@ describe('Create Default Policy tests ', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
       const defaultPolicy = policyFactory();
-      // update defaultPolicy w/ platinum license
+      // update defaultPolicy w/ platinum license & cloud Id
       defaultPolicy.meta.license = 'platinum';
+      defaultPolicy.meta.cloud = 'fakeCloudId';
       expect(policy).toMatchObject(defaultPolicy);
     });
   });

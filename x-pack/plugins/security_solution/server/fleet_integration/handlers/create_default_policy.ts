@@ -6,7 +6,6 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -28,12 +27,10 @@ import { disableProtections } from '../../../common/endpoint/models/policy_confi
 export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined,
-  cloud: CloudSetup,
-  logger: Logger
+  cloud: CloudSetup
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
-  logger.error('testing the create default');
   // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
   factoryPolicy.meta.cloud = cloud?.isCloudEnabled ? cloud.cloudId : '';
