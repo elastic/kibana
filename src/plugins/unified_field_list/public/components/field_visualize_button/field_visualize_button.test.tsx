@@ -58,15 +58,16 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await act(async () => {
       wrapper = await mountWithIntl(
-        <FieldVisualizeButton
-          field={field}
-          dataView={dataView}
-          multiFields={[fieldKeyword]}
-          contextualFields={contextualFields}
-          originatingApp={ORIGINATING_APP}
-          uiActions={uiActions}
-          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
-        />
+        <EuiPopoverFooter>
+          <FieldVisualizeButton
+            field={field}
+            dataView={dataView}
+            multiFields={[fieldKeyword]}
+            contextualFields={contextualFields}
+            originatingApp={ORIGINATING_APP}
+            uiActions={uiActions}
+          />
+        </EuiPopoverFooter>
       );
     });
 

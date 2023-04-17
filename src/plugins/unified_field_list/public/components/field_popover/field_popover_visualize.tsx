@@ -7,15 +7,20 @@
  */
 
 import React from 'react';
-import { EuiPopoverFooter } from '@elastic/eui';
+import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
 import { FieldVisualizeButton, type FieldVisualizeButtonProps } from '../field_visualize_button';
+import { FieldCategorizeButton, FieldCategorizeButtonProps } from '../field_categorize_button';
 
-export type FieldPopoverVisualizeProps = Omit<FieldVisualizeButtonProps, 'wrapInContainer'>;
-
-const wrapInContainer = (element: React.ReactElement): React.ReactElement => {
-  return <EuiPopoverFooter>{element}</EuiPopoverFooter>;
-};
+export type FieldPopoverVisualizeProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 
 export const FieldPopoverVisualize: React.FC<FieldPopoverVisualizeProps> = (props) => {
-  return <FieldVisualizeButton {...props} wrapInContainer={wrapInContainer} />;
+  return (
+    <EuiPopoverFooter>
+      <FieldVisualizeButton {...props} />
+
+      <EuiSpacer size="s" />
+
+      <FieldCategorizeButton {...props} />
+    </EuiPopoverFooter>
+  );
 };

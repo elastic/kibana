@@ -37,7 +37,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { type DataDocuments$ } from '../../services/discover_data_state_container';
-import { FieldPopoverCategorize } from './categorization';
 
 const FieldInfoIcon: React.FC = memo(() => (
   <EuiToolTip
@@ -438,19 +437,6 @@ function DiscoverFieldComponent({
           field={field}
           dataView={dataView}
           multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-          originatingApp={PLUGIN_ID}
-          uiActions={getUiActions()}
-        />
-
-        <EuiSpacer size="s" />
-
-        {/* this should probably be inside FieldPopoverVisualize so it is placed inside the footer.
-        currently this places it below the footer  */}
-        <FieldPopoverCategorize
-          field={field}
-          dataView={dataView}
           trackUiMetric={trackUiMetric}
           contextualFields={contextualFields}
           originatingApp={PLUGIN_ID}

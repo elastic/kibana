@@ -12,7 +12,7 @@ import {
   CategorizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
+import type { AddDslFilterHandler } from '../../types';
 
 async function getCompatibleActions(
   uiActions: UiActionsStart,
