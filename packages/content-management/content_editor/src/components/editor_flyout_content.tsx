@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -70,7 +70,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const isMounted = useRef(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
 
@@ -98,15 +97,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           error.message
         );
       } finally {
-        if (isMounted.current) {
-          setIsSubmitting(false);
-        }
+        setIsSubmitting(false);
       }
     }
 
-    if (isMounted.current) {
-      setIsSubmitted(true);
-    }
+    setIsSubmitted(true);
   }, [onSave, item.id, form, notifyError, entityName]);
 
   const onClickCancel = useCallback(() => {
@@ -125,14 +120,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       },
     })
   );
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   return (
     <>
