@@ -41,7 +41,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const [selectedSeries, setSelectedSeries] = useState<string>('');
+  const [selectedSeries, setSelectedSeries] = useState<string | undefined>();
   const { uiSettings } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
@@ -217,7 +217,7 @@ const AlertDetailsAppSection = ({
                       color={euiTheme.colors.danger}
                     />,
                   ]}
-                  filterSeriesByGroupName={[selectedSeries]}
+                  filterSeriesByGroupName={selectedSeries}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
