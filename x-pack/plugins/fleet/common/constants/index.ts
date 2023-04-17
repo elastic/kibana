@@ -45,3 +45,6 @@ export const FLEET_SERVER_INDICES = [
   '.fleet-policies-leader',
   FLEET_SERVER_SERVERS_INDEX,
 ];
+
+export const FLEET_APP_LOCATOR = 'FLEET_APP_LOCATOR';
+export const INTEGRATIONS_APP_LOCATOR = 'INTEGRATIONS_APP_LOCATOR';

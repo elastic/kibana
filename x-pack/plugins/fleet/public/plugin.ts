@@ -22,7 +22,7 @@ import type {
   CustomIntegrationsSetup,
 } from '@kbn/custom-integrations-plugin/public';
 
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import { once } from 'lodash';
 
@@ -59,6 +59,7 @@ import type { FleetConfigType } from '../common/types';
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
+import { FleetAppLocatorDefinition, IntegrationsLocatorDefinition } from './locators';
 import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
@@ -88,6 +89,7 @@ export interface FleetStart {
 export interface FleetSetupDeps {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  share: SharePluginSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
   customIntegrations: CustomIntegrationsSetup;
@@ -252,6 +254,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         order: 510,
       });
     }
+
+    // Register locators for global navigation
+    deps.share.url.locators.create(new FleetAppLocatorDefinition());
+    deps.share.url.locators.create(new IntegrationsLocatorDefinition());
 
     if (deps.globalSearch) {
       deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
