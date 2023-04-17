@@ -33,9 +33,8 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { COLLECTION_EXPLORER_PATH } from '../../../routes';
 import { FilterBy } from '../../../utils/get_formula_by_filter';
-import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
-import { AnalyticsCollectionExploreTableLogic } from './analytics_collection_explore_table_logic';
+import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
   ExploreTableItem,
@@ -44,7 +43,8 @@ import {
   TopClickedTable,
   TopReferrersTable,
   WorsePerformersTable,
-} from './analytics_collection_explore_table_types';
+} from '../analytics_collection_explore_table_types';
+import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
 const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>> = {
   [FilterBy.Searches]: [
@@ -230,11 +230,11 @@ const tableSettings: {
   },
 };
 
-interface AnalyticsCollectionExploreTableProps {
+interface AnalyticsCollectionOverviewTableProps {
   filterBy: FilterBy;
 }
 
-export const AnalyticsCollectionExploreTable: React.FC<AnalyticsCollectionExploreTableProps> = ({
+export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverviewTableProps> = ({
   filterBy,
 }) => {
   const { euiTheme } = useEuiTheme();

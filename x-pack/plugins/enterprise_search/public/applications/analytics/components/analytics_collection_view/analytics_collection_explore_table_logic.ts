@@ -15,10 +15,15 @@ import {
 } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 
-import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
-import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
-import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
+import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
+import {
+  getBaseRequestParams,
+  getPaginationRequestParams,
+  getPaginationRequestSizeParams,
+  getSearchQueryRequestParams,
+  getTotalCountRequestParams,
+} from './analytics_collection_explore_table_formulas';
 import {
   ExploreTableColumns,
   ExploreTableItem,
@@ -28,6 +33,8 @@ import {
   TopReferrersTable,
   WorsePerformersTable,
 } from './analytics_collection_explore_table_types';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 const BASE_PAGE_SIZE = 10;
 
@@ -46,62 +53,6 @@ interface TableParams<T extends ExploreTableItem = ExploreTableItem> {
     timeRange: TimeRange;
   }): IKibanaSearchRequest;
 }
-
-const getSearchQueryRequestParams = (search: string): { include?: string } => {
-  const createRegexQuery = (queryString: string) => {
-    let query = queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-    query = query
-      .split('')
-      .map((char) => {
-        if (/[a-z]/.test(char)) {
-          return `[${char}${char.toUpperCase()}]`;
-        }
-        return char;
-      })
-      .join('');
-    query = `.*${query}.*`;
-    if (queryString.length > 2) {
-      query = `([a-zA-Z]+ )+?${query}`;
-    }
-
-    return query;
-  };
-
-  return { include: search ? createRegexQuery(search) : undefined };
-};
-const getTotalCountRequestParams = (field: string) => ({
-  totalCount: {
-    cardinality: {
-      field,
-    },
-  },
-});
-const getPaginationRequestSizeParams = (pageIndex: number, pageSize: number) => ({
-  size: (pageIndex + 1) * pageSize,
-});
-const getPaginationRequestParams = (pageIndex: number, pageSize: number) => ({
-  aggs: {
-    sort: {
-      bucket_sort: {
-        from: pageIndex * pageSize,
-        size: pageSize,
-      },
-    },
-  },
-});
-
-const getBaseRequestParams = (timeRange: TimeRange) => ({
-  query: {
-    range: {
-      '@timestamp': {
-        gte: timeRange.from,
-        lt: timeRange.to,
-      },
-    },
-  },
-  size: 0,
-  track_total_hits: false,
-});
 
 const tablesParams: {
   [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;

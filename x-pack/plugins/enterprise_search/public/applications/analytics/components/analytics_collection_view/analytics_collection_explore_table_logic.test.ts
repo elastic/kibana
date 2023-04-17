@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
-
-import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
   AnalyticsCollectionExploreTableLogic,
   Sorting,
 } from './analytics_collection_explore_table_logic';
 import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
-jest.mock('../../../../shared/kibana/kibana_logic', () => ({
+jest.mock('../../../shared/kibana/kibana_logic', () => ({
   KibanaLogic: {
     values: {
       data: {
@@ -138,7 +138,8 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     it('should find and set dataView when findDataView is called', async () => {
       const dataView = { id: 'test' } as DataView;
       jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValue([dataView]);
-      await AnalyticsCollectionExploreTableLogic.actions.findDataView({
+
+      await FetchAnalyticsCollectionLogic.actions.apiSuccess({
         events_datastream: 'events1',
         name: 'collection1',
       } as AnalyticsCollection);

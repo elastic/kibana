@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table/analytics_collection_explore_table_logic';
+import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
   ExploreTableItem,
@@ -41,7 +41,7 @@ import {
   TopClickedTable,
   TopReferrersTable,
   WorsePerformersTable,
-} from '../analytics_collection_explore_table/analytics_collection_explore_table_types';
+} from '../analytics_collection_explore_table_types';
 
 interface TableSetting<T = ExploreTableItem, K = T> {
   columns: Array<

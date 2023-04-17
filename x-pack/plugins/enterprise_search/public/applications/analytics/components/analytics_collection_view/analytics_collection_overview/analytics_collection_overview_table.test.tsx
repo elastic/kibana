@@ -15,10 +15,11 @@ import { EuiBasicTable, EuiTab } from '@elastic/eui';
 
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
-import { AnalyticsCollectionExploreTable } from './analytics_collection_explore_table';
-import { ExploreTables } from './analytics_collection_explore_table_types';
+import { ExploreTables } from '../analytics_collection_explore_table_types';
 
-describe('AnalyticsCollectionExploreTable', () => {
+import { AnalyticsCollectionOverviewTable } from './analytics_collection_overview_table';
+
+describe('AnalyticsCollectionOverviewTable', () => {
   const mockValues = {
     activeTableId: 'search_terms',
     analyticsCollection: {
@@ -41,7 +42,7 @@ describe('AnalyticsCollectionExploreTable', () => {
   });
 
   it('should call setSelectedTable with the correct table id when a tab is clicked', () => {
-    const wrapper = shallow(<AnalyticsCollectionExploreTable filterBy={FilterBy.Sessions} />);
+    const wrapper = shallow(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
 
     const topReferrersTab = wrapper.find(EuiTab).at(0);
     topReferrersTab.simulate('click');
@@ -54,13 +55,13 @@ describe('AnalyticsCollectionExploreTable', () => {
   });
 
   it('should call findDataView with the active table ID and search filter when mounted', () => {
-    mount(<AnalyticsCollectionExploreTable filterBy={FilterBy.Sessions} />);
+    mount(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
     expect(mockActions.findDataView).toHaveBeenCalledWith(mockValues.analyticsCollection);
   });
 
   it('should render a table with the selectedTable', () => {
     setMockValues({ ...mockValues, selectedTable: ExploreTables.WorsePerformers });
-    const wrapper = mount(<AnalyticsCollectionExploreTable filterBy={FilterBy.Sessions} />);
+    const wrapper = mount(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
     expect(wrapper.find(EuiBasicTable).prop('itemId')).toBe(ExploreTables.WorsePerformers);
   });
 });
