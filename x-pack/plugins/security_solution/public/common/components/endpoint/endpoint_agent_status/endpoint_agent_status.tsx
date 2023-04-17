@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoint_hosts/view/host_constants';
 import { getEmptyValue } from '../../empty_value';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -28,8 +29,19 @@ import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
-
 const AUTO_REFRESH_INTERVAL = 10000;
+const ISOLATING_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isIsolating',
+  { defaultMessage: 'Isolating' }
+);
+const RELEASING_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isUnIsolating',
+  { defaultMessage: 'Releasing' }
+);
+const ISOLATED_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isolated',
+  { defaultMessage: 'Isolated' }
+);
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   .isolation-status {
@@ -218,13 +230,28 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
       };
     }, [pendingActions]);
 
+    const badgeDisplayValue = useMemo(() => {
+      return hasPendingIsolate ? (
+        ISOLATING_LABEL
+      ) : hasPendingUnIsolate ? (
+        RELEASING_LABEL
+      ) : isIsolated ? (
+        ISOLATED_LABEL
+      ) : (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.agentAndActionsStatus.multiplePendingActions"
+          defaultMessage="{count} {count, plural, one {action} other {actions}} pending"
+          values={{
+            count: totalPending,
+          }}
+        />
+      );
+    }, [hasPendingIsolate, hasPendingUnIsolate, isIsolated, totalPending]);
+
     const isolatedBadge = useMemo(() => {
       return (
         <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.agentAndActionsStatus.isolated"
-            defaultMessage="Isolated"
-          />
+          {ISOLATED_LABEL}
         </EuiBadge>
       );
     }, [dataTestSubj]);
@@ -256,7 +283,7 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
     // then show a summary with tooltip
     if (hasMultipleActionTypesPending || (!hasPendingIsolate && !hasPendingUnIsolate)) {
       return (
-        <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+        <EuiBadge color="hollow" data-test-subj={dataTestSubj} iconType="plus" iconSide="right">
           <EuiToolTip
             display="block"
             anchorClassName="eui-textTruncate"
@@ -281,13 +308,7 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
             }
           >
             <EuiTextColor color="subdued" data-test-subj={`${dataTestSubj}-pending`}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.agentAndActionsStatus.multiplePendingActions"
-                defaultMessage="{count} {count, plural, one {action} other {actions}} pending"
-                values={{
-                  count: totalPending,
-                }}
-              />
+              {badgeDisplayValue}
             </EuiTextColor>
           </EuiToolTip>
         </EuiBadge>
@@ -300,17 +321,7 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
     return (
       <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
         <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-          {hasPendingIsolate ? (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.agentAndActionsStatus.isIsolating"
-              defaultMessage="Isolating"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.agentAndActionsStatus.isUnIsolating"
-              defaultMessage="Releasing"
-            />
-          )}
+          {badgeDisplayValue}
         </EuiTextColor>
       </EuiBadge>
     );

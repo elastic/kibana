@@ -48,6 +48,10 @@ describe('When showing Endpoint Agent Status', () => {
   let actionsSummary: EndpointPendingActions;
   let apiMocks: ReturnType<typeof agentStatusApiMocks>;
 
+  const triggerTooltip = () => {
+    fireEvent.mouseOver(renderResult.getByTestId('test-actionStatuses-tooltipTrigger'));
+  };
+
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
     apiMocks = agentStatusApiMocks(appTestContext.coreStart.http);
@@ -99,6 +103,30 @@ describe('When showing Endpoint Agent Status', () => {
       expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
     });
 
+    it('should display status and isolated and display other pending actions in tooltip', async () => {
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
+      actionsSummary.pending_actions = {
+        'get-file': 2,
+        execute: 6,
+      };
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('test').textContent).toEqual('HealthyIsolated');
+
+      triggerTooltip();
+
+      await waitFor(() => {
+        expect(
+          within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
+            .textContent
+        ).toEqual('Pending actions:execute6get-file2');
+      });
+    });
+
     it('should display status and action count', async () => {
       actionsSummary.pending_actions = {
         'get-file': 2,
@@ -126,6 +154,29 @@ describe('When showing Endpoint Agent Status', () => {
       expect(getByTestId('test').textContent).toEqual('HealthyIsolating');
     });
 
+    it('should display status and isolating and have tooltip with other pending actions', async () => {
+      actionsSummary.pending_actions = {
+        isolate: 1,
+        'kill-process': 1,
+      };
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('test').textContent).toEqual('HealthyIsolating');
+
+      triggerTooltip();
+
+      await waitFor(() => {
+        expect(
+          within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
+            .textContent
+        ).toEqual('Pending actions:isolate1kill-process1');
+      });
+    });
+
     it('should display status and releasing', async () => {
       actionsSummary.pending_actions = {
         unisolate: 1,
@@ -138,6 +189,30 @@ describe('When showing Endpoint Agent Status', () => {
       });
 
       expect(getByTestId('test').textContent).toEqual('HealthyReleasing');
+    });
+
+    it('should display status and releasing and show other pending actions in tooltip', async () => {
+      actionsSummary.pending_actions = {
+        unisolate: 1,
+        'kill-process': 1,
+      };
+      set(endpointDetails, ENDPOINT_ISOLATION_OBJ_PATH, true);
+      const { getByTestId } = render();
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('test').textContent).toEqual('HealthyReleasing');
+
+      triggerTooltip();
+
+      await waitFor(() => {
+        expect(
+          within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
+            .textContent
+        ).toEqual('Pending actions:kill-process1release1');
+      });
     });
 
     it('should show individual action count in tooltip (including unknown actions) sorted asc', async () => {
@@ -154,9 +229,9 @@ describe('When showing Endpoint Agent Status', () => {
         expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalled();
       });
 
-      expect(getByTestId('test').textContent).toEqual('Healthy12 actions pending');
+      expect(getByTestId('test').textContent).toEqual('HealthyIsolating');
 
-      fireEvent.mouseOver(getByTestId('test-actionStatuses-tooltipTrigger'));
+      triggerTooltip();
 
       await waitFor(() => {
         expect(
