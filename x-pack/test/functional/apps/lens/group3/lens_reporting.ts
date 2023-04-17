@@ -24,7 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const browser = getService('browser');
 
-  describe('lens reporting', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/154958
+  describe.skip('lens reporting', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
