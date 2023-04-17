@@ -35,6 +35,7 @@ import {
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 import { MostUsedChart } from './most_used_chart';
+import { MostUsedCharts } from './most_used_charts';
 import { GeoMap } from './geo_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
@@ -66,6 +67,7 @@ export function MobileServiceOverview() {
       netConnectionType,
       offset,
       comparisonEnabled,
+      transactionType,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -265,6 +267,31 @@ export function MobileServiceOverview() {
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate('xpack.apm.serviceOverview.mostUsedTitle', {
+                      defaultMessage: 'Most used',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiSpacer size="xs" />
+              <EuiFlexItem>
+                <MostUsedCharts
+                  kuery={kueryWithMobileFilters}
+                  start={start}
+                  end={end}
+                  environment={environment}
+                  transactionType={transactionType}
+                  serviceName={serviceName}
+                />
+              </EuiFlexItem>
             </EuiPanel>
           </EuiFlexItem>
 

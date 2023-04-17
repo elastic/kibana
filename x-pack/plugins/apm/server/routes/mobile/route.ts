@@ -26,6 +26,10 @@ import {
   getMobileTermsByField,
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
+import {
+  getMobileMostUsedCharts,
+  MobileMostUsedChartResponse,
+} from './get_mobile_most_used_charts';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -63,6 +67,45 @@ const mobileFiltersRoute = createApmServerRoute({
       apmEventClient,
     });
     return { mobileFilters: filters };
+  },
+});
+
+const mobileChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/mobile/most_used_charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.partial({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    mostUsedCharts: MobileMostUsedChartResponse;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, transactionType } = params.query;
+
+    const charts = await getMobileMostUsedCharts({
+      kuery,
+      environment,
+      transactionType,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+    });
+    return { mostUsedCharts: charts };
   },
 });
 
@@ -268,6 +311,7 @@ const mobileTermsByFieldRoute = createApmServerRoute({
 
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
+  ...mobileChartsRoute,
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,
