@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,14 +16,6 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
-
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -63,14 +54,6 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('unmuteInstance()', () => {
-  beforeEach(() => {
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
-    });
-  });
-
   test('unmutes an alert instance', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -273,44 +256,6 @@ describe('unmuteInstance()', () => {
           },
         })
       );
-    });
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    const rule = {
-      id: '1',
-      type: 'alert',
-      attributes: {
-        actions: [],
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-        scheduledTaskId: 'task-123',
-        mutedInstanceIds: ['2'],
-      },
-      version: '123',
-      references: [],
-    };
-
-    test('should call migrateLegacyActions', async () => {
-      const rulesClient = new RulesClient(rulesClientParams);
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        ...rule,
-        attributes: {
-          ...rule.attributes,
-          consumer: AlertConsumers.SIEM,
-        },
-      });
-      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
-
-      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        actions: [],
-        references: [],
-        ruleId: '1',
-      });
     });
   });
 });
