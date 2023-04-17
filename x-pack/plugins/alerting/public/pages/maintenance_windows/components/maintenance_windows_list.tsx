@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
@@ -15,9 +15,10 @@ import {
   useEuiBackgroundColor,
   EuiToolTip,
   EuiIcon,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowResponse } from '../types';
+import { MaintenanceWindowResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { Status, StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
 
@@ -26,115 +27,114 @@ interface MaintenanceWindowsListProps {
   items: MaintenanceWindowResponse[];
 }
 
+const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+  {
+    field: 'title',
+    name: i18n.NAME,
+    truncateText: true,
+  },
+  {
+    field: 'total',
+    name: (
+      <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
+        <span>
+          {i18n.TABLE_ALERTS}{' '}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
+    render: (alerts: number) => formatNumber(alerts, 'integer'),
+  },
+  {
+    field: 'status',
+    name: i18n.TABLE_STATUS,
+    render: (status: string) => {
+      return (
+        <EuiButton
+          css={css`
+            cursor: default;
+
+            :hover:not(:disabled) {
+              text-decoration: none;
+            }
+          `}
+          fill={status === Status.RUNNING}
+          color={STATUS_DISPLAY[status].color as StatusColor}
+          size="s"
+          onClick={() => {}}
+        >
+          {STATUS_DISPLAY[status].label}
+        </EuiButton>
+      );
+    },
+    sortable: ({ status }) => STATUS_SORT[status],
+  },
+  {
+    field: 'eventStartTime',
+    name: i18n.TABLE_START_TIME,
+    dataType: 'date',
+    render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
+    sortable: true,
+  },
+  {
+    field: 'eventEndTime',
+    name: i18n.TABLE_END_TIME,
+    dataType: 'date',
+    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:mm A'),
+  },
+];
+
+const sorting = {
+  sort: {
+    field: 'status',
+    direction: SortDirection.asc,
+  },
+};
+
+const rowProps = (item: MaintenanceWindowResponse) => ({
+  className: item.status,
+  'data-test-subj': 'list-item',
+});
+
+const search: { filters: SearchFilterConfig[] } = {
+  filters: [
+    {
+      type: 'field_value_selection',
+      field: 'status',
+      name: 'Status',
+      multiSelect: 'or',
+      options: STATUS_OPTIONS,
+    },
+  ],
+};
+
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items }) => {
-    const [, setSelection] = useState<MaintenanceWindowResponse[]>([]);
-    const styles = {
-      status: css`
-        cursor: default;
-
-        :hover:not(:disabled) {
-          text-decoration: none;
-        }
-      `,
-      table: css`
-        .euiTableRow {
-          &.running {
-            background-color: ${useEuiBackgroundColor('warning')};
-          }
-
-          &.archived {
-            background-color: ${useEuiBackgroundColor('subdued')};
-          }
-        }
-      `,
-    };
-
-    const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
-      {
-        field: 'title',
-        name: i18n.NAME,
-        truncateText: true,
-      },
-      {
-        field: 'total',
-        name: (
-          <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
-            <span>
-              {i18n.TABLE_ALERTS}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        render: (alerts: number) => formatNumber(alerts, 'integer'),
-      },
-      {
-        field: 'status',
-        name: i18n.TABLE_STATUS,
-        render: (status: string) => {
-          return (
-            <EuiButton
-              css={styles.status}
-              fill={status === Status.RUNNING}
-              color={STATUS_DISPLAY[status].color as StatusColor}
-              size="s"
-              onClick={() => {}}
-            >
-              {STATUS_DISPLAY[status].label}
-            </EuiButton>
-          );
-        },
-        sortable: ({ status }) => STATUS_SORT[status],
-      },
-      {
-        field: 'eventStartTime',
-        name: i18n.TABLE_START_TIME,
-        dataType: 'date',
-        render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
-        sortable: true,
-      },
-      {
-        field: 'eventEndTime',
-        name: i18n.TABLE_END_TIME,
-        dataType: 'date',
-        render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:mm A'),
-      },
-    ];
+    const warningBackgroundColor = useEuiBackgroundColor('warning');
+    const subduedBackgroundColor = useEuiBackgroundColor('subdued');
 
     return (
       <EuiInMemoryTable
-        css={styles.table}
+        css={css`
+          .euiTableRow {
+            &.running {
+              background-color: ${warningBackgroundColor};
+            }
+
+            &.archived {
+              background-color: ${subduedBackgroundColor};
+            }
+          }
+        `}
         itemId="id"
         loading={loading}
         tableCaption="Maintenance Windows List"
         items={items}
         columns={columns}
         pagination={true}
-        sorting={{
-          sort: {
-            field: 'status',
-            direction: 'asc',
-          },
-        }}
-        selection={{
-          onSelectionChange: (selection: MaintenanceWindowResponse[]) => setSelection(selection),
-        }}
-        isSelectable={true}
-        rowProps={(item: MaintenanceWindowResponse) => ({
-          className: item.status,
-          'data-test-subj': 'list-item',
-        })}
-        search={{
-          filters: [
-            {
-              type: 'field_value_selection',
-              field: 'status',
-              name: 'Status',
-              multiSelect: 'or',
-              options: STATUS_OPTIONS,
-            },
-          ],
-        }}
+        sorting={sorting}
+        rowProps={rowProps}
+        search={search}
       />
     );
   }
