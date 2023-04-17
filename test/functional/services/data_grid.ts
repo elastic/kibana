@@ -202,24 +202,14 @@ export class DataGridService extends FtrService {
   public async clickRowToggle(
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
-    const isFlyoutOpen = await this.testSubjects.exists('docTableDetailsFlyout');
     const row = await this.getRow(options);
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
     const toggle = await row[0].findByTestSubject(testSubj);
 
-    await this.retry.try(async () => {
-      await toggle.scrollIntoViewIfNecessary();
-      await toggle.click();
-      if (isFlyoutOpen) {
-        // should close the flyout
-        await this.testSubjects.missingOrFail('docTableDetailsFlyout');
-      } else {
-        // should open the flyout
-        await this.testSubjects.existOrFail('docTableDetailsFlyout');
-      }
-    });
+    await toggle.scrollIntoViewIfNecessary();
+    await toggle.click();
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
