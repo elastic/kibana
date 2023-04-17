@@ -217,7 +217,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               sorted[i],
               `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
             );
-            console.log(`Checking Row number ${i + 1}Comparing ${value} with ${sorted[i]}`);
           });
         }
       });
