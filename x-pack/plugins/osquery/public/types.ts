@@ -25,6 +25,7 @@ import type {
   getLazyOsqueryResponseActionTypeForm,
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -58,6 +59,7 @@ export interface StartPlugins {
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cases?: CasesUiSetup;
+  share: SharePluginSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

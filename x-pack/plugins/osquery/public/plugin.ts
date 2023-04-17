@@ -31,6 +31,7 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
+import { OsqueryAppLocatorDefinition } from './locator';
 import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
@@ -85,6 +86,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         } as unknown as ServicesWrapperProps['services'])
       );
     });
+
+    plugins.share.url.locators.create(new OsqueryAppLocatorDefinition());
 
     // Return methods that should be available to other plugins
     return {};
