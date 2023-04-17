@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -46,6 +46,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -144,6 +145,11 @@ describe('Actions Plugin', () => {
         name: 'test',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         async executor(options) {
           return { status: 'ok', actionId: options.actionId };
         },
@@ -213,6 +219,7 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
+          enableFooterInEmail: true,
           ...overrides,
         };
       }
@@ -268,6 +275,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -336,6 +344,7 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
+          enableFooterInEmail: true,
           ...overrides,
         };
       }
@@ -371,6 +380,11 @@ describe('Actions Plugin', () => {
           name: 'Server log',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
           executor,
         });
 
@@ -390,6 +404,11 @@ describe('Actions Plugin', () => {
           name: 'ES Index',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
           executor,
         });
 
@@ -432,6 +451,11 @@ describe('Actions Plugin', () => {
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor: jest.fn(),
       };
 
@@ -455,6 +479,11 @@ describe('Actions Plugin', () => {
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor: jest.fn(),
       };
 

@@ -9,15 +9,15 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-export const analyticsEventsIndexExists = async (
+export const analyticsEventsExist = async (
   client: IScopedClusterClient,
   datastreamName: string
 ): Promise<boolean> => {
   try {
-    const response = await client.asCurrentUser.indices.getDataStream({
-      name: datastreamName,
+    const response = await client.asCurrentUser.count({
+      index: datastreamName,
     });
-    return response.data_streams.length > 0;
+    return response.count > 0;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       return false;
