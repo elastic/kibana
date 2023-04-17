@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { createNewAPIKeySet, updateMeta, migrateLegacyActions } from '../lib';
+import { createNewAPIKeySet, updateMeta } from '../lib';
 import { RulesClientContext } from '../types';
 
 export async function updateApiKey(
@@ -31,7 +29,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
   let version: string | undefined;
-  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -42,7 +39,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
-    references = decryptedAlert.references;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
@@ -52,7 +48,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
-    references = alert.references;
   }
 
   try {
@@ -62,7 +57,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
       operation: WriteOperations.UpdateApiKey,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
     if (attributes.actions.length) {
       await context.actionsAuthorization.ensureAuthorized('execute');
     }
@@ -87,21 +81,11 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     errorMessage: 'Error updating API key for rule: could not create API key',
   });
 
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: id,
-    actions: attributes.actions,
-    references,
-    attributes,
-  });
-
   const updateAttributes = updateMeta(context, {
     ...attributes,
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
-    ...(migratedActions.hasLegacyActions
-      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-      : {}),
   });
 
   context.auditLogger?.log(
@@ -115,12 +99,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
-      version,
-      ...(migratedActions.hasLegacyActions
-        ? { references: migratedActions.resultedReferences }
-        : {}),
-    });
+    await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(

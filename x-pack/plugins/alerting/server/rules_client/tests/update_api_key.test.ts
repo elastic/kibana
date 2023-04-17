@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,14 +17,6 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
-
-jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -107,11 +98,6 @@ describe('updateApiKey()', () => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
-    });
   });
 
   test('updates the API key for the alert', async () => {
@@ -433,39 +419,6 @@ describe('updateApiKey()', () => {
           },
         })
       );
-    });
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-        ...existingEncryptedAlert,
-        attributes: { ...existingEncryptedAlert.attributes, consumer: AlertConsumers.SIEM },
-      });
-      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
-
-      rulesClientParams.createAPIKey.mockResolvedValueOnce({
-        apiKeysEnabled: true,
-        result: { id: '234', name: '123', api_key: 'abc' },
-      });
-      await rulesClient.updateApiKey({ id: '1' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: '1',
-        actions: [
-          {
-            actionRef: '1',
-            actionTypeId: '1',
-            group: 'default',
-            id: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-        references: [],
-      });
     });
   });
 });
