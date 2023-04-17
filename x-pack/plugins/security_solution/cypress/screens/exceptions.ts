@@ -11,8 +11,6 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
-export const EXCEPTION_BUILDER_FIELD_ROW = '[data-test-subj="exceptionBuilderEntryFieldFormRow"]';
-
 export const FIELD_INPUT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"] input';
 
@@ -26,9 +24,6 @@ export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 export const VALUES_INPUT =
   '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
 
-export const WILDCARD_VALUES_INPUT =
-  '[data-test-subj="valuesAutocompleteWildcard"] [data-test-subj="comboBoxInput"]';
-
 export const VALUES_MATCH_ANY_INPUT =
   '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
 
@@ -41,8 +36,6 @@ export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';
 export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]';
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
-
-export const CANCEL_EDIT_BTN = '[data-test-subj="cancelExceptionEditButton"]';
 
 export const EXCEPTIONS_OVERFLOW_ACTIONS_BTN =
   '[data-test-subj="sharedListOverflowCardButtonIcon"]';
@@ -134,8 +127,6 @@ export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToR
 export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
-
-export const MAPPINGS_CONFLICT_WARNING = 'input[data-test-subj="mappingConflictsAccordion"]';
 
 // Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =

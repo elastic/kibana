@@ -28,9 +28,6 @@ import {
   EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
-  FIELD_INPUT_PARENT,
-  WILDCARD_VALUES_INPUT,
-  CANCEL_EDIT_BTN,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -76,34 +73,6 @@ export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
-export const assertMatchesFlyoutItem = (
-  index = 0,
-  field: string,
-  operator: string,
-  value: string
-) => {
-  cy.get(EXCEPTION_ITEM_CONTAINER)
-    .eq(index)
-    .find(FIELD_INPUT_PARENT)
-    .eq(0)
-    .should('have.text', field);
-  cy.get(EXCEPTION_ITEM_CONTAINER)
-    .eq(index)
-    .find(OPERATOR_INPUT)
-    .eq(0)
-    .should('have.text', operator);
-  cy.get(EXCEPTION_ITEM_CONTAINER)
-    .eq(index)
-    .find(WILDCARD_VALUES_INPUT)
-    .eq(0)
-    .should('have.text', value);
-};
-
-export const addExceptionWildcardEntryValue = (value: string, index = 0) => {
-  cy.get(WILDCARD_VALUES_INPUT).eq(index).type(`${value}{enter}`);
-  cy.get(EXCEPTION_FLYOUT_TITLE).click();
-};
-
 export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
   cy.get(VALUES_INPUT).eq(index).type(`${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
@@ -116,10 +85,6 @@ export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) =>
 
 export const closeExceptionBuilderFlyout = () => {
   cy.get(CANCEL_BTN).click();
-};
-
-export const closeEditExceptionFlyout = () => {
-  cy.get(CANCEL_EDIT_BTN).click();
 };
 
 export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 0) => {

@@ -221,7 +221,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <>
             <EuiSpacer size="s" />
             <EuiAccordion
-              id={'1'}
+              id={`${entry.id}`}
               buttonContent={
                 <>
                   <EuiIcon
@@ -266,7 +266,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
       const customOptionText =
         entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
-      console.log({ HELP: entry.field?.conflictDescriptions });
+
       const helpText =
         entry.field?.conflictDescriptions == null ? (
           customOptionText
