@@ -7,40 +7,47 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiExpression, EuiFieldNumber, EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiPopover, EuiPopoverFooter, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { AGG_TYPE, MASK_OPERATOR } from '../../../common/constants';
-import { AggDescriptor } from '../../../common/descriptor_types';
-import { panelStrings } from '../../connected_components/panel_strings';
+import { EuiButton, EuiButtonEmpty, EuiFieldNumber, EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiPopoverFooter, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { AGG_TYPE, MASK_OPERATOR } from '../../../../common/constants';
+import { AggDescriptor } from '../../../../common/descriptor_types';
+import { panelStrings } from '../../../connected_components/panel_strings';
+
+const operatorOptions = [
+  {
+    value: MASK_OPERATOR.BELOW,
+    text: i18n.translate('xpack.maps.maskEditor.belowLabel', {
+      defaultMessage: 'below',
+    })
+  },
+  { 
+    value: MASK_OPERATOR.ABOVE,
+    text: i18n.translate('xpack.maps.maskEditor.aboveLabel', {
+      defaultMessage: 'above',
+    })
+  },
+];
+
+export function getOperatorLabel(operator: MASK_OPERATOR): string {
+  const option = operatorOptions.find(option => operator === option.value);
+  return option ? option.text : operator;
+}
 
 interface Props {
-  bucketName: string;
   metric: AggDescriptor;
   onChange: (metric: AggDescriptor) => void;
+  onClose: () => void;
 }
 
 interface State {
-  isPopoverOpen: boolean;
   operator: MASK_OPERATOR;
   value: number | string;
 }
 
 export class MaskEditor extends Component<Props, State> {
   state: State = {
-    isPopoverOpen: false,
     operator: MASK_OPERATOR.BELOW,
     value: '',
-  };
-
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
   };
 
   _onSet = () => {
@@ -55,7 +62,7 @@ export class MaskEditor extends Component<Props, State> {
         value: this.state.value as number,
       },
     });
-    this._closePopover();
+    this.props.onClose();
   }
 
   _onClear = () => {
@@ -64,7 +71,7 @@ export class MaskEditor extends Component<Props, State> {
     };
     delete newMetric.mask;
     this.props.onChange(newMetric);
-    this._closePopover();
+    this.props.onClose();
   }
 
   _onOperatorChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -95,20 +102,7 @@ export class MaskEditor extends Component<Props, State> {
           <EuiFormRow>
             <EuiSelect
               id="maskOperatorSelect"
-              options={[
-                {
-                  value: MASK_OPERATOR.BELOW,
-                  text: i18n.translate('xpack.maps.maskEditor.belowLabel', {
-                    defaultMessage: 'below',
-                  })
-                },
-                { 
-                  value: MASK_OPERATOR.ABOVE,
-                  text: i18n.translate('xpack.maps.maskEditor.aboveLabel', {
-                    defaultMessage: 'above',
-                  })
-                },
-              ]}
+              options={operatorOptions}
               value={this.state.operator}
               onChange={this._onOperatorChange}
               aria-label={i18n.translate('xpack.maps.maskEditor.operatorSelectLabel', {
@@ -138,7 +132,7 @@ export class MaskEditor extends Component<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButtonEmpty
-              onClick={this._closePopover}
+              onClick={this.props.onClose}
               size="s"
             >
               {panelStrings.close}
@@ -169,50 +163,13 @@ export class MaskEditor extends Component<Props, State> {
     );
   }
 
-  _renderContent() {
+  render() {
     return (
       <>
         {this._renderForm()}
         <EuiSpacer size="xs" />
         {this._renderFooter()}
       </>
-    );
-  }
-
-  render() {
-    // masks only supported for numerical metrics
-    if (this.props.metric.aggType === AGG_TYPE.TERMS) {
-      return null;
-    }
-
-    const expressionValue = this.props.metric.mask !== undefined ? 'less than 2' : '--';
-
-    return (
-      <EuiPopover
-        id="mask"
-        button={
-          <EuiExpression
-            color={this.props.metric.mask === undefined ? 'subdued' : 'warning'}
-            description={i18n.translate('xpack.maps.maskEditor.maskDescription', {
-              defaultMessage: 'hide {bucketName} when {aggLabel} is ',
-              values: {
-                bucketName: this.props.bucketName,
-                aggLabel: 'count',
-              },
-            })}
-            value={expressionValue}
-            onClick={this._togglePopover}
-            uppercase={false}
-          />
-        }
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        panelPaddingSize="s"
-        anchorPosition="downCenter"
-        repositionOnScroll={true}
-      >
-        {this._renderContent()}
-      </EuiPopover>
     );
   }
 }

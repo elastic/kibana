@@ -18,7 +18,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
-import { MaskEditor } from './mask_editor';
+import { MaskExpression } from './mask_expression';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -67,6 +67,8 @@ export function MetricEditor({
       return;
     }
 
+    // Intentionally not adding mask.
+    // Changing aggregation likely changes value range so keeping old mask does not seem relevent
     const descriptor = {
       type: metricAggregationType,
       label: metric.label,
@@ -96,6 +98,8 @@ export function MetricEditor({
     if (!fieldName || metric.type === AGG_TYPE.COUNT) {
       return;
     }
+    // Intentionally not adding mask.
+    // Changing field likely changes value range so keeping old mask does not seem relevent
     onChange({
       label: metric.label,
       type: metric.type,
@@ -233,7 +237,7 @@ export function MetricEditor({
         })}
         display="columnCompressed"
       >
-        <MaskEditor bucketName={bucketName} metric={metric} onChange={onChange} />
+        <MaskExpression bucketName={bucketName} fields={fields} metric={metric} onChange={onChange} />
       </EuiFormRow>
 
       {removeButton}
