@@ -7,6 +7,7 @@
 
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import { LensChartConfig, LensLineChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 const REFERENCE_LAYER = 'referenceLayer';
 
@@ -64,11 +65,12 @@ export const load: LensChartConfig = {
   formula: {
     formula: 'average(system.load.1) / max(system.load.cores)',
     format: {
-      id: 'bytes',
+      id: 'percent',
       params: {
-        decimals: 1,
+        decimals: 0,
       },
     },
   },
+  getFilters,
   lineChartConfig: loadLineChart,
 };

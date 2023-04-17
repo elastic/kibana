@@ -14,26 +14,39 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 export const DEFAULT_LAYER_ID = 'layer1';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
+const DEFAULT_BREAKDOWN_SIZE = 10;
 
-export const getHistogramColumn = (columnName: string, sourceField: string) => {
+export const getHistogramColumn = ({
+  columnName,
+  overrides,
+}: {
+  columnName: string;
+  overrides?: Partial<Pick<DateHistogramIndexPatternColumn, 'sourceField' | 'params'>>;
+}) => {
   return {
     [columnName]: {
       dataType: 'date',
       isBucketed: true,
       label: '@timestamp',
       operationType: 'date_histogram',
-      params: { interval: 'auto' },
       scale: 'interval',
-      sourceField,
+      sourceField: '@timestamp',
+      ...overrides,
+      params: { interval: 'auto', ...overrides?.params },
     } as DateHistogramIndexPatternColumn,
   };
 };
 
-export const getBreakdownColumn = (
-  columnName: string,
-  sourceField: string,
-  breakdownSize: number
-): PersistedIndexPatternLayer['columns'] => {
+export const getBreakdownColumn = ({
+  columnName,
+  overrides,
+}: {
+  columnName: string;
+  overrides?: Partial<Pick<TermsIndexPatternColumn, 'sourceField'>> & {
+    breakdownSize?: number;
+  };
+}): PersistedIndexPatternLayer['columns'] => {
+  const { breakdownSize = DEFAULT_BREAKDOWN_SIZE, sourceField } = overrides ?? {};
   return {
     [columnName]: {
       label: `Top ${breakdownSize} values of ${sourceField}`,

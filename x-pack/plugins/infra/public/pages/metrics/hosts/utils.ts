@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { DataViewBase, Filter } from '@kbn/es-query';
 import { SnapshotNode } from '../../../../common/http_api';
 
-export const createHostsFilter = (hostNodes: SnapshotNode[]): Filter => {
+export const createHostsFilter = (hostNodes: SnapshotNode[], dataView?: DataViewBase): Filter => {
   return {
     query: {
       terms: {
         'host.name': hostNodes.map((p) => p.name),
       },
     },
-    meta: {},
+    meta: dataView
+      ? {
+          key: 'host.name',
+          type: 'phrases',
+          value: hostNodes.map((p) => p.name).join(),
+          params: hostNodes.map((p) => p.name),
+          index: dataView.id,
+        }
+      : {},
   };
 };

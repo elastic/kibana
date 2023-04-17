@@ -6,11 +6,12 @@
  */
 
 import { LensChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const diskIORead: LensChartConfig = {
   title: 'Disk Read IOPS',
   formula: {
-    formula: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes >= 0')",
+    formula: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
     format: {
       id: 'bytes',
       params: {
@@ -18,4 +19,5 @@ export const diskIORead: LensChartConfig = {
       },
     },
   },
+  getFilters,
 };

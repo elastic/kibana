@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataViewBase, Filter } from '@kbn/es-query';
 import {
   FormBasedPersistedState,
   FormulaPublicApi,
@@ -40,6 +41,7 @@ export interface LensChartConfig {
   title: string;
   formula: Formula;
   lineChartConfig?: LensLineChartConfig;
+  getFilters: ({ id }: Pick<DataViewBase, 'id'>) => Filter[];
 }
 
 export type TVisualization = XYState | MetricVisualizationState;
@@ -49,6 +51,7 @@ export interface VisualizationAttributes<T extends TVisualization> {
   getLayers(): FormBasedPersistedState['layers'];
   getVisualizationState(): T;
   getReferences(): SavedObjectReference[];
+  getFilters(): Filter[];
   getAdhocDataView(): Record<string, DataViewSpec>;
 }
 

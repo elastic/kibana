@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { LensAttributes, TVisualization, VisualizationAttributes } from '../types';
 
 export const buildLensAttributes = <T extends VisualizationAttributes<TVisualization>>(
@@ -21,7 +20,7 @@ export const buildLensAttributes = <T extends VisualizationAttributes<TVisualiza
         },
       },
       internalReferences: visualization.getReferences(),
-      filters: [],
+      filters: visualization.getFilters(),
       query: { language: 'kuery', query: '' },
       visualization: visualization.getVisualizationState(),
       adHocDataViews: visualization.getAdhocDataView(),

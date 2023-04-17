@@ -6,6 +6,7 @@
  */
 
 import { LensChartConfig, LensLineChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const cpuLineChart: LensLineChartConfig = {
   extraVisualizationState: {
@@ -20,7 +21,8 @@ export const cpuLineChart: LensLineChartConfig = {
 export const cpu: LensChartConfig = {
   title: 'CPU Usage',
   formula: {
-    formula: 'average(system.cpu.total.norm.pct)',
+    formula:
+      '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
     format: {
       id: 'percent',
       params: {
@@ -28,5 +30,7 @@ export const cpu: LensChartConfig = {
       },
     },
   },
+  getFilters,
+
   lineChartConfig: cpuLineChart,
 };

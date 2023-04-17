@@ -6,6 +6,7 @@
  */
 
 import { LensChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const hostCount: LensChartConfig = {
   title: 'Hosts',
@@ -18,4 +19,5 @@ export const hostCount: LensChartConfig = {
       },
     },
   },
+  getFilters,
 };

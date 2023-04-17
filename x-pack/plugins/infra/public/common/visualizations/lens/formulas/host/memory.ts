@@ -6,6 +6,7 @@
  */
 
 import { LensChartConfig, LensLineChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 const memoryLineChart: LensLineChartConfig = {
   extraVisualizationState: {
@@ -20,7 +21,7 @@ const memoryLineChart: LensLineChartConfig = {
 export const memory: LensChartConfig = {
   title: 'Memory',
   formula: {
-    formula: 'average(system.memory.actual.used.bytes) / max(system.memory.total)',
+    formula: 'average(system.memory.actual.used.pct)',
     format: {
       id: 'percent',
       params: {
@@ -29,4 +30,5 @@ export const memory: LensChartConfig = {
     },
   },
   lineChartConfig: memoryLineChart,
+  getFilters,
 };

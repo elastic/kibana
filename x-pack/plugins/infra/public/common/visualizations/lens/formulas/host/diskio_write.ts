@@ -6,11 +6,12 @@
  */
 
 import { LensChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const diskIOWrite: LensChartConfig = {
   title: 'Disk Write IOPS',
   formula: {
-    formula: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes>= 0')",
+    formula: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
     format: {
       id: 'bytes',
       params: {
@@ -18,4 +19,5 @@ export const diskIOWrite: LensChartConfig = {
       },
     },
   },
+  getFilters,
 };

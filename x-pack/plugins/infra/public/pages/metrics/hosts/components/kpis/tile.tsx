@@ -5,10 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { EuiIcon, EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -16,43 +14,38 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiI18n } from '@elastic/eui';
 import styled from 'styled-components';
-import { InfraClientSetupDeps } from '../../../../../types';
+import { EuiToolTip } from '@elastic/eui';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { LensWrapper } from '../chart/lens_wrapper';
 
 export interface KPIChartProps {
   title: string;
   subtitle?: string;
-  backgroundColor: string;
-  trendA11yDescription?: string;
-  trendA11yTitle?: string;
-  type: HostsLensMetricChartFormulas;
   trendLine?: boolean;
+  backgroundColor: string;
+  type: HostsLensMetricChartFormulas;
   toolTip: string;
 }
 
 const MIN_HEIGHT = 150;
 
-export const KPILens = ({
+export const Tile = ({
   title,
   subtitle,
   type,
   backgroundColor,
+  toolTip,
   trendLine = false,
 }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
-  const {
-    services: { lens },
-  } = useKibana<InfraClientSetupDeps>();
 
-  const EmbeddableComponent = lens.EmbeddableComponent;
-
-  const { injectFilters, getExtraActions, error } = useLensAttributes({
+  const { attributes, getExtraActions, error } = useLensAttributes({
     type,
     dataView,
     options: {
@@ -65,13 +58,13 @@ export const KPILens = ({
     visualizationType: 'metricChart',
   });
 
-  const injectedLensAttributes = injectFilters({
+  const extraActionOptions = getExtraActions({
+    timeRange: searchCriteria.dateRange,
     filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
     query: searchCriteria.query,
   });
 
-  const extraActionOptions = getExtraActions(injectedLensAttributes, searchCriteria.dateRange);
-  const extraAction: Action[] = [extraActionOptions.openInLens];
+  const extraActions: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
     const [min, max] = range;
@@ -86,16 +79,14 @@ export const KPILens = ({
 
   return (
     <EuiPanelStyled
-      borderRadius="m"
       hasShadow={false}
-      hasBorder
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsView-kpiChart-${type}`}
+      data-test-subj={`hostsViewKPIChart-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ height: MIN_HEIGHT, alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -114,26 +105,24 @@ export const KPILens = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        injectedLensAttributes && (
-          <EmbeddableComponent
-            id={`hostsViewsmetricsChart-${type}`}
-            style={{
-              height: MIN_HEIGHT,
-            }}
-            attributes={injectedLensAttributes}
-            viewMode={ViewMode.VIEW}
-            timeRange={searchCriteria.dateRange}
-            query={searchCriteria.query}
-            filters={searchCriteria.filters}
-            extraActions={extraAction}
+        <EuiToolTip
+          className="eui-fullWidth"
+          delay="regular"
+          content={toolTip}
+          anchorClassName="eui-fullWidth"
+        >
+          <LensWrapper
+            id={`hostViewKPIChart-${type}`}
+            attributes={attributes}
+            style={{ height: MIN_HEIGHT }}
+            extraActions={extraActions}
             lastReloadRequestTime={baseRequest.requestTs}
-            executionContext={{
-              type: 'visualization',
-              name: `Hosts View KPI Chart`,
-            }}
+            dateRange={searchCriteria.dateRange}
+            filters={searchCriteria.filters}
+            query={searchCriteria.query}
             onBrushEnd={handleBrushEnd}
           />
-        )
+        </EuiToolTip>
       )}
     </EuiPanelStyled>
   );

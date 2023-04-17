@@ -13,12 +13,14 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import {
   DEFAULT_LAYER_ID,
   getAdhocDataView,
   getDefaultReferences,
   getHistogramColumn,
 } from '../utils';
+
 import type { VisualizationAttributes, LensChartConfig, MetricChartOptions } from '../../types';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -62,10 +64,16 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
     const { showTrendLine = true } = this.options ?? {};
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
-      columns: getHistogramColumn(
-        HISTOGRAM_COLUMN_NAME,
-        this.dataView.timeFieldName ?? '@timestamp'
-      ),
+      columns: getHistogramColumn({
+        columnName: HISTOGRAM_COLUMN_NAME,
+        overrides: {
+          sourceField: this.dataView.timeFieldName,
+          params: {
+            interval: 'auto',
+            includeEmptyRows: true,
+          },
+        },
+      }),
       sampling: 1,
     };
 
@@ -89,7 +97,7 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
     };
   }
 
-  getVisualizationState(): MetricVisualizationState & { icon: string } {
+  getVisualizationState(): MetricVisualizationState {
     const { subtitle, backgroundColor, showTrendLine = true } = this.options ?? {};
     return {
       layerId: DEFAULT_LAYER_ID,
@@ -98,7 +106,6 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
       color: backgroundColor,
       subtitle,
       showBar: false,
-      icon: 'warning',
       ...(showTrendLine
         ? {
             trendlineLayerId: TRENDLINE_LAYER_ID,
@@ -124,5 +131,9 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
 
   getTitle(): string {
     return this.options?.showTitle ? this.options?.title ?? this.chartConfig.title : '';
+  }
+
+  getFilters(): Filter[] {
+    return this.chartConfig.getFilters({ id: this.dataView.id ?? DEFAULT_LAYER_ID });
   }
 }

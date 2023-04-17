@@ -13,10 +13,9 @@ import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
-import { KPICharts } from './kpi_charts/kpi_charts';
 import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
-import { KPILensCharts } from './kpi_charts/kpi_lens_charts';
+import { KPIGrid } from './kpis/kpi_grid';
 
 export const HostContainer = () => {
   const { dataView, loading, hasError } = useMetricsDataViewContext();
@@ -41,8 +40,7 @@ export const HostContainer = () => {
       <HostsViewProvider>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <KPICharts />
-            <KPILensCharts />
+            <KPIGrid />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HostsTable />

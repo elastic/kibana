@@ -6,6 +6,7 @@
  */
 
 import { LensChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const memoryAvailable: LensChartConfig = {
   title: 'Memory Available',
@@ -18,4 +19,5 @@ export const memoryAvailable: LensChartConfig = {
       },
     },
   },
+  getFilters,
 };

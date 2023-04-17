@@ -6,6 +6,7 @@
  */
 
 import { LensChartConfig } from '../../../types';
+import { getFilters } from './utils';
 
 export const tx: LensChartConfig = {
   title: 'Network Outbound (TX)',
@@ -19,4 +20,5 @@ export const tx: LensChartConfig = {
       },
     },
   },
+  getFilters,
 };

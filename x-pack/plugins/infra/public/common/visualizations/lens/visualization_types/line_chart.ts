@@ -13,6 +13,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import {
   DEFAULT_LAYER_ID,
   getAdhocDataView,
@@ -25,7 +26,6 @@ import type { LensChartConfig, VisualizationAttributes, LineChartOptions } from 
 const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const ACCESSOR = 'formula_accessor';
-const DEFAULT_BREAKDOWN_SIZE = 10;
 
 export class LineChart implements VisualizationAttributes<XYState> {
   constructor(
@@ -43,12 +43,19 @@ export class LineChart implements VisualizationAttributes<XYState> {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
       columns: {
-        ...getBreakdownColumn(
-          BREAKDOWN_COLUMN_NAME,
-          'host.name',
-          this.options?.breakdownSize ?? DEFAULT_BREAKDOWN_SIZE
-        ),
-        ...getHistogramColumn(HISTOGRAM_COLUMN_NAME, this.dataView.timeFieldName ?? '@timestamp'),
+        ...getBreakdownColumn({
+          columnName: BREAKDOWN_COLUMN_NAME,
+          overrides: {
+            sourceField: 'host.name',
+            breakdownSize: this.options?.breakdownSize,
+          },
+        }),
+        ...getHistogramColumn({
+          columnName: HISTOGRAM_COLUMN_NAME,
+          overrides: {
+            sourceField: this.dataView.timeFieldName,
+          },
+        }),
       },
     };
 
@@ -100,6 +107,10 @@ export class LineChart implements VisualizationAttributes<XYState> {
 
   getTitle(): string {
     return this.options?.title ?? this.chartConfig.title ?? '';
+  }
+
+  getFilters(): Filter[] {
+    return this.chartConfig.getFilters({ id: this.dataView.id ?? DEFAULT_LAYER_ID });
   }
 }
 

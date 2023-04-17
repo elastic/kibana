@@ -74,7 +74,11 @@ export const useLensAttributes = ({
     return visualizationAttributes;
   }, [dataView, formulaAPI, options, type, visualizationType]);
 
-  const injectFilters = (data: { filters: Filter[]; query: Query }): LensAttributes | null => {
+  const injectFilters = (data: {
+    timeRange: TimeRange;
+    filters: Filter[];
+    query: Query;
+  }): LensAttributes | null => {
     if (!attributes) {
       return null;
     }
@@ -88,7 +92,15 @@ export const useLensAttributes = ({
     };
   };
 
-  const getExtraActions = (currentAttributes: LensAttributes | null, timeRange: TimeRange) => {
+  const getExtraActions = ({
+    timeRange,
+    filters,
+    query,
+  }: {
+    timeRange: TimeRange;
+    filters: Filter[];
+    query: Query;
+  }) => {
     return {
       openInLens: {
         id: 'openInLens',
@@ -109,12 +121,13 @@ export const useLensAttributes = ({
           return true;
         },
         async execute(_context: ActionExecutionContext): Promise<void> {
-          if (currentAttributes) {
+          const injectedAttributes = injectFilters({ timeRange, filters, query });
+          if (injectedAttributes) {
             navigateToPrefilledEditor(
               {
                 id: '',
                 timeRange,
-                attributes: currentAttributes,
+                attributes: injectedAttributes,
               },
               {
                 openInNewTab: true,
@@ -127,5 +140,5 @@ export const useLensAttributes = ({
     };
   };
 
-  return { attributes, injectFilters, getExtraActions, error };
+  return { attributes, getExtraActions, error };
 };
