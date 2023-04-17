@@ -248,17 +248,18 @@ export interface AnalyticsCollectionExploreTableLogicValues {
 }
 
 export interface AnalyticsCollectionExploreTableLogicActions {
+  onTableChange(state: { page?: { index: number; size: number }; sort?: Sorting }): {
+    page?: { index: number; size: number };
+    sort?: Sorting;
+  };
   reset(): void;
   setDataView(dataView: DataView): { dataView: DataView };
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
-  setPageIndex(index: number): { index: number };
-  setPageSize(size: number): { size: number };
   setSearch(search: string): { search: string };
   setSelectedTable(
     id: ExploreTables | null,
     sorting?: Sorting
   ): { id: ExploreTables | null; sorting?: Sorting };
-  setSorting(sorting?: Sorting): { sorting?: Sorting };
   setTotalItemsCount(count: number): { count: number };
 }
 
@@ -269,14 +270,12 @@ export const AnalyticsCollectionExploreTableLogic = kea<
   >
 >({
   actions: {
+    onTableChange: ({ page, sort }) => ({ page, sort }),
     reset: true,
     setDataView: (dataView) => ({ dataView }),
     setItems: (items) => ({ items }),
-    setPageIndex: (index) => ({ index }),
-    setPageSize: (size) => ({ size }),
     setSearch: (search) => ({ search }),
     setSelectedTable: (id, sorting) => ({ id, sorting }),
-    setSorting: (sorting) => ({ sorting }),
     setTotalItemsCount: (count) => ({ count }),
   },
   listeners: ({ actions, values }) => {
@@ -328,11 +327,9 @@ export const AnalyticsCollectionExploreTableLogic = kea<
           actions.setDataView(dataView);
         }
       },
-      setPageIndex: fetchItems,
-      setPageSize: fetchItems,
+      onTableChange: fetchItems,
       setSearch: fetchItems,
       setSelectedTable: fetchItems,
-      setSorting: fetchItems,
       [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: fetchItems,
       [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: fetchItems,
     };
@@ -343,12 +340,11 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     isLoading: [
       false,
       {
+        onTableChange: () => true,
         setItems: () => false,
-        setPageIndex: () => true,
-        setPageSize: () => true,
         setSearch: () => true,
         setSelectedTable: () => true,
-        setSorting: () => true,
+        setTableState: () => true,
         [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => true,
         [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => true,
       },
@@ -356,9 +352,19 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     items: [[], { setItems: (_, { items }) => items }],
     pageIndex: [
       0,
-      { reset: () => 0, setPageIndex: (_, { index }) => index, setSelectedTable: () => 0 },
+      {
+        onTableChange: (_, { page }) => page?.index || 0,
+        reset: () => 0,
+        setSelectedTable: () => 0,
+      },
     ],
-    pageSize: [BASE_PAGE_SIZE, { reset: () => BASE_PAGE_SIZE, setPageSize: (_, { size }) => size }],
+    pageSize: [
+      BASE_PAGE_SIZE,
+      {
+        onTableChange: (_, { page }) => page?.size || BASE_PAGE_SIZE,
+        reset: () => BASE_PAGE_SIZE,
+      },
+    ],
     search: [
       '',
       { reset: () => '', setSearch: (_, { search }) => search, setSelectedTable: () => '' },
@@ -367,8 +373,8 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     sorting: [
       null,
       {
+        onTableChange: (_, { sort = null }) => sort,
         setSelectedTable: (_, { sorting = null }) => sorting,
-        setSorting: (_, { sorting = null }) => sorting,
       },
     ],
     totalItemsCount: [0, { setTotalItemsCount: (_, { count }) => count }],

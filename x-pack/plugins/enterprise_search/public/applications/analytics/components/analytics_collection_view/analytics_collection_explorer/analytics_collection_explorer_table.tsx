@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -21,7 +22,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import {
   EuiTableFieldDataColumnType,
   EuiTableSortingType,
@@ -223,7 +223,7 @@ const tableSettings: {
 
 export const AnalyticsCollectionExplorerTable = () => {
   const { euiTheme } = useEuiTheme();
-  const { setSelectedTable, setPageIndex, setPageSize, setSearch, setSorting } = useActions(
+  const { onTableChange, setSelectedTable, setSearch } = useActions(
     AnalyticsCollectionExploreTableLogic
   );
   const { items, isLoading, pageIndex, pageSize, search, selectedTable, sorting, totalItemsCount } =
@@ -239,12 +239,8 @@ export const AnalyticsCollectionExplorerTable = () => {
       sorting: { ...table.sorting, sort: sorting || undefined },
     };
   }
-  const onTableChange = ({ sort, page }: Criteria<ExploreTableItem>) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-    setSorting(sort);
+  const handleTableChange = ({ sort, page }: Criteria<ExploreTableItem>) => {
+    onTableChange({ page, sort });
   };
 
   useEffect(() => {
@@ -320,7 +316,7 @@ export const AnalyticsCollectionExplorerTable = () => {
               showPerPageOptions: true,
               totalItemCount: totalItemsCount,
             }}
-            onChange={onTableChange}
+            onChange={handleTableChange}
           />
         </EuiFlexGroup>
       )}

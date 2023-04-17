@@ -87,18 +87,24 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should handle set sorting', () => {
       const sorting = { direction: 'asc', field: ExploreTableColumns.sessions } as Sorting;
-      AnalyticsCollectionExploreTableLogic.actions.setSorting(sorting);
+      AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+        sort: sorting,
+      });
       expect(AnalyticsCollectionExploreTableLogic.values.sorting).toEqual(sorting);
     });
 
     describe('isLoading', () => {
       it('should handle setPageIndex', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
       it('should handle setPageSize', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
@@ -108,10 +114,12 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       });
 
       it('should handle setSorting', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setSorting({
-          direction: 'asc',
-          field: ExploreTableColumns.sessions,
-        } as Sorting);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          sort: {
+            direction: 'asc',
+            field: ExploreTableColumns.sessions,
+          } as Sorting,
+        });
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
@@ -138,18 +146,24 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     describe('pageIndex', () => {
       it('should handle setPageIndex', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(2);
       });
 
       it('should handle setSelectedTable', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
       });
 
       it('should handle reset', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         AnalyticsCollectionExploreTableLogic.actions.reset();
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
       });
@@ -157,18 +171,24 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     describe('pageSize', () => {
       it('should handle setPageSize', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
       });
 
       it('should handle setSelectedTable', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
       });
 
       it('should handle reset', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
         AnalyticsCollectionExploreTableLogic.actions.reset();
         expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
       });
@@ -230,22 +250,11 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       });
     });
 
-    it('should fetch items when pageIndex changes', () => {
+    it('should fetch items when onTableChange called', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
       (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
 
-      AnalyticsCollectionExploreTableLogic.actions.setPageIndex(4);
-      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
-        sessionId: undefined,
-      });
-    });
-
-    it('should fetch items when pageSize changes', () => {
-      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
-
-      AnalyticsCollectionExploreTableLogic.actions.setPageSize(20);
+      AnalyticsCollectionExploreTableLogic.actions.onTableChange({});
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: undefined,
         sessionId: undefined,
