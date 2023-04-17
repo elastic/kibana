@@ -14,7 +14,6 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { TableId } from '../../common/types';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
@@ -174,7 +173,7 @@ describe('DataTable', () => {
       wrapper.update();
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: SecurityCellActionsTrigger.DEFAULT,
+        triggerId: '',
         fields: [
           {
             name: '@timestamp',

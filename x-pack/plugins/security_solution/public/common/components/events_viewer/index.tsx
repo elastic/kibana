@@ -73,6 +73,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 const storage = new Storage(localStorage);
 
@@ -573,6 +574,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
                           <DataTableComponent
+                            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
                             additionalControls={alertBulkActions}
                             unitCountText={unitCountText}
                             browserFields={browserFields}
