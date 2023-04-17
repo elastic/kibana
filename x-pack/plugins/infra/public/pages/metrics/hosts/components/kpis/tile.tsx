@@ -82,7 +82,7 @@ export const Tile = ({
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsViewKPIChart-${type}`}
+      data-test-subj={`hostsView-metricsTrend-${type}`}
     >
       {error ? (
         <EuiFlexGroup
