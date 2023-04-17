@@ -1845,30 +1845,8 @@
             "label": "utils",
             "description": [],
             "signature": [
-              "{ getTransforms: (definitions: ",
-              {
-                "pluginId": "@kbn/object-versioning",
-                "scope": "common",
-                "docId": "kibKbnObjectVersioningPluginApi",
-                "section": "def-common.ServiceDefinitionVersioned",
-                "text": "ServiceDefinitionVersioned"
-              },
-              ", requestVersion: number, _compiled?: { [path: string]: ",
-              {
-                "pluginId": "@kbn/object-versioning",
-                "scope": "common",
-                "docId": "kibKbnObjectVersioningPluginApi",
-                "section": "def-common.ObjectMigrationDefinition",
-                "text": "ObjectMigrationDefinition"
-              },
-              "; } | undefined) => ",
-              {
-                "pluginId": "@kbn/object-versioning",
-                "scope": "common",
-                "docId": "kibKbnObjectVersioningPluginApi",
-                "section": "def-common.ServiceTransforms",
-                "text": "ServiceTransforms"
-              },
+              "{ getTransforms: ",
+              "StorageContextGetTransformFn",
               "; }"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
