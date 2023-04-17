@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+export interface SelectOptions {
+  label: string;
+  value: string;
+}
+
 export interface ConnectorConfigProperties {
   display: string;
   label: string;
+  options: SelectOptions[];
   order?: number | null;
   sensitive: boolean;
   value: string | number | boolean | null;

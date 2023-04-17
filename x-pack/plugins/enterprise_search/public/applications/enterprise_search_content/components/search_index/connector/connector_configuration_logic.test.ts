@@ -51,20 +51,35 @@ describe('ConnectorConfigurationLogic', () => {
       ConnectorConfigurationLogic.actions.setIsEditing(true);
       ConnectorConfigurationApiLogic.actions.apiSuccess({
         configuration: {
-          foo: { display: 'textbox', label: 'newBar', order: 1, sensitive: false, value: 'oldBar' },
+          foo: {
+            display: 'textbox',
+            label: 'newBar',
+            options: [],
+            order: 1,
+            sensitive: false,
+            value: 'oldBar',
+          },
         },
         indexName: 'indexName',
       });
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
         configState: {
-          foo: { display: 'textbox', label: 'newBar', order: 1, sensitive: false, value: 'oldBar' },
+          foo: {
+            display: 'textbox',
+            label: 'newBar',
+            options: [],
+            order: 1,
+            sensitive: false,
+            value: 'oldBar',
+          },
         },
         configView: [
           {
             display: 'textbox',
             key: 'foo',
             label: 'newBar',
+            options: [],
             order: 1,
             sensitive: false,
             value: 'oldBar',
@@ -77,6 +92,7 @@ describe('ConnectorConfigurationLogic', () => {
         foo: {
           display: 'textbox',
           label: 'thirdBar',
+          options: [],
           order: 1,
           sensitive: false,
           value: 'fourthBar',
@@ -88,6 +104,7 @@ describe('ConnectorConfigurationLogic', () => {
           foo: {
             display: 'textbox',
             label: 'thirdBar',
+            options: [],
             order: 1,
             sensitive: false,
             value: 'fourthBar',
@@ -98,6 +115,7 @@ describe('ConnectorConfigurationLogic', () => {
             display: 'textbox',
             key: 'foo',
             label: 'thirdBar',
+            options: [],
             order: 1,
             sensitive: false,
             value: 'fourthBar',
@@ -108,20 +126,36 @@ describe('ConnectorConfigurationLogic', () => {
     describe('setLocalConfigEntry', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
-          bar: { display: 'textbox', label: 'foo', order: 1, sensitive: false, value: 'foofoo' },
+          bar: {
+            display: 'textbox',
+            label: 'foo',
+            options: [],
+            order: 1,
+            sensitive: false,
+            value: 'foofoo',
+          },
           password: {
             display: 'textbox',
             label: 'thirdBar',
+            options: [],
             order: 2,
             sensitive: true,
             value: 'fourthBar',
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
-          bar: { display: 'textbox', label: 'foo', order: 1, sensitive: false, value: 'foofoo' },
+          bar: {
+            display: 'textbox',
+            label: 'foo',
+            options: [],
+            order: 1,
+            sensitive: false,
+            value: 'foofoo',
+          },
           password: {
             display: 'textbox',
             label: 'thirdBar',
+            options: [],
             order: 2,
             sensitive: true,
             value: 'fourthBar',
@@ -131,6 +165,7 @@ describe('ConnectorConfigurationLogic', () => {
           display: 'textbox',
           key: 'bar',
           label: 'foo',
+          options: [],
           order: 1,
           sensitive: false,
           value: 'fafa',
@@ -138,10 +173,18 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: {
-            bar: { display: 'textbox', label: 'foo', order: 1, sensitive: false, value: 'foofoo' },
+            bar: {
+              display: 'textbox',
+              label: 'foo',
+              options: [],
+              order: 1,
+              sensitive: false,
+              value: 'foofoo',
+            },
             password: {
               display: 'textbox',
               label: 'thirdBar',
+              options: [],
               order: 2,
               sensitive: true,
               value: 'fourthBar',
@@ -152,6 +195,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'bar',
               label: 'foo',
+              options: [],
               order: 1,
               sensitive: false,
               value: 'foofoo',
@@ -160,16 +204,25 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
+              options: [],
               order: 2,
               sensitive: true,
               value: 'fourthBar',
             },
           ],
           localConfigState: {
-            bar: { display: 'textbox', label: 'foo', order: 1, sensitive: false, value: 'fafa' },
+            bar: {
+              display: 'textbox',
+              label: 'foo',
+              options: [],
+              order: 1,
+              sensitive: false,
+              value: 'fafa',
+            },
             password: {
               display: 'textbox',
               label: 'thirdBar',
+              options: [],
               order: 2,
               sensitive: true,
               value: 'fourthBar',
@@ -180,6 +233,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'bar',
               label: 'foo',
+              options: [],
               order: 1,
               sensitive: false,
               value: 'fafa',
@@ -188,6 +242,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
+              options: [],
               order: 2,
               sensitive: true,
               value: 'fourthBar',
@@ -207,6 +262,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'foo',
               label: 'bar',
+              options: [],
               order: 1,
               sensitive: false,
               value: 'barbar',
@@ -238,6 +294,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'foo',
               label: 'bar',
+              options: [],
               order: 1,
               sensitive: false,
               value: 'barbar',
@@ -254,6 +311,7 @@ describe('ConnectorConfigurationLogic', () => {
               display: 'textbox',
               key: 'foo',
               label: 'bar',
+              options: [],
               order: 1,
               sensitive: false,
               value: 'barbar',
@@ -268,7 +326,14 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.makeRequest = jest.fn();
         ConnectorConfigurationLogic.actions.fetchIndexApiSuccess(connectorIndex);
         ConnectorConfigurationLogic.actions.setLocalConfigState({
-          foo: { display: 'textbox', label: 'bar', order: 1, sensitive: true, value: 'Barbara' },
+          foo: {
+            display: 'textbox',
+            label: 'bar',
+            options: [],
+            order: 1,
+            sensitive: true,
+            value: 'Barbara',
+          },
         });
         ConnectorConfigurationLogic.actions.saveConfig();
         expect(ConnectorConfigurationLogic.actions.makeRequest).toHaveBeenCalledWith({

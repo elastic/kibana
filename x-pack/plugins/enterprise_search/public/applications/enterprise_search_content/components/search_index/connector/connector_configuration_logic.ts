@@ -48,10 +48,16 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
+interface SelectOptions {
+  label: string;
+  value: string;
+}
+
 export interface ConfigEntry {
   display: string;
   key: string;
   label: string;
+  options: SelectOptions[];
   order?: number;
   sensitive: boolean;
   value: string | number | boolean | null;
@@ -205,9 +211,12 @@ export const ConnectorConfigurationLogic = kea<
     localConfigState: [
       {},
       {
-        setLocalConfigEntry: (configState, { key, display, label, order, sensitive, value }) => ({
+        setLocalConfigEntry: (
+          configState,
+          { key, display, label, options, order, sensitive, value }
+        ) => ({
           ...configState,
-          [key]: { display, label, order, sensitive, value },
+          [key]: { display, label, options, order, sensitive, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
