@@ -27,7 +27,7 @@ describe('Create Default Policy tests ', () => {
   let licenseService: LicenseService;
 
   const createDefaultPolicyCallback = (config: AnyPolicyCreateConfig | undefined): PolicyConfig => {
-    return createDefaultPolicy(licenseService, config, cloudMock);
+    return createDefaultPolicy(licenseService, config, cloud);
   };
 
   beforeEach(() => {
