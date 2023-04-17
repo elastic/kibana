@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
-import { constructFileKindIdByOwner } from '../../../common/files';
+import * as api from '../../containers/api';
 import {
   buildCasesPermissions,
   createAppMockRenderer,
@@ -24,8 +24,9 @@ import { AddFile } from './add_file';
 import { useToasts } from '../../common/lib/kibana';
 
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { basicFileMock } from '../../containers/mock';
+import { basicCaseId, basicFileMock } from '../../containers/mock';
 
+jest.mock('../../containers/api');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../common/lib/kibana');
 
@@ -214,12 +215,14 @@ describe('AddFile', () => {
     );
   });
 
-  it('filesClient.delete is called correctly if createAttachments fails', async () => {
+  it('deleteFileAttachments is called correctly if createAttachments fails', async () => {
+    const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
+
     createAttachmentsMock.mockImplementation(() => {
       throw new Error();
     });
 
-    appMockRender.render(<AddFile caseId={'foobar'} />);
+    appMockRender.render(<AddFile caseId={basicCaseId} />);
 
     userEvent.click(await screen.findByTestId('cases-files-add'));
 
@@ -227,12 +230,11 @@ describe('AddFile', () => {
 
     userEvent.click(await screen.findByTestId('testOnDone'));
 
-    await waitFor(() =>
-      expect(appMockRender.getFilesClient().delete).toHaveBeenCalledWith({
-        id: mockedExternalReferenceId,
-        kind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-      })
-    );
+    expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
+      caseId: basicCaseId,
+      fileIds: [mockedExternalReferenceId],
+      signal: expect.any(AbortSignal),
+    });
 
     createAttachmentsMock.mockRestore();
   });

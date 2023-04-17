@@ -19,7 +19,6 @@ import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
-import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
@@ -31,6 +30,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { deleteFileAttachments } from '../../containers/api';
 
 interface AddFileProps {
   caseId: string;
@@ -38,7 +38,6 @@ interface AddFileProps {
 
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const { owner, permissions } = useCasesContext();
-  const { client: filesClient } = useFilesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
   const { isLoading, createAttachments } = useCreateAttachments();
   const refreshAttachmentsTable = useRefreshCaseViewPage();
@@ -99,23 +98,13 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        await filesClient.delete({
-          kind: constructFileKindIdByOwner(owner[0] as Owner),
-          id: file.id,
-        });
+        const abortCtrlRef = new AbortController();
+        return deleteFileAttachments({ caseId, fileIds: [file.id], signal: abortCtrlRef.signal });
       }
 
       closeModal();
     },
-    [
-      caseId,
-      createAttachments,
-      filesClient,
-      owner,
-      refreshAttachmentsTable,
-      showDangerToast,
-      showSuccessToast,
-    ]
+    [caseId, createAttachments, owner, refreshAttachmentsTable, showDangerToast, showSuccessToast]
   );
 
   return permissions.create && permissions.update ? (
