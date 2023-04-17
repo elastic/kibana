@@ -118,9 +118,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
       <EuiFlexGroup direction="column">
         {/* Top Buttons and Links */}
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <DashboardsButtons />
-          </EuiFlexItem>
+          <EuiFlexItem>{totalAgents > 0 && <DashboardsButtons />}</EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <AgentActivityButton
