@@ -45,6 +45,10 @@ jest.mock('./utils', () => ({
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('../visualization_actions/use_visualization_response', () => ({
+  useVisualizationResponse: jest.fn().mockReturnValue([{ hits: { total: 999 } }]),
+}));
+
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
@@ -80,7 +84,7 @@ describe('Matrix Histogram Component', () => {
       { text: 'dns.question.registered_domain', value: 'dns.question.registered_domain' },
     ],
     startDate: '2019-07-18T19:00: 00.000Z',
-    subtitle: 'mockSubtitle',
+    subtitle: jest.fn((totalCount) => `Showing: ${totalCount} events`),
     totalCount: -1,
     title: 'mockTitle',
     runtimeMappings: mockRuntimeMappings,
@@ -318,6 +322,23 @@ describe('Matrix Histogram Component', () => {
 
     test('it should render Lens Embeddable', () => {
       expect(wrapper.find(`[data-test-subj="visualization-embeddable"]`).exists()).toEqual(true);
+    });
+
+    test('it should render visualization count as subtitle', () => {
+      mockUseMatrix.mockReturnValue([
+        false,
+        {
+          data: [],
+          inspect: false,
+          totalCount: 0,
+        },
+      ]);
+      wrapper.setProps({ endDate: 100 });
+      wrapper.update();
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual(
+        'Showing: 999 events'
+      );
     });
   });
 });
