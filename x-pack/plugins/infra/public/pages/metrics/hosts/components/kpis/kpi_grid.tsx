@@ -71,7 +71,7 @@ const KPI_CHARTS: KPIChartProps[] = [
     subtitle: i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.subtitle', {
       defaultMessage: 'Average',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.tooltip', {
+    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.tooltip', {
       defaultMessage:
         'Number of bytes which have been received per second on the public interfaces of the hosts.',
     }),
