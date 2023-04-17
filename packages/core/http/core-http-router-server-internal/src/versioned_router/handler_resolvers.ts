@@ -7,16 +7,16 @@
  */
 
 /**
- * A Kibana HTTP API version
- *
- * @note
- * For public APIs: conforms to the Elastic API version specification APIs as a date string formatted as YYYY-MM-DD.
- * Ex. 2021-01-01 -> 2022-02-02
- *
- * @note
- * For internal APIs: follow the convention of monotonic increasing integers.
- * Ex. 1 -> 2 -> 3
- *
- * @experimental
+ * Assumes that there is at least one version in the array.
+ * @internal
  */
-export type ApiVersion = string;
+type Resolver = (versions: string[]) => string;
+
+const oldest: Resolver = (versions) => [...versions].sort((a, b) => a.localeCompare(b))[0];
+
+const newest: Resolver = (versions) => [...versions].sort((a, b) => b.localeCompare(a))[0];
+
+export const resolvers = {
+  oldest,
+  newest,
+};
