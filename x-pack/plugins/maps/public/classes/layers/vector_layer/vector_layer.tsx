@@ -64,6 +64,7 @@ import { syncBoundsData } from './bounds_data';
 import { JoinState } from './types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { getAlphaExpression } from './get_alpha_expression';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
@@ -692,6 +693,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return undefined;
   }
 
+  // feature-state is not supported in filter expressions
+  // https://github.com/mapbox/mapbox-gl-js/issues/8487
+  // therefore, metric masking must be accomplished via setting opacity paint property - hack
+  _getAlphaExpression() {
+    return getAlphaExpression(this.getAlpha(), this.getSource(), this.getValidJoins());
+  }
+
   _setMbPointsProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
@@ -759,13 +767,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       this.getCurrentStyle().setMBPaintPropertiesForPoints({
-        alpha: this.getAlpha(),
+        alpha: this._getAlphaExpression(),
         mbMap,
         pointLayerId: markerLayerId,
       });
     } else {
       this.getCurrentStyle().setMBSymbolPropertiesForPoints({
-        alpha: this.getAlpha(),
+        alpha: this._getAlphaExpression(),
         mbMap,
         symbolLayerId: markerLayerId,
       });
@@ -811,7 +819,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     this.getCurrentStyle().setMBPaintProperties({
-      alpha: this.getAlpha(),
+      alpha: this._getAlphaExpression(),
       mbMap,
       fillLayerId,
       lineLayerId,
@@ -865,7 +873,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
+      alpha: this._getAlphaExpression(),
       mbMap,
       textLayerId: labelLayerId,
     });

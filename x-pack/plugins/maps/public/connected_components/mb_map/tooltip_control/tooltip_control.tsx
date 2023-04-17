@@ -278,6 +278,7 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
+    console.log(JSON.stringify(mbFeatures, null, ' '));
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;

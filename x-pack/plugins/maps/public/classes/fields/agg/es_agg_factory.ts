@@ -26,6 +26,7 @@ export function esAggFieldsFactory(
       label: aggDescriptor.label,
       source,
       origin,
+      mask: aggDescriptor.mask,
     });
   } else if (aggDescriptor.type === AGG_TYPE.PERCENTILE) {
     aggField = new PercentileAggField({
