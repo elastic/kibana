@@ -10,6 +10,7 @@ import moment from 'moment';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
 import { MaintenanceWindowResponse } from '../types';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-05').toISOString();
@@ -23,7 +24,7 @@ describe('MaintenanceWindowsList', () => {
       expirationDate: date,
       events: [],
       rRule: { dtstart: date, tzid: 'UTC' },
-      status: 'running',
+      status: MaintenanceWindowStatus.Running,
       eventStartTime: date,
       eventEndTime: date,
       createdBy: 'elastic',
@@ -40,7 +41,7 @@ describe('MaintenanceWindowsList', () => {
       expirationDate: date,
       events: [],
       rRule: { dtstart: date, tzid: 'UTC' },
-      status: 'upcoming',
+      status: MaintenanceWindowStatus.Upcoming,
       eventStartTime: date,
       eventEndTime: date,
       createdBy: 'elastic',
@@ -57,7 +58,7 @@ describe('MaintenanceWindowsList', () => {
       expirationDate: date,
       events: [],
       rRule: { dtstart: date, tzid: 'UTC' },
-      status: 'finished',
+      status: MaintenanceWindowStatus.Finished,
       eventStartTime: date,
       eventEndTime: date,
       createdBy: 'elastic',
@@ -74,7 +75,7 @@ describe('MaintenanceWindowsList', () => {
       expirationDate: date,
       events: [],
       rRule: { dtstart: date, tzid: 'UTC' },
-      status: 'archived',
+      status: MaintenanceWindowStatus.Archived,
       eventStartTime: date,
       eventEndTime: date,
       createdBy: 'elastic',

@@ -7,6 +7,7 @@
 import { invert, mapValues } from 'lodash';
 import moment from 'moment';
 import * as i18n from './translations';
+import { MaintenanceWindowStatus } from '../../../common';
 
 // TODO - consolidate enum with backend
 export enum Frequency {
@@ -106,32 +107,25 @@ export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_R
   Number(v)
 );
 
-export enum Status {
-  RUNNING = 'running',
-  UPCOMING = 'upcoming',
-  FINISHED = 'finished',
-  ARCHIVED = 'archived',
-}
-
 export const STATUS_DISPLAY: Record<string, { color: string; label: string }> = {
-  [Status.RUNNING]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
-  [Status.UPCOMING]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
-  [Status.FINISHED]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
-  [Status.ARCHIVED]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
+  [MaintenanceWindowStatus.Running]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
+  [MaintenanceWindowStatus.Upcoming]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
+  [MaintenanceWindowStatus.Finished]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
+  [MaintenanceWindowStatus.Archived]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
 };
 
 export type StatusColor = 'warning' | 'success' | 'text';
 
 export const STATUS_SORT = {
-  [Status.RUNNING]: 0,
-  [Status.UPCOMING]: 1,
-  [Status.FINISHED]: 2,
-  [Status.ARCHIVED]: 3,
+  [MaintenanceWindowStatus.Running]: 0,
+  [MaintenanceWindowStatus.Upcoming]: 1,
+  [MaintenanceWindowStatus.Finished]: 2,
+  [MaintenanceWindowStatus.Archived]: 3,
 };
 
 export const STATUS_OPTIONS = [
-  { value: Status.RUNNING, name: i18n.TABLE_STATUS_RUNNING },
-  { value: Status.UPCOMING, name: i18n.TABLE_STATUS_UPCOMING },
-  { value: Status.FINISHED, name: i18n.TABLE_STATUS_FINISHED },
-  { value: Status.ARCHIVED, name: i18n.TABLE_STATUS_ARCHIVED },
+  { value: MaintenanceWindowStatus.Running, name: i18n.TABLE_STATUS_RUNNING },
+  { value: MaintenanceWindowStatus.Upcoming, name: i18n.TABLE_STATUS_UPCOMING },
+  { value: MaintenanceWindowStatus.Finished, name: i18n.TABLE_STATUS_FINISHED },
+  { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
 ];

@@ -20,7 +20,8 @@ import {
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
-import { Status, StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
@@ -58,7 +59,7 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
               text-decoration: none;
             }
           `}
-          fill={status === Status.RUNNING}
+          fill={status === MaintenanceWindowStatus.Running}
           color={STATUS_DISPLAY[status].color as StatusColor}
           size="s"
           onClick={() => {}}
