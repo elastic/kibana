@@ -318,7 +318,7 @@ const useCloudFormationTemplate = ({
 }: {
   input: NewPackagePolicyPostureInput;
   agentPolicy?: AgentPolicy;
-  onChangeAgentPolicy: (agentPolicy: AgentPolicy) => void;
+  onChangeAgentPolicy?: (agentPolicy: AgentPolicy) => void;
   packageInfo: PackageInfo;
 }) => {
   useEffect(() => {
@@ -326,7 +326,7 @@ const useCloudFormationTemplate = ({
     if (input.policy_template !== VULN_MGMT_POLICY_TEMPLATE) {
       // Clear CloudFormation template URL and stack name
       // when switching to a non-Vuln Mgmt policy template
-      onChangeAgentPolicy({
+      onChangeAgentPolicy?.({
         ...agentPolicy,
         cloud_formation_template_url: '',
       });
@@ -336,7 +336,7 @@ const useCloudFormationTemplate = ({
 
     if (templateUrl === '') return;
     if (agentPolicy?.cloud_formation_template_url === templateUrl) return;
-    onChangeAgentPolicy({
+    onChangeAgentPolicy?.({
       ...agentPolicy,
       cloud_formation_template_url: templateUrl,
     });

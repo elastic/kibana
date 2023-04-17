@@ -36,7 +36,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   validationResults?: PackagePolicyValidationResults;
   agentPolicy?: AgentPolicy;
   packageInfo: PackageInfo;
-  onChangeAgentPolicy: (newAgentPolicy: Partial<AgentPolicy>) => void;
+  onChangeAgentPolicy?: (newAgentPolicy: Partial<AgentPolicy>) => void;
 };
 
 /**
