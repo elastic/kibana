@@ -28,6 +28,8 @@ import {
   CriteriaWithPagination,
   Query,
   Ast,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -131,6 +133,23 @@ type TableListProps<T extends UserContentCommonSchema> = Pick<
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
 > & { onFetchSuccess: () => void };
+
+export interface TableListTab<T extends UserContentCommonSchema = UserContentCommonSchema> {
+  title: string;
+  getTableList: (
+    propsFromParent: Pick<TableListProps<T>, 'tableListTitle' | 'onFetchSuccess'>
+  ) => React.ReactNode;
+}
+
+type TabbedTableListViewProps = Pick<
+  TableListViewProps<UserContentCommonSchema>,
+  | 'tableListTitle'
+  | 'tableListDescription'
+  | 'additionalRightSideActions'
+  | 'headingId'
+  | 'children'
+  | 'withoutPageTemplateWrapper'
+> & { tabs: TableListTab[] };
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
@@ -951,7 +970,7 @@ function TableListComp<T extends UserContentCommonSchema>({
   );
 }
 
-const TableList = React.memo(TableListComp) as typeof TableListComp;
+export const TableList = React.memo(TableListComp) as typeof TableListComp;
 
 export const TableListView = <T extends UserContentCommonSchema>({
   tableListTitle,
@@ -1025,6 +1044,58 @@ export const TableListView = <T extends UserContentCommonSchema>({
             }
           }}
         />
+      </KibanaPageTemplate.Section>
+    </PageTemplate>
+  );
+};
+
+export const TabbedTableListView = ({
+  tableListTitle,
+  tableListDescription,
+  additionalRightSideActions,
+  headingId,
+  children,
+  withoutPageTemplateWrapper,
+  tabs,
+}: TabbedTableListViewProps) => {
+  const PageTemplate = withoutPageTemplateWrapper
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
+  const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
+
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const tableList = useMemo(
+    () =>
+      tabs[selectedTab].getTableList({
+        tableListTitle,
+        onFetchSuccess: () => {},
+      }),
+    [selectedTab, tableListTitle, tabs]
+  );
+
+  return (
+    <PageTemplate panelled>
+      <KibanaPageTemplate.Header
+        pageTitle={<span id={headingId}>{tableListTitle}</span>}
+        description={tableListDescription}
+        rightSideItems={additionalRightSideActions?.slice(0, 2)}
+        data-test-subj="top-nav"
+      >
+        <EuiTabs>
+          {tabs.map((tab, index) => (
+            <EuiTab onClick={() => setSelectedTab(index)} isSelected={index === selectedTab}>
+              {tab.title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </KibanaPageTemplate.Header>
+      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+        {/* Any children passed to the component */}
+        {children}
+
+        {tableList}
       </KibanaPageTemplate.Section>
     </PageTemplate>
   );

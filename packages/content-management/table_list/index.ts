@@ -8,10 +8,11 @@
 
 export {
   TableListView,
+  TabbedTableListView,
   TableList,
   TableListViewProvider,
   TableListViewKibanaProvider,
 } from './src';
 
-export type { UserContentCommonSchema } from './src';
+export type { UserContentCommonSchema, TableListTab } from './src';
 export type { TableListViewKibanaDependencies } from './src/services';

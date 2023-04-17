@@ -19,7 +19,11 @@ import { useLocation } from 'react-router-dom';
 
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { TableListView } from '@kbn/content-management-table-list';
+import {
+  TableList,
+  TabbedTableListView,
+  type TableListTab,
+} from '@kbn/content-management-table-list';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
@@ -289,38 +293,50 @@ export const VisualizeListing = () => {
     />
   );
 
+  const tabs: TableListTab[] = [
+    {
+      title: 'Visualizations',
+      getTableList: (propsFromParent) => (
+        <TableList<VisualizeUserContent>
+          id="vis"
+          // we allow users to create visualizations even if they can't save them
+          // for data exploration purposes
+          createItem={createNewVis}
+          findItems={fetchItems}
+          deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+          editItem={visualizeCapabilities.save ? editItem : undefined}
+          customTableColumn={getCustomColumn()}
+          listingLimit={listingLimit}
+          initialPageSize={initialPageSize}
+          initialFilter={''}
+          contentEditor={{
+            isReadonly: !visualizeCapabilities.save,
+            onSave: onContentEditorSave,
+            customValidators: contentEditorValidators,
+          }}
+          emptyPrompt={noItemsFragment}
+          entityName={i18n.translate('visualizations.listing.table.entityName', {
+            defaultMessage: 'visualization',
+          })}
+          entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
+            defaultMessage: 'visualizations',
+          })}
+          getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
+            getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+          }
+          {...propsFromParent}
+        />
+      ),
+    },
+  ];
+
   return (
-    <TableListView<VisualizeUserContent>
-      id="vis"
+    <TabbedTableListView
       headingId="visualizeListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      createItem={createNewVis}
-      findItems={fetchItems}
-      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-      editItem={visualizeCapabilities.save ? editItem : undefined}
-      customTableColumn={getCustomColumn()}
-      listingLimit={listingLimit}
-      initialPageSize={initialPageSize}
-      initialFilter={''}
-      contentEditor={{
-        isReadonly: !visualizeCapabilities.save,
-        onSave: onContentEditorSave,
-        customValidators: contentEditorValidators,
-      }}
-      emptyPrompt={noItemsFragment}
-      entityName={i18n.translate('visualizations.listing.table.entityName', {
-        defaultMessage: 'visualization',
-      })}
-      entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
-        defaultMessage: 'visualizations',
-      })}
       tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
-      getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
-      }
+      tabs={tabs}
     >
       {dashboardCapabilities.createNew && (
         <>
@@ -328,6 +344,6 @@ export const VisualizeListing = () => {
           <EuiSpacer size="m" />
         </>
       )}
-    </TableListView>
+    </TabbedTableListView>
   );
 };
