@@ -156,15 +156,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
           'ssl.verification_mode': 'full',
           tags: [],
-          throttling: {
-            value: {
-              download: '5',
-              latency: '20',
-              upload: '3',
-            },
-            label: 'default',
-            id: 'default',
-          },
+          throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
           timeout: null,
           type: 'browser',
           'url.port': null,

@@ -79,7 +79,7 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
           logger.log.warn(
             `Failed to remove ZIP URL fields from legacy Synthetics monitor: ${e.message}`
           );
-          return migrated;
+          return doc;
         }
       }
       return migrated;
