@@ -93,6 +93,7 @@ describe('ConnectorConfigurationLogic', () => {
     it('should set config on setConfigState', () => {
       ConnectorConfigurationLogic.actions.setConfigState({
         foo: {
+          depends_on: [],
           display: 'textbox',
           label: 'thirdBar',
           options: [],

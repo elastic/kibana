@@ -1,0 +1,6 @@
+.dependency {
+  padding: 16px;
+}
+.dependency + .dependency {
+  margin-top: 0px;
+}

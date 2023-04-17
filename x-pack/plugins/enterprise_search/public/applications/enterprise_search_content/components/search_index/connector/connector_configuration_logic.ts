@@ -7,7 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
+import {
+  ConnectorConfiguration,
+  ConnectorStatus,
+  Dependency,
+  DependencyLookup,
+  SelectOption,
+} from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {
@@ -48,16 +54,12 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
-interface SelectOptions {
-  label: string;
-  value: string;
-}
-
 export interface ConfigEntry {
+  depends_on: Dependency[];
   display: string;
   key: string;
   label: string;
-  options: SelectOptions[];
+  options: SelectOption[];
   order?: number;
   required: boolean;
   sensitive: boolean;
@@ -105,6 +107,19 @@ export function ensureNumberType(value: string | number | boolean | null): numbe
 
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
   return Boolean(value);
+}
+
+export function dependenciesSatisfied(
+  dependencies: Dependency[],
+  dependencyLookup: DependencyLookup
+): boolean {
+  for (const dependency of dependencies) {
+    if (dependency.value !== dependencyLookup[dependency.field]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -214,10 +229,11 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          { key, display, label, options, order, required, sensitive, value }
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          { key, depends_on, display, label, options, order, required, sensitive, value }
         ) => ({
           ...configState,
-          [key]: { display, label, options, order, required, sensitive, value },
+          [key]: { depends_on, display, label, options, order, required, sensitive, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
