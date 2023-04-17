@@ -15,6 +15,7 @@ import type {
 } from '@kbn/observability-plugin/public';
 import { ObservabilitySharedPluginSetup } from '@kbn/observability-shared-plugin/public/plugin';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
@@ -22,6 +23,7 @@ export interface ProfilingPluginPublicSetupDeps {
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
   charts: ChartsPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
