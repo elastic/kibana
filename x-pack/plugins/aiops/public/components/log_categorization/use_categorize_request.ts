@@ -13,7 +13,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { estypes } from '@elastic/elasticsearch';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { Sampling } from './sampling_menu';
+import { RandomSampler } from './sampling_menu';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
@@ -58,7 +58,7 @@ export function useCategorizeRequest() {
 
   const abortController = useRef(new AbortController());
 
-  const sampling = useMemo(() => new Sampling(), []);
+  const randomSampler = useMemo(() => new RandomSampler(), []);
 
   const runCategorizeRequest = useCallback(
     (
@@ -70,7 +70,7 @@ export function useCategorizeRequest() {
       query: QueryDslQueryContainer,
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
-      const { wrap, unwrap } = sampling.createRandomSamplerWrapper();
+      const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
         data.search
@@ -99,7 +99,7 @@ export function useCategorizeRequest() {
           });
       });
     },
-    [data.search, sampling]
+    [data.search, randomSampler]
   );
 
   const cancelRequest = useCallback(() => {
@@ -107,7 +107,7 @@ export function useCategorizeRequest() {
     abortController.current = new AbortController();
   }, []);
 
-  return { runCategorizeRequest, cancelRequest, sampling };
+  return { runCategorizeRequest, cancelRequest, randomSampler };
 }
 
 function createCategoryRequest(

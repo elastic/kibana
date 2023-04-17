@@ -9,8 +9,8 @@ import { EuiButton, EuiFlexItem, EuiFormRow, EuiRange, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import React, { useState } from 'react';
-// import { roundToDecimalPlace } from '../utils';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_PROBABILITIES,
@@ -82,7 +82,7 @@ export const RandomSamplerRangeSlider = ({
               setSamplingProbabilityInput(value / 100);
             } else {
               // Because the incremental step is very small (0.0001),
-              // everytime user clicks the ^/∨ in the numerical input
+              // every time user clicks the ^/∨ in the numerical input
               // we need to make sure it rounds up or down to the next whole number
               const nearestInt = value > prevValue ? Math.ceil(value) : Math.floor(value);
               setSamplingProbabilityInput(nearestInt / 100);
@@ -110,18 +110,3 @@ export const RandomSamplerRangeSlider = ({
     </EuiFlexItem>
   );
 };
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! move
-export function roundToDecimalPlace(num?: number, dp: number = 2): number | string {
-  if (num === undefined) return '';
-  if (num % 1 === 0) {
-    // no decimal place
-    return num;
-  }
-
-  if (Math.abs(num) < Math.pow(10, -dp)) {
-    return Number.parseFloat(String(num)).toExponential(2);
-  }
-  const m = Math.pow(10, dp);
-  return Math.round(num * m) / m;
-}

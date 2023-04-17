@@ -19,38 +19,42 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+
+import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import {
+  RandomSampler,
   RandomSamplerOption,
   RANDOM_SAMPLER_OPTION,
   RANDOM_SAMPLER_SELECT_OPTIONS,
 } from './random_sampler';
-import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
-import { Sampling } from './sampling';
 
 interface Props {
-  sampling: Sampling;
+  randomSampler: RandomSampler;
   reload: () => void;
 }
 
-export const SamplingMenu: FC<Props> = ({ sampling, reload }) => {
+export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
-  const samplingProbability = useObservable(sampling.getProbability$(), sampling.getProbability());
+  const samplingProbability = useObservable(
+    randomSampler.getProbability$(),
+    randomSampler.getProbability()
+  );
   const setSamplingProbability = useCallback(
     (probability: number | null) => {
-      sampling.setProbability(probability);
+      randomSampler.setProbability(probability);
       reload();
     },
-    [reload, sampling]
+    [reload, randomSampler]
   );
 
-  const randomSamplerPreference = useObservable(sampling.getMode$(), sampling.getMode());
+  const randomSamplerPreference = useObservable(randomSampler.getMode$(), randomSampler.getMode());
   const setRandomSamplerPreference = useCallback(
     (mode: RandomSamplerOption) => {
-      sampling.setMode(mode);
+      randomSampler.setMode(mode);
       reload();
     },
-    [reload, sampling]
+    [randomSampler, reload]
   );
 
   const { calloutInfoMessage, buttonText } = useMemo(() => {

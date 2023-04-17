@@ -26,7 +26,7 @@ export class AiopsPlugin
     // importing async to keep the aiops plugin size to a minimum
     Promise.all([
       import('@kbn/ui-actions-plugin/public'),
-      import('./categorize_field_actions'),
+      import('./components/log_categorization'),
       firstValueFrom(plugins.licensing.license$),
     ]).then(([uiActionsImports, { categorizeFieldAction }, license]) => {
       if (license.hasAtLeast('platinum')) {

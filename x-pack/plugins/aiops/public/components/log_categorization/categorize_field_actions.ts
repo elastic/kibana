@@ -12,8 +12,8 @@ import {
   type CategorizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { showCategorizeFlyout } from './shared_flyout';
-import { AiopsPluginStartDeps } from './types';
+import { AiopsPluginStartDeps } from '../../types';
+import { showCategorizeFlyout } from './show_flyout';
 
 export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({

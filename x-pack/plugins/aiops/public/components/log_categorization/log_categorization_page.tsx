@@ -47,7 +47,7 @@ export const LogCategorizationPage: FC = () => {
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { runCategorizeRequest, cancelRequest, sampling } = useCategorizeRequest();
+  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
@@ -153,7 +153,7 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
-      sampling.setDocCount(documentStats.totalCount);
+      randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
@@ -163,7 +163,15 @@ export const LogCategorizationPage: FC = () => {
       setData(null);
       setTotalCount(documentStats.totalCount);
     }
-  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery, sampling]);
+  }, [
+    documentStats,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    randomSampler,
+  ]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -265,7 +273,7 @@ export const LogCategorizationPage: FC = () => {
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <SamplingMenu sampling={sampling} reload={() => loadCategories()} />
+          <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

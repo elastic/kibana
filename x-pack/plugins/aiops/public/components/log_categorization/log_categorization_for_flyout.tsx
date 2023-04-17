@@ -55,7 +55,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   } = useAiopsAppContext();
 
   const mounted = useRef(false);
-  const { runCategorizeRequest, cancelRequest, sampling } = useCategorizeRequest();
+  const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -167,7 +167,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
-      sampling.setDocCount(documentStats.totalCount);
+      randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
         Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
           key: +key,
@@ -185,7 +185,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     searchString,
     searchQuery,
     loadCategories,
-    sampling,
+    randomSampler,
   ]);
 
   return (
@@ -203,7 +203,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SamplingMenu sampling={sampling} reload={() => forceRefresh()} />
+            <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

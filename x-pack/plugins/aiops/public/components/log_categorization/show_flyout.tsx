@@ -19,9 +19,9 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { AiopsAppContext } from './hooks/use_aiops_app_context';
-import { LogCategorizationFlyout } from './components/log_categorization/log_categorization_for_flyout';
-import { AiopsPluginStartDeps } from './types';
+import { AiopsPluginStartDeps } from '../../types';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 
 export async function showCategorizeFlyout(
   field: DataViewField,

@@ -6,4 +6,4 @@
  */
 
 export { SamplingMenu } from './sampling_menu';
-export { Sampling } from './sampling';
+export { RandomSampler } from './random_sampler';
