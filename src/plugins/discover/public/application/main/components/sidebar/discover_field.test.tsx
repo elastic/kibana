@@ -23,7 +23,7 @@ import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import * as DetailsUtil from './deprecated_stats/get_details';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FieldItemButton, FieldsGroupNames } from '@kbn/unified-field-list-plugin/public';
+import { FieldItemButton } from '@kbn/unified-field-list-plugin/public';
 
 jest.spyOn(DetailsUtil, 'getDetails');
 
@@ -100,7 +100,6 @@ async function getComponent({
     showFieldStats,
     isSelected: selected,
     isEmpty: false,
-    groupName: FieldsGroupNames.AvailableFields,
     groupIndex: 1,
     itemIndex: 0,
     contextualFields: [],

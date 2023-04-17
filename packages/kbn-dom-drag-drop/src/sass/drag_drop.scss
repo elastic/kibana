@@ -15,7 +15,7 @@
   width: 100%;
   left: 0;
   opacity: .9;
-  transform: translate(4px, 4px);
+  transform: translate($euiSizeXS, $euiSizeXS);
   z-index: $domDragDropZLevel3;
   pointer-events: none;
   outline: $euiFocusRingSize solid currentColor; // Safari & Firefox

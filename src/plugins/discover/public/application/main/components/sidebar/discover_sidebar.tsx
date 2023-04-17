@@ -240,7 +240,6 @@ export function DiscoverSidebarComponent({
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
           contextualFields={columns}
-          groupName={groupName}
           groupIndex={groupIndex}
           itemIndex={itemIndex}
           isEmpty={groupName === FieldsGroupNames.EmptyFields}

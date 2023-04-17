@@ -20,7 +20,6 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
-  FieldsGroupNames,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
@@ -185,11 +184,6 @@ export interface DiscoverFieldProps {
   highlight?: string;
 
   /**
-   * Group name in the field list
-   */
-  groupName: FieldsGroupNames;
-
-  /**
    * Group index in the field list
    */
   groupIndex: number;
@@ -217,7 +211,6 @@ function DiscoverFieldComponent({
   onDeleteField,
   showFieldStats,
   contextualFields,
-  groupName,
   groupIndex,
   itemIndex,
 }: DiscoverFieldProps) {
