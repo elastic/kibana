@@ -119,8 +119,7 @@ export const getPackagePolicyCreateCallback = (
     const defaultPolicyValue = createDefaultPolicy(
       licenseService,
       endpointIntegrationConfig,
-      cloud,
-      logger
+      cloud
     );
 
     return {

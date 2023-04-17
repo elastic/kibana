@@ -17,6 +17,7 @@ import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
 } from '@kbn/fleet-plugin/common/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -111,7 +112,8 @@ describe('ingest_integration tests ', () => {
         requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
-        exceptionListClient
+        exceptionListClient,
+        cloudMock.createSetup()
       );
 
       return callback(

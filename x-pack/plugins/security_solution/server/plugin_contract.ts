@@ -66,7 +66,7 @@ export interface SecuritySolutionPluginSetupDependencies {
 export interface SecuritySolutionPluginStartDependencies {
   alerting: AlertingPluginStart;
   cases?: CasesStart;
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
   cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
