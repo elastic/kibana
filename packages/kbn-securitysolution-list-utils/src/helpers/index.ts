@@ -677,12 +677,12 @@ export const getEntryOnOperatorChange = (
   }
 };
 
-const isKibanaStringType = (type: string) => {
+export const isKibanaStringType = (type: string) => {
   const kbnFieldType = castEsToKbnFieldTypeName(type);
   return kbnFieldType === KBN_FIELD_TYPES.STRING;
 };
 
-const fieldSupportsMatches = (field: DataViewFieldBase) => {
+export const fieldSupportsMatches = (field: DataViewFieldBase) => {
   return field.esTypes?.some(isKibanaStringType);
 };
 
