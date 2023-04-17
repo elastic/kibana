@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
@@ -27,10 +28,16 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
     });
 
   return exploreLink ? (
-    <EuiCallOut title="Need a deeper analysis?" iconType="inspect">
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.title',
+        { defaultMessage: 'Need a deeper analysis?' }
+      )}
+      iconType="inspect"
+    >
       <p>
         <FormattedMessage
-          id="xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.title"
+          id="xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.description"
           defaultMessage="Review your event logs in Discover to get more insights about your application metrics."
         />
       </p>
