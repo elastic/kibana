@@ -56,7 +56,7 @@ describe('Responder header endpoint info', () => {
     const agentStatus = await renderResult.findByTestId(
       'responderHeaderEndpointAgentIsolationStatus'
     );
-    expect(agentStatus.textContent).toBe(`Unhealthy2 actions pending`);
+    expect(agentStatus.textContent).toBe(`UnhealthyIsolating`);
   });
   it('should show last updated time', async () => {
     const lastUpdated = await renderResult.findByTestId('responderHeaderLastSeen');
