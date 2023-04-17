@@ -12,7 +12,10 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
+import {
+  staticInventoryViewAttributes,
+  staticInventoryViewId,
+} from '../../../common/inventory_views/defaults';
 import {
   CreateInventoryViewAttributesRequestPayload,
   InventoryViewRequestQuery,
@@ -46,7 +49,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       }),
     ]);
 
-    const defaultView = this.createStaticView(
+    const defaultView = InventoryViewsClient.createStaticView(
       sourceConfiguration.configuration.inventoryDefaultView
     );
     const views = inventoryViewSavedObject.saved_objects.map((savedObject) =>
@@ -74,7 +77,9 @@ export class InventoryViewsClient implements IInventoryViewsClient {
         sourceId
       );
 
-      return this.createStaticView(sourceConfiguration.configuration.inventoryDefaultView);
+      return InventoryViewsClient.createStaticView(
+        sourceConfiguration.configuration.inventoryDefaultView
+      );
     }
 
     const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
@@ -109,7 +114,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     attributes: CreateInventoryViewAttributesRequestPayload,
     query: InventoryViewRequestQuery
   ): Promise<InventoryView> {
-    this.logger.debug(`Trying to create inventory view ...`);
+    this.logger.debug(`Trying to update inventory view with id "${inventoryViewId}"...`);
 
     // Validate there is not a view with the same name
     await this.assertNameConflict(attributes.name, [inventoryViewId]);
@@ -160,7 +165,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       perPage: 1000,
     });
 
-    const hasConflict = [this.createStaticView(), ...results.saved_objects].some(
+    const hasConflict = [InventoryViewsClient.createStaticView(), ...results.saved_objects].some(
       (obj) => !whitelist.includes(obj.id) && obj.attributes.name === name
     );
 
@@ -169,46 +174,11 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     }
   }
 
-  private createStaticView = (defaultViewId?: string): InventoryView => ({
-    id: InventoryViewsClient.STATIC_VIEW_ID,
+  public static createStaticView = (defaultViewId?: string): InventoryView => ({
+    id: staticInventoryViewId,
     attributes: {
-      name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
-        defaultMessage: 'Default view',
-      }),
+      ...staticInventoryViewAttributes,
       isDefault: defaultViewId === InventoryViewsClient.STATIC_VIEW_ID,
-      isStatic: true,
-      metric: {
-        type: 'cpu',
-      },
-      groupBy: [],
-      nodeType: 'host',
-      view: 'map',
-      customOptions: [],
-      boundsOverride: {
-        max: 1,
-        min: 0,
-      },
-      autoBounds: true,
-      accountId: '',
-      region: '',
-      customMetrics: [],
-      legend: {
-        palette: 'cool',
-        steps: 10,
-        reverseColors: false,
-      },
-      source: 'default',
-      sort: {
-        by: 'name',
-        direction: 'desc',
-      },
-      timelineOpen: false,
-      filterQuery: {
-        kind: 'kuery',
-        expression: '',
-      },
-      time: Date.now(),
-      autoReload: false,
     },
   });
 }
