@@ -156,6 +156,15 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: {
+              id: 'custom',
+              label: 'Custom',
+              value: {
+                download: '5',
+                latency: '20',
+                upload: '10',
+              },
+            },
           },
           unsupportedKeys: [],
           errors: [],
@@ -205,6 +214,15 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: {
+              id: 'custom',
+              label: 'Custom',
+              value: {
+                download: '10',
+                latency: '18',
+                upload: '15',
+              },
+            },
           },
           unsupportedKeys: [],
           errors: [],
