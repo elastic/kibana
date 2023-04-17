@@ -121,6 +121,8 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             enabled: { type: 'boolean' },
           },
         },
+        cloud_formation_template_url: { type: 'text' },
+        cloud_formation_stack_name: { type: 'text' },
       },
     },
     migrations: {
