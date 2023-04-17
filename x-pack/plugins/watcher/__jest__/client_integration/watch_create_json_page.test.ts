@@ -274,6 +274,82 @@ describe('<JsonWatchEditPage /> create route', () => {
           expect(find('simulateResultsFlyoutTitle').text()).toEqual('Simulation results');
         });
       });
+
+      describe('results flyout', () => {
+        describe('for condition that is met', () => {
+          beforeEach(async () => {
+            const { actions, component } = testBed;
+
+            httpRequestsMockHelpers.setLoadExecutionResultResponse({
+              watchHistoryItem: {
+                details: {
+                  result: {
+                    condition: {
+                      met: true,
+                    },
+                    actions: [
+                      {
+                        id: 'my-logging-action',
+                        type: 'logging',
+                        status: 'simulated',
+                      },
+                    ],
+                  },
+                },
+                watchStatus: {
+                  actionStatuses: [
+                    {
+                      id: 'my-logging-action',
+                      state: 'OK',
+                    },
+                  ],
+                },
+              },
+            });
+
+            await act(async () => {
+              actions.clickSimulateButton();
+            });
+            component.update();
+          });
+
+          test('should set the correct condition met status', () => {
+            const { exists } = testBed;
+            expect(exists('conditionMetStatus')).toBe(true);
+            expect(exists('conditionNotMetStatus')).toBe(false);
+          });
+        });
+
+        describe('for condition that is not', () => {
+          beforeEach(async () => {
+            const { actions, component } = testBed;
+
+            httpRequestsMockHelpers.setLoadExecutionResultResponse({
+              watchHistoryItem: {
+                details: {
+                  result: {
+                    condition: {
+                      met: false,
+                    },
+                    actions: [],
+                  },
+                },
+              },
+            });
+
+            await act(async () => {
+              actions.clickSimulateButton();
+            });
+            component.update();
+          });
+
+          test('should set the correct condition not met status', () => {
+            const { exists } = testBed;
+            expect(exists('conditionMetStatus')).toBe(false);
+            expect(exists('conditionNotMetStatus')).toBe(true);
+          });
+        });
+      });
     });
   });
 });
