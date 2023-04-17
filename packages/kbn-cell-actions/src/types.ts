@@ -10,7 +10,6 @@ import type {
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
-import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
@@ -87,14 +86,6 @@ export interface CellActionsProps {
   metadata?: Metadata;
 
   className?: string;
-  /**
-   * optional property passed to EuiPopover when mode === CellActionsMode.HOVER
-   */
-  anchorPosition?: PopoverAnchorPosition;
-  /**
-   * optional styles object passed to EuiPopover when mode === CellActionsMode.HOVER
-   */
-  panelStyle?: { [key: string]: string };
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {

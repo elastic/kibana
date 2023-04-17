@@ -145,7 +145,7 @@ export const getRiskScoreColumns = (
           type: 'keyword',
           aggregatable: true,
         }}
-        mode={CellActionsMode.HOVER}
+        mode={CellActionsMode.HOVER_DOWN}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
