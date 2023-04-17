@@ -80,8 +80,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'production',
           field: 'service.version',
         });
-        const fieldNames = response.mainStatistics.map((item) => item.name);
-        expect(fieldNames.length).to.be.equal(3);
+        const fieldValues = response.mainStatistics.map((item) => item.name);
+
+        expect(fieldValues).to.be.eql(['2.3', '1.1', '1.2']);
+
+        const latencyValues = response.mainStatistics.map((item) => item.latency);
+
+        expect(latencyValues).to.be.eql([400000, 20000, 20000]);
+
+        const throughputValues = response.mainStatistics.map((item) => item.throughput);
+        expect(throughputValues).to.be.eql([
+          1.800002000002222, 1.0000011111123457, 1.0000011111123457,
+        ]);
       });
       it('returns the correct data for Os version', async () => {
         const response = await getMobileMainStatisticsByField({
@@ -89,8 +99,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'production',
           field: 'host.os.version',
         });
-        const fieldNames = response.mainStatistics.map((item) => item.name);
-        expect(fieldNames.length).to.be.equal(1);
+
+        const fieldValues = response.mainStatistics.map((item) => item.name);
+
+        expect(fieldValues).to.be.eql(['10']);
+
+        const latencyValues = response.mainStatistics.map((item) => item.latency);
+
+        expect(latencyValues).to.be.eql([210000]);
+
+        const throughputValues = response.mainStatistics.map((item) => item.throughput);
+        expect(throughputValues).to.be.eql([1.4000015555572838]);
       });
       it('returns the correct data for Devices', async () => {
         const response = await getMobileMainStatisticsByField({
@@ -98,8 +117,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'production',
           field: 'device.model.identifier',
         });
-        const fieldNames = response.mainStatistics.map((item) => item.name);
-        expect(fieldNames.length).to.be.equal(3);
+        const fieldValues = response.mainStatistics.map((item) => item.name);
+
+        expect(fieldValues).to.be.eql(['SM-G973F', 'HUAWEI P2-0000', 'SM-G930F']);
+
+        const latencyValues = response.mainStatistics.map((item) => item.latency);
+
+        expect(latencyValues).to.be.eql([400000, 20000, 20000]);
+
+        const throughputValues = response.mainStatistics.map((item) => item.throughput);
+        expect(throughputValues).to.be.eql([
+          0.6000006666674074, 0.40000044444493826, 0.40000044444493826,
+        ]);
       });
     });
   });

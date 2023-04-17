@@ -44,7 +44,7 @@ interface Props {
   start: number;
   end: number;
   field: string;
-  fieldNames: string[];
+  fieldValues: string[];
   offset?: string;
 }
 
@@ -53,7 +53,7 @@ async function getMobileDetailedStatisticsByField({
   kuery,
   serviceName,
   field,
-  fieldNames,
+  fieldValues,
   apmEventClient,
   start,
   end,
@@ -94,8 +94,8 @@ async function getMobileDetailedStatisticsByField({
           detailed_statistics: {
             terms: {
               field,
-              include: fieldNames,
-              size: fieldNames.length,
+              include: fieldValues,
+              size: fieldValues.length,
             },
             aggs: {
               timeseries: {
@@ -152,7 +152,7 @@ export async function getMobileDetailedStatisticsByFieldPeriods({
   kuery,
   serviceName,
   field,
-  fieldNames,
+  fieldValues,
   apmEventClient,
   start,
   end,
@@ -163,7 +163,7 @@ export async function getMobileDetailedStatisticsByFieldPeriods({
     kuery,
     serviceName,
     field,
-    fieldNames,
+    fieldValues,
     apmEventClient,
     start,
     end,

@@ -93,7 +93,7 @@ export function useMobileStatisticsFetcher({
                 start,
                 end,
                 field,
-                fieldNames: JSON.stringify(
+                fieldValues: JSON.stringify(
                   data?.mainStatistics.map(({ name }) => name).sort()
                 ),
                 offset:

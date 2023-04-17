@@ -128,9 +128,25 @@ export async function generateMobileData({
         galaxy10.startNewSession();
         galaxy7.startNewSession();
         huaweiP2.startNewSession();
+        galaxy10
+          .appMetrics({
+            'application.launch.time': 1000,
+          })
+          .timestamp(timestamp);
+        galaxy7
+          .appMetrics({
+            'application.launch.time': 1000,
+          })
+          .timestamp(timestamp);
+        huaweiP2
+          .appMetrics({
+            'application.launch.time': 1000,
+          })
+          .timestamp(timestamp);
         return [
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -174,6 +190,7 @@ export async function generateMobileData({
             ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success()
@@ -201,6 +218,7 @@ export async function generateMobileData({
             ),
           galaxy7
             .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy7.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success()

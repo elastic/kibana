@@ -117,6 +117,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return this;
   }
 
+  // FIXME  synthtrace shouldn't have side-effects like this. We should use an API like .session() which returns a session
   startNewSession() {
     this.fields['session.id'] = generateLongId();
     return this;

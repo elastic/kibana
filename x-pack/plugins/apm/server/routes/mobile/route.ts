@@ -324,7 +324,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
       environmentRt,
       t.type({
         field: t.string,
-        fieldNames: jsonRt.pipe(t.array(t.string)),
+        fieldValues: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
   }),
@@ -335,7 +335,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, field, offset, fieldNames } =
+    const { kuery, environment, start, end, field, offset, fieldValues } =
       params.query;
 
     return await getMobileDetailedStatisticsByFieldPeriods({
@@ -346,7 +346,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
       serviceName,
       apmEventClient,
       field,
-      fieldNames,
+      fieldValues,
       offset,
     });
   },
