@@ -81,7 +81,7 @@ Canvas::
 * Fixes an issue where the image upload component was unable to load for image elements {kibana-pull}154385[#154385]
 
 Dashboard::
-Improves the async controls flyout behaviour {kibana-pull}154004[#154004]
+Improves controls flyout performance for data views with a large number of fields {kibana-pull}154004[#154004]
 
 Discover::
 Fixes aborted request handling in the saved search embeddable {kibana-pull}153822[#153822]
