@@ -73,7 +73,6 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 
 const storage = new Storage(localStorage);
 
@@ -81,7 +80,6 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface EventsViewerProps {
   defaultModel: SubsetDataTableModel;
-  disableCellActions?: boolean;
   end: string;
   entityType?: EntityType;
   tableId: TableId;
@@ -100,6 +98,7 @@ export interface EventsViewerProps {
   indexNames?: string[];
   bulkActions: boolean | BulkActionsProp;
   additionalRightMenuOptions?: React.ReactNode[];
+  cellActionsTriggerId?: string;
 }
 
 /**
@@ -108,27 +107,27 @@ export interface EventsViewerProps {
  * NOTE: As of writting, it is not used in the Case_View component
  */
 const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux> = ({
+  additionalFilters,
+  additionalRightMenuOptions,
+  bulkActions,
+  cellActionsTriggerId,
+  clearSelected,
+  currentFilter,
   defaultModel,
-  disableCellActions,
   end,
   entityType = 'events',
-  tableId,
+  hasCrudPermissions = true,
+  indexNames,
   leadingControlColumns,
-  pageFilters,
-  currentFilter,
   onRuleChange,
+  pageFilters,
   renderCellValue,
   rowRenderers,
-  start,
-  sourcererScope,
-  additionalFilters,
-  hasCrudPermissions = true,
-  unit = defaultUnit,
-  indexNames,
-  bulkActions,
   setSelected,
-  clearSelected,
-  additionalRightMenuOptions,
+  sourcererScope,
+  start,
+  tableId,
+  unit = defaultUnit,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
@@ -574,12 +573,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
                           <DataTableComponent
-                            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+                            cellActionsTriggerId={cellActionsTriggerId}
                             additionalControls={alertBulkActions}
                             unitCountText={unitCountText}
                             browserFields={browserFields}
                             data={nonDeletedEvents}
-                            disableCellActions={disableCellActions}
                             id={tableId}
                             loadPage={loadPage}
                             renderCellValue={renderCellValue}

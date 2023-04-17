@@ -16,12 +16,3 @@ export interface ESProcessorConfig {
 export interface Processor {
   [typeName: string]: ESProcessorConfig;
 }
-
-export interface Pipeline {
-  name: string;
-  description?: string;
-  version?: number;
-  processors: string | Processor[];
-  on_failure?: Processor[];
-  isManaged?: boolean;
-}

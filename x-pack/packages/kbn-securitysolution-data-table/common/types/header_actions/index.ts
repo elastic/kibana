@@ -47,6 +47,7 @@ export type ColumnHeaderOptions = Pick<
   subType?: IFieldSubType;
   type?: string;
 };
+
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;

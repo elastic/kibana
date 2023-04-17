@@ -35,4 +35,9 @@ export type {
 } from './common/types';
 
 export { getColumnHeaders } from './components/data_table/column_headers/helpers';
+export {
+  getEventIdToDataMapping,
+  addBuildingBlockStyle,
+  isEventBuildingBlockType,
+} from './components/data_table/helpers';
 export { getPageRowIndex } from './components/data_table/pagination';

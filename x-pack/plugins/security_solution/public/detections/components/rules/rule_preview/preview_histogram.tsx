@@ -241,7 +241,6 @@ export const PreviewHistogram = ({
         <StatefulEventsViewer
           pageFilters={pageFilters}
           defaultModel={getAlertsPreviewDefaultModel(license)}
-          disableCellActions={true}
           end={extendedEndDate}
           tableId={TableId.rulePreview}
           leadingControlColumns={getPreviewTableControlColumn(1.5)}

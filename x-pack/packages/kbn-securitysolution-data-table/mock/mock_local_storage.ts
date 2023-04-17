@@ -6,7 +6,6 @@
  */
 
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -24,13 +23,5 @@ export const localStorageMock = (): IStorage => {
     removeItem(key: string) {
       delete store[key];
     },
-  };
-};
-
-export const createSecuritySolutionStorageMock = () => {
-  const localStorage = localStorageMock();
-  return {
-    localStorage,
-    storage: new Storage(localStorage),
   };
 };

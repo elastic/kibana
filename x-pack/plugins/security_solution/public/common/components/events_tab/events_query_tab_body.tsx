@@ -46,6 +46,7 @@ import {
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
@@ -182,6 +183,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       )}
       <StatefulEventsViewer
         additionalFilters={toggleExternalAlertsCheckbox}
+        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         start={startDate}
         end={endDate}
         leadingControlColumns={leadingControlColumns}

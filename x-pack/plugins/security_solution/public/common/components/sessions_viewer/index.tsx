@@ -26,6 +26,7 @@ import { eventsDefaultModel } from '../events_viewer/default_model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -149,6 +150,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   return (
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
+        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         pageFilters={sessionsFilter}
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
