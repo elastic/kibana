@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState, useEffect, FC } from 'react';
+import React, { ChangeEvent, useMemo, useState, useRef, useEffect, FC } from 'react';
 
 import {
   EuiComboBox,
@@ -62,10 +62,14 @@ function getLinkToOptions() {
   ];
 }
 
-function getDropDownOptions(job: Job | DataFrameAnalyticsConfig, dataView?: DataView) {
-  if (isAnomalyDetectionJob(job)) {
+function getDropDownOptions(
+  isFirstRender: boolean,
+  job: Job | DataFrameAnalyticsConfig,
+  dataView?: DataView
+) {
+  if (isAnomalyDetectionJob(job) && isFirstRender) {
     return getQueryEntityFieldNames(job);
-  } else if (isDataFrameAnalyticsConfigs(job) && dataView !== undefined) {
+  } else if ((isDataFrameAnalyticsConfigs(job) || !isFirstRender) && dataView !== undefined) {
     return getSupportedFieldNames(job, dataView);
   }
   return [];
@@ -78,7 +82,6 @@ interface CustomUrlEditorProps {
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   showTimeRangeSelector?: boolean;
-  // dataView?: DataView;
   job: Job | DataFrameAnalyticsConfig;
 }
 
@@ -92,10 +95,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   dashboards,
   dataViewListItems,
   job,
-  // dataView,
 }) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
-  const isAnomalyJob = isAnomalyDetectionJob(job);
+  const isAnomalyJob = useMemo(() => isAnomalyDetectionJob(job), [job]);
 
   const {
     services: {
@@ -103,8 +105,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     },
   } = useMlKibana();
 
+  const isFirst = useRef(true);
+
   useEffect(() => {
-    // For DFA uses the destination index Data View to get the query entities and falls back to source index Data View.
     async function getQueryEntityDropdownOptions() {
       let dataViewToUse: DataView | undefined;
       const dataViewId = customUrl?.kibanaSettings?.discoverIndexPatternId;
@@ -114,8 +117,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       } catch (e) {
         dataViewToUse = undefined;
       }
-      const dropDownOptions = await getDropDownOptions(job, dataViewToUse);
+      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
       setQueryEntityFieldNames(dropDownOptions);
+
+      if (isFirst.current) {
+        isFirst.current = false;
+      }
     }
 
     if (job !== undefined) {
@@ -159,6 +166,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       kibanaSettings: {
         ...kibanaSettings,
         discoverIndexPatternId: e.target.value,
+        queryFieldNames: [],
       },
     });
   };
