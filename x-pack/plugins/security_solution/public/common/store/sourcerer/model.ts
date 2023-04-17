@@ -56,17 +56,22 @@ export interface KibanaDataView {
  */
 export interface SourcererDataView extends KibanaDataView {
   id: string;
-  /** determines how we can use the field in the app
+  /**
+   * @deprecated
+   * determines how we can use the field in the app
    * aggregatable, searchable, type, example
    * category, description, format
    * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /** comes from dataView.fields.toSpec() */
+  /**
+   * @deprecated use sourcererDataView.fields
+   * comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
   fields: DataViewFieldBase[];
   /** set when data view fields are fetched */
   loading: boolean;
   /**
+   * @deprecated use sourcererDataView.runtimeMappings
    * Needed to pass to search strategy
    * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
    */
@@ -84,6 +89,7 @@ export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
   dataViewId: string | null; // null if legacy pre-8.0 timeline
   /**
+   * @deprecated use sourcererDataView
    * DataViewBase with enhanced index fields used in timelines
    */
   indexPattern: SecuritySolutionDataViewBase;
@@ -91,12 +97,23 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /** all active & inactive patterns from SourcererDataView['title']  */
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * all active & inactive patterns from SourcererDataView['title']
+   */
   patternList: string[];
+  /**
+   * @deprecated use sourcererDataView.runtimeMappings
+   */
   runtimeMappings: SourcererDataView['runtimeMappings'];
-  /** all selected patterns from SourcererScope['selectedPatterns'] */
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  // active patterns when dataViewId == null
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * active patterns when dataViewId == null
+   */
   activePatterns?: string[];
   sourcererDataView?: SourcererDataView | (Omit<SourcererDataView, 'id'> & { id: string | null });
 }
