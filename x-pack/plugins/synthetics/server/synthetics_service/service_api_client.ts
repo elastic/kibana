@@ -25,7 +25,7 @@ export interface ServiceData {
     hosts: string[];
     api_key: string;
   };
-  endpoint?: 'monitors' | 'run' | 'sync';
+  endpoint?: 'monitors' | 'runOnce' | 'sync';
   isEdit?: boolean;
   licenseLevel: string;
 }
@@ -93,7 +93,7 @@ export class ServiceAPIClient {
   }
 
   async runOnce(data: ServiceData) {
-    return this.callAPI('POST', { ...data, endpoint: 'run' });
+    return this.callAPI('POST', { ...data, endpoint: 'runOnce' });
   }
 
   async syncMonitors(data: ServiceData) {
@@ -158,18 +158,17 @@ export class ServiceAPIClient {
         locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
+        const promise = this.callServiceEndpoint(
+          { monitors: locMonitors, isEdit, endpoint, output, licenseLevel },
+          method,
+          url
+        );
         promises.push(
-          rxjsFrom(
-            this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, endpoint, output, licenseLevel },
-              method,
-              url
-            )
-          ).pipe(
+          rxjsFrom(promise).pipe(
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
-                `Successfully called service location ${url} with method ${method} with ${locMonitors.length} monitors `
+                `Successfully called service location ${url}${result.request.path} for ${endpoint} with method ${method} with ${locMonitors.length} monitors `
               );
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
@@ -215,13 +214,15 @@ export class ServiceAPIClient {
       case 'monitors':
         url += '/monitors';
         break;
-      case 'run':
+      case 'runOnce':
         url += '/run';
         break;
       case 'sync':
         url += '/monitors/sync';
         break;
     }
+
+    const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
 
     return axios(
       this.addVersionHeader({
@@ -234,11 +235,7 @@ export class ServiceAPIClient {
           is_edit: isEdit,
           license_level: licenseLevel,
         },
-        headers: this.authorization
-          ? {
-              Authorization: this.authorization,
-            }
-          : undefined,
+        headers: authHeader,
         httpsAgent: this.getHttpsAgent(baseUrl),
       })
     );

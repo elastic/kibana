@@ -376,10 +376,17 @@ describe('callAPI', () => {
     await apiClient.runOnce({
       monitors: testMonitors,
       output,
+      licenseLevel: 'trial',
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
       headers: {
         'x-kibana-version': '8.7.0',
       },
@@ -421,10 +428,17 @@ describe('callAPI', () => {
     await apiClient.syncMonitors({
       monitors: testMonitors,
       output,
+      licenseLevel: 'trial',
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
-      data: { monitors: request1, is_edit: undefined, output, stack_version: '8.7.0' },
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
       headers: {
         'x-kibana-version': '8.7.0',
       },
