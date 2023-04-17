@@ -59,6 +59,7 @@ export interface ConfigEntry {
   label: string;
   options: SelectOptions[];
   order?: number;
+  required: boolean;
   sensitive: boolean;
   value: string | number | boolean | null;
 }
@@ -213,10 +214,10 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          { key, display, label, options, order, sensitive, value }
+          { key, display, label, options, order, required, sensitive, value }
         ) => ({
           ...configState,
-          [key]: { display, label, options, order, sensitive, value },
+          [key]: { display, label, options, order, required, sensitive, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
