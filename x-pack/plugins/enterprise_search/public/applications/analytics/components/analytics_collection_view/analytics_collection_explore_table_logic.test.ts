@@ -49,8 +49,12 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     dataView: null,
     isLoading: false,
     items: [],
+    pageIndex: 0,
+    pageSize: 10,
+    search: '',
     selectedTable: null,
     sorting: null,
+    totalItemsCount: 0,
   };
 
   it('initializes with default values', () => {
@@ -87,20 +91,111 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       expect(AnalyticsCollectionExploreTableLogic.values.sorting).toEqual(sorting);
     });
 
-    it('should handle isLoading', () => {
-      expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(false);
+    describe('isLoading', () => {
+      it('should handle setPageIndex', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
 
-      AnalyticsCollectionExploreTableLogic.actions.setItems([]);
-      expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(false);
+      it('should handle setPageSize', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
 
-      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      it('should handle setSearch', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
 
-      AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
-      expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      it('should handle setSorting', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSorting({
+          direction: 'asc',
+          field: ExploreTableColumns.sessions,
+        } as Sorting);
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
 
-      AnalyticsCollectionToolbarLogic.actions.setSearchSessionId('12345');
-      expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      it('should handle setItems', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setItems([]);
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(false);
+      });
+
+      it('should handle setSelectedTable', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
+
+      it('should handle setTimeRange', () => {
+        AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
+
+      it('should handle setSearchSessionId', () => {
+        AnalyticsCollectionToolbarLogic.actions.setSearchSessionId('12345');
+        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
+      });
+    });
+
+    describe('pageIndex', () => {
+      it('should handle setPageIndex', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(2);
+      });
+
+      it('should handle setSelectedTable', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
+      });
+
+      it('should handle reset', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageIndex(2);
+        AnalyticsCollectionExploreTableLogic.actions.reset();
+        expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
+      });
+    });
+
+    describe('pageSize', () => {
+      it('should handle setPageSize', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
+      });
+
+      it('should handle setSelectedTable', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
+      });
+
+      it('should handle reset', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setPageSize(10);
+        AnalyticsCollectionExploreTableLogic.actions.reset();
+        expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
+      });
+    });
+
+    describe('search', () => {
+      it('should handle setSearch', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+        expect(AnalyticsCollectionExploreTableLogic.values.search).toEqual('test');
+      });
+
+      it('should handle setSelectedTable', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        expect(AnalyticsCollectionExploreTableLogic.values.search).toEqual('');
+      });
+
+      it('should handle reset', () => {
+        AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+        AnalyticsCollectionExploreTableLogic.actions.reset();
+        expect(AnalyticsCollectionExploreTableLogic.values.search).toEqual('');
+      });
+    });
+
+    it('should handle totalItemsCount', () => {
+      AnalyticsCollectionExploreTableLogic.actions.setTotalItemsCount(100);
+      expect(AnalyticsCollectionExploreTableLogic.values.totalItemsCount).toEqual(100);
     });
   });
 
@@ -132,6 +227,39 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: undefined,
         sessionId: '1234',
+      });
+    });
+
+    it('should fetch items when pageIndex changes', () => {
+      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
+      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+
+      AnalyticsCollectionExploreTableLogic.actions.setPageIndex(4);
+      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+        indexPattern: undefined,
+        sessionId: undefined,
+      });
+    });
+
+    it('should fetch items when pageSize changes', () => {
+      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
+      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+
+      AnalyticsCollectionExploreTableLogic.actions.setPageSize(20);
+      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+        indexPattern: undefined,
+        sessionId: undefined,
+      });
+    });
+
+    it('should fetch items when search changes', () => {
+      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
+      (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
+
+      AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+      expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
+        indexPattern: undefined,
+        sessionId: undefined,
       });
     });
 

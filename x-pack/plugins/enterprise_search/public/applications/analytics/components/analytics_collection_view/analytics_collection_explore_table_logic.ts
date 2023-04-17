@@ -259,7 +259,7 @@ export interface AnalyticsCollectionExploreTableLogicActions {
     sorting?: Sorting
   ): { id: ExploreTables | null; sorting?: Sorting };
   setSorting(sorting?: Sorting): { sorting?: Sorting };
-  setTotalItemCount(count: number): { count: number };
+  setTotalItemsCount(count: number): { count: number };
 }
 
 export const AnalyticsCollectionExploreTableLogic = kea<
@@ -277,7 +277,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     setSearch: (search) => ({ search }),
     setSelectedTable: (id, sorting) => ({ id, sorting }),
     setSorting: (sorting) => ({ sorting }),
-    setTotalItemCount: (count) => ({ count }),
+    setTotalItemsCount: (count) => ({ count }),
   },
   listeners: ({ actions, values }) => {
     const fetchItems = () => {
@@ -311,7 +311,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
               const { items, totalCount } = parseResponse(response);
 
               actions.setItems(items);
-              actions.setTotalItemCount(totalCount);
+              actions.setTotalItemsCount(totalCount);
               search$.unsubscribe();
             }
           },
@@ -371,6 +371,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         setSorting: (_, { sorting = null }) => sorting,
       },
     ],
-    totalItemsCount: [0, { setTotalItemCount: (_, { count }) => count }],
+    totalItemsCount: [0, { setTotalItemsCount: (_, { count }) => count }],
   }),
 });
