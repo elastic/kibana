@@ -54,7 +54,6 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'fleet_server_host_id',
     'agent_features',
     'cloud_formation_template_url',
-    'cloud_formation_stack_name',
   ]);
 
 const FormWrapper = styled.div`

@@ -48,13 +48,6 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   cloud_formation_template_url: schema.maybe(schema.nullable(schema.string())),
-  // cloud_formation_stack_name: schema.maybe(schema.nullable(schema.string())),
-  cloud_formation_stack_name: schema.conditional(
-    schema.siblingRef('cloud_formation_template_url'),
-    schema.string({ minLength: 1 }),
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.nullable(schema.string()))
-  ),
 };
 
 export const NewAgentPolicySchema = schema.object({

@@ -19,8 +19,6 @@ import {
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
-import type { CloudFormation } from '../../../../../../../../../components/agent_enrollment_flyout/types';
-
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
 import type { InstallAgentPageProps } from './types';
@@ -64,13 +62,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const isK8s =
     props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
-  const cloudFormation: CloudFormation | undefined =
-    agentPolicy?.cloud_formation_template_url && agentPolicy?.cloud_formation_stack_name
-      ? {
-          templateUrl: agentPolicy.cloud_formation_template_url,
-          stackName: agentPolicy.cloud_formation_stack_name,
-        }
-      : undefined;
+  const cloudFormation = agentPolicy?.cloud_formation_template_url;
 
   const installManagedCommands = ManualInstructions({
     apiKey: enrollmentAPIKey.api_key,

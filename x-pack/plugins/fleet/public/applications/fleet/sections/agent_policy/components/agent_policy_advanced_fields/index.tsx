@@ -674,13 +674,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           label={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldLabel"
-              defaultMessage="CloudFormation template"
+              defaultMessage="CloudFormation template URL"
             />
           }
           helpText={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldHelpText"
-              defaultMessage="URL pointing to a CloudFormation template."
+              defaultMessage="Supported params: FLEET_ENROLLMENT_TOKEN, FLEET_URL, KIBANA_VERSION"
             />
           }
         >
@@ -698,40 +698,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               'xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldPlaceholder',
               {
                 defaultMessage: 'CloudFormation template URL',
-              }
-            )}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          key="cloudFormationStackName"
-          error={
-            touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
-              ? validation.cloud_formation_stack_name
-              : null
-          }
-          isInvalid={Boolean(
-            touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
-          )}
-          label={
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.cloudFormationStackNameFieldLabel"
-              defaultMessage="CloudFormation Stack Name"
-            />
-          }
-        >
-          <EuiFieldText
-            fullWidth
-            value={agentPolicy.cloud_formation_stack_name}
-            onChange={(e) => updateAgentPolicy({ cloud_formation_stack_name: e.target.value })}
-            isInvalid={Boolean(
-              touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
-            )}
-            onBlur={() => setTouchedFields({ ...touchedFields, cloud_formation_stack_name: true })}
-            placeholder={i18n.translate(
-              'xpack.fleet.agentPolicyForm.cloudFormationStackNameFieldPlaceholder',
-              {
-                defaultMessage: 'Optional CloudFormation Stack Name',
               }
             )}
           />

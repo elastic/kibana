@@ -47,11 +47,4 @@ describe('Agent Policy form validation', () => {
     });
     expect(result.inactivity_timeout).toBeDefined();
   });
-  it('should return error when CloudFormation template is set with empty Stack Name', () => {
-    const result = agentPolicyFormValidation({
-      cloud_formation_template_url: 'some-url',
-      cloud_formation_stack_name: '',
-    });
-    expect(result.cloud_formation_stack_name).toBeDefined();
-  });
 });

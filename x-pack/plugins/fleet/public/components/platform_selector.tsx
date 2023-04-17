@@ -25,8 +25,6 @@ import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hook
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
-import type { CloudFormation } from './agent_enrollment_flyout/types';
-
 interface Props {
   linuxCommand: string;
   macCommand: string;
@@ -41,7 +39,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormation?: CloudFormation;
+  cloudFormation?: string;
 }
 
 // Otherwise the copy button is over the text
