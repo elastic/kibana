@@ -1052,6 +1052,8 @@
       "@kbn/saved-objects-management-plugin/*": ["src/plugins/saved_objects_management/*"],
       "@kbn/saved-objects-plugin": ["src/plugins/saved_objects"],
       "@kbn/saved-objects-plugin/*": ["src/plugins/saved_objects/*"],
+      "@kbn/saved-objects-settings": ["packages/kbn-saved-objects-settings"],
+      "@kbn/saved-objects-settings/*": ["packages/kbn-saved-objects-settings/*"],
       "@kbn/saved-objects-tagging-oss-plugin": ["src/plugins/saved_objects_tagging_oss"],
       "@kbn/saved-objects-tagging-oss-plugin/*": ["src/plugins/saved_objects_tagging_oss/*"],
       "@kbn/saved-objects-tagging-plugin": ["x-pack/plugins/saved_objects_tagging"],
