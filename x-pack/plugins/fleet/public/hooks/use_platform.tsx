@@ -62,7 +62,7 @@ export const REDUCED_PLATFORM_OPTIONS: Array<{
 export const CLOUD_FORMATION_PLATFORM_OPTION = {
   id: 'cloudFormation',
   label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.cloudFormation', {
-    defaultMessage: 'Cloud Formation',
+    defaultMessage: 'CloudFormation',
   }),
   'data-test-subj': 'platformTypeCloudFormation',
 };

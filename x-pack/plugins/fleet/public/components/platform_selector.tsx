@@ -25,6 +25,8 @@ import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hook
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 import { CloudFormationInstructions } from './agent_enrollment_flyout/cloud_formation_instructions';
 
+import type { CloudFormation } from './agent_enrollment_flyout/types';
+
 interface Props {
   linuxCommand: string;
   macCommand: string;
@@ -39,6 +41,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  cloudFormation?: CloudFormation;
 }
 
 // Otherwise the copy button is over the text
@@ -53,7 +56,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
-  hasCloudFormationIntegration = true,
   hasK8sIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
@@ -61,6 +63,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fullCopyButton,
   onCopy,
+  cloudFormation,
 }) => {
   const { platform, setPlatform } = usePlatform();
 
@@ -75,12 +78,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
 
-    if (hasCloudFormationIntegration) {
+    if (cloudFormation) {
       return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
     }
 
     return platformOptions;
-  }, [hasCloudFormationIntegration, isReduced]);
+  }, [cloudFormation, isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -113,6 +116,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    cloudFormation: '',
   };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -159,13 +163,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'cloudFormation' && (
+        {platform === 'cloudFormation' && cloudFormation && (
           <>
-            <CloudFormationInstructions enrollmentAPIKey={enrollToken} />
+            <CloudFormationInstructions
+              cloudFormation={cloudFormation}
+              enrollmentAPIKey={enrollToken}
+            />
             <EuiSpacer size="s" />
           </>
         )}
-        {!hasK8sIntegrationMultiPage && (
+        {!hasK8sIntegrationMultiPage && !cloudFormation && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>

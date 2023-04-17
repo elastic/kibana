@@ -291,6 +291,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onChange={handleExtensionViewOnChange}
             validationResults={validationResults}
             isEditPage={false}
+            onChangeAgentPolicy={updateNewAgentPolicy}
           />
         </ExtensionWrapper>
       )
