@@ -14,17 +14,20 @@ import {
   PartialTheme,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexItem, euiPaletteColorBlind, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  euiPaletteColorBlindBehindText,
+  EuiTitle,
+} from '@elastic/eui';
 
 const theme: PartialTheme = {
   chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
   chartPaddings: { left: 0 },
   partition: {
-    fontFamily: 'Arial',
     minFontSize: 5,
     idealFontSizeJump: 1.1,
     outerSizeRatio: 1,
-    emptySizeRatio: 0.5,
+    emptySizeRatio: 0.3,
     circlePadding: 3,
   },
 };
@@ -34,16 +37,16 @@ export function SunburstChart({
   label,
   chartKey,
 }: {
-  data?: Array<{ key: string | number; percentage: string; docCount: number }>;
+  data?: Array<{ key: string | number; docCount: number }>;
   label?: string;
   chartKey: string;
 }) {
-  const colors = euiPaletteColorBlind();
+  const colors = euiPaletteColorBlindBehindText({ sortBy: 'natural' });
   return data?.length ? (
     <EuiFlexItem
       grow={true}
       key={chartKey}
-      style={{ height: '210px', width: '210px' }}
+      style={{ height: '200px', width: '200px' }}
     >
       <EuiTitle size="xs">
         <h2 style={{ fontSize: '0.8571rem' }}>{label}</h2>
@@ -69,7 +72,7 @@ export function SunburstChart({
               },
               shape: {
                 fillColor: (_, sortIndex) => {
-                  return colors[sortIndex % colors.length];
+                  return colors[sortIndex];
                 },
               },
             },

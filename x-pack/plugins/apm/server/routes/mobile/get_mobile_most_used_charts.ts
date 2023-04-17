@@ -32,7 +32,6 @@ export type MobileMostUsedChartResponse = Array<{
   key: MobileMostUsedChartTypes;
   options: Array<{
     key: string | number;
-    percentage: string;
     docCount: number;
   }>;
 }>;
@@ -106,7 +105,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'device',
       options:
-        calculatePercentage(
+        calculateTotalCounts(
           response.aggregations?.devices?.buckets,
           response.aggregations?.devices?.sum_other_doc_count
         ) || [],
@@ -114,7 +113,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'osVersion',
       options:
-        calculatePercentage(
+        calculateTotalCounts(
           response.aggregations?.osVersions?.buckets,
           response.aggregations?.osVersions?.sum_other_doc_count
         ) || [],
@@ -122,7 +121,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'appVersion',
       options:
-        calculatePercentage(
+        calculateTotalCounts(
           response.aggregations?.appVersions?.buckets,
           response.aggregations?.appVersions?.sum_other_doc_count
         ) || [],
@@ -130,7 +129,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'netConnectionType',
       options:
-        calculatePercentage(
+        calculateTotalCounts(
           response.aggregations?.netConnectionTypes?.buckets,
           response.aggregations?.netConnectionTypes?.sum_other_doc_count
         ) || [],
@@ -138,42 +137,44 @@ export async function getMobileMostUsedCharts({
   ];
 }
 
-// function calculateTotalCounts(
-//   buckets: Array<{ key: string | number; doc_count: number }> = [],
-//   otherCount: number = 0
-// ) {
-//   const options = buckets.map(({ key, doc_count: docCount }) => ({
-//     key,
-//     docCount,
-//   }));
-//   if (otherCount > 0) {
-//     options.push({
-//       key: 'other',
-//       docCount: otherCount,
-//     });
-//   }
-// }
-function calculatePercentage(
+function calculateTotalCounts(
   buckets: Array<{ key: string | number; doc_count: number }> = [],
   otherCount: number = 0
 ) {
-  const total = buckets.reduce(
-    (acc, { doc_count: docCount }) => acc + docCount,
-    otherCount
-  );
-  const percentage = buckets.map(({ key, doc_count: docCount }) => ({
+  const options = buckets.map(({ key, doc_count: docCount }) => ({
     key,
     docCount,
-    percentage: ((docCount / total) * 100).toFixed(2),
   }));
-
   if (otherCount > 0) {
-    percentage.push({
+    options.push({
       key: 'other',
       docCount: otherCount,
-      percentage: ((otherCount / total) * 100).toFixed(2),
     });
   }
 
-  return percentage;
+  return options;
 }
+// function calculatePercentage(
+//   buckets: Array<{ key: string | number; doc_count: number }> = [],
+//   otherCount: number = 0
+// ) {
+//   const total = buckets.reduce(
+//     (acc, { doc_count: docCount }) => acc + docCount,
+//     otherCount
+//   );
+//   const percentage = buckets.map(({ key, doc_count: docCount }) => ({
+//     key,
+//     docCount,
+//     percentage: ((docCount / total) * 100).toFixed(2),
+//   }));
+//
+//   if (otherCount > 0) {
+//     percentage.push({
+//       key: 'other',
+//       docCount: otherCount,
+//       percentage: ((otherCount / total) * 100).toFixed(2),
+//     });
+//   }
+//
+//   return percentage;
+// }
