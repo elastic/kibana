@@ -27,7 +27,6 @@ export interface WatchCreateJsonTestBed extends TestBed<WatchCreateJsonTestSubje
     selectTab: (tab: 'edit' | 'simulate') => void;
     clickSubmitButton: () => void;
     clickSimulateButton: () => void;
-    setJsonField: (value: object) => void;
   };
 }
 
@@ -53,17 +52,12 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchCreateJsonTestBe
     testBed.find('simulateWatchButton').simulate('click');
   };
 
-  const setJsonField = (value: object) => {
-    testBed.find('jsonEditor').simulate('change', { jsonString: JSON.stringify(value) });
-  };
-
   return {
     ...testBed,
     actions: {
       selectTab,
       clickSubmitButton,
       clickSimulateButton,
-      setJsonField,
     },
   };
 };
