@@ -90,7 +90,7 @@ Elastic Security::
 For the Elastic Security 8.7.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 Fleet::
-* The Advanced options toggle in the policy editor now always displays by default {kibana-pull}154612[#154612]
+* Fixes an issue where the Advanced options toggle in the policy editor was always showing {kibana-pull}154612[#154612]
 * Fixes an issue where the warning icon was unable to display in 8.7 {kibana-pull}154119[#154119]
 * Adds updates to output logic {kibana-pull}153226[#153226]
 
