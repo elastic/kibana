@@ -47,6 +47,10 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
+import {
+  MlManagementLocatorDefinition,
+  MlManagementLocator,
+} from './locator/ml_management_locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
@@ -96,6 +100,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | MlLocator;
+  private managementSectionLocator: undefined | MlManagementLocator;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -146,6 +151,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+      this.managementSectionLocator = pluginsSetup.share.url.locators.create(
+        new MlManagementLocatorDefinition()
+      );
     }
 
     if (pluginsSetup.management) {
@@ -212,6 +220,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      managementSectionLocator: this.managementSectionLocator,
     };
   }
 

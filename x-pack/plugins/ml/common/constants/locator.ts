@@ -6,6 +6,7 @@
  */
 
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
+export const ML_MANAGEMENT_LOCATOR = 'ML_MANAGEMENT_LOCATOR';
 
 export const ML_PAGES = {
   ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',

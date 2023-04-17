@@ -282,6 +282,9 @@ export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;
 
+// locator specifically for management section
+export type MlManagementLocator = LocatorPublic<{}>;
+
 export type TrainedModelsUrlState = MLPageState<
   typeof ML_PAGES.TRAINED_MODELS_MANAGE,
   TrainedModelsQueryState | undefined
