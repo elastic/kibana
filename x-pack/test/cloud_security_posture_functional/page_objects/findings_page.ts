@@ -94,12 +94,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await element.findAllByCssSelector('thead tr :is(th,td)');
     },
 
-    async getLoading() {
-      const element = await this.getElement();
-      const loading = await element.findAllByClassName('euiBasicTable euiBasicTable-loading');
-      return loading;
-    },
-
     async getColumnIndex(columnName: string) {
       const headers = await this.getHeaders();
       const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
