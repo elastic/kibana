@@ -18,6 +18,7 @@ export interface FieldRequestConfig {
   type: SupportedFieldType;
   cardinality: number;
   existsInDocs: boolean;
+  supportedAggs?: Set<string>;
 }
 
 export interface DocumentCountBuckets {

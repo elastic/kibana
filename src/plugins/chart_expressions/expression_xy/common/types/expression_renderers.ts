@@ -7,12 +7,13 @@
  */
 
 import { CustomAnnotationTooltip } from '@elastic/charts';
+import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
 } from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
-import { XYProps } from './expression_functions';
+import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
@@ -20,6 +21,7 @@ export interface XYChartProps {
   syncCursor: boolean;
   syncColors: boolean;
   canNavigateToLens?: boolean;
+  overrides?: AllowedXYOverrides & AllowedSettingsOverrides;
 }
 
 export interface XYRender {

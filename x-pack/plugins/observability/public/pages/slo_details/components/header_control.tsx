@@ -151,7 +151,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           ruleTypeId={SLO_BURN_RATE_RULE_ID}
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
-          initialValues={{ name: `${slo.name} burn rate` }}
+          initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
         />
       ) : null}
     </>

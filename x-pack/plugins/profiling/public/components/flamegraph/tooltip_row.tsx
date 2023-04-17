@@ -19,7 +19,7 @@ export function TooltipRow({
   formatValue,
 }: {
   value: number;
-  label: string;
+  label: string | React.ReactElement;
   comparison?: number;
   formatDifferenceAsPercentage: boolean;
   showDifference: boolean;
@@ -58,7 +58,7 @@ export function TooltipRow({
       <EuiFlexGroup direction="row" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <strong>{label}:</strong>
+            <strong style={{ display: 'flex' }}>{label}:</strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>

@@ -14,7 +14,6 @@ const ScriptSourceCodec = t.interface({
 
 export const MetadataCodec = t.partial({
   is_tls_enabled: t.boolean,
-  is_zip_url_tls_enabled: t.boolean,
   script_source: ScriptSourceCodec,
 });
 

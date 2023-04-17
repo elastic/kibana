@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ALERT_DURATION,
   ALERT_FLAPPING,
+  ALERT_RULE_CATEGORY,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
@@ -40,7 +41,13 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   return (
     <div data-test-subj="page-title-container">
-      {alert.reason}
+      <FormattedMessage
+        id="xpack.observability.pages.alertDetails.pageTitle.title"
+        values={{
+          ruleCategory: alert.fields[ALERT_RULE_CATEGORY],
+        }}
+        defaultMessage="{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}"
+      />
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
@@ -53,7 +60,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.triggered"
+                id="xpack.observability.pages.alertDetails.pageTitle.triggered"
                 defaultMessage="Triggered"
               />
               :&nbsp;
@@ -72,7 +79,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.duration"
+                id="xpack.observability.pages.alertDetails.pageTitle.duration"
                 defaultMessage="Duration"
               />
               :&nbsp;
@@ -91,7 +98,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
+                id="xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate"
                 defaultMessage="Last status update"
               />
               :&nbsp;

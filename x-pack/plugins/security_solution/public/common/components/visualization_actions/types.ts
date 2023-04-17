@@ -16,12 +16,24 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
   stackByField?: string,
-  alertsOptions?: ExtraOptions
+  extraOptions?: ExtraOptions
 ) => LensAttributes;
 
+export interface UseLensAttributesProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraOptions?: ExtraOptions;
+  getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
+  stackByField?: string;
+  title?: string;
+}
+
 export interface VisualizationActionsProps {
+  applyGlobalQueriesAndFilters?: boolean;
   className?: string;
   extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
@@ -30,6 +42,7 @@ export interface VisualizationActionsProps {
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
@@ -106,6 +119,7 @@ export interface ExtraOptions {
   ruleId?: string;
   spaceId?: string;
   status?: Status;
+  dnsIsPtrIncluded?: boolean;
 }
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
@@ -113,4 +127,19 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
   inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
+}
+
+export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
+  took: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
 }

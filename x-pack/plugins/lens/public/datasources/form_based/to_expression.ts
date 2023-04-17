@@ -31,6 +31,7 @@ import { isColumnFormatted, isColumnOfType } from './operations/definitions/help
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
+import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -415,7 +416,7 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
-          probability: layer.sampling || 1,
+          probability: getSamplingValue(layer),
           samplerSeed: seedrandom(searchSessionId).int32(),
         }).toAst(),
         {
