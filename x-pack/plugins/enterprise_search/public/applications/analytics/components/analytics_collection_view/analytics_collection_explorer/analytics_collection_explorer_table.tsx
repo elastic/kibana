@@ -43,6 +43,8 @@ import {
   WorsePerformersTable,
 } from '../analytics_collection_explore_table_types';
 
+import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
+
 interface TableSetting<T = ExploreTableItem, K = T> {
   columns: Array<
     EuiBasicTableColumn<T & K> & {
@@ -322,6 +324,8 @@ export const AnalyticsCollectionExplorerTable = () => {
           />
         </EuiFlexGroup>
       )}
+
+      <AnalyticsCollectionExplorerCallout />
     </EuiFlexGroup>
   );
 };
