@@ -58,7 +58,7 @@ describe('useFilesTableColumns', () => {
               "render": [Function],
             },
             Object {
-              "description": "Delete File",
+              "description": "Delete attachment",
               "isPrimary": true,
               "name": "Delete",
               "render": [Function],

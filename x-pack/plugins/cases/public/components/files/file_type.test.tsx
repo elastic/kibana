@@ -27,7 +27,6 @@ describe('getFileType', () => {
       icon: 'document',
       displayName: 'File Attachment Type',
       getAttachmentViewObject: expect.any(Function),
-      hideDefaultActions: true,
     });
   });
 
@@ -77,7 +76,7 @@ describe('getFileType', () => {
       expect(actions.length).toBe(2);
       expect(actions[0]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
-        isPrimary: true,
+        isPrimary: false,
         label: 'Download File',
         render: expect.any(Function),
       });
@@ -101,8 +100,8 @@ describe('getFileType', () => {
       expect(actions.length).toBe(2);
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
-        isPrimary: true,
-        label: 'Delete File',
+        isPrimary: false,
+        label: 'Delete attachment',
         render: expect.any(Function),
       });
 
@@ -125,8 +124,8 @@ describe('getFileType', () => {
       expect(actions.length).toBe(2);
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
-        isPrimary: true,
-        label: 'Delete File',
+        isPrimary: false,
+        label: 'Delete attachment',
         render: expect.any(Function),
       });
 
@@ -147,7 +146,7 @@ describe('getFileType', () => {
         fileType.getAttachmentViewObject({ ...attachmentViewProps, externalReferenceMetadata: {} })
       ).toEqual({
         event: 'added an unknown file',
-        hideDefaultActions: true,
+        hideDefaultActions: false,
         timelineAvatar: 'document',
         type: 'regular',
       });

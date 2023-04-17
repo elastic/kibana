@@ -71,11 +71,11 @@ describe('FilesTable', () => {
   });
 
   it('renders single result count properly', async () => {
-    const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 4 };
+    const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 1 };
     appMockRender.render(<FilesTable {...defaultProps} pagination={mockPagination} />);
 
     expect(await screen.findByTestId('cases-files-table-results-count')).toHaveTextContent(
-      'Showing 4 files'
+      `Showing ${defaultProps.items.length} file`
     );
   });
 
