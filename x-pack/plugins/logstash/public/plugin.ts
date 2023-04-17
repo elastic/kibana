@@ -13,15 +13,17 @@ import { once } from 'lodash';
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
 import { LogstashLicenseService } from './services';
+import { LogstashManagementLocatorDefinition } from './locators';
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
-
+  share: SharePluginSetup;
   home?: HomePublicPluginSetup;
 }
 
@@ -48,6 +50,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
         return renderApp(coreStart, params, isMonitoringEnabled, logstashLicense$);
       },
     });
+    plugins.share.url.locators.create(new LogstashManagementLocatorDefinition());
 
     this.licenseSubscription = combineLatest([logstashLicense$, this.capabilities$]).subscribe(
       ([license, capabilities]) => {

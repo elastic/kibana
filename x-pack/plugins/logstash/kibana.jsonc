@@ -13,6 +13,7 @@
     "requiredPlugins": [
       "licensing",
       "management",
+      "share",
       "features"
     ],
     "optionalPlugins": [
