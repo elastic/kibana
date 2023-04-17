@@ -116,8 +116,18 @@ const GroupSelectorComponent = ({
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const button = useMemo(
-    () => (
+  const button = useMemo(() => {
+    // need to use groupsSelected to ensure proper selection order (selectedOptions does not handle selection order)
+    const buttonLabel = isGroupSelected('none')
+      ? i18n.NONE
+      : groupsSelected.reduce((optionsTitle, o) => {
+          const selection = selectedOptions.find((opt) => opt.key === o);
+          if (selection == null) {
+            return optionsTitle;
+          }
+          return optionsTitle ? [optionsTitle, selection.label].join(', ') : selection.label;
+        }, '');
+    return (
       <StyledEuiButtonEmpty
         data-test-subj="group-selector-dropdown"
         flush="both"
@@ -125,28 +135,13 @@ const GroupSelectorComponent = ({
         iconSize="s"
         iconType="arrowDown"
         onClick={onButtonClick}
-        title={
-          isGroupSelected('none')
-            ? i18n.NONE
-            : selectedOptions.reduce(
-                (optionsTitle, o) => (optionsTitle ? [optionsTitle, o.label].join(', ') : o.label),
-                ''
-              )
-        }
+        title={buttonLabel}
         size="xs"
       >
-        {`${title}: ${
-          isGroupSelected('none')
-            ? i18n.NONE
-            : selectedOptions.reduce(
-                (optionsTitle, o) => (optionsTitle ? [optionsTitle, o.label].join(', ') : o.label),
-                ''
-              )
-        }`}
+        {`${title}: ${buttonLabel}`}
       </StyledEuiButtonEmpty>
-    ),
-    [isGroupSelected, onButtonClick, selectedOptions, title]
-  );
+    );
+  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
 
   return (
     <EuiPopover
