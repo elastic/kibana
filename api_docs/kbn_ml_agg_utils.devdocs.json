@@ -623,6 +623,45 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantTerm",
+        "type": "Function",
+        "tags": [],
+        "label": "isSignificantTerm",
+        "description": [
+          "\nType guard for a significant term.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isSignificantTerm.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "whether arg is of type SignificantTerm"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.numberValidator",
         "type": "Function",
         "tags": [],
@@ -1069,7 +1108,7 @@
         "tags": [],
         "label": "SignificantTerm",
         "description": [
-          "\nSignificant term meta data for a field/value pair."
+          "\nSignificant term meta data for a field/value pair.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
         ],
         "signature": [
           {
