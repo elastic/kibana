@@ -48,8 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.deleteIndices(destinationIndex);
   }
 
-  // @todo: mark this back from only
-  describe.only('/api/transform/reauthorize_transforms', function () {
+  describe('/api/transform/reauthorize_transforms', function () {
     const apiKeysForTransformUsers = new Map<USER, SecurityCreateApiKeyResponse>();
 
     async function expectUnauthorizedTransform(transformId: string, createdByUser: USER) {
