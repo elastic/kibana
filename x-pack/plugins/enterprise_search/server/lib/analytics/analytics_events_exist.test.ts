@@ -7,14 +7,12 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { analyticsEventsIndexExists } from './analytics_events_index_exists';
+import { analyticsEventsExist } from './analytics_events_exist';
 
 describe('analytics collection events exists function', () => {
   const mockClient = {
     asCurrentUser: {
-      indices: {
-        getDataStream: jest.fn(),
-      },
+      count: jest.fn(),
     },
   };
 
@@ -24,14 +22,14 @@ describe('analytics collection events exists function', () => {
 
   describe('checking if analytics events index exists', () => {
     it('should call exists endpoint', async () => {
-      mockClient.asCurrentUser.indices.getDataStream.mockImplementationOnce(() => ({
-        data_streams: [{ name: 'example' }],
+      mockClient.asCurrentUser.count.mockImplementationOnce(() => ({
+        count: 1,
       }));
       await expect(
-        analyticsEventsIndexExists(mockClient as unknown as IScopedClusterClient, 'example')
+        analyticsEventsExist(mockClient as unknown as IScopedClusterClient, 'example')
       ).resolves.toEqual(true);
-      expect(mockClient.asCurrentUser.indices.getDataStream).toHaveBeenCalledWith({
-        name: 'example',
+      expect(mockClient.asCurrentUser.count).toHaveBeenCalledWith({
+        index: 'example',
       });
     });
   });
