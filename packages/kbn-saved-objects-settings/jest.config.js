@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '@kbn/saved-objects-settings';
-export type { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-saved-objects-settings'],
+};
