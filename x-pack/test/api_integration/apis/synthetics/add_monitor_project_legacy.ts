@@ -953,7 +953,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'browser',
               hash: 'ekrjelkjrelkjre',
             },
-            reason: 'Failed to save or update monitor. Configuration is not valid',
+            reason: "Couldn't save or update monitor because of an invalid configuration.",
           },
         ]);
         expect(messages[0].createdMonitors).eql([]);
