@@ -67,7 +67,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { ActionCreateService } from '../../services/actions';
+import { actionCreateService } from '../../services/actions';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 interface CallRouteInterface {
@@ -134,7 +134,7 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: ActionCreateService(mockScopedClient.asInternalUser, endpointContext),
+        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 

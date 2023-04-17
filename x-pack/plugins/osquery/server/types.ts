@@ -24,10 +24,10 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { CreateActionService } from './handlers/action/create_action_service';
+import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
-  createActionService: ReturnType<typeof CreateActionService> | undefined;
+  createActionService: ReturnType<typeof createActionService> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

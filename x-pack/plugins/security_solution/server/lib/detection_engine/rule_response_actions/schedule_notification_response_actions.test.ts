@@ -53,7 +53,10 @@ describe('ScheduleNotificationResponseActions', () => {
     saved_query_id: undefined,
     ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
   };
-  const osqueryActionMock = jest.fn();
+  const osqueryActionMock = {
+    create: jest.fn(),
+    stop: jest.fn(),
+  };
   const endpointActionMock = jest.fn();
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({

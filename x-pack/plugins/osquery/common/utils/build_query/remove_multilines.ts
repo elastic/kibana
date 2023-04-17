@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const removeMultilines = (query: string): string =>
-  query.replaceAll('\r\n', ' ').replaceAll('\n', ' ').replaceAll(/  +/g, ' ');
+export const removeMultilines = (query?: string): string =>
+  query?.replaceAll('\r\n', ' ').replaceAll('\n', ' ').replaceAll(/  +/g, ' ') || '';

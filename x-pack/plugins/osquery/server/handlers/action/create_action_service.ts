@@ -13,7 +13,7 @@ import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';
 
-export const CreateActionService = (osqueryContext: OsqueryAppContext) => {
+export const createActionService = (osqueryContext: OsqueryAppContext) => {
   let licenseSubscription: Subscription | null = null;
   const licenses: OsqueryActiveLicenses = { isActivePlatinumLicense: false };
 

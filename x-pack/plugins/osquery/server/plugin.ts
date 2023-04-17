@@ -41,7 +41,7 @@ import { createDataViews } from './create_data_views';
 
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
-import { CreateActionService } from './handlers/action/create_action_service';
+import { createActionService } from './handlers/action/create_action_service';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -50,7 +50,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private licenseSubscription: Subscription | null = null;
-  private createActionService: ReturnType<typeof CreateActionService> | null = null;
+  private createActionService: ReturnType<typeof createActionService> | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -84,7 +84,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       usageCollection: plugins.usageCollection,
     });
 
-    this.createActionService = CreateActionService(osqueryContext);
+    this.createActionService = createActionService(osqueryContext);
 
     core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(

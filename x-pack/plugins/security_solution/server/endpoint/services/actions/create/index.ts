@@ -53,16 +53,17 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
 
-export const ActionCreateService = (
+export const actionCreateService = (
   esClient: ElasticsearchClient,
   endpointContext: EndpointAppContext
 ) => {
-  let licenseSubscription: Subscription | undefined | null = null;
-  const licenses: { isActiveEnterpriseLicense: boolean } = { isActiveEnterpriseLicense: false };
+  const licenseSubscription: Subscription | undefined | null = null;
+  // const licenses: { isActiveEnterpriseLicense: boolean } = { isActiveEnterpriseLicense: false };
 
-  licenseSubscription = endpointContext.licensing?.license$.subscribe(async (license) => {
-    licenses.isActiveEnterpriseLicense = license.isActive && license.hasAtLeast('enterprise');
-  });
+  // TODO i know this doesnt work, got conflicts when merging main, going to solve this
+  // licenseSubscription = (endpointContext as any).licensing?.license$.subscribe(async (license) => {
+  //   licenses.isActiveEnterpriseLicense = license.isActive && license.hasAtLeast('enterprise');
+  // });
 
   const createAction = async (
     payload: TypeOf<typeof ResponseActionBodySchema> & {
@@ -284,7 +285,7 @@ export const ActionCreateService = (
 
   const stop = () => {
     if (licenseSubscription) {
-      licenseSubscription.unsubscribe();
+      // licenseSubscription.unsubscribe();
     }
   };
 
