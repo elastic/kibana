@@ -23,6 +23,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -456,6 +457,7 @@ export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
   uuid = 'kibana.alert.rule.uuid',
+  case_ids = 'kibana.alert.case_ids',
 }
 
 export interface InspectQuery {
@@ -736,4 +738,10 @@ export interface TableUpdateHandlerArgs {
 
 export interface LazyLoadProps {
   hideLazyLoader?: boolean;
+}
+
+export interface NotifyWhenSelectOptions {
+  isSummaryOption?: boolean;
+  isForEachAlertOption?: boolean;
+  value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }

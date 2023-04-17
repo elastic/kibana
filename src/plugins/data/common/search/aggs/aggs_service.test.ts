@@ -208,7 +208,7 @@ describe('Aggs service', () => {
     test('types registry returns initialized type providers', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.get('terms').name).toBe('terms');
+      expect(start.types.get('terms')?.name).toBe('terms');
     });
   });
 });

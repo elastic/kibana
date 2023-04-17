@@ -40,6 +40,7 @@ const aggTypeConfigMock = () => ({
 export const aggTypesRegistrySetupMock = (): AggTypesRegistrySetup => ({
   registerBucket: jest.fn(),
   registerMetric: jest.fn(),
+  registerLegacy: jest.fn(),
 });
 
 export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
