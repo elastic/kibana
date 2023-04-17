@@ -68,7 +68,6 @@ describe('Isolate command', () => {
   describe('from Alerts', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
-    let alertId: string;
     let hostname: string;
 
     before(() => {
@@ -82,9 +81,6 @@ describe('Isolate command', () => {
             endpointAgentId: endpointData.data.hosts[0].agent.id,
             endpointHostname: endpointData.data.hosts[0].host.name,
             endpointIsolated: false,
-          }).then((indexedAlert) => {
-            alertData = indexedAlert;
-            alertId = alertData.alerts[0]._id;
           });
         });
     });
@@ -116,9 +112,22 @@ describe('Isolate command', () => {
       cy.visit('/app/security/alerts');
       closeAllToasts();
 
-      cy.getByTestSubj('filters-global-container').within(() => {
-        cy.getByTestSubj('queryInput').click().type(`_id:${alertId} {enter}`);
+      // cy.getByTestSubj('filters-global-container').within(() => {
+      //   cy.getByTestSubj('queryInput').click().type(`_id:${alertId} {enter}`);
+      // });
+      cy.getByTestSubj('alertsTable').within(() => {
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('exist');
+          });
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('not.exist');
+          });
       });
+
       openAlertDetails();
 
       isolateHostWithComment(isolateComment, hostname);

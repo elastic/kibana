@@ -43,7 +43,7 @@ export const releaseHostWithComment = (comment: string, hostname: string) => {
 };
 
 export const openAlertDetails = () => {
-  cy.getByTestSubj('expand-event').click();
+  cy.getByTestSubj('expand-event').first().click();
   cy.getByTestSubj('take-action-dropdown-btn').click();
 };
 
