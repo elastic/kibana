@@ -11,10 +11,7 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButton,
-  formatNumber,
   useEuiBackgroundColor,
-  EuiToolTip,
-  EuiIcon,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,18 +30,6 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
     field: 'title',
     name: i18n.NAME,
     truncateText: true,
-  },
-  {
-    field: 'total',
-    name: (
-      <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
-        <span>
-          {i18n.TABLE_ALERTS}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
-    ),
-    render: (alerts: number) => formatNumber(alerts, 'integer'),
   },
   {
     field: 'status',
