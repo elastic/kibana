@@ -21,6 +21,13 @@ export const EDIT_CONTROLS = i18n.translate(
   }
 );
 
+export const ADD_CONTROLS = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.addControls',
+  {
+    defaultMessage: 'Add Controls',
+  }
+);
+
 export const SAVE_CONTROLS = i18n.translate(
   'xpack.securitySolution.filtersGroup.contextMenu.saveControls',
   {
@@ -82,5 +89,12 @@ export const REVERT_CHANGES = i18n.translate(
   'xpack.securitySolution.filtersGroup.contextMenu.revertChanges',
   {
     defaultMessage: 'Revert Changes',
+  }
+);
+
+export const ADD_CONTROLS_MAX_LIMIT = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.addControls.maxLimit',
+  {
+    defaultMessage: 'Maximum of 4 controls can be added.',
   }
 );

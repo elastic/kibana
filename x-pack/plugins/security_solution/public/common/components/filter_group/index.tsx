@@ -31,7 +31,6 @@ import { APP_ID } from '../../../../common/constants';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
-import { NUM_OF_CONTROLS } from './config';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
@@ -39,6 +38,7 @@ import { AddControl, SaveControls } from './buttons';
 import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
+import { NUM_OF_CONTROLS } from './config';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -412,13 +412,15 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
           ) : null}
-          {!isViewMode &&
-          !showFiltersChangedBanner &&
-          (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
-            Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
+          {!isViewMode && !showFiltersChangedBanner ? (
             <>
               <EuiFlexItem grow={false}>
-                <AddControl onClick={addControlsHandler} />
+                <AddControl
+                  onClick={addControlsHandler}
+                  isDisabled={
+                    Object.values(controlGroupInputUpdates.panels).length >= NUM_OF_CONTROLS.MAX
+                  }
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SaveControls onClick={saveChangesHandler} />
