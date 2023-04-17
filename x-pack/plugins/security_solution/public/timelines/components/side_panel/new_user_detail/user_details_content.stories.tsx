@@ -10,7 +10,7 @@ import { storiesOf, addDecorator } from '@storybook/react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { UserDetailsContentComponent } from './user_details_content';
 import { StorybookProviders } from '../../../../common/mock/storybook_providers';
-import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './mocks';
+import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './__mocks__';
 
 addDecorator((storyFn) => (
   <StorybookProviders>

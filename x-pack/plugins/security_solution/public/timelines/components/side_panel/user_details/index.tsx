@@ -20,9 +20,9 @@ const UserDetailsPanelComponent = ({
   handleOnClose,
   isFlyoutView,
   isDraggable,
-  isNewFlyoutEnable,
+  isNewUserDetailsFlyoutEnable,
 }: UserDetailsProps) => {
-  if (isNewFlyoutEnable) {
+  if (isNewUserDetailsFlyoutEnable) {
     return isFlyoutView ? (
       <EuiFlyoutBody>
         <UserDetailsContent userName={userName} contextID={contextID} isDraggable={isDraggable} />

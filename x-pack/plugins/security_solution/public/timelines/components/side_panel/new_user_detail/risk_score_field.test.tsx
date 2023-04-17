@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { RiskScoreField } from './risk_score_field';
-import { mockRiskScoreState } from './mocks';
+import { mockRiskScoreState } from './__mocks__';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 describe('RiskScoreField', () => {

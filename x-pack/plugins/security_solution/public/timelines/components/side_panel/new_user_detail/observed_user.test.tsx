@@ -8,7 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { mockObservedUser } from './mocks';
+import { mockObservedUser } from './__mocks__';
 import { ObservedUser } from './observed_user';
 
 describe('ObservedUser', () => {

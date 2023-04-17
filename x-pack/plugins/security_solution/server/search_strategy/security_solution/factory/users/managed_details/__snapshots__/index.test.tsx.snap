@@ -96,11 +96,11 @@ Object {
               },
             },
             "user": Object {
-              "email": "taylor.swanson@elastic.co",
+              "email": "tes.user@elastic.co",
               "first_name": "Taylor",
-              "full_name": "Taylor Swanson",
+              "full_name": "Test user",
               "id": "39fac578-91fb-47f6-8f7a-fab05ce70d8b",
-              "last_name": "Swanson",
+              "last_name": "Test last name",
               "phone": Array [
                 "1235559999",
               ],
@@ -159,11 +159,11 @@ Object {
       },
     },
     "user": Object {
-      "email": "taylor.swanson@elastic.co",
+      "email": "tes.user@elastic.co",
       "first_name": "Taylor",
-      "full_name": "Taylor Swanson",
+      "full_name": "Test user",
       "id": "39fac578-91fb-47f6-8f7a-fab05ce70d8b",
-      "last_name": "Swanson",
+      "last_name": "Test last name",
       "phone": Array [
         "1235559999",
       ],

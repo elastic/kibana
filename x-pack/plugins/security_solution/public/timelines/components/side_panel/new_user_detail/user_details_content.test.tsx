@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './mocks';
+import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './__mocks__';
 import { UserDetailsContentComponent } from './user_details_content';
 
 const mockProps = {

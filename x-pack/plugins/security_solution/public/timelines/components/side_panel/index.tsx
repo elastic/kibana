@@ -53,7 +53,7 @@ export const DetailsPanel = React.memo(
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
-    const isNewFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
+    const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -126,7 +126,7 @@ export const DetailsPanel = React.memo(
 
     if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
       flyoutUniqueKey = currentTabDetail.params.userName;
-      if (isNewFlyoutEnable) {
+      if (isNewUserDetailsFlyoutEnable) {
         panelSize = 'm';
       }
       visiblePanel = (
@@ -136,7 +136,7 @@ export const DetailsPanel = React.memo(
           handleOnClose={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
-          isNewFlyoutEnable={isNewFlyoutEnable}
+          isNewUserDetailsFlyoutEnable={isNewUserDetailsFlyoutEnable}
         />
       );
     }

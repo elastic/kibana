@@ -9,7 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { ManagedUser } from './managed_user';
-import { mockManagedUser } from './mocks';
+import { mockManagedUser } from './__mocks__';
 
 describe('ManagedUser', () => {
   const mockProps = {
