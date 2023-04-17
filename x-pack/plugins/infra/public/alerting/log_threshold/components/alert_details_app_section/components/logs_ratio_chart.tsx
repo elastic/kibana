@@ -169,7 +169,6 @@ const LogsRatioChart: React.FC<ChartProps> = ({
           color={colorTransformer(Color.color0)}
           timeZone={timezone}
         />
-        ,
         {showThreshold && threshold ? (
           <LineAnnotation
             id={`threshold-line`}
