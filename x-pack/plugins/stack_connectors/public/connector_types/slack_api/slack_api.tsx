@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -29,6 +30,20 @@ export const getConnectorType = (): ConnectorTypeModel<
   PostMessageParams
 > => ({
   id: SLACK_API_CONNECTOR_ID,
+  group: [
+    {
+      id: '.slack',
+      name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
+        defaultMessage: 'Webhook',
+      }),
+    },
+    {
+      id: '.slack_api',
+      name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+        defaultMessage: 'Web API',
+      }),
+    },
+  ],
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
   actionTypeTitle: ACTION_TYPE_TITLE,
@@ -52,4 +67,20 @@ export const getConnectorType = (): ConnectorTypeModel<
   },
   actionConnectorFields: lazy(() => import('./slack_connectors')),
   actionParamsFields: lazy(() => import('./slack_params')),
+  resetParamsOnConnectorChange: (
+    params: WebhookParams | PostMessageParams
+  ): WebhookParams | PostMessageParams | {} => {
+    if ('message' in params) {
+      return {
+        subAction: 'postMessage',
+        subActionParams: {
+          channels: [],
+          text: params.message,
+        },
+      };
+    } else if ('subAction' in params) {
+      return params;
+    }
+    return {};
+  },
 });

@@ -245,7 +245,7 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => actionTypesIndex[item.id] && item.id !== '.slack_api')
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
@@ -360,6 +360,27 @@ export const ActionForm = ({
                 }}
                 onSelectConnector={(connectorId: string) => {
                   setActionIdByIndex(connectorId, index);
+                  const newConnector = connectors.find((connector) => connector.id === connectorId);
+                  if (newConnector && newConnector.actionTypeId) {
+                    const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                    if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                        if (i === index) {
+                          return {
+                            ..._item,
+                            actionTypeId: newConnector.actionTypeId,
+                            id: connectorId,
+                            params:
+                              actionTypeRegistered.resetParamsOnConnectorChange != null
+                                ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                                : {},
+                          };
+                        }
+                        return _item;
+                      });
+                      setActions(updatedActions);
+                    }
+                  }
                 }}
               />
             );
@@ -388,6 +409,31 @@ export const ActionForm = ({
               }}
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
+                const newConnector = connectors.find((connector) => connector.id === id);
+                if (
+                  newConnector &&
+                  actionConnector &&
+                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                ) {
+                  const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                  if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                      if (i === index) {
+                        return {
+                          ..._item,
+                          actionTypeId: newConnector.actionTypeId,
+                          id,
+                          params:
+                            actionTypeRegistered.resetParamsOnConnectorChange != null
+                              ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                              : {},
+                        };
+                      }
+                      return _item;
+                    });
+                    setActions(updatedActions);
+                  }
+                }
               }}
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {

@@ -19,6 +19,7 @@ interface ConnectorOption {
 }
 
 interface SelectionProps {
+  allowGroupConnector?: string[];
   actionItem: RuleAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -30,6 +31,7 @@ interface SelectionProps {
 export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
+  allowGroupConnector,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -38,8 +40,8 @@ function ConnectorsSelectionComponent({
   onConnectorSelected,
 }: SelectionProps) {
   const validConnectors = useMemo(
-    () => getValidConnectors(connectors, actionItem, actionTypesIndex),
-    [actionItem, actionTypesIndex, connectors]
+    () => getValidConnectors(connectors, actionItem, actionTypesIndex, allowGroupConnector),
+    [actionItem, actionTypesIndex, allowGroupConnector, connectors]
   );
 
   const selectedConnectors = useMemo(

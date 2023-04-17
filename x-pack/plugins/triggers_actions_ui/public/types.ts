@@ -253,6 +253,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  group?: Array<{ id: string; name: string }>;
+  resetParamsOnConnectorChange?: (params: ActionParams) => ActionParams | {};
 }
 
 export interface GenericValidationResult<T> {

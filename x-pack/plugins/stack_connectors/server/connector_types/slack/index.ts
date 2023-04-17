@@ -71,7 +71,7 @@ export function getConnectorType({
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.stackConnectors.slack.title', {
-      defaultMessage: 'Slack Webhook',
+      defaultMessage: 'Slack',
     }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
