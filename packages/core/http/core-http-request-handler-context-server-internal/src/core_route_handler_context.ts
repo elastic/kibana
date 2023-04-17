@@ -50,15 +50,15 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   readonly deprecations: CoreDeprecationsRouteHandlerContext;
   readonly env: Pick<Env, 'mode'>;
 
-  constructor(deps: CoreRouteHandlerContextParams, request: KibanaRequest) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(deps.elasticsearch, request);
-    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(deps.savedObjects, request);
-    this.uiSettings = new CoreUiSettingsRouteHandlerContext(deps.uiSettings, this.savedObjects);
+  constructor(params: CoreRouteHandlerContextParams, request: KibanaRequest) {
+    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(params.elasticsearch, request);
+    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(params.savedObjects, request);
+    this.uiSettings = new CoreUiSettingsRouteHandlerContext(params.uiSettings, this.savedObjects);
     this.deprecations = new CoreDeprecationsRouteHandlerContext(
-      deps.deprecations,
+      params.deprecations,
       this.elasticsearch,
       this.savedObjects
     );
-    this.env = { mode: deps.env.mode };
+    this.env = { mode: params.env.mode };
   }
 }
