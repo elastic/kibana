@@ -193,6 +193,7 @@ export const useDashboardMenuItems = ({
       discardChanges: {
         ...topNavStrings.discardChanges,
         id: 'reset',
+        testId: 'dashboardDiscardChangesMenuItem',
         disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
         run: () => discardChanges(),
       } as TopNavMenuData,
