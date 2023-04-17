@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { fieldValidators, FIELD_TYPES, UseField, Field, SelectField } from '../../../../../../shared_imports';
+import {
+  fieldValidators,
+  FIELD_TYPES,
+  UseField,
+  Field,
+  SelectField,
+} from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -190,10 +196,9 @@ export const GeoGrid: FunctionComponent = () => {
                   },
                   {
                     value: 'WKT',
-                    text: i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.geoGrid.wktOption',
-                      { defaultMessage: 'WKT' }
-                    ),
+                    text: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.wktOption', {
+                      defaultMessage: 'WKT',
+                    }),
                   },
                 ],
               },
@@ -234,7 +239,6 @@ export const GeoGrid: FunctionComponent = () => {
         component={Field}
         path="fields.precision"
       />
-
 
       <IgnoreMissingField />
     </>
