@@ -622,6 +622,7 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
+include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]

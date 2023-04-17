@@ -103,12 +103,14 @@ Object {
 exports[`KQL Custom Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
     "version": 1,
   },
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
-    "index": "slo-observability.sli-v1",
-    "pipeline": "slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v1",
+    "pipeline": ".slo-observability.sli.monthly",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -147,7 +149,7 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "field": "@timestamp",
+          "field": "log_timestamp",
           "fixed_interval": "2m",
         },
       },
@@ -198,7 +200,7 @@ Object {
   "sync": Object {
     "time": Object {
       "delay": "1m",
-      "field": "@timestamp",
+      "field": "log_timestamp",
     },
   },
   "transform_id": Any<String>,
@@ -208,12 +210,14 @@ Object {
 exports[`KQL Custom Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
     "version": 1,
   },
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
-    "index": "slo-observability.sli-v1",
-    "pipeline": "slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v1",
+    "pipeline": ".slo-observability.sli.monthly",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -243,7 +247,7 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "field": "@timestamp",
+          "field": "log_timestamp",
           "fixed_interval": "1m",
         },
       },
@@ -294,7 +298,7 @@ Object {
   "sync": Object {
     "time": Object {
       "delay": "1m",
-      "field": "@timestamp",
+      "field": "log_timestamp",
     },
   },
   "transform_id": Any<String>,
