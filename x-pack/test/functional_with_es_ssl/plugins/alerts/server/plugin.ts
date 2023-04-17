@@ -94,7 +94,7 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
     throw new Error('Failed to execute alert type');
   },
   validate: {
-    params: schema.never(),
+    params: { validate: (params) => params },
   },
 };
 

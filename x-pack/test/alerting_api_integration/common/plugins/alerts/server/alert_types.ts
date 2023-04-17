@@ -705,7 +705,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
       return { state: {} };
     },
     validate: {
-      params: { validate: () => ({ pattern: [true] }) },
+      params: paramsSchema,
     },
   };
   return result;
