@@ -529,6 +529,7 @@ test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic
 test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects @elastic/kibana-core
+packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 src/plugins/saved_search @elastic/kibana-data-discovery
