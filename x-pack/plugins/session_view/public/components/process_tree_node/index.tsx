@@ -186,8 +186,12 @@ export function ProcessTreeNode({
       }
 
       onProcessSelected?.(process);
+
+      if (isSessionLeader && scrollerRef.current) {
+        scrollerRef.current.scrollTop = 0;
+      }
     },
-    [onProcessSelected, process]
+    [isSessionLeader, onProcessSelected, process, scrollerRef]
   );
 
   const processDetails = process.getDetails();

@@ -141,7 +141,6 @@ export const useStyles = ({
       processNode.position = 'sticky';
       processNode.top = '-' + size.base;
       processNode.zIndex = 1;
-      processNode.marginBottom = size.s;
       processNode.borderTop = `${size.base} solid transparent`;
       processNode.backgroundColor = euiVars.euiColorLightestShade;
       processNode.borderBottom = border.editable;
