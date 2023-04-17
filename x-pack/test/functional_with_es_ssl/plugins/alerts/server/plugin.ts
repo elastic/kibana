@@ -71,9 +71,7 @@ export const alwaysFiringAlertType: RuleType<
     };
   },
   validate: {
-    params: schema.object({
-      instances: schema.arrayOf(schema.any()),
-    }),
+    params: schema.any(),
   },
 };
 
