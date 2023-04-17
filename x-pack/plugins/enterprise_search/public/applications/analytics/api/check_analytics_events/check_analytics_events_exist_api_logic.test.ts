@@ -9,9 +9,9 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { checkAnalyticsEventsIndexExists } from './check_analytics_events_index_api_logic';
+import { checkAnalyticsEventsExist } from './check_analytics_events_exist_api_logic';
 
-describe('FetchAnalyticsCollectionApiLogic', () => {
+describe('AnalyticsEventsExistApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
@@ -22,10 +22,10 @@ describe('FetchAnalyticsCollectionApiLogic', () => {
       const promise = Promise.resolve({ exists: true });
       const indexName = 'eventsIndex';
       http.get.mockReturnValue(promise);
-      const result = checkAnalyticsEventsIndexExists({ indexName });
+      const result = checkAnalyticsEventsExist({ indexName });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        `/internal/enterprise_search/analytics/events/${indexName}/exists`
+        `/internal/enterprise_search/analytics/collection/${indexName}/events/exist`
       );
       await expect(result).resolves.toEqual({ exists: true });
     });

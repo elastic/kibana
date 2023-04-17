@@ -1090,12 +1090,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
       defaultMessage: 'Text assertion',
     }),
-    required: true,
+    required: false,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.helpText', {
       defaultMessage: 'Consider the page loaded when the specified text is rendered.',
     }),
     validation: () => ({
-      required: true,
+      required: false,
     }),
     props: (): EuiFieldTextProps => ({
       readOnly,
