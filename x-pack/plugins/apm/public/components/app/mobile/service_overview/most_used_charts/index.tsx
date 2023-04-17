@@ -14,7 +14,7 @@ import { APIReturnType } from '../../../../../services/rest/create_call_apm_api'
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 
 type MostUsedCharts =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/most_used_charts'>['mostUsedCharts'][0];
+  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/most_used_charts'>['mostUsedCharts'][0];
 
 const MOST_USED_CHARTS: Array<{ key: MostUsedCharts['key']; label: string }> = [
   {
