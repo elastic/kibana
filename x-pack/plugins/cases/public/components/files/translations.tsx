@@ -24,7 +24,7 @@ export const DATE_ADDED = i18n.translate('xpack.cases.caseView.files.dateAdded',
 });
 
 export const DELETE_FILE = i18n.translate('xpack.cases.caseView.files.deleteFile', {
-  defaultMessage: 'Delete File',
+  defaultMessage: 'Delete attachment',
 });
 
 export const DOWNLOAD_FILE = i18n.translate('xpack.cases.caseView.files.downloadFile', {
@@ -88,7 +88,7 @@ export const ADDED_UNKNOWN_FILE = i18n.translate('xpack.cases.caseView.files.add
 });
 
 export const DOWNLOAD = i18n.translate('xpack.cases.caseView.files.download', {
-  defaultMessage: 'download',
+  defaultMessage: 'Download attachment',
 });
 
 export const DELETE = i18n.translate('xpack.cases.caseView.files.delete', {

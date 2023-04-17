@@ -1015,21 +1015,22 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('hides correctly the  default actions', async () => {
+      const onClick = jest.fn();
+
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
           {
-            type: AttachmentActionType.BUTTON,
+            type: AttachmentActionType.BUTTON as const,
             label: 'My primary button',
             isPrimary: true,
             iconType: 'danger',
-            onClick: () => {},
+            onClick,
           },
           {
-            type: AttachmentActionType.BUTTON,
-            label: 'My primary 2 button',
-            isPrimary: true,
-            iconType: 'danger',
-            onClick: () => {},
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'download',
+            onClick,
           },
         ],
         hideDefaultActions: true,
@@ -1050,14 +1051,24 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-
       appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(await screen.findByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
-      expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+
+      await waitForEuiPopoverOpen();
+
+      // default "Delete attachment" action
+      expect(screen.queryByTestId('property-actions-user-action-trash')).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete attachment')).not.toBeInTheDocument();
+      expect(screen.getByText('My button')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it('shows correctly the registered primary actions and non-primary actions', async () => {

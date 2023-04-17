@@ -7,19 +7,20 @@
 
 import React from 'react';
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import * as i18n from './translations';
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
-interface FileDeleteButtonIconProps {
+interface FileDeleteButtonProps {
   caseId: string;
   fileId: string;
+  isIcon?: boolean;
 }
 
-const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ caseId, fileId }) => {
+const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fileId, isIcon }) => {
   const { permissions } = useCasesContext();
   const { isLoading, mutate: deleteFileAttachment } = useDeleteFileAttachment();
 
@@ -27,16 +28,22 @@ const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ ca
     onDelete: () => deleteFileAttachment({ caseId, fileId }),
   });
 
+  const buttonProps = {
+    iconType: 'trash',
+    'aria-label': i18n.DELETE_FILE,
+    color: 'danger' as const,
+    isDisabled: isLoading,
+    onClick: onModalOpen,
+    'data-test-subj': 'cases-files-delete-button',
+  };
+
   return permissions.delete ? (
     <>
-      <EuiButtonIcon
-        iconType={'trash'}
-        aria-label={i18n.DELETE_FILE}
-        color={'danger'}
-        isDisabled={isLoading}
-        onClick={onModalOpen}
-        data-test-subj={'cases-files-delete-button'}
-      />
+      {isIcon ? (
+        <EuiButtonIcon {...buttonProps} />
+      ) : (
+        <EuiButtonEmpty {...buttonProps}>{i18n.DELETE_FILE}</EuiButtonEmpty>
+      )}
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.DELETE_FILE_TITLE}
@@ -50,6 +57,6 @@ const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ ca
     <></>
   );
 };
-FileDeleteButtonIconComponent.displayName = 'FileDeleteButtonIcon';
+FileDeleteButtonComponent.displayName = 'FileDeleteButton';
 
-export const FileDeleteButtonIcon = React.memo(FileDeleteButtonIconComponent);
+export const FileDeleteButton = React.memo(FileDeleteButtonComponent);

@@ -25,6 +25,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     isLoading: false,
     registeredAttachmentActions: [],
     onDelete: jest.fn(),
+    hideDefaultActions: false,
   };
 
   beforeEach(() => {
@@ -87,6 +88,14 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   it('does not show the property actions without delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+  });
+
+  it('does not show the property actions when hideDefaultActions', async () => {
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />
+    );
 
     expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });

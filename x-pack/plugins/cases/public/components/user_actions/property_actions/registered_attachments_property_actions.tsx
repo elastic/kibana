@@ -20,12 +20,14 @@ interface Props {
   isLoading: boolean;
   registeredAttachmentActions: AttachmentAction[];
   onDelete: () => void;
+  hideDefaultActions: boolean;
 }
 
 const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   isLoading,
   registeredAttachmentActions,
   onDelete,
+  hideDefaultActions,
 }) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
@@ -33,7 +35,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   });
 
   const propertyActions = useMemo(() => {
-    const showTrashIcon = permissions.delete;
+    const showTrashIcon = permissions.delete && !hideDefaultActions;
 
     return [
       ...(showTrashIcon
@@ -50,7 +52,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
         : []),
       ...registeredAttachmentActions,
     ];
-  }, [permissions.delete, onModalOpen, registeredAttachmentActions]);
+  }, [permissions.delete, hideDefaultActions, onModalOpen, registeredAttachmentActions]);
 
   return (
     <>

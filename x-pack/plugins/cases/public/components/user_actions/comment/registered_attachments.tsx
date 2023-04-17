@@ -156,13 +156,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
                 )) ||
                 (action.type === AttachmentActionType.CUSTOM && action.render())
             )}
-            {!attachmentViewObject.hideDefaultActions && (
-              <RegisteredAttachmentsPropertyActions
-                isLoading={isLoading}
-                onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
-                registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
-              />
-            )}
+            <RegisteredAttachmentsPropertyActions
+              isLoading={isLoading}
+              onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
+              registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
+              hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
+            />
           </UserActionContentToolbar>
         ),
         children: renderer(props),

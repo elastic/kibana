@@ -13,8 +13,8 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 import * as i18n from './translations';
 import { parseMimeType } from './utils';
 import { FileNameLink } from './file_name_link';
-import { FileDownloadButtonIcon } from './file_download_button_icon';
-import { FileDeleteButtonIcon } from './file_delete_button_icon';
+import { FileDownloadButton } from './file_download_button';
+import { FileDeleteButton } from './file_delete_button';
 
 export interface FilesTableColumnsProps {
   caseId: string;
@@ -55,13 +55,15 @@ export const useFilesTableColumns = ({
           name: 'Download',
           isPrimary: true,
           description: i18n.DOWNLOAD_FILE,
-          render: (file: FileJSON) => <FileDownloadButtonIcon fileId={file.id} />,
+          render: (file: FileJSON) => <FileDownloadButton fileId={file.id} isIcon={true} />,
         },
         {
           name: 'Delete',
           isPrimary: true,
           description: i18n.DELETE_FILE,
-          render: (file: FileJSON) => <FileDeleteButtonIcon caseId={caseId} fileId={file.id} />,
+          render: (file: FileJSON) => (
+            <FileDeleteButton caseId={caseId} fileId={file.id} isIcon={true} />
+          ),
         },
       ],
     },

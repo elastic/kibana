@@ -14,13 +14,13 @@ import type { DownloadableFile } from './types';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
-import { FileDownloadButtonIcon } from './file_download_button_icon';
+import { FileDownloadButton } from './file_download_button';
 import { FileNameLink } from './file_name_link';
 import { FilePreview } from './file_preview';
 import * as i18n from './translations';
 import { isImage, isValidFileExternalReferenceMetadata } from './utils';
 import { useFilePreview } from './use_file_preview';
-import { FileDeleteButtonIcon } from './file_delete_button_icon';
+import { FileDeleteButton } from './file_delete_button';
 
 interface FileAttachmentEventProps {
   file: DownloadableFile;
@@ -40,26 +40,26 @@ const FileAttachmentEvent = ({ file }: FileAttachmentEventProps) => {
 
 FileAttachmentEvent.displayName = 'FileAttachmentEvent';
 
-function getFileDownloadButtonIcon(fileId: string) {
-  return <FileDownloadButtonIcon fileId={fileId} />;
+function getFileDownloadButton(fileId: string) {
+  return <FileDownloadButton fileId={fileId} isIcon={false} />;
 }
 
-function getFileDeleteButtonIcon(caseId: string, fileId: string) {
-  return <FileDeleteButtonIcon caseId={caseId} fileId={fileId} />;
+function getFileDeleteButton(caseId: string, fileId: string) {
+  return <FileDeleteButton caseId={caseId} fileId={fileId} isIcon={false} />;
 }
 
 const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => [
   {
     type: AttachmentActionType.CUSTOM as const,
-    isPrimary: true,
-    render: () => getFileDownloadButtonIcon(fileId),
+    render: () => getFileDownloadButton(fileId),
     label: i18n.DOWNLOAD_FILE,
+    isPrimary: false,
   },
   {
     type: AttachmentActionType.CUSTOM as const,
-    isPrimary: true,
-    render: () => getFileDeleteButtonIcon(caseId, fileId),
+    render: () => getFileDeleteButton(caseId, fileId),
     label: i18n.DELETE_FILE,
+    isPrimary: false,
   },
 ];
 
@@ -69,7 +69,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
       type: 'regular',
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
-      hideDefaultActions: true,
+      hideDefaultActions: false,
     };
   }
 
@@ -95,5 +95,4 @@ export const getFileType = (): ExternalReferenceAttachmentType => ({
   icon: 'document',
   displayName: 'File Attachment Type',
   getAttachmentViewObject: getFileAttachmentViewObject,
-  hideDefaultActions: true,
 });
