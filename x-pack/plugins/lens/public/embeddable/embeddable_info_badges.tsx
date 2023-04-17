@@ -69,21 +69,29 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
       closePopover={closePopover}
     >
       <div>
-        {messages.map(({ shortMessage, longMessage }, index) => (
-          <aside
-            key={`${shortMessage}-${index}`}
-            css={css`
-              padding: ${index > 0 ? 0 : euiTheme.size.base} ${euiTheme.size.base}
-                ${index > 0 ? euiTheme.size.s : 0};
-            `}
-          >
-            {index ? <EuiHorizontalRule margin="s" /> : null}
-            <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
-              <h3>{shortMessage}</h3>
-            </EuiTitle>
-            <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
-          </aside>
-        ))}
+        {messages.map(({ shortMessage, longMessage }, index) => {
+          const isFirstItem = index === 0;
+          const isLastItem = index === messages.length - 1;
+          let bottomPadding = isFirstItem ? 0 : euiTheme.size.s;
+          if (isLastItem) {
+            bottomPadding = euiTheme.size.base;
+          }
+          return (
+            <aside
+              key={`${shortMessage}-${index}`}
+              css={css`
+                padding: ${!isFirstItem ? 0 : euiTheme.size.base} ${euiTheme.size.base}
+                  ${bottomPadding};
+              `}
+            >
+              {index ? <EuiHorizontalRule margin="s" /> : null}
+              <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
+                <h3>{shortMessage}</h3>
+              </EuiTitle>
+              <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
+            </aside>
+          );
+        })}
       </div>
     </EuiPopover>
   );
