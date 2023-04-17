@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Logger, SavedObject } from '@kbn/core/server';
+import { Logger, SavedObject, ElasticsearchClient } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskInstance,
@@ -56,6 +56,7 @@ const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 export class SyntheticsService {
   private logger: Logger;
+  private esClient?: ElasticsearchClient;
   private readonly server: UptimeServerSetup;
   public apiClient: ServiceAPIClient;
 
@@ -242,6 +243,42 @@ export class SyntheticsService {
     }
   }
 
+  private async getLicense() {
+    this.esClient = this.getESClient();
+    let license;
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error(
+        'Cannot sync monitors with the Synthetics service. Elasticsearch client is unavailable: cannot retrieve license information'
+      );
+    }
+    try {
+      license = (await this.esClient.license.get())?.license;
+    } catch (e) {
+      throw new Error(
+        `Cannot sync monitors with the Synthetics service. Unable to determine license level: ${e}`
+      );
+    }
+
+    if (license?.status === 'expired') {
+      throw new Error('Cannot sync monitors with the Synthetics service. License is expired.');
+    }
+
+    if (!license?.type) {
+      throw new Error(
+        'Cannot sync monitors with the Synthetics service. Unable to determine license level.'
+      );
+    }
+
+    return license;
+  }
+
+  private getESClient() {
+    if (!this.server.coreStart) {
+      return;
+    }
+    return this.server.coreStart?.elasticsearch.client.asInternalUser;
+  }
+
   async getOutput() {
     const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
     if (!isValid) {
@@ -261,6 +298,7 @@ export class SyntheticsService {
   async addConfig(config: ConfigData | ConfigData[]) {
     try {
       const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
+      const license = await this.getLicense();
 
       const output = await this.getOutput();
       if (output) {
@@ -269,6 +307,7 @@ export class SyntheticsService {
         this.syncErrors = await this.apiClient.post({
           monitors,
           output,
+          licenseLevel: license.type,
         });
       }
       return this.syncErrors;
@@ -279,6 +318,7 @@ export class SyntheticsService {
 
   async editConfig(monitorConfig: ConfigData | ConfigData[], isEdit = true) {
     try {
+      const license = await this.getLicense();
       const monitors = this.formatConfigs(
         Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
       );
@@ -289,6 +329,7 @@ export class SyntheticsService {
           monitors,
           output,
           isEdit,
+          licenseLevel: license.type,
         };
 
         this.syncErrors = await this.apiClient.put(data);
@@ -300,6 +341,7 @@ export class SyntheticsService {
   }
 
   async pushConfigs() {
+    const license = await this.getLicense();
     const service = this;
     const subject = new Subject<MonitorFields[]>();
 
@@ -307,6 +349,10 @@ export class SyntheticsService {
 
     subject.subscribe(async (monitors) => {
       try {
+        if (monitors.length === 0) {
+          return;
+        }
+
         if (!output) {
           output = await this.getOutput();
 
@@ -326,6 +372,7 @@ export class SyntheticsService {
         service.syncErrors = await this.apiClient.put({
           monitors,
           output,
+          licenseLevel: license.type,
         });
       } catch (e) {
         sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -344,6 +391,7 @@ export class SyntheticsService {
   }
 
   async runOnceConfigs(configs: ConfigData) {
+    const license = await this.getLicense();
     const monitors = this.formatConfigs(configs);
     if (monitors.length === 0) {
       return;
@@ -358,6 +406,7 @@ export class SyntheticsService {
       return await this.apiClient.runOnce({
         monitors,
         output,
+        licenseLevel: license.type,
       });
     } catch (e) {
       this.logger.error(e);
@@ -366,6 +415,7 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: ConfigData[]) {
+    const license = await this.getLicense();
     const hasPublicLocations = configs.some((config) =>
       config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)
     );
@@ -379,12 +429,14 @@ export class SyntheticsService {
       const data = {
         output,
         monitors: this.formatConfigs(configs),
+        licenseLevel: license.type,
       };
       return await this.apiClient.delete(data);
     }
   }
 
   async deleteAllConfigs() {
+    const license = await this.getLicense();
     const subject = new Subject<MonitorFields[]>();
 
     subject.subscribe(async (monitors) => {
@@ -401,6 +453,7 @@ export class SyntheticsService {
         const data = {
           output,
           monitors,
+          licenseLevel: license.type,
         };
         return await this.apiClient.delete(data);
       }
