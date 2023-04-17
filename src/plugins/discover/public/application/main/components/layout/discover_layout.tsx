@@ -63,7 +63,6 @@ export function DiscoverLayout({
   savedSearch,
   searchSource,
   stateContainer,
-  persistDataView,
   updateAdHocDataViewId,
   updateDataViewList,
 }: DiscoverLayoutProps) {
@@ -301,7 +300,6 @@ export function DiscoverLayout({
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
-        persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         updateDataViewList={updateDataViewList}
       />

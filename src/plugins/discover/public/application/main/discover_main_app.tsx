@@ -50,7 +50,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     inspectorAdapters,
     onChangeDataView,
     onUpdateQuery,
-    persistDataView,
     updateAdHocDataViewId,
     resetSavedSearch,
     searchSource,
@@ -111,7 +110,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         savedSearch={savedSearch}
         searchSource={searchSource}
         stateContainer={stateContainer}
-        persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         updateDataViewList={updateDataViewList}
       />

@@ -37,7 +37,6 @@ export type DiscoverTopNavProps = Pick<
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 };
@@ -57,7 +56,6 @@ export const DiscoverTopNav = ({
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
-  persistDataView,
   updateAdHocDataViewId,
   updateDataViewList,
 }: DiscoverTopNavProps) => {
@@ -165,7 +163,6 @@ export const DiscoverTopNav = ({
         isPlainRecord,
         adHocDataViews,
         updateDataViewList,
-        persistDataView,
         updateAdHocDataViewId,
       }),
     [
@@ -179,7 +176,6 @@ export const DiscoverTopNav = ({
       onOpenSavedSearch,
       isPlainRecord,
       adHocDataViews,
-      persistDataView,
       updateAdHocDataViewId,
       updateDataViewList,
     ]

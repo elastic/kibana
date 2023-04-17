@@ -25,7 +25,6 @@ export interface DiscoverLayoutProps {
   savedSearch: SavedSearch;
   searchSource: ISearchSource;
   stateContainer: DiscoverStateContainer;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 }

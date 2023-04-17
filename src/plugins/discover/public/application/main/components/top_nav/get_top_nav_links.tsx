@@ -33,7 +33,6 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
   isPlainRecord,
-  persistDataView,
   adHocDataViews,
   updateDataViewList,
   updateAdHocDataViewId,
@@ -49,7 +48,6 @@ export const getTopNavLinks = ({
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
   updateDataViewList: (dataView: DataView[]) => void;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
@@ -159,10 +157,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      const updatedDataView = await persistDataView(dataView);
-      if (!services.share || !updatedDataView) {
-        return;
-      }
+      if (!services.share) return;
 
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
