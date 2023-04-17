@@ -26,9 +26,7 @@ export const format = (fields: Record<string, unknown>, readOnly: boolean = fals
   const formattedFields = formatter(fields) as MonitorFields;
   const textAssertion = formattedFields[ConfigKey.TEXT_ASSERTION]
     ? `
-          expect(await page.isVisible('text=${
-            formattedFields[ConfigKey.TEXT_ASSERTION]
-          }')).toBeTruthy();`
+          await page.getByText('${formattedFields[ConfigKey.TEXT_ASSERTION]}').first().waitFor();`
     : ``;
   const formattedMap = {
     [FormMonitorType.SINGLE]: {
