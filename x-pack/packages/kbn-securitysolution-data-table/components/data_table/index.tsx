@@ -80,7 +80,6 @@ interface BaseDataTableProps {
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
-  disableCellActions?: boolean;
   fieldBrowserOptions?: FieldBrowserOptions;
   id: string;
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -139,7 +138,6 @@ export const DataTableComponent = React.memo<DataTableProps>(
     browserFields,
     bulkActions = true,
     data,
-    disableCellActions = false,
     fieldBrowserOptions,
     hasCrudPermissions,
     id,
@@ -330,7 +328,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
 
     const columnsCellActionsProps = useMemo(() => {
-      const fields = disableCellActions
+      const fields = !cellActionsTriggerId
         ? []
         : columnHeaders.map((column) => ({
             name: column.id,
@@ -350,7 +348,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         },
         dataGridRef,
       };
-    }, [disableCellActions, columnHeaders, cellActionsTriggerId, id, data]);
+    }, [columnHeaders, cellActionsTriggerId, id, data]);
 
     const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
 

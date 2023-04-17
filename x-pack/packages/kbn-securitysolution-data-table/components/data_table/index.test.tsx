@@ -167,13 +167,17 @@ describe('DataTable', () => {
       const data = mockTimelineData.slice(0, 1);
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...props} data={data} />
+          <DataTableComponent
+            cellActionsTriggerId="mockCellActionsTrigger"
+            {...props}
+            data={data}
+          />
         </TestProviders>
       );
       wrapper.update();
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: '',
+        triggerId: 'mockCellActionsTrigger',
         fields: [
           {
             name: '@timestamp',
@@ -189,10 +193,10 @@ describe('DataTable', () => {
       });
     });
 
-    test('does not render cell actions if disableCellActions is true', () => {
+    test('does not render cell actions if cellActionsTriggerId is not specified', () => {
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} disableCellActions />
+          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} />
         </TestProviders>
       );
       wrapper.update();
@@ -208,7 +212,11 @@ describe('DataTable', () => {
       mockUseDataGridColumnsCellActions.mockReturnValueOnce([]);
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} />
+          <DataTableComponent
+            cellActionsTriggerId="mockCellActionsTrigger"
+            {...props}
+            data={mockTimelineData.slice(0, 1)}
+          />
         </TestProviders>
       );
       wrapper.update();
@@ -226,7 +234,11 @@ describe('DataTable', () => {
       mockUseDataGridColumnsCellActions.mockReturnValueOnce([[() => <div />]]);
       const wrapper = mount(
         <TestProviders>
-          <DataTableComponent {...props} data={mockTimelineData.slice(0, 1)} />
+          <DataTableComponent
+            cellActionsTriggerId="mockCellActionsTrigger"
+            {...props}
+            data={mockTimelineData.slice(0, 1)}
+          />
         </TestProviders>
       );
       wrapper.update();

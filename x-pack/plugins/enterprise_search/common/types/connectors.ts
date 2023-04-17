@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface ConnectorConfigProperties {
+  display: string;
   label: string;
   order?: number | null;
+  sensitive: boolean;
   value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
   extract_full_html?: { label: string; value: boolean };
 };
+
+export interface ConnectorSyncConfigProperties {
+  label: string;
+  value: string | number | boolean | null;
+}
+
+export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -170,7 +179,7 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorConfiguration;
+    configuration: ConnectorSyncConfiguration;
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
