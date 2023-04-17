@@ -30,7 +30,6 @@ import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 
 const theme: PartialTheme = {
   chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
-  chartPaddings: { left: 50 },
   partition: {
     minFontSize: 5,
     idealFontSizeJump: 1.1,
@@ -45,11 +44,13 @@ export function SunburstChart({
   label,
   chartKey,
   fetchStatus,
+  chartWidth,
 }: {
   data?: Array<{ key: string | number; docCount: number }>;
   label?: string;
   chartKey: string;
   fetchStatus: FETCH_STATUS;
+  chartWidth: number;
 }) {
   const colors = euiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const isDataAvailable = data && data.length > 0;
@@ -57,7 +58,7 @@ export function SunburstChart({
     <EuiFlexItem
       grow={true}
       key={chartKey}
-      style={{ height: '200px', width: '200px' }}
+      style={{ height: '200px', width: chartWidth }}
     >
       <EuiTitle size="xs">
         <h2 style={{ fontSize: '0.8571rem' }}>{label}</h2>

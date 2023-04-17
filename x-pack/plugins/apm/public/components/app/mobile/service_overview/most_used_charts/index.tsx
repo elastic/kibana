@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, EuiAutoSizer } from '@elastic/eui';
 import { SunburstChart } from './sunburst_chart';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
@@ -83,26 +83,34 @@ export function MostUsedCharts({
   );
 
   return (
-    <EuiFlexGroup
-      direction={groupDirection}
-      gutterSize="s"
-      justifyContent="spaceEvenly"
-    >
-      {MOST_USED_CHARTS.map(({ key, label }) => {
-        const chartData =
-          data?.mostUsedCharts.find((chart) => chart.key === key)?.options ||
-          [];
-        return (
-          <div key={key}>
-            <SunburstChart
-              data={chartData}
-              label={label}
-              chartKey={key}
-              fetchStatus={status}
-            />
-          </div>
-        );
-      })}
-    </EuiFlexGroup>
+    <div style={{ height: '200px' }}>
+      <EuiAutoSizer>
+        {({ width }) => (
+          <EuiFlexGroup
+            direction={groupDirection}
+            gutterSize="s"
+            justifyContent="spaceEvenly"
+            style={{ position: 'absolute' }}
+          >
+            {MOST_USED_CHARTS.map(({ key, label }) => {
+              const chartData =
+                data?.mostUsedCharts.find((chart) => chart.key === key)
+                  ?.options || [];
+              return (
+                <div key={key}>
+                  <SunburstChart
+                    data={chartData}
+                    label={label}
+                    chartKey={key}
+                    fetchStatus={status}
+                    chartWidth={width / MOST_USED_CHARTS.length}
+                  />
+                </div>
+              );
+            })}
+          </EuiFlexGroup>
+        )}
+      </EuiAutoSizer>
+    </div>
   );
 }
