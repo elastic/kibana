@@ -7,10 +7,11 @@
 
 import moment from 'moment';
 import { has } from 'lodash';
-import { MaintenanceWindow, RRule } from '../types';
+import { MaintenanceWindow } from '../types';
 import { EndsOptions, Frequency } from '../constants';
 import { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import { getInitialByWeekday } from './get_initial_by_weekday';
+import { RRuleParams } from '../../../../common';
 
 export const convertFromMaintenanceWindow = (maintenanceWindow: MaintenanceWindow): FormProps => {
   const startDate = maintenanceWindow.rRule.dtstart;
@@ -52,7 +53,10 @@ export const convertFromMaintenanceWindow = (maintenanceWindow: MaintenanceWindo
       recurringSchedule.count = rRule.count;
     }
     if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
-      recurringSchedule.byweekday = getInitialByWeekday(rRule.byweekday, moment(startDate));
+      recurringSchedule.byweekday = getInitialByWeekday(
+        rRule.byweekday as string[],
+        moment(startDate)
+      );
     }
     if (frequency === Frequency.MONTHLY) {
       if (rRule.byweekday) {
@@ -67,7 +71,7 @@ export const convertFromMaintenanceWindow = (maintenanceWindow: MaintenanceWindo
   return form;
 };
 
-const isCustom = (rRule: RRule) => {
+const isCustom = (rRule: RRuleParams) => {
   const freq = rRule.freq?.toString() as Frequency;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
