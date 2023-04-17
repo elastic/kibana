@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { MaintenanceWindowResponse } from '../../pages/maintenance_windows/types';
 import { getMaintenanceWindowsList } from './list';
+import { MaintenanceWindowStatus } from '../../../common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -31,7 +32,7 @@ describe('getMaintenanceWindowsList', () => {
             interval: 1,
             byweekday: ['TH'],
           },
-          status: 'upcoming',
+          status: MaintenanceWindowStatus.Upcoming,
           event_start_time: '2023-03-23T19:16:21.293Z',
           event_end_time: '2023-03-23T19:16:21.293Z',
           created_by: null,
@@ -60,7 +61,7 @@ describe('getMaintenanceWindowsList', () => {
           interval: 1,
           byweekday: ['TH'],
         },
-        status: 'upcoming',
+        status: MaintenanceWindowStatus.Upcoming,
         eventStartTime: '2023-03-23T19:16:21.293Z',
         eventEndTime: '2023-03-23T19:16:21.293Z',
         createdBy: null,
