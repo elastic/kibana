@@ -20,6 +20,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Host',
           }
         ),
+        options: [],
         order: 1,
         sensitive: false,
         value: '',
@@ -32,6 +33,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Username',
           }
         ),
+        options: [],
         order: 2,
         sensitive: false,
         value: '',
@@ -44,6 +46,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Password',
           }
         ),
+        options: [],
         order: 3,
         sensitive: true,
         value: '',
@@ -56,6 +59,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Database',
           }
         ),
+        options: [],
         order: 4,
         sensitive: false,
         value: '',
@@ -68,6 +72,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Collection',
           }
         ),
+        options: [],
         order: 5,
         sensitive: false,
         value: '',
@@ -80,6 +85,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Direct connection',
           }
         ),
+        options: [],
         order: 6,
         sensitive: false,
         value: true,
@@ -108,6 +114,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Host',
           }
         ),
+        options: [],
         order: 1,
         sensitive: false,
         value: '',
@@ -120,6 +127,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Port',
           }
         ),
+        options: [],
         order: 2,
         sensitive: false,
         value: '',
@@ -132,6 +140,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Username',
           }
         ),
+        options: [],
         order: 3,
         sensitive: false,
         value: '',
@@ -144,6 +153,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Password',
           }
         ),
+        options: [],
         order: 4,
         sensitive: true,
         value: '',
@@ -156,6 +166,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Database',
           }
         ),
+        options: [],
         order: 5,
         sensitive: false,
         value: '',
@@ -168,6 +179,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Tables',
           }
         ),
+        options: [],
         order: 6,
         sensitive: false,
         value: '',
@@ -180,6 +192,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Enable SSL',
           }
         ),
+        options: [],
         order: 7,
         sensitive: false,
         value: false,
@@ -192,6 +205,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'SSL certificate',
           }
         ),
+        options: [],
         order: 8,
         sensitive: false,
         value: '',
