@@ -242,7 +242,12 @@ describe('generateMlInferencePipelineBody lib function', () => {
       model: mockTextClassificationModel,
       pipelineName: 'my-pipeline',
       fieldMappings: [
-        { sourceField: 'my-source-field', targetField: 'ml.inference.my-source-field_expanded' },
+        { sourceField: 'my-source-field_1', targetField: 'ml.inference.my-source-field_expanded' },
+        { sourceField: 'my-source-field_2', targetField: 'my-source-ml.inference-field_expanded' },
+        {
+          sourceField: 'my-source-field_3',
+          targetField: 'ml.inference.my-source-2-ml.inference-field_expanded',
+        },
       ],
     });
 
@@ -257,11 +262,39 @@ describe('generateMlInferencePipelineBody lib function', () => {
             },
           }),
           expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-2-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field': 'MODEL_INPUT_FIELD',
+                'my-source-field_1': 'MODEL_INPUT_FIELD',
               },
               target_field: 'ml.inference.my-source-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_2': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-ml.inference-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_3': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-2-ml.inference-field_expanded',
             }),
           }),
         ]),
