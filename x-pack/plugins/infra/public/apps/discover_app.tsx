@@ -45,18 +45,23 @@ export const renderApp = (plugins: InfraClientStartDeps, pluginStart: InfraClien
 };
 
 const redirectToDiscover = (discover: DiscoverStart, resolvedLogView?: ResolvedLogView) => {
+  const navigationOptions = { replace: true };
+
   if (!resolvedLogView) {
-    return discover.locator?.navigate({});
+    return discover.locator?.navigate({}, navigationOptions);
   }
 
   const columns = parseColumns(resolvedLogView.columns);
   const dataViewSpec = resolvedLogView.dataViewReference.toSpec();
 
-  return discover.locator?.navigate({
-    columns,
-    dataViewId: dataViewSpec.id,
-    dataViewSpec,
-  });
+  return discover.locator?.navigate(
+    {
+      columns,
+      dataViewId: dataViewSpec.id,
+      dataViewSpec,
+    },
+    navigationOptions
+  );
 };
 
 /**
