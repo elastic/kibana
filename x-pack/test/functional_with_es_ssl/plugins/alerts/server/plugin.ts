@@ -8,7 +8,6 @@
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as AlertingSetup, RuleType } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { schema } from '@kbn/config-schema';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -28,7 +27,7 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   },
   producer: 'alerts',
   validate: {
-    params: schema.any(),
+    params: { validate: (params) => params },
   },
 };
 
@@ -71,7 +70,7 @@ export const alwaysFiringAlertType: RuleType<
     };
   },
   validate: {
-    params: schema.any(),
+    params: { validate: (params) => params },
   },
 };
 
