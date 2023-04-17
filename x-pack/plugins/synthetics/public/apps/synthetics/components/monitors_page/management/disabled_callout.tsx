@@ -15,8 +15,9 @@ export const DisabledCallout = ({ total }: { total: number }) => {
   const { enablement, enableSynthetics, invalidApiKeyError, loading } = useEnablement();
 
   const showDisableCallout = !enablement.isEnabled && total > 0;
+  const showInvalidApiKeyError = invalidApiKeyError && total > 0;
 
-  if (invalidApiKeyError) {
+  if (showInvalidApiKeyError) {
     return <InvalidApiKeyCalloutCallout />;
   }
 
