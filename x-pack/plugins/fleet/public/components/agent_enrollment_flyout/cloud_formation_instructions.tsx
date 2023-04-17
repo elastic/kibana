@@ -78,7 +78,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
       <EuiCallOut
         title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.callout', {
           defaultMessage:
-            'Sign in to your cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation template.',
+            'Sign in to your cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation.',
         })}
         color="warning"
         iconType="warning"
