@@ -4841,6 +4841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
