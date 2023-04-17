@@ -19,15 +19,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
+import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { NoDataPage } from './no_data_page';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { LicensePrompt } from './shared/license_prompt';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
     start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
+  const license = useLicenseContext();
 
   const { docLinks, notifications } = core;
 
@@ -41,6 +44,14 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   );
 
   const http = useAutoAbortedHttpClient([]);
+
+  if (!license?.hasAtLeast('enterprise')) {
+    return (
+      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+        <LicensePrompt />
+      </ProfilingAppPageTemplate>
+    );
+  }
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
