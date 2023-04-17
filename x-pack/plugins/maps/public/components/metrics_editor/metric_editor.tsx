@@ -237,7 +237,12 @@ export function MetricEditor({
         })}
         display="columnCompressed"
       >
-        <MaskExpression bucketName={bucketName} fields={fields} metric={metric} onChange={onChange} />
+        <MaskExpression
+          bucketName={bucketName}
+          fields={fields}
+          metric={metric}
+          onChange={onChange}
+        />
       </EuiFormRow>
 
       {removeButton}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FilterSpecification } from '@kbn/mapbox-gl';
 import { DataView } from '@kbn/data-plugin/common';
 import { IField } from '../field';
 import { IESAggSource } from '../../sources/es_agg_source';
@@ -22,5 +21,5 @@ export interface CountAggFieldParams {
   label?: string;
   source: IESAggSource;
   origin: FIELD_ORIGIN;
-  mask?: CountAggDescriptor['mask'],
+  mask?: CountAggDescriptor['mask'];
 }

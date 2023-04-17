@@ -7,9 +7,18 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiFieldNumber, EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiPopoverFooter, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { AGG_TYPE, MASK_OPERATOR } from '../../../../common/constants';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldNumber,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiPopoverFooter,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
+import { MASK_OPERATOR } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { panelStrings } from '../../../connected_components/panel_strings';
 
@@ -18,18 +27,18 @@ const operatorOptions = [
     value: MASK_OPERATOR.BELOW,
     text: i18n.translate('xpack.maps.maskEditor.belowLabel', {
       defaultMessage: 'below',
-    })
+    }),
   },
-  { 
+  {
     value: MASK_OPERATOR.ABOVE,
     text: i18n.translate('xpack.maps.maskEditor.aboveLabel', {
       defaultMessage: 'above',
-    })
+    }),
   },
 ];
 
 export function getOperatorLabel(operator: MASK_OPERATOR): string {
-  const option = operatorOptions.find(option => operator === option.value);
+  const option = operatorOptions.find((option) => operator === option.value);
   return option ? option.text : operator;
 }
 
@@ -63,16 +72,16 @@ export class MaskEditor extends Component<Props, State> {
       },
     });
     this.props.onClose();
-  }
+  };
 
   _onClear = () => {
     const newMetric = {
-      ...this.props.metric
+      ...this.props.metric,
     };
     delete newMetric.mask;
     this.props.onChange(newMetric);
     this.props.onClose();
-  }
+  };
 
   _onOperatorChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({
@@ -88,7 +97,11 @@ export class MaskEditor extends Component<Props, State> {
   };
 
   _hasChanges() {
-    return this.props.metric.mask === undefined || this.props.metric.mask.operator !== this.state.operator || this.props.metric.mask.value !== this.state.value;
+    return (
+      this.props.metric.mask === undefined ||
+      this.props.metric.mask.operator !== this.state.operator ||
+      this.props.metric.mask.value !== this.state.value
+    );
   }
 
   _isValueInValid() {
@@ -131,10 +144,7 @@ export class MaskEditor extends Component<Props, State> {
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButtonEmpty
-              onClick={this.props.onClose}
-              size="s"
-            >
+            <EuiButtonEmpty onClick={this.props.onClose} size="s">
               {panelStrings.close}
             </EuiButtonEmpty>
           </EuiFlexItem>

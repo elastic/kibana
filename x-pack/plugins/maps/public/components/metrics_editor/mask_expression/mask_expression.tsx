@@ -9,9 +9,8 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { AGG_TYPE, MASK_OPERATOR } from '../../../../common/constants';
+import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { panelStrings } from '../../../connected_components/panel_strings';
 import { getOperatorLabel, MaskEditor } from './mask_editor';
 import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
 

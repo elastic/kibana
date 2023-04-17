@@ -133,7 +133,7 @@ export class CountAggField implements IESAggField {
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
     return getAggRange(metaFeature, '_count');
   }
-  
+
   getMask() {
     return this._mask;
   }
