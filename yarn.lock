@@ -4241,6 +4241,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/generate-csv@link:packages/kbn-generate-csv":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -4553,6 +4561,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-plugin@link:x-pack/plugins/ml":
   version "0.0.0"
   uid ""
@@ -4741,6 +4753,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-common@link:packages/kbn-reporting/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
   version "0.0.0"
   uid ""
@@ -4825,6 +4841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
@@ -4890,6 +4910,10 @@
   uid ""
 
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
   version "0.0.0"
   uid ""
 

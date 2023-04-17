@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
@@ -17,6 +18,8 @@ describe('transform connector for export', () => {
     supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
     validate: {
+      config: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
       secrets: {
         schema: {
           validate: (value: unknown) => value as ActionTypeSecrets,
@@ -245,6 +248,8 @@ describe('transform connector for export', () => {
     actionTypeRegistry.get.mockReturnValue({
       ...connectorType,
       validate: {
+        config: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
         secrets: {
           schema: {
             validate: (value: unknown) => {
