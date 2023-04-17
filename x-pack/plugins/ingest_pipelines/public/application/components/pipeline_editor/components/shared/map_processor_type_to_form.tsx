@@ -386,7 +386,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         'Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape.',
     }),
     getDefaultDescription: ({ field }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.redact', {
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geogrid', {
         defaultMessage: 'Adds geo-grid data to documents based on the value of "{field}"',
         values: {
           field,
