@@ -7,7 +7,6 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 
 type FilterClauses = keyof estypes.QueryDslBoolQuery;
 const validClauses: FilterClauses[] = ['must', 'filter', 'must_not', 'should'];
@@ -47,8 +46,4 @@ export const hasFilters = (query?: any) => {
     .some(([_, filter]) => {
       return Array.isArray(filter) ? filter.length > 0 : !!filter;
     });
-};
-
-export const hasSortByMetric = (params: GetHostsRequestBodyPayload) => {
-  return params.sortField && params.sortField !== 'name';
 };

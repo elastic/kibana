@@ -42,7 +42,9 @@ describe('mapper', () => {
   test('should map the aggregation object to the expected response object', () => {
     const hosts = mapToApiResponse(metricsApiRequest, [
       {
-        key: 'host-0',
+        key: {
+          hostGroup: 'host-0',
+        },
         doc_count: 155,
         diskLatency: {
           doc_count: 0,

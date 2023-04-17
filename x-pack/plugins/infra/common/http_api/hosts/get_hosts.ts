@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT, inRangeRT } from '@kbn/io-ts-utils';
+import { isGreaterOrEqualRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const HostMetricTypeRT = rt.keyof({
@@ -42,12 +42,10 @@ export const HostSortFieldRT = rt.keyof({ name: null, ...HostMetricTypeRT.keys }
 
 export const GetHostsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
-    sortField: HostSortFieldRT,
-    sortDirection: rt.union([rt.literal('desc'), rt.literal('asc')]),
     query: rt.UnknownRecord,
+    limit: isGreaterOrEqualRt(1),
   }),
   rt.type({
-    limit: rt.union([inRangeRT(1, 100), createLiteralValueFromUndefinedRT(10)]),
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
     sourceId: rt.string,
     timeRange: TimerangeRT,
@@ -73,6 +71,6 @@ export type GetHostsRequestBodyPayload = Omit<
   rt.TypeOf<typeof GetHostsRequestBodyPayloadRT>,
   'limit'
 > & {
-  limit: number;
+  limit?: number;
 };
 export type GetHostsResponsePayload = rt.TypeOf<typeof GetHostsResponsePayloadRT>;

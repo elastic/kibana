@@ -8,16 +8,16 @@
 
 import * as rt from 'io-ts';
 
-export interface InRangeBrand {
-  readonly InRange: unique symbol;
+export interface IsGreaterOrEqualBrand {
+  readonly IsGreaterOrEqual: unique symbol;
 }
 
-export type InRange = rt.Branded<number, InRangeBrand>;
+export type IsGreaterOrEqual = rt.Branded<number, IsGreaterOrEqualBrand>;
 
-export const inRangeRt = (start: number, end: number) =>
+export const isGreaterOrEqualRt = (value: number) =>
   rt.brand(
     rt.number, // codec
-    (n): n is InRange => n >= start && n <= end,
+    (n): n is IsGreaterOrEqual => n >= value,
     // refinement of the number type
-    'InRange' // name of this codec
+    'IsGreaterOrEqual' // name of this codec
   );

@@ -6,10 +6,14 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient } from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, ISearchClient } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
-import { GetHostsRequestBodyPayload } from '../../../../../common/http_api/hosts';
+import { afterKeyObjectRT } from '../../../../../common/http_api';
+import { findInventoryModel } from '../../../../../common/inventory_models';
+import { GetHostsRequestBodyPayload, HostMetricType } from '../../../../../common/http_api/hosts';
+import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
+import { AfterKey } from '../types';
 
 export const createFilters = ({
   params,
@@ -40,6 +44,7 @@ export const createFilters = ({
 
   return [
     ...hostNamesFilter,
+    ...extraFilterList,
     {
       range: {
         '@timestamp': {
@@ -54,7 +59,6 @@ export const createFilters = ({
         field: 'host.name',
       },
     },
-    ...extraFilterList,
   ];
 };
 
@@ -64,11 +68,18 @@ export const runQuery = <T>(
   decoder: (aggregation: Record<string, estypes.AggregationsAggregate> | undefined) => T | undefined
 ): Observable<T | undefined> => {
   return serchClient
-    .search({
-      params: queryRequest,
-    })
+    .search(
+      {
+        params: queryRequest,
+      },
+      {
+        strategy: ES_SEARCH_STRATEGY,
+      }
+    )
     .pipe(
-      map((res) => decoder(res.rawResponse.aggregations)),
+      map((res) => {
+        return decoder(res.rawResponse.aggregations);
+      }),
       catchError((err) => {
         const error = {
           message: err.message,
@@ -79,4 +90,28 @@ export const runQuery = <T>(
         throw error;
       })
     );
+};
+
+export const getInventoryModelAggregations = (
+  metrics: HostMetricType[]
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
+  return metrics.reduce(
+    (acc, metric) => ({
+      ...acc,
+      ...inventoryModel.metrics.snapshot?.[metric],
+    }),
+    {}
+  );
+};
+
+export const getAfterKey = (groupName: string, afterKey?: AfterKey) => {
+  if (!afterKey) {
+    return null;
+  }
+  if (afterKeyObjectRT.is(afterKey)) {
+    return { after: afterKey };
+  } else {
+    return { after: { [groupName]: afterKey } };
+  }
 };

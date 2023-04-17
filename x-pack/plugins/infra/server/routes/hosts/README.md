@@ -5,13 +5,11 @@ This API returns a list of hosts and their metrics.
 **POST /api/metrics/hosts**
 parameters:
 
-- limit: max number of hosts; accepts from 1 to 100
 - metrics: list of metrics to be calculated and returned for each host
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
 - timeRange: time range object containing start and end attributes - passed in timestamp
 - (optional) query: filter
-- (optional) sortField: field used to sort the results
-- (optional) sortDirection: "asc" | "desc"
+- (optional) limit: max number of hosts
 
 The response includes:
 
@@ -61,8 +59,6 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/hosts' 
         "from": 1680040800000,
         "to":   1680645600000
     },
-    "sortField": "rx",
-    "sortDirection": "desc",
     "sourceId": "default"
 }'
 ```

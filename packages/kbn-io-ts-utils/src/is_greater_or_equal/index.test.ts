@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { inRangeRt } from '.';
+import { isGreaterOrEqualRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('inRangeRT', () => {
-  test('passes if value is within range', () => {
-    expect(isRight(inRangeRt(1, 100).decode(50))).toBe(true);
+  test('passes if value is a positive number', () => {
+    expect(isRight(isGreaterOrEqualRt(0).decode(1))).toBe(true);
   });
 
-  test('fails if value above the range', () => {
-    expect(isRight(inRangeRt(1, 100).decode(101))).toBe(false);
+  test('passes if value is 0', () => {
+    expect(isRight(isGreaterOrEqualRt(0).decode(0))).toBe(true);
   });
 
-  test('fails if value below the range', () => {
-    expect(isRight(inRangeRt(1, 100).decode(0))).toBe(false);
+  test('fails if value is a negative number', () => {
+    expect(isRight(isGreaterOrEqualRt(0).decode(-1))).toBe(false);
   });
 });

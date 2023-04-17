@@ -9,8 +9,9 @@ import { GetHostsResponsePayload } from '../../../../common/http_api/hosts';
 import { getFilteredHosts } from './get_filtered_hosts';
 import { mapToApiResponse } from './mapper';
 import { hasFilters } from './utils';
-import { getTopHosts } from './get_top_hosts';
 import { GetHostsArgs } from './types';
+import { getAllHosts } from './get_all_hosts';
+import { COMPOSITE_KEY } from './constants';
 
 export const getHosts = async (args: GetHostsArgs): Promise<GetHostsResponsePayload> => {
   const runFilterQuery = hasFilters(args.params.query);
@@ -22,13 +23,14 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetHostsResponsePayl
     };
   }
 
-  const topHosts = await getTopHosts(args, hostNamesShortList);
-  return mapToApiResponse(args.params, topHosts?.hosts.buckets);
+  const result = await getAllHosts(args, hostNamesShortList);
+
+  return mapToApiResponse(args.params, result?.hosts.buckets);
 };
 
 const getFilteredHostNames = async (args: GetHostsArgs) => {
   const filteredHosts = await getFilteredHosts(args);
 
   const { hosts } = filteredHosts ?? {};
-  return hosts?.buckets.map((p) => p.key) ?? [];
+  return hosts?.buckets.map((p) => p.key[COMPOSITE_KEY]) ?? [];
 };

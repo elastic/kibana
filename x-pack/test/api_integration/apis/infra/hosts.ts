@@ -91,11 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'diskLatency', value: 0 },
+              { name: 'diskLatency', value: null },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryTotal', value: 15768948736 },
-              { name: 'rx', value: 0 },
-              { name: 'tx', value: 0 },
+              { name: 'rx', value: null },
+              { name: 'tx', value: null },
             ],
             name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
           },
@@ -137,99 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'cloud.provider', value: 'gcp' },
             ],
             metrics: [{ name: 'memory', value: 0.2346666666666667 }],
-            name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
-          },
-        ]);
-      });
-
-      it('should sort all hosts sorted by cpu desc', async () => {
-        const body: GetHostsRequestBodyPayload = {
-          ...basePayload,
-          metrics: [
-            {
-              type: 'cpu',
-            },
-          ],
-          sortField: 'cpu',
-          sortDirection: 'desc',
-        };
-        const response = await makeRequest({ body, expectedHTTPCode: 200 });
-
-        expect(response.body.hosts).eql([
-          {
-            metadata: [
-              { name: 'host.os.name', value: 'CentOS Linux' },
-              { name: 'cloud.provider', value: 'gcp' },
-            ],
-            metrics: [{ name: 'cpu', value: 0.6146666666666667 }],
-            name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
-          },
-          {
-            metadata: [
-              { name: 'host.os.name', value: 'CentOS Linux' },
-              { name: 'cloud.provider', value: 'gcp' },
-            ],
-            metrics: [{ name: 'cpu', value: 0.44708333333333333 }],
-            name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-          },
-          {
-            metadata: [
-              { name: 'host.os.name', value: 'CentOS Linux' },
-              { name: 'cloud.provider', value: 'gcp' },
-            ],
-            metrics: [{ name: 'cpu', value: 0.3514166666666667 }],
-            name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
-          },
-        ]);
-      });
-
-      it('should return 1 host sorted by cpu desc', async () => {
-        const body: GetHostsRequestBodyPayload = {
-          ...basePayload,
-          limit: 1,
-          metrics: [
-            {
-              type: 'cpu',
-            },
-          ],
-          sortField: 'cpu',
-          sortDirection: 'desc',
-        };
-        const response = await makeRequest({ body, expectedHTTPCode: 200 });
-
-        expect(response.body.hosts).eql([
-          {
-            metadata: [
-              { name: 'host.os.name', value: 'CentOS Linux' },
-              { name: 'cloud.provider', value: 'gcp' },
-            ],
-            metrics: [{ name: 'cpu', value: 0.6146666666666667 }],
-            name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
-          },
-        ]);
-      });
-
-      it('should return 1 host sorted by memoryTotal asc', async () => {
-        const body: GetHostsRequestBodyPayload = {
-          ...basePayload,
-          limit: 1,
-          metrics: [
-            {
-              type: 'memoryTotal',
-            },
-          ],
-          sortField: 'memoryTotal',
-          sortDirection: 'asc',
-        };
-        const response = await makeRequest({ body, expectedHTTPCode: 200 });
-
-        expect(response.body.hosts).eql([
-          {
-            metadata: [
-              { name: 'host.os.name', value: 'CentOS Linux' },
-              { name: 'cloud.provider', value: 'gcp' },
-            ],
-            metrics: [{ name: 'memoryTotal', value: 15768940544 }],
             name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
           },
         ]);
@@ -303,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in limit: 0 does not match expected type InRange in limit: 0 does not match expected type pipe(undefined, BooleanFromString)'
+          '[request body]: Failed to validate: in limit: 0 does not match expected type IsGreaterOrEqual'
         );
       });
 
@@ -312,27 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in limit: -2 does not match expected type InRange in limit: -2 does not match expected type pipe(undefined, BooleanFromString)'
+          '[request body]: Failed to validate: in limit: -2 does not match expected type IsGreaterOrEqual'
         );
-      });
-
-      it('should fail when limit above 100', async () => {
-        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 150 };
-        const response = await makeRequest({ body, expectedHTTPCode: 400 });
-
-        expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in limit: 150 does not match expected type InRange in limit: 150 does not match expected type pipe(undefined, BooleanFromString)'
-        );
-      });
-
-      it('should pass when limit is 1', async () => {
-        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 1 };
-        await makeRequest({ body, expectedHTTPCode: 200 });
-      });
-
-      it('should pass when limit is 100', async () => {
-        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 100 };
-        await makeRequest({ body, expectedHTTPCode: 200 });
       });
 
       it('should fail when metric is invalid', async () => {
@@ -341,24 +229,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
-        );
-      });
-
-      it('should fail when sortDirection is invalid', async () => {
-        const invalidBody = { ...basePayload, sortDirection: 'any' };
-        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
-
-        expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in sortDirection: "any" does not match expected type "desc" in sortDirection: "any" does not match expected type "asc"'
-        );
-      });
-
-      it('should fail when sortField is invalid', async () => {
-        const invalidBody = { ...basePayload, sortField: 'any' };
-        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
-
-        expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in sortField: "any" does not match expected type "name" | "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
         );
       });
 
