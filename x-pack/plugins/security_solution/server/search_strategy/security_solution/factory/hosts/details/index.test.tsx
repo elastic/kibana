@@ -20,7 +20,6 @@ import type {
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const mockDeps = {
   esClient: {} as IScopedClusterClient,
@@ -35,7 +34,6 @@ const mockDeps = {
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
-    licensing: licensingMock.createSetup(),
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
   request: {} as KibanaRequest,
