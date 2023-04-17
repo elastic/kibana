@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const UNABLE_TO_FETCH_RULE_SNOOZE_SETTINGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.ruleSnooze.error.unableToFetch',
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSnoozeBadge.error.unableToFetch',
   {
     defaultMessage: 'Unable to fetch snooze settings',
   }

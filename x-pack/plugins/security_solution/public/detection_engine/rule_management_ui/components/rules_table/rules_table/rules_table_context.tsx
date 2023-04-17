@@ -38,17 +38,18 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
-import * as i18n from './translations';
 
-export interface ExtendedRule extends Rule {
-  snoozeSettings?: RuleSnoozeSettings | Error;
+interface RulesSnoozeSettings {
+  data?: Record<string, RuleSnoozeSettings>; // Mapped by rule SO's id (not ruleId)
+  isLoading: boolean;
+  isError: boolean;
 }
 
 export interface RulesTableState {
   /**
    * Rules to display (sorted and paginated in case of in-memory)
    */
-  rules: ExtendedRule[];
+  rules: Rule[];
   /**
    * Currently selected table filter
    */
@@ -113,6 +114,10 @@ export interface RulesTableState {
    * Whether the state has its default value
    */
   isDefault: boolean;
+  /**
+   * Rules snooze settings for the current rules
+   */
+  rulesSnoozeSettings: RulesSnoozeSettings;
 }
 
 export type LoadingRuleAction =
@@ -262,14 +267,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total },
+    data: { rules, total } = { rules: [], total: 0 },
     refetch,
     dataUpdatedAt,
     isFetched,
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindExtendedRules(
+  } = useFindRules(
     {
       filterOptions,
       sortingOptions,
@@ -281,9 +286,27 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   );
 
+  // Fetch rules snooze settings
+  const {
+    data: rulesSnoozeSettings,
+    isLoading: isSnoozeSettingsLoading,
+    isError: isSnoozeSettingsFetchError,
+    refetch: refetchSnoozeSettings,
+  } = useFetchRulesSnoozeSettings(
+    rules.map((x) => x.id),
+    { enabled: rules.length > 0 }
+  );
+
+  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+    const response = await refetch();
+    await refetchSnoozeSettings();
+
+    return response;
+  }, [refetch, refetchSnoozeSettings]);
+
   const actions = useMemo(
     () => ({
-      reFetchRules: refetch,
+      reFetchRules: refetchRulesAndSnoozeSettings,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -297,7 +320,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetch,
+      refetchRulesAndSnoozeSettings,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -312,10 +335,21 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(
-    () => ({
+  const providerValue = useMemo(() => {
+    const rulesSnoozeSettingsMap = rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
+      map[snoozeSettings.id] = snoozeSettings;
+
+      return map;
+    }, {} as Record<string, RuleSnoozeSettings>);
+
+    return {
       state: {
         rules,
+        rulesSnoozeSettings: {
+          data: rulesSnoozeSettingsMap,
+          isLoading: isSnoozeSettingsLoading,
+          isError: isSnoozeSettingsFetchError,
+        },
         pagination: {
           page,
           perPage,
@@ -342,29 +376,31 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    }),
-    [
-      rules,
-      page,
-      perPage,
-      total,
-      filterOptions,
-      isPreflightInProgress,
-      isActionInProgress,
-      isAllSelected,
-      isFetched,
-      isFetching,
-      isLoading,
-      isRefetching,
-      isRefreshOn,
-      dataUpdatedAt,
-      loadingRules.ids,
-      loadingRules.action,
-      selectedRuleIds,
-      sortingOptions,
-      actions,
-    ]
-  );
+    };
+  }, [
+    rules,
+    rulesSnoozeSettings,
+    isSnoozeSettingsLoading,
+    isSnoozeSettingsFetchError,
+    page,
+    perPage,
+    total,
+    filterOptions,
+    isPreflightInProgress,
+    isActionInProgress,
+    isAllSelected,
+    isFetched,
+    isFetching,
+    isLoading,
+    isRefetching,
+    isRefreshOn,
+    dataUpdatedAt,
+    loadingRules.ids,
+    loadingRules.action,
+    selectedRuleIds,
+    sortingOptions,
+    actions,
+  ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };
@@ -381,67 +417,6 @@ export const useRulesTableContext = (): RulesTableContextType => {
 
 export const useRulesTableContextOptional = (): RulesTableContextType | null =>
   useContext(RulesTableContext);
-
-interface ExtendedData {
-  rules: ExtendedRule[];
-  total: number;
-}
-
-function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
-  const {
-    data: { rules, total } = { rules: [], total: 0 },
-    refetch: refetchRules,
-    ...restResult
-  } = useFindRules(...params);
-
-  // Fetch rule snooze settings
-  const {
-    data: rulesSnoozeSettings,
-    isError: isSnoozeSettingsFetchingError,
-    refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(
-    rules.map((x) => x.id),
-    { enabled: rules.length > 0 }
-  );
-
-  const extendedData = useMemo<ExtendedData>(() => {
-    if (isSnoozeSettingsFetchingError) {
-      return {
-        rules: rules.map((r) => ({
-          ...r,
-          snoozeSettings: new Error(i18n.UNABLE_TO_FETCH_RULE_SNOOZE_SETTINGS),
-        })),
-        total,
-      };
-    }
-
-    if (!rulesSnoozeSettings) {
-      return { rules, total };
-    }
-
-    const rulesSnoozeSettingsMap = new Map(rulesSnoozeSettings?.map((x) => [x.id, x]));
-
-    return {
-      rules: rules.map((r) => ({
-        ...r,
-        snoozeSettings: rulesSnoozeSettingsMap.get(r.id),
-      })),
-      total,
-    };
-  }, [rules, total, rulesSnoozeSettings, isSnoozeSettingsFetchingError]);
-  const refetchRulesAndSnoozeSettings = useCallback(async () => {
-    const response = await refetchRules();
-    await refetchSnoozeSettings();
-
-    return response;
-  }, [refetchRules, refetchSnoozeSettings]);
-
-  return {
-    ...restResult,
-    refetch: refetchRulesAndSnoozeSettings,
-    data: extendedData,
-  };
-}
 
 function isDefaultState(
   filter: FilterOptions,

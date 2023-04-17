@@ -180,13 +180,10 @@ describe('RulesTableContextProvider', () => {
           rulesSnoozeSettings: new Error('some error'),
         });
 
-        expect(state.rules).toEqual([
-          { name: 'rule 1', snoozeSettings: new Error('Unable to fetch snooze settings') },
-          { name: 'rule 2', snoozeSettings: new Error('Unable to fetch snooze settings') },
-        ]);
+        expect(state.rules).toEqual([{ name: 'rule 1' }, { name: 'rule 2' }]);
       });
 
-      it('returns rules with snooze settings', () => {
+      it('returns rules after snooze settings loaded', () => {
         const state = renderUseRulesTableContext({
           rules: [
             { id: '1', name: 'rule 1' },
@@ -202,14 +199,40 @@ describe('RulesTableContextProvider', () => {
           {
             id: '1',
             name: 'rule 1',
-            snoozeSettings: { id: '1', mute_all: true, snooze_schedule: [] },
           },
           {
             id: '2',
             name: 'rule 2',
-            snoozeSettings: { id: '2', mute_all: false, snooze_schedule: [] },
           },
         ]);
+      });
+    });
+
+    describe('rules snooze settings', () => {
+      it('returns snooze settings', () => {
+        const state = renderUseRulesTableContext({
+          rules: [
+            { id: '1', name: 'rule 1' },
+            { id: '2', name: 'rule 2' },
+          ] as Rule[],
+          rulesSnoozeSettings: [
+            { id: '1', mute_all: true, snooze_schedule: [] },
+            { id: '2', mute_all: false, snooze_schedule: [] },
+          ],
+        });
+
+        expect(state.rulesSnoozeSettings.data).toEqual({
+          '1': {
+            id: '1',
+            mute_all: true,
+            snooze_schedule: [],
+          },
+          '2': {
+            id: '2',
+            mute_all: false,
+            snooze_schedule: [],
+          },
+        });
       });
     });
   });
