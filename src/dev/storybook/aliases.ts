@@ -43,6 +43,7 @@ export const storybookAliases = {
   lists: 'x-pack/plugins/lists/.storybook',
   observability: 'x-pack/plugins/observability/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
+  random_sampling: 'src/plugins/random_sampling/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'packages/security-solution/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',

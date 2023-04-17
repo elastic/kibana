@@ -4713,6 +4713,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/random-sampling-plugin@link:src/plugins/random_sampling":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-field@link:packages/kbn-react-field":
   version "0.0.0"
   uid ""

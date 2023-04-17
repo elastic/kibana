@@ -988,6 +988,8 @@
       "@kbn/presentation-util-plugin/*": ["src/plugins/presentation_util/*"],
       "@kbn/profiling-plugin": ["x-pack/plugins/profiling"],
       "@kbn/profiling-plugin/*": ["x-pack/plugins/profiling/*"],
+      "@kbn/random-sampling-plugin": ["src/plugins/random_sampling"],
+      "@kbn/random-sampling-plugin/*": ["src/plugins/random_sampling/*"],
       "@kbn/react-field": ["packages/kbn-react-field"],
       "@kbn/react-field/*": ["packages/kbn-react-field/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],
