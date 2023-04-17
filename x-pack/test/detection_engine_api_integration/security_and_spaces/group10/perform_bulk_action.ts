@@ -33,7 +33,7 @@ import {
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
-  waitForRuleFailure,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -333,9 +333,8 @@ export default ({ getService }: FtrProviderContext): void => {
           uuid: ruleBody.actions[0].uuid,
         },
       ]);
-      // TODO: at this moment rule execution will be failing, but fix on the way
-      // once fixed, it should be changed to waitForRuleSuccess
-      await waitForRuleFailure({ id: rule1.id, supertest, log });
+      // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
+      await waitForRuleSuccess({ id: rule1.id, supertest, log });
     });
 
     it('should disable rules', async () => {
