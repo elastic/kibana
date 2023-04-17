@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
 import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
@@ -43,6 +44,43 @@ export const useChartPreviewData = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
+        if (isRatioRule(ruleParams.criteria)) {
+          const ratio = await Promise.all([
+            callGetChartPreviewDataAPI(
+              logViewReference,
+              http!.fetch,
+              { ...ruleParams, criteria: [...ruleParams.criteria[0]] },
+              buckets,
+              executionTimeRange
+            ),
+            callGetChartPreviewDataAPI(
+              logViewReference,
+              http!.fetch,
+              { ...ruleParams, criteria: [...ruleParams.criteria[1]] },
+              buckets,
+              executionTimeRange
+            ),
+          ]);
+          // The two array have the same length and the same time range.
+          const seriesQueryA = ratio[0].data.series[0].points;
+          const seriesQueryB = ratio[1].data.series[0].points;
+          const ratioPoints = [];
+          for (let index = 0; index < seriesQueryA.length; index++) {
+            const point = {
+              timestamp: seriesQueryA[index].timestamp,
+              value: 0,
+            };
+            // We follow the mathematics principle that dividing by 0 isn't possible,
+            if (seriesQueryA[index].value === 0 || seriesQueryB[index].value === 0) {
+              ratioPoints.push(point);
+            } else {
+              const ratioValue = seriesQueryA[index].value / seriesQueryB[index].value;
+              ratioPoints.push({ ...point, value: ratioValue });
+            }
+          }
+          const series = [{ id: 'ratio', points: ratioPoints }];
+          return { data: { series } };
+        }
         return await callGetChartPreviewDataAPI(
           logViewReference,
           http!.fetch,
