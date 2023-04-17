@@ -41,7 +41,6 @@ import type {
   KibanaResponseFactory,
   RouteMethod,
   HttpServiceSetup,
-  IRouterWithVersion,
 } from '@kbn/core-http-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
@@ -508,12 +507,12 @@ type PublicRequestHandler<
 export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };
 
 /**
- * Public version of IRouter, default-scoped to {@link RequestHandlerContext} and with versioned router.
+ * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
  * See [@link IRouter}
  * @public
  */
 type PublicRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
-  IRouterWithVersion<ContextType>;
+  IRouter<ContextType>;
 
 export type { PublicRouter as IRouter, IRouter as IBaseRouter };
 
