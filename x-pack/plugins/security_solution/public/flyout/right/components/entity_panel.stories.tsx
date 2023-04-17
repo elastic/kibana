@@ -17,25 +17,33 @@ export default {
 const defaultProps = {
   title: 'title',
   iconType: 'storage',
-  content: 'test content',
 };
+const children = <p>{'test content'}</p>;
 
 export const Default: Story<void> = () => {
-  return <EntityPanel {...defaultProps} />;
+  return <EntityPanel {...defaultProps}>{children}</EntityPanel>;
 };
 
 export const Expandable: Story<void> = () => {
-  return <EntityPanel {...defaultProps} expandable={true} />;
+  return (
+    <EntityPanel {...defaultProps} expandable={true}>
+      {children}
+    </EntityPanel>
+  );
 };
 
 export const ExpandableDefaultOpen: Story<void> = () => {
-  return <EntityPanel {...defaultProps} expandable={true} expanded={true} />;
+  return (
+    <EntityPanel {...defaultProps} expandable={true} expanded={true}>
+      {children}
+    </EntityPanel>
+  );
 };
 
 export const EmptyDefault: Story<void> = () => {
-  return <EntityPanel {...defaultProps} content={null} />;
+  return <EntityPanel {...defaultProps} />;
 };
 
 export const EmptyDefaultExpanded: Story<void> = () => {
-  return <EntityPanel {...defaultProps} expandable={true} content={null} />;
+  return <EntityPanel {...defaultProps} expandable={true} />;
 };

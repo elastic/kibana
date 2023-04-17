@@ -127,9 +127,7 @@ describe.skip('Alert details expandable flyout left panel', { testIsolation: fal
     it('should display content when switching buttons', () => {
       openInsightsTab();
       openEntities();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT)
-        .should('be.visible')
-        .and('have.text', 'Entities');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
 
       openThreatIntelligence();
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT)

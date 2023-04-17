@@ -10,36 +10,42 @@ import { render } from '@testing-library/react';
 import { EntityPanel } from './entity_panel';
 import {
   ENTITY_PANEL_TEST_ID,
-  ENTITY_PANEL_ICON_TEST_ID,
   ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID,
   ENTITY_PANEL_HEADER_TEST_ID,
   ENTITY_PANEL_CONTENT_TEST_ID,
 } from './test_ids';
+import { ThemeProvider } from 'styled-components';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 const defaultProps = {
   title: 'test',
   iconType: 'storage',
-  content: 'test content',
 };
+const children = <p>{'test content'}</p>;
 
 describe('<EntityPanel />', () => {
   describe('panel is not expandable by default', () => {
     it('should render non-expandable panel by default', () => {
-      const { getByTestId, queryByTestId } = render(<EntityPanel {...defaultProps} />);
+      const { getByTestId, queryByTestId } = render(
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps}>{children}</EntityPanel>
+        </ThemeProvider>
+      );
 
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
       expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
-
       expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID).firstChild).toHaveAttribute(
-        'data-euiicon-type',
-        'storage'
-      );
     });
 
     it('should not render content when content is null', () => {
-      const { queryByTestId } = render(<EntityPanel {...defaultProps} content={null} />);
+      const { queryByTestId } = render(
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} />
+        </ThemeProvider>
+      );
 
       expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
@@ -49,7 +55,11 @@ describe('<EntityPanel />', () => {
   describe('panel is expandable', () => {
     it('should render panel with toggle and collapsed by default', () => {
       const { getByTestId, queryByTestId } = render(
-        <EntityPanel {...defaultProps} expandable={true} />
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true}>
+            {children}
+          </EntityPanel>
+        </ThemeProvider>
       );
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
@@ -57,7 +67,13 @@ describe('<EntityPanel />', () => {
     });
 
     it('click toggle button should expand the panel', () => {
-      const { getByTestId } = render(<EntityPanel {...defaultProps} expandable={true} />);
+      const { getByTestId } = render(
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true}>
+            {children}
+          </EntityPanel>
+        </ThemeProvider>
+      );
 
       const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
@@ -69,7 +85,9 @@ describe('<EntityPanel />', () => {
 
     it('should not render toggle or content when content is null', () => {
       const { queryByTestId } = render(
-        <EntityPanel {...defaultProps} content={null} expandable={true} />
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true} />
+        </ThemeProvider>
       );
       expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
@@ -79,7 +97,11 @@ describe('<EntityPanel />', () => {
   describe('panel is expandable and expanded by default', () => {
     it('should render header and content', () => {
       const { getByTestId } = render(
-        <EntityPanel {...defaultProps} expandable={true} expanded={true} />
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true} expanded={true}>
+            {children}
+          </EntityPanel>
+        </ThemeProvider>
       );
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
@@ -89,7 +111,11 @@ describe('<EntityPanel />', () => {
 
     it('click toggle button should collapse the panel', () => {
       const { getByTestId, queryByTestId } = render(
-        <EntityPanel {...defaultProps} expandable={true} expanded={true} />
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true} expanded={true}>
+            {children}
+          </EntityPanel>
+        </ThemeProvider>
       );
 
       const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
@@ -103,7 +129,9 @@ describe('<EntityPanel />', () => {
 
     it('should not render content when content is null', () => {
       const { queryByTestId } = render(
-        <EntityPanel {...defaultProps} content={null} expandable={true} />
+        <ThemeProvider theme={mockTheme}>
+          <EntityPanel {...defaultProps} expandable={true} />
+        </ThemeProvider>
       );
       expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();

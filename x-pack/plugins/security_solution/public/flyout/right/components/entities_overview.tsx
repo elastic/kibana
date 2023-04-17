@@ -58,20 +58,16 @@ export const EntitiesOverview: React.FC = () => {
       <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
         {userName && (
           <EuiFlexItem>
-            <EntityPanel
-              title={userName}
-              iconType={USER_ICON}
-              content={<UserEntityOverview userName={userName} />}
-            />
+            <EntityPanel title={userName} iconType={USER_ICON}>
+              <UserEntityOverview userName={userName} />
+            </EntityPanel>
           </EuiFlexItem>
         )}
         {hostName && (
           <EuiFlexItem>
-            <EntityPanel
-              title={hostName}
-              iconType={HOST_ICON}
-              content={<HostEntityOverview hostName={hostName} />}
-            />
+            <EntityPanel title={hostName} iconType={HOST_ICON}>
+              <HostEntityOverview hostName={hostName} />
+            </EntityPanel>
           </EuiFlexItem>
         )}
         <EuiButtonEmpty
