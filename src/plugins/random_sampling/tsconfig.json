@@ -12,14 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/embeddable-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/test-jest-helpers",
-    "@kbn/utility-types",
-    "@kbn/utility-types-jest",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",
