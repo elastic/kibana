@@ -45,24 +45,25 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
-  getFilesClient?: (scope: string) => ScopedFilesClient;
   license?: ILicense;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 
-export const mockedFilesClient = createMockFilesClient() as unknown as DeeplyMockedKeys<
-  ScopedFilesClient<unknown>
->;
+const mockGetFilesClient = () => {
+  const mockedFilesClient = createMockFilesClient() as unknown as DeeplyMockedKeys<
+    ScopedFilesClient<unknown>
+  >;
 
-mockedFilesClient.getFileKind.mockImplementation(() => ({
-  id: 'test',
-  maxSizeBytes: 10000,
-  http: {},
-}));
+  mockedFilesClient.getFileKind.mockImplementation(() => ({
+    id: 'test',
+    maxSizeBytes: 10000,
+    http: {},
+  }));
 
-const mockGetFilesClient = () => mockedFilesClient;
+  return () => mockedFilesClient;
+};
 
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 
@@ -75,9 +76,10 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  getFilesClient = mockGetFilesClient,
   license,
 }) => {
+  const services = createStartServicesMock({ license });
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -91,7 +93,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     },
   });
 
-  const services = createStartServicesMock({ license });
+  const getFilesClient = mockGetFilesClient();
 
   return (
     <I18nProvider>
@@ -129,6 +131,7 @@ export interface AppMockRenderer {
   coreStart: StartServices;
   queryClient: QueryClient;
   AppWrapper: React.FC<{ children: React.ReactElement }>;
+  getFilesClient: () => ScopedFilesClient;
 }
 
 export const testQueryClient = new QueryClient({
@@ -155,7 +158,6 @@ export const createAppMockRenderer = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  getFilesClient = mockGetFilesClient,
   license,
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock({ license });
@@ -172,6 +174,8 @@ export const createAppMockRenderer = ({
       error: () => {},
     },
   });
+
+  const getFilesClient = mockGetFilesClient();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
@@ -215,6 +219,7 @@ export const createAppMockRenderer = ({
     AppWrapper,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    getFilesClient,
   };
 };
 

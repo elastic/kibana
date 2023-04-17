@@ -12,11 +12,7 @@ import { basicFileMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 
 import { constructFileKindIdByOwner } from '../../../common/files';
-import {
-  createAppMockRenderer,
-  mockedFilesClient,
-  mockedTestProvidersOwner,
-} from '../../common/mock';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { FilesTable } from './files_table';
 import userEvent from '@testing-library/user-event';
 
@@ -136,8 +132,8 @@ describe('FilesTable', () => {
   it('download button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
-    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+    expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+    expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
       fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       id: basicFileMock.id,
     });
@@ -148,8 +144,8 @@ describe('FilesTable', () => {
   it('delete button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
-    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+    expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+    expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
       fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       id: basicFileMock.id,
     });
@@ -160,8 +156,8 @@ describe('FilesTable', () => {
   it('clicking delete button opens deletion modal', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
-    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+    expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+    expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
       fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       id: basicFileMock.id,
     });

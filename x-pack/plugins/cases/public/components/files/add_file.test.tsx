@@ -19,7 +19,6 @@ import {
   buildCasesPermissions,
   createAppMockRenderer,
   mockedTestProvidersOwner,
-  mockedFilesClient,
 } from '../../common/mock';
 import { AddFile } from './add_file';
 import { useToasts } from '../../common/lib/kibana';
@@ -229,7 +228,7 @@ describe('AddFile', () => {
     userEvent.click(await screen.findByTestId('testOnDone'));
 
     await waitFor(() =>
-      expect(mockedFilesClient.delete).toHaveBeenCalledWith({
+      expect(appMockRender.getFilesClient().delete).toHaveBeenCalledWith({
         id: mockedExternalReferenceId,
         kind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       })

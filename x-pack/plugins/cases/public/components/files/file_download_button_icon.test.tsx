@@ -9,11 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
-import {
-  createAppMockRenderer,
-  mockedFilesClient,
-  mockedTestProvidersOwner,
-} from '../../common/mock';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { FileDownloadButtonIcon } from './file_download_button_icon';
 import { basicFileMock } from '../../containers/mock';
 import { constructFileKindIdByOwner } from '../../../common/files';
@@ -31,8 +27,8 @@ describe('FileDownloadButtonIcon', () => {
 
     expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
-    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
-    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+    expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+    expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
       fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       id: basicFileMock.id,
     });

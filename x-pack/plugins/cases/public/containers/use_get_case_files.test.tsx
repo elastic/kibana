@@ -10,7 +10,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { basicCase } from './mock';
 
 import type { AppMockRenderer } from '../common/mock';
-import { mockedTestProvidersOwner, mockedFilesClient, createAppMockRenderer } from '../common/mock';
+import { mockedTestProvidersOwner, createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFiles } from './use_get_case_files';
 import { constructFileKindIdByOwner } from '../../common/files';
@@ -44,7 +44,7 @@ describe('useGetCaseFiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    mockedFilesClient.list = jest.fn().mockImplementation(() => {
+    appMockRender.getFilesClient().list = jest.fn().mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
@@ -53,7 +53,7 @@ describe('useGetCaseFiles', () => {
     });
     await waitForNextUpdate();
 
-    expect(mockedFilesClient.list).toBeCalledWith(expectedCallParams);
+    expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
     expect(addError).toHaveBeenCalled();
   });
 
@@ -64,7 +64,7 @@ describe('useGetCaseFiles', () => {
       });
       await waitForNextUpdate();
 
-      expect(mockedFilesClient.list).toBeCalledWith(expectedCallParams);
+      expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
     });
   });
 });
