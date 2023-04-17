@@ -149,7 +149,7 @@ describe('application-level user messages', () => {
           activeDatasource: {
             checkIntegrity: jest.fn(() => ['missing_pattern']),
           } as unknown as Datasource,
-          activeDatasourceState: { state: {} },
+          activeDatasourceState: { isLoading: false, state: {} },
           core: createCoreStartWithPermissions(),
           ...irrelevantProps,
         })
@@ -166,7 +166,7 @@ describe('application-level user messages', () => {
                 activeDatasource: {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,
-                activeDatasourceState: { state: {} },
+                activeDatasourceState: { isLoading: false, state: {} },
                 // user can go to management, but indexPatterns management is not accessible
                 core: createCoreStartWithPermissions({
                   navLinks: { management: true },
@@ -188,7 +188,7 @@ describe('application-level user messages', () => {
                 activeDatasource: {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,
-                activeDatasourceState: { state: {} },
+                activeDatasourceState: { isLoading: false, state: {} },
                 // user can't go to management at all
                 core: createCoreStartWithPermissions({
                   navLinks: { management: false },
