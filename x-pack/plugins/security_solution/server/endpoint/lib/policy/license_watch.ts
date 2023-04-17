@@ -107,7 +107,7 @@ export class PolicyWatcher {
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
         updatePolicy.inputs[0].config.policy.value.meta.license = license.type || '';
         // add cloud id to policy meta
-        //TODO: remove this logger after checking with cloud deployment
+        // TODO: remove this logger after checking with cloud deployment
         this.logger.error(this.cloud?.isCloudEnabled as unknown as string);
         updatePolicy.inputs[0].config.policy.value.meta.cloud = this.cloud?.isCloudEnabled
           ? this.cloud.cloudId
