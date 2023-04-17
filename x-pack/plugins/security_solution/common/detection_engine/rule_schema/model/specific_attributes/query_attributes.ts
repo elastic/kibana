@@ -11,6 +11,12 @@ import {
   PositiveIntegerGreaterThanZero,
 } from '@kbn/securitysolution-io-ts-types';
 
+export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
+export const AlertSuppressionMissingFields = t.union([
+  t.literal('singleAlertForAllDocuments'),
+  t.literal('oneAlertPerDocument'),
+]);
+
 export const AlertSuppressionGroupBy = LimitedSizeArray({
   codec: t.string,
   minSize: 1,
@@ -43,6 +49,11 @@ export const AlertSuppression = t.intersection([
       duration: AlertSuppressionDuration,
     })
   ),
+  t.exact(
+    t.partial({
+      missing_fields_strategy: AlertSuppressionMissingFields,
+    })
+  ),
 ]);
 
 export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
@@ -55,6 +66,11 @@ export const AlertSuppressionCamel = t.intersection([
   t.exact(
     t.partial({
       duration: AlertSuppressionDuration,
+    })
+  ),
+  t.exact(
+    t.partial({
+      missingFieldsStrategy: AlertSuppressionMissingFields,
     })
   ),
 ]);

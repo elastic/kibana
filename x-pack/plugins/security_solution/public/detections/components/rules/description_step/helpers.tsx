@@ -47,7 +47,10 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
+import {
+  GroupByOptions,
+  SuppressionMissingFieldsOptions,
+} from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import type { LicenseService } from '../../../../../common/license';
@@ -568,6 +571,43 @@ export const buildAlertSuppressionWindowDescription = (
     groupByRadioSelection === GroupByOptions.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionMissingFieldsDescription = (
+  label: string,
+  value: SuppressionMissingFieldsOptions,
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(value)) {
+    return [];
+  }
+
+  const description =
+    value === SuppressionMissingFieldsOptions.OneAlertPerDocument
+      ? 'One alert per each document'
+      : 'Single alert for all documents';
 
   const title = (
     <>

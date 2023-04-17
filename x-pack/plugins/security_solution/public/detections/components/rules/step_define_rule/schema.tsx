@@ -622,6 +622,14 @@ export const schema: FormSchema<DefineStepRule> = {
     value: {},
     unit: {},
   },
+  suppressionMissingFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
+      {
+        defaultMessage: 'Strategy for documents with missing "suppress by" fields',
+      }
+    ),
+  },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(

@@ -46,6 +46,7 @@ import {
   RuleStep,
   DataSourceType,
   GroupByOptions,
+  SuppressionMissingFieldsOptions,
 } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
@@ -179,6 +180,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'groupByRadioSelection',
       'groupByDuration.value',
       'groupByDuration.unit',
+      'suppressionMissingFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -561,6 +563,34 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields]
   );
 
+  const AlertsSuppressionMissingFields = useCallback(
+    ({ suppressionMissingFields }) => (
+      <EuiRadioGroup
+        disabled={
+          !license.isAtLeast(minimumLicenseForSuppression) ||
+          groupByFields == null ||
+          groupByFields.length === 0
+        }
+        idSelected={suppressionMissingFields.value}
+        options={[
+          {
+            id: SuppressionMissingFieldsOptions.SingleAlertForAllDocuments,
+            label: 'Single alert for all documents',
+          },
+          {
+            id: SuppressionMissingFieldsOptions.OneAlertPerDocument,
+            label: 'One alert per each document',
+          },
+        ]}
+        onChange={(id: string) => {
+          suppressionMissingFields.setValue(id);
+        }}
+        data-test-subj="suppressionMissingFieldsOptions"
+      />
+    ),
+    [license, groupByFields]
+  );
+
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
     () => [
       {
@@ -901,6 +931,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             >
               {GroupByChildren}
+            </UseMultiFields>
+          </RuleTypeEuiFormRow>
+
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionMissingFields"
+            label={`Strategy for documents with missing "suppress by" fields`}
+          >
+            <UseMultiFields
+              fields={{
+                suppressionMissingFields: {
+                  path: 'suppressionMissingFields',
+                },
+              }}
+            >
+              {AlertsSuppressionMissingFields}
             </UseMultiFields>
           </RuleTypeEuiFormRow>
 

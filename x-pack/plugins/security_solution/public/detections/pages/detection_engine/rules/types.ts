@@ -148,6 +148,11 @@ export enum GroupByOptions {
   PerTimePeriod = 'per-time-period',
 }
 
+export enum SuppressionMissingFieldsOptions {
+  SingleAlertForAllDocuments = 'singleAlertForAllDocuments',
+  OneAlertPerDocument = 'oneAlertPerDocument',
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -176,6 +181,7 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
+  suppressionMissingFields?: SuppressionMissingFieldsOptions;
 }
 
 export interface Duration {
