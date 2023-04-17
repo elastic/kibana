@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { pluginServices } from '../../services/plugin_services';
-import { createConfirmStrings, discardConfirmStrings } from '../_dashboard_app_strings';
+import { pluginServices } from '../services/plugin_services';
+import { createConfirmStrings, discardConfirmStrings } from './_dashboard_listing_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 

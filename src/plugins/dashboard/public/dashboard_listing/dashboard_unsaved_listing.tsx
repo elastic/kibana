@@ -17,12 +17,13 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import type { DashboardRedirect } from '../types';
-import { DashboardAttributes } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
+import { DashboardAttributes } from '../../common';
+import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../_dashboard_app_strings';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const DashboardUnsavedItem = ({
   id,
@@ -104,13 +105,13 @@ interface UnsavedItemMap {
 }
 
 export interface DashboardUnsavedListingProps {
-  refreshUnsavedDashboards: () => void;
-  redirectTo: DashboardRedirect;
   unsavedDashboardIds: string[];
+  refreshUnsavedDashboards: () => void;
+  goToDashboard: (dashboardId?: string, viewMode?: ViewMode) => void;
 }
 
 export const DashboardUnsavedListing = ({
-  redirectTo,
+  goToDashboard,
   unsavedDashboardIds,
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
@@ -123,9 +124,9 @@ export const DashboardUnsavedListing = ({
 
   const onOpen = useCallback(
     (id?: string) => {
-      redirectTo({ destination: 'dashboard', id, editMode: true });
+      goToDashboard(id, ViewMode.EDIT);
     },
-    [redirectTo]
+    [goToDashboard]
   );
 
   const onDiscard = useCallback(
