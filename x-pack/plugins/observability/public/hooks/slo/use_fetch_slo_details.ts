@@ -52,6 +52,7 @@ export function useFetchSloDetails({
           // ignore error for retrieving slos
         }
       },
+      keepPreviousData: true,
       enabled: Boolean(sloId),
       refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
