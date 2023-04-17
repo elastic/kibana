@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
@@ -81,10 +81,14 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
 export const Description = React.memo(
   ({ appId, caseData, isLoadingDescription, onUpdateField }: GetDescriptionUserActionArgs) => {
-    const [isEdit, setIsEdit] = useState<boolean>(false);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
-    useLensDraftComment();
+    const [isEdit, setIsEdit] = useState<boolean>(false);
+
+    const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
+
+    if (hasIncomingLensState && draftComment?.commentId && !isEdit) {
+      setIsEdit(true);
+    }
 
     const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
       const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
@@ -92,74 +96,74 @@ export const Description = React.memo(
       return Boolean(sessionStorage.getItem(draftStorageKey));
     };
 
-    const handleOnChangeEditable = useCallback(
-      () => {
-        clearDraftComment();
-        setIsEdit(false);
-      },
-      [clearDraftComment],
-    );
+    const handleOnChangeEditable = useCallback(() => {
+      clearDraftComment();
+      setIsEdit(false);
+    }, [clearDraftComment]);
 
-    const descriptionCommentListObj = useMemo<EuiCommentProps>(() => {
-      return {
-        username: null,
-        event: i18n.DESCRIPTION,
-        'data-test-subj': 'description-action',
-        timestamp: null,
-        children: !isCollapsed ? (
-          <>
-            <UserActionMarkdown
-              caseId={caseData.id}
-              id={DESCRIPTION_ID}
-              content={draftComment?.commentId ? draftComment.commentId : caseData.description}
-              isEditable={isEdit}
-              onSaveContent={(content: string) => {
-                onUpdateField({ key: DESCRIPTION_ID, value: content });
-              }}
-              onChangeEditable={handleOnChangeEditable}
-            />
-            {!isEdit &&
-            !isLoadingDescription &&
-            hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
-              <MyEuiCommentFooter>
-                <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
-                  {i18n.UNSAVED_DRAFT_DESCRIPTION}
-                </EuiText>
-              </MyEuiCommentFooter>
-            ) : (
-              ''
-            )}
-          </>
-        ) : null,
-        timelineAvatar: null,
-        className: classNames({
-          isEdit,
-          draftFooter:
-            !isEdit && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
-          collapsedList: isCollapsed,
-        }),
-        actions: (
-          <>
-            <EuiButtonIcon
-              aria-label={i18n.EDIT_DESCRIPTION}
-              iconType="pencil"
-              onClick={() => {
-                setIsEdit(!isEdit);
-              }}
-              data-test-subj="description-edit-icon"
-            />
-            <EuiButtonIcon
-              aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
-              iconType="fold"
-              onClick={() => {
-                setIsCollapsed(!isCollapsed);
-              }}
-              data-test-subj="description-collapse-icon"
-            />
-          </>
-        ),
-      };
-    }, [caseData.description,isEdit, isCollapsed, isLoadingDescription ])
+    const descriptionCommentListObj: EuiCommentProps = {
+      username: null,
+      event: i18n.DESCRIPTION,
+      'data-test-subj': 'description-action',
+      timestamp: null,
+      children: !isCollapsed ? (
+        <>
+          <UserActionMarkdown
+            key={isEdit ? DESCRIPTION_ID : undefined}
+            caseId={caseData.id}
+            id={DESCRIPTION_ID}
+            content={
+              draftComment?.commentId && hasIncomingLensState
+                ? draftComment.comment
+                : caseData.description
+            }
+            isEditable={isEdit}
+            onSaveContent={(content: string) => {
+              onUpdateField({ key: DESCRIPTION_ID, value: content });
+            }}
+            onChangeEditable={handleOnChangeEditable}
+          />
+          {!isEdit &&
+          !isLoadingDescription &&
+          hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
+            <MyEuiCommentFooter>
+              <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
+                {i18n.UNSAVED_DRAFT_DESCRIPTION}
+              </EuiText>
+            </MyEuiCommentFooter>
+          ) : (
+            ''
+          )}
+        </>
+      ) : null,
+      timelineAvatar: null,
+      className: classNames({
+        isEdit,
+        draftFooter:
+          !isEdit && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
+        collapsedList: isCollapsed,
+      }),
+      actions: (
+        <>
+          <EuiButtonIcon
+            aria-label={i18n.EDIT_DESCRIPTION}
+            iconType="pencil"
+            onClick={() => {
+              setIsEdit(!isEdit);
+            }}
+            data-test-subj="description-edit-icon"
+          />
+          <EuiButtonIcon
+            aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+            iconType="fold"
+            onClick={() => {
+              setIsCollapsed(!isCollapsed);
+            }}
+            data-test-subj="description-collapse-icon"
+          />
+        </>
+      ),
+    };
 
     return isLoadingDescription ? (
       <EuiFlexGroup justifyContent="center" alignItems="center">
