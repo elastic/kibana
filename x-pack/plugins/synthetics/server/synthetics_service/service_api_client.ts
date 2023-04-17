@@ -168,7 +168,7 @@ export class ServiceAPIClient {
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
-                `Successfully called service location ${url}${result.request.path} for ${endpoint} with method ${method} with ${locMonitors.length} monitors `
+                `Successfully called service location ${url}${result.request.path} with method ${method} with ${locMonitors.length} monitors `
               );
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
