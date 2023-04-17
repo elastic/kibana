@@ -13,7 +13,6 @@
     },
     "index": "exceptions-0001",
     "mappings": {
-      "dynamic": false,
       "properties": {
         "@timestamp": {
           "type": "date"
