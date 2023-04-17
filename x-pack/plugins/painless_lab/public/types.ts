@@ -8,9 +8,11 @@
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 export interface PluginDependencies {
   licensing: LicensingPluginSetup;
   home: HomePublicPluginSetup;
   devTools: DevToolsSetup;
+  share: SharePluginSetup;
 }

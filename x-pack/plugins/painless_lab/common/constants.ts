@@ -15,3 +15,5 @@ export const PLUGIN = {
 };
 
 export const API_BASE_PATH = '/api/painless_lab';
+
+export const PAINLESS_LAB_APP_LOCATOR = 'PAINLESS_LAB_APP_LOCATOR';

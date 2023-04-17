@@ -14,6 +14,7 @@ import { PLUGIN } from '../common/constants';
 
 import { PluginDependencies } from './types';
 import { getLinks } from './links';
+import { PainlessLabAppLocatorDefinition } from './locator';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -23,7 +24,7 @@ const checkLicenseStatus = (license: ILicense) => {
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
   public setup(
     { http, getStartServices, uiSettings }: CoreSetup,
-    { devTools, home, licensing }: PluginDependencies
+    { devTools, share, home, licensing }: PluginDependencies
   ) {
     home.featureCatalogue.register({
       id: PLUGIN.id,
@@ -82,6 +83,8 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         };
       },
     });
+
+    share.url.locators.create(new PainlessLabAppLocatorDefinition());
 
     licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {

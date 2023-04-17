@@ -13,7 +13,8 @@
     "requiredPlugins": [
       "devTools",
       "licensing",
-      "home"
+      "home",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact"
