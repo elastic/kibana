@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { lastValueFrom } from 'rxjs';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
 import {
   isEsSearchResponseWithAggregations,
   isMultiBucketAggregate,
 } from '../../../../../../../../../common/api_schemas/type_guards';
-import { useApi } from '../../../../../../../hooks';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
+import { useAppDependencies, useToastNotifications } from '../../../../../../../app_dependencies';
+
 import { FilterAggConfigTerm } from '../types';
-import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 /**
  * Form component for the term filter aggregation.
@@ -29,9 +34,9 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   onChange,
   selectedField,
 }) => {
-  const api = useApi();
   const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
+  const { data } = useAppDependencies();
 
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +67,11 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         },
       };
 
-      const response = await api.esSearch(esSearchRequest);
+      const { rawResponse: response } = await lastValueFrom(
+        data.search.search({
+          params: esSearchRequest,
+        })
+      );
 
       setIsLoading(false);
 
