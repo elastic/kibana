@@ -6,7 +6,6 @@
  */
 
 import { find } from './find';
-import { fromKueryExpression } from '@kbn/es-query';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import {
@@ -48,11 +47,10 @@ describe('MaintenanceWindowClient - find', () => {
       ],
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await find(mockContext, { filter: 'title: test' });
+    const result = await find(mockContext);
 
     expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      filter: fromKueryExpression('title: test'),
     });
 
     expect(result.data.length).toEqual(2);

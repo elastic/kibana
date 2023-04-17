@@ -87,6 +87,7 @@ export interface BaseCspSetupStatus {
   kspm: BaseCspSetupBothPolicy;
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
+  installedPackageVersion?: string | undefined;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;

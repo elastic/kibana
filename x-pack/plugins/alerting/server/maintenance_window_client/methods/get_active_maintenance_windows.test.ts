@@ -65,8 +65,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
           "filter": Array [
             Object {
               "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
+                "filter": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
@@ -148,8 +147,12 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
           "filter": Array [
             Object {
               "bool": Object {
+<<<<<<< HEAD
                 "minimum_should_match": 1,
                 "should": Array [
+=======
+                "filter": Array [
+>>>>>>> main
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,

@@ -46,13 +46,13 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
 
-import { createMaintenanceWindowRoute } from './create_maintenance_window';
-import { getMaintenanceWindowRoute } from './get_maintenance_window';
-import { updateMaintenanceWindowRoute } from './update_maintenance_window';
-import { deleteMaintenanceWindowRoute } from './delete_maintenance_window';
-import { findMaintenanceWindowsRoute } from './find_maintenance_windows';
-import { archiveMaintenanceWindowRoute } from './archive_maintenance_window';
-import { finishMaintenanceWindowRoute } from './finish_maintenance_window';
+import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
+import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
+import { updateMaintenanceWindowRoute } from './maintenance_window/update_maintenance_window';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/delete_maintenance_window';
+import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenance_windows';
+import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
+import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
