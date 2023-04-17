@@ -49,6 +49,12 @@ export const TestPipeline: React.FC = () => {
 
   const isSmallerViewport = useIsWithinMaxBreakpoint('s');
   const inputRef = useRef<HTMLInputElement>();
+  const sampleFieldValue = i18n.translate(
+    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
+    {
+      defaultMessage: 'REPLACE ME',
+    }
+  );
 
   return (
     <>
@@ -151,31 +157,24 @@ export const TestPipeline: React.FC = () => {
                     </strong>
                   </p>
                 </EuiText>
-                {fieldMappings && (
-                  <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
-                    {`[{"_index":"index","_id":"id","_source":{${fieldMappings
-                      .map(
-                        (fieldMapping) =>
-                          `"${fieldMapping.sourceField}": "${i18n.translate(
-                            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
-                            {
-                              defaultMessage: 'REPLACE ME',
-                            }
-                          )}"`
-                      )
-                      .join(', ')}}}]`}
-                  </EuiCodeBlock>
-                )}
-                {sourceField && (
-                  <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
-                    {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"${i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
-                      {
-                        defaultMessage: 'REPLACE ME',
-                      }
-                    )}"}}]`}
-                  </EuiCodeBlock>
-                )}
+                <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
+                  {JSON.stringify(
+                    JSON.parse(
+                      `[{"_index":"index", "_id":"id", "_source":{${
+                        fieldMappings
+                          ? fieldMappings
+                              .map(
+                                (fieldMapping) =>
+                                  `"${fieldMapping.sourceField}": "${sampleFieldValue}"`
+                              )
+                              .join(', ')
+                          : `"${sourceField}":"${sampleFieldValue}"`
+                      }}}]`
+                    ),
+                    null,
+                    2
+                  )}
+                </EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
