@@ -38,8 +38,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     unsafe: {
       slo: { enabled: false },
       alertDetails: {
-        apm: { enabled: false },
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
       },

@@ -33,9 +33,6 @@ const configSchema = schema.object({
       metrics: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
-      logs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),

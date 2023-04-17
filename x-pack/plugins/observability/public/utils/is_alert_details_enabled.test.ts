@@ -31,7 +31,6 @@ import type { TopAlert } from '../typings/alerts';
 const defaultConfig = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
     },
@@ -71,7 +70,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
@@ -113,7 +111,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
@@ -159,7 +156,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: true },
             uptime: { enabled: false },
           },
@@ -201,7 +197,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: true },
           },
@@ -243,7 +238,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },
@@ -255,7 +249,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },
