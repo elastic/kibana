@@ -51,5 +51,17 @@ export const agentPolicyFormValidation = (
     ];
   }
 
+  if (
+    agentPolicy.cloud_formation_template_url !== '' &&
+    agentPolicy.cloud_formation_stack_name === ''
+  ) {
+    errors.cloud_formation_stack_name = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.cloudFormationStackNameRequiredErrorMessage"
+        defaultMessage="Stack name is required when a template is provided."
+      />,
+    ];
+  }
+
   return errors;
 };

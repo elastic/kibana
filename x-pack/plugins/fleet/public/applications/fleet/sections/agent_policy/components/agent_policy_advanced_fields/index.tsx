@@ -642,6 +642,101 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.cloudFormation"
+              defaultMessage="CloudFormation"
+            />
+            &nbsp;
+            <EuiBetaBadge label="beta" size="s" color="accent" />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.cloudFormationDescription"
+            defaultMessage="If provided a template, CloudFormation option will be available to deploy and install the Elastic Agent."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          key="cloudFormationTemplate"
+          error={
+            touchedFields.cloud_formation_template_url && validation.cloud_formation_template_url
+              ? validation.cloud_formation_template_url
+              : null
+          }
+          isInvalid={Boolean(
+            touchedFields.cloud_formation_template_url && validation.cloud_formation_template_url
+          )}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldLabel"
+              defaultMessage="CloudFormation template"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldHelpText"
+              defaultMessage="URL pointing to a CloudFormation template."
+            />
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            value={agentPolicy.cloud_formation_template_url}
+            onChange={(e) => updateAgentPolicy({ cloud_formation_template_url: e.target.value })}
+            isInvalid={Boolean(
+              touchedFields.cloud_formation_template_url && validation.cloud_formation_template_url
+            )}
+            onBlur={() =>
+              setTouchedFields({ ...touchedFields, cloud_formation_template_url: true })
+            }
+            placeholder={i18n.translate(
+              'xpack.fleet.agentPolicyForm.cloudFormationTemplateFieldPlaceholder',
+              {
+                defaultMessage: 'CloudFormation template URL',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          key="cloudFormationStackName"
+          error={
+            touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
+              ? validation.cloud_formation_stack_name
+              : null
+          }
+          isInvalid={Boolean(
+            touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
+          )}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.cloudFormationStackNameFieldLabel"
+              defaultMessage="CloudFormation Stack Name"
+            />
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            value={agentPolicy.cloud_formation_stack_name}
+            onChange={(e) => updateAgentPolicy({ cloud_formation_stack_name: e.target.value })}
+            isInvalid={Boolean(
+              touchedFields.cloud_formation_stack_name && validation.cloud_formation_stack_name
+            )}
+            onBlur={() => setTouchedFields({ ...touchedFields, cloud_formation_stack_name: true })}
+            placeholder={i18n.translate(
+              'xpack.fleet.agentPolicyForm.cloudFormationStackNameFieldPlaceholder',
+              {
+                defaultMessage: 'Optional CloudFormation Stack Name',
+              }
+            )}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
       {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
         <EuiDescribedFormGroup
           title={
@@ -693,6 +788,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
         />
       ) : null}
+      <EuiSpacer size="l" />
     </>
   );
 };
