@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { KPIChartProps, Tile } from './tile';
 import { HostsTile } from './hosts_tile';
+import { ChartBaseProps } from '../chart/metric_chart_wrapper';
 
 const KPI_CHARTS: KPIChartProps[] = [
   {
@@ -77,6 +78,22 @@ const KPI_CHARTS: KPIChartProps[] = [
   },
 ];
 
+const HOSTS_CHART: ChartBaseProps = {
+  type: 'hostsCount',
+  color: '#6DCCB1',
+  metricType: 'value',
+  title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
+    defaultMessage: 'Hosts',
+  }),
+  trendA11yTitle: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.a11y.title', {
+    defaultMessage: 'Hosts count.',
+  }),
+  toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.tooltip', {
+    defaultMessage: 'The number of hosts returned by your current search criteria.',
+  }),
+  ['data-test-subj']: 'hostsView-metricsTrend-hosts',
+};
+
 export const KPIGrid = () => {
   return (
     <EuiFlexGroup
@@ -86,24 +103,7 @@ export const KPIGrid = () => {
       data-test-subj="hostsView-metricsTrend"
     >
       <EuiFlexItem>
-        <HostsTile
-          type="hostsCount"
-          metricType="value"
-          color="#6DCCB1"
-          title={i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
-            defaultMessage: 'Hosts',
-          })}
-          trendA11yTitle={i18n.translate(
-            'xpack.infra.hostsViewPage.metricTrend.hostCount.a11y.title',
-            {
-              defaultMessage: 'Hosts count.',
-            }
-          )}
-          toolTip={i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.tooltip', {
-            defaultMessage: 'The number of hosts returned by your current search criteria.',
-          })}
-          data-test-subj="hostsView-metricsTrend-hosts"
-        />
+        <HostsTile {...HOSTS_CHART} />
       </EuiFlexItem>
       {KPI_CHARTS.map(({ ...chartProp }) => (
         <EuiFlexItem key={chartProp.type}>

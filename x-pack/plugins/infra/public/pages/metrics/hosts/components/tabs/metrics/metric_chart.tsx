@@ -69,7 +69,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasBorder
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsViewMetricChart-${type}`}
+      data-test-subj={`hostsView-metricChart-${type}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -93,7 +93,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewMetricChart-${type}`}
+          id={`hostsViewsmetricsChart-${type}`}
           attributes={attributes}
           style={{ height: MIN_HEIGHT }}
           extraActions={extraActions}
