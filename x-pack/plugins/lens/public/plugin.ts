@@ -55,6 +55,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -153,6 +154,7 @@ export interface LensPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
+  randomSampling: RandomSamplingPublicPluginStart;
 }
 
 export interface LensPublicSetup {

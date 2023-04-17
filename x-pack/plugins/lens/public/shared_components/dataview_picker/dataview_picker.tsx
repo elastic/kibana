@@ -19,9 +19,10 @@ import {
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type IndexPatternRef } from '../../types';
 import { type ToolbarButtonProps, ToolbarButton } from './toolbar_button';
-import { RandomSamplingIcon } from './sampling_icon';
+import { LensAppServices } from '../../app_plugin/types';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -43,6 +44,8 @@ function TriggerButton({
     isMissingCurrent?: boolean;
   }) {
   const { euiTheme } = useEuiTheme();
+  const { randomSampling } = useKibana<LensAppServices>().services;
+  const RandomSamplingIcon = randomSampling.ui.SamplingIcon;
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
     ? {

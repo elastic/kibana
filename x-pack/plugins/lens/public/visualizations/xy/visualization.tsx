@@ -21,6 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -121,6 +122,7 @@ export const getXyVisualization = ({
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
+  randomSampling,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -131,6 +133,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  randomSampling: RandomSamplingPublicPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -568,13 +571,28 @@ export const getXyVisualization = ({
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
-          <LayerHeaderContent
-            {...otherProps}
-            onChangeIndexPattern={(indexPatternId) => {
-              // TODO: should it trigger an action as in the datasource?
-              onChangeIndexPattern(indexPatternId);
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
+              randomSampling,
             }}
-          />
+          >
+            <LayerHeaderContent
+              {...otherProps}
+              onChangeIndexPattern={(indexPatternId) => {
+                // TODO: should it trigger an action as in the datasource?
+                onChangeIndexPattern(indexPatternId);
+              }}
+            />
+          </KibanaContextProvider>
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
@@ -633,6 +651,7 @@ export const getXyVisualization = ({
               docLinks: core.docLinks,
               http: core.http,
               unifiedSearch,
+              randomSampling,
             }}
           >
             {dimensionEditor}

@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { FormBasedPersistedState, FormBasedPrivateState } from './types';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { Ast } from '@kbn/interpreter';
@@ -210,6 +211,7 @@ describe('IndexPattern Data Source', () => {
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      randomSampling: randomSamplingPluginMock.createStartContract(),
     });
 
     baseState = {

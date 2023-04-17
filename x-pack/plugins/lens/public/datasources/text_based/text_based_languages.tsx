@@ -17,8 +17,9 @@ import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -53,12 +54,14 @@ export function getTextBasedDatasource({
   data,
   expressions,
   dataViews,
+  randomSampling,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
+  randomSampling: RandomSamplingPublicPluginStart;
 }) {
   const getSuggestionsForState = (state: TextBasedPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
@@ -356,6 +359,7 @@ export function getTextBasedDatasource({
               dataViews={dataViews}
               expressions={expressions}
               layerFields={layerFields}
+              randomSampling={randomSampling}
               {...props}
             />
           </I18nProvider>

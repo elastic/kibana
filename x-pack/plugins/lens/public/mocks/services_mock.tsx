@@ -19,6 +19,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 
 import {
   mockAttributeService,
@@ -177,5 +178,6 @@ export function makeDefaultServices(
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     docLinks: startMock.docLinks,
+    randomSampling: randomSamplingPluginMock.createStartContract(),
   };
 }

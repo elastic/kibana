@@ -144,6 +144,7 @@ export async function getLensServices(
     unifiedSearch,
     docLinks: coreStart.docLinks,
     locator,
+    randomSampling: startDependencies.randomSampling,
   };
 }
 

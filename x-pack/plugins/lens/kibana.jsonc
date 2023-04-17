@@ -34,6 +34,7 @@
       "expressionHeatmap",
       "expressionXY",
       "eventAnnotation",
+      "randomSampling",
       "unifiedSearch",
       "unifiedFieldList"
     ],

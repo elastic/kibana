@@ -39,6 +39,7 @@ import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
 import { layerTypes, Visualization } from '../..';
+import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -92,6 +93,7 @@ const xyVisualization = getXyVisualization({
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  randomSampling: randomSamplingPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {

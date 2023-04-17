@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../../types';
 import { FormBasedPrivateState } from './types';
@@ -39,22 +38,20 @@ export function LayerPanel({
   });
 
   return (
-    <I18nProvider>
-      <ChangeIndexPattern
-        data-test-subj="indexPattern-switcher"
-        trigger={{
-          label: indexPattern?.name || notFoundTitleLabel,
-          title: indexPattern?.title || notFoundTitleLabel,
-          'data-test-subj': 'lns_layerIndexPatternLabel',
-          size: 's',
-          fontWeight: 'normal',
-          samplingValue: getSamplingValue(layer),
-        }}
-        indexPatternId={layer.indexPatternId}
-        indexPatternRefs={indexPatternRefs}
-        isMissingCurrent={!indexPattern}
-        onChangeIndexPattern={onChangeIndexPattern}
-      />
-    </I18nProvider>
+    <ChangeIndexPattern
+      data-test-subj="indexPattern-switcher"
+      trigger={{
+        label: indexPattern?.name || notFoundTitleLabel,
+        title: indexPattern?.title || notFoundTitleLabel,
+        'data-test-subj': 'lns_layerIndexPatternLabel',
+        size: 's',
+        fontWeight: 'normal',
+        samplingValue: getSamplingValue(layer),
+      }}
+      indexPatternId={layer.indexPatternId}
+      indexPatternRefs={indexPatternRefs}
+      isMissingCurrent={!indexPattern}
+      onChangeIndexPattern={onChangeIndexPattern}
+    />
   );
 }

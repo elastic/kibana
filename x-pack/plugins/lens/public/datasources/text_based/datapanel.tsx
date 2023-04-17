@@ -26,6 +26,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
+import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
@@ -37,6 +38,7 @@ export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateS
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
   layerFields?: string[];
+  randomSampling: RandomSamplingPublicPluginStart;
 };
 
 export function TextBasedDataPanel({
@@ -52,6 +54,7 @@ export function TextBasedDataPanel({
   expressions,
   dataViews,
   layerFields,
+  randomSampling,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
@@ -141,6 +144,7 @@ export function TextBasedDataPanel({
     <KibanaContextProvider
       services={{
         ...core,
+        randomSampling,
       }}
     >
       <ChildDragDropProvider {...dragDropContext}>

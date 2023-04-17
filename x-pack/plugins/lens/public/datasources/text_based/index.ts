@@ -10,6 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import { EditorFrameSetup } from '../../types';
 
 export interface TextBasedSetupPlugins {
@@ -21,6 +22,7 @@ export interface TextBasedStartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
+  randomSampling: RandomSamplingPublicPluginStart;
 }
 
 export class TextBasedDatasource {
@@ -29,7 +31,8 @@ export class TextBasedDatasource {
   setup(core: CoreSetup<TextBasedStartPlugins>, { editorFrame }: TextBasedSetupPlugins) {
     editorFrame.registerDatasource(async () => {
       const { getTextBasedDatasource } = await import('../../async_services');
-      const [coreStart, { data, dataViews, expressions }] = await core.getStartServices();
+      const [coreStart, { data, dataViews, expressions, randomSampling }] =
+        await core.getStartServices();
 
       return getTextBasedDatasource({
         core: coreStart,
@@ -37,6 +40,7 @@ export class TextBasedDatasource {
         data,
         dataViews,
         expressions,
+        randomSampling,
       });
     });
   }
