@@ -15,6 +15,8 @@ import { act } from 'react-dom/test-utils';
 
 import { EuiContextMenuItem, EuiSuperDatePicker } from '@elastic/eui';
 
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+
 import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar';
 
 describe('AnalyticsCollectionToolbar', () => {
@@ -31,7 +33,10 @@ describe('AnalyticsCollectionToolbar', () => {
     jest.clearAllMocks();
 
     setMockValues({
-      analyticsCollection: {},
+      analyticsCollection: {
+        events_datastream: 'test-events',
+        name: 'test',
+      } as AnalyticsCollection,
       dataViewId: 'data-view-test',
       isLoading: false,
       refreshInterval: { pause: false, value: 10000 },
@@ -89,5 +94,15 @@ describe('AnalyticsCollectionToolbar', () => {
     expect(exploreInDiscoverItem).toHaveLength(1);
 
     expect(exploreInDiscoverItem.prop('href')).toBe("/app/discover#/?_a=(index:'data-view-test')");
+  });
+
+  it('should correct link to the manage datastream link', () => {
+    const exploreInDiscoverItem = wrapper.find(EuiContextMenuItem).at(1);
+
+    expect(exploreInDiscoverItem).toHaveLength(1);
+
+    expect(exploreInDiscoverItem.prop('href')).toBe(
+      '/app/management/data/index_management/data_streams/test-events'
+    );
   });
 });
