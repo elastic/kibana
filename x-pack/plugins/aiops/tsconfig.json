@@ -52,6 +52,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
     "@kbn/unified-search-plugin",
+    "@kbn/unified-field-list-plugin",
   ],
   "exclude": [
     "target/**/*",
