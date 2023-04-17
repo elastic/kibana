@@ -118,7 +118,8 @@ _meta:
         body: {
           description: 'Merges latest endpoint and Agent metadata documents.',
           dest: {
-            index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+            index: '.metrics-endpoint.metadata_united_default',
+            aliases: [],
           },
           frequency: '1s',
           pivot: {
@@ -341,7 +342,7 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
           },
@@ -351,19 +352,8 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -387,7 +377,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -427,7 +417,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -635,7 +625,7 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
           },
@@ -645,19 +635,8 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -681,7 +660,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -720,7 +699,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -897,7 +876,7 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
           },
@@ -907,19 +886,8 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -943,7 +911,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -982,7 +950,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -1155,43 +1123,11 @@ _meta:
       previousInstallation.installed_es
     );
 
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
     // If downgrading to and older version, and destination index already exists
     // aliases should still be updated to point .latest to this index
-    expect(esClient.indices.updateAliases.mock.calls).toEqual([
-      [
-        {
-          body: {
-            actions: [
-              {
-                add: {
-                  index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-                  alias: '.metrics-endpoint.metadata_united_default.all',
-                },
-              },
-              {
-                add: {
-                  index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-                  alias: '.metrics-endpoint.metadata_united_default.latest',
-                },
-              },
-            ],
-          },
-        },
-      ],
-    ]);
+    expect(esClient.indices.updateAliases.mock.calls).toEqual([]);
 
     expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [

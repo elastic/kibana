@@ -43,6 +43,7 @@ import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
 import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
+import { getDestinationIndexAliases } from './transform_utils';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -203,10 +204,6 @@ const processTransformAssetsPerModule = (
       const installationOrder =
         isFinite(content._meta?.order) && content._meta?.order >= 0 ? content._meta?.order : 0;
       const transformVersion = content._meta?.fleet_transform_version ?? '0.1.0';
-      // The “all” alias for the transform destination indices will be adjusted to include the new transform destination index as well as everything it previously included
-      const allIndexAliasName = `${content.dest.index}.all`;
-      // The “latest” alias for the transform destination indices will point solely to the new transform destination index
-      const latestIndexAliasName = `${content.dest.index}.latest`;
 
       transformsSpecifications
         .get(transformModuleId)
@@ -214,12 +211,12 @@ const processTransformAssetsPerModule = (
 
       // Create two aliases associated with the destination index
       // for better handling during upgrades
-      const alias = {
-        [allIndexAliasName]: {},
-        [latestIndexAliasName]: {},
-      };
+      const aliases = getDestinationIndexAliases(content.dest.aliases);
+      const aliasNames = aliases.map((a) => a.alias);
+      // Override yml settings with alia format for transform's dest.aliases
+      content.dest.aliases = aliases;
 
-      const versionedIndexName = `${content.dest.index}-${installNameSuffix}`;
+      const versionedIndexName = content.dest.index; // @todo: `${content.dest.index}-${installNameSuffix}`;
       content.dest.index = versionedIndexName;
       indicesToAddRefs.push({
         id: versionedIndexName,
@@ -231,9 +228,10 @@ const processTransformAssetsPerModule = (
       const runAsKibanaSystem = content._meta?.run_as_kibana_system !== false;
 
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
-      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', aliases);
       transformsSpecifications.get(transformModuleId)?.set('transform', content);
       transformsSpecifications.get(transformModuleId)?.set('transformVersion', transformVersion);
+
       content._meta = {
         ...(content._meta ?? {}),
         ...getESAssetMetadata({ packageName: installablePackage.name }),
@@ -251,7 +249,7 @@ const processTransformAssetsPerModule = (
       const currentTransformSameAsPrev =
         previousInstalledTransformEsAssets.find((t) => t.id === installationName) !== undefined;
       if (previousInstalledTransformEsAssets.length === 0) {
-        aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+        aliasesRefs.push(...aliasNames);
         transforms.push({
           transformModuleId,
           installationName,
@@ -296,7 +294,9 @@ const processTransformAssetsPerModule = (
             runAsKibanaSystem,
           });
           transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
-          aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+          if (aliasNames.length > 0) {
+            aliasesRefs.push(...aliasNames);
+          }
         } else {
           transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
         }
@@ -406,7 +406,6 @@ const installTransformsAssets = async (
       aliasesRefs,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
-      // runAsKibanaSystem,
     } = processTransformAssetsPerModule(
       installablePackage,
       installNameSuffix,
@@ -526,58 +525,6 @@ const installTransformsAssets = async (
           }
         })
         .filter((p) => p !== undefined)
-    );
-
-    // create destination indices
-    await Promise.all(
-      transforms.map(async (transform) => {
-        const index = transform.content.dest.index;
-
-        const aliases = transformsSpecifications
-          .get(transform.transformModuleId)
-          ?.get('destinationIndexAlias');
-        try {
-          const resp = await retryTransientEsErrors(
-            () =>
-              esClient.indices.create(
-                {
-                  index,
-                  aliases,
-                },
-                { ignore: [400] }
-              ),
-            { logger }
-          );
-          logger.debug(`Created destination index: ${index}`);
-
-          // If index already exists, we still need to update the destination index alias
-          // to point '{destinationIndexName}.latest' to the versioned index
-          // @ts-ignore status is a valid field of resp
-          if (resp.status === 400 && aliases) {
-            await retryTransientEsErrors(
-              () =>
-                esClient.indices.updateAliases({
-                  body: {
-                    actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
-                  },
-                }),
-              { logger }
-            );
-            logger.debug(`Created aliases for destination index: ${index}`);
-          }
-        } catch (err) {
-          logger.error(
-            `Error creating destination index: ${JSON.stringify({
-              index,
-              aliases: transformsSpecifications
-                .get(transform.transformModuleId)
-                ?.get('destinationIndexAlias'),
-            })} with error ${err}`
-          );
-
-          throw new Error(err.message);
-        }
-      })
     );
 
     // If the transforms have specific installation order, install & optionally start transforms sequentially
