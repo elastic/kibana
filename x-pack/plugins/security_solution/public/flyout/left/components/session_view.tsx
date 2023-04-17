@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { getField } from '../../shared/utils';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 import { SESSION_VIEW_ERROR_MESSAGE } from './translations';
 import { SESSION_VIEW_ERROR_TEST_ID, SESSION_VIEW_TEST_ID } from './test_ids';
@@ -24,7 +25,7 @@ export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
   const { getFieldsData } = useLeftPanelContext();
 
-  const sessionEntityId = getFieldsData(SESSION_ENTITY_ID) as string;
+  const sessionEntityId = getField(getFieldsData(SESSION_ENTITY_ID));
 
   if (!sessionEntityId) {
     return (
