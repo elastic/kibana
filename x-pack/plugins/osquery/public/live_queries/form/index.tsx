@@ -149,7 +149,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           saved_query_id: values.savedQueryId,
           query,
           alert_ids: values.alertIds,
-          pack_id: values?.packId?.length ? values?.packId[0] : undefined,
+          pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
@@ -157,7 +157,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       await mutateAsync(serializedData);
     },
-    [alertAttachmentContext, mutateAsync]
+    [alertAttachmentContext, mutateAsync, queryType]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(
