@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-import { SunburstChart } from './sunburst';
+import { SunburstChart } from './sunburst_chart';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
 
 type MostUsedCharts =
   APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/most_used_charts'>['mostUsedCharts'][0];
@@ -82,9 +82,7 @@ export function MostUsedCharts({
     [start, end, environment, kuery, serviceName, transactionType]
   );
 
-  return status === FETCH_STATUS.LOADING ? (
-    <>loading</>
-  ) : (
+  return (
     <EuiFlexGroup
       direction={groupDirection}
       gutterSize="s"
@@ -96,7 +94,12 @@ export function MostUsedCharts({
           [];
         return (
           <div key={key}>
-            <SunburstChart data={chartData} label={label} chartKey={key} />
+            <SunburstChart
+              data={chartData}
+              label={label}
+              chartKey={key}
+              fetchStatus={status}
+            />
           </div>
         );
       })}
