@@ -62,6 +62,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   timeRange?: TimeRange;
   /**
+   * The relative time range, used when timeRange is an absolute range (e.g. for edit visualization button)
+   */
+  relativeTimeRange?: TimeRange;
+  /**
    * The current columns
    */
   columns?: string[];
@@ -114,10 +118,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   lensSuggestionsApi: LensSuggestionsApi;
   /**
-   * Callback to get the relative time range, useful when passing an absolute time range (e.g. for edit visualization button)
-   */
-  getRelativeTimeRange?: () => TimeRange;
-  /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
   onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
@@ -165,6 +165,7 @@ export const UnifiedHistogramLayout = ({
   currentSuggestion: originalSuggestion,
   isPlainRecord,
   timeRange,
+  relativeTimeRange,
   columns,
   request,
   hits,
@@ -178,7 +179,6 @@ export const UnifiedHistogramLayout = ({
   disabledActions,
   lensSuggestionsApi,
   input$,
-  getRelativeTimeRange,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -250,6 +250,7 @@ export const UnifiedHistogramLayout = ({
           query={query}
           filters={filters}
           timeRange={timeRange}
+          relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
           currentSuggestion={currentSuggestion}
@@ -263,7 +264,6 @@ export const UnifiedHistogramLayout = ({
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          getRelativeTimeRange={getRelativeTimeRange}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}

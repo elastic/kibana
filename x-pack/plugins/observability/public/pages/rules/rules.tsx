@@ -32,6 +32,20 @@ export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+    },
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
+
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
@@ -48,42 +62,41 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { status, lastResponse } = urlStateStorage.get<{
-    status: RuleStatus[];
+  const { lastResponse, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
-  }>('_a') || { status: [], lastResponse: [] };
+    search: string;
+    status: RuleStatus[];
+    type: string[];
+  }>('_a') || { lastResponse: [], search: '', status: [], type: [] };
 
-  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateSearch, setSearch] = useState<string>(search);
+  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
+  const [stateType, setType] = useState<string[]>(type);
+
   const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ]);
-
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { status: newStatus, lastResponse });
-    return { lastResponse: stateLastResponse || [], status: newStatus };
+    urlStateStorage.set('_a', { lastResponse, search, status: newStatus, type });
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
-    return { lastResponse: newLastResponse, status: stateStatus || [] };
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, search, status, type });
+  };
+
+  const handleTypeFilterChange = (newType: string[]) => {
+    setType(newType);
+    urlStateStorage.set('_a', { lastResponse, search, status, type: newType });
+  };
+
+  const handleSearchFilterChange = (newSearch: string) => {
+    setSearch(newSearch);
+    urlStateStorage.set('_a', { lastResponse, search: newSearch, status, type });
   };
 
   return (
@@ -132,6 +145,8 @@ export function RulesPage() {
             rulesListKey="observability_rulesListColumns"
             showActionFilter={false}
             statusFilter={stateStatus}
+            searchFilter={stateSearch}
+            typeFilter={stateType}
             visibleColumns={[
               'ruleName',
               'ruleExecutionStatusLastDate',
@@ -140,7 +155,9 @@ export function RulesPage() {
               'ruleExecutionState',
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
+            onSearchFilterChange={handleSearchFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
+            onTypeFilterChange={handleTypeFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

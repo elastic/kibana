@@ -18,6 +18,7 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
+x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
@@ -175,7 +176,6 @@ packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
 packages/core/http/core-http-server-internal @elastic/kibana-core
 packages/core/http/core-http-server-mocks @elastic/kibana-core
-packages/core/http/core-http-versioned-router-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-browser @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
@@ -380,6 +380,8 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
+packages/kbn-generate-csv @elastic/appex-sharedux
+packages/kbn-generate-csv-types @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
@@ -457,9 +459,13 @@ x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
+x-pack/packages/ml/number_utils @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
+x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
+x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
@@ -469,8 +475,10 @@ src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
+x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability @elastic/actionable-observability
+x-pack/plugins/observability_shared @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
 packages/kbn-optimizer @elastic/kibana-operations
@@ -499,6 +507,7 @@ packages/kbn-repo-packages @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
@@ -520,6 +529,7 @@ test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic
 test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects @elastic/kibana-core
+packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 src/plugins/saved_search @elastic/kibana-data-discovery

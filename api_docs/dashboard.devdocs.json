@@ -474,6 +474,10 @@
               "DashboardReduxState",
               ", action: { payload: ",
               "DashboardStateFromSaveModal",
+              "; type: string; }) => void; setStateFromSettingsFlyout: (state: ",
+              "DashboardReduxState",
+              ", action: { payload: ",
+              "DashboardStateFromSettingsFlyout",
               "; type: string; }) => void; setDescription: (state: ",
               "DashboardReduxState",
               ", action: { payload: string | undefined; type: string; }) => void; setViewMode: (state: ",
@@ -506,17 +510,7 @@
               },
               "; type: string; }) => void; resetToLastSavedInput: (state: ",
               "DashboardReduxState",
-              ") => void; setUseMargins: (state: ",
-              "DashboardReduxState",
-              ", action: { payload: boolean; type: string; }) => void; setSyncCursor: (state: ",
-              "DashboardReduxState",
-              ", action: { payload: boolean; type: string; }) => void; setSyncColors: (state: ",
-              "DashboardReduxState",
-              ", action: { payload: boolean; type: string; }) => void; setSyncTooltips: (state: ",
-              "DashboardReduxState",
-              ", action: { payload: boolean; type: string; }) => void; setHidePanelTitles: (state: ",
-              "DashboardReduxState",
-              ", action: { payload: boolean; type: string; }) => void; setFiltersAndQuery: (state: ",
+              ") => void; setFiltersAndQuery: (state: ",
               "DashboardReduxState",
               ", action: { payload: Pick<",
               {
@@ -577,6 +571,8 @@
               ", action: { payload: [number, number] | undefined; type: string; }) => void; setExpandedPanelId: (state: ",
               "DashboardReduxState",
               ", action: { payload: string | undefined; type: string; }) => void; setFullScreenMode: (state: ",
+              "DashboardReduxState",
+              ", action: { payload: boolean; type: string; }) => void; setHasOverlays: (state: ",
               "DashboardReduxState",
               ", action: { payload: boolean; type: string; }) => void; }>"
             ],
@@ -781,10 +777,10 @@
           },
           {
             "parentPluginId": "dashboard",
-            "id": "def-public.DashboardContainer.showOptions",
+            "id": "def-public.DashboardContainer.showSettings",
             "type": "Function",
             "tags": [],
-            "label": "showOptions",
+            "label": "showSettings",
             "description": [],
             "signature": [
               "(this: ",
@@ -795,28 +791,13 @@
                 "section": "def-public.DashboardContainer",
                 "text": "DashboardContainer"
               },
-              ", anchorElement: HTMLElement) => void"
+              ") => void"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "dashboard",
-                "id": "def-public.DashboardContainer.showOptions.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "anchorElement",
-                "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
-                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_options_popover.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "children": []
           },
           {
             "parentPluginId": "dashboard",
@@ -1164,12 +1145,28 @@
             "label": "forceRefresh",
             "description": [],
             "signature": [
-              "() => void"
+              "(refreshControlGroup?: boolean) => void"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.forceRefresh.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "refreshControlGroup",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1590,6 +1587,10 @@
           "DashboardReduxState",
           ", action: { payload: ",
           "DashboardStateFromSaveModal",
+          "; type: string; }) => void; setStateFromSettingsFlyout: (state: ",
+          "DashboardReduxState",
+          ", action: { payload: ",
+          "DashboardStateFromSettingsFlyout",
           "; type: string; }) => void; setDescription: (state: ",
           "DashboardReduxState",
           ", action: { payload: string | undefined; type: string; }) => void; setViewMode: (state: ",
@@ -1622,17 +1623,7 @@
           },
           "; type: string; }) => void; resetToLastSavedInput: (state: ",
           "DashboardReduxState",
-          ") => void; setUseMargins: (state: ",
-          "DashboardReduxState",
-          ", action: { payload: boolean; type: string; }) => void; setSyncCursor: (state: ",
-          "DashboardReduxState",
-          ", action: { payload: boolean; type: string; }) => void; setSyncColors: (state: ",
-          "DashboardReduxState",
-          ", action: { payload: boolean; type: string; }) => void; setSyncTooltips: (state: ",
-          "DashboardReduxState",
-          ", action: { payload: boolean; type: string; }) => void; setHidePanelTitles: (state: ",
-          "DashboardReduxState",
-          ", action: { payload: boolean; type: string; }) => void; setFiltersAndQuery: (state: ",
+          ") => void; setFiltersAndQuery: (state: ",
           "DashboardReduxState",
           ", action: { payload: Pick<",
           {
@@ -1693,6 +1684,8 @@
           ", action: { payload: [number, number] | undefined; type: string; }) => void; setExpandedPanelId: (state: ",
           "DashboardReduxState",
           ", action: { payload: string | undefined; type: string; }) => void; setFullScreenMode: (state: ",
+          "DashboardReduxState",
+          ", action: { payload: boolean; type: string; }) => void; setHasOverlays: (state: ",
           "DashboardReduxState",
           ", action: { payload: boolean; type: string; }) => void; }, ",
           {

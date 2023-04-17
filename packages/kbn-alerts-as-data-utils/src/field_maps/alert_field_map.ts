@@ -22,6 +22,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -109,6 +110,11 @@ export const alertFieldMap = {
   },
   [ALERT_RULE_PRODUCER]: {
     type: 'keyword',
+    array: false,
+    required: true,
+  },
+  [ALERT_RULE_REVISION]: {
+    type: 'long',
     array: false,
     required: true,
   },

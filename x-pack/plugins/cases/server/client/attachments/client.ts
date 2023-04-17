@@ -29,12 +29,14 @@ import type {
   GetArgs,
   UpdateArgs,
   BulkGetArgs,
+  BulkDeleteFileArgs,
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
 import { find, get, getAll, getAllAlertsAttachToCase } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
+import { bulkDeleteFileAttachments } from './bulk_delete';
 
 /**
  * API for interacting with the attachments to a case.
@@ -54,6 +56,7 @@ export interface AttachmentsSubClient {
    * Deletes a single attachment for a specific case.
    */
   delete(deleteArgs: DeleteArgs): Promise<void>;
+  bulkDeleteFileAttachments(deleteArgs: BulkDeleteFileArgs): Promise<void>;
   /**
    * Retrieves all comments matching the search criteria.
    */
@@ -92,14 +95,15 @@ export const createAttachmentsSubClient = (
     add: (params: AddArgs) => addComment(params, clientArgs),
     bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
     bulkGet: (params) => bulkGet(params, clientArgs, casesClient),
-    deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
-    delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
-    find: (findArgs: FindArgs) => find(findArgs, clientArgs),
-    getAllAlertsAttachToCase: (params: GetAllAlertsAttachToCase) =>
-      getAllAlertsAttachToCase(params, clientArgs, casesClient),
-    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
-    get: (getArgs: GetArgs) => get(getArgs, clientArgs),
-    update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),
+    delete: (params) => deleteComment(params, clientArgs),
+    deleteAll: (params) => deleteAll(params, clientArgs),
+    bulkDeleteFileAttachments: (params) =>
+      bulkDeleteFileAttachments(params, clientArgs, casesClient),
+    find: (params) => find(params, clientArgs),
+    getAllAlertsAttachToCase: (params) => getAllAlertsAttachToCase(params, clientArgs, casesClient),
+    getAll: (params) => getAll(params, clientArgs),
+    get: (params) => get(params, clientArgs),
+    update: (params) => update(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

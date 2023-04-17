@@ -15,6 +15,8 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import type { GoalProps } from '@elastic/charts';
 import {
   EXPRESSION_GAUGE_NAME,
   GAUGE_FUNCTION_RENDERER_NAME,
@@ -84,3 +86,7 @@ export interface Accessors {
   metric?: string;
   goal?: string;
 }
+
+export type AllowedGaugeOverrides = Partial<
+  Record<'gauge', Simplify<MakeOverridesSerializable<GoalProps>>>
+>;

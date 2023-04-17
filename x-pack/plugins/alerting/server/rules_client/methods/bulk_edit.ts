@@ -41,8 +41,6 @@ import {
   applyBulkEditOperation,
   buildKueryNodeFilter,
   injectReferencesIntoActions,
-  generateAPIKeyName,
-  apiKeyAsAlertAttributes,
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
   verifySnoozeScheduleLimit,
@@ -55,14 +53,20 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
+import {
+  getAlertFromRaw,
+  extractReferences,
+  validateActions,
+  updateMeta,
+  addGeneratedActionValues,
+  createNewAPIKeySet,
+} from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
-  CreateAPIKeyResult,
-  NormalizedAlertActionWithUuid,
+  NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -115,9 +119,17 @@ export type BulkEditOperation =
       value?: undefined;
     };
 
-type ApiKeysMap = Map<string, { oldApiKey?: string; newApiKey?: string }>;
+type ApiKeysMap = Map<
+  string,
+  {
+    oldApiKey?: string;
+    newApiKey?: string;
+    oldApiKeyCreatedByUser?: boolean | null;
+    newApiKeyCreatedByUser?: boolean | null;
+  }
+>;
 
-type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner'>;
+type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>;
 
 type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
@@ -280,6 +292,9 @@ export async function bulkEdit<Params extends RuleTypeParams>(
       attributes.alertTypeId as string,
       attributes as RawRule,
       references,
+      false,
+      false,
+      false,
       false
     );
   });
@@ -424,7 +439,10 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 }): Promise<void> {
   try {
     if (rule.attributes.apiKey) {
-      apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
+      apiKeysMap.set(rule.id, {
+        oldApiKey: rule.attributes.apiKey,
+        oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
+      });
     }
 
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
@@ -484,7 +502,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions as NormalizedAlertActionWithUuid[],
+      ruleActions.actions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams
     );
 
@@ -578,7 +596,7 @@ async function getUpdatedAttributesFromOperations(
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: addUuid(operation.value),
+          value: addGeneratedActionValues(operation.value),
         };
 
         try {
@@ -725,23 +743,20 @@ async function prepareApiKeys(
   hasUpdateApiKeyOperation: boolean,
   username: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
-  const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName: attributes.name,
+    username,
+    shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
+    errorMessage: 'Error updating rule: could not create API key',
+  });
 
-  let createdAPIKey: CreateAPIKeyResult | null = null;
-  try {
-    createdAPIKey = shouldUpdateApiKey
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, attributes.name))
-      : null;
-  } catch (error) {
-    throw Error(`Error updating rule: could not create API key - ${error.message}`);
-  }
-
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
   // collect generated API keys
   if (apiKeyAttributes.apiKey) {
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
       newApiKey: apiKeyAttributes.apiKey,
+      newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
     });
   }
 
@@ -803,7 +818,7 @@ async function saveBulkUpdatedRules(
       await bulkMarkApiKeysForInvalidation(
         {
           apiKeys: Array.from(apiKeysMap.values())
-            .filter((value) => value.newApiKey)
+            .filter((value) => value.newApiKey && !value.newApiKeyCreatedByUser)
             .map((value) => value.newApiKey as string),
         },
         context.logger,
@@ -815,13 +830,15 @@ async function saveBulkUpdatedRules(
 
   result.saved_objects.map(({ id, error }) => {
     const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
+    const oldApiKeyCreatedByUser = apiKeysMap.get(id)?.oldApiKeyCreatedByUser;
     const newApiKey = apiKeysMap.get(id)?.newApiKey;
+    const newApiKeyCreatedByUser = apiKeysMap.get(id)?.newApiKeyCreatedByUser;
 
     // if SO wasn't saved and has new API key it will be invalidated
-    if (error && newApiKey) {
+    if (error && newApiKey && !newApiKeyCreatedByUser) {
       apiKeysToInvalidate.push(newApiKey);
       // if SO saved and has old Api Key it will be invalidate
-    } else if (!error && oldApiKey) {
+    } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
       apiKeysToInvalidate.push(oldApiKey);
     }
   });

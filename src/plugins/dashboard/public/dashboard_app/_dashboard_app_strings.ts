@@ -46,6 +46,11 @@ export const unsavedChangesBadgeStrings = {
     i18n.translate('dashboard.unsavedChangesBadge', {
       defaultMessage: 'Unsaved changes',
     }),
+  getUnsavedChangedBadgeToolTipContent: () =>
+    i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
+      defaultMessage:
+        ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+    }),
 };
 
 export const leaveConfirmStrings = {
@@ -323,12 +328,12 @@ export const topNavStrings = {
       defaultMessage: 'Share Dashboard',
     }),
   },
-  options: {
-    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
-      defaultMessage: 'options',
+  settings: {
+    label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
+      defaultMessage: 'settings',
     }),
-    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
-      defaultMessage: 'Options',
+    description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
+      defaultMessage: 'Open dashboard settings',
     }),
   },
   clone: {

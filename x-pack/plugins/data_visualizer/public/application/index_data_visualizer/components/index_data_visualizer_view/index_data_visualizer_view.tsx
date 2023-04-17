@@ -37,6 +37,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -59,12 +60,10 @@ import {
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import type { SupportedFieldType } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { OMIT_FIELDS } from '../../../../../common/constants';
-import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
@@ -214,10 +213,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
-    const indexedFieldTypes: SupportedFieldType[] = [];
+    const indexedFieldTypes: string[] = [];
     dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType: SupportedFieldType | undefined = kbnTypeToJobType(field);
+        const dataVisualizerType = kbnTypeToSupportedType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }
@@ -278,6 +277,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
+      id: 'index_data_visualizer',
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);

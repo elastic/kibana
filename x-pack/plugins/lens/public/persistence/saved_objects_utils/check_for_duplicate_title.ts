@@ -6,7 +6,7 @@
  */
 
 import type { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
-import { DOC_TYPE } from '../../../common';
+import { DOC_TYPE } from '../../../common/constants';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';

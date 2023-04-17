@@ -35,7 +35,7 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { withLensData } from '../../../hoc/with_lens_data';
-import { COLLECTION_VIEW_PATH } from '../../../routes';
+import { COLLECTION_OVERVIEW_PATH } from '../../../routes';
 
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
@@ -102,9 +102,8 @@ export const AnalyticsCollectionCard: React.FC<
   const cardStyles = AnalyticsCollectionCardStyles(euiTheme);
   const status = getChartStatus(secondaryMetric);
   const CARD_THEME = getCardTheme(euiTheme)[status];
-  const collectionViewUrl = generateEncodedPath(COLLECTION_VIEW_PATH, {
+  const collectionViewUrl = generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
     name: collection.name,
-    section: 'events',
   });
   const handleCardClick = (event: MouseEvent) => {
     event?.preventDefault();

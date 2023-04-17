@@ -1074,7 +1074,6 @@ describe('migration actions', () => {
         }
       `);
     });
-
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,

@@ -45,7 +45,7 @@ import type {
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
-import type { DateRange, LayerType, SortingHint } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -244,6 +244,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery?: Query;
   searchFilters?: Filter[];
   title?: string;
+  description?: string;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -282,7 +283,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
   uniqueId?: string;
-  severity: 'error' | 'warning';
+  severity: 'error' | 'warning' | 'info';
   shortMessage: string;
   longMessage: React.ReactNode | string;
   fixableInEditor: boolean;
@@ -475,6 +476,7 @@ export interface Datasource<T = unknown, P = unknown> {
     deps: {
       frame: FrameDatasourceAPI;
       setState: StateSetter<T>;
+      visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
 
@@ -873,6 +875,8 @@ export interface Suggestion<T = unknown, V = unknown> {
   previewExpression?: Ast | string;
   previewIcon: IconType;
   hide?: boolean;
+  // flag to indicate if the visualization is incomplete
+  incomplete?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
 }
@@ -925,6 +929,10 @@ export interface VisualizationSuggestion<T = unknown> {
    * directly.
    */
   hide?: boolean;
+  /**
+   * Flag indicating whether this suggestion is incomplete
+   */
+  incomplete?: boolean;
   /**
    * Descriptive title of the suggestion. Should be as short as possible. This title is shown if
    * the suggestion is advertised to the user and will also show either the `previewExpression` or

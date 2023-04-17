@@ -23,6 +23,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -253,7 +254,6 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
-  resetParamsOnConnectorChange?: (params: ActionParams) => ActionParams | {};
 }
 
 export interface GenericValidationResult<T> {
@@ -457,6 +457,7 @@ export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
   uuid = 'kibana.alert.rule.uuid',
+  case_ids = 'kibana.alert.case_ids',
 }
 
 export interface InspectQuery {
@@ -493,7 +494,10 @@ export interface FetchAlertData {
 
 export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
-  casesData: { cases: Map<string, Case>; isLoading: boolean };
+  cases: {
+    data: Map<string, Case>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -597,7 +601,11 @@ export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => Field
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
-  casesFeatureId: string;
+  cases?: {
+    featureId: string;
+    owner: string[];
+    syncAlerts?: boolean;
+  };
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;
@@ -614,7 +622,6 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  app_id?: string;
 }
 
 export enum BulkActionsVerbs {
@@ -731,4 +738,10 @@ export interface TableUpdateHandlerArgs {
 
 export interface LazyLoadProps {
   hideLazyLoader?: boolean;
+}
+
+export interface NotifyWhenSelectOptions {
+  isSummaryOption?: boolean;
+  isForEachAlertOption?: boolean;
+  value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }
