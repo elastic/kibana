@@ -18,6 +18,7 @@ export const useConnectionProfiles = (initialValue?: ThrottlingConfig) => {
         value: 'custom',
         inputDisplay: (
           <ConnectionProfile
+            id="custom"
             throttling={initialValue?.id === 'custom' ? initialValue : undefined}
           />
         ),

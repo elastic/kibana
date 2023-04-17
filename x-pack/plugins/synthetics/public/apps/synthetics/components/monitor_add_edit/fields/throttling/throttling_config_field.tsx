@@ -61,13 +61,19 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
         readOnly={props.readOnly}
       />
       {isThrottlingDisabled && <ThrottlingDisabledCallout />}
-      {isCustom && <ThrottlingFields throttling={props?.value} setValue={props.onChange} />}
+      {isCustom && (
+        <ThrottlingFields
+          throttling={props?.value}
+          setValue={props.onChange}
+          readOnly={props.readOnly}
+        />
+      )}
     </>
   );
 };
 
 export const PROFILE_OPTIONS = PROFILE_VALUES.map(({ id }) => ({
   value: id,
-  inputDisplay: <ConnectionProfile throttling={PROFILES_MAP[id]} />,
+  inputDisplay: <ConnectionProfile throttling={PROFILES_MAP[id]} id={id} />,
   'data-test-subj': `syntheticsThrottlingSelect-${id}`,
 }));

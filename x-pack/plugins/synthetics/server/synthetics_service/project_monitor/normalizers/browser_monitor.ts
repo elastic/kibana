@@ -10,11 +10,14 @@ import {
   ConfigKey,
   DataStream,
   FormMonitorType,
+  ProjectMonitor,
+  ThrottlingConfig,
 } from '../../../../common/runtime_types';
 import {
   PROFILE_VALUES_ENUM,
   DEFAULT_FIELDS,
   PROFILES_MAP,
+  PROFILE_VALUES,
 } from '../../../../common/constants/monitor_defaults';
 import {
   NormalizedProjectProps,
@@ -42,10 +45,7 @@ export const getNormalizeBrowserFields = ({
     version,
   });
 
-  let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
-  if (typeof monitor.throttling === 'boolean' && !monitor.throttling) {
-    throttling = PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
-  }
+  const throttling = normalizeThrottling(monitor.throttling);
 
   const normalizedFields = {
     ...commonFields,
@@ -77,4 +77,41 @@ export const getNormalizeBrowserFields = ({
     unsupportedKeys: [],
     errors,
   };
+};
+
+export const normalizeThrottling = (
+  monitorThrottling: ProjectMonitor['throttling']
+): ThrottlingConfig => {
+  const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
+
+  let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
+  if (typeof monitorThrottling === 'boolean' && !monitorThrottling) {
+    throttling = PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
+  }
+  if (typeof monitorThrottling === 'object') {
+    const { download, upload, latency } = monitorThrottling;
+    const matchedProfile = PROFILE_VALUES.find(({ value }) => {
+      return (
+        Number(value?.download) === download &&
+        Number(value?.upload) === upload &&
+        Number(value?.latency) === latency
+      );
+    });
+
+    if (matchedProfile) {
+      return matchedProfile;
+    } else {
+      return {
+        id: 'custom',
+        label: 'Custom',
+        value: {
+          download: String(download),
+          upload: String(upload),
+          latency: String(latency),
+        },
+      };
+    }
+  }
+
+  return throttling;
 };

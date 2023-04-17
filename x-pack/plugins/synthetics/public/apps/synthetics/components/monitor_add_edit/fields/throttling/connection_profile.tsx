@@ -8,9 +8,31 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { PROFILE_VALUES_ENUM } from '../../../../../../../common/constants/monitor_defaults';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 
-export const ConnectionProfile = ({ throttling }: { throttling?: ThrottlingConfig }) => {
+export const ConnectionProfile = ({
+  throttling,
+  id,
+}: {
+  throttling?: ThrottlingConfig;
+  id: string;
+}) => {
+  if (id === PROFILE_VALUES_ENUM.NO_THROTTLING) {
+    return (
+      <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.synthetics.monitorAddEdit.throttling.connectionProfile.disabled.label"
+              defaultMessage="No throttling"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (throttling && throttling.value) {
     const { label, value } = throttling;
 

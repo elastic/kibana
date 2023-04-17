@@ -253,7 +253,11 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql(false);
+          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
+            value: null,
+            id: 'no-throttling',
+            label: 'No throttling',
+          });
         }
       } finally {
         await Promise.all([
