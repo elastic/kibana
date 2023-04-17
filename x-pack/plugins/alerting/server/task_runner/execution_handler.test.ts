@@ -71,7 +71,7 @@ const ruleType: NormalizedRuleType<
   producer: 'alerts',
   getSummarizedAlerts: getSummarizedAlertsMock,
   validate: {
-    params: schema.never(),
+    params: schema.any(),
   },
 };
 const rule = {

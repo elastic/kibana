@@ -163,7 +163,7 @@ describe('bulkDelete', () => {
       },
       producer: 'alerts',
       validate: {
-        params: schema.never(),
+        params: schema.any(),
       },
     });
   });

@@ -59,7 +59,7 @@ const ruleType: UntypedNormalizedRuleType = {
   executor: jest.fn(),
   producer: 'alerts',
   validate: {
-    params: schema.never(),
+    params: schema.any(),
   },
 };
 let fakeTimer: sinon.SinonFakeTimers;

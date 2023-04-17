@@ -18,7 +18,6 @@ import {
 import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { schema } from '@kbn/config-schema';
 import {
   AlertState,
   AlertNodeState,
@@ -105,7 +104,7 @@ export class BaseRule {
         context: actionVariables,
       },
       validate: {
-        params: schema.never(),
+        params: { validate: (params) => params },
       },
     };
   }

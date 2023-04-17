@@ -10,7 +10,6 @@ import { Subject } from 'rxjs';
 import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { schema } from '@kbn/config-schema';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();
@@ -74,7 +73,7 @@ describe('getLicenseCheckForRuleType', () => {
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     validate: {
-      params: schema.never(),
+      params: { validate: (params) => params },
     },
   };
 

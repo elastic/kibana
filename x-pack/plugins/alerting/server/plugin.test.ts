@@ -35,7 +35,6 @@ jest.mock('./alerts_service/alerts_service', () => ({
 }));
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { schema } from '@kbn/config-schema';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -73,7 +72,7 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
     return { state: {} };
   },
   validate: {
-    params: schema.never(),
+    params: { validate: (params) => params },
   },
 };
 
