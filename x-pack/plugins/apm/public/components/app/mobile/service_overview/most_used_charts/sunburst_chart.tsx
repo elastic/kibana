@@ -30,7 +30,7 @@ import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 
 const theme: PartialTheme = {
   chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
-  chartPaddings: { left: 0 },
+  chartPaddings: { left: 50 },
   partition: {
     minFontSize: 5,
     idealFontSizeJump: 1.1,
@@ -125,7 +125,7 @@ export function NoResultsFound() {
         <EuiSpacer size="s" />
         <p>
           <FormattedMessage
-            id="most_used.noDataLabel"
+            id="xpack.apm.mobile.charts.noResultsFound"
             defaultMessage="No results found"
           />
         </p>
