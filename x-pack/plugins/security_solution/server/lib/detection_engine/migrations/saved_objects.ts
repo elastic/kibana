@@ -15,6 +15,9 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
     sourceIndex: {
       type: 'keyword',
     },
+    updated: {
+      type: 'date',
+    },
     version: {
       type: 'long',
     },
