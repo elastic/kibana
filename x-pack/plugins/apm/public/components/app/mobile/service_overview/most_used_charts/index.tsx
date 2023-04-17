@@ -64,7 +64,7 @@ export function MostUsedCharts({
   const { data = { mostUsedCharts: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/mobile/most_used_charts',
+        'GET /internal/apm/mobile-services/{serviceName}/most_used_charts',
         {
           params: {
             path: { serviceName },

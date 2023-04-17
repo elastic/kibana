@@ -71,7 +71,7 @@ const mobileFiltersRoute = createApmServerRoute({
 });
 
 const mobileChartsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/mobile/most_used_charts',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/most_used_charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
