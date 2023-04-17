@@ -146,88 +146,84 @@ const AlertDetailsAppSection = ({
 
   const getLogCountChart = () => {
     if (!!rule.params.criteria && !isRatioRule(rule.params.criteria)) {
-      return (
-        <EuiPanel hasBorder={true} data-test-subj="logsCountAlertDetails">
-          {rule.params.criteria.map((criteria, idx) => {
-            const chartCriterion = criteria as PartialCriterion;
-            return (
-              <EuiPanel
-                key={`${chartCriterion.field}${idx}`}
-                hasBorder={true}
-                data-test-subj="logsCountChartAlertDetails"
-              >
-                <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-                  {chartCriterion.comparator && (
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
-                            defaultMessage: 'Logs for {field} {comparator} {value}',
-                            values: {
-                              field: chartCriterion.field,
-                              comparator: ComparatorToi18nMap[chartCriterion.comparator],
-                              value: chartCriterion.value,
-                            },
-                          })}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                <EuiSpacer size="l" />
-                <EuiFlexGroup>
-                  <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
-                    <EuiSpacer size="s" />
-                    {chartCriterion.comparator && (
-                      <Threshold
-                        title={`Threshold breached`}
-                        chartProps={{ theme, baseTheme: LIGHT_THEME }}
-                        comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
-                        id={`${chartCriterion.field}-${chartCriterion.value}`}
-                        threshold={rule.params.count.value}
-                        value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
-                        valueFormatter={formatThreshold}
-                      />
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={5}>
-                    <CriterionPreview
-                      ruleParams={rule.params}
-                      logViewReference={{
-                        type: 'log-view-reference',
-                        logViewId: rule.params.logView.logViewId,
-                      }}
-                      chartCriterion={chartCriterion}
-                      showThreshold={true}
-                      executionTimeRange={{
-                        gte: Number(moment(timeRange.from).format('x')),
-                        lte: Number(moment(timeRange.to).format('x')),
-                      }}
-                      annotations={[
-                        <AlertAnnotation
-                          key={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                          id={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
-                          alertStart={alert.start}
-                          color={euiTheme.colors.danger}
-                          dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
-                        />,
-                        <AlertActiveTimeRangeAnnotation
-                          key={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                          id={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
-                          alertStart={alert.start}
-                          alertEnd={alertEnd}
-                          color={euiTheme.colors.danger}
-                        />,
-                      ]}
-                      filterSeriesByGroupName={[selectedSeries]}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            );
-          })}
-        </EuiPanel>
-      );
+      return rule.params.criteria.map((criteria, idx) => {
+        const chartCriterion = criteria as PartialCriterion;
+        return (
+          <EuiPanel
+            key={`${chartCriterion.field}${idx}`}
+            hasBorder={true}
+            data-test-subj={`logsCountChartAlertDetails-${chartCriterion.field}${idx}`}
+          >
+            <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+              {chartCriterion.comparator && (
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h2>
+                      {i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
+                        defaultMessage: 'Logs for {field} {comparator} {value}',
+                        values: {
+                          field: chartCriterion.field,
+                          comparator: ComparatorToi18nMap[chartCriterion.comparator],
+                          value: chartCriterion.value,
+                        },
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+                <EuiSpacer size="s" />
+                {chartCriterion.comparator && (
+                  <Threshold
+                    title={`Threshold breached`}
+                    chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                    comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
+                    id={`${chartCriterion.field}-${chartCriterion.value}`}
+                    threshold={rule.params.count.value}
+                    value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
+                    valueFormatter={formatThreshold}
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={5}>
+                <CriterionPreview
+                  ruleParams={rule.params}
+                  logViewReference={{
+                    type: 'log-view-reference',
+                    logViewId: rule.params.logView.logViewId,
+                  }}
+                  chartCriterion={chartCriterion}
+                  showThreshold={true}
+                  executionTimeRange={{
+                    gte: Number(moment(timeRange.from).format('x')),
+                    lte: Number(moment(timeRange.to).format('x')),
+                  }}
+                  annotations={[
+                    <AlertAnnotation
+                      key={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
+                      id={`${alert.start}${chartCriterion.field}${idx}-start-alert-annotation`}
+                      alertStart={alert.start}
+                      color={euiTheme.colors.danger}
+                      dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
+                    />,
+                    <AlertActiveTimeRangeAnnotation
+                      key={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
+                      id={`${alert.start}${chartCriterion.field}${idx}-active-alert-annotation`}
+                      alertStart={alert.start}
+                      alertEnd={alertEnd}
+                      color={euiTheme.colors.danger}
+                    />,
+                  ]}
+                  filterSeriesByGroupName={[selectedSeries]}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        );
+      });
     } else return null;
   };
 
