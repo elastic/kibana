@@ -30,7 +30,6 @@ import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('../../utils');
 const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;
@@ -59,7 +58,6 @@ describe('Action List Handler', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
-      licensing: licensingMock.createSetup(),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
 
@@ -98,7 +96,7 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
-    const defaultParams = { pageSize: 10, page: 1, withRuleActions: true };
+    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler(defaultParams);
@@ -126,7 +124,7 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withRuleActions: true,
+        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({

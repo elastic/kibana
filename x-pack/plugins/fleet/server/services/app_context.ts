@@ -120,6 +120,10 @@ class AppContextService {
     return this.securityStart!;
   }
 
+  public getSecuritySetup() {
+    return this.securitySetup!;
+  }
+
   public getSecurityLicense() {
     return this.securitySetup!.license;
   }

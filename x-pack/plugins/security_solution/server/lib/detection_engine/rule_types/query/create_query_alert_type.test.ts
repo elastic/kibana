@@ -56,7 +56,7 @@ describe('Custom Query Alerts', () => {
       createQueryAlertType({
         eventsTelemetry,
         licensing,
-        osqueryCreateActionService: undefined,
+        scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',
@@ -104,7 +104,7 @@ describe('Custom Query Alerts', () => {
       createQueryAlertType({
         eventsTelemetry,
         licensing,
-        osqueryCreateActionService: undefined,
+        scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
         version: '1.0.0',

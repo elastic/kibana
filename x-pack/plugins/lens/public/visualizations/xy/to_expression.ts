@@ -49,7 +49,7 @@ import type {
 } from './types';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { hasIcon } from './xy_config_panel/shared/icon_select';
+import { hasIcon } from '../../shared_components/icon_select/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {

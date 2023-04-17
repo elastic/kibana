@@ -5,17 +5,13 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFilterGroup,
-  EuiSuperUpdateButton,
-  EuiFilterButton,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ActionsLogWithRuleToggle } from './actions_log_with_rule_toggle';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -24,7 +20,6 @@ import {
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { FILTER_NAMES } from '../translations';
 
 export const ActionsLogFilters = memo(
   ({
@@ -40,8 +35,6 @@ export const ActionsLogFilters = memo(
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
-    displayAutomatedResponses,
-    toggleDisplayAutomatedResponses,
     'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
@@ -56,11 +49,12 @@ export const ActionsLogFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
-    displayAutomatedResponses: boolean;
-    toggleDisplayAutomatedResponses: (newState: boolean) => void;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
+      'endpointResponseActionsEnabled'
+    );
     const filters = useMemo(() => {
       return (
         <>
@@ -84,27 +78,19 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          <EuiFilterButton
-            hasActiveFilters={displayAutomatedResponses}
-            onClick={() => {
-              toggleDisplayAutomatedResponses(!displayAutomatedResponses);
-            }}
-            data-test-subj={getTestId('automated-responses-filter')}
-          >
-            {FILTER_NAMES.automated}
-          </EuiFilterButton>
+          {responseActionsEnabled && (
+            <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} isFlyout={isFlyout} />
+          )}
         </>
       );
     }, [
       dataTestSubj,
-      displayAutomatedResponses,
-      getTestId,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
       onChangeStatusesFilter,
+      responseActionsEnabled,
       showHostsFilter,
-      toggleDisplayAutomatedResponses,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);

@@ -10,7 +10,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
-import { AppState } from '../services/discover_app_state_container';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
@@ -49,7 +49,7 @@ export function getStateDefaults({
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
 
-  const defaultState: AppState = {
+  const defaultState: DiscoverAppState = {
     query,
     sort: !sort.length
       ? getDefaultSort(
@@ -61,7 +61,7 @@ export function getStateDefaults({
     columns,
     index: dataView?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
+    filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,

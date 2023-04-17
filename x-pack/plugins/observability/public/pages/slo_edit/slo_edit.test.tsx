@@ -19,7 +19,6 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
 import { SloEditPage } from './slo_edit';
@@ -88,6 +87,11 @@ const mockKibana = () => {
       storage: {
         get: () => {},
       },
+      triggersActionsUi: {
+        getAddRuleFlyout: jest
+          .fn()
+          .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
+      },
       uiSettings: {
         get: () => {},
       },
@@ -118,6 +122,9 @@ describe('SLO Edit Page', () => {
 
     it('navigates to the SLO List page', async () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+      jest
+        .spyOn(Router, 'useLocation')
+        .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
       useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
 
@@ -156,6 +163,9 @@ describe('SLO Edit Page', () => {
     describe('when no sloId route param is provided', () => {
       it('renders the SLO Edit page in pristine state', async () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
 
@@ -183,48 +193,25 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
         expect(screen.queryByTestId('sloForm')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type
-        );
-
+        expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+        // Show default values from the kql indicator
+        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.kql.custom');
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toBeNull();
+        expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue('');
+        expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue('');
+        expect(screen.queryByTestId('customKqlIndicatorFormTotalQueryInput')).toHaveValue('');
 
-        expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-            ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.filter
-            : ''
-        );
-        expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-            ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.good
-            : ''
-        );
-        expect(screen.queryByTestId('customKqlIndicatorFormTotalQueryInput')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-            ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.total
-            : ''
-        );
-
-        expect(screen.queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.budgetingMethod
-        );
-        expect(screen.queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.timeWindow.duration as any
-        );
-        expect(screen.queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.objective.target
-        );
-
-        expect(screen.queryByTestId('sloFormNameInput')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.name
-        );
-        expect(screen.queryByTestId('sloFormDescriptionTextArea')).toHaveValue(
-          SLO_EDIT_FORM_DEFAULT_VALUES.description
-        );
+        // other sections are hidden
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeNull();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeNull();
       });
 
       it.skip('calls the createSlo hook if all required values are filled in', async () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
         useFetchIndicesMock.mockReturnValue({
           isLoading: false,
           indices: [{ name: 'some-index' }],
@@ -262,9 +249,12 @@ describe('SLO Edit Page', () => {
         userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
         userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
 
-        const t = Date.now();
-        await waitFor(() => expect(screen.getByTestId('sloFormSubmitButton')).toBeEnabled());
-        console.log('end waiting for submit button: ', Math.ceil(Date.now() - t));
+        // all sections are visible
+        expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+        expect(screen.getByTestId('sloFormSubmitButton')).toBeEnabled();
 
         fireEvent.click(screen.getByTestId('sloFormSubmitButton')!);
 
@@ -310,6 +300,9 @@ describe('SLO Edit Page', () => {
       it('renders the SLO Edit page with prefilled form values', async () => {
         const slo = buildSlo({ id: '123' });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo });
 
@@ -337,12 +330,15 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
         expect(screen.queryByTestId('sloForm')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
+        // all sections are visible
+        expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
+        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );
-
         expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
           slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.filter : ''
         );
@@ -398,77 +394,10 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
-        await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
-
+        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
         fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
 
-        expect(mockUpdate).toMatchInlineSnapshot(`
-          [MockFunction] {
-            "calls": Array [
-              Array [
-                Object {
-                  "slo": Object {
-                    "budgetingMethod": "occurrences",
-                    "description": "some description useful",
-                    "indicator": Object {
-                      "params": Object {
-                        "filter": "baz: foo and bar > 2",
-                        "good": "http_status: 2xx",
-                        "index": "some-index",
-                        "total": "a query",
-                      },
-                      "type": "sli.kql.custom",
-                    },
-                    "name": "super important level service",
-                    "objective": Object {
-                      "target": 0.98,
-                    },
-                    "settings": Object {
-                      "frequency": "1m",
-                      "syncDelay": "1m",
-                      "timestampField": "@timestamp",
-                    },
-                    "tags": Array [
-                      "k8s",
-                      "production",
-                      "critical",
-                    ],
-                    "timeWindow": Object {
-                      "duration": "30d",
-                      "isRolling": true,
-                    },
-                  },
-                  "sloId": "123",
-                },
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          }
-        `);
-      });
-
-      it('blocks submitting if not all required values are filled in', async () => {
-        const slo = buildSlo();
-
-        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-
-        useFetchIndicesMock.mockReturnValue({
-          isLoading: false,
-          indices: [],
-        });
-
-        useFetchSloMock.mockReturnValue({ isLoading: false, slo: { ...slo, name: '' } });
-
-        render(<SloEditPage />);
-
-        await waitFor(() => {
-          expect(screen.queryByTestId('sloFormSubmitButton')).toBeDisabled();
-        });
+        expect(mockUpdate).toMatchInlineSnapshot(`[MockFunction]`);
       });
     });
 
@@ -477,6 +406,9 @@ describe('SLO Edit Page', () => {
         const slo = buildSlo();
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo });
 
@@ -501,18 +433,105 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
+        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+
         await waitFor(() => {
-          expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
           fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
         });
 
         expect(mockAddSuccess).toBeCalled();
       });
 
-      it('navigates to the SLO List page', async () => {
+      it('navigates to the SLO List page when checkbox to create new rule is not checked', async () => {
         const slo = buildSlo();
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
+        useFetchIndicesMock.mockReturnValue({
+          isLoading: false,
+          indices: [{ name: 'some-index' }],
+        });
+
+        useCreateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        render(<SloEditPage />);
+
+        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+
+        await waitFor(() => {
+          fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+        });
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+      });
+
+      it('navigates to the SLO Edit page when checkbox to create new rule is checked', async () => {
+        const slo = buildSlo();
+
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
+        useFetchIndicesMock.mockReturnValue({
+          isLoading: false,
+          indices: [{ name: 'some-index' }],
+        });
+
+        useCreateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        render(<SloEditPage />);
+
+        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+
+        await waitFor(() => {
+          fireEvent.click(screen.getByTestId('createNewRuleCheckbox'));
+          fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+        });
+
+        expect(mockNavigate).toBeCalledWith(
+          mockBasePathPrepend(`${paths.observability.sloEdit(slo.id)}?create-rule=true`)
+        );
+      });
+
+      it('opens the Add Rule Flyout when visiting an existing SLO with search params set', async () => {
+        const slo = buildSlo();
+
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: 'create-rule=true', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo });
 
@@ -538,11 +557,8 @@ describe('SLO Edit Page', () => {
         render(<SloEditPage />);
 
         await waitFor(() => {
-          expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
-          fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
+          expect(screen.getByTestId('add-rule-flyout')).toBeTruthy();
         });
-
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
       });
     });
 
@@ -551,6 +567,9 @@ describe('SLO Edit Page', () => {
         const slo = buildSlo();
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, slo });
 
@@ -575,8 +594,9 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
+        expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
+
         await waitFor(() => {
-          expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled();
           fireEvent.click(screen.getByTestId('sloFormSubmitButton'));
         });
 

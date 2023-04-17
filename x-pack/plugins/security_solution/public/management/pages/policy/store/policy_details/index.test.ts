@@ -269,6 +269,7 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
+                  meta: { license: '' },
                   windows: {
                     events: {
                       credential_access: true,

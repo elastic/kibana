@@ -16,7 +16,10 @@ import {
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  SavedObjectConfig,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
 import {
   registerResolveImportErrorsRoute,
@@ -122,6 +125,7 @@ describe(`POST ${URL}`, () => {
     expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
       request: expect.anything(),
       createNewCopies: false,
+      compatibilityMode: false,
     });
   });
 
@@ -161,7 +165,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ migrationVersion: {} })],
+      [expect.objectContaining({ typeMigrationVersion: '' })],
       expect.any(Object) // options
     );
   });
@@ -199,7 +203,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, migrationVersion: {} }],
+      [{ type, id, attributes, typeMigrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
   });
@@ -238,7 +242,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, migrationVersion: {} }],
+      [{ type, id, attributes, typeMigrationVersion: '' }],
       expect.objectContaining({ overwrite: true })
     );
   });
@@ -282,7 +286,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, migrationVersion: {} }],
+      [{ type, id, attributes, references, typeMigrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -331,7 +335,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, migrationVersion: {} }],
+      [{ type, id, attributes, references, typeMigrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -409,6 +413,108 @@ describe(`POST ${URL}`, () => {
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
           }),
         ],
+        expect.any(Object) // options
+      );
+    });
+  });
+
+  describe('compatibilityMode enabled', () => {
+    it('imports objects and creates legacy URL aliases', async () => {
+      const mockUuid = jest.requireMock('uuid');
+      mockUuid.v4 = jest.fn().mockReturnValue('new-id-1');
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
+
+      const obj1 = {
+        type: 'visualization',
+        id: 'my-vis',
+        attributes: { title: 'Look at my visualization' },
+        references: [],
+      };
+      const obj2 = {
+        type: 'dashboard',
+        id: 'new-id-2',
+        originId: 'my-dashboard',
+        attributes: { title: 'Look at my dashboard' },
+        references: [],
+      };
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
+
+      // Prepare mock results for the created legacy URL alias for obj2.
+      const legacyUrlAliasObj2 = {
+        id: `default:${obj2.type}:${obj2.originId}`,
+        type: LEGACY_URL_ALIAS_TYPE,
+        references: [],
+        attributes: {
+          sourceId: obj2.originId,
+          targetNamespace: 'default',
+          targetType: obj2.type,
+          targetId: obj2.id,
+          purpose: 'savedObjectImport',
+        },
+      };
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [legacyUrlAliasObj2],
+      });
+
+      const result = await supertest(httpSetup.server.listener)
+        .post(`${URL}?compatibilityMode=true`)
+        .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .send(
+          [
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
+            '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="retries"',
+            '',
+            '[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern","to":"existing"}]},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
+            '--EXAMPLE--',
+          ].join('\r\n')
+        )
+        .expect(200);
+
+      expect(result.body).toEqual({
+        success: true,
+        successCount: 2,
+        successResults: [
+          {
+            type: obj1.type,
+            id: 'my-vis',
+            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+          },
+          {
+            type: obj2.type,
+            id: 'my-dashboard',
+            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+            destinationId: obj2.id,
+          },
+        ],
+        warnings: [],
+      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2); // successResults objects were created because no resolvable errors are present
+      expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+        1,
+        [
+          expect.objectContaining({
+            type: 'visualization',
+            id: 'my-vis',
+            references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+          }),
+          expect.objectContaining({
+            type: 'dashboard',
+            id: 'new-id-2',
+            originId: 'my-dashboard',
+            references: [{ name: 'ref_0', type: 'visualization', id: 'my-vis' }],
+          }),
+        ],
+        expect.any(Object) // options
+      );
+      expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+        2,
+        [expect.objectContaining(legacyUrlAliasObj2)],
         expect.any(Object) // options
       );
     });

@@ -38,8 +38,8 @@ interface OptionalFilterParams {
   /** list of action Ids that should have outputs */
   withOutputs?: string[];
   /** Include automated response actions */
-  withRuleActions?: boolean;
-  alertIds?: string[];
+  withAutomatedActions?: boolean;
+  alertId?: string[];
 }
 
 /**
@@ -60,6 +60,7 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
+  withAutomatedActions,
   withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
@@ -82,6 +83,7 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    withAutomatedActions,
     withOutputs,
   });
 
@@ -121,8 +123,8 @@ export const getActionList = async ({
   userIds,
   unExpiredOnly = false,
   withOutputs,
-  withRuleActions,
-  alertIds,
+  withAutomatedActions,
+  alertId,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -146,8 +148,8 @@ export const getActionList = async ({
     userIds,
     unExpiredOnly,
     withOutputs,
-    withRuleActions,
-    alertIds,
+    withAutomatedActions,
+    alertId,
   });
 
   return {
@@ -183,8 +185,8 @@ const getActionDetailsList = async ({
   userIds,
   unExpiredOnly,
   withOutputs,
-  withRuleActions,
-  alertIds,
+  withAutomatedActions,
+  alertId,
 }: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -206,8 +208,8 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
-      withRuleActions,
-      alertIds,
+      withAutomatedActions,
+      alertId,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;

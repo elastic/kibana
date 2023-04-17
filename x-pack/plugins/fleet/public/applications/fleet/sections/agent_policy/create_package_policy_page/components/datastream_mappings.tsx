@@ -18,7 +18,11 @@ import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 
 export interface PackagePolicyEditorDatastreamMappingsProps {
   packageInfo: PackageInfo;
-  packageInputStream: { id?: string; data_stream: { dataset: string; type: string } };
+  packageInputStream: {
+    id?: string;
+    data_stream: { dataset: string; type: string };
+  };
+  customDataset?: string;
 }
 
 function useComponentTemplates(dataStream: { dataset: string; type: string }) {
@@ -35,8 +39,10 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
 
 export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
   PackagePolicyEditorDatastreamMappingsProps
-> = ({ packageInputStream, packageInfo }) => {
-  const dataStream = packageInputStream.data_stream;
+> = ({ packageInputStream, packageInfo, customDataset }) => {
+  const dataStream = customDataset
+    ? { ...packageInputStream.data_stream, dataset: customDataset }
+    : packageInputStream.data_stream;
   const pageUrl = usePackagePolicyEditorPageUrl(packageInputStream.id);
 
   const { application, docLinks } = useStartServices();

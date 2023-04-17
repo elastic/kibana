@@ -27,7 +27,7 @@ const defaultArgs = {
   groupingId,
   groupingState: initialState,
   tracker: jest.fn(),
-  onGroupChangeCallback: jest.fn(),
+  onGroupChange: jest.fn(),
 };
 const customField = 'custom.field';
 describe('useGetGroupSelector', () => {
@@ -167,8 +167,8 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange(customField));
-    expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledTimes(1);
-    expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledWith({
+    expect(defaultArgs.onGroupChange).toHaveBeenCalledTimes(1);
+    expect(defaultArgs.onGroupChange).toHaveBeenCalledWith({
       tableId: groupingId,
       groupByField: customField,
     });

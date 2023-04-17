@@ -25,7 +25,10 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   version?: string;
   /** Array of references to other saved objects */
   references?: SavedObjectReference[];
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritDoc SavedObjectsMigrationVersion}
+   * @deprecated
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /**
    * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
@@ -37,6 +40,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * field set and you want to create it again.
    */
   coreMigrationVersion?: string;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  typeMigrationVersion?: string;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
   /**

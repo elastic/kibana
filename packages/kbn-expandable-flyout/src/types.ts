@@ -36,8 +36,4 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanel) => React.ReactElement;
-  /**
-   * Width used when rendering the panel
-   */
-  width: number; // TODO remove this, the width shouldn't be a property of a panel, but handled at the flyout level
 }

@@ -627,6 +627,7 @@
         "name": "@timestamp",
         "type": "date",
         "aggregatable": true,
+        "counter": false,
         "aggIds": []
       },
       {
@@ -634,6 +635,7 @@
         "name": "CPUUtilization",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -667,6 +669,7 @@
         "name": "DiskReadBytes",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -700,6 +703,7 @@
         "name": "DiskReadOps",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -733,6 +737,7 @@
         "name": "DiskWriteBytes",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -766,6 +771,7 @@
         "name": "DiskWriteOps",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -799,6 +805,7 @@
         "name": "instance",
         "type": "keyword",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "distinct_count",
           "high_distinct_count",
@@ -810,6 +817,7 @@
         "name": "NetworkIn",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -843,6 +851,7 @@
         "name": "NetworkOut",
         "type": "double",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
@@ -876,6 +885,7 @@
         "name": "region",
         "type": "keyword",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "distinct_count",
           "high_distinct_count",
@@ -887,6 +897,7 @@
         "name": "sourcetype",
         "type": "text",
         "aggregatable": false,
+        "counter": false,
         "aggIds": []
       },
       {
@@ -894,6 +905,7 @@
         "name": "sourcetype.keyword",
         "type": "keyword",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "distinct_count",
           "high_distinct_count",

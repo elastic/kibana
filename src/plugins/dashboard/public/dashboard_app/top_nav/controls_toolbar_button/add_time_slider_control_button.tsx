@@ -19,7 +19,7 @@ interface Props {
   controlGroup: ControlGroupContainer;
 }
 
-export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props) => {
+export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
 
   return (
     <EuiContextMenuItem
-      key="addTimeSliderControl"
+      {...rest}
       icon="plusInCircle"
       onClick={() => {
         controlGroup.addTimeSliderControl();

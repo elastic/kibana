@@ -55,6 +55,34 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
+const UnitedMetadataSortMethod: estypes.SortCombinations[] = [
+  { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+];
+
+export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
+  return {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { 'agent.id': agentID } },
+                  { term: { 'HostDetails.agent.id': agentID } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      sort: MetadataSortMethod,
+      size: 1,
+    },
+    index: metadataCurrentIndexPattern,
+  };
+}
+
 export function getESQueryHostMetadataByFleetAgentIds(
   fleetAgentIds: string[]
 ): estypes.SearchRequest {
@@ -183,7 +211,7 @@ export async function buildUnitedIndexQuery(
     body: {
       query,
       track_total_hits: true,
-      sort: MetadataSortMethod,
+      sort: UnitedMetadataSortMethod,
       fields,
       runtime_mappings: runtimeMappings,
     },

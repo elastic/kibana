@@ -6,16 +6,24 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType } from '@elastic/eui';
+import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
 } from '../../../common/api';
 import type { Case } from '../../containers/types';
 
+export interface AttachmentAction {
+  onClick: () => void;
+  iconType: string;
+  label: string;
+  color?: EuiButtonProps['color'];
+  isPrimary?: boolean;
+}
+
 export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];
-  actions?: EuiCommentProps['actions'];
+  getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
 }
@@ -39,6 +47,7 @@ export interface AttachmentType<Props> {
   icon: IconType;
   displayName: string;
   getAttachmentViewObject: () => AttachmentViewObject<Props>;
+  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

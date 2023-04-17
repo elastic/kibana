@@ -26,12 +26,16 @@ describe('markDuplicates', () => {
           {
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
-            duplicate: true,
+            docCount: 101,
+            duplicate: 2,
+            pValue: 0.01,
           },
           {
             fieldName: 'airline',
             fieldValue: 'UAL',
-            duplicate: false,
+            docCount: 101,
+            duplicate: 1,
+            pValue: 0.01,
           },
         ],
         docCount: 101,
@@ -43,12 +47,16 @@ describe('markDuplicates', () => {
           {
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
-            duplicate: true,
+            docCount: 49,
+            duplicate: 2,
+            pValue: 0.001,
           },
           {
             fieldName: 'airline',
             fieldValue: 'AAL',
-            duplicate: false,
+            docCount: 49,
+            duplicate: 1,
+            pValue: 0.001,
           },
         ],
         docCount: 49,
@@ -70,20 +78,45 @@ describe('markDuplicates', () => {
 
     expect(markedDuplicates).toEqual([
       {
-        docCount: 792,
+        id: '40215074',
         group: [
           {
-            duplicate: false,
             fieldName: 'response_code',
             fieldValue: '500',
+            docCount: 792,
+            duplicate: 1,
+            pValue: 0.010770456205312423,
           },
           {
-            duplicate: false,
             fieldName: 'url',
             fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
         ],
-        id: '2038579476',
+        docCount: 792,
+        pValue: 0.010770456205312423,
+      },
+      {
+        id: '47022118',
+        group: [
+          {
+            fieldName: 'url',
+            fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+          {
+            fieldName: 'user',
+            fieldValue: 'Peter',
+            docCount: 634,
+            duplicate: 1,
+            pValue: 0.010770456205312423,
+          },
+        ],
+        docCount: 634,
         pValue: 0.010770456205312423,
       },
     ]);

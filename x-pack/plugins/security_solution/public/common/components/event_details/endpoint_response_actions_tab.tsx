@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { ActionsLogTable } from '../../../management/components/endpoint_response_actions_list/components/actions_log_table';
 import { useGetEndpointActionList } from '../../../management/hooks';
-import type { AlertRawEventData, ExpandedEventFieldsObject } from './types';
+import type { ExpandedEventFieldsObject, RawEventData } from './types';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
@@ -26,7 +26,7 @@ const TabContentWrapper = styled.div`
 export const useEndpointResponseActionsTab = ({
   rawEventData,
 }: {
-  rawEventData?: AlertRawEventData;
+  rawEventData?: RawEventData;
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
@@ -36,29 +36,32 @@ export const useEndpointResponseActionsTab = ({
     isFetched,
   } = useGetEndpointActionList(
     {
-      alertIds: [rawEventData?._id ?? ''],
-      withRuleActions: true,
+      alertId: [rawEventData?._id ?? ''],
+      withAutomatedActions: true,
     },
     { retry: false, enabled: rawEventData && responseActionsEnabled }
   );
 
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
-  if (!rawEventData || !responseActionsEnabled) {
-    return;
-  }
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
 
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  const endpointResponseActions = responseActions?.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
+  const responseActions = useMemo(
+    () => expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions,
+    [expandedEventFieldsObject]
   );
-  if (!endpointResponseActions?.length) {
+
+  const endpointResponseActions = useMemo(
+    () =>
+      responseActions?.filter(
+        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
+      ),
+    [responseActions]
+  );
+
+  if (!endpointResponseActions?.length || !rawEventData || !responseActionsEnabled) {
     return;
   }
 
@@ -84,7 +87,7 @@ export const useEndpointResponseActionsTab = ({
               loading={isFetching}
               onChange={() => null}
               totalItemCount={totalItemCount}
-              queryParams={{ withRuleActions: true }}
+              queryParams={{ withAutomatedActions: true }}
               showHostNames
             />
           ) : null}

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RawEventData } from './types';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -29,17 +30,6 @@ type RuleParameters = Array<{
   }>;
 }>;
 
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: RuleParameters;
-    ['kibana.alert.rule.name']: string[];
-  };
-
-  [key: string]: unknown;
-}
-
 interface ExpandedEventFieldsObject {
   agent?: {
     id: string[];
@@ -58,7 +48,7 @@ export const useOsqueryTab = ({
   rawEventData,
   ecsData,
 }: {
-  rawEventData?: AlertRawEventData;
+  rawEventData?: RawEventData;
   ecsData?: Ecs;
 }) => {
   const {
@@ -99,28 +89,28 @@ export const useOsqueryTab = ({
     skip: shouldEarlyReturn,
   });
 
-  if (shouldEarlyReturn) {
-    return;
-  }
-
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const osqueryResponseActions = responseActions?.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+  const osqueryResponseActions = useMemo(
+    () =>
+      responseActions?.filter(
+        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+      ),
+    [responseActions]
   );
 
-  if (!osqueryResponseActions?.length) {
+  if (!osqueryResponseActions?.length || shouldEarlyReturn) {
     return;
   }
 
   const actionItems = actionsData?.data.items || [];
 
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
   return {
     id: EventsViewType.osqueryView,

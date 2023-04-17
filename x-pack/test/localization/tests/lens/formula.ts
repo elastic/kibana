@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
-        formula: `count() + average(bytes)`,
+        formula: `ifelse(count() > 1, (count() + average(bytes)) / 2, 5)`,
       });
 
       expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);

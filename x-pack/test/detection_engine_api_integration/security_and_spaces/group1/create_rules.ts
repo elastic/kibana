@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
@@ -26,12 +25,13 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleMlRule,
   getSimpleMlRuleOutput,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
   waitForAlertToComplete,
   waitForSignalsToBePresent,
   getThresholdRuleForSignalTesting,
+  waitForRulePartialFailure,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id);
+          await waitForRuleSuccess({ supertest, log, id: body.id });
         });
 
         it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
@@ -129,12 +129,11 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
-            body.id,
-            RuleExecutionStatus['partial failure']
-          );
+            id: body.id,
+          });
 
           const { body: rule } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
@@ -157,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, RuleExecutionStatus.succeeded);
+          await waitForRuleSuccess({ supertest, log, id: body.id });
         });
 
         it('should create a single rule without an input index', async () => {
@@ -519,12 +518,11 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyId = body.id;
 
         await waitForAlertToComplete(supertest, log, bodyId);
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          bodyId,
-          RuleExecutionStatus['partial failure']
-        );
+          id: bodyId,
+        });
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -551,12 +549,11 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRulePartialFailure({
           supertest,
           log,
-          bodyId,
-          RuleExecutionStatus['partial failure']
-        );
+          id: bodyId,
+        });
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: rule } = await supertest

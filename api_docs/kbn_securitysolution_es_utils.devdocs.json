@@ -136,7 +136,7 @@
         "signature": [
           "(esClient: ",
           "ElasticsearchClient",
-          ", pattern: string, maxAttempts?: number) => Promise<boolean>"
+          ", pattern: string, specifyAlias?: boolean, maxAttempts?: number) => Promise<boolean>"
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
         "deprecated": false,
@@ -175,6 +175,21 @@
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
             "id": "def-common.deleteAllIndex.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "specifyAlias",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.deleteAllIndex.$4",
             "type": "number",
             "tags": [],
             "label": "maxAttempts",

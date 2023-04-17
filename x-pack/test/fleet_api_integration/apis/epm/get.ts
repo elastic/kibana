@@ -38,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  // Failing: See https://github.com/elastic/kibana/issues/149794
-  describe.skip('EPM - get', () => {
+  describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -215,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
       const pkgVersion = '8.6.0';
       await installPackage(pkg, pkgVersion);
       const response = await supertestWithoutAuth
-        .get(`/api/fleet/epm/packages/${pkg}`)
+        .get(`/api/fleet/epm/packages/${pkg}/${pkgVersion}`)
         .auth(
           testUsers.endpoint_integr_read_only_fleet_none.username,
           testUsers.endpoint_integr_read_only_fleet_none.password

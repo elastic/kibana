@@ -234,6 +234,7 @@ export const TakeActionDropdown = React.memo(
       onSuccess: refetchFlyoutData,
       isActiveTimelines: isActiveTimeline(scopeId),
       isInDetections,
+      refetch,
     });
 
     const items: React.ReactElement[] = useMemo(

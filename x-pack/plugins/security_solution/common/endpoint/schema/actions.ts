@@ -151,8 +151,8 @@ export const EndpointActionListRequestSchema = {
         }),
       ])
     ),
-    withRuleActions: schema.boolean({ defaultValue: true }),
-    alertIds: schema.maybe(
+    withAutomatedActions: schema.boolean({ defaultValue: true }),
+    alertId: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), {
           minSize: 1,
@@ -164,8 +164,8 @@ export const EndpointActionListRequestSchema = {
         }),
         schema.string({
           minLength: 1,
-          validate: (actionId) => {
-            if (!actionId.trim().length) {
+          validate: (alertId) => {
+            if (!alertId.trim().length) {
               return 'alertId cannot be an empty string';
             }
           },

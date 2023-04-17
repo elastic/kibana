@@ -47,8 +47,8 @@ export const useGetEndpointActionList = (
           statuses: query.statuses,
           userIds,
           withOutputs: query.withOutputs,
-          withRuleActions: query.withRuleActions,
-          alertIds: query.alertIds,
+          withAutomatedActions: query.withAutomatedActions,
+          alertId: query.alertId,
         },
       });
     },

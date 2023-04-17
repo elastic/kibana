@@ -27,11 +27,10 @@ export const createQueryAlertType = (
     eventsTelemetry,
     experimentalFeatures,
     version,
-    osqueryCreateActionService,
+    scheduleNotificationResponseActionsService,
     licensing,
     id,
     name,
-    endpointAppContext,
   } = createOptions;
   return {
     id,
@@ -84,9 +83,8 @@ export const createQueryAlertType = (
         version,
         spaceId,
         bucketHistory: state.suppressionGroupHistory,
-        osqueryCreateActionService,
         licensing,
-        endpointAppContext,
+        scheduleNotificationResponseActionsService,
       });
     },
   };

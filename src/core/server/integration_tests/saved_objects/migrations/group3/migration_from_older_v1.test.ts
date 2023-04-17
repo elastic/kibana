@@ -130,7 +130,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
           const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
           const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
           if (convertToMultiNamespaceTypeVersion) {
-            // Setting this option registers a conversion migration that is reflected in the object's `migrationVersions` field
+            // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
             migrationsKeys.push(convertToMultiNamespaceTypeVersion);
           }
           const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
@@ -150,9 +150,8 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     doc: SavedObjectsRawDoc,
     expectedVersions: Record<string, string | undefined>
   ) => {
-    const migrationVersions = doc._source.migrationVersion;
     const type = doc._source.type;
-    expect(migrationVersions ? migrationVersions[type] : undefined).toEqual(expectedVersions[type]);
+    expect(doc._source.typeMigrationVersion).toEqual(expectedVersions[type]);
   };
 
   const stopServers = async () => {

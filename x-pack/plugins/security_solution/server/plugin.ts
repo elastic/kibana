@@ -28,6 +28,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
@@ -129,7 +130,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private telemetryUsageCounter?: UsageCounter;
   private kibanaIndex?: string;
   private endpointContext: EndpointAppContext;
-  private endpointActionCreateService: ReturnType<typeof ActionCreateService> | undefined;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -141,15 +141,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
+
+    this.logger.debug('plugin initialized');
     this.endpointContext = {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
       experimentalFeatures: this.config.experimentalFeatures,
-      licensing: undefined,
     };
-
-    this.logger.debug('plugin initialized');
   }
 
   public setup(
@@ -167,12 +166,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
-
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateActionService: plugins.osquery.createActionService,
-      endpointAppContext: this.endpointContext,
-    };
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -194,11 +187,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
     });
-
-    // Don't have access to plugins in the constructor, so we have to initialize the
-    if (this.endpointContext) {
-      this.endpointContext.licensing = plugins.licensing;
-    }
 
     initUsageCollectors({
       core,
@@ -222,6 +210,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
+      licensing: plugins.licensing,
     };
 
     const ruleDataServiceOptions = {
@@ -255,6 +244,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -477,11 +473,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.policyWatcher.start(licenseService);
     }
 
-    this.endpointActionCreateService = ActionCreateService(
-      core.elasticsearch.client.asInternalUser,
-      this.endpointContext
-    );
-
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
       endpointMetadataService: new EndpointMetadataService(
@@ -512,7 +503,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      actionCreateService: this.endpointActionCreateService,
+      actionCreateService: new ActionCreateService(
+        core.elasticsearch.client.asInternalUser,
+        this.endpointContext
+      ),
     });
 
     this.telemetryReceiver.start(
@@ -549,7 +543,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
-    this.endpointActionCreateService?.stop();
     licenseService.stop();
   }
 }

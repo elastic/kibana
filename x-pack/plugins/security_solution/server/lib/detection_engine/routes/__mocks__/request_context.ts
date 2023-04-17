@@ -106,7 +106,6 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
-  const licensing = licensingMock.createSetup();
 
   return {
     core,
@@ -136,13 +135,6 @@ const createSecuritySolutionRequestContextMock = (
       // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
-    getQueryRuleAdditionalOptions: {
-      licensing,
-      osqueryCreateActionService: {
-        stop: jest.fn(),
-        create: jest.fn(),
-      },
-    },
   };
 };
 

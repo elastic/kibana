@@ -62,6 +62,7 @@ describe('checkVersionCompatibility', () => {
     expect(getModelVersionsFromMappingsMock).toHaveBeenCalledWith({
       mappings,
       source: 'mappingVersions',
+      knownTypes: ['foo', 'bar'],
     });
   });
 

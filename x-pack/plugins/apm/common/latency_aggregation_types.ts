@@ -18,3 +18,10 @@ export const latencyAggregationTypeRt = t.union([
   t.literal(LatencyAggregationType.p95),
   t.literal(LatencyAggregationType.p99),
 ]);
+
+export const getLatencyAggregationType = (
+  latencyAggregationType: string | null | undefined
+): LatencyAggregationType => {
+  return (latencyAggregationType ??
+    LatencyAggregationType.avg) as LatencyAggregationType;
+};

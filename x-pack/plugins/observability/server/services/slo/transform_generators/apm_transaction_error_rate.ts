@@ -38,7 +38,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
+      this.buildGroupBy(slo),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -52,7 +52,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     const queryFilter: Query[] = [
       {
         range: {
-          [slo.settings.timestampField]: {
+          '@timestamp': {
             gte: `now-${slo.timeWindow.duration.format()}`,
           },
         },

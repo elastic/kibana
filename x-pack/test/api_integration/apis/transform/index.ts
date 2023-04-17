@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./reset_transforms'));
     loadTestFile(require.resolve('./start_transforms'));
     loadTestFile(require.resolve('./stop_transforms'));
+    loadTestFile(require.resolve('./schedule_now_transforms'));
     loadTestFile(require.resolve('./transforms'));
     loadTestFile(require.resolve('./transforms_nodes'));
     loadTestFile(require.resolve('./transforms_preview'));

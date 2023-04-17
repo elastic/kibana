@@ -53,6 +53,7 @@ export const ResponseActionsLog = memo<
       startDate: startDateFromUrl,
       endDate: endDateFromUrl,
       users: usersFromUrl,
+      withAutomatedActions: withAutomatedActionsFromUrl,
       withOutputs: withOutputsFromUrl,
       setUrlWithOutputs,
     } = useActionHistoryUrlParams();
@@ -70,7 +71,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withRuleActions: true,
+      withAutomatedActions: true,
     });
 
     // update query state from URL params
@@ -87,6 +88,7 @@ export const ResponseActionsLog = memo<
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
           withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
+          withAutomatedActions: !!withAutomatedActionsFromUrl,
         }));
       }
     }, [
@@ -97,6 +99,7 @@ export const ResponseActionsLog = memo<
       setQueryParams,
       usersFromUrl,
       withOutputsFromUrl,
+      withAutomatedActionsFromUrl,
     ]);
 
     // date range picker state and handlers
@@ -188,13 +191,6 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
-    const onChangeDisplayAutomatedResponses = useCallback(
-      (withRuleActions: boolean) => {
-        setQueryParams((prevState) => ({ ...prevState, withRuleActions }));
-      },
-      [setQueryParams]
-    );
-
     // handle onChange
     const handleTableOnChange = useCallback(
       ({ page: _page }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => {
@@ -253,8 +249,6 @@ export const ResponseActionsLog = memo<
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
           showHostsFilter={showHostNames}
-          displayAutomatedResponses={queryParams.withRuleActions}
-          toggleDisplayAutomatedResponses={onChangeDisplayAutomatedResponses}
           data-test-subj={dataTestSubj}
         />
         {isFetched && !totalItemCount ? (
