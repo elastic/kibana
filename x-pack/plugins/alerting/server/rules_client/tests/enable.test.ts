@@ -675,12 +675,30 @@ describe('enable()', () => {
 
   describe('legacy actions migration for SIEM', () => {
     test('should call migrateLegacyActions', async () => {
+      (migrateLegacyActions as jest.Mock).mockResolvedValueOnce({
+        hasLegacyActions: true,
+        resultedActions: ['fake-action-1'],
+        resultedReferences: ['fake-ref-1'],
+      });
+
       const existingDecryptedSiemRule = {
         ...existingRule,
         attributes: { ...existingRule.attributes, consumer: AlertConsumers.SIEM },
       };
 
+      const migratedSIEMRule = {
+        ...existingDecryptedSiemRule,
+        attributes: {
+          ...existingDecryptedSiemRule.attributes,
+          actions: ['fake-action-1'],
+          throttle: undefined,
+          notifyWhen: undefined,
+        },
+        version: 'migrated',
+      };
+
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
+      unsecuredSavedObjectsClient.create.mockResolvedValue(migratedSIEMRule);
       (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
       await rulesClient.enable({ id: '1' });
@@ -701,6 +719,30 @@ describe('enable()', () => {
         references: [],
         ruleId: '1',
       });
+      // to mitigate AAD issues, we call create with overwrite=true and actions related props
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          ...migratedSIEMRule.attributes,
+        }),
+        {
+          id: migratedSIEMRule.id,
+          overwrite: true,
+          references: ['fake-ref-1'],
+          version: existingDecryptedSiemRule.version,
+        }
+      );
+      // update with enabling rule should be called afterwards
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'alert',
+        migratedSIEMRule.id,
+        expect.objectContaining({
+          enabled: true,
+        }),
+        {
+          version: migratedSIEMRule.version,
+        }
+      );
     });
   });
 });
