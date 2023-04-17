@@ -52,6 +52,7 @@ interface ChartProps {
   threshold?: Threshold;
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
+  filterSeriesByGroupName?: string;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
@@ -62,6 +63,7 @@ const LogsRatioChart: React.FC<ChartProps> = ({
   threshold,
   showThreshold,
   executionTimeRange,
+  filterSeriesByGroupName,
   annotations,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
@@ -99,6 +101,7 @@ const LogsRatioChart: React.FC<ChartProps> = ({
     ruleParams: chartAlertParams,
     buckets,
     executionTimeRange,
+    filterSeriesByGroupName,
   });
 
   useEffect(() => {
@@ -126,17 +129,7 @@ const LogsRatioChart: React.FC<ChartProps> = ({
       ? [Comparator.LT, Comparator.LT_OR_EQ].includes(threshold.comparator)
       : false;
   const barSeries = useMemo(() => {
-    return series.reduce<Array<{ timestamp: number; value: number; groupBy: string }>>(
-      (acc, serie) => {
-        const barPoints = serie.points.reduce<
-          Array<{ timestamp: number; value: number; groupBy: string }>
-        >((pointAcc, point) => {
-          return [...pointAcc, { ...point, groupBy: serie.id }];
-        }, []);
-        return [...acc, ...barPoints];
-      },
-      []
-    );
+    return series.flatMap(({ points, id }) => points.map((point) => ({ ...point, groupBy: id })));
   }, [series]);
   if (isLoading) {
     return <LoadingState />;

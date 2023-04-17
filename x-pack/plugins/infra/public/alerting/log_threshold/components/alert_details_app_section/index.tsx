@@ -113,6 +113,7 @@ const AlertDetailsAppSection = ({
                   logViewId: rule.params.logView.logViewId,
                 }}
                 ruleParams={rule.params}
+                filterSeriesByGroupName={selectedSeries}
                 showThreshold={true}
                 threshold={rule.params.count}
                 executionTimeRange={{

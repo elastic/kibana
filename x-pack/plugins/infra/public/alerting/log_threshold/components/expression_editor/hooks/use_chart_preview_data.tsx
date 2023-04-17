@@ -26,6 +26,7 @@ interface Options {
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
   executionTimeRange?: ExecutionTimeRange;
+  filterSeriesByGroupName?: string;
 }
 
 export const useChartPreviewData = ({
@@ -33,6 +34,7 @@ export const useChartPreviewData = ({
   ruleParams,
   buckets,
   executionTimeRange,
+  filterSeriesByGroupName,
 }: Options) => {
   const { http } = useKibana().services;
   const [chartPreviewData, setChartPreviewData] = useState<
@@ -62,8 +64,20 @@ export const useChartPreviewData = ({
             ),
           ]);
           // The two array have the same length and the same time range.
-          const seriesQueryA = ratio[0].data.series[0].points;
-          const seriesQueryB = ratio[1].data.series[0].points;
+          let seriesQueryA = ratio[0].data.series[0].points;
+          let seriesQueryB = ratio[1].data.series[0].points;
+
+          // When groupBy and a filter is applied, return the ratio only for the filtered grouped-by
+          if (ruleParams.groupBy.length && filterSeriesByGroupName) {
+            seriesQueryA =
+              ratio[0].data.series.find((series) => series.id === filterSeriesByGroupName)
+                ?.points || [];
+
+            seriesQueryB =
+              ratio[1].data.series.find((series) => series.id === filterSeriesByGroupName)
+                ?.points || [];
+          }
+
           const ratioPoints = [];
           for (let index = 0; index < seriesQueryA.length; index++) {
             const point = {
