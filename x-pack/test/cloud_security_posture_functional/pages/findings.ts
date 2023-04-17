@@ -175,7 +175,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
     describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
@@ -187,6 +186,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         return a.localeCompare(b);
       };
 
+      /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
       const sleep = (num: number) => {
         return new Promise((res) => setTimeout(res, num));
       };
@@ -205,11 +205,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
+          /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
           await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-          // const test = await latestFindingsTable.getLoading();
-          // expect(test).to.be.empty();
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
