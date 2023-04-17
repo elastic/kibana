@@ -3595,6 +3595,63 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.NotifyWhenSelectOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotifyWhenSelectOptions",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.NotifyWhenSelectOptions.isSummaryOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSummaryOption",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.NotifyWhenSelectOptions.isForEachAlertOption",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isForEachAlertOption",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.NotifyWhenSelectOptions.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "EuiSuperSelectOption",
+              "<\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\">"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.RuleAction",
         "type": "Interface",
         "tags": [],
@@ -3679,7 +3736,14 @@
             "label": "frequency",
             "description": [],
             "signature": [
-              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleActionFrequency",
+                "text": "RuleActionFrequency"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,

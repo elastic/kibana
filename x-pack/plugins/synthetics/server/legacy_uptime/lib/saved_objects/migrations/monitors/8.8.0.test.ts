@@ -17,6 +17,7 @@ import {
   icmpUptimeUI,
   httpUptimeUI,
 } from './test_fixtures/8.7.0';
+import { httpUI as httpUI850 } from './test_fixtures/8.5.0';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -48,6 +49,39 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
+  });
+
+  describe('alerting config', () => {
+    it('sets alerting config when it is not defined', () => {
+      expect(httpUI850.attributes[ConfigKey.ALERT_CONFIG]).toBeUndefined();
+      const actual = migration880(encryptedSavedObjectsSetup)(httpUI850, context);
+      expect(actual.attributes[ConfigKey.ALERT_CONFIG]).toEqual({
+        status: {
+          enabled: true,
+        },
+      });
+    });
+
+    it('uses existing alerting config when it is defined', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [ConfigKey.ALERT_CONFIG]: {
+            status: {
+              enabled: false,
+            },
+          },
+        },
+      };
+      expect(testMonitor.attributes[ConfigKey.ALERT_CONFIG]).toBeTruthy();
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      expect(actual.attributes[ConfigKey.ALERT_CONFIG]).toEqual({
+        status: {
+          enabled: false,
+        },
+      });
+    });
   });
 
   describe('config hash', () => {
