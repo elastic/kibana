@@ -91,7 +91,11 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
             <EuiSpacer size="m" />
           </EuiFlexItem>
           {topEvents.map((event, index) => (
-            <EuiFlexItem key={`startDate.${index}`} grow={false}>
+            <EuiFlexItem
+              data-test-subj="upcoming-events-popover-item"
+              key={`startDate.${index}`}
+              grow={false}
+            >
               <EuiFlexGroup
                 responsive={false}
                 alignItems="center"

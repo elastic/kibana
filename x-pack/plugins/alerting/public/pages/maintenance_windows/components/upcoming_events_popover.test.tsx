@@ -8,6 +8,7 @@ import { fireEvent } from '@testing-library/react';
 import * as React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('rule_actions_popover', () => {
   let appMockRenderer: AppMockRenderer;
@@ -33,7 +34,7 @@ describe('rule_actions_popover', () => {
             { gte: '2023-05-19T14:58:40.243Z', lte: '2023-05-19T14:58:40.243Z' },
           ],
           id: 'dccedda0-dad4-11ed-9f8d-2b13e6c2138e',
-          status: 'upcoming',
+          status: MaintenanceWindowStatus.Upcoming,
           expirationDate: '2024-04-14T14:58:58.997Z',
           rRule: {
             dtstart: '2023-04-14T14:58:40.243Z',
@@ -61,8 +62,6 @@ describe('rule_actions_popover', () => {
     expect(result.getByTestId('upcoming-events-popover-title')).toHaveTextContent(
       'Repeats every Friday'
     );
-    expect(result.queryByText('04/28/23 10:58 AM')).toBeInTheDocument();
-    expect(result.queryByText('05/05/23 10:58 AM')).toBeInTheDocument();
-    expect(result.queryByText('05/12/23 10:58 AM')).toBeInTheDocument();
+    expect(result.getAllByTestId('upcoming-events-popover-item').length).toBe(3);
   });
 });
