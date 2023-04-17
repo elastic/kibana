@@ -29,6 +29,7 @@ import {
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -261,6 +262,9 @@ export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTra
   trainedModelStats?.deployment_stats?.reason;
 
 export const getMlInferencePrefixedFieldName = (fieldName: string) =>
-  `ml.inference.${stripMlInferencePrefix(fieldName)}`; // Strip first, then prepend, to prevent against double-prepending
+  fieldName.startsWith(ML_INFERENCE_PREFIX) ? fieldName : `${ML_INFERENCE_PREFIX}${fieldName}`;
 
-const stripMlInferencePrefix = (fieldName: string) => fieldName.replace('ml.inference.', '');
+const stripMlInferencePrefix = (fieldName: string) =>
+  fieldName.startsWith(ML_INFERENCE_PREFIX)
+    ? fieldName.replace(ML_INFERENCE_PREFIX, '')
+    : fieldName;
