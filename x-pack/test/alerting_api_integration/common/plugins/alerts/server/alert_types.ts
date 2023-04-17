@@ -870,7 +870,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: { validate: (params) => params },
     },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
