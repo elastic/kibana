@@ -30,7 +30,7 @@ import {
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types';
-import { validateMonitor } from './monitor_validation';
+import { validateMonitor, validateProjectMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
   let testSchedule;
@@ -237,6 +237,18 @@ describe('validateMonitor', () => {
           'Invalid schedule 4 minutes supplied to monitor configuration. Please use a supported monitor schedule.',
       });
     });
+
+    it(`when location is not valid`, () => {
+      const result = validateMonitor({
+        ...testICMPFields,
+        locations: ['invalid-location'],
+      } as unknown as MonitorFields);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type icmp',
+        details: 'Invalid value "invalid-location" supplied to "locations"',
+      });
+    });
   });
 
   describe('should validate', () => {
@@ -396,6 +408,43 @@ describe('validateMonitor', () => {
         reason: '',
         details: '',
         payload: testMonitor,
+      });
+    });
+  });
+
+  describe('Project Monitor', () => {
+    it(`when schedule is not valid`, () => {
+      const result = validateProjectMonitor(
+        {
+          ...testICMPFields,
+          locations: [],
+        } as any,
+        [],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'Invalid value "{"number":"5","unit":"m"}" supplied to "schedule" | You must add at least one location or private location to this monitor.',
+      });
+    });
+
+    it(`when location is not valid`, () => {
+      const result = validateProjectMonitor(
+        {
+          ...testICMPFields,
+          locations: ['invalid-location'],
+          schedule: 5,
+        } as any,
+        [],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
       });
     });
   });
