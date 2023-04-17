@@ -105,6 +105,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
           references: migratedActions.resultedReferences,
         }
       );
+      existingApiKey = updatedObject.attributes.apiKey;
       attributes = updatedObject.attributes;
       version = updatedObject.version;
       references = updatedObject.references;
