@@ -59,8 +59,15 @@ export {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   ECS_COMPONENT_TEMPLATE_NAME,
   ECS_CONTEXT,
+  TOTAL_FIELDS_LIMIT,
   getComponentTemplate,
   type PublicFrameworkAlertsService,
+  createOrUpdateIlmPolicy,
+  createOrUpdateComponentTemplate,
+  getIndexTemplate,
+  createOrUpdateIndexTemplate,
+  createConcreteWriteIndex,
+  installWithTimeout,
 } from './alerts_service';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);

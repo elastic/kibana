@@ -41,10 +41,9 @@ export const getIndexPatternSelectComponent = () =>
   pluginsStart.unifiedSearch.ui.IndexPatternSelect;
 export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
-export const getExecutionContext = () => coreStart.executionContext;
+export const getExecutionContextService = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
-export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
 export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
@@ -68,6 +67,7 @@ export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getContentManagement = () => pluginsStart.contentManagement;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };

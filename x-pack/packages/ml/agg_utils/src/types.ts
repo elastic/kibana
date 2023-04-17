@@ -58,6 +58,9 @@ export interface HistogramField {
 
 /**
  * Significant term meta data for a field/value pair.
+ * Note this is used as a custom type within Explain Log Rate Spikes
+ * for a p-value based variant, not a generic significant terms
+ * aggregation type.
  */
 export interface SignificantTerm extends FieldValuePair {
   doc_count: number;
@@ -96,8 +99,10 @@ export interface SignificantTermGroupHistogram {
   histogram: SignificantTermHistogramItem[];
 }
 
-interface SignificantTermGroupItem extends FieldValuePair {
-  duplicate?: boolean;
+export interface SignificantTermGroupItem extends FieldValuePair {
+  docCount: number;
+  pValue: number | null;
+  duplicate?: number;
 }
 
 /**

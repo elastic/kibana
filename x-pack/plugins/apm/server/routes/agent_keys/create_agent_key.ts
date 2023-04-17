@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
 
 const resource = '*';
+
+export interface CreateAgentKeyResponse {
+  agentKey: SecurityCreateApiKeyResponse;
+}
 
 export async function createAgentKey({
   context,

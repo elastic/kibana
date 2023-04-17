@@ -92,6 +92,7 @@ export function DependencyContents({
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton
+          data-test-subj="apmDependencyContentsDependencyDetailsButton"
           href={detailsUrl}
           fill={true}
           onClick={() => {

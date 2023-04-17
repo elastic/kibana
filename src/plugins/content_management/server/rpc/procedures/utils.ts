@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '../../../common/utils';
-import type { Version } from '../../../common';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import type { Version } from '@kbn/object-versioning';
+import type { StorageContext } from '../../core';
+import type { Context as RpcContext } from '../types';
 
-export const validateRequestVersion = (
+const validateRequestVersion = (
   requestVersion: Version | undefined,
   latestVersion: Version
 ): Version => {
@@ -18,12 +20,39 @@ export const validateRequestVersion = (
     throw new Error('Request version missing');
   }
 
-  const requestVersionNumber = validateVersion(requestVersion);
-  const latestVersionNumber = parseInt(latestVersion.substring(1), 10);
+  const { result, value: requestVersionNumber } = validateVersion(requestVersion);
 
-  if (requestVersionNumber > latestVersionNumber) {
+  if (!result) {
+    throw new Error(`Invalid version [${requestVersion}]. Must be an integer.`);
+  }
+
+  if (requestVersionNumber > latestVersion) {
     throw new Error(`Invalid version. Latest version is [${latestVersion}].`);
   }
 
-  return requestVersion;
+  return requestVersionNumber;
+};
+
+export const getStorageContext = ({
+  contentTypeId,
+  version: _version,
+  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory },
+}: {
+  contentTypeId: string;
+  version?: number;
+  ctx: RpcContext;
+}): StorageContext => {
+  const contentDefinition = contentRegistry.getDefinition(contentTypeId);
+  const version = validateRequestVersion(_version, contentDefinition.version.latest);
+  const storageContext: StorageContext = {
+    requestHandlerContext,
+    version: {
+      request: version,
+      latest: contentDefinition.version.latest,
+    },
+    utils: {
+      getTransforms: getTransformsFactory(contentTypeId, version),
+    },
+  };
+  return storageContext;
 };

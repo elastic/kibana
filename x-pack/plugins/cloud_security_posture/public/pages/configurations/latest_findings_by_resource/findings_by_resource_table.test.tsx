@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -88,12 +89,12 @@ describe('<FindingsByResourceTable />', () => {
       </TestProvider>
     );
 
-    data.forEach((item, i) => {
+    data.forEach((item) => {
       const row = screen.getByTestId(
         TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(item))
       );
       expect(row).toBeInTheDocument();
-      expect(within(row).getByText(item.resource_id)).toBeInTheDocument();
+      expect(within(row).getByText(item.resource_id || '')).toBeInTheDocument();
       if (item['resource.name'])
         expect(within(row).getByText(item['resource.name'])).toBeInTheDocument();
       if (item['resource.sub_type'])

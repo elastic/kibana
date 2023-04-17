@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
         expect(res.get('content-disposition')).to.equal(
-          'attachment; filename="The Very Cool Workpad for PDF Tests.pdf"'
+          'attachment; filename=The%20Very%20Cool%20Workpad%20for%20PDF%20Tests.pdf'
         );
       });
     });

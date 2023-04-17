@@ -10,7 +10,7 @@ import { ContentType } from './content_type';
 import type { ContentTypeDefinition } from './content_type_definition';
 
 test('create a content type with just an id', () => {
-  const type = new ContentType({ id: 'test', version: { latest: 'v1' } });
+  const type = new ContentType({ id: 'test', version: { latest: 1 } });
 
   expect(type.id).toBe('test');
   expect(type.name).toBe('test');
@@ -24,7 +24,7 @@ test('create a content type with all the full definition', () => {
     name: 'Test',
     icon: 'test',
     description: 'Test description',
-    version: { latest: 'v1' },
+    version: { latest: 1 },
   };
   const type = new ContentType(definition);
 

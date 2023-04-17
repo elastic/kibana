@@ -15,10 +15,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiPopover,
   EuiTabbedContent,
-  EuiEmptyPrompt,
   EuiSuperSelectOption,
   EuiButton,
   EuiFlyoutSize,
@@ -30,13 +28,11 @@ import {
   useLoadRuleTypes,
   RuleType,
   getNotifyWhenOptions,
-  RuleEventLogListProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
 import {
@@ -50,16 +46,16 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components/page_title';
+import { NoRuleFoundPanel } from './components/no_rule_found_panel';
 import { getHealthColor } from './helpers/get_health_color';
 import { hasExecuteActionsCapability } from './helpers/has_execute_actions_capability';
 import { hasAllPrivilege } from './helpers/has_all_privilege';
 import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { AlertStatus } from '../../../common/typings';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
-import { ObservabilityAppServices } from '../../application/types';
+import type { AlertStatus } from '../../../common/typings';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export const EXECUTION_TAB = 'execution';
 export const ALERTS_TAB = 'alerts';
@@ -84,36 +80,37 @@ export function RuleDetailsPage() {
       url: { locators },
     },
     triggersActionsUi: {
+      actionTypeRegistry,
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout: EditAlertFlyout,
-      getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
+      getEditRuleFlyout: EditRuleFlyout,
+      getRuleDefinition: RuleDefinition,
+      getRuleEventLogList: RuleEventLogList,
       getRuleStatusPanel: RuleStatusPanel,
-      getRuleDefinition,
     },
   } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const history = useHistory();
   const location = useLocation();
-
-  const chartThemes = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
     [observabilityRuleTypeRegistry]
   );
-
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
+
+  const chartProps = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
+
   const [tabId, setTabId] = useState<TabId>(() => {
     const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
     return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
@@ -224,7 +221,9 @@ export function RuleDetailsPage() {
     },
     {
       href: http.basePath.prepend(paths.observability.rules),
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
     {
       text: rule && rule.name,
@@ -257,10 +256,7 @@ export function RuleDetailsPage() {
       content: (
         <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
           <EuiFlexItem>
-            {getRuleEventLogList<'default'>({
-              ruleId: rule?.id,
-              ruleType,
-            } as RuleEventLogListProps)}
+            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -303,29 +299,7 @@ export function RuleDetailsPage() {
   ];
 
   if (isPageLoading || isRuleLoading) return <CenterJustifiedSpinner />;
-  if (!rule || errorRule)
-    return (
-      <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="warning"
-          color="danger"
-          title={
-            <h2>
-              {i18n.translate('xpack.observability.ruleDetails.errorPromptTitle', {
-                defaultMessage: 'Unable to load rule details',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.observability.ruleDetails.errorPromptBody', {
-                defaultMessage: 'There was an error loading the rule details.',
-              })}
-            </p>
-          }
-        />
-      </EuiPanel>
-    );
+  if (!rule || errorRule) return <NoRuleFoundPanel />;
 
   const isLicenseError =
     rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
@@ -410,18 +384,25 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartThemes={chartThemes}
+            chartProps={chartProps}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
-        {getRuleDefinition({ rule, onEditRule: reloadRule } as RuleDefinitionProps)}
+        <RuleDefinition
+          rule={rule}
+          onEditRule={reloadRule}
+          ruleTypeRegistry={ruleTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+        />
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
+
       <div ref={tabsRef} />
+
       <EuiTabbedContent
         data-test-subj="ruleDetailsTabbedContent"
         tabs={tabs}
@@ -430,8 +411,9 @@ export function RuleDetailsPage() {
           onTabIdChange(tab.id as TabId);
         }}
       />
+
       {editFlyoutVisible && (
-        <EditAlertFlyout
+        <EditRuleFlyout
           initialRule={rule}
           onClose={() => {
             setEditFlyoutVisible(false);

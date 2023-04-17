@@ -129,6 +129,7 @@ export function Waterfall({
       <div>
         <div style={{ display: 'flex' }}>
           <EuiButtonEmpty
+            data-test-subj="apmWaterfallButton"
             style={{ zIndex: 3, position: 'absolute' }}
             iconType={isAccordionOpen ? 'fold' : 'unfold'}
             onClick={() => {

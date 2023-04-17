@@ -44,7 +44,7 @@ export const useAddToRulesTable = ({
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    initialPageSize: 5,
+    initialPageSize: 25,
     showPerPageOptions: false,
   });
 

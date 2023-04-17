@@ -60,6 +60,7 @@ export const WaterfallSearch = ({
       </EuiText>
 
       <EuiFieldSearch
+        data-test-subj="syntheticsWaterfallSearchFieldSearch"
         fullWidth
         aria-label={FILTER_REQUESTS_LABEL}
         placeholder={SEARCH_REQUESTS_LABEL}

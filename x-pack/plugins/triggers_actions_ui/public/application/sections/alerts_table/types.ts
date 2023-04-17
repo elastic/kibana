@@ -17,7 +17,7 @@ export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface CellComponentProps {
   alert: Alert;
-  cases: AlertsTableProps['casesData']['cases'];
+  cases: AlertsTableProps['cases']['data'];
   columnId: SystemCellId;
   isLoading: boolean;
   showAlertStatusWithFlapping: boolean;
@@ -31,3 +31,31 @@ export interface SystemCellComponentMap {
 }
 
 export type SystemCellId = keyof SystemCellComponentMap;
+
+type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown>) => {
+  open: ({ attachments }: { attachments: any[] }) => void;
+  close: () => void;
+};
+
+type UseCasesAddToExistingCaseModal = (props?: Record<string, unknown>) => {
+  open: ({
+    getAttachments,
+  }: {
+    getAttachments: ({ theCase }: { theCase: { id: string } }) => any[];
+  }) => void;
+  close: () => void;
+};
+
+export interface CasesService {
+  ui: {
+    getCasesContext: () => React.FC<any>;
+  };
+  hooks: {
+    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+  };
+  helpers: {
+    groupAlertsByRule: (items?: any[]) => any[];
+    canUseCases: (owners: string[]) => Record<string, unknown>;
+  };
+}

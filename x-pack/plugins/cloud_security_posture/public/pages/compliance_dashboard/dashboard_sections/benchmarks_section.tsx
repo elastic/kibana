@@ -195,7 +195,13 @@ export const BenchmarksSection = ({
               }
               viewAllButtonTitle={i18n.translate(
                 'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                { defaultMessage: 'View all failed findings for this cluster' }
+                {
+                  defaultMessage: 'View all failed findings for this {postureAsset}',
+                  values: {
+                    postureAsset:
+                      dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
+                  },
+                }
               )}
               onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
             />

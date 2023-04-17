@@ -39,6 +39,7 @@ function ActionMenuButton({
 }) {
   return (
     <EuiButton
+      data-test-subj="apmActionMenuButtonInvestigateButton"
       isLoading={isLoading}
       iconType="arrowDown"
       iconSide="right"

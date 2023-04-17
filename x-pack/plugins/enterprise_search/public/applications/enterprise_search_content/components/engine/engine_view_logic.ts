@@ -8,7 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { EnterpriseSearchSchemaField } from '../../../../../common/types/engines';
+import { SchemaField } from '../../../../../common/types/engines';
 
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -43,7 +43,7 @@ export interface EngineViewValues {
   isDeleteModalVisible: boolean;
   isLoadingEngine: boolean;
   isLoadingEngineSchema: boolean;
-  schemaFields: EnterpriseSearchSchemaField[];
+  schemaFields: SchemaField[];
 }
 
 export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewActions>>({
@@ -103,15 +103,7 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
     ],
     schemaFields: [
       () => [selectors.engineSchemaData],
-      (data) =>
-        Object.entries(data?.field_capabilities?.fields ?? {})
-          .map(([name]) =>
-            Object.entries({
-              field_name: name,
-              field_type: [...Object.keys(data?.field_capabilities?.fields[name])],
-            })
-          )
-          .map((fields) => Object.fromEntries(fields)),
+      (data: EngineViewValues['engineSchemaData']) => data?.fields || [],
     ],
   }),
 });

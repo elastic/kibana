@@ -719,7 +719,9 @@ describe('processAlerts', () => {
 
   describe('updating flappingHistory', () => {
     test('if new alert, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
 
       const alerts = cloneDeep({ '1': activeAlert });
       alerts['1'].scheduleActions('default' as never, { foo: '1' });
@@ -741,6 +743,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -756,6 +759,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -769,7 +773,7 @@ describe('processAlerts', () => {
 
     test('if alert is still active, set flapping state to false', () => {
       const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -793,6 +797,7 @@ describe('processAlerts', () => {
                 false,
                 false,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -803,9 +808,11 @@ describe('processAlerts', () => {
     });
 
     test('if alert is active and previously recovered, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-2' },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -830,6 +837,7 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -846,6 +854,7 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -859,11 +868,11 @@ describe('processAlerts', () => {
 
     test('if alert is recovered and previously active, set flapping state to true', () => {
       const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
       activeAlert.scheduleActions('default' as never, { foo: '1' });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -888,6 +897,7 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -897,7 +907,7 @@ describe('processAlerts', () => {
 
     test('if alert is still recovered, set flapping state to false', () => {
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -922,6 +932,7 @@ describe('processAlerts', () => {
                 false,
                 false,
               ],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -930,14 +941,16 @@ describe('processAlerts', () => {
     });
 
     test('if setFlapping is false should not update flappingHistory', () => {
-      const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
       activeAlert1.scheduleActions('default' as never, { foo: '1' });
       const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-2' },
       });
       activeAlert2.scheduleActions('default' as never, { foo: '1' });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('3', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-3' },
       });
 
       const previouslyRecoveredAlerts = cloneDeep({ '3': recoveredAlert });
@@ -959,6 +972,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -970,6 +984,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 false,
               ],
+              "uuid": "uuid-2",
             },
             "state": Object {},
           },
@@ -980,6 +995,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -995,6 +1011,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 false,
               ],
+              "uuid": "uuid-3",
             },
             "state": Object {},
           },
@@ -1005,7 +1022,7 @@ describe('processAlerts', () => {
     describe('when hasReachedAlertLimit is true', () => {
       test('if alert is still active, set flapping state to false', () => {
         const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
 
         const alerts = cloneDeep({ '1': activeAlert });
@@ -1029,6 +1046,7 @@ describe('processAlerts', () => {
                   false,
                   false,
                 ],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
@@ -1040,10 +1058,12 @@ describe('processAlerts', () => {
 
       test('if new alert, set flapping state to true', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
+          meta: { flappingHistory: [false], uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1066,14 +1086,17 @@ describe('processAlerts', () => {
                   false,
                   false,
                 ],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
+                  false,
                   true,
                 ],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1087,8 +1110,10 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
+                  false,
                   true,
                 ],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1102,10 +1127,12 @@ describe('processAlerts', () => {
 
       test('if alert is active and previously recovered, set flapping state to true', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1128,6 +1155,7 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "uuid": "uuid-1",
               },
               "state": Object {
                 "duration": "0",
@@ -1139,6 +1167,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1155,6 +1184,7 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "uuid": "uuid-1",
               },
               "state": Object {
                 "duration": "0",
@@ -1166,6 +1196,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1179,10 +1210,12 @@ describe('processAlerts', () => {
 
       test('if setFlapping is false should not update flappingHistory', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1204,12 +1237,14 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   false,
                 ],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1223,6 +1258,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",

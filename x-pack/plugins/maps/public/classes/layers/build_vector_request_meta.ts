@@ -22,11 +22,10 @@ export function buildVectorRequestMeta(
   return {
     ...dataFilters,
     fieldNames: _.uniq(fieldNames).sort(),
-    geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
     sourceQuery: sourceQuery ? sourceQuery : undefined,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
-    sourceMeta: source.getSyncMeta(),
+    sourceMeta: source.getSyncMeta(dataFilters),
     applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
     isForceRefresh,
     isFeatureEditorOpenForLayer,

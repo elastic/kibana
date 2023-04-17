@@ -1,0 +1,11 @@
+{
+  "nodes.get_repositories_metering_info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes/{nodes}/_repositories_metering"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-repositories-metering-api.html"
+  }
+}

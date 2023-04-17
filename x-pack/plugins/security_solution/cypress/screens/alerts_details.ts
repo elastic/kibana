@@ -83,3 +83,5 @@ export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-te
 export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
 
 export const OPEN_ALERT_DETAILS_PAGE = `[data-test-subj="open-alert-details-page"]`;
+
+export const COPY_ALERT_FLYOUT_LINK = `[data-test-subj="copy-alert-flyout-link"]`;

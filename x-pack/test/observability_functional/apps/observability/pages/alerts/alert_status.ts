@@ -16,7 +16,7 @@ const RECOVERED_ALERTS = 30;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('alert status filter', function () {
+  describe('Alert status filter >', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');

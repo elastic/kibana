@@ -206,6 +206,7 @@ describe('ruleType', () => {
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
+        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -272,6 +273,7 @@ describe('ruleType', () => {
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
+        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -338,6 +340,7 @@ describe('ruleType', () => {
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
+        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -403,6 +406,7 @@ describe('ruleType', () => {
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
+        revision: 0,
         schedule: {
           interval: '1h',
         },

@@ -13,6 +13,9 @@ export const DEFAULT_META = {
   total: 0,
 };
 
+export const updateMetaTotalState = (oldState: Page, newTotal: number) => {
+  return { ...oldState, total: newTotal };
+};
 export const updateMetaPageIndex = (oldState: Page, newPageIndex: number) => {
   return { ...oldState, from: newPageIndex * oldState.size };
 };

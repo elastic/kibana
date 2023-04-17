@@ -88,6 +88,7 @@ export function AgentKeys() {
         {areApiKeysEnabled && canManage && !isEmpty(agentKeys) && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmAgentKeysCreateApmAgentKeyButton"
               onClick={() => setIsFlyoutVisible(true)}
               fill={true}
               iconType="plusInCircle"
@@ -238,6 +239,7 @@ function AgentKeysContent({
         }
         actions={
           <EuiButton
+            data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
             onClick={onCreateAgentClick}
             fill={true}
             iconType="plusInCircle"

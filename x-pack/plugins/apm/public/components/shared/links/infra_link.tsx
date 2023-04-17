@@ -48,5 +48,5 @@ export const getInfraHref = ({
 export function InfraLink({ app, path, query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const href = getInfraHref({ app, basePath: core.http.basePath, query, path });
-  return <EuiLink {...rest} href={href} />;
+  return <EuiLink data-test-subj="apmInfraLinkLink" {...rest} href={href} />;
 }

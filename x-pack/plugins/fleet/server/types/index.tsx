@@ -12,6 +12,7 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
+  AgentActionType,
   ActionStatus,
   ActionErrorResult,
   CurrentUpgrade,

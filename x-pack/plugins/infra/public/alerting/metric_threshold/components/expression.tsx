@@ -28,8 +28,8 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
@@ -56,12 +56,8 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { docLinks } = useKibanaContextForPlugin().services;
+  const { source, createDerivedIndexPattern } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
@@ -337,6 +333,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -405,6 +402,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         )) || (
           <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -446,6 +444,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 groupCount: redundantFilterGroupBy.length,
                 filteringAndGroupingLink: (
                   <EuiLink
+                    data-test-subj="infraExpressionsTheDocsLink"
                     href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
                   >
                     {i18n.translate(
@@ -498,4 +497,4 @@ const docCountNoDataDisabledHelpText = i18n.translate(
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expressions;
+export default withSourceProvider<Props>(Expressions)('default');

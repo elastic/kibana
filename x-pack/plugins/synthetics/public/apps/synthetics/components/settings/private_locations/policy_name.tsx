@@ -31,7 +31,10 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
-            <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
+            <EuiLink
+              data-test-subj="syntheticsPolicyNameLink"
+              href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
+            >
               {policy?.name}
             </EuiLink>
           ) : (

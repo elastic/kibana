@@ -133,7 +133,11 @@ export function MobileServiceOverview() {
             preview. You can help us improve the experience by giving feedback. {feedbackLink}."
                   values={{
                     feedbackLink: (
-                      <EuiLink href="https://ela.st/feedback-mobile-apm">
+                      <EuiLink
+                        target={'_blank'}
+                        data-test-subj="apmMobileServiceOverviewGiveFeedbackLink"
+                        href="https://ela.st/feedback-apm-mobile"
+                      >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.mobileCallOutLink',
                           {
@@ -320,7 +324,10 @@ export function MobileServiceOverview() {
                     fixedHeight={true}
                     showPerPageOptions={false}
                     link={
-                      <EuiLink href={dependenciesLink}>
+                      <EuiLink
+                        data-test-subj="apmMobileServiceOverviewViewDependenciesLink"
+                        href={dependenciesLink}
+                      >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.dependenciesTableTabLink',
                           { defaultMessage: 'View dependencies' }

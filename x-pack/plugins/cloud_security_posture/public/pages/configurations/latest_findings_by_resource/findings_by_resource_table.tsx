@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { generatePath, Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -44,7 +45,8 @@ interface Props {
 }
 
 export const getResourceId = (resource: FindingsByResourcePage) => {
-  return [resource.resource_id, ...resource['rule.section']].join('/');
+  const sections = resource['rule.section'] || [];
+  return [resource.resource_id, ...sections].join('/');
 };
 
 const FindingsByResourceTableComponent = ({
@@ -81,9 +83,7 @@ const FindingsByResourceTableComponent = ({
         getNonSortableColumn(findingsByResourceColumns['rule.benchmark.name']),
         { onAddFilter }
       ),
-      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.belongs_to), {
-        onAddFilter,
-      }),
+      getNonSortableColumn(findingsByResourceColumns.belongs_to),
       findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]
@@ -124,17 +124,21 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
     width: '15%',
-    render: (resourceId: FindingsByResourcePage['resource_id']) => (
-      <Link
-        to={generatePath(findingsNavigation.resource_findings.path, {
-          resourceId: encodeURIComponent(resourceId),
-        })}
-        className="eui-textTruncate"
-        title={resourceId}
-      >
-        {resourceId}
-      </Link>
-    ),
+    render: (resourceId: FindingsByResourcePage['resource_id']) => {
+      if (!resourceId) return;
+
+      return (
+        <Link
+          to={generatePath(findingsNavigation.resource_findings.path, {
+            resourceId: encodeURIComponent(resourceId),
+          })}
+          className="eui-textTruncate"
+          title={resourceId}
+        >
+          {resourceId}
+        </Link>
+      );
+    },
   },
   baseFindingsColumns['resource.sub_type'],
   baseFindingsColumns['resource.name'],
@@ -185,10 +189,19 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
-      <ComplianceScoreBar
-        totalPassed={data.findings.passed_findings}
-        totalFailed={data.findings.failed_findings}
-      />
+      <div
+        css={css`
+          width: 100%;
+          .cspComplianceScoreBarTooltip {
+            width: 100%;
+          }
+        `}
+      >
+        <ComplianceScoreBar
+          totalPassed={data.findings.passed_findings}
+          totalFailed={data.findings.failed_findings}
+        />
+      </div>
     ),
     dataType: 'number',
   },

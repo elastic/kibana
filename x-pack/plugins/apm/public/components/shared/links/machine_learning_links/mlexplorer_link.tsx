@@ -23,6 +23,7 @@ export function MLExplorerLink({ jobId, external, children }: Props) {
 
   return (
     <EuiLink
+      data-test-subj="apmMLExplorerLinkLink"
       children={children}
       href={href}
       external={external}

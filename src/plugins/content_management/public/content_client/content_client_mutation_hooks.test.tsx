@@ -24,7 +24,7 @@ const setup = () => {
   const contentTypeRegistry = new ContentTypeRegistry();
   contentTypeRegistry.register({
     id: 'testType',
-    version: { latest: 'v3' },
+    version: { latest: 3 },
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
@@ -42,7 +42,7 @@ const setup = () => {
 describe('useCreateContentMutation', () => {
   test('should call rpcClient.create with input and resolve with output', async () => {
     const { Wrapper, crudClient } = setup();
-    const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' }, version: 'v2' };
+    const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' }, version: 2 };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useCreateContentMutation(), { wrapper: Wrapper });
@@ -61,7 +61,7 @@ describe('useUpdateContentMutation', () => {
       contentTypeId: 'testType',
       id: 'test',
       data: { foo: 'bar' },
-      version: 'v2',
+      version: 2,
     };
     const output = { test: 'test' };
     crudClient.update.mockResolvedValueOnce(output);
@@ -77,7 +77,7 @@ describe('useUpdateContentMutation', () => {
 describe('useDeleteContentMutation', () => {
   test('should call rpcClient.delete with input and resolve with output', async () => {
     const { Wrapper, crudClient } = setup();
-    const input: DeleteIn = { contentTypeId: 'testType', id: 'test', version: 'v2' };
+    const input: DeleteIn = { contentTypeId: 'testType', id: 'test', version: 2 };
     const output = { test: 'test' };
     crudClient.delete.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useDeleteContentMutation(), { wrapper: Wrapper });

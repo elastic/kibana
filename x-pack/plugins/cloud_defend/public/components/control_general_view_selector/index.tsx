@@ -39,14 +39,10 @@ import {
   getSelectorTypeIcon,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
+  validateStringValuesForCondition,
 } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
-import {
-  VALID_SELECTOR_NAME_REGEX,
-  MAX_SELECTOR_NAME_LENGTH,
-  MAX_CONDITION_VALUE_LENGTH_BYTES,
-  MAX_FILE_PATH_VALUE_LENGTH_BYTES,
-} from '../../common/constants';
+import { VALID_SELECTOR_NAME_REGEX, MAX_SELECTOR_NAME_LENGTH } from '../../common/constants';
 
 interface ConditionProps {
   label: string;
@@ -287,17 +283,11 @@ export const ControlGeneralViewSelector = ({
         errors.push(i18n.errorValueRequired);
       }
 
-      values.forEach((value) => {
-        const bytes = new Blob([value]).size;
+      const stringValueErrors = validateStringValuesForCondition(prop, values);
 
-        if (prop === 'targetFilePath') {
-          if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
-            errors.push(i18n.errorValueLengthExceeded);
-          }
-        } else if (bytes > MAX_CONDITION_VALUE_LENGTH_BYTES) {
-          errors.push(i18n.errorValueLengthExceeded);
-        }
-      });
+      if (stringValueErrors.length > 0) {
+        errors.push(...stringValueErrors);
+      }
 
       if (errors.length) {
         errorMap[prop] = errors;

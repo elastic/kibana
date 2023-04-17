@@ -63,9 +63,6 @@ import { registerObservabilityRuleTypes } from './rules/register_observability_r
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };
@@ -292,7 +289,6 @@ export class Plugin
               app: observabilityAppId,
               label: link.title,
               path: link.path ?? '',
-              isBetaFeature: link.id === 'slos' ? true : false,
             }));
 
           const sections = [

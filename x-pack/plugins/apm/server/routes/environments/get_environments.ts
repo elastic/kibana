@@ -34,7 +34,7 @@ export async function getEnvironments({
   size: number;
   start: number;
   end: number;
-}) {
+}): Promise<Environment[]> {
   const operationName = serviceName
     ? 'get_environments_for_service'
     : 'get_environments';

@@ -14,7 +14,12 @@ export const CreateMLJobsButton: React.FunctionComponent<{
   onClick: () => void;
 }> = ({ isDisabled, onClick }) => {
   return (
-    <EuiButton isDisabled={isDisabled} fill onClick={onClick}>
+    <EuiButton
+      data-test-subj="infraCreateMLJobsButtonCreateMlJobButton"
+      isDisabled={isDisabled}
+      fill
+      onClick={onClick}
+    >
       <FormattedMessage
         id="xpack.infra.analysisSetup.createMlJobButton"
         defaultMessage="Create ML job"

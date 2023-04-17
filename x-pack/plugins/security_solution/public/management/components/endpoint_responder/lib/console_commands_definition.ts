@@ -119,7 +119,7 @@ const commandToCapabilitiesPrivilegesMap = new Map<
   ],
 ]);
 
-const getRbacControl = ({
+export const getRbacControl = ({
   commandName,
   privileges,
 }: {

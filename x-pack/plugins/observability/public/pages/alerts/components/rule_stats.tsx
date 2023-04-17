@@ -73,7 +73,10 @@ export const renderRuleStats = (
     <ConditionalWrap
       condition={ruleStats.disabled > 0}
       wrap={(wrappedChildren) => (
-        <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'disabled')}>
+        <EuiButtonEmpty
+          data-test-subj="o11yDisabledStatsComponentButton"
+          href={createRuleStatsLink(ruleStats, 'disabled')}
+        >
           {wrappedChildren}
         </EuiButtonEmpty>
       )}
@@ -96,7 +99,10 @@ export const renderRuleStats = (
     <ConditionalWrap
       condition={ruleStats.muted + ruleStats.snoozed > 0}
       wrap={(wrappedChildren) => (
-        <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'snoozed')}>
+        <EuiButtonEmpty
+          data-test-subj="o11ySnoozedStatsComponentButton"
+          href={createRuleStatsLink(ruleStats, 'snoozed')}
+        >
           {wrappedChildren}
         </EuiButtonEmpty>
       )}
@@ -119,7 +125,10 @@ export const renderRuleStats = (
     <ConditionalWrap
       condition={ruleStats.error > 0}
       wrap={(wrappedChildren) => (
-        <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'error')}>
+        <EuiButtonEmpty
+          data-test-subj="o11yErrorStatsComponentButton"
+          href={createRuleStatsLink(ruleStats, 'error')}
+        >
           {wrappedChildren}
         </EuiButtonEmpty>
       )}

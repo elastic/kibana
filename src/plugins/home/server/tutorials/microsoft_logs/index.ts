@@ -59,6 +59,6 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network', 'security', 'azure'],
+    integrationBrowserCategories: ['edr_xdr', 'security'],
   };
 }

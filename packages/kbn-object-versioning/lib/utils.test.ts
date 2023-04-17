@@ -12,6 +12,8 @@ describe('utils', () => {
   describe('validateVersion()', () => {
     [
       { input: '123', isValid: true, expected: 123 },
+      { input: '1111111111111111111111111', isValid: true, expected: 1111111111111111111111111 },
+      { input: '111111111111.1111111111111', isValid: false, expected: null },
       { input: 123, isValid: true, expected: 123 },
       { input: 1.23, isValid: false, expected: null },
       { input: '123a', isValid: false, expected: null },

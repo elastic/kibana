@@ -141,7 +141,11 @@ export const FlyoutHome = (props: Props) => {
                 <>
                   <EuiFlexGroup gutterSize={'s'}>
                     <EuiFlexItem grow={false}>
-                      <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
+                      <EuiButton
+                        data-test-subj="infraFlyoutHomeManageJobsInMlButton"
+                        {...manageJobsLinkProps}
+                        style={{ marginRight: 5 }}
+                      >
                         <FormattedMessage
                           defaultMessage="Manage jobs in ML"
                           id="xpack.infra.ml.anomalyFlyout.manageJobs"
@@ -254,7 +258,10 @@ const CreateJobTab = (props: CreateJobTab) => {
             footer={
               <>
                 {props.hasHostJobs && (
-                  <EuiButtonEmpty onClick={props.createHosts}>
+                  <EuiButtonEmpty
+                    data-test-subj="infraCreateJobTabRecreateJobsButton"
+                    onClick={props.createHosts}
+                  >
                     <FormattedMessage
                       defaultMessage="Recreate jobs"
                       id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
@@ -262,7 +269,10 @@ const CreateJobTab = (props: CreateJobTab) => {
                   </EuiButtonEmpty>
                 )}
                 {!props.hasHostJobs && (
-                  <EuiButton onClick={props.createHosts}>
+                  <EuiButton
+                    data-test-subj="infraCreateJobTabEnableButton"
+                    onClick={props.createHosts}
+                  >
                     <FormattedMessage
                       defaultMessage="Enable"
                       id="xpack.infra.ml.anomalyFlyout.create.createButton"
@@ -292,7 +302,10 @@ const CreateJobTab = (props: CreateJobTab) => {
             footer={
               <>
                 {props.hasK8sJobs && (
-                  <EuiButtonEmpty onClick={props.createK8s}>
+                  <EuiButtonEmpty
+                    data-test-subj="infraCreateJobTabRecreateJobsButton"
+                    onClick={props.createK8s}
+                  >
                     <FormattedMessage
                       defaultMessage="Recreate jobs"
                       id="xpack.infra.ml.anomalyFlyout.create.recreateButton"
@@ -300,7 +313,10 @@ const CreateJobTab = (props: CreateJobTab) => {
                   </EuiButtonEmpty>
                 )}
                 {!props.hasK8sJobs && (
-                  <EuiButton onClick={props.createK8s}>
+                  <EuiButton
+                    data-test-subj="infraCreateJobTabEnableButton"
+                    onClick={props.createK8s}
+                  >
                     <FormattedMessage
                       defaultMessage="Enable"
                       id="xpack.infra.ml.anomalyFlyout.create.createButton"

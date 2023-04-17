@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -39,6 +39,7 @@ export interface Props {
   ecsData: Ecs;
   id?: string;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  refresh: () => void;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -48,20 +49,19 @@ export function AlertActions({
   ecsData,
   id: pageId,
   observabilityRuleTypeRegistry,
+  refresh,
   setFlyoutAlert,
 }: Props) {
   const {
     cases: {
       helpers: { getRuleIdFromEvent },
-      hooks: { getUseCasesAddToNewCaseFlyout, getUseCasesAddToExistingCaseModal },
+      hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
     },
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
-  const createCaseFlyout = getUseCasesAddToNewCaseFlyout();
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -98,6 +98,13 @@ export function AlertActions({
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
 
+  const onSuccess = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
+
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };
@@ -112,7 +119,7 @@ export function AlertActions({
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ attachments: caseAttachments });
+    selectCaseModal.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
 

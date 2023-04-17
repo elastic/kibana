@@ -202,6 +202,10 @@
                 "system_status": {
                   "type": "keyword"
                 },
+                "time_range": {
+                  "type": "date_range",
+                  "format": "epoch_millis||strict_date_optional_time"
+                },
                 "uuid": {
                   "type": "keyword"
                 },
@@ -470,6 +474,10 @@
                 "system_status": {
                   "type": "keyword"
                 },
+                "time_range": {
+                  "type": "date_range",
+                  "format": "epoch_millis||strict_date_optional_time"
+                },
                 "uuid": {
                   "type": "keyword"
                 },
@@ -713,6 +721,10 @@
                 },
                 "system_status": {
                   "type": "keyword"
+                },
+                "time_range": {
+                  "type": "date_range",
+                  "format": "epoch_millis||strict_date_optional_time"
                 },
                 "uuid": {
                   "type": "keyword"

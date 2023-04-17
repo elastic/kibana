@@ -43,7 +43,10 @@ describe('getFieldValuePairCounts', () => {
         '500': 1,
       },
       url: {
-        'home.php': 1,
+        'home.php': 2,
+      },
+      user: {
+        Peter: 1,
       },
     });
   });

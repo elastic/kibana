@@ -18,8 +18,10 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
 import { getStepDetailsRoute } from './components/step_details_page/route_config';
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
@@ -52,13 +54,6 @@ export type RouteProps = LazyObservabilityPageTemplateProps & {
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
-
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
@@ -108,7 +103,11 @@ const getRoutes = (
             defaultMessage="For more information about available monitor types and other options, see our {docs}."
             values={{
               docs: (
-                <EuiLink target="_blank" href="#">
+                <EuiLink
+                  data-test-subj="syntheticsGetRoutesDocumentationLink"
+                  target="_blank"
+                  href="#"
+                >
                   <FormattedMessage
                     id="xpack.synthetics.addMonitor.pageHeader.docsLink"
                     defaultMessage="documentation"
@@ -172,7 +171,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
-  const { application, observability } = useKibana<ClientPluginsStart>().services;
+  const { application } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
@@ -184,9 +183,10 @@ export const PageRouter: FC = () => {
     location,
     application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
-  const PageTemplateComponent = observability.navigation.PageTemplate;
 
   apiService.addInspectorRequest = addInspectorRequest;
+
+  const isUnPrivileged = useSyntheticsPrivileges();
 
   return (
     <Switch>
@@ -202,24 +202,25 @@ export const PageRouter: FC = () => {
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <PageTemplateComponent
-                pageHeader={pageHeader}
+              <SyntheticsPageTemplateComponent
+                pageHeader={isUnPrivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                <RouteComponent />
-              </PageTemplateComponent>
+                {isUnPrivileged || <RouteComponent />}
+              </SyntheticsPageTemplateComponent>
             </div>
           </Route>
         )
       )}
       <Route
         component={() => (
-          <PageTemplateComponent>
+          <SyntheticsPageTemplateComponent>
             <NotFoundPrompt
               actions={[
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
                   iconType="arrowLeft"
                   flush="both"
                   onClick={() => {
@@ -232,7 +233,7 @@ export const PageRouter: FC = () => {
                 </EuiButtonEmpty>,
               ]}
             />
-          </PageTemplateComponent>
+          </SyntheticsPageTemplateComponent>
         )}
       />
     </Switch>

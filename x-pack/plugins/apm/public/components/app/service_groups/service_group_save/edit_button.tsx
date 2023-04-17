@@ -32,6 +32,7 @@ export function EditButton({ onClick }: Props) {
       )}
     >
       <EuiButton
+        data-test-subj="apmEditButtonEditGroupButton"
         iconType="pencil"
         onClick={() => {
           dismissTour();

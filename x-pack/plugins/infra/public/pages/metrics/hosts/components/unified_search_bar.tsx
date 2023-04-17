@@ -6,62 +6,45 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  type Filter,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid } from '@elastic/eui';
-import type { InfraClientStartDeps } from '../../../../types';
+import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
+import { useMetricsDataViewContext } from '../hooks/use_data_view';
+import { HostsSearchPayload } from '../hooks/use_unified_search_url_state';
 
-interface Props {
-  dataView: DataView;
-}
-
-export const UnifiedSearchBar = ({ dataView }: Props) => {
+export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch, application },
-  } = useKibana<InfraClientStartDeps>();
+  } = useKibanaContextForPlugin();
+  const { dataView } = useMetricsDataViewContext();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
     if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
-      onQueryChange({ panelFilters });
+      onSubmit({ panelFilters });
     }
   };
 
-  const onQueryChange = ({
-    payload,
-    panelFilters,
-  }: {
-    payload?: { dateRange: TimeRange; query?: Query };
-    panelFilters?: Filter[];
-  }) => {
-    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
-  };
-
-  const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+  const handleRefresh = (payload: HostsSearchPayload, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
     if (isUpdate === false) {
-      onQueryChange({ payload });
+      onSubmit(payload);
     }
   };
 
   return (
-    <EuiFlexGrid gutterSize="s">
+    <StickyContainer>
       <SearchBar
         appName={'Infra Hosts'}
         displayStyle="inPage"
-        indexPatterns={[dataView]}
+        indexPatterns={dataView && [dataView]}
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
@@ -80,6 +63,26 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         filters={searchCriteria.filters}
         onFiltersChange={onPanelFiltersChange}
       />
-    </EuiFlexGrid>
+      <EuiHorizontalRule margin="none" />
+    </StickyContainer>
+  );
+};
+
+const StickyContainer = (props: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGrid
+      gutterSize="none"
+      css={css`
+        position: sticky;
+        top: calc(${euiTheme.size.xxxl} * 2);
+        z-index: ${euiTheme.levels.header};
+        background: ${euiTheme.colors.emptyShade};
+        padding-top: ${euiTheme.size.m};
+        margin-top: -${euiTheme.size.l};
+      `}
+      {...props}
+    />
   );
 };

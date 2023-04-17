@@ -802,7 +802,7 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
-  it('tests processing dimension field', () => {
+  it('tests processing dimension field on a keyword', () => {
     const literalYml = `
 - name: example.id
   type: keyword
@@ -822,7 +822,60 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on an long', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              time_series_dimension: true,
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on an long without timeserie enabled', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: false,
+    });
     expect(mappings).toEqual(expectedMapping);
   });
 

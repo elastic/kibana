@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '../../common/utils';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition } from './types';
+import type { ContentCrud } from './crud';
 
 export class ContentRegistry {
   private types = new Map<string, ContentType>();
@@ -22,14 +23,24 @@ export class ContentRegistry {
    * @param contentType The content type to register
    * @param config The content configuration
    */
-  register<S extends ContentStorage = ContentStorage>(definition: ContentTypeDefinition<S>) {
+  register<S extends ContentStorage<any> = ContentStorage>(definition: ContentTypeDefinition<S>) {
     if (this.types.has(definition.id)) {
       throw new Error(`Content [${definition.id}] is already registered`);
     }
 
-    validateVersion(definition.version?.latest);
+    const { result, value } = validateVersion(definition.version?.latest);
+    if (!result) {
+      throw new Error(`Invalid version [${definition.version?.latest}]. Must be an integer.`);
+    }
 
-    const contentType = new ContentType(definition, this.eventBus);
+    if (value < 1) {
+      throw new Error(`Version must be >= 1`);
+    }
+
+    const contentType = new ContentType(
+      { ...definition, version: { ...definition.version, latest: value } },
+      this.eventBus
+    );
 
     this.types.set(contentType.id, contentType);
   }
@@ -48,8 +59,8 @@ export class ContentRegistry {
   }
 
   /** Get the crud instance of a content type */
-  getCrud(id: string) {
-    return this.getContentType(id).crud;
+  getCrud<T = unknown>(id: string) {
+    return this.getContentType(id).crud as ContentCrud<T>;
   }
 
   /** Helper to validate if a content type has been registered */

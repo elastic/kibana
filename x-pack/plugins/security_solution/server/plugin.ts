@@ -28,6 +28,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
@@ -101,6 +102,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { ActionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -127,6 +129,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
   private kibanaIndex?: string;
+  private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -140,6 +143,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
+    this.endpointContext = {
+      logFactory: this.pluginContext.logger,
+      service: this.endpointAppContextService,
+      config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      experimentalFeatures: this.config.experimentalFeatures,
+    };
   }
 
   public setup(
@@ -158,11 +167,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
-    };
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -179,13 +183,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       APP_ID,
       (context, request) => requestContextFactory.create(context, request)
     );
-
-    const endpointContext: EndpointAppContext = {
-      logFactory: pluginContext.logger,
-      service: this.endpointAppContextService,
-      config: (): Promise<ConfigType> => Promise.resolve(config),
-      experimentalFeatures,
-    };
 
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
@@ -213,6 +210,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
+      licensing: plugins.licensing,
     };
 
     const ruleDataServiceOptions = {
@@ -246,6 +244,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -296,15 +301,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    registerEndpointRoutes(router, endpointContext);
+    registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
       router,
       plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      endpointContext
+      this.endpointContext
     );
     registerLimitedConcurrencyRoutes(core);
-    registerPolicyRoutes(router, endpointContext);
-    registerActionRoutes(router, endpointContext);
+    registerPolicyRoutes(router, this.endpointContext);
+    registerActionRoutes(router, this.endpointContext);
 
     const ruleTypes = [
       LEGACY_NOTIFICATIONS_ID,
@@ -337,7 +342,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (exceptionListsSetupEnabled()) {
       this.lists = plugins.lists;
       this.manifestTask = new ManifestTask({
-        endpointAppContext: endpointContext,
+        endpointAppContext: this.endpointContext,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
@@ -362,7 +367,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext,
+        this.endpointContext,
         depsStart.spaces?.spacesService?.getSpaceId,
         ruleDataClient
       );
@@ -383,7 +388,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
-      endpointAppContext: endpointContext,
+      endpointAppContext: this.endpointContext,
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       taskManager: plugins.taskManager!,
@@ -498,6 +503,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
+      actionCreateService: new ActionCreateService(
+        core.elasticsearch.client.asInternalUser,
+        this.endpointContext
+      ),
     });
 
     this.telemetryReceiver.start(
