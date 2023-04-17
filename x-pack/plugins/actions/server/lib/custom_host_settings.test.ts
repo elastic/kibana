@@ -73,6 +73,7 @@ describe('custom_host_settings', () => {
       rejectUnauthorized: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
+      enableFooterInEmail: true,
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {
