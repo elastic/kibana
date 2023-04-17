@@ -17,6 +17,7 @@ import { useLoadActions } from '../hooks/use_load_actions';
 
 interface InlineActionsProps {
   actionContext: CellActionExecutionContext;
+  anchorPosition: 'rightCenter' | 'downCenter';
   showActionTooltips: boolean;
   visibleCellActions: number;
   disabledActionTypes: string[];
@@ -24,6 +25,7 @@ interface InlineActionsProps {
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
+  anchorPosition,
   showActionTooltips,
   visibleCellActions,
   disabledActionTypes,
@@ -61,6 +63,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
           <ExtraActionsPopOver
             actions={extraActions}
             actionContext={actionContext}
+            anchorPosition={anchorPosition}
             button={button}
             closePopOver={closePopOver}
             isOpen={isPopoverOpen}

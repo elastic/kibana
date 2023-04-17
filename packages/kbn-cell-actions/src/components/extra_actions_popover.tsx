@@ -83,7 +83,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       isOpen={isOpen}
       closePopover={closePopOver}
       panelPaddingSize="xs"
-      anchorPosition={'downCenter'}
+      anchorPosition={anchorPosition}
       hasArrow={false}
       repositionOnScroll
       ownFocus

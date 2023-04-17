@@ -45,7 +45,7 @@ interface Props {
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
-  anchorPosition = 'downCenter',
+  anchorPosition,
   children,
   visibleCellActions,
   actionContext,
