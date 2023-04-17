@@ -13,17 +13,20 @@ import type {
   ManagementSection,
   ManagementSetup,
 } from '@kbn/management-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { PluginStartDependencies } from '../plugin';
 import { apiKeysManagementApp } from './api_keys';
+import { SecurityManagementLocatorDefinition } from './locators';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
 
 interface SetupParams {
   management: ManagementSetup;
+  share: SharePluginSetup;
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
@@ -39,7 +42,7 @@ export class ManagementService {
   private licenseFeaturesSubscription?: Subscription;
   private securitySection?: ManagementSection;
 
-  setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
+  setup({ getStartServices, management, share, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
@@ -49,6 +52,7 @@ export class ManagementService {
     );
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
+    share.url.locators.create(new SecurityManagementLocatorDefinition());
   }
 
   start({ capabilities }: StartParams) {

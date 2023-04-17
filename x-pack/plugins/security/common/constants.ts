@@ -93,3 +93,8 @@ export const SESSION_EXTENSION_THROTTLE_MS = 60 * 1000;
  * Route to get session info and extend session expiration
  */
 export const SESSION_ROUTE = '/internal/security/session';
+
+/**
+ * Locator ID to navigate to Management apps registered by Security
+ */
+export const SECURITY_MANAGEMENT_LOCATOR = 'SECURITY_MANAGEMENT_LOCATOR';
