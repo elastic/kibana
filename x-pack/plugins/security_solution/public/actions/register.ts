@@ -6,9 +6,9 @@
  */
 
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
-import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
+
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartPlugins, StartServices } from '../types';
 import { createFilterInCellActionFactory, createFilterOutCellActionFactory } from './filter';
@@ -23,11 +23,8 @@ import {
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { SecurityCellActionsTrigger } from './constants';
-import type {
-  SecurityCellActionExecutionContext,
-  SecurityCellActionName,
-  SecurityCellActions,
-} from './types';
+import type { SecurityCellActionName, SecurityCellActions } from './types';
+import { enhanceActionWithTelemetry } from './telemetry';
 
 export const registerUIActions = (
   { uiActions }: StartPlugins,
@@ -92,28 +89,6 @@ const registerCellActionsTrigger = (
     const actionFactory = cellActions[actionName];
     const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
 
-    uiActions.addTriggerAction(triggerId, actionWithTelemetry(action, services));
+    uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
   });
-};
-
-const actionWithTelemetry = (
-  action: CellAction<CellActionExecutionContext>,
-  services: StartServices
-): CellAction<CellActionExecutionContext> => {
-  const { telemetry } = services;
-  const { execute, ...rest } = action;
-  const enhancedExecute = (
-    context: ActionExecutionContext<SecurityCellActionExecutionContext>
-  ): Promise<void> => {
-    telemetry.reportCellActionClicked({
-      actionId: rest.id,
-      displayName: rest.getDisplayName(context),
-      fieldName: context.field.name,
-      metadata: context.metadata,
-    });
-
-    return execute(context);
-  };
-
-  return { ...rest, execute: enhancedExecute };
 };

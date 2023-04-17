@@ -216,6 +216,26 @@ const cellActionClickedEvent: TelemetryEvent = {
   },
 };
 
+const anomaliesCountClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AnomaliesCountClicked,
+  schema: {
+    jobId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Job id',
+        optional: false,
+      },
+    },
+    count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of anomalies',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
@@ -225,4 +245,5 @@ export const telemetryEvents = [
   entityRiskFilteredEvent,
   mlJobUpdateEvent,
   cellActionClickedEvent,
+  anomaliesCountClickedEvent,
 ];

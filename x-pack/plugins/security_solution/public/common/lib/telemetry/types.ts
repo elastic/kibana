@@ -23,6 +23,7 @@ export enum TelemetryEventTypes {
   EntityRiskFiltered = 'Entity Risk Filtered',
   MLJobUpdate = 'ML Job Update',
   CellActionClicked = 'Cell Action Clicked',
+  AnomaliesCountClicked = 'Anomalies Count Clicked',
 }
 
 export interface ReportAlertsGroupingChangedParams {
@@ -78,6 +79,11 @@ export interface ReportCellActionClickedParams {
   fieldName: string;
 }
 
+export interface ReportAnomaliesCountClickedParams {
+  jobId: string;
+  count: number;
+}
+
 export type TelemetryEventParams =
   | ReportAlertsGroupingChangedParams
   | ReportAlertsGroupingToggledParams
@@ -86,7 +92,9 @@ export type TelemetryEventParams =
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
   | ReportMLJobUpdateParams
-  | ReportCellActionClickedParams;
+  | ReportCellActionClickedParams
+  | ReportCellActionClickedParams
+  | ReportAnomaliesCountClickedParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -99,6 +107,8 @@ export interface TelemetryClientStart {
   reportMLJobUpdate(params: ReportMLJobUpdateParams): void;
 
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
+
+  reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -133,4 +143,8 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.CellActionClicked;
       schema: RootSchema<ReportCellActionClickedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AnomaliesCountClicked;
+      schema: RootSchema<ReportAnomaliesCountClickedParams>;
     };
