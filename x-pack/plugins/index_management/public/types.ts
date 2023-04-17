@@ -7,7 +7,7 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services';
 
 export interface IndexManagementPluginSetup {
@@ -18,6 +18,7 @@ export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
 }
 
 export interface StartDependencies {

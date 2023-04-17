@@ -53,3 +53,5 @@ export {
 } from './ui_metric';
 
 export { MAJOR_VERSION } from './plugin';
+
+export const INDEX_MANAGEMENT_LOCATOR = 'INDEX_MANAGEMENT_LOCATOR';

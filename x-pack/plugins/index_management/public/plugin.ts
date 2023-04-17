@@ -11,8 +11,8 @@ import SemVer from 'semver/classes/semver';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
+import { IndexManagementLocatorDefinition } from './locators';
 import { ExtensionsService } from './services';
-
 import {
   IndexManagementPluginSetup,
   SetupDependencies,
@@ -59,6 +59,7 @@ export class IndexMgmtUIPlugin {
           );
         },
       });
+      plugins.share.url.locators.create(new IndexManagementLocatorDefinition());
     }
 
     return {
