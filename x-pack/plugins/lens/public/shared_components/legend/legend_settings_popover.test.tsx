@@ -122,21 +122,4 @@ describe('Legend Settings', () => {
     );
     expect(component.exists('[data-test-subj="lens-legend-nested-switch"]')).toEqual(false);
   });
-
-  it('should still render but disable the nested legend switch', () => {
-    const component = shallow(
-      <LegendSettingsPopover
-        {...props}
-        renderNestedLegendSwitch
-        nestedLegend
-        disabledNestedLegendSwitch
-      />
-    );
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]').prop('checked')).toEqual(
-      false
-    );
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]').prop('disabled')).toEqual(
-      true
-    );
-  });
 });

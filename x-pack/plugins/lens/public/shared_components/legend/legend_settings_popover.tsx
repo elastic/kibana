@@ -22,7 +22,6 @@ import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
 import { useDebouncedValue } from '../debounced_value';
-import { TooltipWrapper } from '../tooltip_wrapper';
 
 export interface LegendSettingsPopoverProps {
   /**
@@ -93,10 +92,6 @@ export interface LegendSettingsPopoverProps {
    * Callback on nested switch status change
    */
   onTruncateLegendChange?: (event: EuiSwitchEvent) => void;
-  /**
-   * Disables the nested legend switch when enable
-   */
-  disabledNestedLegendSwitch?: boolean;
   /**
    * If true, nested legend switch is rendered
    */
@@ -186,7 +181,6 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onFloatingColumnsChange = noop,
   onPositionChange,
   renderNestedLegendSwitch,
-  disabledNestedLegendSwitch,
   nestedLegend,
   onNestedLegendChange = noop,
   valueInLegend,
@@ -295,25 +289,16 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 defaultMessage: 'Nested',
               })}
             >
-              <TooltipWrapper
-                tooltipContent={i18n.translate('xpack.lens.shared.disabledNestedLegend', {
-                  defaultMessage:
-                    'This setting only applies when a configuration with multiple levels is defined.',
+              <EuiSwitch
+                compressed
+                label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+                  defaultMessage: 'Nested',
                 })}
-                condition={Boolean(disabledNestedLegendSwitch)}
-              >
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-                    defaultMessage: 'Nested',
-                  })}
-                  data-test-subj="lens-legend-nested-switch"
-                  showLabel={false}
-                  checked={disabledNestedLegendSwitch ? false : Boolean(nestedLegend)}
-                  onChange={onNestedLegendChange}
-                  disabled={Boolean(disabledNestedLegendSwitch)}
-                />
-              </TooltipWrapper>
+                data-test-subj="lens-legend-nested-switch"
+                showLabel={false}
+                checked={Boolean(nestedLegend)}
+                onChange={onNestedLegendChange}
+              />
             </EuiFormRow>
           )}
           {renderValueInLegendSwitch && (
