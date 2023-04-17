@@ -531,10 +531,16 @@ describe('MlInferenceLogic', () => {
 
         MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          destinationField: 'my-dest-field',
+          destinationField: mockModelConfiguration.configuration.destinationField,
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
           modelID: textExpansionModel.model_id,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
-          sourceField: 'my-field',
+          sourceField: mockModelConfiguration.configuration.sourceField,
         });
         MLInferenceLogic.actions.createPipeline();
 
@@ -542,6 +548,12 @@ describe('MlInferenceLogic', () => {
           indexName: mockModelConfiguration.indexName,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
           pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
         });
       });
     });

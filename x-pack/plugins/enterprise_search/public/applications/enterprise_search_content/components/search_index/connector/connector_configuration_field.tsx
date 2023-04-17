@@ -14,6 +14,8 @@ import {
   EuiFieldText,
   EuiFieldNumber,
   EuiFieldPassword,
+  EuiRadioGroup,
+  EuiSelect,
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
@@ -40,9 +42,40 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { key, display, label, sensitive, value } = configEntry;
+  const { key, display, label, options, sensitive, value } = configEntry;
 
   switch (display) {
+    case 'dropdown':
+      return options.length > 3 ? (
+        <EuiSelect
+          options={options.map((option) => ({ text: option.label, value: option.value }))}
+          value={ensureStringType(value)}
+          onChange={(event) => {
+            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+          }}
+        />
+      ) : (
+        <EuiRadioGroup
+          options={options.map((option) => ({ id: option.value, label: option.label }))}
+          idSelected={ensureStringType(value)}
+          onChange={(id) => {
+            setLocalConfigEntry({ ...configEntry, value: id });
+          }}
+          name="radio group"
+        />
+      );
+
+    case 'numeric':
+      return (
+        <EuiFieldNumber
+          value={ensureNumberType(value)}
+          disabled={status === Status.LOADING}
+          onChange={(event) => {
+            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+          }}
+        />
+      );
+
     case 'textarea':
       const textarea = (
         <EuiTextArea
@@ -60,17 +93,6 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         </EuiAccordion>
       ) : (
         textarea
-      );
-
-    case 'numeric':
-      return (
-        <EuiFieldNumber
-          value={ensureNumberType(value)}
-          disabled={status === Status.LOADING}
-          onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
-          }}
-        />
       );
 
     case 'toggle':
