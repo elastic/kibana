@@ -62,22 +62,7 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when logs: { enabled: false }', () => {
-      expect(isAlertDetailsEnabledPerApp(logsAlert, defaultConfig)).toBeFalsy();
-    });
 
-    it('returns TRUE when logs: { enabled: true }', () => {
-      const updatedConfig = {
-        unsafe: {
-          alertDetails: {
-            metrics: { enabled: false },
-            uptime: { enabled: false },
-          },
-        },
-      } as ConfigSchema;
-      expect(isAlertDetailsEnabledPerApp(logsAlert, updatedConfig)).toBeTruthy();
-    });
-  });
   describe('APM alert', () => {
     const APMAlert = {
       reason: 'reason message',

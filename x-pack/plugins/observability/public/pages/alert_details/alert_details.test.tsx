@@ -98,7 +98,6 @@ const params = {
 const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: true },
       metrics: { enabled: true },
       uptime: { enabled: true },
     },
