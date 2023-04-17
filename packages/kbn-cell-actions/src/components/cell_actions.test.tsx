@@ -60,7 +60,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.HOVER} triggerId={TRIGGER_ID} field={FIELD}>
+        <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} field={FIELD}>
           Field value
         </CellActions>
       </CellActionsProvider>
