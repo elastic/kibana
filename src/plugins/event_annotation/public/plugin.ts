@@ -6,18 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  type Plugin,
-  type CoreSetup,
-  type CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  type AppMountParameters,
-} from '@kbn/core/public';
+import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
 import {
   manualPointEventAnnotation,
@@ -26,8 +21,7 @@ import {
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
-import type { EventAnnotationAppServices } from './render_app';
-import { ANNOTATION_LIBRARY_APP_ID } from '../common/constants';
+import { EventAnnotationListingPageServices, getTableList } from './get_table_list';
 
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -38,6 +32,7 @@ export interface EventAnnotationStartDependencies {
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
+  visualizations: VisualizationsSetup;
 }
 
 /** @public */
@@ -60,14 +55,9 @@ export class EventAnnotationPlugin
       getFetchEventAnnotations({ getStartServices: core.getStartServices })
     );
 
-    core.application.register({
-      id: ANNOTATION_LIBRARY_APP_ID,
-      title: 'Event Annotation Library',
-      order: 8000,
-      euiIconType: 'logoKibana',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      mount: async (params: AppMountParameters) => {
+    dependencies.visualizations.listingViewRegistry.add({
+      title: 'Annotation Groups',
+      getTableList: async (props) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
         const eventAnnotationService = await new EventAnnotationService(
@@ -75,23 +65,50 @@ export class EventAnnotationPlugin
           pluginsStart.savedObjectsManagement
         ).getService();
 
-        const services: EventAnnotationAppServices = {
+        const services: EventAnnotationListingPageServices = {
           core: coreStart,
-          history: params.history,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
         };
 
-        const { renderApp } = await import('./render_app');
-
-        const unmount = renderApp(params, services);
-
-        return () => {
-          unmount();
-        };
+        // TODO wire parent props
+        return getTableList(props, services);
       },
     });
+
+    // core.application.register({
+    //   id: ANNOTATION_LIBRARY_APP_ID,
+    //   title: 'Event Annotation Library',
+    //   order: 8000,
+    //   euiIconType: 'logoKibana',
+    //   defaultPath: '#/',
+    //   category: DEFAULT_APP_CATEGORIES.kibana,
+    //   mount: async (params: AppMountParameters) => {
+    //     const [coreStart, pluginsStart] = await core.getStartServices();
+
+    //     const eventAnnotationService = await new EventAnnotationService(
+    //       coreStart,
+    //       pluginsStart.savedObjectsManagement
+    //     ).getService();
+
+    //     const services: EventAnnotationAppServices = {
+    //       core: coreStart,
+    //       history: params.history,
+    //       savedObjectsTagging: pluginsStart.savedObjectsTagging,
+    //       eventAnnotationService,
+    //       PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
+    //     };
+
+    //     const { renderApp } = await import('./render_app');
+
+    //     const unmount = renderApp(params, services);
+
+    //     return () => {
+    //       unmount();
+    //     };
+    //   },
+    // });
   }
 
   public start(

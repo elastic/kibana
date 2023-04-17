@@ -8,11 +8,11 @@
 
 import React from 'react';
 import {
-  EventAnnotationGroupListView,
+  EventAnnotationGroupTableList,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
-} from './list_view';
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
+} from './table_list';
+import { TableList, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -33,7 +33,7 @@ describe('annotation list view', () => {
     ignoreGlobalFilters: false,
   };
 
-  let wrapper: ShallowWrapper<typeof EventAnnotationGroupListView>;
+  let wrapper: ShallowWrapper<typeof EventAnnotationGroupTableList>;
   let mockEventAnnotationService: EventAnnotationServiceType;
 
   beforeEach(() => {
@@ -54,8 +54,8 @@ describe('annotation list view', () => {
       ),
     } as Partial<IUiSettingsClient> as IUiSettingsClient;
 
-    wrapper = shallow<typeof EventAnnotationGroupListView>(
-      <EventAnnotationGroupListView
+    wrapper = shallow<typeof EventAnnotationGroupTableList>(
+      <EventAnnotationGroupTableList
         eventAnnotationService={mockEventAnnotationService}
         savedObjectsTagging={taggingApiMock.create()}
         uiSettings={mockUiSettings}
@@ -63,15 +63,18 @@ describe('annotation list view', () => {
           delete: true,
           save: true,
         }}
+        parentProps={{
+          onFetchSuccess: () => {},
+        }}
       />
     );
   });
 
   it('renders a table list view', () => {
     expect(wrapper.debug()).toMatchInlineSnapshot(`
-      "<div data-test-id=\\"annotationLibraryListingView\\">
-        <Memo(TableListViewComp) findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" tableListTitle=\\"Annotation Library\\" onClickTitle={[Function: onClickTitle]} />
-      </div>"
+      "<Fragment>
+        <Memo(TableListComp) tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function: onClickTitle]} onFetchSuccess={[Function: onFetchSuccess]} />
+      </Fragment>"
     `);
   });
 
@@ -79,7 +82,7 @@ describe('annotation list view', () => {
     const searchQuery = 'My Search Query';
     const references = [{ id: 'first_id', type: 'sometype' }];
     const referencesToExclude = [{ id: 'second_id', type: 'sometype' }];
-    wrapper.find(TableListView).prop('findItems')(searchQuery, {
+    wrapper.find(TableList).prop('findItems')(searchQuery, {
       references,
       referencesToExclude,
     });
@@ -96,13 +99,13 @@ describe('annotation list view', () => {
     it('prevent deleting when user is missing perms', () => {
       wrapper.setProps({ visualizeCapabilities: { delete: false } });
 
-      expect(wrapper.find(TableListView).prop('deleteItems')).toBeUndefined();
+      expect(wrapper.find(TableList).prop('deleteItems')).toBeUndefined();
     });
 
     it('deletes groups using the service', () => {
-      expect(wrapper.find(TableListView).prop('deleteItems')).toBeDefined();
+      expect(wrapper.find(TableList).prop('deleteItems')).toBeDefined();
 
-      wrapper.find(TableListView).prop('deleteItems')!([
+      wrapper.find(TableList).prop('deleteItems')!([
         {
           id: 'some-id-1',
           references: [
@@ -147,14 +150,14 @@ describe('annotation list view', () => {
     it('prevents editing when user is missing perms', () => {
       wrapper.setProps({ visualizeCapabilities: { save: false } });
 
-      expect(wrapper.find(TableListView).prop('deleteItems')).toBeUndefined();
+      expect(wrapper.find(TableList).prop('deleteItems')).toBeUndefined();
     });
 
     it('edits existing group', async () => {
       expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
 
       act(() => {
-        wrapper.find(TableListView).prop('editItem')!({ id: '1234' } as UserContentCommonSchema);
+        wrapper.find(TableList).prop('editItem')!({ id: '1234' } as UserContentCommonSchema);
       });
 
       // wait one tick to give promise time to settle

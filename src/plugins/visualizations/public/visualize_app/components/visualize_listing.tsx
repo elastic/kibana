@@ -8,7 +8,14 @@
 
 import './visualize_listing.scss';
 
-import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
+import React, {
+  useCallback,
+  useRef,
+  useMemo,
+  useEffect,
+  MouseEvent,
+  MutableRefObject,
+} from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +33,7 @@ import {
 } from '@kbn/content-management-table-list';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListViewProps } from '@kbn/content-management-table-list/src';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
@@ -77,71 +85,33 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     },
   };
 };
+type CustomTableViewProps = Pick<
+  TableListViewProps<VisualizeUserContent>,
+  'createItem' | 'findItems' | 'deleteItems' | 'editItem' | 'contentEditor' | 'emptyPrompt'
+>;
 
-export const VisualizeListing = () => {
+const useTableListViewProps = (
+  closeNewVisModal: MutableRefObject<() => void>,
+  listingLimit: number
+): CustomTableViewProps => {
   const {
     services: {
-      core,
       application,
-      executionContext,
-      chrome,
       history,
-      toastNotifications,
-      stateTransferService,
-      savedObjects,
       uiSettings,
-      visualizeCapabilities,
-      dashboardCapabilities,
-      kbnUrlStateStorage,
-      overlays,
+      savedObjects,
       savedObjectsTagging,
+      overlays,
+      toastNotifications,
+      visualizeCapabilities,
     },
   } = useKibana<VisualizeServices>();
-  const { pathname } = useLocation();
-  const closeNewVisModal = useRef(() => {});
+
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
-  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
-
-  useExecutionContext(executionContext, {
-    type: 'application',
-    page: 'list',
-  });
-
-  useEffect(() => {
-    if (pathname === '/new') {
-      // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
-      closeNewVisModal.current = showNewVisModal({
-        onClose: () => {
-          // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
-          history.push(VisualizeConstants.LANDING_PAGE_PATH);
-        },
-      });
-    } else {
-      // close modal window if exists
-      closeNewVisModal.current();
-    }
-  }, [history, pathname]);
-
-  useMount(() => {
-    // Reset editor state for all apps if the visualize listing page is loaded.
-    stateTransferService.clearEditorState();
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize Library',
-        }),
-      },
-    ]);
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
-    );
-  });
-  useUnmount(() => closeNewVisModal.current());
 
   const createNewVis = useCallback(() => {
     closeNewVisModal.current = showNewVisModal();
-  }, []);
+  }, [closeNewVisModal]);
 
   const editItem = useCallback(
     ({ attributes: { editUrl, editApp } }: VisualizeUserContent) => {
@@ -269,6 +239,75 @@ export const VisualizeListing = () => {
     [savedObjects.client, toastNotifications]
   );
 
+  const props: CustomTableViewProps = {
+    findItems: fetchItems,
+    deleteItems,
+    contentEditor: {
+      isReadonly: !visualizeCapabilities.save,
+      onSave: onContentEditorSave,
+      customValidators: contentEditorValidators,
+    },
+    editItem,
+    emptyPrompt: noItemsFragment,
+    createItem: createNewVis,
+  };
+
+  return props;
+};
+
+export const VisualizeListing = () => {
+  const {
+    services: {
+      application,
+      executionContext,
+      chrome,
+      history,
+      stateTransferService,
+      dashboardCapabilities,
+      uiSettings,
+      kbnUrlStateStorage,
+      listingViewRegistry,
+    },
+  } = useKibana<VisualizeServices>();
+  const { pathname } = useLocation();
+  const closeNewVisModal = useRef(() => {});
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'list',
+  });
+
+  useEffect(() => {
+    if (pathname === '/new') {
+      // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
+      closeNewVisModal.current = showNewVisModal({
+        onClose: () => {
+          // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
+          history.push(VisualizeConstants.LANDING_PAGE_PATH);
+        },
+      });
+    } else {
+      // close modal window if exists
+      closeNewVisModal.current();
+    }
+  }, [history, pathname]);
+
+  useMount(() => {
+    // Reset editor state for all apps if the visualize listing page is loaded.
+    stateTransferService.clearEditorState();
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
+          defaultMessage: 'Visualize Library',
+        }),
+      },
+    ]);
+    chrome.docTitle.change(
+      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
+    );
+  });
+  useUnmount(() => closeNewVisModal.current());
+
   const calloutMessage = (
     <FormattedMessage
       data-test-subj="visualize-dashboard-flow-prompt"
@@ -293,28 +332,27 @@ export const VisualizeListing = () => {
     />
   );
 
-  const tabs: TableListTab[] = [
-    {
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+
+  const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
+
+  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
+    defaultMessage: 'Visualize Library',
+  });
+
+  const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(
+    () => ({
       title: 'Visualizations',
       getTableList: (propsFromParent) => (
         <TableList<VisualizeUserContent>
           id="vis"
           // we allow users to create visualizations even if they can't save them
           // for data exploration purposes
-          createItem={createNewVis}
-          findItems={fetchItems}
-          deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-          editItem={visualizeCapabilities.save ? editItem : undefined}
           customTableColumn={getCustomColumn()}
           listingLimit={listingLimit}
           initialPageSize={initialPageSize}
           initialFilter={''}
-          contentEditor={{
-            isReadonly: !visualizeCapabilities.save,
-            onSave: onContentEditorSave,
-            customValidators: contentEditorValidators,
-          }}
-          emptyPrompt={noItemsFragment}
           entityName={i18n.translate('visualizations.listing.table.entityName', {
             defaultMessage: 'visualization',
           })}
@@ -322,20 +360,33 @@ export const VisualizeListing = () => {
             defaultMessage: 'visualizations',
           })}
           getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-            getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+            getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
           }
+          tableCaption={visualizeLibraryTitle}
+          {...tableViewProps}
           {...propsFromParent}
         />
       ),
-    },
-  ];
+    }),
+    [
+      application,
+      initialPageSize,
+      kbnUrlStateStorage,
+      listingLimit,
+      tableViewProps,
+      visualizeLibraryTitle,
+    ]
+  );
+
+  const tabs = useMemo(
+    () => [visualizeTab, ...Array.from(listingViewRegistry as Set<TableListTab>)],
+    [listingViewRegistry, visualizeTab]
+  );
 
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
-        defaultMessage: 'Visualize Library',
-      })}
+      title={visualizeLibraryTitle}
       tabs={tabs}
     >
       {dashboardCapabilities.createNew && (

@@ -12,6 +12,7 @@
       "savedObjectsManagement",
       "data",
       "presentationUtil",
+      "visualizations"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",

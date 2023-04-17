@@ -51,7 +51,7 @@ const requiredProps: TableListViewProps = {
   listingLimit: 500,
   initialFilter: '',
   initialPageSize: 20,
-  tableListTitle: 'test title',
+  title: 'test title',
   findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
   getDetailViewLink: () => 'http://elastic.co',
   urlStateEnabled: false,

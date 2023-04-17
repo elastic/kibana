@@ -103,6 +103,7 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
+import { ListingViewRegistry } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -110,8 +111,10 @@ import { EditInLensAction } from './actions/edit_in_lens_action';
  * @public
  */
 
-export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
-
+export type VisualizationsSetup = TypesSetup & {
+  visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
+};
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
 }
@@ -234,6 +237,7 @@ export class VisualizationsPlugin
     };
 
     const start = createStartServicesGetter(core.getStartServices);
+    const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
     core.application.register({
@@ -308,6 +312,7 @@ export class VisualizationsPlugin
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
         };
 
@@ -367,6 +372,7 @@ export class VisualizationsPlugin
     return {
       ...this.types.setup(),
       visEditorsRegistry,
+      listingViewRegistry,
     };
   }
 

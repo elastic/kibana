@@ -23,7 +23,7 @@ import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
-  TableListProps as TableListProps,
+  TableListProps,
   UserContentCommonSchema,
 } from '../table_list_view';
 import { TableSortSelect } from './table_sort_select';

@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { TableListView } from '@kbn/content-management-table-list';
+import { TableList, TableListTabParentProps } from '@kbn/content-management-table-list';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
@@ -33,16 +33,18 @@ import { EventAnnotationGroupContent } from '../../common/types';
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
-export const EventAnnotationGroupListView = ({
+export const EventAnnotationGroupTableList = ({
   uiSettings,
   eventAnnotationService,
   visualizeCapabilities,
   savedObjectsTagging,
+  parentProps,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   savedObjectsTagging: SavedObjectsTaggingApi;
+  parentProps: TableListTabParentProps;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -128,11 +130,12 @@ export const EventAnnotationGroupListView = ({
   ) : undefined;
 
   return (
-    <div data-test-id="annotationLibraryListingView">
-      <TableListView<EventAnnotationGroupContent>
-        // we allow users to create visualizations even if they can't save them
-        // for data exploration purposes
+    <>
+      <TableList<EventAnnotationGroupContent>
         // createItem={createNewGroup}
+        tableCaption={i18n.translate('eventAnnotation.tableList.listTitle', {
+          defaultMessage: 'Annotation Library',
+        })}
         findItems={fetchItems}
         deleteItems={
           visualizeCapabilities.delete
@@ -147,28 +150,22 @@ export const EventAnnotationGroupListView = ({
                   .then((group) => setGroupToEditInfo({ group, id }))
             : undefined
         }
-        // customTableColumn={getCustomColumn()}
         listingLimit={listingLimit}
         initialPageSize={initialPageSize}
         initialFilter={''}
-        // emptyPrompt={noItemsFragment}
+        // emptyPrompt={noItemsFragment} TODO
         entityName={i18n.translate('eventAnnotation.tableList.entityName', {
           defaultMessage: 'annotation group',
         })}
         entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
           defaultMessage: 'annotation groups',
         })}
-        tableListTitle={i18n.translate('eventAnnotation.tableList.listTitle', {
-          defaultMessage: 'Annotation Library',
-        })}
         onClickTitle={(item) => {
           // TODO - what happens if I click here?
         }}
-        // getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-        //   getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
-        // }
+        {...parentProps}
       />
       {flyout}
-    </div>
+    </>
   );
 };
