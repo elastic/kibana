@@ -92,6 +92,7 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
    * Partial saved object, used as output for update
    */
   PartialItem: PartialItem<Attributes>;
+
   /**
    * Get item params
    */
