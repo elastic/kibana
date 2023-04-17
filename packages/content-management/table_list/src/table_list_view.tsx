@@ -986,10 +986,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
 
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
-  if (!hasInitialFetchReturned) {
-    return null;
-  }
-
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
