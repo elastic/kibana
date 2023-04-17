@@ -9,14 +9,16 @@ import { RawRule } from '../../types';
 import { partiallyUpdateAlert } from '../../saved_objects';
 import { isSnoozeExpired } from '../../lib';
 import { RulesClientContext } from '../types';
-import { updateMeta, migrateLegacyActions } from '../lib';
+import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,
   { id }: { id: string }
 ): Promise<void> {
-  const { attributes, version, references } =
-    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+    'alert',
+    id
+  );
 
   const snoozeSchedule = attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => {
@@ -31,25 +33,12 @@ export async function clearExpiredSnoozes(
 
   if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
 
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: id,
-    actions: attributes.actions,
-    references,
-    attributes,
-  });
-
   const updateAttributes = updateMeta(context, {
     snoozeSchedule,
-    ...(migratedActions.hasLegacyActions
-      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-      : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
-  const updateOptions = {
-    version,
-    ...(migratedActions.hasLegacyActions ? { references: migratedActions.resultedReferences } : {}),
-  };
+  const updateOptions = { version };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,

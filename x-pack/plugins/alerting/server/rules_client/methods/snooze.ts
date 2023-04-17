@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { RawRule, RuleSnoozeSchedule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -14,7 +15,7 @@ import { validateSnoozeStartDate } from '../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../lib/errors/rule_muted';
 import { RulesClientContext } from '../types';
 import { getSnoozeAttributes, verifySnoozeScheduleLimit } from '../common';
-import { updateMeta, migrateLegacyActions } from '../lib';
+import { updateMeta } from '../lib';
 
 export interface SnoozeParams {
   id: string;
@@ -47,8 +48,10 @@ async function snoozeWithOCC(
     snoozeSchedule: RuleSnoozeSchedule;
   }
 ) {
-  const { attributes, version, references } =
-    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+    'alert',
+    id
+  );
 
   try {
     await context.authorization.ensureAuthorized({
@@ -90,25 +93,12 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: id,
-    actions: attributes.actions,
-    references,
-    attributes,
-  });
-
   const updateAttributes = updateMeta(context, {
     ...newAttrs,
-    ...(migratedActions.hasLegacyActions
-      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-      : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
-  const updateOptions = {
-    version,
-    ...(migratedActions.hasLegacyActions ? { references: migratedActions.resultedReferences } : {}),
-  };
+  const updateOptions = { version };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta, migrateLegacyActions } from '../lib';
+import { updateMeta } from '../lib';
 import { clearUnscheduledSnooze } from '../common';
 
 export async function unmuteAll(
@@ -25,8 +26,10 @@ export async function unmuteAll(
 }
 
 async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
-  const { attributes, version, references } =
-    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
+    'alert',
+    id
+  );
 
   try {
     await context.authorization.ensureAuthorized({
@@ -60,27 +63,14 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: id,
-    actions: attributes.actions,
-    references,
-    attributes,
-  });
-
   const updateAttributes = updateMeta(context, {
     muteAll: false,
     mutedInstanceIds: [],
     snoozeSchedule: clearUnscheduledSnooze(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
-    ...(migratedActions.hasLegacyActions
-      ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-      : {}),
   });
-  const updateOptions = {
-    version,
-    ...(migratedActions.hasLegacyActions ? { references: migratedActions.resultedReferences } : {}),
-  };
+  const updateOptions = { version };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,

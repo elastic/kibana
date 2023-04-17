@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
+import { Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { MuteOptions } from '../types';
 import { RulesClientContext } from '../types';
-import { updateMeta, migrateLegacyActions } from '../lib';
+import { updateMeta } from '../lib';
 
 export async function muteInstance(
   context: RulesClientContext,
@@ -28,8 +28,10 @@ async function muteInstanceWithOCC(
   context: RulesClientContext,
   { alertId, alertInstanceId }: MuteOptions
 ) {
-  const { attributes, version, references } =
-    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', alertId);
+  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
+    'alert',
+    alertId
+  );
 
   try {
     await context.authorization.ensureAuthorized({
@@ -65,32 +67,16 @@ async function muteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: alertId,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
-
     mutedInstanceIds.push(alertInstanceId);
     await context.unsecuredSavedObjectsClient.update(
       'alert',
       alertId,
       updateMeta(context, {
         mutedInstanceIds,
-        ...(migratedActions.hasLegacyActions
-          ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
-          : {}),
-
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
       }),
-      {
-        version,
-        ...(migratedActions.hasLegacyActions
-          ? { references: migratedActions.resultedReferences }
-          : {}),
-      }
+      { version }
     );
   }
 }
