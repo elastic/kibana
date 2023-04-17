@@ -110,6 +110,7 @@ import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
+import { IgnoredGlobalFiltersEntries } from './info_badges';
 
 const XY_ID = 'lnsXY';
 
@@ -897,7 +898,9 @@ export const getXyVisualization = ({
       );
     }
 
-    return [...errors, ...warnings];
+    const info = getNotifiableFeatures(state, frame.dataViews);
+
+    return errors.concat(warnings, info);
   },
 
   getUniqueLabels(state) {
@@ -940,88 +943,7 @@ export const getXyVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: XYState) {
-    const isHorizontal = isHorizontalChart(state.layers);
-    const visualizationLayersInfo = state.layers.map((layer) => {
-      const dimensions = [];
-      let chartType: SeriesType | undefined;
-      let icon;
-      let label;
-      if (isDataLayer(layer)) {
-        chartType = layer.seriesType;
-        const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
-        icon = layerVisType?.icon;
-        label = layerVisType?.fullLabel || layerVisType?.label;
-        if (layer.xAccessor) {
-          dimensions.push({
-            name: getAxisName('x', { isHorizontal }),
-            id: layer.xAccessor,
-            dimensionType: 'x',
-          });
-        }
-        if (layer.accessors && layer.accessors.length) {
-          layer.accessors.forEach((accessor) => {
-            dimensions.push({
-              name: getAxisName('y', { isHorizontal }),
-              id: accessor,
-              dimensionType: 'y',
-            });
-          });
-        }
-        if (layer.splitAccessor) {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Breakdown',
-            }),
-            dimensionType: 'breakdown',
-            id: layer.splitAccessor,
-          });
-        }
-      }
-      if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
-        layer.accessors.forEach((accessor) => {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
-              defaultMessage: 'Reference line',
-            }),
-            dimensionType: 'reference_line',
-            id: accessor,
-          });
-        });
-        label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
-          defaultMessage: 'Reference lines',
-        });
-        icon = IconChartBarReferenceLine;
-      }
-      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
-        layer.annotations.forEach((annotation) => {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
-              defaultMessage: 'Annotation',
-            }),
-            dimensionType: 'annotation',
-            id: annotation.id,
-          });
-        });
-        label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-          defaultMessage: 'Annotations',
-        });
-        icon = IconChartBarAnnotations;
-      }
-
-      return {
-        layerId: layer.layerId,
-        layerType: layer.layerType,
-        chartType,
-        icon,
-        label,
-        dimensions,
-      };
-    });
-    return {
-      layers: visualizationLayersInfo,
-    };
-  },
+  getVisualizationInfo,
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
     return isEqual(
@@ -1068,3 +990,118 @@ const getMappedAccessors = ({
   }
   return mappedAccessors;
 };
+
+function getVisualizationInfo(state: XYState) {
+  const isHorizontal = isHorizontalChart(state.layers);
+  const visualizationLayersInfo = state.layers.map((layer) => {
+    const dimensions = [];
+    let chartType: SeriesType | undefined;
+    let icon;
+    let label;
+    if (isDataLayer(layer)) {
+      chartType = layer.seriesType;
+      const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+      icon = layerVisType?.icon;
+      label = layerVisType?.fullLabel || layerVisType?.label;
+      if (layer.xAccessor) {
+        dimensions.push({
+          name: getAxisName('x', { isHorizontal }),
+          id: layer.xAccessor,
+          dimensionType: 'x',
+        });
+      }
+      if (layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({
+            name: getAxisName('y', { isHorizontal }),
+            id: accessor,
+            dimensionType: 'y',
+          });
+        });
+      }
+      if (layer.splitAccessor) {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+            defaultMessage: 'Breakdown',
+          }),
+          dimensionType: 'breakdown',
+          id: layer.splitAccessor,
+        });
+      }
+    }
+    if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
+      layer.accessors.forEach((accessor) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
+            defaultMessage: 'Reference line',
+          }),
+          dimensionType: 'reference_line',
+          id: accessor,
+        });
+      });
+      label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+        defaultMessage: 'Reference lines',
+      });
+      icon = IconChartBarReferenceLine;
+    }
+    if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+      layer.annotations.forEach((annotation) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
+            defaultMessage: 'Annotation',
+          }),
+          dimensionType: 'annotation',
+          id: annotation.id,
+        });
+      });
+      label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+        defaultMessage: 'Annotations',
+      });
+      icon = IconChartBarAnnotations;
+    }
+
+    return {
+      layerId: layer.layerId,
+      layerType: layer.layerType,
+      chartType,
+      icon,
+      label,
+      dimensions,
+    };
+  });
+  return {
+    layers: visualizationLayersInfo,
+  };
+}
+
+function getNotifiableFeatures(
+  state: XYState,
+  dataViews: FramePublicAPI['dataViews']
+): UserMessage[] {
+  const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
+    (layer) => layer.ignoreGlobalFilters
+  );
+  if (!annotationsWithIgnoreFlag.length) {
+    return [];
+  }
+  const visualizationInfo = getVisualizationInfo(state);
+
+  return [
+    {
+      uniqueId: 'ignoring-global-filters-layers',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
+        defaultMessage: 'Layers ignoring global filters',
+      }),
+      longMessage: (
+        <IgnoredGlobalFiltersEntries
+          layers={annotationsWithIgnoreFlag}
+          visualizationInfo={visualizationInfo}
+          dataViews={dataViews}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
+}

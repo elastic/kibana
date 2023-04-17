@@ -23,7 +23,7 @@ import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
-  Props as TableListViewProps,
+  TableListProps as TableListProps,
   UserContentCommonSchema,
 } from '../table_list_view';
 import { TableSortSelect } from './table_sort_select';
@@ -50,7 +50,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
-  deleteItems: TableListViewProps<T>['deleteItems'];
+  deleteItems: TableListProps<T>['deleteItems'];
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;

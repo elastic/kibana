@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Uptime app should show 1 UP monitor', async function () {
       await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
       // dismiss the Management tour if it's present
-      if (await this.testSubjects.exists('syntheticsManagementTourDismiss')) {
+      if (await testSubjects.exists('syntheticsManagementTourDismiss')) {
         await testSubjects.click('syntheticsManagementTourDismiss');
       }
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
