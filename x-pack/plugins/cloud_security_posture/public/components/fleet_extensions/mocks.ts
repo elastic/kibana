@@ -42,12 +42,6 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
                 default: 's3_url',
                 show_user: false,
               },
-              {
-                type: 'text',
-                name: 'cloud_formation_stack_name',
-                default: 'stack_name',
-                show_user: false,
-              },
             ],
           },
         ],

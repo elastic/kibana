@@ -329,18 +329,16 @@ const useCloudFormationTemplate = ({
       onChangeAgentPolicy({
         ...agentPolicy,
         cloud_formation_template_url: '',
-        cloud_formation_stack_name: '',
       });
       return;
     }
-    const { stackName, templateUrl } = getVulnMgmtCloudFormation(packageInfo);
+    const templateUrl = getVulnMgmtCloudFormation(packageInfo);
 
     if (templateUrl === '') return;
     if (agentPolicy?.cloud_formation_template_url === templateUrl) return;
     onChangeAgentPolicy({
       ...agentPolicy,
       cloud_formation_template_url: templateUrl,
-      cloud_formation_stack_name: stackName,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentPolicy?.cloud_formation_template_url, input.policy_template]);

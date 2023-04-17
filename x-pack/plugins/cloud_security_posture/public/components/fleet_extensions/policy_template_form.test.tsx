@@ -162,7 +162,6 @@ describe('<CspPolicyTemplateForm />', () => {
     // make sure CloudFormation template is reset
     expect(onChangeAgentPolicy).toHaveBeenCalledWith({
       cloud_formation_template_url: '',
-      cloud_formation_stack_name: '',
     });
   });
 
@@ -184,7 +183,6 @@ describe('<CspPolicyTemplateForm />', () => {
     // make sure CloudFormation template is reset
     expect(onChangeAgentPolicy).toHaveBeenCalledWith({
       cloud_formation_template_url: '',
-      cloud_formation_stack_name: '',
     });
   });
 
@@ -477,7 +475,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChangeAgentPolicy).toHaveBeenNthCalledWith(1, {
         cloud_formation_template_url: 's3_url',
-        cloud_formation_stack_name: 'stack_name',
       });
     });
   });

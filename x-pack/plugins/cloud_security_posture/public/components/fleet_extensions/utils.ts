@@ -138,38 +138,23 @@ export const hasPolicyTemplateInputs = (
   return policyTemplate.hasOwnProperty('inputs');
 };
 
-interface CloudFormation {
-  templateUrl: string;
-  stackName: string;
-}
-
-const emptyCloudFormation: CloudFormation = {
-  templateUrl: '',
-  stackName: '',
-};
-
-export const getVulnMgmtCloudFormation = (packageInfo: PackageInfo): CloudFormation => {
-  if (!packageInfo.policy_templates) return emptyCloudFormation;
+export const getVulnMgmtCloudFormation = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
 
   const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find((p) => p.name === 'vuln_mgmt');
-  if (!vulnMgmtPolicyTemplate) return emptyCloudFormation;
+  if (!vulnMgmtPolicyTemplate) return '';
 
   const vulnMgmtInputs =
     hasPolicyTemplateInputs(vulnMgmtPolicyTemplate) && vulnMgmtPolicyTemplate.inputs;
 
-  if (!vulnMgmtInputs) return emptyCloudFormation;
-  if (!vulnMgmtInputs[0].vars) return emptyCloudFormation;
+  if (!vulnMgmtInputs) return '';
+  if (!vulnMgmtInputs[0].vars) return '';
 
   const cloudFormationTemplate = vulnMgmtInputs[0].vars.find(
     (v) => v.name === 'cloud_formation_template'
   );
-  const cloudFormationStackName = vulnMgmtInputs[0].vars.find(
-    (v) => v.name === 'cloud_formation_stack_name'
-  );
-  return {
-    templateUrl: String(cloudFormationTemplate?.default || ''),
-    stackName: String(cloudFormationStackName?.default || 'Elastic-Vulnerability-Management'),
-  };
+
+  return String(cloudFormationTemplate?.default || '');
 };
 
 /**
