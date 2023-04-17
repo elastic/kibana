@@ -161,8 +161,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(
             this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, runOnce, output, licenseLevel },
-              { monitors: locMonitors, isEdit, output, endpoint },
+              { monitors: locMonitors, isEdit, endpoint, output, licenseLevel },
               method,
               url
             )
