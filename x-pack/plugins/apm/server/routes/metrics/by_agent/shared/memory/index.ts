@@ -166,7 +166,12 @@ export async function getMemoryChartData({
           memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
         },
         additionalFilters: [
-          { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+          {
+            bool: {
+              should: [cgroupMemoryFilter],
+              minimum_should_match: 1,
+            },
+          },
           ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_cgroup_memory_metrics_charts',
@@ -188,8 +193,12 @@ export async function getMemoryChartData({
             memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
           },
           additionalFilters: [
-            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            {
+              bool: {
+                should: [systemMemoryFilter],
+                minimum_should_match: 1,
+              },
+            },
             ...termQuery(FAAS_ID, serverlessId),
           ],
           operationName: 'get_system_memory_metrics_charts',
