@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { Category } from './use_categorize_request';
 import type { QueryMode } from './category_table';
@@ -62,7 +63,7 @@ export function createFilter(
   selection: Category[],
   mode: QueryMode,
   category?: Category
-) {
+): Filter {
   const selectedRows = category === undefined ? selection : [category];
   return {
     query: {

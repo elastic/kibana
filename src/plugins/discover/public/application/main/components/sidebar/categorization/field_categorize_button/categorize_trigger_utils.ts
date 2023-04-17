@@ -12,6 +12,7 @@ import {
   CategorizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 
 async function getCompatibleActions(
   uiActions: UiActionsStart,
@@ -31,7 +32,7 @@ export function triggerCategorizeActions(
   field: DataViewField,
   originatingApp: string,
   dataView?: DataView,
-  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
+  onAddDSLFilter?: AddDslFilterHandler
 ) {
   if (!dataView) return;
   const triggerOptions: CategorizeFieldContext = {

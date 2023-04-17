@@ -57,6 +57,7 @@ export type {
   UnifiedFieldListPluginSetup,
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
+  AddDslFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
   FieldTypeKnown,

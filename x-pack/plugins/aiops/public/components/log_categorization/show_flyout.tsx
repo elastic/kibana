@@ -19,7 +19,8 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { AiopsPluginStartDeps } from '../../types';
+import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
+import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 
@@ -28,7 +29,7 @@ export async function showCategorizeFlyout(
   dataView: DataView,
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
-  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
+  onAddFilter?: AddDslFilterHandler
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
 

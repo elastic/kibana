@@ -7,6 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginSetup {}
 
@@ -17,6 +18,12 @@ export type AddFieldFilterHandler = (
   field: DataViewField | '_exists_',
   value: unknown,
   type: '+' | '-'
+) => void;
+
+export type AddDslFilterHandler = (
+  field: DataViewField | string,
+  values: Filter,
+  alias?: string
 ) => void;
 
 export enum ExistenceFetchStatus {

@@ -11,6 +11,7 @@ import { EuiButtonProps } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { FieldCategorizeButtonInner } from './field_categorize_button_inner';
 import { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';
 
@@ -24,7 +25,7 @@ export interface FieldCategorizeButtonProps {
   buttonProps?: Partial<EuiButtonProps>;
   wrapInContainer?: (element: React.ReactElement) => React.ReactElement;
   closePopover?: () => void;
-  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
+  onAddDSLFilter?: AddDslFilterHandler;
 }
 
 export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(

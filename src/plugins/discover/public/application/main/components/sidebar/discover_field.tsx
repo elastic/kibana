@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { FieldButton } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
+  type AddDslFilterHandler,
   FieldIcon,
   FieldPopover,
   FieldPopoverHeader,
@@ -231,7 +232,7 @@ export interface DiscoverFieldProps {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
-  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
+  onAddDSLFilter?: AddDslFilterHandler;
   /**
    * Callback to remove a field column from the table
    * @param fieldName

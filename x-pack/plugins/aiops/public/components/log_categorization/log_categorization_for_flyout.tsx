@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
+import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { useData } from '../../hooks/use_data';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -33,7 +34,7 @@ export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
-  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
+  onAddFilter?: AddDslFilterHandler;
   onClose: () => void;
 }
 

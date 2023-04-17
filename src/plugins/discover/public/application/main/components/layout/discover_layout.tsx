@@ -17,13 +17,13 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildEmptyFilter } from '@kbn/es-query';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -156,18 +156,21 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onAddDSLFilter = useCallback(
-    (field: DataViewField | string, values: unknown, alias?: string) => {
+  const onAddDSLFilter: AddDslFilterHandler = useCallback(
+    (field: DataViewField | string, values: Filter, alias?: string) => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const filter = buildEmptyFilter(false, dataView.id);
       if (alias) {
         filter.meta.alias = alias;
       }
-      filter.query = (values as estypes.QueryDslNestedQuery).query;
+      filter.query = values.query;
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+      }
       return filterManager.addFilters([filter]);
     },
-    [filterManager, dataView, dataViews, capabilities]
+    [dataView, dataViews, capabilities, trackUiMetric, filterManager]
   );
 
   const onFieldEdited = useCallback(

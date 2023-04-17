@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -48,7 +49,7 @@ interface Props {
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
-  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
+  onAddFilter?: AddDslFilterHandler;
   onClose?: () => void;
   enableRowActions?: boolean;
 }
