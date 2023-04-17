@@ -37,7 +37,10 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function createTransform(transformId: string, headers: object) {
     const config = generateTransformConfig(transformId, true);
-    await transform.api.createTransformWithHeaders(transformId, config, headers, true);
+    await transform.api.createTransform(transformId, config, {
+      headers,
+      deferValidation: true,
+    });
   }
 
   async function cleanUpTransform(transformId: string) {
@@ -56,6 +59,8 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: getTransformBody } = await transform.api.getTransform(transformId);
       const transformInfo = getTransformBody.transforms[0];
       const expectedApiKeyId = apiKeysForTransformUsers?.get(user)?.id;
+
+      expect(typeof transformInfo.authorization.api_key).to.be('object');
       expect(transformInfo.authorization.api_key.id).to.eql(
         expectedApiKeyId,
         `Expected authorization api_key for ${transformId} to be ${expectedApiKeyId} (got ${JSON.stringify(
@@ -78,32 +83,17 @@ export default ({ getService }: FtrProviderContext) => {
       );
     }
 
-    async function expectAuthorizedTransform(
-      transformId: string,
-      createdByUser: USER,
-      expectedApiKey?: SecurityCreateApiKeyResponse
-    ) {
+    async function expectAuthorizedTransform(transformId: string, createdByUser: USER) {
       const { body: getTransformBody } = await transform.api.getTransform(transformId);
       const transformInfo = getTransformBody.transforms[0];
 
-      if (expectedApiKey) {
-        const expectedApiKeyId = expectedApiKey?.id;
-
-        expect(transformInfo.authorization.api_key.id).to.eql(
-          expectedApiKeyId,
-          `Expected authorization api_key for ${transformId} to be ${expectedApiKeyId} (got ${JSON.stringify(
-            transformInfo.authorization.api_key
-          )})`
-        );
-      } else {
-        const expectedApiKeyId = apiKeysForTransformUsers?.get(createdByUser)?.id;
-        expect(transformInfo.authorization.api_key.id).to.not.eql(
-          expectedApiKeyId,
-          `Expected authorization api_key for ${transformId} to not be ${expectedApiKeyId} (got ${JSON.stringify(
-            transformInfo.authorization.api_key
-          )})`
-        );
-      }
+      const expectedApiKeyId = apiKeysForTransformUsers?.get(createdByUser)?.id;
+      expect(transformInfo.authorization.api_key.id).to.not.eql(
+        expectedApiKeyId,
+        `Expected authorization api_key for ${transformId} to not be ${expectedApiKeyId} (got ${JSON.stringify(
+          transformInfo.authorization.api_key
+        )})`
+      );
       const stats = await transform.api.getTransformStats(transformId);
       expect(stats.health.status).to.eql(
         'green',
