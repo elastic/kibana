@@ -25,22 +25,22 @@ interface Reference {
   name: string;
 }
 
-export interface CreateOptions {
+interface CreateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-export interface SearchOptions {
+interface SearchOptions {
   /** Flag to indicate to only search the text on the "title" field */
   onlyTitle?: boolean;
 }
 
-export interface UpdateOptions {
+interface UpdateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-export type GetResultSO<Item extends object> = GetResult<
+type GetResultSO<Item extends object> = GetResult<
   Item,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
@@ -49,6 +49,9 @@ export type GetResultSO<Item extends object> = GetResult<
   }
 >;
 
+/**
+ * Saved object with metadata
+ */
 export interface SOWithMetadata<Attributes extends object> {
   id: string;
   type: string;
@@ -67,26 +70,81 @@ export interface SOWithMetadata<Attributes extends object> {
   originId?: string;
 }
 
+type PartialItem<Attributes extends object> = Omit<
+  SOWithMetadata<Attributes>,
+  'attributes' | 'references'
+> & {
+  attributes: Partial<Attributes>;
+  references: Reference[] | undefined;
+};
+
+/**
+ * Types used by content management storage
+ * @argument ContentType - content management type. assumed to be the same as saved object type
+ * @argument Attributes - attributes of the saved object
+ */
 export interface ContentManagementCrudTypes<ContentType extends string, Attributes extends object> {
+  /**
+   * Complete saved object
+   */
   Item: SOWithMetadata<Attributes>;
-  PartialItem: Omit<SOWithMetadata<Attributes>, 'attributes' | 'references'> & {
-    attributes: Partial<Attributes>;
-    references: Reference[] | undefined;
-  };
-
+  /**
+   * Partial saved object, used as output for update
+   */
+  PartialItem: PartialItem<Attributes>;
+  /**
+   * Get item params
+   */
   GetIn: GetIn<ContentType>;
+  /**
+   * Get item result
+   */
   GetOut: GetResultSO<SOWithMetadata<Attributes>>;
-
+  /**
+   * Create item params
+   */
   CreateIn: CreateIn<ContentType, Attributes, CreateOptions>;
+  /**
+   * Create item result
+   */
   CreateOut: CreateResult<SOWithMetadata<Attributes>>;
+  /**
+   * Create options
+   */
+  CreateOptions: CreateOptions;
 
+  /**
+   * Search item params
+   */
   SearchIn: SearchIn<ContentType, SearchOptions>;
+  /**
+   * Search item result
+   */
   SearchOut: SearchResult<SOWithMetadata<Attributes>>;
+  /**
+   * Search options
+   */
+  SearchOptions: SearchOptions;
 
+  /**
+   * Update item params
+   */
   UpdateIn: UpdateIn<ContentType, Attributes, UpdateOptions>;
-  UpdateOut: UpdateResult<SOWithMetadata<Attributes>>;
+  /**
+   * Update item result
+   */
+  UpdateOut: UpdateResult<PartialItem<Attributes>>;
+  /**
+   * Update options
+   */
+  UpdateOptions: UpdateOptions;
 
+  /**
+   * Delete item params
+   */
   DeleteIn: DeleteIn<ContentType>;
-
+  /**
+   * Delete item result
+   */
   DeleteOut: DeleteResult;
 }

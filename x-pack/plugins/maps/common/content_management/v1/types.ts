@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ContentManagementCrudTypes, SearchOptions } from '@kbn/content-management-utils';
-export type { CreateOptions, UpdateOptions } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
 export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
@@ -32,11 +31,13 @@ export type MapGetOut = MapCrudTypes['GetOut'];
 
 export type MapCreateIn = MapCrudTypes['CreateIn'];
 export type MapCreateOut = MapCrudTypes['CreateOut'];
+export type MapCreateOptions = MapCrudTypes['CreateOptions'];
 
 // ----------- UPDATE --------------
 
 export type MapUpdateIn = MapCrudTypes['UpdateIn'];
 export type MapUpdateOut = MapCrudTypes['UpdateOut'];
+export type MapUpdateOptions = MapCrudTypes['UpdateOptions'];
 
 // ----------- DELETE --------------
 
@@ -47,4 +48,4 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
-export type MapSearchOptions = SearchOptions;
+export type MapSearchOptions = MapCrudTypes['SearchOptions'];
