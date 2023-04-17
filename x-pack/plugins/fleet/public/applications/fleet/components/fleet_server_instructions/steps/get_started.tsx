@@ -104,7 +104,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                 content={
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.getStartedInstructionsPortTooltips"
-                    defaultMessage="This can be changed during Fleet Server installation."
+                    defaultMessage="This can only be set during Fleet Server installation."
                   />
                 }
                 position="right"
