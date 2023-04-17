@@ -28,7 +28,7 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   },
   producer: 'alerts',
   validate: {
-    params: schema.object({}),
+    params: schema.any(),
   },
 };
 

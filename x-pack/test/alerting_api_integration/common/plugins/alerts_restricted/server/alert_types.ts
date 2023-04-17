@@ -27,7 +27,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -42,7 +42,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   alerting.registerType(noopRestrictedAlertType);

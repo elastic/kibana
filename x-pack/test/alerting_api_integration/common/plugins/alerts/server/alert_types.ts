@@ -196,7 +196,7 @@ function getCumulativeFiringAlertType() {
       };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   return result;
@@ -870,7 +870,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: { validate: (params) => params },
+      params: schema.any(),
     },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -885,7 +885,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -903,7 +903,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -921,7 +921,7 @@ export function defineAlertTypes(
       return { state: {} };
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -941,7 +941,7 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
   function getLongRunningRuleType() {
@@ -969,7 +969,7 @@ export function defineAlertTypes(
         return { state: {} };
       },
       validate: {
-        params: schema.object({}),
+        params: schema.any(),
       },
     };
     return result;
@@ -990,7 +990,7 @@ export function defineAlertTypes(
     },
     producer: 'alertsFixture',
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
 
