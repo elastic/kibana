@@ -14,6 +14,7 @@ import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 import { HOST_OS_VERSION } from '../../../../../../common/es_fields/apm';
 
 function OSVersionTab({
+  agentName,
   environment,
   kuery,
   start,
@@ -22,7 +23,6 @@ function OSVersionTab({
   offset,
 }: TabContentProps) {
   const {
-    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,

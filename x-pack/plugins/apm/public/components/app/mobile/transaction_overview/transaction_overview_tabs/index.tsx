@@ -14,6 +14,7 @@ import { appVersionTab } from './app_version_tab';
 import { devicesTab } from './devices_tab';
 
 export interface TabContentProps {
+  agentName?: string;
   environment: string;
   start: string;
   end: string;
@@ -26,6 +27,7 @@ export interface TabContentProps {
 const tabs = [transactionsTab, appVersionTab, osVersionTab, devicesTab];
 
 export function TransactionOverviewTabs({
+  agentName,
   environment,
   start,
   end,
@@ -61,6 +63,7 @@ export function TransactionOverviewTabs({
       <EuiSpacer size="m" />
       <TabContent
         {...{
+          agentName,
           environment,
           start,
           end,

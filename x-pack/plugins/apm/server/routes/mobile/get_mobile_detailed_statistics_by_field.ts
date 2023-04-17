@@ -72,7 +72,7 @@ async function getMobileDetailedStatisticsByField({
   });
 
   const response = await apmEventClient.search(
-    `get_mobile_detailed_statistics_by_${field}`,
+    `get_mobile_detailed_statistics_by_field`,
     {
       apm: {
         events: [ProcessorEvent.transaction],

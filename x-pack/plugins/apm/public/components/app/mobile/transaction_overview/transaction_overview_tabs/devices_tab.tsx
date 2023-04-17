@@ -14,6 +14,7 @@ import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 import { DEVICE_MODEL_IDENTIFIER } from '../../../../../../common/es_fields/apm';
 
 function DevicesTab({
+  agentName,
   environment,
   kuery,
   start,
@@ -22,7 +23,6 @@ function DevicesTab({
   offset,
 }: TabContentProps) {
   const {
-    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,

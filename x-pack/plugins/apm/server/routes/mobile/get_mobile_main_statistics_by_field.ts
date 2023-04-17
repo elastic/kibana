@@ -56,7 +56,7 @@ export async function getMobileMainStatisticsByField({
   field,
 }: Props) {
   const response = await apmEventClient.search(
-    `get_mobile_main_statistics_by_${field}`,
+    `get_mobile_main_statistics_by_field`,
     {
       apm: {
         events: [
@@ -67,7 +67,7 @@ export async function getMobileMainStatisticsByField({
       },
       body: {
         track_total_hits: false,
-        size: 1,
+        size: 0,
         query: {
           bool: {
             filter: [
@@ -84,7 +84,6 @@ export async function getMobileMainStatisticsByField({
             terms: {
               field,
               size: 1000,
-              order: { _count: 'desc' },
             },
             aggs: {
               latency: {
@@ -116,7 +115,6 @@ export async function getMobileMainStatisticsByField({
     }
   );
 
-  const agentName = response.hits.hits[0]?._source.agent.name;
   const mainStatistics =
     response.aggregations?.main_statistics.buckets.map((bucket) => {
       return {
@@ -135,5 +133,5 @@ export async function getMobileMainStatisticsByField({
       };
     }) ?? [];
 
-  return { mainStatistics, agentName };
+  return { mainStatistics };
 }

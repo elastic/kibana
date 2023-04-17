@@ -67,7 +67,6 @@ export function useMobileStatisticsFetcher({
               requestId: uuidv4(),
               mainStatistics: response.mainStatistics,
               totalItems: response.mainStatistics.length,
-              agentName: response.agentName,
             };
           });
         }
@@ -75,7 +74,7 @@ export function useMobileStatisticsFetcher({
       [environment, start, end, kuery, serviceName, field]
     );
 
-  const { mainStatistics, requestId, totalItems, agentName } = data;
+  const { mainStatistics, requestId, totalItems } = data;
 
   const {
     data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
@@ -114,7 +113,6 @@ export function useMobileStatisticsFetcher({
   );
 
   return {
-    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,

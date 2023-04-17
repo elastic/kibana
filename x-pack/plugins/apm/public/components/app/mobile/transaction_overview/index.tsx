@@ -51,7 +51,7 @@ export function MobileTransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, agentName } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -90,6 +90,7 @@ export function MobileTransactionOverview() {
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionOverviewTabs
+          agentName={agentName}
           environment={environment}
           kuery={kueryWithMobileFilters}
           start={start}
