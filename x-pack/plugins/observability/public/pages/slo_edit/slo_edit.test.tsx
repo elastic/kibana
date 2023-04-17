@@ -9,7 +9,7 @@ import React from 'react';
 import Router from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { waitFor, fireEvent, screen } from '@testing-library/dom';
-import { act, cleanup } from '@testing-library/react';
+import { cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { render } from '../../utils/test_helper';
