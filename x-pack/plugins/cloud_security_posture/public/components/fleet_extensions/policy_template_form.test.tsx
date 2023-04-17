@@ -8,8 +8,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
-import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  getMockPackageInfoVulnMgmtAWS,
+  getMockPolicyAWS,
+  getMockPolicyEKS,
+  getMockPolicyK8s,
+  getMockPolicyVulnMgmtAWS,
+} from './mocks';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
@@ -23,21 +34,28 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+const onChange = jest.fn();
+const onChangeAgentPolicy = jest.fn();
+
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
+    onChange.mockClear();
+    onChangeAgentPolicy.mockClear();
   });
-
-  const onChange = jest.fn();
 
   const WrappedComponent = ({
     newPolicy,
     edit = false,
+    agentPolicy,
+    packageInfo = {} as PackageInfo,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
   }) => (
     <TestProvider>
       {edit && (
@@ -45,24 +63,24 @@ describe('<CspPolicyTemplateForm />', () => {
           policy={newPolicy as PackagePolicy}
           newPolicy={newPolicy}
           onChange={onChange}
-          packageInfo={{} as PackageInfo}
+          packageInfo={packageInfo}
           isEditPage={true}
+          onChangeAgentPolicy={onChangeAgentPolicy}
+          agentPolicy={agentPolicy}
         />
       )}
       {!edit && (
         <CspPolicyTemplateForm
           newPolicy={newPolicy}
           onChange={onChange}
-          packageInfo={{} as PackageInfo}
+          packageInfo={packageInfo}
           isEditPage={false}
+          onChangeAgentPolicy={onChangeAgentPolicy}
+          agentPolicy={agentPolicy}
         />
       )}
     </TestProvider>
   );
-
-  beforeEach(() => {
-    onChange.mockClear();
-  });
 
   it('updates package policy namespace to default when it changes', () => {
     const policy = getMockPolicyK8s();
@@ -140,6 +158,12 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: eksPolicy,
     });
+
+    // make sure CloudFormation template is reset
+    expect(onChangeAgentPolicy).toHaveBeenCalledWith({
+      cloud_formation_template_url: '',
+      cloud_formation_stack_name: '',
+    });
   });
 
   it('renders CSPM input selector', () => {
@@ -156,6 +180,12 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option2).toBeDisabled();
     expect(option3).toBeDisabled();
     expect(option1).toBeChecked();
+
+    // make sure CloudFormation template is reset
+    expect(onChangeAgentPolicy).toHaveBeenCalledWith({
+      cloud_formation_template_url: '',
+      cloud_formation_stack_name: '',
+    });
   });
 
   it('renders disabled KSPM input when editing', () => {
@@ -438,4 +468,17 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
   }
+
+  describe('Vuln Mgmt', () => {
+    it('Update Agent Policy CloudFormation template and stack name from vars', () => {
+      const policy = getMockPolicyVulnMgmtAWS();
+      const packageInfo = getMockPackageInfoVulnMgmtAWS();
+      render(<WrappedComponent newPolicy={policy} packageInfo={packageInfo} />);
+
+      expect(onChangeAgentPolicy).toHaveBeenNthCalledWith(1, {
+        cloud_formation_template_url: 's3_url',
+        cloud_formation_stack_name: 'stack_name',
+      });
+    });
+  });
 });
