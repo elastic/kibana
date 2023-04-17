@@ -12,6 +12,7 @@ import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
 import { uiMetricService } from './application/lib/ui_metric';
+import { UpgradeAssistantManagementLocatorDefinition } from './locator';
 import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
 
 export class UpgradeAssistantUIPlugin
@@ -89,6 +90,8 @@ export class UpgradeAssistantUIPlugin
           };
         },
       });
+
+      share.url.locators.create(new UpgradeAssistantManagementLocatorDefinition());
     }
   }
 
