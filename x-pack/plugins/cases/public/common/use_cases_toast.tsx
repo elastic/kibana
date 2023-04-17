@@ -172,6 +172,13 @@ export const useCasesToast = () => {
     showDangerToast: (title: string) => {
       toasts.addDanger({ title, className: 'eui-textBreakWord' });
     },
+    showInfoToast: (title: string, text?: string) => {
+      toasts.addInfo({
+        title,
+        text,
+        className: 'eui-textBreakWord',
+      });
+    },
   };
 };
 

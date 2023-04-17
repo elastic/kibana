@@ -98,6 +98,7 @@ export interface WorkspacePanelProps {
 interface WorkspaceState {
   expandError: boolean;
   expressionToRender: string | null | undefined;
+  errors: UserMessage[];
 }
 
 const dropProps = {
@@ -165,6 +166,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const [localState, setLocalState] = useState<WorkspaceState>({
     expandError: false,
     expressionToRender: undefined,
+    errors: [],
   });
 
   const initialRenderComplete = useRef<boolean>();
@@ -278,15 +280,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
-    severity: 'error',
-  });
+  const workspaceErrors = useCallback(() => {
+    return getUserMessages(['visualization', 'visualizationInEditor'], {
+      severity: 'error',
+    });
+  }, [getUserMessages]);
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     // shouldn't build expression if there is any type of error other than an expression build error
     // (in which case we try again every time because the config might have changed)
-    if (workspaceErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+    if (workspaceErrors().every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -361,9 +365,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
+        errors: workspaceErrors(),
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 
@@ -555,7 +560,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
-        errors={workspaceErrors}
+        errors={localState.errors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
