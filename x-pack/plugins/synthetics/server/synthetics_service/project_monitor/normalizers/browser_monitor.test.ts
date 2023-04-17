@@ -13,7 +13,11 @@ import {
   ProjectMonitor,
   PrivateLocation,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
@@ -255,6 +259,7 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING],
           },
           unsupportedKeys: [],
           errors: [],

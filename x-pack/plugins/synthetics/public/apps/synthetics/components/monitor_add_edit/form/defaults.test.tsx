@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ConfigKey, DataStream, FormMonitorType, SyntheticsMonitor } from '../types';
-import { DEFAULT_FIELDS } from '../constants';
+import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 
 describe('defaults', () => {
@@ -59,7 +59,7 @@ describe('defaults', () => {
         upload: '3',
       },
       id: 'default',
-      label: 'default',
+      label: 'Default',
     },
     timeout: '16',
     type: 'browser',
@@ -118,12 +118,7 @@ describe('defaults', () => {
       'ssl.verification_mode': 'full',
       synthetics_args: [],
       tags: [],
-      throttling: {
-        download: 5,
-        upload: 3,
-        latency: 20,
-        label: 'Test',
-      },
+      throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
       timeout: '16',
       type: 'browser',
       'url.port': null,

@@ -6,6 +6,7 @@
  */
 import { ConfigKey, DataStream } from '../runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
+import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants/monitor_defaults';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {
@@ -1145,12 +1146,7 @@ const browserConfig: any = {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  throttling: {
-    download: 5,
-    label: 'default',
-    latency: 20,
-    upload: 3,
-  },
+  throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
   'ssl.certificate_authorities': '',
   'ssl.certificate': '',
   'ssl.key': '',
