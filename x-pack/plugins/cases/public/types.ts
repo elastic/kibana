@@ -17,6 +17,7 @@ import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
@@ -59,6 +60,7 @@ export interface CasesPluginSetup {
   security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface CasesPluginStart {

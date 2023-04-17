@@ -28,6 +28,7 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import { RulesManagementLocatorDefinition } from './locators';
 
 /**
  * @public
@@ -92,6 +93,8 @@ export class CasesUiPlugin
         });
       },
     });
+
+    plugins.share.url.locators.create(new RulesManagementLocatorDefinition());
 
     return {
       attachmentFramework: {

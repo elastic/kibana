@@ -173,3 +173,5 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
 };
+
+export const RULES_MANAGEMENT_LOCATOR = 'RULES_MANAGEMENT_LOCATOR';
