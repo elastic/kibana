@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export interface CSVExportType {}
+export interface CSVExportType {
+  locator: string;
+}
 
-export interface PNGExportType {}
+export interface PNGExportType {
+  locator: string;
+}
 
-export interface PDFExportType {}
+export interface PDFExportType {
+  locator: string;
+}
 
 // ExportType in export_registry.ts should be the umbrella type for each of these

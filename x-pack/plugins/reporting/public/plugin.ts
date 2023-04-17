@@ -42,6 +42,7 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
+import { ExportTypesRegistry } from './export_registry';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -77,6 +78,7 @@ export interface ReportingPublicPluginSetupDendencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  exportTypeRegistry: ExportTypesRegistry;
 }
 
 export interface ReportingPublicPluginStartDendencies {
@@ -112,6 +114,7 @@ export class ReportingPublicPlugin
   });
   private config: ClientConfigType;
   private contract?: ReportingSetup;
+  private exportTypeRegistry = new ExportTypesRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -154,6 +157,8 @@ export class ReportingPublicPlugin
     const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
+
+    this.exportTypeRegistry.register(apiClient.list(await apiClient.total()));
 
     home.featureCatalogue.register({
       id: 'reporting',

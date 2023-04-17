@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 import type { Job } from './lib/job';
 
 // these types go into the registry and need to include the following properties
-interface ExportType {
+export interface ExportType {
   // some sort of locator param
   // this is used in report_listing but might not be needed for the export type registry
   ilmLocator?: string; // urlService.locators.get(‘ILM_LOCATOR_ID’); // urlService is a prop
@@ -20,13 +20,20 @@ interface ExportType {
 
 // this is created by the reporting plugin from the setup and registerExportType()
 export class ExportTypesRegistry {
-  private exportType: string;
   // what data structure should the registry be
   private exportTypeRegistry: ExportType[] = [];
 
-  public registerExportType(exportType) {
+  public register(et: ExportType) {
     // validation of export type
+    this.validateExportType(et);
   }
-  validateExportType(exportType) {}
-  public getExportType() {}
+  public getExportType(et: ExportType) {
+    this.validateExportType(et);
+  }
+
+  validateExportType(et: ExportType) {}
+
+  public getExportTypeRegistry() {
+    return this.exportTypeRegistry;
+  }
 }

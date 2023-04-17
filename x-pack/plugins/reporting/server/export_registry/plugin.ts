@@ -5,32 +5,33 @@
  * 2.0.
  */
 
-// import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import type { ReportingPublicPluginSetupDendencies } from '../../public/plugin';
-// import { ExportTypesRegistry } from './export_registry';
+import type { ExportType } from '../../public/export_registry';
 
 interface ExportTypesPluginSetupContract {
   // depends on the Reporting Plugin x-pack/plugins/reporting/public/plugin.ts
   getReportingPlugin(): ReportingPublicPluginSetupDendencies;
 }
 
-// interface ExportTypesPluginStartContract {}
+interface ExportTypesPluginStartContract {}
 
-// export class ExportTypesPlugin
-//   implements Plugin<ExportTypesPluginSetupContract, ExportTypesPluginStartContract>
-// {
-//   private exportType?: string;
-//   // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
-//   private exportTypeRegistry: ExportTypesRegistry = new ExportTypesRegistry();
+export class ExportTypesPlugin
+  implements Plugin<ExportTypesPluginSetupContract, ExportTypesPluginStartContract>
+{
+  private type: any;
+  private exportType?: ExportType;
+  // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
 
-//   private getExportType() {
-//     if (!this.exportType) throw new Error('');
-//     return this.getExportType;
-//   }
+  private getExportType() {
+    if (!this.exportType) throw new Error('');
+    return this.getExportType;
+  }
 
-//   public setup(core: CoreSetup<object, unknown>, plugins: object) {
-//     const reporting = this.getExportType();
-//     return this.exportTypeRegistry;
-//   }
-//   public start() {}
-// }
+  public setup(core: CoreSetup<object, unknown>, plugins: object) {
+    this.getExportType(this.type);
+  }
+  public start() {
+    return this.exportType;
+  }
+}
