@@ -41,6 +41,8 @@ export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
+export * from './rrule_type';
+export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 
@@ -57,3 +59,4 @@ export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const ALERTS_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
+export const ENABLE_MAINTENANCE_WINDOWS = false;
