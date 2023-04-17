@@ -42,6 +42,7 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
+import { ReportingManagementLocatorDefinition } from './locators';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -200,6 +201,8 @@ export class ReportingPublicPlugin
         };
       },
     });
+
+    share.url.locators.create(new ReportingManagementLocatorDefinition());
 
     core.application.register({
       id: 'reportingRedirect',

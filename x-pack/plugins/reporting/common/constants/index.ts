@@ -79,6 +79,7 @@ export const API_USAGE_COUNTER_TYPE = 'reportingApi';
 export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
 // Management UI route
+export const REPORTING_MANAGEMENT_LOCATOR = 'REPORTING_MANAGEMENT_LOCATOR';
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
