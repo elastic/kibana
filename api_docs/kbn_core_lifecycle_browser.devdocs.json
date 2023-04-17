@@ -682,10 +682,6 @@
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/kibana_services.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },

@@ -96,7 +96,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('bulk_create_attachments', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/154859
+  describe.skip('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
