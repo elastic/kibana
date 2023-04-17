@@ -154,13 +154,26 @@ export const TestPipeline: React.FC = () => {
                 {fieldMappings && (
                   <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
                     {`[{"_index":"index","_id":"id","_source":{${fieldMappings
-                      .map((fieldMapping) => `"${fieldMapping.sourceField}": "REPLACE ME"`)
+                      .map(
+                        (fieldMapping) =>
+                          `"${fieldMapping.sourceField}": "${i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
+                            {
+                              defaultMessage: 'REPLACE ME',
+                            }
+                          )}"`
+                      )
                       .join(', ')}}}]`}
                   </EuiCodeBlock>
                 )}
                 {sourceField && (
                   <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
-                    {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"REPLACE ME"}}]`}
+                    {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"${i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
+                      {
+                        defaultMessage: 'REPLACE ME',
+                      }
+                    )}"}}]`}
                   </EuiCodeBlock>
                 )}
               </EuiFlexItem>
