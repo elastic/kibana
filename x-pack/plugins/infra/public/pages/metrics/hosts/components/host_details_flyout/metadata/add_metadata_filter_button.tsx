@@ -21,6 +21,13 @@ interface AddMetadataFilterButtonProps {
   };
 }
 
+const filterAddedToastTitle = i18n.translate(
+  'xpack.infra.hostsViewPage.flyout.metadata.filterAdded',
+  {
+    defaultMessage: 'Filter was added',
+  }
+);
+
 export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) => {
   const { dataView } = useMetricsDataViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
@@ -32,6 +39,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
       data: {
         query: { filterManager: filterManagerService },
       },
+      notifications: { toasts: toastsService },
     },
   } = useKibanaContextForPlugin();
 
@@ -46,7 +54,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     return (
       <span>
         <EuiToolTip
-          content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
+          content={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.setFilterTooltip', {
             defaultMessage: 'Remove filter',
           })}
         >
@@ -54,9 +62,12 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             color="primary"
             size="s"
             iconType="filter"
-            aria-label={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel', {
-              defaultMessage: 'Filter',
-            })}
+            aria-label={i18n.translate(
+              'xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel',
+              {
+                defaultMessage: 'Filter',
+              }
+            )}
             onClick={() => filterManagerService.removeFilter(existingFilter)}
           />
         </EuiToolTip>
@@ -67,7 +78,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   return (
     <span className="euiTableCellContent__hoverItem expandedItemActions__completelyHide">
       <EuiToolTip
-        content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
+        content={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.setFilterTooltip', {
           defaultMessage: 'View event with filter',
         })}
       >
@@ -75,7 +86,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           color="text"
           size="s"
           iconType="filter"
-          aria-label={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel', {
+          aria-label={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel', {
             defaultMessage: 'Add Filter',
           })}
           onClick={() => {
@@ -87,6 +98,10 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             });
             if (newFilter) {
               filterManagerService.addFilters(newFilter);
+              toastsService.addSuccess({
+                title: filterAddedToastTitle,
+                toastLifeTimeMs: 10000,
+              });
             }
           }}
         />
