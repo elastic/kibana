@@ -67,7 +67,7 @@ import {
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
@@ -649,19 +649,47 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     dispatch(setScrollToPanelId(id));
   };
 
-  public scrollToPanel = (panelRef: HTMLDivElement | null) => {
+  public scrollToPanel = async (id: string) => {
+    const panelRef = document.getElementById(`panel-${id}`);
+
     if (!panelRef) {
+      setTimeout(() => {
+        this.scrollToPanel(id);
+      }, 50);
       return;
     }
 
-    panelRef.scrollIntoView({ block: 'center' });
+    const { gridData } = this.getPanelState(id) as DashboardPanelState;
+
+    const controlsOffset = document.getElementsByClassName('dshDashboardViewport-controls')[0]
+      .scrollHeight;
+
+    const topNavOffset = document
+      .getElementsByClassName('dashboardViewport')[0]
+      .getBoundingClientRect().top;
+
+    const viewportHeight = window.innerHeight - topNavOffset;
+
+    // Estimated scroll position
+    const panelY = gridData.y * DASHBOARD_GRID_HEIGHT;
+    const panelBottom =
+      (gridData.y + gridData.h) * DASHBOARD_GRID_HEIGHT + topNavOffset + controlsOffset;
+
+    if (panelBottom > viewportHeight / 2) {
+      // First scroll to the estimated scroll position calculated from grid data
+      window.scrollTo(0, panelY);
+      // Then fire a second scroll after giving the dashboard enough time to load
+      // to allow the panel element to scroll itself into view
+      setTimeout(() => {
+        panelRef.scrollIntoView({ block: 'center' });
+      }, 500);
+    }
+
     this.setScrollToPanelId(undefined);
   };
 
   public scrollToTop = () => {
-    document
-      .getElementsByClassName(`controlGroup`)[0]
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementsByClassName(`controlGroup`)[0]?.scrollIntoView({ behavior: 'smooth' });
   };
 
   public setHighlightPanelId = (id: string | undefined) => {
@@ -673,7 +701,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     dispatch(setHighlightPanelId(id));
   };
 
-  public highlightPanel = async (panelRef: HTMLDivElement) => {
+  public highlightPanel = (id: string) => {
+    const panelRef = document.getElementById(`panel-${id}`);
+
     this.setHighlightPanelId(undefined);
     if (panelRef) {
       panelRef.classList.add('dshDashboardGrid__item--highlighted');

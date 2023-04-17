@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 
 import {
@@ -59,7 +59,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       useDashboardContainerContext();
     const scrollToPanelId = select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = select((state) => state.componentState.highlightPanelId);
-
+    const theme = useEuiTheme();
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const classes = classNames({
@@ -70,15 +70,13 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     });
 
     useLayoutEffect(() => {
-      if (ref) {
-        if (scrollToPanelId === id) {
-          container.scrollToPanel(ref.current);
-        }
-        if (highlightPanelId === id) {
-          container.highlightPanel(ref.current);
-        }
+      if (scrollToPanelId === id) {
+        container.scrollToPanel(id);
       }
-    }, [id, ref, container, scrollToPanelId, highlightPanelId]);
+      if (highlightPanelId === id) {
+        container.highlightPanel(id);
+      }
+    }, [id, container, scrollToPanelId, highlightPanelId]);
 
     return (
       <div
