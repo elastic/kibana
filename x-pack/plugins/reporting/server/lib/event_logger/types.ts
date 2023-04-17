@@ -6,7 +6,7 @@
  */
 
 import { LogMeta } from '@kbn/core/server';
-import type { TaskRunMetrics } from '../../../common/types';
+import { TaskRunMetrics } from '@kbn/reporting-common';
 import { ActionType } from '.';
 
 export interface ReportingAction<A extends ActionType> extends LogMeta {

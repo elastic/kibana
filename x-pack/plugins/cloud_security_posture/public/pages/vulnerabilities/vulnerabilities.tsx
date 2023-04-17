@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
@@ -29,6 +29,9 @@ import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
 import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
+import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -39,6 +42,9 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
 
 export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const getSetupStatus = useCspSetupStatusApi();
+
+  if (getSetupStatus?.data?.vuln_mgmt.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -74,6 +80,21 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     enabled: !queryError,
   });
 
+  const [isVulnerabilityDetailFlyoutVisible, setIsVulnerabilityDetailFlyoutVisible] =
+    useState(false);
+
+  const [vulnerability, setVulnerability] = useState<VulnerabilityRecord>();
+
+  const showFlyout = (vulnerabilityRecord: VulnerabilityRecord) => {
+    setIsVulnerabilityDetailFlyoutVisible(true);
+    setVulnerability(vulnerabilityRecord);
+  };
+
+  const hideFlyout = () => {
+    setIsVulnerabilityDetailFlyoutVisible(false);
+    setVulnerability(undefined);
+  };
+
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
       const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
@@ -87,7 +108,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              alert(`Flyout id ${vulnerabilityRow.vulnerability.id}`);
+              showFlyout(vulnerabilityRow);
             }}
           />
         );
@@ -176,64 +197,73 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           }
         />
       ) : (
-        <EuiDataGrid
-          css={css`
-            & .euiDataGridHeaderCell__icon {
-              display: none;
-            }
-            & .euiDataGrid__controls {
-              border-bottom: none;
-            }
-            & .euiButtonIcon {
-              color: ${euiTheme.colors.primary};
-            }
-            & .euiDataGridRowCell {
-              font-size: ${euiTheme.size.m};
-            }
-          `}
-          aria-label="Data grid styling demo"
-          columns={columns}
-          columnVisibility={{
-            visibleColumns: columns.map(({ id }) => id),
-            setVisibleColumns: () => {},
-          }}
-          rowCount={data?.total}
-          toolbarVisibility={{
-            showColumnSelector: false,
-            showDisplaySelector: false,
-            showKeyboardShortcuts: false,
-            additionalControls: {
-              left: {
-                prepend: (
-                  <EuiButtonEmpty size="xs" color="text">
-                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                      defaultMessage:
-                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                      values: { total: data?.total },
-                    })}
-                  </EuiButtonEmpty>
-                ),
+        <>
+          <EuiDataGrid
+            css={css`
+              & .euiDataGridHeaderCell__icon {
+                display: none;
+              }
+              & .euiDataGrid__controls {
+                border-bottom: none;
+              }
+              & .euiButtonIcon {
+                color: ${euiTheme.colors.primary};
+              }
+              & .euiDataGridRowCell {
+                font-size: ${euiTheme.size.m};
+              }
+            `}
+            aria-label="Data grid styling demo"
+            columns={columns}
+            columnVisibility={{
+              visibleColumns: columns.map(({ id }) => id),
+              setVisibleColumns: () => {},
+            }}
+            rowCount={data?.total}
+            toolbarVisibility={{
+              showColumnSelector: false,
+              showDisplaySelector: false,
+              showKeyboardShortcuts: false,
+              additionalControls: {
+                left: {
+                  prepend: (
+                    <EuiButtonEmpty size="xs" color="text">
+                      {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                        defaultMessage:
+                          '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                        values: { total: data?.total },
+                      })}
+                    </EuiButtonEmpty>
+                  ),
+                },
               },
-            },
-          }}
-          gridStyle={{
-            border: 'horizontal',
-            cellPadding: 'l',
-            stripes: false,
-            rowHover: 'none',
-            header: 'underline',
-          }}
-          renderCellValue={renderCellValue}
-          inMemory={{ level: 'sorting' }}
-          sorting={{ columns: sort, onSort }}
-          pagination={{
-            pageIndex,
-            pageSize,
-            pageSizeOptions: [10, 25, 100],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-        />
+            }}
+            gridStyle={{
+              border: 'horizontal',
+              cellPadding: 'l',
+              stripes: false,
+              rowHover: 'none',
+              header: 'underline',
+            }}
+            renderCellValue={renderCellValue}
+            inMemory={{ level: 'sorting' }}
+            sorting={{ columns: sort, onSort }}
+            pagination={{
+              pageIndex,
+              pageSize,
+              pageSizeOptions: [10, 25, 100],
+              onChangeItemsPerPage,
+              onChangePage,
+            }}
+          />
+          {/* Todo: Add Pagination */}
+          {isVulnerabilityDetailFlyoutVisible && !!vulnerability && (
+            <VulnerabilityFindingFlyout
+              vulnerabilityRecord={vulnerability}
+              closeFlyout={hideFlyout}
+            />
+          )}
+        </>
       )}
     </>
   );

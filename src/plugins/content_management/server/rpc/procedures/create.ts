@@ -8,31 +8,21 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { CreateIn } from '../../../common';
-import type { StorageContext } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validateRequestVersion } from './utils';
+import { getStorageContext } from './utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
-  fn: async (ctx, { contentTypeId, version: _version, data, options }) => {
-    const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const version = validateRequestVersion(_version, contentDefinition.version.latest);
+  fn: async (ctx, { contentTypeId, version, data, options }) => {
+    const storageContext = getStorageContext({
+      contentTypeId,
+      version,
+      ctx,
+    });
 
-    // Execute CRUD
     const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    const storageContext: StorageContext = {
-      requestHandlerContext: ctx.requestHandlerContext,
-      version: {
-        request: version,
-        latest: contentDefinition.version.latest,
-      },
-      utils: {
-        getTransforms: ctx.getTransformsFactory(contentTypeId),
-      },
-    };
-    const result = await crudInstance.create(storageContext, data, options);
 
-    return result;
+    return crudInstance.create(storageContext, data, options);
   },
 };
