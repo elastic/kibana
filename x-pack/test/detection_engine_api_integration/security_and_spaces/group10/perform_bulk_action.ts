@@ -33,6 +33,7 @@ import {
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
+  waitForRuleFailure,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,6 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   const postBulkAction = () =>
     supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
@@ -72,11 +74,13 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await deleteAllRules(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {
@@ -329,6 +333,9 @@ export default ({ getService }: FtrProviderContext): void => {
           uuid: ruleBody.actions[0].uuid,
         },
       ]);
+      // TODO: at this moment rule execution will be failing, but fix on the way
+      // once fixed, it should be changed to waitForRuleSuccess
+      await waitForRuleFailure({ id: rule1.id, supertest, log });
     });
 
     it('should disable rules', async () => {
