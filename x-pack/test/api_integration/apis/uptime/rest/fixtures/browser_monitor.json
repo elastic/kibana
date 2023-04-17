@@ -37,8 +37,8 @@
       "latency": 20,
       "upload": 3
     },
-    "isCustom": false,
-    "label": "default"
+    "id": "default",
+    "label": "Default"
   },
   "locations": [],
   "name": "Test HTTP Monitor 03",
