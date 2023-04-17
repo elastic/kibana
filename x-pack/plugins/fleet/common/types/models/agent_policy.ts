@@ -33,6 +33,8 @@ export interface NewAgentPolicy {
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
+  cloud_formation_stack_name?: string;
+  cloud_formation_template_url?: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
