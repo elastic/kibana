@@ -273,7 +273,6 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
 }
-
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
   RuleTypeState,
