@@ -17,11 +17,11 @@ import { AnalyticsCollectionExplorerTable } from './analytics_collection_explore
 
 describe('AnalyticsCollectionExplorerTable', () => {
   const mockActions = {
+    onTableChange: jest.fn(),
     setPageIndex: jest.fn(),
     setPageSize: jest.fn(),
     setSearch: jest.fn(),
     setSelectedTable: jest.fn(),
-    setSorting: jest.fn(),
   };
 
   beforeEach(() => {
@@ -55,24 +55,16 @@ describe('AnalyticsCollectionExplorerTable', () => {
     });
   });
 
-  it('should call setSorting when table called onChange', () => {
+  it('should call onTableChange when table called onChange', () => {
     const table = shallow(<AnalyticsCollectionExplorerTable />).find('EuiBasicTable');
 
-    table.simulate('change', { sort: { direction: 'asc', field: 'test' } });
-    expect(mockActions.setSorting).toHaveBeenCalledWith({ direction: 'asc', field: 'test' });
-  });
-
-  it('should call setPageIndex when table called onChange', () => {
-    const table = shallow(<AnalyticsCollectionExplorerTable />).find('EuiBasicTable');
-
-    table.simulate('change', { page: { index: 23 } });
-    expect(mockActions.setPageIndex).toHaveBeenCalledWith(23);
-  });
-
-  it('should call setPageSize when table called onChange', () => {
-    const table = shallow(<AnalyticsCollectionExplorerTable />).find('EuiBasicTable');
-
-    table.simulate('change', { page: { size: 44 } });
-    expect(mockActions.setPageSize).toHaveBeenCalledWith(44);
+    table.simulate('change', {
+      page: { index: 23, size: 44 },
+      sort: { direction: 'asc', field: 'test' },
+    });
+    expect(mockActions.onTableChange).toHaveBeenCalledWith({
+      page: { index: 23, size: 44 },
+      sort: { direction: 'asc', field: 'test' },
+    });
   });
 });

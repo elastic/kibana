@@ -240,7 +240,7 @@ export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverv
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
-  const { setSelectedTable, setSorting } = useActions(AnalyticsCollectionExploreTableLogic);
+  const { onTableChange, setSelectedTable } = useActions(AnalyticsCollectionExploreTableLogic);
   const { items, isLoading, selectedTable, sorting } = useValues(
     AnalyticsCollectionExploreTableLogic
   );
@@ -286,7 +286,7 @@ export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverv
               loading={isLoading}
               sorting={table.sorting}
               onChange={({ sort }) => {
-                setSorting(sort);
+                onTableChange({ sort });
               }}
             />
           )
