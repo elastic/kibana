@@ -39,7 +39,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormation?: string;
+  cloudFormation?: string | null;
 }
 
 // Otherwise the copy button is over the text

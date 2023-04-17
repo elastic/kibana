@@ -37,7 +37,7 @@ export const InstallManagedAgentStep = ({
   isComplete?: boolean;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormation?: string;
+  cloudFormation?: string | null;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;

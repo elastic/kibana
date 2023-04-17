@@ -21,7 +21,7 @@ interface Props {
   fullCopyButton?: boolean;
   isManaged?: boolean;
   onCopy?: () => void;
-  cloudFormation?: string;
+  cloudFormation?: string | null;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({

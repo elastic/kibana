@@ -686,7 +686,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiFieldText
             fullWidth
-            value={agentPolicy.cloud_formation_template_url}
+            value={agentPolicy.cloud_formation_template_url || ''}
             onChange={(e) => updateAgentPolicy({ cloud_formation_template_url: e.target.value })}
             isInvalid={Boolean(
               touchedFields.cloud_formation_template_url && validation.cloud_formation_template_url
