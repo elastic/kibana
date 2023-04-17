@@ -20,6 +20,7 @@ import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -47,6 +48,10 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
+import {
+  CasesManagementLocatorDefinition,
+  ConnectorsManagementLocatorDefinition,
+} from './locators';
 import { LazyLoadProps } from './types';
 
 import type {
@@ -142,6 +147,7 @@ interface PluginsSetup {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
   actions: ActionsPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 interface PluginsStart {
@@ -326,6 +332,9 @@ export class Plugin
         });
       },
     });
+
+    plugins.share.url.locators.create(new CasesManagementLocatorDefinition());
+    plugins.share.url.locators.create(new ConnectorsManagementLocatorDefinition());
 
     if (this.experimentalFeatures.internalAlertsTable) {
       registerAlertsTableConfiguration({
