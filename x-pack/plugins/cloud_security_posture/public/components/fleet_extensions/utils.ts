@@ -7,7 +7,10 @@
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackageInfo,
   PackagePolicyConfigRecordEntry,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
 import {
@@ -21,6 +24,7 @@ import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
@@ -34,7 +38,8 @@ type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_VANILLA; policy_template: typeof KSPM_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE };
+  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VULN_MGMT_AWS; policy_template: typeof VULN_MGMT_POLICY_TEMPLATE };
 
 // Extend NewPackagePolicyInput with known string literals for input type and policy template
 export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
@@ -120,6 +125,52 @@ export const getPosturePolicy = (
     posture: { value: getPostureType(inputType) },
   }),
 });
+
+type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
+  inputs: Array<{
+    vars?: RegistryVarsEntry[];
+  }>;
+};
+// type guard for checking inputs
+export const hasPolicyTemplateInputs = (
+  policyTemplate: RegistryPolicyTemplate
+): policyTemplate is RegistryPolicyTemplateWithInputs => {
+  return policyTemplate.hasOwnProperty('inputs');
+};
+
+interface CloudFormation {
+  templateUrl: string;
+  stackName: string;
+}
+
+const emptyCloudFormation: CloudFormation = {
+  templateUrl: '',
+  stackName: '',
+};
+
+export const getVulnMgmtCloudFormation = (packageInfo: PackageInfo): CloudFormation => {
+  if (!packageInfo.policy_templates) return emptyCloudFormation;
+
+  const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find((p) => p.name === 'vuln_mgmt');
+  if (!vulnMgmtPolicyTemplate) return emptyCloudFormation;
+
+  const vulnMgmtInputs =
+    hasPolicyTemplateInputs(vulnMgmtPolicyTemplate) && vulnMgmtPolicyTemplate.inputs;
+
+  if (!vulnMgmtInputs) return emptyCloudFormation;
+  if (!vulnMgmtInputs[0].vars) return emptyCloudFormation;
+
+  const cloudFormationTemplate = vulnMgmtInputs[0].vars.find(
+    (v) => v.name === 'cloud_formation_template'
+  );
+  const cloudFormationStackName = vulnMgmtInputs[0].vars.find(
+    (v) => v.name === 'cloud_formation_stack_name'
+  );
+  return {
+    templateUrl: String(cloudFormationTemplate?.default || ''),
+    stackName: String(cloudFormationStackName?.default || 'Elastic-Vulnerability-Management'),
+  };
+};
 
 /**
  * Input vars that are hidden from the user
