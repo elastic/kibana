@@ -127,7 +127,7 @@ export const useAddToCaseActions = ({
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ attachments: caseAttachments });
+    selectCaseModal.open({ getAttachments: () => caseAttachments });
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {

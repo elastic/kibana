@@ -22,6 +22,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
 
   const props = {
     isLoading: false,
+    registeredAttachmentActions: [],
     onDelete: jest.fn(),
   };
 
@@ -94,5 +95,22 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+  });
+
+  it('renders correctly registered attachments', async () => {
+    const onClick = jest.fn();
+    const action = [{ label: 'My button', iconType: 'download', onClick }];
+
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} registeredAttachmentActions={action} />
+    );
+
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await waitForEuiPopoverOpen();
+
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(2);
+    expect(result.queryByTestId('property-actions-user-action-download')).toBeInTheDocument();
   });
 });

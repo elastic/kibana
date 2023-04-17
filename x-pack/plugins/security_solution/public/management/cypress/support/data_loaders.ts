@@ -8,8 +8,13 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import type { ActionDetails } from '../../../../common/endpoint/types';
-import { sendEndpointActionResponse } from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
+import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import {
+  deleteIndexedEndpointPolicyResponse,
+  indexEndpointPolicyResponse,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import type { HostPolicyResponse } from '../../../../common/endpoint/types';
+import type { IndexEndpointHostsCyTaskOptions } from '../types';
 import type {
   IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
@@ -88,20 +93,14 @@ export const dataLoaders = (
       return null;
     },
 
-    indexEndpointHosts: async (options: {
-      count?: number;
-      seed?: string;
-      disableEndpointActionsForHost?: boolean;
-      endpointIsolated?: boolean;
-      bothIsolatedAndNormalEndpoints?: boolean;
-    }) => {
+    indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
       const { kbnClient, esClient } = await stackServicesPromise;
+      const { count: numHosts, version, os } = options;
+
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
-        numHosts: options.count,
-        generatorSeed: options.seed,
-        disableEndpointActionsForHost: options.disableEndpointActionsForHost,
-        endpointIsolated: options.endpointIsolated,
-        bothIsolatedAndNormalEndpoints: options.bothIsolatedAndNormalEndpoints,
+        numHosts,
+        version,
+        os,
       });
     },
 
@@ -110,12 +109,7 @@ export const dataLoaders = (
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
     },
 
-    indexEndpointRuleAlerts: async (options: {
-      endpointAgentId: string;
-      endpointHostname?: string;
-      endpointIsolated?: boolean;
-      count?: number;
-    }) => {
+    indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
       const { esClient, log } = await stackServicesPromise;
       return (
         await indexEndpointRuleAlerts({
@@ -133,12 +127,18 @@ export const dataLoaders = (
       return deleteIndexedEndpointRuleAlerts(esClient, data, log);
     },
 
-    sendHostActionResponse: async (data: {
-      action: ActionDetails;
-      state: { state?: 'success' | 'failure' };
-    }) => {
+    indexEndpointPolicyResponse: async (
+      policyResponse: HostPolicyResponse
+    ): Promise<IndexedEndpointPolicyResponse> => {
       const { esClient } = await stackServicesPromise;
-      return sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+      return indexEndpointPolicyResponse(esClient, policyResponse);
+    },
+
+    deleteIndexedEndpointPolicyResponse: async (
+      indexedData: IndexedEndpointPolicyResponse
+    ): Promise<null> => {
+      const { esClient } = await stackServicesPromise;
+      return deleteIndexedEndpointPolicyResponse(esClient, indexedData).then(() => null);
     },
   });
 };
