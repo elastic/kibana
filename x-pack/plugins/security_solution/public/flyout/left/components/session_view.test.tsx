@@ -31,13 +31,7 @@ jest.mock('../../../common/lib/kibana', () => {
 describe('<SessionView />', () => {
   it('renders session view correctly', () => {
     const contextValue = {
-      getFieldsData: () => ({
-        process: {
-          entry_leader: {
-            entity_id: 'id',
-          },
-        },
-      }),
+      getFieldsData: () => 'id',
     } as unknown as LeftPanelContext;
 
     const wrapper = render(
