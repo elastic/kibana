@@ -20,6 +20,7 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import type { AgentPolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
@@ -28,10 +29,12 @@ import {
   CLOUDBEAT_VULN_MGMT_AWS,
   CSPM_POLICY_TEMPLATE,
   SUPPORTED_POLICY_TEMPLATES,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import {
   getPosturePolicy,
   getPostureInputHiddenVars,
+  getVulnMgmtCloudFormation,
   POSTURE_NAMESPACE,
   type NewPackagePolicyPostureInput,
   isPostureInput,
@@ -85,11 +88,20 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage }) => {
+  ({
+    newPolicy,
+    onChange,
+    validationResults,
+    isEditPage,
+    packageInfo,
+    agentPolicy,
+    onChangeAgentPolicy,
+  }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
@@ -143,6 +155,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     usePolicyTemplateInitialName({ isEditPage, isLoading, integration, newPolicy, updatePolicy });
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
+    useCloudFormationTemplate({ agentPolicy, input, onChangeAgentPolicy, packageInfo });
 
     if (isLoading) {
       return (
@@ -290,4 +304,44 @@ const getSelectedOption = (
   assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
 
   return selectedOption;
+};
+
+/**
+ * Update CloudFormation template and stack name in the Agent Policy
+ * based on the selected policy template
+ */
+const useCloudFormationTemplate = ({
+  input,
+  agentPolicy = {} as AgentPolicy,
+  onChangeAgentPolicy,
+  packageInfo,
+}: {
+  input: NewPackagePolicyPostureInput;
+  agentPolicy?: AgentPolicy;
+  onChangeAgentPolicy: (agentPolicy: AgentPolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  useEffect(() => {
+    // CloudFormation currently only supported by Vuln Mgmt
+    if (input.policy_template !== VULN_MGMT_POLICY_TEMPLATE) {
+      // Clear CloudFormation template URL and stack name
+      // when switching to a non-Vuln Mgmt policy template
+      onChangeAgentPolicy({
+        ...agentPolicy,
+        cloud_formation_template_url: '',
+        cloud_formation_stack_name: '',
+      });
+      return;
+    }
+    const { stackName, templateUrl } = getVulnMgmtCloudFormation(packageInfo);
+
+    if (templateUrl === '') return;
+    if (agentPolicy?.cloud_formation_template_url === templateUrl) return;
+    onChangeAgentPolicy({
+      ...agentPolicy,
+      cloud_formation_template_url: templateUrl,
+      cloud_formation_stack_name: stackName,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentPolicy?.cloud_formation_template_url, input.policy_template]);
 };
