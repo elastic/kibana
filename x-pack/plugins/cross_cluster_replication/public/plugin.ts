@@ -17,12 +17,14 @@ import { PluginDependencies, ClientConfigType } from './types';
 
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';
+import { CcrManagementLocatorDefinition } from './locators';
 
 export class CrossClusterReplicationPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(coreSetup: CoreSetup, plugins: PluginDependencies) {
-    const { licensing, remoteClusters, usageCollection, management, indexManagement } = plugins;
+    const { licensing, remoteClusters, usageCollection, management, share, indexManagement } =
+      plugins;
     const esSection = management.sections.section.data;
 
     const {
@@ -73,6 +75,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
       },
     });
 
+    share.url.locators.create(new CcrManagementLocatorDefinition());
+
     // NOTE: We enable the plugin by default instead of disabling it by default because this
     // creates a race condition that causes functional tests to fail on CI (see #66781).
     Promise.all([firstValueFrom(licensing.license$), getStartServices()]).then(
@@ -115,6 +119,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
     );
   }
 
-  public start() {}
-  public stop() {}
+  public start() { }
+  public stop() { }
 }

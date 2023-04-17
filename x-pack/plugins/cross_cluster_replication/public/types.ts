@@ -7,6 +7,7 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { RemoteClustersPluginSetup } from '@kbn/remote-clusters-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -14,6 +15,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 export interface PluginDependencies {
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
   indexManagement: IndexManagementPluginSetup;
   remoteClusters: RemoteClustersPluginSetup;
   licensing: LicensingPluginSetup;

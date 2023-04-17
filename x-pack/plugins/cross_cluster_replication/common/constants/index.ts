@@ -31,6 +31,7 @@ export const BASE_PATH_REMOTE_CLUSTERS = 'data/remote_clusters';
 export const API_BASE_PATH = '/api/cross_cluster_replication';
 export const API_REMOTE_CLUSTERS_BASE_PATH = '/api/remote_clusters';
 export const API_INDEX_MANAGEMENT_BASE_PATH = '/api/index_management';
+export const CCR_MANAGEMENT_LOCATOR = 'CCR_MANAGEMENT_LOCATOR';
 
 export const FOLLOWER_INDEX_ADVANCED_SETTINGS = {
   maxReadRequestOperationCount: 5120,
