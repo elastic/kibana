@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "6cfc277ed3211639e37546ac625f4a68f2494215",
         "action_task_params": "5f419caba96dd8c77d0f94013e71d43890e3d5d6",
-        "alert": "1e4cd6941f1eb39c729c646e91fbfb9700de84b9",
+        "alert": "7bec97d7775a025ecf36a33baf17386b9e7b4c3c",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
@@ -112,6 +112,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "legacy-url-alias": "9b8cca3fbb2da46fd12823d3cd38fdf1c9f24bc8",
         "lens": "2f6a8231591e3d62a83506b19e165774d74588ea",
         "lens-ui-telemetry": "d6c4e330d170eefc6214dbf77a53de913fa3eebc",
+        "maintenance-window": "a9777f4e71381c56b4422bf8d30f626bde301c79",
         "map": "7902b2e2a550e0b73fd5aa6c4e2ba3a4e6558877",
         "metrics-explorer-view": "713dbf1ab5e067791d19170f715eb82cf07ebbcc",
         "ml-job": "12e21f1b1adfcc1052dc0b10c7459de875653b94",

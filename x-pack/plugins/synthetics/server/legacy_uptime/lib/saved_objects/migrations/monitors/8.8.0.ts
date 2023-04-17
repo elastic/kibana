@@ -48,6 +48,11 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
             number: getNearestSupportedSchedule(migrated.attributes[ConfigKey.SCHEDULE].number),
             unit: ScheduleUnit.MINUTES,
           },
+          [ConfigKey.ALERT_CONFIG]: migrated.attributes[ConfigKey.ALERT_CONFIG] || {
+            status: {
+              enabled: true,
+            },
+          },
           // when any action to change a project monitor configuration is taken
           // outside of the synthetics agent cli, we should set the config hash back
           // to an empty string so that the project monitors configuration

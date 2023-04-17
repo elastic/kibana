@@ -120,9 +120,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       }
     }, [isDefaultDatastream, containerRef]);
 
-    // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
-
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
@@ -170,6 +167,21 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const { data: dataStreamsData } = useGetDataStreams();
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
+
+    // Showing advanced options toggle state
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
+    const hasAdvancedOptions = useMemo(() => {
+      return (
+        advancedVars.length > 0 ||
+        (isPackagePolicyEdit && showPipelinesAndMappings) ||
+        isExperimentalDataStreamSettingsEnabled
+      );
+    }, [
+      advancedVars.length,
+      isExperimentalDataStreamSettingsEnabled,
+      isPackagePolicyEdit,
+      showPipelinesAndMappings,
+    ]);
 
     return (
       <>
@@ -257,101 +269,104 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   </EuiFlexItem>
                 );
               })}
-              {/* Advanced section - always shown since we display experimental indexing settings here */}
-              <Fragment>
-                <EuiFlexItem>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                        onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                        flush="left"
-                        data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
-                          defaultMessage="Advanced options"
-                        />
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiText color="danger" size="s">
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                            defaultMessage="{count, plural, one {# error} other {# errors}}"
-                            values={{ count: advancedVarsWithErrorsCount }}
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {isShowingAdvanced ? (
-                  <>
-                    {advancedVars.map((varDef) => {
-                      if (!packagePolicyInputStream.vars) return null;
-                      const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInputStream.vars?.[varName]?.value;
 
-                      return (
-                        <EuiFlexItem key={varName}>
-                          <PackagePolicyInputVarField
-                            varDef={varDef}
-                            value={value}
-                            onChange={(newValue: any) => {
-                              updatePackagePolicyInputStream({
-                                vars: {
-                                  ...packagePolicyInputStream.vars,
-                                  [varName]: {
-                                    type: varType,
-                                    value: newValue,
+              {/* Advanced section */}
+              {hasAdvancedOptions && (
+                <Fragment>
+                  <EuiFlexItem>
+                    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                          onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                          flush="left"
+                          data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
+                            defaultMessage="Advanced options"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      {!isShowingAdvanced && hasErrors && advancedVarsWithErrorsCount ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiText color="danger" size="s">
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                              defaultMessage="{count, plural, one {# error} other {# errors}}"
+                              values={{ count: advancedVarsWithErrorsCount }}
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {isShowingAdvanced ? (
+                    <>
+                      {advancedVars.map((varDef) => {
+                        if (!packagePolicyInputStream.vars) return null;
+                        const { name: varName, type: varType } = varDef;
+                        const value = packagePolicyInputStream.vars?.[varName]?.value;
+
+                        return (
+                          <EuiFlexItem key={varName}>
+                            <PackagePolicyInputVarField
+                              varDef={varDef}
+                              value={value}
+                              onChange={(newValue: any) => {
+                                updatePackagePolicyInputStream({
+                                  vars: {
+                                    ...packagePolicyInputStream.vars,
+                                    [varName]: {
+                                      type: varType,
+                                      value: newValue,
+                                    },
                                   },
-                                },
-                              });
-                            }}
-                            errors={inputStreamValidationResults?.vars![varName]}
-                            forceShowErrors={forceShowErrors}
-                            packageType={packageInfo.type}
-                            packageName={packageInfo.name}
-                            datastreams={datastreams}
-                            isEditPage={isEditPage}
-                          />
-                        </EuiFlexItem>
-                      );
-                    })}
-                    {isPackagePolicyEdit && showPipelinesAndMappings && (
-                      <>
-                        <EuiFlexItem>
-                          <PackagePolicyEditorDatastreamPipelines
-                            packageInputStream={packagePolicyInputStream}
-                            packageInfo={packageInfo}
-                            customDataset={customDatasetVarValue}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <PackagePolicyEditorDatastreamMappings
-                            packageInputStream={packagePolicyInputStream}
-                            packageInfo={packageInfo}
-                            customDataset={customDatasetVarValue}
-                          />
-                        </EuiFlexItem>
-                      </>
-                    )}
-                    {/* Experimental index/datastream settings e.g. synthetic source */}
-                    {isExperimentalDataStreamSettingsEnabled && (
-                      <ExperimentDatastreamSettings
-                        registryDataStream={packageInputStream.data_stream}
-                        experimentalDataFeatures={
-                          packagePolicy.package?.experimental_data_stream_features
-                        }
-                        setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                      />
-                    )}
-                  </>
-                ) : null}
-              </Fragment>
+                                });
+                              }}
+                              errors={inputStreamValidationResults?.vars![varName]}
+                              forceShowErrors={forceShowErrors}
+                              packageType={packageInfo.type}
+                              packageName={packageInfo.name}
+                              datastreams={datastreams}
+                              isEditPage={isEditPage}
+                            />
+                          </EuiFlexItem>
+                        );
+                      })}
+                      {isPackagePolicyEdit && showPipelinesAndMappings && (
+                        <>
+                          <EuiFlexItem>
+                            <PackagePolicyEditorDatastreamPipelines
+                              packageInputStream={packagePolicyInputStream}
+                              packageInfo={packageInfo}
+                              customDataset={customDatasetVarValue}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <PackagePolicyEditorDatastreamMappings
+                              packageInputStream={packagePolicyInputStream}
+                              packageInfo={packageInfo}
+                              customDataset={customDatasetVarValue}
+                            />
+                          </EuiFlexItem>
+                        </>
+                      )}
+                      {/* Experimental index/datastream settings e.g. synthetic source */}
+                      {isExperimentalDataStreamSettingsEnabled && (
+                        <ExperimentDatastreamSettings
+                          registryDataStream={packageInputStream.data_stream}
+                          experimentalDataFeatures={
+                            packagePolicy.package?.experimental_data_stream_features
+                          }
+                          setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
+                        />
+                      )}
+                    </>
+                  ) : null}
+                </Fragment>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGrid>
