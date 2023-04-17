@@ -74,7 +74,7 @@ const AlertDetailsAppSection = ({
     setAlertSummaryFields(alertSummaryFields);
   }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
 
-  const getLogRationChart = () => {
+  const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {
       return (
         <EuiPanel hasBorder={true} data-test-subj="logsRatioChartAlertDetails">
@@ -243,7 +243,7 @@ const AlertDetailsAppSection = ({
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-      {getLogRationChart()}
+      {getLogRatioChart()}
       {getLogCountChart()}
       {getLogsHistoryChart()}
     </EuiFlexGroup>
