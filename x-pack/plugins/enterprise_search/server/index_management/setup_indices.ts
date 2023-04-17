@@ -238,7 +238,7 @@ const indices: IndexDefinition[] = [
         deleted_document_count: { type: 'integer' },
         error: { type: 'keyword' },
         indexed_document_count: { type: 'integer' },
-        indexed_document_volume: { type: 'integer' },
+        indexed_document_volume: { type: 'unsigned_long' },
         last_seen: { type: 'date' },
         metadata: { type: 'object' },
         started_at: { type: 'date' },
