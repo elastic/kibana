@@ -61,8 +61,8 @@ describe('rule_actions_popover', () => {
     expect(result.getByTestId('upcoming-events-popover-title')).toHaveTextContent(
       'Repeats every Friday'
     );
-    expect(result.getByText('04/28/23 10:58 AM')).toBeInTheDocument();
-    expect(result.getByText('05/05/23 10:58 AM')).toBeInTheDocument();
-    expect(result.getByText('05/12/23 10:58 AM')).toBeInTheDocument();
+    expect(result.queryByText('04/28/23 10:58 AM')).toBeInTheDocument();
+    expect(result.queryByText('05/05/23 10:58 AM')).toBeInTheDocument();
+    expect(result.queryByText('05/12/23 10:58 AM')).toBeInTheDocument();
   });
 });
