@@ -33,7 +33,7 @@ interface BasicFilter {
 
 interface FilterWithMultipleValues extends BasicFilter {
   operation: typeof Operation.IS_ONE_OF | typeof Operation.IS_NOT_ONE_OF;
-  value: string[];
+  value: string[] | string;
 }
 
 interface FilterWithRange extends BasicFilter {
@@ -302,7 +302,11 @@ export class FilterBarService extends FtrService {
 
       await this.createFilter(filter);
 
+      await this.testSubjects.scrollIntoView('saveFilter');
       await this.testSubjects.clickWhenNotDisabled('saveFilter');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.waitForDeleted('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }

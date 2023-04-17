@@ -12,24 +12,24 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   removeServerGeneratedProperties,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
   getSimpleRule,
   updateRule,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   getRule,
   createNewAction,
   findImmutableRuleById,
-  getPrePackagedRulesStatus,
+  getPrebuiltRulesAndTimelinesStatus,
   getSimpleRuleOutput,
   ruleToUpdateSchema,
 } from '../../utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../utils/create_prebuilt_rule_saved_objects';
+import { ELASTIC_SECURITY_RULE_ID } from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   const getImmutableRule = async () => {
-    await installPrePackagedRules(supertest, es, log);
+    await installMockPrebuiltRules(supertest, es);
     return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
   };
 
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           meta: {}, // create a rule with the action attached and a meta field
         };
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should not change properties of immutable rule when applying actions to it', async () => {
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await updateRule(supertest, log, ruleToUpdate);
 
-        const status = await getPrePackagedRulesStatus(supertest, log);
+        const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
         expect(status.rules_not_installed).to.eql(0);
       });
 

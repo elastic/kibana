@@ -428,7 +428,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
       expireErrorExists ||
-      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)),
+      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
+      (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
+        isEmpty(selectedRulesToAddTo) &&
+        listType === ExceptionListTypeEnum.RULE_DEFAULT),
     [
       isSubmitting,
       isClosingAlerts,
@@ -439,6 +442,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       addExceptionToRadioSelection,
       exceptionListsToAddTo,
       expireErrorExists,
+      selectedRulesToAddTo,
+      listType,
     ]
   );
 
@@ -530,12 +535,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             newCommentValue={newComment}
             newCommentOnChange={setComment}
           />
-          <EuiHorizontalRule />
-          <ExceptionsExpireTime
-            expireTime={expireTime}
-            setExpireTime={setExpireTime}
-            setExpireError={setExpireError}
-          />
+          {listType !== ExceptionListTypeEnum.ENDPOINT && (
+            <>
+              <EuiHorizontalRule />
+              <ExceptionsExpireTime
+                expireTime={expireTime}
+                setExpireTime={setExpireTime}
+                setExpireError={setExpireError}
+              />
+            </>
+          )}
           {showAlertCloseOptions && (
             <>
               <EuiHorizontalRule />

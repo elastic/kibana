@@ -61,6 +61,7 @@ export const buildThreatEnrichment = ({
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams,
       eventsCount: signals.length,
+      termsQueryAllowed: false,
     });
 
     const enrichment = threatEnrichmentFactory({

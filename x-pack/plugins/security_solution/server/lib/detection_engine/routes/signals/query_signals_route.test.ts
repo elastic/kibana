@@ -48,6 +48,20 @@ describe('query for signal', () => {
       );
     });
 
+    test('search on an index pattern without wildcard added', async () => {
+      const response = await server.inject(
+        getSignalsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(ruleDataClient.getReader).toHaveBeenCalledWith(
+        expect.objectContaining({
+          namespace: 'default',
+        })
+      );
+    });
+
     test('returns 200 when using single agg', async () => {
       const response = await server.inject(
         getSignalsAggsQueryRequest(),

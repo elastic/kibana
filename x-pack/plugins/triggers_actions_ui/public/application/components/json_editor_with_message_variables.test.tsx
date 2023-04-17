@@ -69,4 +69,18 @@ describe('JsonEditorWithMessageVariables', () => {
       '{{{myVar}}}'
     );
   });
+
+  test('renders correct value when the input value prop updates', () => {
+    const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
+
+    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual('');
+
+    const inputTargetValue = '{"new": "value"}';
+    wrapper.setProps({ inputTargetValue });
+    wrapper.update();
+
+    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
+      inputTargetValue
+    );
+  });
 });

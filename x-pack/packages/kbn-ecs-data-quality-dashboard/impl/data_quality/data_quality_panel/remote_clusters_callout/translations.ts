@@ -15,6 +15,6 @@ export const TO_CHECK_INDICES_ON_REMOTE_CLUSTERS = i18n.translate(
   'ecsDataQualityDashboard.remoteClustersCallout.toCheckIndicesOnRemoteClustersLabel',
   {
     defaultMessage:
-      "To check indices on remote clusters supporting cross-cluster search, login to the remote cluster's Kibana",
+      "To check indices on remote clusters supporting cross-cluster search, log in to the remote cluster's Kibana",
   }
 );

@@ -32,7 +32,11 @@ export const useHostUnisolation = ({
   const unIsolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostUnIsolation({ endpointId, comment, caseIds });
+      const isolationStatus = await createHostUnIsolation({
+        endpointId,
+        comment,
+        caseIds: caseIds && caseIds.length > 0 ? caseIds : undefined,
+      });
       setLoading(false);
       return isolationStatus.action ? true : false;
     } catch (error) {

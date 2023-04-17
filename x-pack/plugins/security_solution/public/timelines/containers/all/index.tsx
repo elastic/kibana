@@ -10,6 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getTimelineQueryTypes } from '../helpers';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
@@ -93,6 +94,7 @@ export const getAllTimeline = memoizeOne(
       updatedBy: timeline.updatedBy,
       timelineType: timeline.timelineType ?? TimelineType.default,
       templateTimelineId: timeline.templateTimelineId,
+      queryType: getTimelineQueryTypes(timeline),
     }))
 );
 

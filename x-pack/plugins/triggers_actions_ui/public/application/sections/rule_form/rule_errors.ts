@@ -61,9 +61,10 @@ export function validateBaseProperties(
 
   const invalidThrottleActions = ruleObject.actions.filter((a) => {
     const throttleDuration = a.frequency?.throttle ? parseDuration(a.frequency.throttle) : 0;
-    const intervalDuration = ruleObject.schedule.interval
-      ? parseDuration(ruleObject.schedule.interval)
-      : 0;
+    const intervalDuration =
+      ruleObject.schedule.interval && ruleObject.schedule.interval.length > 1
+        ? parseDuration(ruleObject.schedule.interval)
+        : 0;
     return (
       a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE && throttleDuration < intervalDuration
     );

@@ -68,6 +68,7 @@ export const StepDurationPanel = ({
       </EuiFlexGroup>
 
       <ExploratoryViewEmbeddable
+        id="stepDurationLines"
         axisTitlesVisibility={{ yLeft: false, yRight: false, x: false }}
         customHeight={'300px'}
         reportType={ReportTypes.KPI}

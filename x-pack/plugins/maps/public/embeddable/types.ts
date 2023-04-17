@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
   Embeddable,
@@ -13,7 +12,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 

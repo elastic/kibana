@@ -26,7 +26,6 @@ import {
   FieldPopoverVisualize,
   FieldIcon,
   getFieldIconProps,
-  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop } from '../../drag_drop';
@@ -214,11 +213,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                 ),
               }}
               fieldIcon={lensFieldIcon}
-              fieldName={
-                <EuiHighlight search={wrapFieldNameOnDot(highlight)}>
-                  {wrapFieldNameOnDot(field.displayName)}
-                </EuiHighlight>
-              }
+              fieldName={<EuiHighlight search={highlight || ''}>{field.displayName}</EuiHighlight>}
               fieldInfoIcon={lensInfoIcon}
             />
           </DragDrop>

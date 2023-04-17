@@ -12,7 +12,7 @@ import {
   USER_TABLE_ROW_TOTAL_ALERTS,
 } from '../../screens/detection_response';
 import { QUERY_TAB_BUTTON } from '../../screens/timeline';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { closeTimeline } from '../../tasks/timeline';
@@ -25,7 +25,7 @@ describe.skip('Detection response view', () => {
     before(() => {
       cleanKibana();
       login();
-      createCustomRuleEnabled(getNewRule());
+      createRule(getNewRule());
       visit(DETECTIONS_RESPONSE_URL);
     });
 

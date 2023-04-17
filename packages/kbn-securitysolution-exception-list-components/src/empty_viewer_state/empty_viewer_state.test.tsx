@@ -19,7 +19,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.ERROR}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
       />
     );
 
@@ -34,7 +34,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.ERROR}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
         title="Error title"
         body="Error body"
       />
@@ -49,7 +49,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.LOADING}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
       />
     );
 
@@ -60,7 +60,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY_SEARCH}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
       />
     );
 
@@ -77,7 +77,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY_SEARCH}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
         title="Empty search title"
         body="Empty search body"
       />
@@ -92,7 +92,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
         body="There are no endpoint exceptions."
         buttonText="Add endpoint exception"
       />
@@ -108,7 +108,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
       />
     );
 
@@ -125,7 +125,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
         listType={ListTypeText.ENDPOINT}
       />
     );
@@ -143,7 +143,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={true}
         viewerStatus={ViewerStatus.EMPTY}
-        onCreateExceptionListItem={jest.fn()}
+        onEmptyButtonStateClick={jest.fn()}
         listType={ListTypeText.ENDPOINT}
       />
     );

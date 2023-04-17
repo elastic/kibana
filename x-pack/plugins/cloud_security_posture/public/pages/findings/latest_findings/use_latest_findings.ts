@@ -60,6 +60,17 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
+  runtime_mappings: {
+    'rule.benchmark.posture_type': {
+      type: 'keyword',
+    },
+    'cloud.account.id': {
+      type: 'keyword',
+    },
+    'cloud.account.name': {
+      type: 'keyword',
+    },
+  },
 });
 
 /**

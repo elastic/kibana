@@ -129,56 +129,81 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  if (options.retryCount === undefined) {
-    // creating an action doc so that update tags  shows up in activity
-    await createAgentAction(esClient, {
-      id: actionId,
-      agents: agentIds,
-      created_at: new Date().toISOString(),
-      type: 'UPDATE_TAGS',
-      total: options.total ?? res.total,
-    });
-  }
-
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
   const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
+  const updatedCount = res.updated ?? 0;
+  const updatedIds = getUuidArray(updatedCount);
+
+  const failures = res.failures ?? [];
+  const failureCount = failures.length;
+
+  const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
+
+  const versionConflictCount = res.version_conflicts ?? 0;
+  const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
+
+  // creating an action doc so that update tags  shows up in activity
+  // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
+  // this ensures that the action status count will be accurate
+  await createAgentAction(esClient, {
+    id: actionId,
+    agents: updatedIds
+      .concat(failures.map((failure) => failure.id))
+      .concat(isLastRetry ? versionConflictIds : []),
+    created_at: new Date().toISOString(),
+    type: 'UPDATE_TAGS',
+    total: options.total ?? res.total,
+  });
+  appContextService
+    .getLogger()
+    .debug(
+      `action doc wrote on ${
+        updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
+      } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
+    );
+
   // writing successful action results
-  if (res.updated ?? 0 > 0) {
+  if (updatedCount > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      agentIds.map((id) => ({
+      updatedIds.map((id) => ({
         agentId: id,
         actionId,
       }))
     );
+    appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
   }
 
   // writing failures from es update
-  if (res.failures && res.failures.length > 0) {
+  if (failures.length > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      res.failures.map((failure) => ({
+      failures.map((failure) => ({
         agentId: failure.id,
         actionId,
         error: failure.cause.reason,
       }))
     );
+    appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);
   }
 
-  if (res.version_conflicts ?? 0 > 0) {
+  if (versionConflictCount > 0) {
     // write out error results on last retry, so action is not stuck in progress
     if (options.retryCount === MAX_RETRY_COUNT) {
       await bulkCreateAgentActionResults(
         esClient,
-        getUuidArray(res.version_conflicts!).map((id) => ({
+        versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
           error: 'version conflict on last retry',
         }))
       );
+      appContextService
+        .getLogger()
+        .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
-    throw new Error(`version conflict of ${res.version_conflicts} agents`);
+    throw new Error(`version conflict of ${versionConflictCount} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

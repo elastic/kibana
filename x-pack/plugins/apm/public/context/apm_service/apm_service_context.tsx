@@ -23,6 +23,7 @@ export interface APMServiceContextValue {
   agentName?: string;
   serverlessType?: ServerlessType;
   transactionType?: string;
+  transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
   runtimeName?: string;
   fallbackToTransactions: boolean;
@@ -31,6 +32,7 @@ export interface APMServiceContextValue {
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
+  transactionTypeStatus: FETCH_STATUS.NOT_INITIATED,
   transactionTypes: [],
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
@@ -65,11 +67,12 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { transactionTypes, status: transactionTypeStatus } =
+    useServiceTransactionTypesFetcher({
+      serviceName,
+      start,
+      end,
+    });
 
   const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
@@ -89,6 +92,7 @@ export function ApmServiceContextProvider({
         agentName,
         serverlessType,
         transactionType: currentTransactionType,
+        transactionTypeStatus,
         transactionTypes,
         runtimeName,
         fallbackToTransactions,

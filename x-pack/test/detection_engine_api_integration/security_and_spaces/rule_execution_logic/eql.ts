@@ -28,7 +28,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getOpenSignals,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - remaining tests use preview API

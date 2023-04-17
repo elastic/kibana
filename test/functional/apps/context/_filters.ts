@@ -215,5 +215,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
       );
     });
+
+    it('should add comma delimiter values', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is one of', value: 'png, jpeg' });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal('extension: is one of png, jpeg');
+    });
   });
 }

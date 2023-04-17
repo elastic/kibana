@@ -84,7 +84,7 @@ export const registerSyntheticsStatusCheckRule = (
         syntheticsMonitorClient
       );
 
-      const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks(
+      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
       );
 
@@ -129,6 +129,7 @@ export const registerSyntheticsStatusCheckRule = (
         getAlertUuid,
         spaceId,
         staleDownConfigs,
+        upConfigs,
       });
 
       return {

@@ -56,6 +56,7 @@ export const OverviewPage: React.FC = () => {
   } = useEnablement();
 
   const {
+    loaded: overviewLoaded,
     data: { monitors },
     pageState,
   } = useSelector(selectOverviewState);
@@ -94,7 +95,7 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  const noMonitorFound = monitorsLoaded && monitors?.length === 0;
+  const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
 
   return (
     <>

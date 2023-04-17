@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 
-import { useAbsoluteDate } from '../../../../hooks';
+import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
@@ -21,7 +21,7 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
 
   const theme = useTheme();
 
-  const { from, to } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
+  const { from, to } = useRefreshedRange(30, 'days');
 
   const attributes = useMemo(() => {
     return [
@@ -44,6 +44,7 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
 
   return (
     <ExploratoryViewEmbeddable
+      id="monitor-test-runs-sparkline"
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}

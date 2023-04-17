@@ -30,7 +30,7 @@ export const useTimelineSavePrompt = (
   onAppLeave: (handler: AppLeaveHandler) => void
 ) => {
   const dispatch = useDispatch();
-  const { overlays, application } = useKibana().services;
+  const { overlays, application, http } = useKibana().services;
   const getIsTimelineVisible = useShowTimelineForGivenPath();
   const history = useHistory();
 
@@ -66,10 +66,12 @@ export const useTimelineSavePrompt = (
 
         if (confirmRes) {
           unblock();
-
-          application.navigateToUrl(location.pathname + location.hash + location.search, {
-            state: location.state,
-          });
+          application.navigateToUrl(
+            http.basePath.get() + location.pathname + location.hash + location.search,
+            {
+              state: location.state,
+            }
+          );
         } else {
           showSaveTimelineModal();
         }
@@ -92,6 +94,7 @@ export const useTimelineSavePrompt = (
     };
   }, [
     history,
+    http.basePath,
     application,
     overlays,
     showSaveTimelineModal,

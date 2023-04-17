@@ -10,6 +10,10 @@ import { each, get } from 'lodash';
 const CONTAINS_DYNAMIC_PARAMETER_REGEX = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
 
 export const replaceParamsQuery = (query: string, data: object) => {
+  if (!containsDynamicQuery(query)) {
+    return { result: query, skipped: false };
+  }
+
   const matchedBrackets = query.match(new RegExp(CONTAINS_DYNAMIC_PARAMETER_REGEX));
   let resultQuery = query;
 

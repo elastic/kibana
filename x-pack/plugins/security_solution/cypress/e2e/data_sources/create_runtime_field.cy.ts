@@ -11,7 +11,7 @@ import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timelin
 
 import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
 
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
@@ -27,7 +27,7 @@ describe('Create DataView runtime field', () => {
   it('adds field to alert table', () => {
     const fieldName = 'field.name.alert.page';
     visit(ALERTS_URL);
-    createCustomRuleEnabled(getNewRule());
+    createRule(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
     openEventsViewerFieldsBrowser();

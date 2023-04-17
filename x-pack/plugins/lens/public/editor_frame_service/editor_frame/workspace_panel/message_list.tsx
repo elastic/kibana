@@ -124,7 +124,7 @@ export const MessageList = ({
                   <EuiIcon type={IconWarning} color="warning" />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
                 <EuiText size="s">{message.longMessage}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

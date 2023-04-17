@@ -23,6 +23,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   describe('scheduled task id', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -115,6 +116,37 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
         consumer: 'alertsFixture',
       });
       expect(taskRecord.task.enabled).to.eql(true);
+    });
+
+    it('deletes associated task for rule if task is unrecognized', async () => {
+      const RULE_ID = '46be60d4-ae63-48ed-ab6f-f4d9b4defacf';
+      // We've archived a disabled rule with a scheduled task ID that references
+      // a task with a removed task type. Task manager will mark the task as unrecognized.
+      // When we enable the rule, the unrecognized task should be removed and a new
+      // task created in its place
+
+      // scheduled task should exist and be unrecognized
+      await retry.try(async () => {
+        const taskRecordLoaded = await getScheduledTask(RULE_ID);
+        expect(taskRecordLoaded.task.status).to.equal('unrecognized');
+      });
+
+      // enable the rule
+      await supertestWithoutAuth
+        .post(`${getUrlPrefix(``)}/api/alerting/rule/${RULE_ID}/_enable`)
+        .set('kbn-xsrf', 'foo');
+      await retry.try(async () => {
+        const response = await supertestWithoutAuth.get(
+          `${getUrlPrefix(``)}/api/alerting/rule/${RULE_ID}`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.enabled).to.be(true);
+      });
+
+      // new scheduled task should exist with ID and status should not be unrecognized
+      const newTaskRecordLoaded = await getScheduledTask(RULE_ID);
+      expect(newTaskRecordLoaded.task.status).not.to.equal('unrecognized');
     });
   });
 }

@@ -60,8 +60,7 @@ const NotDeployed = () => {
         <p>
           <FormattedMessage
             id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription"
-            defaultMessage="To see findings, please finish the setup process by installing an elastic agent on your
-          Kubernetes cluster."
+            defaultMessage="In order to begin detecting security misconfigurations, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
           />
         </p>
       }

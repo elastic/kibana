@@ -42,7 +42,6 @@ journey('Exploratory view', async ({ page, params }) => {
     await loginToKibana({
       page,
       user: { username: 'elastic', password: 'changeme' },
-      dismissTour: false,
     });
   });
 

@@ -37,6 +37,7 @@ import { parseInterval } from '../../../signals/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
@@ -61,6 +62,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
+const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -80,7 +82,7 @@ export const previewRulesRoute = async (
         body: buildRouteValidation(previewRulesSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
@@ -134,8 +136,8 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
               },
               cluster: [],
             },

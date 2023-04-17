@@ -9,7 +9,11 @@
 export { DocumentMigrator, KibanaMigrator, buildActiveMappings, mergeTypes } from './src';
 export type { KibanaMigratorOptions } from './src';
 export { getAggregatedTypesDocuments } from './src/actions/check_for_unknown_docs';
-export { addExcludedTypesToBoolQuery } from './src/model/helpers';
+export {
+  addExcludedTypesToBoolQuery,
+  createBulkIndexOperationTuple,
+  createBulkDeleteOperationBody,
+} from './src/model/helpers';
 
 // these are only used for integration tests
 export {

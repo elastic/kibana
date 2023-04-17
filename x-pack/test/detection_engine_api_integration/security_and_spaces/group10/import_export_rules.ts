@@ -17,7 +17,7 @@ import {
   binaryToString,
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
 } from '../../utils';
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should be able to reimport a rule referencing an exception list with existing comments', async () => {

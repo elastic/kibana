@@ -35,6 +35,25 @@ export enum TableId {
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
+export enum TableEntityType {
+  alert = 'alert',
+  event = 'event',
+  session = 'session',
+}
+
+export const tableEntity: Record<TableId, TableEntityType> = {
+  [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
+  [TableId.hostsPageEvents]: TableEntityType.event,
+  [TableId.networkPageEvents]: TableEntityType.event,
+  [TableId.usersPageEvents]: TableEntityType.event,
+  [TableId.test]: TableEntityType.event,
+  [TableId.alternateTest]: TableEntityType.event,
+  [TableId.rulePreview]: TableEntityType.event,
+  [TableId.hostsPageSessions]: TableEntityType.session,
+  [TableId.kubernetesPageSessions]: TableEntityType.session,
+} as const;
+
 const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.usersPageEvents),
   runtimeTypes.literal(TableId.hostsPageEvents),

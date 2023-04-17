@@ -49,3 +49,18 @@ You can configure the interval at which {kib} tries to remove expired and invali
 xpack.security.session.cleanupInterval: "1d"
 --------------------------------------------------------------------------------
 --
+
+[[session-max-sessions]]
+==== Maximum number of concurrent sessions
+By default, there is no limit to the maximum number of concurrent sessions each user can have in {kib}.
+To add a limit, use the `xpack.security.session.сoncurrentSessions.maxSessions` configuration option.
+If set, the value of this option should be an integer between `1` and `1000`.
+When the limit is exceeded, the oldest session is automatically invalidated.
+
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.сoncurrentSessions:
+  maxSessions: 3
+--------------------------------------------------------------------------------
+--

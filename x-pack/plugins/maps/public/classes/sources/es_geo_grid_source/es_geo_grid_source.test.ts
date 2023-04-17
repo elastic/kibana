@@ -223,7 +223,7 @@ describe('ESGeoGridSource', () => {
           meta: {
             alias: null,
             disabled: false,
-            key: 'bar',
+            isMultiIndex: true,
             negate: false,
             type: 'spatial_filter',
           },

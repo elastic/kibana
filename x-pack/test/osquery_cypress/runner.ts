@@ -12,10 +12,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-import {
-  // AgentManager,
-  AgentManagerParams,
-} from './agent';
+import { AgentManager, AgentManagerParams } from './agent';
 import { FleetManager } from './fleet_server';
 
 async function withFleetAgent(
@@ -47,8 +44,7 @@ async function withFleetAgent(
     },
   };
   const fleetManager = new FleetManager(params, log, requestOptions);
-
-  // const agentManager = new AgentManager(params, log, requestOptions);
+  const agentManager = new AgentManager(params, log, requestOptions);
 
   // Since the managers will create uncaughtException event handlers we need to exit manually
   process.on('uncaughtException', (err) => {
@@ -57,13 +53,13 @@ async function withFleetAgent(
     process.exit(1);
   });
 
-  // await agentManager.setup();
   await fleetManager.setup();
+  await agentManager.setup();
   try {
     await runner({});
   } finally {
+    agentManager.cleanup();
     fleetManager.cleanup();
-    // agentManager.cleanup();
   }
 }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { constant, get, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { constant, get } from 'lodash';
 import { UserConfiguredActionConnector, IErrorObject, Rule } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {

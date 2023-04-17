@@ -246,6 +246,7 @@ describe('Task Runner Cancel', () => {
             history: [],
             last_run: {
               metrics: {
+                duration: 0,
                 gap_duration_s: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,

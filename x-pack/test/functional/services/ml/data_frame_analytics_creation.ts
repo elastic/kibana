@@ -16,13 +16,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 import type { MlApi } from './api';
-import type { MlFieldStatsFlyout } from './field_stats_flyout';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   mlApi: MlApi,
-  mlFieldStatsFlyout: MlFieldStatsFlyout
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const headerPage = getPageObject('header');
   const commonPage = getPageObject('common');
@@ -209,7 +209,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       fieldType: 'keyword' | 'date' | 'number',
       expectedContent?: string[]
     ) {
-      await mlFieldStatsFlyout.assertFieldStatFlyoutContentFromTrigger(
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromTrigger(
         'mlAnalyticsCreateJobWizardIncludesSelect',
         fieldName,
         fieldType,
@@ -275,7 +275,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       fieldType: 'keyword' | 'date' | 'number',
       expectedContent?: string[]
     ) {
-      await mlFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
         'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
         fieldName,
         fieldType,
@@ -288,7 +288,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       fieldType: 'keyword' | 'date' | 'number',
       expectedContent: string[]
     ) {
-      await mlFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {

@@ -9,12 +9,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 
+import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../common/constants';
+
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
-const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 export type InactivityTimeouts = Awaited<
   ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
 >;

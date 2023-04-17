@@ -83,7 +83,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             ...panel.explicitInput,
             ...inputToReturn,
           }) &&
-            isEqual(latestPanelState.current.width, panel.width))
+            isEqual(latestPanelState.current.width, panel.width) &&
+            isEqual(latestPanelState.current.grow, panel.grow))
         ) {
           reject();
           ref.close();
@@ -97,6 +98,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         }).then((confirmed) => {
           if (confirmed) {
             dispatch(setControlWidth({ width: panel.width, embeddableId }));
+            dispatch(setControlGrow({ grow: panel.grow, embeddableId }));
             reject();
             ref.close();
           }

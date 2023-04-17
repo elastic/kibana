@@ -15,47 +15,26 @@ import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/r
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 
-export const createQueries = async (
-  params: CreateLiveQueryRequestBodySchema,
-  agents: string[],
-  osqueryContext: OsqueryAppContext
-) =>
-  params.queries?.length
-    ? map(params.queries, (query) =>
-        pickBy(
-          {
-            ...query,
-            action_id: uuidv4(),
-            agents,
-          },
-          (value) => !isEmpty(value) || value === true
-        )
-      )
-    : [
-        pickBy(
-          {
-            action_id: uuidv4(),
-            id: uuidv4(),
-            query: params.query,
-            saved_query_id: params.saved_query_id,
-            saved_query_prebuilt: params.saved_query_id
-              ? await isSavedQueryPrebuilt(
-                  osqueryContext.service.getPackageService()?.asInternalUser,
-                  params.saved_query_id
-                )
-              : undefined,
-            ecs_mapping: params.ecs_mapping,
-            agents,
-          },
-          (value) => !isEmpty(value)
-        ),
-      ];
+export const PARAMETER_NOT_FOUND = i18n.translate(
+  'xpack.osquery.liveQueryActions.error.notFoundParameters',
+  {
+    defaultMessage:
+      "This query hasn't been called due to parameter used and its value not found in the alert.",
+  }
+);
 
-export const createDynamicQueries = async (
-  params: CreateLiveQueryRequestBodySchema,
-  alertData: ParsedTechnicalFields,
-  osqueryContext: OsqueryAppContext
-) =>
+interface CreateDynamicQueriesParams {
+  params: CreateLiveQueryRequestBodySchema;
+  alertData?: ParsedTechnicalFields;
+  agents: string[];
+  osqueryContext: OsqueryAppContext;
+}
+export const createDynamicQueries = async ({
+  params,
+  alertData,
+  agents,
+  osqueryContext,
+}: CreateDynamicQueriesParams) =>
   params.queries?.length
     ? map(params.queries, ({ query, ...restQuery }) => {
         const replacedQuery = replacedQueries(query, alertData);
@@ -66,7 +45,7 @@ export const createDynamicQueries = async (
             ...restQuery,
             action_id: uuidv4(),
             alert_ids: params.alert_ids,
-            agents: params.agent_ids,
+            agents,
           },
           (value) => !isEmpty(value) || value === true
         );
@@ -77,8 +56,6 @@ export const createDynamicQueries = async (
             action_id: uuidv4(),
             id: uuidv4(),
             ...replacedQueries(params.query, alertData),
-            // just for single queries - we need to overwrite the error property
-            error: undefined,
             saved_query_id: params.saved_query_id,
             saved_query_prebuilt: params.saved_query_id
               ? await isSavedQueryPrebuilt(
@@ -88,13 +65,13 @@ export const createDynamicQueries = async (
               : undefined,
             ecs_mapping: params.ecs_mapping,
             alert_ids: params.alert_ids,
-            agents: params.agent_ids,
+            agents,
           },
           (value) => !isEmpty(value)
         ),
       ];
 
-const replacedQueries = (
+export const replacedQueries = (
   query: string | undefined,
   alertData?: ParsedTechnicalFields
 ): { query: string | undefined; error?: string } => {
@@ -105,10 +82,7 @@ const replacedQueries = (
       query: result,
       ...(skipped
         ? {
-            error: i18n.translate('xpack.osquery.liveQueryActions.error.notFoundParameters', {
-              defaultMessage:
-                "This query hasn't been called due to parameter used and its value not found in the alert.",
-            }),
+            error: PARAMETER_NOT_FOUND,
           }
         : {}),
     };

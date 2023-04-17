@@ -53,8 +53,8 @@ export class RX implements ILensVisualization {
     const dataLayer = this.formula.insertOrReplaceFormulaColumn(
       'y_network_in_bytes',
       {
-        formula: "counter_rate(max(system.network.in.bytes), kql='system.network.in.bytes: *') * 8",
-        timeScale: 's',
+        formula:
+          "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
         format: {
           id: 'bits',
           params: {
@@ -95,13 +95,13 @@ export class RX implements ILensVisualization {
           negate: false,
           alias: null,
           index: '3be1e71b-4bc5-4462-a314-04539f877a19',
-          key: 'system.network.in.bytes',
+          key: 'host.network.ingress.bytes',
           value: 'exists',
           type: 'exists',
         },
         query: {
           exists: {
-            field: 'system.network.in.bytes',
+            field: 'host.network.ingress.bytes',
           },
         },
         $state: {

@@ -245,6 +245,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ]
   );
 
+  const osqueryFlyout = useMemo(() => {
+    return (
+      <OsqueryFlyout
+        agentId={agentId}
+        defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+        onClose={handleOnOsqueryClick}
+        ecsData={ecsRowData}
+      />
+    );
+  }, [agentId, alertId, ecsRowData, handleOnOsqueryClick]);
+
   return (
     <>
       {items.length > 0 && (
@@ -285,14 +296,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
-      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout
-          agentId={agentId}
-          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
-          onClose={handleOnOsqueryClick}
-          ecsData={ecsRowData}
-        />
-      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && osqueryFlyout}
     </>
   );
 };

@@ -13,6 +13,7 @@ import type {
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
@@ -121,25 +122,33 @@ export class ObservabilityDataViews {
 
     const { runtimeFields } = getFieldFormatsForApp(app);
 
-    const dataView = await this.dataViews.create(
-      {
-        title: appIndicesPattern,
-        id: getAppDataViewId(app, indices),
-        timeFieldName: '@timestamp',
-        fieldFormats: this.getFieldFormats(app),
-        name: DataTypesLabels[app],
-      },
-      false,
-      false
-    );
+    const id = getAppDataViewId(app, indices);
 
-    if (runtimeFields !== null) {
-      runtimeFields.forEach(({ name, field }) => {
-        dataView.addRuntimeField(name, field);
-      });
+    try {
+      const dataView = await this.dataViews.create(
+        {
+          id,
+          title: appIndicesPattern,
+          timeFieldName: '@timestamp',
+          fieldFormats: this.getFieldFormats(app),
+          name: DataTypesLabels[app],
+        },
+        false,
+        false
+      );
+
+      if (runtimeFields !== null) {
+        runtimeFields.forEach(({ name, field }) => {
+          dataView.addRuntimeField(name, field);
+        });
+      }
+
+      return dataView;
+    } catch (e) {
+      if (e instanceof DataViewMissingIndices) {
+        this.dataViews.clearInstanceCache(id);
+      }
     }
-
-    return dataView;
   }
 
   async createAndSavedDataView(app: AppDataType, indices: string) {

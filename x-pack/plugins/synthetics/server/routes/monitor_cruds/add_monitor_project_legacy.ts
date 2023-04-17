@@ -45,11 +45,11 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
       const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
 
       const { keep_stale: keepStale, project: projectId } = request.body || {};
-      const { publicLocations, privateLocations } = await getAllLocations(
+      const { publicLocations, privateLocations } = await getAllLocations({
         server,
         syntheticsMonitorClient,
-        savedObjectsClient
-      );
+        savedObjectsClient,
+      });
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({

@@ -55,6 +55,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.last_detected": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,

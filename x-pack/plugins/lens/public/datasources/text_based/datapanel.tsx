@@ -21,7 +21,6 @@ import {
   FieldListFilters,
   FieldIcon,
   GetCustomFieldType,
-  wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -132,9 +131,7 @@ export function TextBasedDataPanel({
             onClick={() => {}}
             fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
             fieldName={
-              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-                {wrapFieldNameOnDot(field.name)}
-              </EuiHighlight>
+              <EuiHighlight search={fieldSearchHighlight || ''}>{field.name}</EuiHighlight>
             }
           />
         </DragDrop>

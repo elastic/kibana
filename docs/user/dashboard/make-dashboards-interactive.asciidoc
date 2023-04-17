@@ -35,7 +35,7 @@ There are three types of controls:
 For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
-image::images/dashboard_controlsOptionsList_8.6.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
+image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
 
 * *Range slider* &mdash; Adds a slider that allows you to filter the data within a specified range of values. 
 +
@@ -48,7 +48,7 @@ image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control for t
 +
 For example, you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, and the global time filter is *Last 7 days*. When you add the time slider, you can click the previous and next buttons to advance the time range backward or forward, and click the play button to watch how the data changes over the last 7 days. 
 [role="screenshot"]
-image::images/dashboard_timeSliderControl_8.5.0.gif[Time slider control for the the Last 7 days]
+image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control for the the Last 7 days]
 
 [float]
 [[create-and-add-options-list-and-range-slider-controls]]
@@ -79,10 +79,6 @@ The *Control type* is automatically applied for the field you selected.
 . If you are creating an *Options list*, specify the additional settings:
 
 * To allow multiple options to be selected in the dropdown, select *Allow multiple selections in dropdown*.
-
-* To allow options to be inlcluded or excluded on the dashboard, select *Allow selections to be excluded*.
-
-* To allow an exists query to be created, select *Allow exists query*.
 
 * To populate the entire list of options, even when the list takes longer to populate than expected, select *Ignore timeout for results*.
 

@@ -29,19 +29,20 @@ describe('ALL - Inventory', () => {
 
     cy.wait(1000);
 
-    cy.getBySel('nodeContainer').click();
+    cy.getBySel('nodeContainer').first().click();
     cy.contains('Osquery').click();
     inputQuery('select * from uptime;');
 
     submitQuery();
     checkResults();
   });
+
   it('should be able to run the previously saved query', () => {
     cy.getBySel('toggleNavButton').click();
     cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
     cy.wait(500);
-    cy.getBySel('nodeContainer').click();
+    cy.getBySel('nodeContainer').first().click();
     cy.contains('Osquery').click();
 
     cy.getBySel('comboBoxInput').first().click();

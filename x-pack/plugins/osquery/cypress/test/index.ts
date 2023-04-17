@@ -17,4 +17,5 @@ export enum ROLES {
   detections_admin = 'detections_admin',
   admin = 'admin', // base: ['all']
   alert_test = 'alert_test',
+  none = 'none',
 }

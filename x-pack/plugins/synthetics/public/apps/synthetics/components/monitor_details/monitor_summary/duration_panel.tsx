@@ -16,6 +16,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface DurationPanelProps {
   from: string;
   to: string;
+  id: string;
 }
 
 export const DurationPanel = (props: DurationPanelProps) => {
@@ -34,6 +35,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={props.id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

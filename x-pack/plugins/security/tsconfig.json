@@ -52,6 +52,7 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

@@ -8,7 +8,7 @@
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
-import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
@@ -69,18 +69,13 @@ describe('Add exception using data views from rule details', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createCustomRuleEnabled(
-      {
-        ...getNewRule(),
-        customQuery: 'agent.name:*',
-        dataSource: { dataView: 'exceptions-*', type: 'dataView' },
-        runsEvery: {
-          interval: '10',
-          timeType: 'Seconds',
-          type: 's',
-        },
-      },
-      'rule_testing'
+    createRule(
+      getNewRule({
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      })
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();

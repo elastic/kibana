@@ -198,6 +198,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                 <div style={{ width: '300px' }}>
                   {!isSizeOptionDisabled && (
                     <EuiFormRow
+                      data-test-subj="eql-size-field"
                       label={i18n.EQL_OPTIONS_SIZE_LABEL}
                       helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
                     >
@@ -210,6 +211,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                     </EuiFormRow>
                   )}
                   <EuiFormRow
+                    data-test-subj="eql-event-category-field"
                     label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
                     helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
                   >
@@ -221,6 +223,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                     />
                   </EuiFormRow>
                   <EuiFormRow
+                    data-test-subj="eql-tiebreaker-field"
                     label={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
                     helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
                   >
@@ -232,6 +235,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                     />
                   </EuiFormRow>
                   <EuiFormRow
+                    data-test-subj="eql-timestamp-field"
                     label={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
                     helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
                   >

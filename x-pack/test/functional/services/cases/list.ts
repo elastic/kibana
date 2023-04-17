@@ -204,9 +204,10 @@ export function CasesTableServiceProvider(
     async changeStatus(status: CaseStatuses, index: number) {
       await this.openRowActions(index);
 
-      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await retry.waitFor('status panel exists', async () => {
+        return find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
+      });
 
-      await find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
       const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
 
       statusButton.click();
@@ -218,9 +219,10 @@ export function CasesTableServiceProvider(
     async changeSeverity(severity: CaseSeverity, index: number) {
       await this.openRowActions(index);
 
-      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await retry.waitFor('severity panel exists', async () => {
+        return find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
+      });
 
-      await find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
       const statusButton = await find.byCssSelector(
         '[data-test-subj*="case-action-severity-panel-"'
       );

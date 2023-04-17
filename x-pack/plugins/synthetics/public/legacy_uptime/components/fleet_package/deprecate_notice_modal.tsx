@@ -23,16 +23,16 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
       }
       onCancel={onCancel}
       onConfirm={() => {
-        application?.navigateToApp('uptime', { path: '/manage-monitors' });
+        application?.navigateToApp('synthetics');
       }}
-      confirmButtonText={GO_MONITOR_MANAGEMENT_TEXT}
+      confirmButtonText={GO_SYNTHETICS_TEXT}
       cancelButtonText={GO_BACK_TEXT}
     >
       <p>
         <FormattedMessage
           id="xpack.synthetics.deprecateNoticeModal.description"
           defaultMessage="The Elastic Synthetics integration is deprecated. Instead, you can now monitor endpoints,
-        pages, and user journeys directly from Uptime much more efficiently:"
+        pages, and user journeys directly in the Synthetics app much more efficiently:"
         />
       </p>
       <p>
@@ -82,7 +82,7 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
 };
 
 const HEADER_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.headerText', {
-  defaultMessage: 'Synthetic Monitoring is now available out of the box in Uptime',
+  defaultMessage: 'Synthetic Monitoring is now available out of the box in Synthetics',
 });
 
 const GO_BACK_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goBack', {
@@ -93,9 +93,6 @@ const READ_DOCS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.rea
   defaultMessage: 'read docs.',
 });
 
-const GO_MONITOR_MANAGEMENT_TEXT = i18n.translate(
-  'xpack.synthetics.deprecateNoticeModal.goToMonitorManagement',
-  {
-    defaultMessage: 'Go to Monitor Management',
-  }
-);
+const GO_SYNTHETICS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goToSynthetics', {
+  defaultMessage: 'Go to Synthetics',
+});

@@ -242,7 +242,7 @@ Object {
               <span
                 class="eui-textTruncate"
               >
-                Manage rules
+                Link rules
               </span>
             </span>
           </button>
@@ -309,7 +309,7 @@ Object {
             <span
               class="eui-textTruncate"
             >
-              Manage rules
+              Link rules
             </span>
           </span>
         </button>
@@ -433,7 +433,7 @@ Object {
               <span
                 class="eui-textTruncate"
               >
-                Manage rules
+                Link rules
               </span>
             </span>
           </button>
@@ -580,7 +580,7 @@ Object {
             <span
               class="eui-textTruncate"
             >
-              Manage rules
+              Link rules
             </span>
           </span>
         </button>
@@ -1022,7 +1022,7 @@ Object {
               <span
                 class="eui-textTruncate"
               >
-                Manage rules
+                Link rules
               </span>
             </span>
           </button>
@@ -1117,7 +1117,7 @@ Object {
             <span
               class="eui-textTruncate"
             >
-              Manage rules
+              Link rules
             </span>
           </span>
         </button>

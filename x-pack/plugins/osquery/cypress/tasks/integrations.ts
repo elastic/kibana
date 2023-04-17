@@ -12,6 +12,8 @@ import {
   CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
+  TOAST_CLOSE_BTN,
+  TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
 
 export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
@@ -30,6 +32,19 @@ export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();
+    }
+  });
+}
+
+export function closeToastIfVisible() {
+  cy.get('body').then(($body) => {
+    const button = $body.find(TOAST_CLOSE_BTN_SEL);
+    if (button.length) {
+      if (button.length > 1) {
+        cy.getBySel(TOAST_CLOSE_BTN).click({ multiple: true, force: true });
+      } else {
+        cy.getBySel(TOAST_CLOSE_BTN).click();
+      }
     }
   });
 }

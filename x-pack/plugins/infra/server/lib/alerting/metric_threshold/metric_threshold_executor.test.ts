@@ -690,6 +690,143 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  describe('querying with a groupBy parameter host.name and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string[] = ['host.name'],
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+    const instanceIdA = 'host-01';
+    const instanceIdB = 'host-02';
+
+    test('rule tags and source tags are combined in alert context', async () => {
+      setEvaluationResults([
+        {
+          'host-01': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-01' },
+            context: {
+              tags: ['host-01_tag1', 'host-01_tag2'],
+            },
+          },
+          'host-02': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-02' },
+            context: {
+              tags: ['host-02_tag1', 'host-02_tag2'],
+            },
+          },
+        },
+      ]);
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+        'host-01_tag1',
+        'host-01_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+        'host-02_tag1',
+        'host-02_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+    });
+  });
+
+  describe('querying without a groupBy parameter and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string = '',
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+
+    test('rule tags are added in alert context', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+      ]);
+
+      const instanceID = '*';
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceID).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+    });
+  });
+
   describe('querying with multiple criteria', () => {
     afterAll(() => clearInstances());
     const execute = (

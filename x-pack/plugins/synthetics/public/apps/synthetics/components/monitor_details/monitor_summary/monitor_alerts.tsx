@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { AlertActions } from './alert_actions';
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -36,8 +37,9 @@ export const MonitorAlerts = ({
   const theme = useTheme();
 
   const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
 
-  if (!monitorId) {
+  if (!monitorId || !selectedLocation) {
     return <EuiLoadingContent />;
   }
 
@@ -69,6 +71,14 @@ export const MonitorAlerts = ({
                         'kibana.alert.rule.category': ['Synthetics monitor status'],
                         'monitor.id': [monitorId],
                       },
+                      filters: [
+                        {
+                          field: 'observer.geo.name',
+                          // in 8.6.0, observer.geo.name was mapped to the id,
+                          // so we have to pass both values to maintain history
+                          values: [selectedLocation.label, selectedLocation.id],
+                        },
+                      ],
                     },
                   ]}
                 />
@@ -105,7 +115,15 @@ export const MonitorAlerts = ({
                   'kibana.alert.rule.category': ['Synthetics monitor status'],
                   'monitor.id': [monitorId],
                 },
-                filters: [{ field: 'kibana.alert.status', values: ['active'] }],
+                filters: [
+                  { field: 'kibana.alert.status', values: ['active'] },
+                  {
+                    field: 'observer.geo.name',
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
+                  },
+                ],
               },
             ]}
           />
@@ -129,7 +147,15 @@ export const MonitorAlerts = ({
                 dataType: 'alerts',
                 selectedMetricField: RECORDS_FIELD,
                 name: ACTIVE_LABEL,
-                filters: [{ field: 'kibana.alert.status', values: ['active'] }],
+                filters: [
+                  { field: 'kibana.alert.status', values: ['active'] },
+                  {
+                    field: 'observer.geo.name',
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
+                  },
+                ],
                 color: theme.eui.euiColorVis7_behindText,
               },
             ]}
@@ -152,7 +178,15 @@ export const MonitorAlerts = ({
                   'kibana.alert.rule.category': ['Synthetics monitor status'],
                   'monitor.id': [monitorId],
                 },
-                filters: [{ field: 'kibana.alert.status', values: ['recovered'] }],
+                filters: [
+                  { field: 'kibana.alert.status', values: ['recovered'] },
+                  {
+                    field: 'observer.geo.name',
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
+                  },
+                ],
               },
             ]}
           />
@@ -176,7 +210,15 @@ export const MonitorAlerts = ({
                 dataType: 'alerts',
                 selectedMetricField: 'recovered_alerts',
                 name: RECOVERED_LABEL,
-                filters: [{ field: 'kibana.alert.status', values: ['recovered'] }],
+                filters: [
+                  { field: 'kibana.alert.status', values: ['recovered'] },
+                  {
+                    field: 'observer.geo.name',
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
+                  },
+                ],
                 color: theme.eui.euiColorVis0_behindText,
               },
             ]}

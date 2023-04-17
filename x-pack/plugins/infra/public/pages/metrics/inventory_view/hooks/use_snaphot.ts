@@ -26,17 +26,26 @@ export interface UseSnapshotRequest
   timerange?: InfraTimerangeInput;
   requestTs?: number;
 }
-export function useSnapshot({
-  timerange,
-  currentTime,
-  accountId = '',
-  region = '',
-  groupBy = null,
-  sendRequestImmediately = true,
-  includeTimeseries = true,
-  requestTs,
-  ...args
-}: UseSnapshotRequest) {
+
+export interface UseSnapshotRequestOptions {
+  abortable?: boolean;
+}
+
+export function useSnapshot(
+  {
+    timerange,
+    currentTime,
+    accountId = '',
+    region = '',
+    groupBy = null,
+    sendRequestImmediately = true,
+    includeTimeseries = true,
+    dropPartialBuckets = true,
+    requestTs,
+    ...args
+  }: UseSnapshotRequest,
+  options?: UseSnapshotRequestOptions
+) {
   const decodeResponse = (response: any) => {
     return pipe(
       SnapshotNodeResponseRT.decode(response),
@@ -56,13 +65,17 @@ export function useSnapshot({
       lookbackSize: 5,
     },
     includeTimeseries,
+    dropPartialBuckets,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify(payload),
-    decodeResponse
+    decodeResponse,
+    undefined,
+    undefined,
+    options?.abortable
   );
 
   useEffect(() => {

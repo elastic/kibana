@@ -110,7 +110,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
           defaultMessage:
-            'The interval to check for changes in source indices when the transformation runs continuously.',
+            'The interval to check for changes in source indices when the transform runs continuously.',
         })}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',

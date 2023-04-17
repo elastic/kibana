@@ -101,6 +101,7 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
+
 describe('agent policy', () => {
   beforeEach(() => {
     getAgentPolicyUpdateMock().mockClear();
@@ -108,9 +109,9 @@ describe('agent policy', () => {
 
   describe('create', () => {
     it('is_managed present and false by default', async () => {
+      const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
-      const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       await expect(
@@ -169,7 +170,7 @@ describe('agent policy', () => {
       ]);
     });
 
-    it('should throw error for agent policy which has managed package poolicy', async () => {
+    it('should throw error for agent policy which has managed package policy', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
           id: 'package-1',
@@ -211,6 +212,20 @@ describe('agent policy', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, undefined);
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          attributes: expect.objectContaining({
+            fleet_server_hosts: ['http://fleetserver:8220'],
+            revision: NaN,
+            updated_by: 'system',
+          }),
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          references: [],
+          score: 1,
+          type: 'ingest_manager_settings',
+        },
+      ]);
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });

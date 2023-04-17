@@ -52,15 +52,47 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiFlexGroup direction="column" gutterSize="m">
                   {[
                     {
-                      title: i18n.translate('xpack.fleet.agentDetails.cpuLabel', {
-                        defaultMessage: 'CPU',
-                      }),
+                      title: (
+                        <EuiToolTip
+                          content={
+                            <FormattedMessage
+                              id="xpack.fleet.agentDetails.cpuTooltip"
+                              defaultMessage="Average CPU usage in the last 5 minutes"
+                            />
+                          }
+                        >
+                          <span>
+                            <FormattedMessage
+                              id="xpack.fleet.agentDetails.cpuTitle"
+                              defaultMessage="CPU"
+                            />
+                            &nbsp;
+                            <EuiIcon type="iInCircle" />
+                          </span>
+                        </EuiToolTip>
+                      ),
                       description: formatAgentCPU(agent.metrics, agentPolicy),
                     },
                     {
-                      title: i18n.translate('xpack.fleet.agentDetails.memoryLabel', {
-                        defaultMessage: 'Memory',
-                      }),
+                      title: (
+                        <EuiToolTip
+                          content={
+                            <FormattedMessage
+                              id="xpack.fleet.agentDetails.memoryTooltip"
+                              defaultMessage="Average memory usage in the last 5 minutes"
+                            />
+                          }
+                        >
+                          <span>
+                            <FormattedMessage
+                              id="xpack.fleet.agentDetails.memoryTitle"
+                              defaultMessage="Memory"
+                            />
+                            &nbsp;
+                            <EuiIcon type="iInCircle" />
+                          </span>
+                        </EuiToolTip>
+                      ),
                       description: formatAgentMemory(agent.metrics, agentPolicy),
                     },
                   ].map(({ title, description }) => {

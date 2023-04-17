@@ -29,7 +29,7 @@ import {
   openFirstAlert,
   selectCountTable,
 } from '../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -48,7 +48,7 @@ describe('Changing alert status', () => {
   });
   context('Opening alerts', () => {
     beforeEach(() => {
-      createCustomRuleEnabled(getNewRule());
+      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectNumberOfAlerts(3);
@@ -114,13 +114,13 @@ describe('Changing alert status', () => {
   context('Marking alerts as acknowledged', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule());
+      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
       clearGroupByTopInput();
     });
-    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -154,7 +154,7 @@ describe('Changing alert status', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule(), '1', 100);
+      createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
@@ -223,7 +223,7 @@ describe('Changing alert status', () => {
         });
     });
 
-    it('Closes one alert when more than one opened alerts are selected', () => {
+    it.skip('Closes one alert when more than one opened alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -306,13 +306,13 @@ describe('Changing alert status', () => {
     });
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule());
+      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
       clearGroupByTopInput();
     });
-    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {

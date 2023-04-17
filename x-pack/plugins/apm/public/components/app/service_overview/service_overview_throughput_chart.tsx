@@ -21,7 +21,7 @@ import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
@@ -60,12 +60,17 @@ export function ServiceOverviewThroughputChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } =
+    useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE);
+      }
+
       if (serviceName && transactionType && start && end) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/throughput',
@@ -98,6 +103,7 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       offset,
       transactionName,
       comparisonEnabled,
@@ -111,7 +117,7 @@ export function ServiceOverviewThroughputChart({
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
-      data: data.currentPeriod,
+      data: data?.currentPeriod ?? [],
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
@@ -121,7 +127,7 @@ export function ServiceOverviewThroughputChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod,
+            data: data?.previousPeriod ?? [],
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,

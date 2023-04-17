@@ -9,17 +9,12 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
-import { GROUP_BY, TECHNICAL_PREVIEW } from '../translations';
+import * as i18n from '../translations';
 import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
-
-const none = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOptionName', {
-  defaultMessage: 'None',
-});
 
 interface GroupSelectorProps {
   fields: FieldSpec[];
@@ -34,17 +29,38 @@ const GroupsSelectorComponent = ({
   groupSelected = 'none',
   onGroupChange,
   options,
-  title = '',
+  title = i18n.GROUP_BY,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
       {
         id: 'firstPanel',
+        title: (
+          <EuiFlexGroup
+            component="span"
+            justifyContent="spaceBetween"
+            gutterSize="none"
+            style={{ lineHeight: 1 }}
+          >
+            <EuiFlexItem grow={false} component="p" style={{ lineHeight: 1.5 }}>
+              {i18n.SELECT_FIELD.toUpperCase()}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <EuiBetaBadge
+                label={i18n.BETA}
+                size="s"
+                tooltipContent={i18n.BETA_TOOL_TIP}
+                tooltipPosition="left"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         items: [
           {
             'data-test-subj': 'panel-none',
-            name: none,
+            name: i18n.NONE,
             icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: () => onGroupChange('none'),
           },
@@ -56,9 +72,7 @@ const GroupsSelectorComponent = ({
           })),
           {
             'data-test-subj': `panel-custom`,
-            name: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByOptionName', {
-              defaultMessage: 'Custom field',
-            }),
+            name: i18n.CUSTOM_FIELD,
             icon: 'empty',
             panel: 'customPanel',
           },
@@ -66,9 +80,7 @@ const GroupsSelectorComponent = ({
       },
       {
         id: 'customPanel',
-        title: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByPanelTitle', {
-          defaultMessage: 'Group By Custom Field',
-        }),
+        title: i18n.GROUP_BY_CUSTOM_FIELD,
         width: 685,
         content: (
           <CustomFieldPanel
@@ -101,12 +113,16 @@ const GroupsSelectorComponent = ({
         iconType="arrowDown"
         onClick={onButtonClick}
         title={
-          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
+          groupSelected !== 'none' && selectedOption.length > 0
+            ? selectedOption[0].label
+            : i18n.NONE
         }
         size="xs"
       >
-        {`${title ?? GROUP_BY}: ${
-          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
+        {`${title}: ${
+          groupSelected !== 'none' && selectedOption.length > 0
+            ? selectedOption[0].label
+            : i18n.NONE
         }`}
       </StyledEuiButtonEmpty>
     ),
@@ -114,25 +130,18 @@ const GroupsSelectorComponent = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem>
-        <EuiPopover
-          button={button}
-          closePopover={closePopover}
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-        >
-          <StyledContextMenu
-            data-test-subj="groupByContextMenu"
-            initialPanelId="firstPanel"
-            panels={panels}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiBetaBadge label={TECHNICAL_PREVIEW} size="s" style={{ marginTop: 2 }} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPopover
+      button={button}
+      closePopover={closePopover}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+    >
+      <StyledContextMenu
+        data-test-subj="groupByContextMenu"
+        initialPanelId="firstPanel"
+        panels={panels}
+      />
+    </EuiPopover>
   );
 };
 

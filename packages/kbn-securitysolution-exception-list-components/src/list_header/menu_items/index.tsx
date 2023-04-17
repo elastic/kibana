@@ -81,7 +81,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               if (typeof onManageRules === 'function') onManageRules();
             }}
           >
-            {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
+            {i18n.EXCEPTION_LIST_HEADER_LINK_RULES_BUTTON}
           </EuiButton>
         </EuiFlexItem>
       )}

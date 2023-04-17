@@ -22,6 +22,7 @@ import {
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
 } from '../../../helpers';
+import { SAME_FAMILY } from '../../same_family/translations';
 import { HOT, WARM, COLD, FROZEN, UNMANAGED } from '../../../ilm_phases_empty_prompt/translations';
 import * as i18n from '../translations';
 import type {
@@ -111,6 +112,9 @@ export const getCustomMarkdownTableRows = (
     )
     .join('\n');
 
+export const getSameFamilyBadge = (enrichedFieldMetadata: EnrichedFieldMetadata): string =>
+  enrichedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
+
 export const getIncompatibleMappingsMarkdownTableRows = (
   incompatibleMappings: EnrichedFieldMetadata[]
 ): string =>
@@ -119,7 +123,7 @@ export const getIncompatibleMappingsMarkdownTableRows = (
       (x) =>
         `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(x.type)} | ${getCodeFormattedValue(
           x.indexFieldType
-        )} |`
+        )} ${getSameFamilyBadge(x)} |`
     )
     .join('\n');
 

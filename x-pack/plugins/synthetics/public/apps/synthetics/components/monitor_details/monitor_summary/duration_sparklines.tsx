@@ -16,6 +16,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface DurationSparklinesProps {
   from: string;
   to: string;
+  id: string;
 }
 
 export const DurationSparklines = (props: DurationSparklinesProps) => {
@@ -36,6 +37,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
   return (
     <>
       <ExploratoryViewEmbeddable
+        id={props.id}
         reportType={ReportTypes.KPI}
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}

@@ -10,7 +10,7 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createCustomRuleEnabled } from './api_calls/rules';
+import { createRule } from './api_calls/rules';
 import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
@@ -148,6 +148,6 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', 100);
+  createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
   refreshUntilAlertsIndexExists();
 };

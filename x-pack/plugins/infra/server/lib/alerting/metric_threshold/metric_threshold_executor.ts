@@ -287,9 +287,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
-            ? alertResults[0][group].context
-            : null
-          : null;
+            ? alertResults[0][group].context ?? {}
+            : {}
+          : {};
+
+        additionalContext.tags = Array.from(
+          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
+        );
 
         const alert = alertFactory(`${group}`, reason, actionGroupId, additionalContext);
         const alertUuid = getAlertUuid(group);

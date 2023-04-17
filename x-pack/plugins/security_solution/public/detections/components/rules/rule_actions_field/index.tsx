@@ -64,6 +64,10 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
+  // Workaround for setAlertActionsProperty being fired with prevProps when followed by setActionIdByIndex
+  // For details see: https://github.com/elastic/kibana/issues/142217
+  const [isInitializingAction, setIsInitializingAction] = useState(false);
+
   const actions: RuleAction[] = useMemo(
     () => (!isEmpty(field.value) ? (field.value as RuleAction[]) : []),
     [field.value]
@@ -83,6 +87,9 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
+      if (isEmpty(updatedActions[index].params)) {
+        setIsInitializingAction(true);
+      }
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
@@ -98,24 +105,30 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     (key: string, value: RuleActionParam, index: number) => {
       // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
-      // and triggers validation after params have been updated
-      setTimeout(
-        () =>
-          field.setValue((prevValue: RuleAction[]) => {
-            const updatedActions = [...prevValue];
-            updatedActions[index] = {
-              ...updatedActions[index],
-              params: {
-                ...updatedActions[index].params,
-                [key]: value,
-              },
-            };
-            return updatedActions;
-          }),
-        0
-      );
+      // and triggers validation after params have been updated, however it introduced a new issue where any additional input
+      // would result in the cursor jumping to the end of the text area (https://github.com/elastic/kibana/issues/149885)
+      const updateValue = () => {
+        field.setValue((prevValue: RuleAction[]) => {
+          const updatedActions = [...prevValue];
+          updatedActions[index] = {
+            ...updatedActions[index],
+            params: {
+              ...updatedActions[index].params,
+              [key]: value,
+            },
+          };
+          return updatedActions;
+        });
+      };
+
+      if (isInitializingAction) {
+        setTimeout(updateValue, 0);
+        setIsInitializingAction(false);
+      } else {
+        updateValue();
+      }
     },
-    [field]
+    [field, isInitializingAction]
   );
 
   const actionForm = useMemo(

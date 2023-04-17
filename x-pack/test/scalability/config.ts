@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
@@ -42,10 +42,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   }
 
   const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
+  const configPath = journey.configPath ?? 'x-pack/performance/journeys/login.ts';
 
-  const baseConfig = (
-    await readConfigFile(require.resolve('../../performance/journeys/login.ts'))
-  ).getAll();
+  const baseConfig = (await readConfigFile(path.resolve(REPO_ROOT, configPath))).getAll();
 
   return {
     ...baseConfig,
@@ -63,10 +62,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...baseConfig.kbnTestServer,
+      serverArgs: [
+        ...baseConfig.kbnTestServer.serverArgs,
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(baseConfig.kbnTestServer.serverArgs),
+          // Enable logger for the Ops Metrics
+          {
+            name: 'metrics.ops',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
+      ],
       sourceArgs: [
         ...baseConfig.kbnTestServer.sourceArgs,
-        '--no-base-path',
-        '--env.name=development',
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],

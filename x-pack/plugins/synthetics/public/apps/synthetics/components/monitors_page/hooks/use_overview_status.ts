@@ -15,7 +15,7 @@ import {
   selectOverviewStatus,
 } from '../../../state/overview_status';
 
-export function useOverviewStatus() {
+export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
 
   const { status, error, loaded } = useSelector(selectOverviewStatus);
@@ -24,16 +24,16 @@ export function useOverviewStatus() {
 
   const dispatch = useDispatch();
   const reload = useCallback(() => {
-    dispatch(fetchOverviewStatusAction.get(pageState));
-  }, [dispatch, pageState]);
+    dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+  }, [dispatch, pageState, scopeStatusByLocation]);
 
   useEffect(() => {
     if (loaded) {
-      dispatch(quietFetchOverviewStatusAction.get(pageState));
+      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     } else {
       reload();
     }
-  }, [dispatch, reload, lastRefresh, pageState, loaded]);
+  }, [dispatch, reload, lastRefresh, pageState, loaded, scopeStatusByLocation]);
 
   return {
     status,

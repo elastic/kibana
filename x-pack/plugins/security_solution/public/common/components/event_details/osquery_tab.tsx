@@ -117,7 +117,6 @@ export const useOsqueryTab = ({
   const actionItems = actionsData?.data.items || [];
 
   const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
-  const agentIds = expandedEventFieldsObject.agent?.id;
 
   return {
     id: EventsViewType.osqueryView,
@@ -135,12 +134,7 @@ export const useOsqueryTab = ({
             emptyPrompt
           ) : (
             <>
-              <OsqueryResults
-                agentIds={agentIds}
-                ruleName={ruleName}
-                actionItems={actionItems}
-                ecsData={ecsData}
-              />
+              <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
               <EuiSpacer size="s" />
             </>
           )}

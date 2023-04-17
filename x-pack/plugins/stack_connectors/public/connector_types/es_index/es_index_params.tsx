@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { isEmpty } from 'lodash';
 import {
   EuiIcon,
   EuiText,
@@ -45,10 +46,25 @@ export const IndexParamsFields = ({
   );
   const [isActionConnectorChanged, setIsActionConnectorChanged] = useState<boolean>(false);
 
-  const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined) =>
-    doc && doc.length > 0 ? (doc[0] as unknown as string) : undefined;
+  const getDocumentToIndex = (docs: Array<Record<string, any>> | undefined) => {
+    // 'documents' param is stored as an array of objects but the JSON editor expects a single
+    // stringified object
 
-  const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(
+    // check that param is a non-empty array
+    return docs && docs.length > 0
+      ? // if the array entry is a string, we can pass it directly to the JSON editor
+        typeof docs[0] === 'string'
+        ? docs[0]
+        : // otherwise check that the array entry is non-empty as sometimes we
+        // use an empty object to trigger validation but we don't want to auto-populate with an empty object
+        !isEmpty(docs[0])
+        ? // if non-empty object, stringify it into format that JSON editor expects
+          JSON.stringify(docs[0], null, 2)
+        : null
+      : undefined;
+  };
+
+  const [documentToIndex, setDocumentToIndex] = useState<string | undefined | null>(
     getDocumentToIndex(documents)
   );
   const [alertHistoryIndexSuffix, setAlertHistoryIndexSuffix] = useState<string>(
@@ -58,9 +74,6 @@ export const IndexParamsFields = ({
 
   useEffect(() => {
     setDocumentToIndex(getDocumentToIndex(documents));
-    if (documents === null) {
-      setDocumentToIndex('{}');
-    }
   }, [documents]);
 
   useEffect(() => {
@@ -77,10 +90,14 @@ export const IndexParamsFields = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector?.id]);
 
-  const onDocumentsChange = (updatedDocuments: string) => {
+  const onDocumentsChange = (updatedDocuments: string | null) => {
     try {
-      const documentsJSON = JSON.parse(updatedDocuments);
-      editAction('documents', [documentsJSON], index);
+      if (updatedDocuments != null) {
+        const documentsJSON = JSON.parse(updatedDocuments);
+        editAction('documents', [documentsJSON], index);
+      } else {
+        editAction('documents', updatedDocuments, index);
+      }
       setDocumentToIndex(updatedDocuments);
     } catch (e) {
       // set document as empty to turn on the validation for non empty valid JSON object
@@ -180,11 +197,7 @@ export const IndexParamsFields = ({
       messageVariables={messageVariables}
       paramsProperty={'documents'}
       data-test-subj="documentToIndex"
-      inputTargetValue={
-        documentToIndex === null
-          ? '{}' // need this to trigger validation
-          : documentToIndex
-      }
+      inputTargetValue={documentToIndex}
       label={documentsFieldLabel}
       aria-label={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
         defaultMessage: 'Code editor',
@@ -202,7 +215,7 @@ export const IndexParamsFields = ({
       onBlur={() => {
         if (!documentToIndex) {
           // set document as empty to turn on the validation for non empty valid JSON object
-          onDocumentsChange('{}');
+          onDocumentsChange(null);
         }
       }}
     />
