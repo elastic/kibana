@@ -18,8 +18,8 @@ import type { LocationDescriptor, History } from 'history';
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
 import {
-  TableListView,
-  Props as TableListViewProps,
+  TableList,
+  TableListProps as TableListProps,
   UserContentCommonSchema,
 } from './table_list_view';
 
@@ -49,7 +49,7 @@ interface Router {
   };
 }
 
-const requiredProps: TableListViewProps = {
+const requiredProps: TableListProps = {
   entityName: 'test',
   entityNamePlural: 'tests',
   listingLimit: 500,
@@ -75,13 +75,10 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  const setup = registerTestBed<string, TableListViewProps>(
-    WithServices<TableListViewProps>(TableListView),
-    {
-      defaultProps: { ...requiredProps },
-      memoryRouter: { wrapComponent: true },
-    }
-  );
+  const setup = registerTestBed<string, TableListProps>(WithServices<TableListProps>(TableList), {
+    defaultProps: { ...requiredProps },
+    memoryRouter: { wrapComponent: true },
+  });
 
   test('render default empty prompt', async () => {
     let testBed: TestBed;
@@ -340,8 +337,8 @@ describe('TableListView', () => {
   });
 
   describe('column sorting', () => {
-    const setupColumnSorting = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupColumnSorting = registerTestBed<string, TableListProps>(
+      WithServices<TableListProps>(TableList, {
         TagList: getTagList({ references: [] }),
       }),
       {
@@ -549,8 +546,8 @@ describe('TableListView', () => {
   });
 
   describe('content editor', () => {
-    const setupInspector = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView),
+    const setupInspector = registerTestBed<string, TableListProps>(
+      WithServices<TableListProps>(TableList),
       {
         defaultProps: { ...requiredProps },
         memoryRouter: { wrapComponent: true },
@@ -600,8 +597,8 @@ describe('TableListView', () => {
   });
 
   describe('tag filtering', () => {
-    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupTagFiltering = registerTestBed<string, TableListProps>(
+      WithServices<TableListProps>(TableList, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
@@ -752,8 +749,8 @@ describe('TableListView', () => {
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
-      WithServices<TableListViewProps>(TableListView, {
+    const setupTagFiltering = registerTestBed<string, TableListProps>(
+      WithServices<TableListProps>(TableList, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },

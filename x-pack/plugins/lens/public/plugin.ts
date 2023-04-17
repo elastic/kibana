@@ -244,7 +244,8 @@ export interface LensPublicStart {
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
-  dataViews: DataView
+  dataViews: DataView,
+  excludedVisualizations?: string[]
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -609,15 +610,13 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (
-            context: VisualizeFieldContext | VisualizeEditorContext,
-            dataView: DataView
-          ) => {
+          suggestions: (context, dataView, excludedVisualizations) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
               dataView,
+              excludedVisualizations,
             });
           },
         };

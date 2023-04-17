@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { TableListView } from './table_list_view';
+export { TableList, TableListView } from './table_list_view';
 
 export type {
-  Props as TableListViewProps,
+  TableListProps as TableListProps,
   State as TableListViewState,
   UserContentCommonSchema,
 } from './table_list_view';

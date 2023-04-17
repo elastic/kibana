@@ -21,7 +21,7 @@ import {
   GaugeColorModes,
 } from '../../common';
 import GaugeComponent from './gauge_component';
-import { Chart, Goal } from '@elastic/charts';
+import { Chart, Goal, Settings } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -403,6 +403,21 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
       expect(goal.prop('bands')).toEqual([0, 2, 6, 8, 10]);
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallowWithIntl(
+        <GaugeComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

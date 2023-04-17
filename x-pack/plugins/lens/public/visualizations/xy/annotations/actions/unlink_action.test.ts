@@ -69,8 +69,6 @@ describe('annotation group unlink actions', () => {
 
     expect(setState).toHaveBeenCalledWith({ ...state, layers: [byValueLayer] });
 
-    expect(toasts.addSuccess).toHaveBeenCalledWith(
-      `Unlinked "${byRefLayer.__lastSaved.title}" from library`
-    );
+    expect(toasts.addSuccess).toHaveBeenCalledWith(`Unlinked "${byRefLayer.__lastSaved.title}"`);
   });
 });

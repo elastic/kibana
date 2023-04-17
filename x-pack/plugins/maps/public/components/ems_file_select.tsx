@@ -98,7 +98,7 @@ export class EMSFileSelect extends Component<Props, State> {
         isClearable={false}
         singleSelection={true}
         isDisabled={this.state.emsFileOptions.length === 0}
-        data-test-subj="emsVectorComboBox"
+        data-test-subj="emsFileSelect"
       />
     );
   }
