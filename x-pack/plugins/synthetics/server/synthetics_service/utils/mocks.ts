@@ -17,7 +17,7 @@ export const mockEncryptedSO = (
       find: jest.fn().mockReturnValue({
         async *[Symbol.asyncIterator]() {
           yield {
-            saved_objects: [data],
+            saved_objects: data === null ? [] : [data],
           };
         },
       }),
