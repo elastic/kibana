@@ -82,16 +82,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const hooksForm = useHookForm<LiveQueryFormFields>();
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    resetField,
-    clearErrors,
-    getFieldState,
-    register,
-    formState: { isSubmitting },
-  } = hooksForm;
+  const { handleSubmit, watch, setValue, resetField, clearErrors, getFieldState, register } =
+    hooksForm;
 
   const canRunSingleQuery = useMemo(
     () =>
@@ -196,7 +188,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <EuiButton
               id="submit-button"
               disabled={!enabled}
-              isLoading={isSubmitting}
+              isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
             >
               <FormattedMessage
@@ -215,7 +207,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       resultsStatus,
       handleShowSaveQueryFlyout,
       enabled,
-      isSubmitting,
+      isLoading,
       handleSubmit,
       onSubmit,
     ]
