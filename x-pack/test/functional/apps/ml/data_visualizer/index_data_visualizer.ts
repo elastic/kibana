@@ -141,6 +141,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/137032
+  // Failing: See https://github.com/elastic/kibana/issues/154452
   describe.skip('index based', function () {
     this.tags(['ml']);
     before(async () => {
