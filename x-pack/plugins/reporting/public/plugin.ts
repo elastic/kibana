@@ -268,7 +268,6 @@ export class ReportingPublicPlugin
         catchError((err) => handleError(notifications, err, core.theme))
       )
       .subscribe();
-
     return this.getContract();
   }
 
