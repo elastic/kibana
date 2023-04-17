@@ -35,7 +35,7 @@ import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_set
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
 interface OwnProps {
-  currentAlertStatusFilterValue?: Status;
+  currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
   getGrouping: (

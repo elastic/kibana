@@ -173,7 +173,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (arePageFiltersEnabled) {
       return detectionPageFilters;
     }
-    return buildAlertStatusFilter(statusFilter);
+    return buildAlertStatusFilter(statusFilter[0] ?? 'open');
   }, [statusFilter, detectionPageFilters, arePageFiltersEnabled]);
 
   useEffect(() => {
@@ -326,7 +326,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <AlertsTableFilterGroup
-              status={statusFilter[0] ?? ''}
+              status={statusFilter[0] ?? 'open'}
               onFilterGroupChanged={onFilterGroupChangedCallback}
             />
           </EuiFlexItem>
