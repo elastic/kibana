@@ -47,6 +47,12 @@ export type DashboardAppLocatorParams = Partial<
   dashboardId?: string;
 
   /**
+   * Set to `true`, if you do not have a dashboardId and you wish to navigate to the listing page instead of a
+   * new unsaved dashboard.
+   */
+  showLanding?: boolean;
+
+  /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
    * whether to hash the data in the url to avoid url length issues.
    */
@@ -100,11 +106,12 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       useHash: paramsUseHash,
       preserveSavedFilters,
       dashboardId,
+      showLanding,
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
 
-    const hash = dashboardId ? `view/${dashboardId}` : `create`;
+    const hash = dashboardId ? `view/${dashboardId}` : showLanding ? `` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (preserveSavedFilters === false) return [];
