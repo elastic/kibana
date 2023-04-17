@@ -15,9 +15,9 @@ import {
 } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
 import {
   ExploreTableColumns,
@@ -37,9 +37,71 @@ export interface Sorting<T extends ExploreTableItem = ExploreTableItem> {
 }
 
 interface TableParams<T extends ExploreTableItem = ExploreTableItem> {
-  parseResponseToItems(response: IKibanaSearchResponse): T[];
-  requestParams(timeRange: TimeRange, sorting: Sorting<T> | null): IKibanaSearchRequest;
+  parseResponse(response: IKibanaSearchResponse): { items: T[]; totalCount: number };
+  requestParams(props: {
+    pageIndex: number;
+    pageSize: number;
+    search: string;
+    sorting: Sorting<T> | null;
+    timeRange: TimeRange;
+  }): IKibanaSearchRequest;
 }
+
+const getSearchQueryRequestParams = (search: string): { include?: string } => {
+  const createRegexQuery = (queryString: string) => {
+    let query = queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+    query = query
+      .split('')
+      .map((char) => {
+        if (/[a-z]/.test(char)) {
+          return `[${char}${char.toUpperCase()}]`;
+        }
+        return char;
+      })
+      .join('');
+    query = `.*${query}.*`;
+    if (queryString.length > 2) {
+      query = `([a-zA-Z]+ )+?${query}`;
+    }
+
+    return query;
+  };
+
+  return { include: search ? createRegexQuery(search) : undefined };
+};
+const getTotalCountRequestParams = (field: string) => ({
+  totalCount: {
+    cardinality: {
+      field,
+    },
+  },
+});
+const getPaginationRequestSizeParams = (pageIndex: number, pageSize: number) => ({
+  size: (pageIndex + 1) * pageSize,
+});
+const getPaginationRequestParams = (pageIndex: number, pageSize: number) => ({
+  aggs: {
+    sort: {
+      bucket_sort: {
+        from: pageIndex * pageSize,
+        size: pageSize,
+      },
+    },
+  },
+});
+
+const getBaseRequestParams = (timeRange: TimeRange) => ({
+  query: {
+    range: {
+      '@timestamp': {
+        gte: timeRange.from,
+        lt: timeRange.to,
+      },
+    },
+  },
+  size: 0,
+  track_total_hits: false,
+});
 
 const tablesParams: {
   [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;
@@ -48,20 +110,27 @@ const tablesParams: {
   [ExploreTables.WorsePerformers]: TableParams<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
-    parseResponseToItems: (
+    parseResponse: (
       response: IKibanaSearchResponse<{
-        aggregations: { searches: { buckets: Array<{ doc_count: number; key: string }> } };
+        aggregations: {
+          searches: { buckets: Array<{ doc_count: number; key: string }> };
+          totalCount: { value: number };
+        };
       }>
-    ) =>
-      response.rawResponse.aggregations.searches.buckets.map((bucket) => ({
+    ) => ({
+      items: response.rawResponse.aggregations.searches.buckets.map((bucket) => ({
         [ExploreTableColumns.count]: bucket.doc_count,
         [ExploreTableColumns.searchTerms]: bucket.key,
       })),
-    requestParams: (timeRange, sorting) => ({
+      totalCount: response.rawResponse.aggregations.totalCount.value,
+    }),
+    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
       params: {
         aggs: {
           searches: {
             terms: {
+              ...getSearchQueryRequestParams(search),
+              ...getPaginationRequestSizeParams(pageIndex, pageSize),
               field: 'search.query',
               order: sorting
                 ? {
@@ -69,42 +138,42 @@ const tablesParams: {
                       sorting.direction,
                   }
                 : undefined,
-              size: BASE_PAGE_SIZE,
             },
+            ...getPaginationRequestParams(pageIndex, pageSize),
           },
+          ...getTotalCountRequestParams('search.query'),
         },
-        query: {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-              lt: timeRange.to,
-            },
-          },
-        },
-        size: 0,
-        track_total_hits: false,
+        ...getBaseRequestParams(timeRange),
       },
     }),
   },
   [ExploreTables.WorsePerformers]: {
-    parseResponseToItems: (
+    parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
-          formula: { searches: { buckets: Array<{ doc_count: number; key: string }> } };
+          formula: {
+            searches: { buckets: Array<{ doc_count: number; key: string }> };
+            totalCount: { value: number };
+          };
         };
       }>
-    ) =>
-      response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
+    ) => ({
+      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
         [ExploreTableColumns.count]: bucket.doc_count,
         [ExploreTableColumns.query]: bucket.key,
       })),
-    requestParams: (timeRange, sorting) => ({
+      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+    }),
+    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
       params: {
         aggs: {
           formula: {
             aggs: {
+              ...getTotalCountRequestParams('search.query'),
               searches: {
                 terms: {
+                  ...getSearchQueryRequestParams(search),
+                  ...getPaginationRequestSizeParams(pageIndex, pageSize),
                   field: 'search.query',
                   order: sorting
                     ? {
@@ -112,45 +181,44 @@ const tablesParams: {
                           sorting?.direction,
                       }
                     : undefined,
-                  size: BASE_PAGE_SIZE,
                 },
+                ...getPaginationRequestParams(pageIndex, pageSize),
               },
             },
             filter: { term: { 'search.results.total_results': '0' } },
           },
         },
-        query: {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-              lt: timeRange.to,
-            },
-          },
-        },
-        size: 0,
-        track_total_hits: false,
+        ...getBaseRequestParams(timeRange),
       },
     }),
   },
   [ExploreTables.TopClicked]: {
-    parseResponseToItems: (
+    parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
-          formula: { searches: { buckets: Array<{ doc_count: number; key: string }> } };
+          formula: {
+            searches: { buckets: Array<{ doc_count: number; key: string }> };
+            totalCount: { value: number };
+          };
         };
       }>
-    ) =>
-      response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
+    ) => ({
+      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
         [ExploreTableColumns.count]: bucket.doc_count,
         [ExploreTableColumns.page]: bucket.key,
       })),
-    requestParams: (timeRange, sorting) => ({
+      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+    }),
+    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
       params: {
         aggs: {
           formula: {
             aggs: {
+              ...getTotalCountRequestParams('search.results.items.page.url'),
               searches: {
                 terms: {
+                  ...getSearchQueryRequestParams(search),
+                  ...getPaginationRequestSizeParams(pageIndex, pageSize),
                   field: 'search.results.items.page.url',
                   order: sorting
                     ? {
@@ -158,45 +226,44 @@ const tablesParams: {
                           sorting.direction,
                       }
                     : undefined,
-                  size: BASE_PAGE_SIZE,
                 },
+                ...getPaginationRequestParams(pageIndex, pageSize),
               },
             },
             filter: { term: { 'event.action': 'search_click' } },
           },
         },
-        query: {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-              lt: timeRange.to,
-            },
-          },
-        },
-        size: 0,
-        track_total_hits: false,
+        ...getBaseRequestParams(timeRange),
       },
     }),
   },
   [ExploreTables.TopReferrers]: {
-    parseResponseToItems: (
+    parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
-          formula: { searches: { buckets: Array<{ doc_count: number; key: string }> } };
+          formula: {
+            searches: { buckets: Array<{ doc_count: number; key: string }> };
+            totalCount: { value: number };
+          };
         };
       }>
-    ) =>
-      response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
+    ) => ({
+      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
         [ExploreTableColumns.sessions]: bucket.doc_count,
         [ExploreTableColumns.page]: bucket.key,
       })),
-    requestParams: (timeRange, sorting) => ({
+      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+    }),
+    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
       params: {
         aggs: {
           formula: {
             aggs: {
+              ...getTotalCountRequestParams('page.referrer'),
               searches: {
                 terms: {
+                  ...getSearchQueryRequestParams(search),
+                  ...getPaginationRequestSizeParams(pageIndex, pageSize),
                   field: 'page.referrer',
                   order: sorting
                     ? {
@@ -204,23 +271,14 @@ const tablesParams: {
                           sorting?.direction,
                       }
                     : undefined,
-                  size: BASE_PAGE_SIZE,
                 },
+                ...getPaginationRequestParams(pageIndex, pageSize),
               },
             },
             filter: { term: { 'event.action': 'page_view' } },
           },
         },
-        query: {
-          range: {
-            '@timestamp': {
-              gte: timeRange.from,
-              lt: timeRange.to,
-            },
-          },
-        },
-        size: 0,
-        track_total_hits: false,
+        ...getBaseRequestParams(timeRange),
       },
     }),
   },
@@ -230,18 +288,27 @@ export interface AnalyticsCollectionExploreTableLogicValues {
   dataView: DataView | null;
   isLoading: boolean;
   items: ExploreTableItem[];
+  pageIndex: number;
+  pageSize: number;
+  search: string;
   selectedTable: ExploreTables | null;
   sorting: Sorting | null;
+  totalItemsCount: number;
 }
 
 export interface AnalyticsCollectionExploreTableLogicActions {
+  reset(): void;
   setDataView(dataView: DataView): { dataView: DataView };
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
+  setPageIndex(index: number): { index: number };
+  setPageSize(size: number): { size: number };
+  setSearch(search: string): { search: string };
   setSelectedTable(
     id: ExploreTables | null,
     sorting?: Sorting
   ): { id: ExploreTables | null; sorting?: Sorting };
   setSorting(sorting?: Sorting): { sorting?: Sorting };
+  setTotalItemCount(count: number): { count: number };
 }
 
 export const AnalyticsCollectionExploreTableLogic = kea<
@@ -254,8 +321,12 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     reset: true,
     setDataView: (dataView) => ({ dataView }),
     setItems: (items) => ({ items }),
+    setPageIndex: (index) => ({ index }),
+    setPageSize: (size) => ({ size }),
+    setSearch: (search) => ({ search }),
     setSelectedTable: (id, sorting) => ({ id, sorting }),
     setSorting: (sorting) => ({ sorting }),
+    setTotalItemCount: (count) => ({ count }),
   },
   listeners: ({ actions, values }) => {
     const fetchItems = () => {
@@ -263,23 +334,33 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         return;
       }
 
-      const { requestParams, parseResponseToItems } = tablesParams[
-        values.selectedTable
-      ] as TableParams;
+      const { requestParams, parseResponse } = tablesParams[values.selectedTable] as TableParams;
       const timeRange = AnalyticsCollectionToolbarLogic.values.timeRange;
 
       const search$ = KibanaLogic.values.data.search
-        .search(requestParams(timeRange, values.sorting), {
-          indexPattern: values.dataView || undefined,
-          sessionId: AnalyticsCollectionToolbarLogic.values.searchSessionId,
-        })
+        .search(
+          requestParams({
+            pageIndex: values.pageIndex,
+            pageSize: values.pageSize,
+            search: values.search,
+            sorting: values.sorting,
+            timeRange,
+          }),
+          {
+            indexPattern: values.dataView || undefined,
+            sessionId: AnalyticsCollectionToolbarLogic.values.searchSessionId,
+          }
+        )
         .subscribe({
           error: (e) => {
             KibanaLogic.values.data.search.showError(e);
           },
           next: (response) => {
             if (isCompleteResponse(response)) {
-              actions.setItems(parseResponseToItems(response));
+              const { items, totalCount } = parseResponse(response);
+
+              actions.setItems(items);
+              actions.setTotalItemCount(totalCount);
               search$.unsubscribe();
             }
           },
@@ -296,15 +377,13 @@ export const AnalyticsCollectionExploreTableLogic = kea<
           actions.setDataView(dataView);
         }
       },
-      setSelectedTable: () => {
-        fetchItems();
-      },
-      [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => {
-        fetchItems();
-      },
-      [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => {
-        fetchItems();
-      },
+      setPageIndex: fetchItems,
+      setPageSize: fetchItems,
+      setSearch: fetchItems,
+      setSelectedTable: fetchItems,
+      setSorting: fetchItems,
+      [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: fetchItems,
+      [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: fetchItems,
     };
   },
   path: ['enterprise_search', 'analytics', 'collections', 'explore', 'table'],
@@ -314,12 +393,25 @@ export const AnalyticsCollectionExploreTableLogic = kea<
       false,
       {
         setItems: () => false,
+        setPageIndex: () => true,
+        setPageSize: () => true,
+        setSearch: () => true,
         setSelectedTable: () => true,
+        setSorting: () => true,
         [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => true,
         [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => true,
       },
     ],
     items: [[], { setItems: (_, { items }) => items }],
+    pageIndex: [
+      0,
+      { reset: () => 0, setPageIndex: (_, { index }) => index, setSelectedTable: () => 0 },
+    ],
+    pageSize: [BASE_PAGE_SIZE, { reset: () => BASE_PAGE_SIZE, setPageSize: (_, { size }) => size }],
+    search: [
+      '',
+      { reset: () => '', setSearch: (_, { search }) => search, setSelectedTable: () => '' },
+    ],
     selectedTable: [null, { setSelectedTable: (_, { id }) => id }],
     sorting: [
       null,
@@ -328,5 +420,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         setSorting: (_, { sorting = null }) => sorting,
       },
     ],
+    totalItemsCount: [0, { setTotalItemCount: (_, { count }) => count }],
   }),
 });

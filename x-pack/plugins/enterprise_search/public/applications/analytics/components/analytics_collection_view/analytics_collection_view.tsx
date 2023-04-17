@@ -25,6 +25,8 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
+import { AnalyticsCollectionExplorer } from './analytics_collection_explorer/analytics_collection_explorer';
+
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate/analytics_collection_integrate_view';
 import { AnalyticsCollectionOverview } from './analytics_collection_overview/analytics_collection_overview';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
@@ -52,7 +54,9 @@ export const AnalyticsCollectionView: React.FC = () => {
           <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollection} />
         </Route>
 
-        <Route exact path={COLLECTION_EXPLORER_PATH} />
+        <Route exact path={COLLECTION_EXPLORER_PATH}>
+          <AnalyticsCollectionExplorer />
+        </Route>
       </Switch>
     );
   }
