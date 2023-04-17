@@ -47,6 +47,15 @@ const chartBase: ChartBase = {
   series,
 };
 
+export const systemMemoryFilter = {
+  bool: {
+    filter: [
+      { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    ],
+  },
+};
+
 export const percentSystemMemoryUsedScript = {
   lang: 'painless',
   source: `
@@ -59,6 +68,16 @@ export const percentSystemMemoryUsedScript = {
     return null;
   `,
 } as const;
+
+export const cgroupMemoryFilter = {
+  bool: {
+    filter: [
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+      { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
+      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    ],
+  },
+};
 
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
