@@ -8,31 +8,30 @@
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import { isConfigSchema } from '@kbn/config-schema';
-import type {
-  ErrorHttpResponseOptions,
-  IRouter,
-  IRouterWithVersion,
-  KibanaRequest,
-  RequestHandler,
-  RequestHandlerContextBase,
-  RouteConfig,
-  RouteMethod,
-  RouterRoute,
-  VersionedRouter,
-} from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
-import { RouterRouteHandler } from '@kbn/core-http-server/src/router/router';
+import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
-import type { Logger } from '@kbn/logging';
-import { wrapErrors } from './error_wrapper';
+import type {
+  KibanaRequest,
+  ErrorHttpResponseOptions,
+  RouteConfig,
+  RouteMethod,
+  RequestHandlerContextBase,
+  RouterRoute,
+  IRouter,
+  RequestHandler,
+  VersionedRouter,
+  IRouterWithVersion,
+} from '@kbn/core-http-server';
+import { validBodyOutput } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
-import { RouteValidator } from './validator';
-import { CoreVersionedRouter } from './versioned_router';
+import { wrapErrors } from './error_wrapper';
 
 export type ContextEnhancer<
   P,
@@ -146,18 +145,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       ) => {
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
-        const internalHandler: RouterRouteHandler = async (req, responseToolkit) =>
-          await this.handle({
-            routeSchemas,
-            request: req,
-            responseToolkit,
-            handler: this.enhanceWithContext(handler),
-          });
-
         this.routes.push({
-          handler: async (req, responseToolkit) => {
-            return internalHandler(req, responseToolkit);
-          },
+          handler: async (req, responseToolkit) =>
+            await this.handle({
+              routeSchemas,
+              request: req,
+              responseToolkit,
+              handler: this.enhanceWithContext(handler),
+            }),
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
