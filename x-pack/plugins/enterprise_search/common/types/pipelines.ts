@@ -7,6 +7,8 @@
 
 import { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
+import { FieldMapping } from '../ml_inference_pipeline';
+
 export interface InferencePipeline {
   modelId: string | undefined;
   modelState: TrainedModelState;
@@ -81,6 +83,7 @@ export interface CreateMlInferencePipelineParameters {
 }
 
 export interface CreateMLInferencePipelineDefinition {
+  field_mappings: FieldMapping[];
   pipeline_definition: MlInferencePipeline;
   pipeline_name: string;
 }

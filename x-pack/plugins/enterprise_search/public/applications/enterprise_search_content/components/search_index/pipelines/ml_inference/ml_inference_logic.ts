@@ -257,11 +257,12 @@ export const MLInferenceLogic = kea<
         mlInferencePipeline, // Full pipeline definition
       } = values;
       actions.makeCreatePipelineRequest(
-        isTextExpansionModelSelected && mlInferencePipeline
+        isTextExpansionModelSelected && mlInferencePipeline && configuration.fieldMappings
           ? {
               indexName,
-              pipelineName: configuration.pipelineName,
+              fieldMappings: configuration.fieldMappings,
               pipelineDefinition: mlInferencePipeline,
+              pipelineName: configuration.pipelineName,
             }
           : {
               destinationField:
