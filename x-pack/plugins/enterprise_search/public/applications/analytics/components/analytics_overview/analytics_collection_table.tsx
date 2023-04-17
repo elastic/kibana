@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { useActions } from 'kea';
+
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -19,6 +21,7 @@ import {
   EuiButtonGroup,
   useEuiTheme,
   EuiButton,
+  EuiFieldSearch,
 } from '@elastic/eui';
 
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
@@ -31,6 +34,8 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
 import { AnalyticsCollectionTableStyles } from './analytics_collection_table.styles';
+import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
+import { increment } from 'fp-ts/lib/function';
 
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   {
@@ -72,10 +77,12 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 
 interface AnalyticsCollectionTableProps {
   collections: AnalyticsCollection[];
+  onSearch: (query: string) => void;
 }
 
 export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
   collections,
+  onSearch
 }) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);
@@ -113,6 +120,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
     [analyticsCollectionTableStyles.button]
   );
   const [filterId, setFilterId] = useState<FilterBy>(filterOptions[0].id);
+  const [query, setQuery] = useState<string>('');
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: defaultQuickRanges[0].start,
     to: defaultQuickRanges[0].end,
@@ -127,12 +135,16 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiSearchBar
-              box={{
-                placeholder: i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
-                  defaultMessage: 'Search collection names',
-                }),
+            <EuiFieldSearch
+              placeholder={i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
+                defaultMessage: 'Search collection names',
+              })}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
               }}
+              onSearch={onSearch}
+              incremental
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -16,7 +16,7 @@ import {
 } from '../../api/index/fetch_analytics_collections_api_logic';
 
 export interface AnalyticsCollectionsActions {
-  fetchAnalyticsCollections(): void;
+  fetchAnalyticsCollections(query: string): void;
   makeRequest: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['makeRequest'];
 }
 export interface AnalyticsCollectionsValues {
@@ -38,7 +38,9 @@ export const AnalyticsCollectionsLogic = kea<
     values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
-    fetchAnalyticsCollections: () => {
+    fetchAnalyticsCollections: async ({ query }, breakpoint) => {
+      if (query) {
+        await breakpoint(200)
       actions.makeRequest({});
     },
   }),
