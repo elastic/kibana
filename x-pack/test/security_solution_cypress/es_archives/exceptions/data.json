@@ -8,6 +8,9 @@
       "agent": {
         "name": "foo"
       },
+      "elf": {
+        "architecture": "short"
+      },
       "unique_value": {
         "test": "test field"
       },

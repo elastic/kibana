@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_URL,
+} from '../../../common/constants';
 import type { RuleCreateProps } from '../../../common/detection_engine/rule_schema';
 
 export const createRule = (rule: RuleCreateProps) => {
@@ -13,6 +16,25 @@ export const createRule = (rule: RuleCreateProps) => {
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+};
+
+export const bulkAddIndexToRules = (indexToAdd: string[]) => {
+  return cy.request({
+    method: 'POST',
+    url: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: {
+      query: '',
+      action: 'edit',
+      edit: [
+        {
+          type: 'add_index_patterns',
+          value: indexToAdd,
+        },
+      ],
+    },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
