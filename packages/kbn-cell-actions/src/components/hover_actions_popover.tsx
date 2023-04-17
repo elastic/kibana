@@ -124,12 +124,12 @@ export const HoverActionsPopover: React.FC<Props> = ({
 
   return (
     <>
-      <div onMouseLeave={() => {}}>
+      <div onMouseLeave={closePopover}>
         <EuiPopover
           panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
           anchorPosition={anchorPosition}
           button={content}
-          closePopover={() => {}}
+          closePopover={closePopover}
           hasArrow={false}
           isOpen={showHoverContent}
           panelPaddingSize="none"

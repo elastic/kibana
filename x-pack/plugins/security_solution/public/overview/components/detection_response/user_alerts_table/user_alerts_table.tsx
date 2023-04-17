@@ -146,15 +146,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
       <SecurityCellActions
-        anchorPosition="rightCenter"
-        panelStyle={{ marginTop: '8px' }}
         field={{
           name: 'user.name',
           value: userName,
           type: 'keyword',
           aggregatable: true,
         }}
-        mode={CellActionsMode.HOVER_DOWN}
+        mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
@@ -176,15 +174,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <SecurityCellActions
-          anchorPosition="rightCenter"
-          panelStyle={{ marginTop: '8px' }}
           field={{
             name: 'user.name',
             value: userName,
             type: 'keyword',
             aggregatable: true,
           }}
-          mode={CellActionsMode.HOVER_DOWN}
+          mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
           metadata={{
             andFilters: [
@@ -210,15 +206,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         <SecurityCellActions
-          anchorPosition="rightCenter"
-          panelStyle={{ marginTop: '8px' }}
           field={{
             name: 'user.name',
             value: userName,
             type: 'keyword',
             aggregatable: true,
           }}
-          mode={CellActionsMode.HOVER_DOWN}
+          mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
           metadata={{
             andFilters: [
@@ -243,15 +237,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         <SecurityCellActions
-          anchorPosition="rightCenter"
-          panelStyle={{ marginTop: '8px' }}
           field={{
             name: 'user.name',
             value: userName,
             type: 'keyword',
             aggregatable: true,
           }}
-          mode={CellActionsMode.HOVER_DOWN}
+          mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
           metadata={{
             andFilters: [
@@ -276,15 +268,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         <SecurityCellActions
-          anchorPosition="rightCenter"
-          panelStyle={{ marginTop: '8px' }}
           field={{
             name: 'user.name',
             value: userName,
             type: 'keyword',
             aggregatable: true,
           }}
-          mode={CellActionsMode.HOVER_DOWN}
+          mode={CellActionsMode.HOVER_RIGHT}
           triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
           metadata={{
             andFilters: [

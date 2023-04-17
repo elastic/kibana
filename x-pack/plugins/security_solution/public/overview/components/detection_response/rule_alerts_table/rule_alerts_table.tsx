@@ -99,15 +99,13 @@ export const getTableColumns: GetTableColumns = ({
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
       <SecurityCellActions
-        anchorPosition="rightCenter"
-        panelStyle={{ marginTop: '8px' }}
         field={{
           name: ALERT_RULE_NAME,
           value: name,
           type: 'keyword',
           aggregatable: true,
         }}
-        mode={CellActionsMode.HOVER_DOWN}
+        mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],

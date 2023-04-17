@@ -137,15 +137,13 @@ export const getRiskScoreColumns = (
     mobileOptions: { show: true },
     render: (alertCount: number, risk) => (
       <SecurityCellActions
-        anchorPosition="rightCenter"
-        panelStyle={{ marginTop: '8px' }}
         field={{
           name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
           value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
           type: 'keyword',
           aggregatable: true,
         }}
-        mode={CellActionsMode.HOVER_DOWN}
+        mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
