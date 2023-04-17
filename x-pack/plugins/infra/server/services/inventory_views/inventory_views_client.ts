@@ -174,7 +174,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     }
   }
 
-  public static createStaticView = (defaultViewId?: string): InventoryView => ({
+  private static createStaticView = (defaultViewId?: string): InventoryView => ({
     id: staticInventoryViewId,
     attributes: {
       ...staticInventoryViewAttributes,

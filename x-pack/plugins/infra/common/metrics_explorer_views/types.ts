@@ -5,29 +5,31 @@
  * 2.0.
  */
 
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const metricsExplorerViewAttributesRT = rt.intersection([
   rt.strict({
-    name: rt.string,
+    name: nonEmptyStringRt,
+    isDefault: rt.boolean,
+    isStatic: rt.boolean,
   }),
   rt.UnknownRecord,
 ]);
 
 export type MetricsExplorerViewAttributes = rt.TypeOf<typeof metricsExplorerViewAttributesRT>;
 
-// export const inventoryViewRT = rt.exact(
-//   rt.intersection([
-//     rt.type({
-//       id: rt.string,
-//       origin: logViewOriginRT,
-//       attributes: logViewAttributesRT,
-//     }),
-//     rt.partial({
-//       updatedAt: rt.number,
-//       version: rt.string,
-//     }),
-//   ])
-// );
+export const metricsExplorerViewRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: metricsExplorerViewAttributesRT,
+    }),
+    rt.partial({
+      updatedAt: rt.number,
+      version: rt.string,
+    }),
+  ])
+);
 
-// export type LogView = rt.TypeOf<typeof logViewRT>;
+export type MetricsExplorerView = rt.TypeOf<typeof metricsExplorerViewRT>;
