@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -23,6 +23,7 @@ import {
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
 import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { COLLECTION_INTEGRATE_PATH } from '../../../routes';
+import { AnalyticsCollectionDataViewLogic } from '../analytics_collection_data_view_logic';
 import { DeleteAnalyticsCollectionLogic } from '../delete_analytics_collection_logic';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
@@ -78,16 +80,19 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 export const AnalyticsCollectionToolbar: React.FC = () => {
   const [isPopoverOpen, setPopover] = useState(false);
   const { application, navigateToUrl } = useValues(KibanaLogic);
+  const { dataView } = useValues(AnalyticsCollectionDataViewLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
-  const { setTimeRange, setRefreshInterval, findDataViewId, onTimeRefresh } = useActions(
+  const { setTimeRange, setRefreshInterval, onTimeRefresh } = useActions(
     AnalyticsCollectionToolbarLogic
   );
-  const { refreshInterval, timeRange, dataViewId } = useValues(AnalyticsCollectionToolbarLogic);
+  const { refreshInterval, timeRange } = useValues(AnalyticsCollectionToolbarLogic);
   const { deleteAnalyticsCollection } = useActions(DeleteAnalyticsCollectionLogic);
   const { isLoading } = useValues(DeleteAnalyticsCollectionLogic);
-  const discoverUrl = application.getUrlForApp('discover', {
-    path: `#/?_a=(index:'${dataViewId}')`,
-  });
+  const discoverUrl =
+    dataView &&
+    application.getUrlForApp('discover', {
+      path: `#/?_a=(index:'${dataView.id}')`,
+    });
   const manageDatastreamUrl = application.getUrlForApp('management', {
     path: '/data/index_management/data_streams/' + analyticsCollection.events_datastream,
   });
@@ -103,10 +108,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
   const onRefreshChange = ({ isPaused: pause, refreshInterval: value }: OnRefreshChangeProps) => {
     setRefreshInterval({ pause, value });
   };
-
-  useEffect(() => {
-    if (analyticsCollection) findDataViewId(analyticsCollection);
-  }, [analyticsCollection]);
 
   return (
     <EuiFlexGroup gutterSize="m">
@@ -173,17 +174,19 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
                 />
               </EuiContextMenuItem>
 
-              <EuiContextMenuItem
-                icon="visArea"
-                href={discoverUrl}
-                size="s"
-                data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
-              >
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.analytics.collectionsView.openInDiscover"
-                  defaultMessage="Create dashboards in Discover"
-                />
-              </EuiContextMenuItem>
+              {discoverUrl && (
+                <EuiContextMenuItem
+                  icon="visArea"
+                  href={discoverUrl}
+                  size="s"
+                  data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
+                >
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.analytics.collectionsView.openInDiscover"
+                    defaultMessage="Create dashboards in Discover"
+                  />
+                </EuiContextMenuItem>
+              )}
             </RedirectAppLinks>
 
             <EuiPopoverFooter paddingSize="m">

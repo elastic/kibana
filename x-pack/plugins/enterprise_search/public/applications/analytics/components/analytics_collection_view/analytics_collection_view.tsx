@@ -25,6 +25,8 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
+import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
+
 import { AnalyticsCollectionExplorer } from './analytics_collection_explorer/analytics_collection_explorer';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate/analytics_collection_integrate_view';
@@ -35,6 +37,7 @@ import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logi
 
 export const AnalyticsCollectionView: React.FC = () => {
   useMountedLogic(AnalyticsCollectionToolbarLogic);
+  useMountedLogic(AnalyticsCollectionDataViewLogic);
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
   const { name } = useParams<{ name: string }>();

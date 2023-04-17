@@ -15,11 +15,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaLogic } from '../../../../shared/kibana';
-import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
+import { AnalyticsCollectionDataViewLogic } from '../analytics_collection_data_view_logic';
 
 export const AnalyticsCollectionExplorerCallout: React.FC = () => {
   const { application } = useValues(KibanaLogic);
-  const { dataView } = useValues(AnalyticsCollectionExploreTableLogic);
+  const { dataView } = useValues(AnalyticsCollectionDataViewLogic);
   const exploreLink =
     dataView &&
     application.getUrlForApp('discover', {

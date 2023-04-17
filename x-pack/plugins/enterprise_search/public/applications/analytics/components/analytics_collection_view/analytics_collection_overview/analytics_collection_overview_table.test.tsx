@@ -54,11 +54,6 @@ describe('AnalyticsCollectionOverviewTable', () => {
     });
   });
 
-  it('should call findDataView with the active table ID and search filter when mounted', () => {
-    mount(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);
-    expect(mockActions.findDataView).toHaveBeenCalledWith(mockValues.analyticsCollection);
-  });
-
   it('should render a table with the selectedTable', () => {
     setMockValues({ ...mockValues, selectedTable: ExploreTables.WorsePerformers });
     const wrapper = mount(<AnalyticsCollectionOverviewTable filterBy={FilterBy.Sessions} />);

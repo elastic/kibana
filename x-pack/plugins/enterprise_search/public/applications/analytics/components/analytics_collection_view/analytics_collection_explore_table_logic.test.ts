@@ -7,10 +7,6 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { DataView } from '@kbn/data-views-plugin/common';
-
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
@@ -19,15 +15,11 @@ import {
 } from './analytics_collection_explore_table_logic';
 import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
-import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 jest.mock('../../../shared/kibana/kibana_logic', () => ({
   KibanaLogic: {
     values: {
       data: {
-        dataViews: {
-          find: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
-        },
         search: {
           search: jest.fn().mockReturnValue({ subscribe: jest.fn() }),
         },
@@ -46,7 +38,6 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
   });
 
   const defaultProps = {
-    dataView: null,
     isLoading: false,
     items: [],
     pageIndex: 0,
@@ -62,12 +53,6 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
   });
 
   describe('reducers', () => {
-    it('should handle set dataView', () => {
-      const dataView = { id: 'test' } as DataView;
-      AnalyticsCollectionExploreTableLogic.actions.setDataView(dataView);
-      expect(AnalyticsCollectionExploreTableLogic.values.dataView).toBe(dataView);
-    });
-
     it('should handle set items', () => {
       const items = [
         { count: 1, query: 'test' },
@@ -94,32 +79,19 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     });
 
     describe('isLoading', () => {
-      it('should handle setPageIndex', () => {
+      it('should handle onTableChange', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
-        });
-        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
-      });
-
-      it('should handle setPageSize', () => {
-        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
-          page: { index: 2, size: 10 },
+          sort: {
+            direction: 'asc',
+            field: ExploreTableColumns.sessions,
+          } as Sorting,
         });
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
       it('should handle setSearch', () => {
         AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
-        expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
-      });
-
-      it('should handle setSorting', () => {
-        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
-          sort: {
-            direction: 'asc',
-            field: ExploreTableColumns.sessions,
-          } as Sorting,
-        });
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
@@ -270,18 +242,6 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         indexPattern: undefined,
         sessionId: undefined,
       });
-    });
-
-    it('should find and set dataView when findDataView is called', async () => {
-      const dataView = { id: 'test' } as DataView;
-      jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValue([dataView]);
-
-      await FetchAnalyticsCollectionLogic.actions.apiSuccess({
-        events_datastream: 'events1',
-        name: 'collection1',
-      } as AnalyticsCollection);
-
-      expect(AnalyticsCollectionExploreTableLogic.values.dataView).toEqual(dataView);
     });
   });
 });

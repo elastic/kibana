@@ -13,9 +13,10 @@ import {
   isCompleteResponse,
   TimeRange,
 } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
+
+import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 
 import {
   getBaseRequestParams,
@@ -34,7 +35,6 @@ import {
   WorsePerformersTable,
 } from './analytics_collection_explore_table_types';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
-import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 const BASE_PAGE_SIZE = 10;
 
@@ -236,7 +236,6 @@ const tablesParams: {
 };
 
 export interface AnalyticsCollectionExploreTableLogicValues {
-  dataView: DataView | null;
   isLoading: boolean;
   items: ExploreTableItem[];
   pageIndex: number;
@@ -253,7 +252,6 @@ export interface AnalyticsCollectionExploreTableLogicActions {
     sort?: Sorting;
   };
   reset(): void;
-  setDataView(dataView: DataView): { dataView: DataView };
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
   setSearch(search: string): { search: string };
   setSelectedTable(
@@ -272,7 +270,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
   actions: {
     onTableChange: ({ page, sort }) => ({ page, sort }),
     reset: true,
-    setDataView: (dataView) => ({ dataView }),
     setItems: (items) => ({ items }),
     setSearch: (search) => ({ search }),
     setSelectedTable: (id, sorting) => ({ id, sorting }),
@@ -297,7 +294,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
             timeRange,
           }),
           {
-            indexPattern: values.dataView || undefined,
+            indexPattern: AnalyticsCollectionDataViewLogic.values.dataView || undefined,
             sessionId: AnalyticsCollectionToolbarLogic.values.searchSessionId,
           }
         )
@@ -318,15 +315,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     };
 
     return {
-      [FetchAnalyticsCollectionLogic.actionTypes.apiSuccess]: async (collection) => {
-        const dataView = (
-          await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
-        )?.[0];
-
-        if (dataView) {
-          actions.setDataView(dataView);
-        }
-      },
       onTableChange: fetchItems,
       setSearch: fetchItems,
       setSelectedTable: fetchItems,
@@ -336,7 +324,6 @@ export const AnalyticsCollectionExploreTableLogic = kea<
   },
   path: ['enterprise_search', 'analytics', 'collections', 'explore', 'table'],
   reducers: () => ({
-    dataView: [null, { setDataView: (_, { dataView }) => dataView }],
     isLoading: [
       false,
       {
