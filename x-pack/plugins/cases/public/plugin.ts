@@ -53,7 +53,8 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
-    registerCaseFileKinds(plugins.files);
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    registerCaseFileKinds(config.files, plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -106,7 +107,13 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaVersion: this.kibanaVersion,
+      config,
+    });
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders

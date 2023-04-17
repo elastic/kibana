@@ -29,11 +29,10 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -42,8 +41,15 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+
 import {
   createRegionMapFn,
+  GEOHASH_GRID,
+  getGeoHashBucketAgg,
   regionMapRenderer,
   regionMapVisType,
   createTileMapFn,
@@ -78,9 +84,11 @@ import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_s
 import { MapInspectorView, VectorTileInspectorView } from './inspector';
 
 import { setupLensChoroplethChart } from './lens';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
+  data: DataPublicPluginSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
@@ -91,6 +99,7 @@ export interface MapsPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode?: ScreenshotModePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -106,13 +115,13 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -198,9 +207,18 @@ export class MapsPlugin
       },
     });
 
+    plugins.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: getAppTitle(),
+    });
+
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
+    plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
     plugins.visualizations.createBaseVisualization(regionMapVisType);

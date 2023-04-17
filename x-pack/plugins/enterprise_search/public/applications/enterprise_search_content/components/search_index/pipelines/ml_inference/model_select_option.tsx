@@ -49,9 +49,7 @@ export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
-                <span>
-                  <MLModelTypeBadge type={type} />
-                </span>
+                <MLModelTypeBadge type={type} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -27,15 +27,23 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
 export function normalizeSecrets(
   monitor: SavedObject<SyntheticsMonitorWithSecrets>
 ): SavedObject<SyntheticsMonitor> {
-  const defaultFields = DEFAULT_FIELDS[monitor.attributes[ConfigKey.MONITOR_TYPE]];
+  const attributes = normalizeMonitorSecretAttributes(monitor.attributes);
   const normalizedMonitor = {
     ...monitor,
-    attributes: {
-      ...defaultFields,
-      ...monitor.attributes,
-      ...JSON.parse(monitor.attributes.secrets || ''),
-    },
+    attributes,
   };
-  delete normalizedMonitor.attributes.secrets;
   return normalizedMonitor;
+}
+
+export function normalizeMonitorSecretAttributes(
+  monitor: SyntheticsMonitorWithSecrets
+): SyntheticsMonitor {
+  const defaultFields = DEFAULT_FIELDS[monitor[ConfigKey.MONITOR_TYPE]];
+  const normalizedMonitorAttributes = {
+    ...defaultFields,
+    ...monitor,
+    ...JSON.parse(monitor.secrets || ''),
+  };
+  delete normalizedMonitorAttributes.secrets;
+  return normalizedMonitorAttributes;
 }

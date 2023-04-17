@@ -7,6 +7,7 @@
  */
 
 import type { Type } from '@kbn/config-schema';
+import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   RouteConfig,
@@ -21,11 +22,7 @@ import type {
 
 type RqCtx = RequestHandlerContextBase;
 
-/**
- * Assuming that version will be a monotonically increasing number where: version > 0.
- * @experimental
- */
-export type ApiVersion = `${number}`;
+export type { ApiVersion };
 
 /**
  * Configuration for a versioned route
@@ -37,7 +34,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<RouteConfigOptions<Method>, 'access'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
-  access: RouteConfigOptions<Method>['access'];
+  access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
 };
 
 /**
@@ -159,8 +156,8 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
-export interface VersionedRouteResponseValidation<R> {
-  [statusCode: number]: { body: RouteValidationFunction<R> | Type<R> };
+export interface VersionedRouteResponseValidation {
+  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
   unsafe?: { body?: boolean };
 }
 
@@ -168,7 +165,7 @@ export interface VersionedRouteResponseValidation<R> {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B, R> {
+interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental
@@ -180,7 +177,7 @@ interface FullValidationConfig<P, Q, B, R> {
    *       for setting default values!
    * @experimental
    */
-  response?: VersionedRouteResponseValidation<R>;
+  response?: VersionedRouteResponseValidation;
 }
 
 /**
@@ -198,7 +195,7 @@ export interface AddVersionOpts<P, Q, B, R> {
    * Validation for this version of a route
    * @experimental
    */
-  validate: false | FullValidationConfig<P, Q, B, R>;
+  validate: false | FullValidationConfig<P, Q, B>;
 }
 
 /**
