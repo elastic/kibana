@@ -992,7 +992,17 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: (props?: ",
+            "AddToExistingCaseModalProps",
+            ") => { open: ({ getAttachments, }?: { getAttachments?: (({ theCase }: { theCase?: ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.Case",
+              "text": "Case"
+            },
+            " | undefined; }) => ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -1000,7 +1010,7 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; }) => void; close: () => void; }; }"
+            ") | undefined; }) => void; close: () => void; }; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
