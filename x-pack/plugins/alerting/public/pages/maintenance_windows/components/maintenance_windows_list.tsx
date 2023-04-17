@@ -129,7 +129,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
-    const actions: EuiBasicTableColumn<MaintenanceWindowResponse>[] = [
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
       {
         name: '',
         actions: [
