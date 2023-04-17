@@ -27,6 +27,7 @@ import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
   Rule,
@@ -64,6 +65,7 @@ export type { RuleTypeParams };
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
   getRulesSettingsClient: () => RulesSettingsClient;
+  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -402,6 +404,8 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+
+export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

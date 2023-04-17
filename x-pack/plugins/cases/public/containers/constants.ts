@@ -46,6 +46,7 @@ export const casesQueriesKeys = {
 };
 
 export const casesMutationsKeys = {
+  createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
   updateCases: ['update-cases'] as const,
   deleteComment: ['delete-comment'] as const,
