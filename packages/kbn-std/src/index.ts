@@ -19,6 +19,7 @@ export { isRelativeUrl, modifyUrl, getUrlOrigin } from './url';
 export { unset } from './unset';
 export { getFlattenedObject } from './get_flattened_object';
 export { ensureNoUnsafeProperties } from './ensure_no_unsafe_properties';
+export { ensureDeepObject } from './ensure_deep_object';
 export * from './rxjs_7';
 export {
   map$,
