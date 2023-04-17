@@ -6,100 +6,93 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiText,
-  EuiButton,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCopy,
-  EuiCodeBlock,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useGetSettings, useStartServices } from '../../hooks';
-
-import { agentPolicyRouteService } from '../../../common';
-
-import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
+import { useGetSettings, useKibanaVersion, useStartServices } from '../../hooks';
 
 interface Props {
   enrollmentAPIKey?: string;
-  onCopy?: () => void;
-  onDownload?: () => void;
+  cloudFormation: string;
 }
+
+const createCloudFormationUrl = (
+  templateURL: string,
+  enrollmentToken: string,
+  fleetUrl: string,
+  kibanaVersion: string
+) => {
+  const cloudFormationUrl = templateURL
+    .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
+    .replace('FLEET_URL', fleetUrl)
+    .replace('KIBANA_VERSION', kibanaVersion);
+
+  return new URL(cloudFormationUrl).toString();
+};
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
-  onCopy,
-  onDownload,
+  cloudFormation,
 }) => {
+  const [fleetServer, setFleetServer] = useState<string | ''>();
+  const [isError, setIsError] = useState<boolean>(false);
+
   const core = useStartServices();
   const settings = useGetSettings();
   const { notifications } = core;
 
-  const [yaml, setYaml] = useState<string>('');
-  const [fleetServer, setFleetServer] = useState<string | ''>();
-  const [copyButtonClicked, setCopyButtonClicked] = useState(false);
-  const [downloadButtonClicked, setDownloadButtonClicked] = useState(false);
+  const kibanaVersion = useKibanaVersion();
 
-  const onCopyButtonClick = (copy: () => void) => {
-    copy();
-    setCopyButtonClicked(true);
-    if (onCopy) onCopy();
-  };
-
-  const onDownloadButtonClick = (downloadLink: string) => {
-    setDownloadButtonClicked(true);
-    if (onDownload) onDownload();
-    window.location.href = downloadLink;
-  };
-
+  // Fetch the first fleet server host from the settings
   useEffect(() => {
-    async function fetchK8sManifest() {
+    async function fetchAgentManifest() {
       try {
-        const fleetServerHosts = settings.data?.item.fleet_server_hosts;
-        let host = '';
+        const fleetServerHosts = await settings.data?.item.fleet_server_hosts;
         if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
           setFleetServer(fleetServerHosts[0]);
-          host = fleetServerHosts[0];
         }
-        const query = { fleetServer: host, enrolToken: enrollmentAPIKey };
-        const res = await sendGetK8sManifest(query);
-        if (res.error) {
-          throw res.error;
-        }
-
-        if (!res.data) {
-          throw new Error('No data while fetching agent manifest');
-        }
-
-        setYaml(res.data.item);
       } catch (error) {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.agentEnrollment.loadk8sManifestErrorTitle', {
-            defaultMessage: 'Error while fetching agent manifest',
-          }),
+          title: i18n.translate(
+            'xpack.fleet.agentEnrollment.cloudFormation.errorLoadingAgentManifest',
+            {
+              defaultMessage: 'Error while fetching agent manifest',
+            }
+          ),
         });
+        setIsError(true);
       }
     }
-    fetchK8sManifest();
+    fetchAgentManifest();
   }, [notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
 
-  const downloadLink = core.http.basePath.prepend(
-    `${agentPolicyRouteService.getK8sFullDownloadPath()}?fleetServer=${fleetServer}&enrolToken=${enrollmentAPIKey}`
-  );
+  const cloudFormationUrl =
+    enrollmentAPIKey && fleetServer
+      ? createCloudFormationUrl(cloudFormation, enrollmentAPIKey, fleetServer, kibanaVersion)
+      : '';
 
   return (
     <>
       <EuiSpacer size="m" />
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.callout', {
+          defaultMessage:
+            'Sign in to your cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation template.',
+        })}
+        color="warning"
+        iconType="warning"
+      />
+      <EuiSpacer size="m" />
       <EuiButton
+        isLoading={settings.isLoading}
+        isDisabled={isError || cloudFormationUrl === ''}
         color="primary"
+        fill
         target="_blank"
         iconSide="right"
         iconType="popout"
-        onClick={() => onDownloadButtonClick(downloadLink)}
+        href={cloudFormationUrl}
       >
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.cloudFormation.launchButton"

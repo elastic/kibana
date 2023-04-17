@@ -216,6 +216,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   });
 
   const instructionsSteps = useMemo(() => {
+    const cloudFormation = agentPolicy?.cloud_formation_template_url;
+
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
           AgentPolicySelectionStep({
@@ -248,6 +250,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         selectedApiKeyId,
         isK8s,
         enrollToken,
+        cloudFormation,
       })
     );
     if (selectedApiKeyId && apiKeyData) {
