@@ -11,17 +11,23 @@ import ReactDOM from 'react-dom';
 import { EuiPageTemplate } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { StartDeps } from '../types';
-import { TodoApp } from './todos';
+import { MSearchApp } from './msearch';
 
 export const renderApp = (
-  { notifications }: CoreStart,
-  { contentManagement }: StartDeps,
+  core: CoreStart,
+  { contentManagement, savedObjectsTaggingOss }: StartDeps,
   { element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <EuiPageTemplate offset={0}>
+      <EuiPageTemplate.Sidebar />
+
       <EuiPageTemplate.Section>
-        <TodoApp contentClient={contentManagement.client} />
+        <MSearchApp
+          contentClient={contentManagement.client}
+          core={core}
+          savedObjectsTagging={savedObjectsTaggingOss}
+        />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>,
     element
