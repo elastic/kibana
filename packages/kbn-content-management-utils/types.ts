@@ -19,28 +19,28 @@ import type {
   DeleteResult,
 } from '@kbn/content-management-plugin/common';
 
-interface Reference {
+export interface Reference {
   type: string;
   id: string;
   name: string;
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-interface SearchOptions {
+export interface SearchOptions {
   /** Flag to indicate to only search the text on the "title" field */
   onlyTitle?: boolean;
 }
 
-interface UpdateOptions {
+export interface UpdateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-type GetResultSO<Item extends object> = GetResult<
+export type GetResultSO<Item extends object> = GetResult<
   Item,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
