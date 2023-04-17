@@ -20,7 +20,7 @@ import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/r
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { HTTPError, PackSavedObjectAttributes } from '../../common/types';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -55,7 +55,9 @@ export const createActionHandler = async (
   });
 
   if (!selectedAgents.length) {
-    throw new Error('No agents found for selection');
+    const error = new Error('No agents found for selection') as HTTPError;
+    error.statusCode = 400;
+    throw error;
   }
 
   let packSO;
