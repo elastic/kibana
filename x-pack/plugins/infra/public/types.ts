@@ -112,6 +112,11 @@ export interface LensOptions {
   breakdownSize: number;
 }
 
+export interface ExecutionTimeRange {
+  gte: number;
+  lte: number;
+}
+
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
 type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
   ? FirstArgument

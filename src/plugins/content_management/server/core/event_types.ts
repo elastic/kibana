@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-interface BaseEvent<T extends string> {
+interface BaseEvent<T extends string, Options = object> {
   type: T;
   contentTypeId: string;
-  options?: object;
+  options?: Options;
 }
 
 export interface GetItemStart extends BaseEvent<'getItemStart'> {
   contentId: string;
-  options?: object;
 }
 
 export interface GetItemSuccess extends BaseEvent<'getItemSuccess'> {
@@ -28,7 +27,6 @@ export interface GetItemError extends BaseEvent<'getItemError'> {
 
 export interface BulkGetItemStart extends BaseEvent<'bulkGetItemStart'> {
   ids: string[];
-  options?: object;
 }
 
 export interface BulkGetItemSuccess extends BaseEvent<'bulkGetItemSuccess'> {
@@ -39,75 +37,62 @@ export interface BulkGetItemSuccess extends BaseEvent<'bulkGetItemSuccess'> {
 export interface BulkGetItemError extends BaseEvent<'bulkGetItemError'> {
   ids: string[];
   error: unknown;
-  options?: object;
 }
 
 export interface CreateItemStart extends BaseEvent<'createItemStart'> {
   data: object;
-  options?: object;
 }
 
 export interface CreateItemSuccess extends BaseEvent<'createItemSuccess'> {
   data: object;
-  options?: object;
 }
 
 export interface CreateItemError extends BaseEvent<'createItemError'> {
   data: object;
   error: unknown;
-  options?: object;
 }
 
 export interface UpdateItemStart extends BaseEvent<'updateItemStart'> {
   contentId: string;
   data: object;
-  options?: object;
 }
 
 export interface UpdateItemSuccess extends BaseEvent<'updateItemSuccess'> {
   contentId: string;
   data: object;
-  options?: object;
 }
 
 export interface UpdateItemError extends BaseEvent<'updateItemError'> {
   contentId: string;
   data: object;
   error: unknown;
-  options?: object;
 }
 
 export interface DeleteItemStart extends BaseEvent<'deleteItemStart'> {
   contentId: string;
-  options?: object;
 }
 
 export interface DeleteItemSuccess extends BaseEvent<'deleteItemSuccess'> {
   contentId: string;
-  options?: object;
 }
 
 export interface DeleteItemError extends BaseEvent<'deleteItemError'> {
   contentId: string;
   error: unknown;
-  options?: object;
 }
 
 export interface SearchItemStart extends BaseEvent<'searchItemStart'> {
   query: object;
-  options?: object;
 }
 
 export interface SearchItemSuccess extends BaseEvent<'searchItemSuccess'> {
   query: object;
   data: unknown;
-  options?: object;
 }
 
 export interface SearchItemError extends BaseEvent<'searchItemError'> {
   query: object;
   error: unknown;
-  options?: object;
 }
 
 export type ContentEvent =

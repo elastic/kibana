@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
@@ -58,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.notifications.table.waitForTableToLoad();
       await ml.notifications.table.assertRowsNumberPerPage(25);
+      await ml.notifications.table.assertTableSorting('timestamp', 0, 'desc');
     });
 
     it('does not show notifications from another space', async () => {
@@ -91,6 +95,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // refresh the page to avoid 1m wait
       await browser.refresh();
       await ml.notifications.assertNotificationErrorsCount(0);
+    });
+
+    it('supports custom sorting for notifications level', async () => {
+      await ml.navigation.navigateToNotifications();
+      await ml.notifications.table.waitForTableToLoad();
+
+      await PageObjects.timePicker.pauseAutoRefresh();
+      const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
+      const toTime = moment().format(timepickerFormat);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+      await ml.notifications.table.waitForTableToLoad();
+
+      await ml.notifications.table.sortByField('level', 1, 'desc');
+      const rowsDesc = await ml.notifications.table.parseTable();
+      expect(rowsDesc[0].level).to.eql('error');
+
+      await ml.notifications.table.sortByField('level', 1, 'asc');
+      const rowsAsc = await ml.notifications.table.parseTable();
+      expect(rowsAsc[0].level).to.eql('info');
     });
   });
 }

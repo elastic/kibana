@@ -26,7 +26,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
     http,
     cases: {
-      hooks: { getUseCasesAddToExistingCaseModal },
+      hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
   } = useKibana<ObservabilityAppServices>().services;
@@ -40,7 +40,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -62,7 +62,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
 
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const handleViewRuleDetails = () => {

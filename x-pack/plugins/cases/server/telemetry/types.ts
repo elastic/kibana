@@ -9,11 +9,15 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type { Owner } from '../../common/constants/types';
 
-export interface Buckets {
-  buckets: Array<{
-    doc_count: number;
-    key: number | string;
-  }>;
+export type BucketKeyString = Omit<Bucket, 'key'> & { key: string };
+
+interface Bucket<T extends string | number = string | number> {
+  doc_count: number;
+  key: T;
+}
+
+export interface Buckets<T extends string | number = string | number> {
+  buckets: Array<Bucket<T>>;
 }
 
 export interface Cardinality {
@@ -57,12 +61,15 @@ export interface AssigneesFilters {
   };
 }
 
-export interface FileAttachmentAverageSize {
-  averageSize: number;
+export interface FileAttachmentAggsResult {
+  averageSize: {
+    value: number;
+  };
+  topMimeTypes: Buckets<string>;
 }
 
-export type FileAttachmentAggregationResult = Record<Owner, FileAttachmentAverageSize> &
-  FileAttachmentAverageSize;
+export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
+  FileAttachmentAggsResult;
 
 export interface BucketsWithMaxOnCase {
   buckets: Array<
@@ -118,6 +125,10 @@ export interface AttachmentStats extends CommonAttachmentStats {
 
 export interface FileAttachmentStats extends CommonAttachmentStats {
   averageSize: number;
+  topMimeTypes: Array<{
+    name: string;
+    count: number;
+  }>;
 }
 
 export interface AttachmentFramework {

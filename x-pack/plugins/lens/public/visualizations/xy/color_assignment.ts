@@ -16,7 +16,7 @@ import {
 } from '@kbn/event-annotation-plugin/public';
 import type { AccessorConfig, FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {

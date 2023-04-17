@@ -7,9 +7,10 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiPanel } from '@elastic/eui';
-import { HighlightedFields } from '../components/highlighted_fields';
-import { MitreAttack } from '../components/mitre_attack';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { InvestigationSection } from '../components/investigation_section';
+import { DescriptionSection } from '../components/description_section';
+import { InsightsSection } from '../components/insights_section';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -17,10 +18,11 @@ import { MitreAttack } from '../components/mitre_attack';
 export const OverviewTab: FC = memo(() => {
   return (
     <>
-      <MitreAttack />
-      <EuiPanel hasBorder hasShadow={false}>
-        <HighlightedFields />
-      </EuiPanel>
+      <DescriptionSection />
+      <EuiHorizontalRule margin="l" />
+      <InvestigationSection />
+      <EuiHorizontalRule margin="l" />
+      <InsightsSection />
     </>
   );
 });

@@ -77,10 +77,11 @@ const AddButton: React.FC<{
   onClick?: () => void;
 }> = ({ disabled, ingestionMethod, onClick }) => (
   <EuiButton
+    fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
-    color="success"
+    color={disabled ? undefined : 'success'}
     disabled={disabled}
-    iconType="plusInCircle"
+    iconType={disabled ? 'lock' : 'plusInCircle'}
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {

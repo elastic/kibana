@@ -32,6 +32,7 @@ import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 

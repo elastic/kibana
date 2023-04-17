@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -24,7 +24,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
   const unit = slo.timeWindow.duration.slice(-1);
   if ('isRolling' in slo.timeWindow) {
     return (
-      <div>
+      <EuiFlexItem grow={false}>
         <EuiBadge
           color={euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
@@ -32,7 +32,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
         >
           {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
-      </div>
+      </EuiFlexItem>
     );
   }
 
@@ -50,7 +50,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
   const elapsedDurationInDays = now.diff(periodStart, 'days') + 1;
 
   return (
-    <div>
+    <EuiFlexItem grow={false}>
       <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
         {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
@@ -60,6 +60,6 @@ export function SloTimeWindowBadge({ slo }: Props) {
           },
         })}
       </EuiBadge>
-    </div>
+    </EuiFlexItem>
   );
 }

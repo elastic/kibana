@@ -79,6 +79,7 @@ export const MonitorLocationSelect = ({
                       closeLocationList();
                       onChange(location.id, location.label);
                     }}
+                    disabled={selectedLocation?.id === location.id}
                   >
                     {location.label}
                   </EuiContextMenuItem>

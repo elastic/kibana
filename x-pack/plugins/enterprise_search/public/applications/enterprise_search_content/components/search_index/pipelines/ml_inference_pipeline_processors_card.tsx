@@ -15,26 +15,30 @@ import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { IndexNameLogic } from '../index_name_logic';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
+import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
+import { TextExpansionCallOut } from './ml_inference/text_expansion_callout';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const MlInferencePipelineProcessorsCard: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { mlInferencePipelineProcessors: inferencePipelines } = useValues(PipelinesLogic);
-  const { fetchMlInferenceProcessors } = useActions(PipelinesLogic);
+  const { fetchMlInferenceProcessors, openAddMlInferencePipelineModal } =
+    useActions(PipelinesLogic);
   useEffect(() => {
     fetchMlInferenceProcessors({ indexName });
   }, [indexName]);
 
-  if (inferencePipelines === undefined) return null;
-  if (inferencePipelines.length === 0) return null;
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {inferencePipelines.map((item: InferencePipeline, index: number) => (
+      <TextExpansionCallOut dismissable />
+      <EuiFlexItem>
+        <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
+      </EuiFlexItem>
+      {inferencePipelines?.map((item: InferencePipeline, index: number) => (
         <EuiFlexItem key={`${index}-${item.pipelineName}`}>
           <InferencePipelineCard {...item} />
         </EuiFlexItem>
-      ))}
+      )) ?? null}
     </EuiFlexGroup>
   );
 };

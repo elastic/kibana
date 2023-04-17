@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerType } from '../../../../common';
+import type { LayerType } from '../../../../common/types';
 import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {

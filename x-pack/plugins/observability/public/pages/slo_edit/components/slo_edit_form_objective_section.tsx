@@ -10,11 +10,11 @@ import {
   EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiFormLabel,
+  EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,98 +26,131 @@ import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 import { maxWidth } from './slo_edit_form';
 
 export function SloEditFormObjectiveSection() {
-  const { control, watch } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
-            defaultMessage: 'Set objectives',
-          })}
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="xl" />
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormObjectiveSection"
+    >
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
-              defaultMessage: 'Budgeting method',
-            })}
-          </EuiFormLabel>
-
-          <Controller
-            name="budgetingMethod"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { ref, ...field } }) => (
-              <EuiSelect
-                {...field}
-                required
-                id={budgetingSelect}
-                data-test-subj="sloFormBudgetingMethodSelect"
-                options={BUDGETING_METHOD_OPTIONS}
-              />
-            )}
-          />
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
+                  defaultMessage: 'Budgeting method',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.budgetingMethod.tooltip',
+                    {
+                      defaultMessage:
+                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="budgetingMethod"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={budgetingSelect}
+                  data-test-subj="sloFormBudgetingMethodSelect"
+                  options={BUDGETING_METHOD_OPTIONS}
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
-              defaultMessage: 'Time window',
-            })}
-          </EuiFormLabel>
-
-          <Controller
-            name="timeWindow.duration"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { ref, ...field } }) => (
-              <EuiSelect
-                {...field}
-                required
-                id={timeWindowSelect}
-                data-test-subj="sloFormTimeWindowDurationSelect"
-                options={TIMEWINDOW_OPTIONS}
-                value={String(field.value)}
-              />
-            )}
-          />
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
+                  defaultMessage: 'Time window',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.tooltip', {
+                    defaultMessage:
+                      'The rolling time window duration used to compute the SLO over.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.duration"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={timeWindowSelect}
+                  data-test-subj="sloFormTimeWindowDurationSelect"
+                  options={TIMEWINDOW_OPTIONS}
+                  value={String(field.value)}
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
-              defaultMessage: 'Target / SLO (%)',
-            })}
-          </EuiFormLabel>
-
-          <Controller
-            name="objective.target"
-            control={control}
-            rules={{
-              required: true,
-              min: 0.001,
-              max: 99.999,
-            }}
-            render={({ field: { ref, ...field }, fieldState }) => (
-              <EuiFieldNumber
-                {...field}
-                required
-                isInvalid={fieldState.invalid}
-                data-test-subj="sloFormObjectiveTargetInput"
-                value={String(field.value)}
-                min={0.001}
-                max={99.999}
-                step={0.001}
-                onChange={(event) => field.onChange(Number(event.target.value))}
-              />
-            )}
-          />
+          <EuiFormRow
+            isInvalid={getFieldState('objective.target').invalid}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
+                  defaultMessage: 'Target / SLO (%)',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {
+                    defaultMessage: 'The target objective in percentage for the SLO.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="objective.target"
+              control={control}
+              rules={{
+                required: true,
+                min: 0.001,
+                max: 99.999,
+              }}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <EuiFieldNumber
+                  {...field}
+                  required
+                  isInvalid={fieldState.invalid}
+                  data-test-subj="sloFormObjectiveTargetInput"
+                  value={String(field.value)}
+                  min={0.001}
+                  max={99.999}
+                  step={0.001}
+                  onChange={(event) => field.onChange(Number(event.target.value))}
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGrid>
 
@@ -127,7 +160,6 @@ export function SloEditFormObjectiveSection() {
           <SloEditFormObjectiveSectionTimeslices />
         </>
       ) : null}
-      <EuiSpacer size="xl" />
     </EuiPanel>
   );
 }

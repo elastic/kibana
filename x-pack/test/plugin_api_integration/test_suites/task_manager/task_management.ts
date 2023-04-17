@@ -10,15 +10,12 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
-import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
 import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const {
   task: { properties: taskManagerIndexMapping },
 } = TaskManagerMapping;
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface RawDoc {
   _id: string;
@@ -563,12 +560,12 @@ export default function ({ getService }: FtrProviderContext) {
         params: { throwOnMarkAsRunning: true },
       });
 
-      await delay(DEFAULT_POLL_INTERVAL * 3);
+      expect(originalTask.attempts).to.eql(0);
 
+      // Wait for task manager to attempt running the task a second time
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
-        expect(task.attempts).to.eql(3);
-        expect(task.status).to.eql('failed');
+        expect(task.attempts).to.eql(2);
       });
     });
 
@@ -769,17 +766,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should mark non-recurring task as failed if task is still running but maxAttempts has been reached', async () => {
-      const task = await scheduleTask({
+    it('should delete the task if it is still running but maxAttempts has been reached', async () => {
+      await scheduleTask({
         taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('failed');
-        expect(scheduledTask.attempts).to.eql(3);
+        const results = (await currentTasks()).docs;
+        expect(results.length).to.eql(0);
       });
     });
 
@@ -891,38 +886,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         // scheduledRunAt shouldn't be changed
         expect(task.runAt).to.eql(scheduledRunAt);
-      });
-    });
-
-    it('should allow a failed task to be rerun using runSoon', async () => {
-      const taskThatFailsBeforeRunNow = await scheduleTask({
-        taskType: 'singleAttemptSampleTask',
-        params: {
-          waitForParams: true,
-        },
-      });
-      // tell the task to fail on its next run
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
-        failWith: 'error on first run',
-      });
-
-      // wait for task to fail
-      await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
-      });
-
-      // run the task again
-      await runTaskSoon({
-        id: taskThatFailsBeforeRunNow.id,
-      });
-
-      // runTaskSoon should successfully update the runAt property of the task
-      await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-        expect(
-          Date.parse(getTaskById(tasks, taskThatFailsBeforeRunNow.id).runAt)
-        ).to.be.greaterThan(Date.parse(taskThatFailsBeforeRunNow.runAt));
       });
     });
 

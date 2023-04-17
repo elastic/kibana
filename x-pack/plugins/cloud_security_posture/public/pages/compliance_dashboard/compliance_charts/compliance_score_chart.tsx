@@ -166,7 +166,7 @@ export const ComplianceScoreChart = ({
             <EuiFlexGroup
               justifyContent="flexEnd"
               gutterSize="none"
-              alignItems={'baseline'}
+              alignItems="flexStart"
               style={{ paddingRight: euiTheme.size.xl }}
             >
               <CounterLink
@@ -179,7 +179,7 @@ export const ComplianceScoreChart = ({
                   { defaultMessage: 'Passed findings' }
                 )}
               />
-              &nbsp;{`-`}&nbsp;
+              <EuiText size="s">&nbsp;-&nbsp;</EuiText>
               <CounterLink
                 text="failed"
                 count={data.totalFailed}
