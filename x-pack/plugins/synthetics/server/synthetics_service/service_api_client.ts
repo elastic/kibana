@@ -27,6 +27,7 @@ export interface ServiceData {
   };
   endpoint?: 'monitors' | 'run' | 'sync';
   isEdit?: boolean;
+  licenseLevel: string;
 }
 
 export class ServiceAPIClient {
@@ -141,7 +142,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, isEdit, endpoint }: ServiceData
+    { monitors: allMonitors, output, endpoint, isEdit, licenseLevel }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -160,6 +161,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(
             this.callServiceEndpoint(
+              { monitors: locMonitors, isEdit, runOnce, output, licenseLevel },
               { monitors: locMonitors, isEdit, output, endpoint },
               method,
               url
@@ -200,7 +202,7 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, endpoint = 'monitors', isEdit }: ServiceData,
+    { monitors, output, endpoint = 'monitors', isEdit, licenseLevel }: ServiceData,
     method: 'POST' | 'PUT' | 'DELETE',
     baseUrl: string
   ) {
@@ -231,6 +233,7 @@ export class ServiceAPIClient {
           output,
           stack_version: this.stackVersion,
           is_edit: isEdit,
+          license_level: licenseLevel,
         },
         headers: this.authorization
           ? {

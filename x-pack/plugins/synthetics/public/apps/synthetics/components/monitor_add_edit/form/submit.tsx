@@ -56,7 +56,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
     <Redirect to={MONITORS_ROUTE} />
   ) : (
     <>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" wrap={true}>
         <EuiFlexItem grow={true}>
           {isEdit && defaultValues && (
             <div>
@@ -84,7 +84,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
         <EuiFlexItem grow={false}>
           <RunTestButton />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
           <NoPermissionsTooltip
             canEditSynthetics={canEditSynthetics}
             canAddPrivateMonitor={isEdit || canSavePrivateLocation}

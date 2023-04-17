@@ -17,11 +17,12 @@ import { SliChartPanel } from './sli_chart_panel';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
+  isAutoRefreshing: boolean;
 }
 
-export function SloDetails({ slo }: Props) {
+export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse = {} } =
-    useFetchHistoricalSummary({ sloIds: [slo.id] });
+    useFetchHistoricalSummary({ sloIds: [slo.id], shouldRefetch: isAutoRefreshing });
 
   const errorBudgetBurnDownData = formatHistoricalData(
     sloHistoricalSummaryResponse[slo.id],

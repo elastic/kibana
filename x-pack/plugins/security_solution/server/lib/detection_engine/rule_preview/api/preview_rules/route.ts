@@ -97,8 +97,6 @@ export const previewRulesRoute = async (
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
-        const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
-          await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
@@ -304,7 +302,6 @@ export const previewRulesRoute = async (
             const queryAlertType = previewRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
-                ...queryRuleAdditionalOptions,
                 id: QUERY_RULE_TYPE_ID,
                 name: 'Custom Query Rule',
               })
@@ -329,7 +326,6 @@ export const previewRulesRoute = async (
             const savedQueryAlertType = previewRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
-                ...queryRuleAdditionalOptions,
                 id: SAVED_QUERY_RULE_TYPE_ID,
                 name: 'Saved Query Rule',
               })

@@ -27,7 +27,7 @@ export const Expand: Story<void> = () => {
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <RightPanelContext.Provider value={panelContextValue}>
-        <InvestigationSection />
+        <InvestigationSection expanded={true} />
       </RightPanelContext.Provider>
     </ExpandableFlyoutContext.Provider>
   );
@@ -37,7 +37,7 @@ export const Collapse: Story<void> = () => {
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <RightPanelContext.Provider value={panelContextValue}>
-        <InvestigationSection expanded={false} />
+        <InvestigationSection />
       </RightPanelContext.Provider>
     </ExpandableFlyoutContext.Provider>
   );

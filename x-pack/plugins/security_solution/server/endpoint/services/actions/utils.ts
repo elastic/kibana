@@ -58,6 +58,9 @@ interface NormalizedActionRequest {
   command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: EndpointActionDataParameterTypes;
+  alertIds?: string[];
+  ruleId?: string;
+  ruleName?: string;
 }
 
 /**
@@ -83,6 +86,9 @@ export const mapToNormalizedActionRequest = (
       id: actionRequest.EndpointActions.action_id,
       type,
       parameters: actionRequest.EndpointActions.data.parameters,
+      alertIds: actionRequest.EndpointActions.data.alert_id,
+      ruleId: actionRequest.rule?.id,
+      ruleName: actionRequest.rule?.name,
     };
   }
 
