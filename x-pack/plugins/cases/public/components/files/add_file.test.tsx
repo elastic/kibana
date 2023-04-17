@@ -210,7 +210,7 @@ describe('AddFile', () => {
     await waitFor(() =>
       expect(validateMetadata).toHaveBeenCalledWith({
         caseIds: [caseId],
-        owner: mockedTestProvidersOwner[0],
+        owner: [mockedTestProvidersOwner[0]],
       })
     );
   });

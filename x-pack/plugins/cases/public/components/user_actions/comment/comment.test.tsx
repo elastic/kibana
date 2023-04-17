@@ -1014,6 +1014,52 @@ describe('createCommentUserActionBuilder', () => {
       expect(onClick).toHaveBeenCalled();
     });
 
+    it('hides correctly the  default actions', async () => {
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick: () => {},
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick: () => {},
+          },
+        ],
+        hideDefaultActions: true,
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(await screen.findByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
+
+      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    });
+
     it('shows correctly the registered primary actions and non-primary actions', async () => {
       const onClick = jest.fn();
 
