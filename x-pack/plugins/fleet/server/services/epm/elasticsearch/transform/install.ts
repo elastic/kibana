@@ -216,10 +216,8 @@ const processTransformAssetsPerModule = (
       // Override yml settings with alia format for transform's dest.aliases
       content.dest.aliases = aliases;
 
-      const versionedIndexName = content.dest.index; // @todo: `${content.dest.index}-${installNameSuffix}`;
-      content.dest.index = versionedIndexName;
       indicesToAddRefs.push({
-        id: versionedIndexName,
+        id: content.dest.index,
         type: ElasticsearchAssetType.index,
       });
 
