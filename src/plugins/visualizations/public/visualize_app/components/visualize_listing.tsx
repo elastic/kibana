@@ -308,30 +308,6 @@ export const VisualizeListing = () => {
   });
   useUnmount(() => closeNewVisModal.current());
 
-  const calloutMessage = (
-    <FormattedMessage
-      data-test-subj="visualize-dashboard-flow-prompt"
-      id="visualizations.visualizeListingDashboardFlowDescription"
-      defaultMessage="Building a dashboard? Create and add your visualizations right from the {dashboardApp}."
-      values={{
-        dashboardApp: (
-          <EuiLink
-            className="visListingCallout__link"
-            onClick={(event: MouseEvent) => {
-              event.preventDefault();
-              application.navigateToUrl(application.getUrlForApp('dashboards'));
-            }}
-          >
-            <FormattedMessage
-              id="visualizations.visualizeListingDashboardAppName"
-              defaultMessage="Dashboard application"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-  );
-
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
@@ -341,43 +317,75 @@ export const VisualizeListing = () => {
     defaultMessage: 'Visualize Library',
   });
 
-  const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(
-    () => ({
+  const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
+    const calloutMessage = (
+      <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
+        id="visualizations.visualizeListingDashboardFlowDescription"
+        defaultMessage="Building a dashboard? Create and add your visualizations right from the {dashboardApp}."
+        values={{
+          dashboardApp: (
+            <EuiLink
+              className="visListingCallout__link"
+              onClick={(event: MouseEvent) => {
+                event.preventDefault();
+                application.navigateToUrl(application.getUrlForApp('dashboards'));
+              }}
+            >
+              <FormattedMessage
+                id="visualizations.visualizeListingDashboardAppName"
+                defaultMessage="Dashboard application"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+
+    return {
       title: 'Visualizations',
       id: 'visualizations',
       getTableList: (propsFromParent) => (
-        <TableList<VisualizeUserContent>
-          id="vis"
-          // we allow users to create visualizations even if they can't save them
-          // for data exploration purposes
-          customTableColumn={getCustomColumn()}
-          listingLimit={listingLimit}
-          initialPageSize={initialPageSize}
-          initialFilter={''}
-          entityName={i18n.translate('visualizations.listing.table.entityName', {
-            defaultMessage: 'visualization',
-          })}
-          entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
-            defaultMessage: 'visualizations',
-          })}
-          getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-            getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
-          }
-          tableCaption={visualizeLibraryTitle}
-          {...tableViewProps}
-          {...propsFromParent}
-        />
+        <>
+          {dashboardCapabilities.createNew && (
+            <>
+              <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <TableList<VisualizeUserContent>
+            id="vis"
+            // we allow users to create visualizations even if they can't save them
+            // for data exploration purposes
+            customTableColumn={getCustomColumn()}
+            listingLimit={listingLimit}
+            initialPageSize={initialPageSize}
+            initialFilter={''}
+            entityName={i18n.translate('visualizations.listing.table.entityName', {
+              defaultMessage: 'visualization',
+            })}
+            entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
+              defaultMessage: 'visualizations',
+            })}
+            getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
+              getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+            }
+            tableCaption={visualizeLibraryTitle}
+            {...tableViewProps}
+            {...propsFromParent}
+          />
+        </>
       ),
-    }),
-    [
-      application,
-      initialPageSize,
-      kbnUrlStateStorage,
-      listingLimit,
-      tableViewProps,
-      visualizeLibraryTitle,
-    ]
-  );
+    };
+  }, [
+    application,
+    dashboardCapabilities.createNew,
+    initialPageSize,
+    kbnUrlStateStorage,
+    listingLimit,
+    tableViewProps,
+    visualizeLibraryTitle,
+  ]);
 
   const tabs = useMemo(
     () => [visualizeTab, ...Array.from(listingViewRegistry as Set<TableListTab>)],
@@ -395,13 +403,6 @@ export const VisualizeListing = () => {
       changeActiveTab={(id) => {
         application.navigateToUrl(`#/${id}`);
       }}
-    >
-      {dashboardCapabilities.createNew && (
-        <>
-          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-          <EuiSpacer size="m" />
-        </>
-      )}
-    </TabbedTableListView>
+    />
   );
 };

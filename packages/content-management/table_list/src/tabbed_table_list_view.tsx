@@ -7,6 +7,7 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import type {
@@ -70,6 +71,11 @@ export const TabbedTableListView = ({
         pageTitle={<span id={headingId}>{title}</span>}
         description={description}
         data-test-subj="top-nav"
+        css={css`
+          .euiPageHeaderContent {
+            padding-bottom: 0;
+          }
+        `}
       >
         <EuiTabs>
           {tabs.map((tab, index) => (
