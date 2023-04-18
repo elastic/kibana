@@ -137,7 +137,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
-      elasticsearchIndices: `${ELASTICSEARCH_DOCS}ices.html`,
       elser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       ingestionApis: `${ENTERPRISE_SEARCH_DOCS}ingestion-apis.html`,

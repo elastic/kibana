@@ -97,7 +97,7 @@ export const NewSearchIndexPage: React.FC = () => {
   const serviceType = Array.isArray(inputServiceType)
     ? inputServiceType[0]
     : inputServiceType || '';
-  // TODO redirect to new index if type doesn't match
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, 'New search index']}

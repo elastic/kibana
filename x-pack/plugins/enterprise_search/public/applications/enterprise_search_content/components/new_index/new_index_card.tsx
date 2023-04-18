@@ -29,34 +29,33 @@ export interface MethodCardOptions {
   title: EuiCardProps['title'];
 }
 
-// TODO change i18n labels
 const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   [INGESTION_METHOD_IDS.CRAWLER]: {
     description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
+      'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.description',
       {
         defaultMessage: 'Discover, extract, index, and sync all of your website content',
       }
     ),
     footer: {
       buttonLabel: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label',
+        'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label',
         {
           defaultMessage: 'Use a web crawler',
         }
       ),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
+      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label', {
         defaultMessage: 'No development required',
       }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CRAWLER),
-    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.title', {
+    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.title', {
       defaultMessage: 'Web crawler',
     }),
   },
   [INGESTION_METHOD_IDS.CONNECTOR]: {
     description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
+      'xpack.enterpriseSearch.content.newIndex.methodCard.connector.description',
       {
         defaultMessage:
           'Use the connector framework to quickly build connectors for custom data sources',
@@ -64,40 +63,37 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     ),
     footer: {
       buttonLabel: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label',
+        'xpack.enterpriseSearch.content.newIndex.methodCard.connector.label',
         {
           defaultMessage: 'Use a connector',
         }
       ),
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer',
-        {
-          defaultMessage: 'Development required',
-        }
-      ),
+      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.footer', {
+        defaultMessage: 'Development required',
+      }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CONNECTOR),
-    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.title', {
+    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.title', {
       defaultMessage: 'Connector',
     }),
   },
   [INGESTION_METHOD_IDS.API]: {
     description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
+      'xpack.enterpriseSearch.content.newIndex.methodCard.api.description',
       {
         defaultMessage: 'Add documents programmatically by connecting with the API',
       }
     ),
     footer: {
-      buttonLabel: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
+      buttonLabel: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.label', {
         defaultMessage: 'Use the API',
       }),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.footer', {
+      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.footer', {
         defaultMessage: 'Some development required',
       }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.API),
-    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.title', {
+    title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.title', {
       defaultMessage: 'API',
     }),
   },
