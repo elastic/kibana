@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-const createCalculateHealthStatusMock = () => {
-  return jest.fn();
-};
+import type { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 
-export const calculateHealthStatusMock = {
-  create: createCalculateHealthStatusMock,
-};
+export interface SynchronizeMovementActionContext {
+  embeddable: Embeddable<EmbeddableInput>;
+}
