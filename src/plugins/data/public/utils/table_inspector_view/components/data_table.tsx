@@ -8,7 +8,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -194,7 +193,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     return (
       <EuiInMemoryTable
         tableLayout="auto"
-        className={classNames('insDataTableFormat__table', 'eui-xScroll')}
+        className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}
