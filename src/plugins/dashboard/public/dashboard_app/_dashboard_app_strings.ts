@@ -101,29 +101,9 @@ export const getPanelTooOldErrorString = () =>
     defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
   });
 
-export const resetConfirmStrings = {
-  getResetTitle: () =>
-    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
-      defaultMessage: 'Reset dashboard?',
-    }),
-  getResetSubtitle: (viewMode: ViewMode) =>
-    viewMode === ViewMode.EDIT
-      ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-          defaultMessage: `Resetting will cause all unsaved changes to be lost.`,
-        })
-      : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
-          defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
-        }),
-  getResetConfirmButtonText: () =>
-    i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Reset',
-    }),
-};
-
 /*
   Dashboard Listing Page
 */
-
 export const createConfirmStrings = {
   getCreateTitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
