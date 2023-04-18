@@ -7,7 +7,7 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { metricsExplorerViewSavedObjectRT } from './types';
 
 export const metricsExplorerViewSavedObjectName = 'metrics-explorer-view';

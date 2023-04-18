@@ -6,7 +6,7 @@
  */
 
 import { staticInventoryViewAttributes } from './defaults';
-import { InventoryView, InventoryViewAttributes } from './types';
+import type { InventoryView, InventoryViewAttributes } from './types';
 
 export const createInventoryViewMock = (
   id: string,

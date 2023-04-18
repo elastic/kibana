@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import {
+import type {
   CreateInventoryViewAttributesRequestPayload,
   InventoryViewRequestQuery,
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
-import { InventoryView } from '../../../common/inventory_views';
-import { InfraSources } from '../../lib/sources';
+import type { InventoryView } from '../../../common/inventory_views';
+import type { InfraSources } from '../../lib/sources';
 
 export interface InventoryViewsServiceStartDeps {
   infraSources: InfraSources;

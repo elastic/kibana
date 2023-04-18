@@ -6,7 +6,7 @@
  */
 
 import { createInventoryViewsClientMock } from './inventory_views_client.mock';
-import { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './types';
+import type { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './types';
 
 export const createInventoryViewsServiceSetupMock =
   (): jest.Mocked<InventoryViewsServiceSetup> => {};

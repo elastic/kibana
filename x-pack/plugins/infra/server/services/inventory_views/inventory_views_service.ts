@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import typ e{ KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { InventoryViewsClient } from './inventory_views_client';
-import {
+import type {
   InventoryViewsServiceSetup,
   InventoryViewsServiceStart,
   InventoryViewsServiceStartDeps,

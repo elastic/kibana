@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
@@ -15,17 +15,17 @@ import Boom from '@hapi/boom';
 import {
   staticInventoryViewAttributes,
   staticInventoryViewId,
-} from '../../../common/inventory_views/defaults';
-import {
+} from '../../../common/inventory_views';
+import type {
   CreateInventoryViewAttributesRequestPayload,
   InventoryViewRequestQuery,
 } from '../../../common/http_api/latest';
-import { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
+import type { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { IInfraSources } from '../../lib/sources';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { inventoryViewSavedObjectRT } from '../../saved_objects/inventory_view/types';
-import { IInventoryViewsClient } from './types';
+import type { IInventoryViewsClient } from './types';
 
 export class InventoryViewsClient implements IInventoryViewsClient {
   constructor(

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NonEmptyString } from '@kbn/io-ts-utils';
-import { InventoryViewAttributes } from './types';
+import type { NonEmptyString } from '@kbn/io-ts-utils';
+import type { InventoryViewAttributes } from './types';
 
 export const staticInventoryViewId = 'static';
 
