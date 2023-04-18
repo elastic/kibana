@@ -102,7 +102,7 @@ export const normalizeThrottling = (
       return matchedProfile;
     } else {
       return {
-        id: 'custom',
+        id: PROFILE_VALUES_ENUM.CUSTOM,
         label: 'Custom',
         value: {
           download: String(download),

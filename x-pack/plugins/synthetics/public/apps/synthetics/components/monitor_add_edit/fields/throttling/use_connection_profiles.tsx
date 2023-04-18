@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { PROFILE_VALUES_ENUM } from '../../../../../../../common/constants/monitor_defaults';
 import { ConnectionProfile } from './connection_profile';
 import { PROFILE_OPTIONS } from './throttling_config_field';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
@@ -15,11 +16,11 @@ export const useConnectionProfiles = (initialValue?: ThrottlingConfig) => {
     return [
       ...PROFILE_OPTIONS,
       {
-        value: 'custom',
+        value: PROFILE_VALUES_ENUM.CUSTOM,
         inputDisplay: (
           <ConnectionProfile
             id="custom"
-            throttling={initialValue?.id === 'custom' ? initialValue : undefined}
+            throttling={initialValue?.id === PROFILE_VALUES_ENUM.CUSTOM ? initialValue : undefined}
           />
         ),
         'data-test-subj': 'syntheticsThrottlingSelectCustom',

@@ -41,6 +41,7 @@ export enum PROFILE_VALUES_ENUM {
   LTE = 'lte',
   FIBRE = 'fibre',
   NO_THROTTLING = 'no-throttling',
+  CUSTOM = 'custom',
 }
 
 export const PROFILE_VALUES: ThrottlingConfig[] = [
