@@ -95,12 +95,20 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const decodedResourceId = decodeURIComponent(params.resourceId);
 
-  const { pageIndex, sort, queryError, pageSize, setTableOptions, urlQuery, setUrlQuery } =
-    useCloudPostureTable({
-      dataView,
-      defaultQuery: getDefaultQuery,
-      paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-    });
+  const {
+    pageIndex,
+    sort,
+    queryError,
+    pageSize,
+    setTableOptions,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
 
   /**
    * Page ES query result
@@ -246,6 +254,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}
+            onResetFilters={onResetFilters}
             flyoutFindingIndex={flyoutFindingIndex}
             loading={resourceFindings.isFetching}
             items={slicedPage}
