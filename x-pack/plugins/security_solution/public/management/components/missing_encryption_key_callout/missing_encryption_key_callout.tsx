@@ -21,44 +21,44 @@ export const MissingEncryptionKeyCallout = memo(() => {
     return null;
   }
 
-  if (!calloutDismiss && encryptionKeyState.canEncrypt === true) {
-    return (
-      <>
-        <EuiCallOut
-          color="warning"
-          iconType="iInCircle"
-          data-test-subj="missingEncryptionKeyCallout"
-          title={i18n.translate(
-            'xpack.securitySolution.responder.missingEncryptionKey.callout.title',
-            {
-              defaultMessage: 'Set up encryption key',
-            }
-          )}
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
-              defaultMessage="Encryption key will make your environment more secure"
-            />
-          </p>
-
-          <EuiButtonEmpty
-            onClick={onClickDismissButton}
-            color="warning"
-            data-test-subj="dismissEncryptionKeyCallout"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.responder.missingEncryptionKey.callout.dismissButton.label"
-              defaultMessage="Dismiss"
-            />
-          </EuiButtonEmpty>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
+  if (calloutDismiss || encryptionKeyState.canEncrypt === true) {
+    return null;
   }
 
-  return null;
+  return (
+    <>
+      <EuiCallOut
+        color="warning"
+        iconType="iInCircle"
+        data-test-subj="missingEncryptionKeyCallout"
+        title={i18n.translate(
+          'xpack.securitySolution.responder.missingEncryptionKey.callout.title',
+          {
+            defaultMessage: 'Set up encryption key',
+          }
+        )}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
+            defaultMessage="Encryption key will make your environment more secure"
+          />
+        </p>
+
+        <EuiButtonEmpty
+          onClick={onClickDismissButton}
+          color="warning"
+          data-test-subj="dismissEncryptionKeyCallout"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.responder.missingEncryptionKey.callout.dismissButton.label"
+            defaultMessage="Dismiss"
+          />
+        </EuiButtonEmpty>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  );
 });
 
 MissingEncryptionKeyCallout.displayName = 'MissingEncryptionKeyCallout';

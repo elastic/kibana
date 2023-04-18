@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AGENTS_SETUP_API_ROUTES } from '@kbn/fleet-plugin/common';
+import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -22,19 +22,15 @@ describe('Missing encryption key callout', () => {
 
   const policyListApiHandlers = policyListApiPathHandlers();
 
-  const apiReturnsEncryptionKeyIsSet = (encryptionKeySet: boolean) => {
+  const apiReturnsEncryptionKeyIsSet = (canEncrypt: boolean) => {
     mockedContext.coreStart.http.get.mockImplementation((...args) => {
       const [path] = args;
       if (typeof path === 'string') {
         // GET datasouce
-        if (path === AGENTS_SETUP_API_ROUTES.INFO_PATTERN) {
+        if (path === ACTION_STATE_ROUTE) {
           asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
           return Promise.resolve({
-            isReady: true,
-            missing_requirements: [],
-            missing_optional_features: encryptionKeySet
-              ? []
-              : ['encrypted_saved_object_encryption_key_required'],
+            canEncrypt,
           });
         }
 
