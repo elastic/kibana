@@ -29,13 +29,23 @@ export const AnalyticsCollectionDataViewLogic = kea<
   },
   listeners: ({ actions }) => ({
     [FetchAnalyticsCollectionLogic.actionTypes.apiSuccess]: async (collection) => {
-      const dataView = (
+      let dataView = (
         await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
       )?.[0];
 
-      if (dataView) {
-        actions.setDataView(dataView);
+      if (!dataView) {
+        dataView = await KibanaLogic.values.data.dataViews.createAndSave(
+          {
+            allowNoIndex: true,
+            name: `behavioral_analytics.events-${collection.name}`,
+            timeFieldName: '@timestamp',
+            title: collection.events_datastream,
+          },
+          true
+        );
       }
+
+      actions.setDataView(dataView);
     },
   }),
   path: ['enterprise_search', 'analytics', 'collections', 'dataView'],

@@ -22,6 +22,7 @@ jest.mock('../../../shared/kibana/kibana_logic', () => ({
       data: {
         dataViews: {
           find: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
+          createAndSave: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
         },
       },
     },
@@ -57,6 +58,18 @@ describe('AnalyticsCollectionDataViewLogic', () => {
     it('should find and set dataView when analytics collection fetched', async () => {
       const dataView = { id: 'test' } as DataView;
       jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValue([dataView]);
+
+      await FetchAnalyticsCollectionLogic.actions.apiSuccess({
+        events_datastream: 'events1',
+        name: 'collection1',
+      } as AnalyticsCollection);
+
+      expect(AnalyticsCollectionDataViewLogic.values.dataView).toEqual(dataView);
+    });
+
+    it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
+      const dataView = { id: 'test' } as DataView;
+      jest.spyOn(KibanaLogic.values.data.dataViews, 'createAndSave').mockResolvedValue(dataView);
 
       await FetchAnalyticsCollectionLogic.actions.apiSuccess({
         events_datastream: 'events1',
