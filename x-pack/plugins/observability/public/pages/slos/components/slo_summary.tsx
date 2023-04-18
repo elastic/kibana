@@ -40,7 +40,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         <EuiFlexGroup
           direction="row"
           responsive={false}
-          gutterSize="xs"
+          gutterSize="s"
           alignItems="center"
           justifyContent="flexEnd"
         >
@@ -77,7 +77,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         <EuiFlexGroup
           direction="row"
           responsive={false}
-          gutterSize="xs"
+          gutterSize="s"
           alignItems="center"
           justifyContent="flexEnd"
         >
