@@ -27,6 +27,7 @@ export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'opentelemetry/php',
   'opentelemetry/python',
   'opentelemetry/ruby',
+  'opentelemetry/rust',
   'opentelemetry/swift',
   'opentelemetry/webjs',
 ];

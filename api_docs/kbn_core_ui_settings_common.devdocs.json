@@ -433,6 +433,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.TIMEZONE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "TIMEZONE_OPTIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/timezones.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.UiSettingsScope",
         "type": "Type",
         "tags": [],

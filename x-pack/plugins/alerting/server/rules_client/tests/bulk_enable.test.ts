@@ -64,6 +64,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {

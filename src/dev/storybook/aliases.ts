@@ -45,9 +45,11 @@ export const storybookAliases = {
   presentation: 'src/plugins/presentation_util/storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'packages/security-solution/storybook/config',
+  security_solution_data_table: 'x-pack/packages/kbn-securitysolution-data-table/.storybook',
   shared_ux: 'packages/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
+  profiling: 'x-pack/plugins/profiling/.storybook',
 };

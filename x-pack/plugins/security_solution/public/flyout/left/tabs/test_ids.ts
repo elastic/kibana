@@ -11,8 +11,16 @@ export const VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutVisualizeTabSessionViewButton';
 export const VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutVisualizeTabGraphAnalyzerButton';
-export const INSIGHTS_TAB_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsTabContent';
+export const INSIGHTS_TAB_BUTTON_GROUP_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsTabButtonGroup';
+export const INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsTabEntitiesButton';
+export const INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsTabThreatIntelligenceButton';
+export const INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsTabPrevalenceButton';
+export const INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsTabCorrelationsButton';
 export const INVESTIGATIONS_TAB_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationsTabContent';
 export const HISTORY_TAB_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHistoryTabContent';
