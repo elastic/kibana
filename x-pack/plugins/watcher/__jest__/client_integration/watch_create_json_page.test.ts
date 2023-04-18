@@ -12,7 +12,7 @@ import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchCreateJsonTestBed } from './helpers/watch_create_json_page.helpers';
-import { WATCH } from './helpers/jest_constants';
+import { WATCH, WATCH_ID } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJsonPage;
 
@@ -276,77 +276,95 @@ describe('<JsonWatchEditPage /> create route', () => {
       });
 
       describe('results flyout', () => {
-        describe('for condition that is met', () => {
-          beforeEach(async () => {
-            const { actions, component } = testBed;
+        const actionModes = ['simulate', 'force_simulate', 'execute', 'force_execute', 'skip'];
+        const actionModeStatusesConditionMet = [
+          'simulated',
+          'simulated',
+          'executed',
+          'executed',
+          'throttled',
+        ];
+        const actionModeStatusesConditionNotMet = [
+          'not simulated',
+          'not simulated',
+          'not executed',
+          'not executed',
+          'throttled',
+        ];
+        const conditionMetStatuses = [true, false];
+        const ACTION_NAME = 'my-logging-action';
+        const ACTION_TYPE = 'logging';
+        const ACTION_STATE = 'OK';
 
-            httpRequestsMockHelpers.setLoadExecutionResultResponse({
-              watchHistoryItem: {
-                details: {
-                  result: {
-                    condition: {
-                      met: true,
-                    },
-                    actions: [
-                      {
-                        id: 'my-logging-action',
-                        type: 'logging',
-                        status: 'simulated',
+        actionModes.forEach((actionMode, i) => {
+          conditionMetStatuses.forEach((conditionMet) => {
+            describe('for ' + actionMode + ' action mode', () => {
+              describe(
+                conditionMet ? 'when the condition is met' : 'when the condition is not met',
+                () => {
+                  beforeEach(async () => {
+                    const { actions, component, form } = testBed;
+                    form.setInputValue('actionModesSelect', actionMode);
+
+                    httpRequestsMockHelpers.setLoadExecutionResultResponse({
+                      watchHistoryItem: {
+                        details: {
+                          result: {
+                            condition: {
+                              met: conditionMet,
+                            },
+                            actions:
+                              (conditionMet && [
+                                {
+                                  id: ACTION_NAME,
+                                  type: ACTION_TYPE,
+                                  status: conditionMet && actionModeStatusesConditionMet[i],
+                                },
+                              ]) ||
+                              [],
+                          },
+                        },
+                        watchStatus: {
+                          actionStatuses: [
+                            {
+                              id: ACTION_NAME,
+                              state: ACTION_STATE,
+                            },
+                          ],
+                        },
                       },
-                    ],
-                  },
-                },
-                watchStatus: {
-                  actionStatuses: [
-                    {
-                      id: 'my-logging-action',
-                      state: 'OK',
-                    },
-                  ],
-                },
-              },
+                    });
+
+                    await act(async () => {
+                      actions.clickSimulateButton();
+                    });
+                    component.update();
+                  });
+
+                  test('should set the correct condition met status', () => {
+                    const { exists } = testBed;
+                    expect(exists('conditionMetStatus')).toBe(conditionMet);
+                    expect(exists('conditionNotMetStatus')).toBe(!conditionMet);
+                  });
+
+                  test('should set the correct values in the table', () => {
+                    const { table } = testBed;
+                    const { tableCellsValues } = table.getMetaData('simulateResultsTable');
+                    const row = tableCellsValues[0];
+                    expect(row).toEqual([
+                      ACTION_NAME,
+                      ACTION_TYPE,
+                      actionMode,
+                      ACTION_STATE,
+                      '',
+                      conditionMet
+                        ? actionModeStatusesConditionMet[i]
+                        : actionModeStatusesConditionNotMet[i],
+                    ]);
+                  });
+                }
+              );
             });
-
-            await act(async () => {
-              actions.clickSimulateButton();
-            });
-            component.update();
-          });
-
-          test('should set the correct condition met status', () => {
-            const { exists } = testBed;
-            expect(exists('conditionMetStatus')).toBe(true);
-            expect(exists('conditionNotMetStatus')).toBe(false);
-          });
-        });
-
-        describe('for condition that is not', () => {
-          beforeEach(async () => {
-            const { actions, component } = testBed;
-
-            httpRequestsMockHelpers.setLoadExecutionResultResponse({
-              watchHistoryItem: {
-                details: {
-                  result: {
-                    condition: {
-                      met: false,
-                    },
-                    actions: [],
-                  },
-                },
-              },
-            });
-
-            await act(async () => {
-              actions.clickSimulateButton();
-            });
-            component.update();
-          });
-
-          test('should set the correct condition not met status', () => {
-            const { exists } = testBed;
-            expect(exists('conditionMetStatus')).toBe(false);
-            expect(exists('conditionNotMetStatus')).toBe(true);
           });
         });
       });
