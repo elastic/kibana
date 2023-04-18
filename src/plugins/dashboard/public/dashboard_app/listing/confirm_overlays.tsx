@@ -20,10 +20,15 @@ import {
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { pluginServices } from '../../services/plugin_services';
-import { createConfirmStrings, discardConfirmStrings } from '../_dashboard_app_strings';
+import {
+  createConfirmStrings,
+  discardConfirmStrings,
+  resetConfirmStrings,
+} from '../_dashboard_app_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
@@ -34,10 +39,27 @@ export const confirmDiscardUnsavedChanges = (discardCallback: () => void) => {
 
   openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
     confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
-    cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
     buttonColor: 'danger',
     defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
     title: discardConfirmStrings.getDiscardTitle(),
+  }).then((isConfirmed) => {
+    if (isConfirmed) {
+      discardCallback();
+    }
+  });
+};
+
+export const confirmResetUnsavedChanges = (discardCallback: () => void) => {
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
+
+  openConfirm(resetConfirmStrings.getResetSubtitle(), {
+    confirmButtonText: resetConfirmStrings.getResetConfirmButtonText(),
+    buttonColor: 'primary',
+    defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+    title: resetConfirmStrings.getResetTitle(),
+    maxWidth: 500,
   }).then((isConfirmed) => {
     if (isConfirmed) {
       discardCallback();

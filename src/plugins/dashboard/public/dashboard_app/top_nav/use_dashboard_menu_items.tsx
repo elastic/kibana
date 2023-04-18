@@ -20,7 +20,10 @@ import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import {
+  confirmDiscardUnsavedChanges,
+  confirmResetUnsavedChanges,
+} from '../listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
   redirectTo,
@@ -119,19 +122,25 @@ export const useDashboardMenuItems = ({
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
-  const discardChanges = useCallback(
-    (switchToViewMode: boolean = false) => {
+  const resetChanges = useCallback(
+    (viewMode: ViewMode, switchToViewMode: boolean = false) => {
       dashboardContainer.clearOverlays();
-      if (hasUnsavedChanges) {
-        confirmDiscardUnsavedChanges(() => {
-          batch(() => {
-            dashboardContainer.resetToLastSavedState();
-            if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+      if (viewMode === ViewMode.EDIT) {
+        if (hasUnsavedChanges) {
+          confirmDiscardUnsavedChanges(() => {
+            batch(() => {
+              dashboardContainer.resetToLastSavedState();
+              if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+            });
           });
+          return;
+        }
+        dispatch(setViewMode(ViewMode.VIEW));
+      } else {
+        confirmResetUnsavedChanges(() => {
+          dashboardContainer.resetToLastSavedState();
         });
-        return;
       }
-      dispatch(setViewMode(ViewMode.VIEW));
     },
     [dashboardContainer, dispatch, hasUnsavedChanges, setViewMode]
   );
@@ -190,20 +199,12 @@ export const useDashboardMenuItems = ({
         run: () => saveDashboardAs(),
       } as TopNavMenuData,
 
-      discardChanges: {
-        ...topNavStrings.discardChanges,
-        id: 'reset',
-        testId: 'dashboardDiscardChangesMenuItem',
-        disableButton: !hasUnsavedChanges || isSaveInProgress || !lastSavedId || hasOverlays,
-        run: () => discardChanges(),
-      } as TopNavMenuData,
-
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
         disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
-        run: () => discardChanges(true),
+        run: () => resetChanges(ViewMode.EDIT, true),
       } as TopNavMenuData,
 
       share: {
@@ -234,19 +235,35 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     dashboardContainer,
     hasUnsavedChanges,
-    hasOverlays,
     setFullScreenMode,
     isSaveInProgress,
-    discardChanges,
     saveDashboardAs,
     setIsLabsShown,
+    resetChanges,
     lastSavedId,
     setViewMode,
+    hasOverlays,
     isLabsShown,
     showShare,
     dispatch,
     clone,
   ]);
+
+  const getResetChangesMenuItem = useCallback(
+    (viewMode: ViewMode) => {
+      return {
+        ...topNavStrings.resetChanges,
+        id: 'reset',
+        testId: 'dashboardDiscardChangesMenuItem',
+        disableButton:
+          !hasUnsavedChanges ||
+          hasOverlays ||
+          (viewMode === ViewMode.EDIT && (isSaveInProgress || !lastSavedId)),
+        run: () => resetChanges(viewMode),
+      };
+    },
+    [hasOverlays, lastSavedId, resetChanges, isSaveInProgress, hasUnsavedChanges]
+  );
 
   /**
    * Build ordered menus for view and edit mode.
@@ -261,10 +278,10 @@ export const useDashboardMenuItems = ({
       menuItems.fullScreen,
       ...shareMenuItem,
       ...cloneMenuItem,
-      menuItems.discardChanges,
+      { ...getResetChangesMenuItem(ViewMode.VIEW) },
       ...editMenuItem,
     ];
-  }, [menuItems, share, showWriteControls, isLabsEnabled]);
+  }, [menuItems, share, showWriteControls, getResetChangesMenuItem, isLabsEnabled]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
@@ -274,14 +291,14 @@ export const useDashboardMenuItems = ({
       editModeItems.push(
         menuItems.saveAs,
         menuItems.switchToViewMode,
-        menuItems.discardChanges,
+        { ...getResetChangesMenuItem(ViewMode.EDIT) },
         menuItems.quickSave
       );
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
     }
     return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [lastSavedId, menuItems, share, isLabsEnabled]);
+  }, [lastSavedId, menuItems, share, getResetChangesMenuItem, isLabsEnabled]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

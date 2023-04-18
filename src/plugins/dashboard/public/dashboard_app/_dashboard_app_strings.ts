@@ -101,25 +101,36 @@ export const getPanelTooOldErrorString = () =>
     defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
   });
 
+export const resetConfirmStrings = {
+  getResetTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
+      defaultMessage: 'Reset dashboard?',
+    }),
+  getResetSubtitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
+      defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
+    }),
+  getResetConfirmButtonText: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Reset',
+    }),
+};
+
 /*
   Dashboard Listing Page
 */
 export const discardConfirmStrings = {
   getDiscardTitle: () =>
     i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
+      defaultMessage: 'Reset dashboard?',
     }),
   getDiscardSubtitle: () =>
     i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `You can’t recover unsaved changes.`,
+      defaultMessage: `Resetting will cause all unsaved changes to be lost.`,
     }),
   getDiscardConfirmButtonText: () =>
     i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Discard changes',
-    }),
-  getDiscardCancelButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
+      defaultMessage: 'Reset',
     }),
 };
 
@@ -312,12 +323,12 @@ export const topNavStrings = {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
-  discardChanges: {
-    label: i18n.translate('dashboard.topNave.discardChangesButtonAriaLabel', {
-      defaultMessage: 'Discard changes',
+  resetChanges: {
+    label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
+      defaultMessage: 'Reset',
     }),
-    description: i18n.translate('dashboard.topNave.discardChangesConfigDescription', {
-      defaultMessage: 'Discard changes to dashboard',
+    description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
+      defaultMessage: 'Reset changes to dashboard',
     }),
   },
   switchToViewMode: {
