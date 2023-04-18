@@ -46,6 +46,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -218,6 +219,7 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
+          enableFooterInEmail: true,
           ...overrides,
         };
       }
@@ -273,6 +275,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -341,6 +344,7 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
+          enableFooterInEmail: true,
           ...overrides,
         };
       }
