@@ -14,36 +14,31 @@ export const exceptionsArtifactSavedObjectType = ArtifactConstants.SAVED_OBJECT_
 export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     identifier: {
       type: 'keyword',
     },
     compressionAlgorithm: {
       type: 'keyword',
-      index: false,
     },
     encryptionAlgorithm: {
       type: 'keyword',
-      index: false,
     },
     encodedSha256: {
       type: 'keyword',
     },
     encodedSize: {
       type: 'long',
-      index: false,
     },
     decodedSha256: {
       type: 'keyword',
-      index: false,
     },
     decodedSize: {
       type: 'long',
-      index: false,
     },
     created: {
       type: 'date',
-      index: false,
     },
     body: {
       type: 'binary',
@@ -52,28 +47,25 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
 };
 
 export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     created: {
       type: 'date',
-      index: false,
     },
     schemaVersion: {
       type: 'keyword',
     },
     semanticVersion: {
       type: 'keyword',
-      index: false,
     },
     artifacts: {
       type: 'nested',
       properties: {
         policyId: {
           type: 'keyword',
-          index: false,
         },
         artifactId: {
           type: 'keyword',
-          index: false,
         },
       },
     },
