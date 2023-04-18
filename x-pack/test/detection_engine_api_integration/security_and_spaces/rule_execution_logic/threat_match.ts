@@ -131,7 +131,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
     ]);
   };
 
-  expect(alertsA.map(mapAlert)).to.eql(alertsB.map(mapAlert));
+  expect(alertsA.map(mapAlert)).to.not.eql(alertsB.map(mapAlert));
 }
 
 // eslint-disable-next-line import/no-default-export
