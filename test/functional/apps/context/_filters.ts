@@ -20,11 +20,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects(['common', 'context']);
   const testSubjects = getService('testSubjects');
 
   describe('context filters', function contextSize() {
+    before(async function () {
+      await kibanaServer.uiSettings.update({
+        'discover:rowHeightOption': 0, // to fit and show more grid rows
+      });
+    });
+
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
