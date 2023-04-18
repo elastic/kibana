@@ -563,14 +563,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             return i18n.translate(
               'xpack.synthetics.monitorConfig.timeout.browser.greaterThan0Error',
               {
-                defaultMessage: 'Timeout must be greater 0.',
+                defaultMessage: 'Timeout must be greater than 0 minutes.',
               }
             );
           else if (iValue > 900)
             return i18n.translate(
               'xpack.synthetics.monitorConfig.timeout.browser.greaterThan15Error',
               {
-                defaultMessage: 'Timeout may not exceed 15.',
+                defaultMessage: 'Timeout may not exceed 15 minutes.',
               }
             );
 
