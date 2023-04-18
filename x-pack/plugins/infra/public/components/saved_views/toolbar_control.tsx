@@ -9,12 +9,12 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SavedViewCreateModal } from './create_modal';
-import { SavedViewUpdateModal } from './update_modal';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useSavedViewContext } from '../../containers/saved_view/saved_view';
 import { SavedViewListModal } from './view_list_modal';
 import { useBoolean } from '../../hooks/useBoolean';
+import { UpsertViewModal } from './upsert_modal';
 
 interface Props<ViewState> {
   viewState: ViewState;
@@ -159,35 +159,32 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         <EuiListGroup flush={true}>
           <EuiListGroupItem
             data-test-subj="savedViews-manageViews"
-            iconType={'indexSettings'}
+            iconType="indexSettings"
             onClick={goToManageViews}
             label={i18n.translate('xpack.infra.savedView.manageViews', {
               defaultMessage: 'Manage views',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-updateView"
-            iconType={'refresh'}
+            iconType="refresh"
             onClick={goToUpdateView}
             isDisabled={!currentView || currentView.id === '0'}
             label={i18n.translate('xpack.infra.savedView.updateView', {
               defaultMessage: 'Update view',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-loadView"
-            iconType={'importAction'}
+            iconType="importAction"
             onClick={goToLoadView}
             label={i18n.translate('xpack.infra.savedView.loadView', {
               defaultMessage: 'Load view',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-saveNewView"
-            iconType={'save'}
+            iconType="save"
             onClick={goToCreateView}
             label={i18n.translate('xpack.infra.savedView.saveNewView', {
               defaultMessage: 'Save new view',
@@ -195,20 +192,34 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           />
         </EuiListGroup>
       </EuiPopover>
-
       {isCreateModalOpen && (
-        <SavedViewCreateModal isInvalid={isInvalid} close={closeCreateModal} save={save} />
-      )}
-
-      {isUpdateModalOpen && (
-        <SavedViewUpdateModal
-          currentView={currentView}
+        <UpsertViewModal
           isInvalid={isInvalid}
-          close={closeUpdateModal}
-          save={update}
+          onClose={closeCreateModal}
+          onSave={save}
+          title={
+            <FormattedMessage
+              defaultMessage="Save View"
+              id="xpack.infra.waffle.savedView.createHeader"
+            />
+          }
         />
       )}
-
+      {isUpdateModalOpen && (
+        <UpsertViewModal
+          isInvalid={isInvalid}
+          onClose={closeUpdateModal}
+          onSave={update}
+          initialName={currentView.name}
+          initialIncludeTime={Boolean(currentView.time)}
+          title={
+            <FormattedMessage
+              defaultMessage="Update View"
+              id="xpack.infra.waffle.savedView.updateHeader"
+            />
+          }
+        />
+      )}
       {isLoadModalOpen && (
         <SavedViewListModal<any>
           currentView={currentView}
@@ -217,7 +228,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           setView={setCurrentView}
         />
       )}
-
       {isManageFlyoutOpen && (
         <SavedViewManageViewsFlyout<ViewState>
           sourceIsLoading={sourceIsLoading}
