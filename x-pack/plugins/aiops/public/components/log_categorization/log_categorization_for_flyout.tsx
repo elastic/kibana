@@ -208,7 +208,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 {i18n.translate('xpack.aiops.categorizeFlyout.title', {
-                  defaultMessage: 'Categorize {name}',
+                  defaultMessage: 'Pattern analysis of {name}',
                   values: { name: selectedField.name },
                 })}
               </h2>
