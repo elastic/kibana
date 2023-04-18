@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { pick, sortBy } from 'lodash';
+
 import { Asset, AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
 import { pick } from 'lodash';
@@ -309,9 +311,10 @@ export default function ({ getService }: FtrProviderContext) {
           delete asset['@timestamp'];
         });
 
-        expect(getResponse.body.onlyInA).to.eql(onlyInA);
-        expect(getResponse.body.onlyInB).to.eql(onlyInB);
-        expect(getResponse.body.inBoth).to.eql(inBoth);
+        const sortByEan = (assets: any[]) => sortBy(assets, (asset) => asset['asset.ean']);
+        expect(sortByEan(getResponse.body.onlyInA)).to.eql(sortByEan(onlyInA));
+        expect(sortByEan(getResponse.body.onlyInB)).to.eql(sortByEan(onlyInB));
+        expect(sortByEan(getResponse.body.inBoth)).to.eql(sortByEan(inBoth));
       });
     });
 
