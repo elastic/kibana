@@ -6,5 +6,5 @@
  */
 
 export type { IESAggSource } from './types';
-export { AbstractESAggSource, BUCKETS, DEFAULT_METRIC } from './es_agg_source';
+export { AbstractESAggSource, DEFAULT_METRIC } from './es_agg_source';
 export { getAggDisplayName } from './get_agg_display_name';

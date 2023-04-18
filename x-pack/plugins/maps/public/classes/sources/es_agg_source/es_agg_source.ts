@@ -17,12 +17,9 @@ import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getAggDisplayName } from './get_agg_display_name';
+import { BUCKETS } from '../../layers/vector_layer/mask';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
-
-export const BUCKETS = i18n.translate('xpack.maps.source.esAggSource.genericBucketsName', {
-  defaultMessage: 'buckets',
-});
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
