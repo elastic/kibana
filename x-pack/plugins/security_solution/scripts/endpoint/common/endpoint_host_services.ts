@@ -29,7 +29,7 @@ export interface CreateAndEnrollEndpointHostOptions
   hostname?: string;
 }
 
-interface CreateAndEnrollEndpointHostResponse {
+export interface CreateAndEnrollEndpointHostResponse {
   hostname: string;
   agentId: string;
 }
@@ -49,13 +49,13 @@ export const createAndEnrollEndpointHost = async ({
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const [vm, agentDownloadUrl, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
-      vmName: hostname ?? `test.host.${Math.random().toString().substring(2, 6)}`,
+      vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
       disk,
       cpus,
       memory,
     }),
 
-    getAgentDownloadUrl(version, log),
+    getAgentDownloadUrl(version, true, log),
 
     fetchFleetServerUrl(kbnClient),
 
@@ -65,7 +65,7 @@ export const createAndEnrollEndpointHost = async ({
   // Some validations before we proceed
   assert(agentDownloadUrl, 'Missing agent download URL');
   assert(fleetServerUrl, 'Fleet server URL not set');
-  assert(enrollmentToken, 'No enrollment token');
+  assert(enrollmentToken, `No enrollment token for agent policy id [${agentPolicyId}]`);
 
   log.verbose(`Enrolling host [${vm.vmName}]
   with fleet-server [${fleetServerUrl}]

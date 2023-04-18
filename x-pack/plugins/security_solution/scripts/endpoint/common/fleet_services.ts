@@ -28,6 +28,7 @@ import type {
   GetEnrollmentAPIKeysResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
+import semver from 'semver';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -258,13 +259,23 @@ interface ElasticArtifactSearchResponse {
 /**
  * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
  * @param version
+ * @param closestMatch
  * @param log
  */
-export const getAgentDownloadUrl = async (version: string, log?: ToolingLog): Promise<string> => {
+export const getAgentDownloadUrl = async (
+  version: string,
+  /**
+   * When set to true a check will be done to determine the latest version of the agent that
+   * is less than or equal to the `version` provided
+   */
+  closestMatch: boolean = false,
+  log?: ToolingLog
+): Promise<string> => {
+  const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
   const downloadArch =
     { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
-  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
+  const agentFile = `elastic-agent-${agentVersion}-linux-${downloadArch}.tar.gz`;
+  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
 
@@ -272,7 +283,7 @@ export const getAgentDownloadUrl = async (version: string, log?: ToolingLog): Pr
     (response) => {
       if (!response.ok) {
         throw new Error(
-          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status})`
+          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactSearchUrl})`
         );
       }
 
@@ -283,8 +294,58 @@ export const getAgentDownloadUrl = async (version: string, log?: ToolingLog): Pr
   log?.verbose(searchResult);
 
   if (!searchResult.packages[agentFile]) {
-    throw new Error(`Unable to find an Agent download URL for version [${version}]`);
+    throw new Error(`Unable to find an Agent download URL for version [${agentVersion}]`);
   }
 
   return searchResult.packages[agentFile].url;
+};
+
+/**
+ * Given a stack version number, function will return the closest Agent download version available
+ * for download. THis could be the actual version passed in or lower.
+ * @param version
+ */
+export const getLatestAgentDownloadVersion = async (
+  version: string,
+  log?: ToolingLog
+): Promise<string> => {
+  const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
+  const semverMatch = `<=${version}`;
+  const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
+    (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to retrieve list of versions from elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactsUrl})`
+        );
+      }
+
+      return response.json();
+    }
+  );
+
+  const stackVersionToArtifactVersion: Record<string, string> =
+    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+      const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
+      acc[stackVersion] = artifactVersion;
+      return acc;
+    }, {} as Record<string, string>);
+
+  log?.verbose(
+    `Versions found from [${artifactsUrl}]:\n${JSON.stringify(
+      stackVersionToArtifactVersion,
+      null,
+      2
+    )}`
+  );
+
+  const matchedVersion = semver.maxSatisfying(
+    Object.keys(stackVersionToArtifactVersion),
+    semverMatch
+  );
+
+  if (!matchedVersion) {
+    throw new Error(`Unable to find a semver version that meets ${semverMatch}`);
+  }
+
+  return stackVersionToArtifactVersion[matchedVersion];
 };
