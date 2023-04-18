@@ -31,6 +31,7 @@ import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   getDefaultAiOpsListState,
+  isFullAiOpsListState,
   type AiOpsPageUrlState,
 } from '../../application/utils/url_state';
 
@@ -296,7 +297,10 @@ export const LogCategorizationPage: FC = () => {
         fieldSelected={selectedField !== null}
       />
 
-      {selectedField !== undefined && categories !== null && categories.length > 0 ? (
+      {selectedField !== undefined &&
+      categories !== null &&
+      categories.length > 0 &&
+      isFullAiOpsListState(aiopsListState) ? (
         <CategoryTable
           categories={categories}
           aiopsListState={aiopsListState}

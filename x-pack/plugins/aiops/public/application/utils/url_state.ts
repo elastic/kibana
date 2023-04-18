@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Filter, Query } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from './search_utils';
 
@@ -27,12 +28,18 @@ export interface AiOpsIndexBasedAppState {
   filters?: Filter[];
 }
 
+export type AiOpsFullIndexBasedAppState = Required<AiOpsIndexBasedAppState>;
+
 export const getDefaultAiOpsListState = (
   overrides?: Partial<AiOpsIndexBasedAppState>
-): Required<AiOpsIndexBasedAppState> => ({
+): AiOpsFullIndexBasedAppState => ({
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   filters: [],
   ...overrides,
 });
+
+export const isFullAiOpsListState = (arg: unknown): arg is AiOpsFullIndexBasedAppState => {
+  return isPopulatedObject(arg, Object.keys(getDefaultAiOpsListState()));
+};
