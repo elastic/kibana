@@ -31,13 +31,10 @@ import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
 import { AgentStatusFilter } from './agent_status_filter';
+import { DashboardsButtons } from './dashboards_buttons';
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
-`;
-
-const FlexEndEuiFlexItem = styled(EuiFlexItem)`
-  align-self: flex-end;
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -118,17 +115,18 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   return (
     <>
-      {/* Search and filter bar */}
       <EuiFlexGroup direction="column">
-        <FlexEndEuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
+        {/* Top Buttons and Links */}
+        <EuiFlexGroup>
+          <EuiFlexItem>{totalAgents > 0 && <DashboardsButtons />}</EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   <FormattedMessage
@@ -145,7 +143,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiButton>
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   <FormattedMessage
@@ -163,7 +161,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </FlexEndEuiFlexItem>
+        </EuiFlexGroup>
+        {/* Search and filters */}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
