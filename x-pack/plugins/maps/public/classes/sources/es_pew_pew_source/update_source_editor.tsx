@@ -18,6 +18,7 @@ import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
+  bucketName: string;
   indexPatternId: string;
   metrics: AggDescriptor[];
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -82,9 +83,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
-            bucketName={i18n.translate('xpack.maps.source.pewPew.bucketName', {
-              defaultMessage: 'path',
-            })}
+            bucketName={this.props.bucketName}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}

@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
@@ -18,6 +17,7 @@ import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
+  bucketName: string;
   indexPatternId: string;
   splitField: string;
   sortField: string;
@@ -96,9 +96,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
-            bucketName={i18n.translate('xpack.maps.source.esGeoLine.bucketName', {
-              defaultMessage: 'track',
-            })}
+            bucketName={this.props.bucketName}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}

@@ -39,7 +39,7 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, masks, styles, sy
   }
 
   const masksLegend = masks.length 
-    ? <EuiText size="xs">
+    ? <>
         {masks.map(mask => (
           <MaskLegend
             key={mask.getEsAggField().getMbFieldName()}
@@ -48,7 +48,7 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, masks, styles, sy
             value={mask.getValue()}
           />
         ))}
-      </EuiText>
+      </>
     : null;
 
   return (

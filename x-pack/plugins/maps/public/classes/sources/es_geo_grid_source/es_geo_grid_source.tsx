@@ -98,6 +98,24 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     this._descriptor = sourceDescriptor;
   }
 
+  getBucketName() {
+    if (this._descriptor.requestType === RENDER_AS.HEX) {
+      return i18n.translate('xpack.maps.source.esGeoGrid.hex.bucketName', {
+        defaultMessage: 'hexagon',
+      });
+    }
+
+    if (this._descriptor.requestType === RENDER_AS.GRID) {
+      return i18n.translate('xpack.maps.source.esGeoGrid.grid.bucketName', {
+        defaultMessage: 'grid',
+      });
+    }
+
+    return i18n.translate('xpack.maps.source.esGeoGrid.cluster.bucketName', {
+      defaultMessage: 'cluster',
+    });
+  }
+
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
     async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
       sourceEditorArgs.onChange(...sourceChanges);
@@ -129,6 +147,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     }
     return (
       <UpdateSourceEditor
+        bucketName={this.getBucketName()}
         currentLayerType={sourceEditorArgs.currentLayerType}
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}

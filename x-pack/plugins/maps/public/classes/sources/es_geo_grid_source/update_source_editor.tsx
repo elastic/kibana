@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
@@ -25,6 +24,7 @@ import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 import { isMvt } from './is_mvt';
 
 interface Props {
+  bucketName: string;
   currentLayerType?: string;
   geoFieldName: string;
   indexPatternId: string;
@@ -136,24 +136,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
         };
   }
 
-  _getBucketName(renderAs: RENDER_AS) {
-    if (renderAs === RENDER_AS.HEX) {
-      return i18n.translate('xpack.maps.source.esGeoGrid.hex.bucketName', {
-        defaultMessage: 'hexagon',
-      });
-    }
-
-    if (renderAs === RENDER_AS.GRID) {
-      return i18n.translate('xpack.maps.source.esGeoGrid.grid.bucketName', {
-        defaultMessage: 'grid',
-      });
-    }
-
-    return i18n.translate('xpack.maps.source.esGeoGrid.cluster.bucketName', {
-      defaultMessage: 'cluster',
-    });
-  }
-
   _renderMetricsPanel() {
     return (
       <EuiPanel>
@@ -166,7 +148,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <MetricsEditor
           key={this.state.metricsEditorKey}
           allowMultipleMetrics={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
-          bucketName={this._getBucketName(this.props.renderAs)}
+          bucketName={this.props.bucketName}
           metricsFilter={this._getMetricsFilter()}
           fields={this.state.fields}
           metrics={this.props.metrics}

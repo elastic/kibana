@@ -81,6 +81,12 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     });
   }
 
+  getBucketName() {
+    return i18n.translate('xpack.maps.termJoin.bucketName', {
+      defaultMessage: 'term',
+    });
+  }
+
   hasCompleteConfig(): boolean {
     return this._descriptor.indexPatternId !== undefined && this._descriptor.term !== undefined;
   }

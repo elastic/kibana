@@ -25,7 +25,7 @@ export class CountAggField implements IESAggField {
   protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   protected readonly _label?: string;
-  protected readonly _mask?: CountAggDescriptor['mask'];
+  protected readonly _mask?: AbstractAggDescriptor['mask'];
 
   constructor({ label, source, origin, mask }: CountAggFieldParams) {
     this._source = source;

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiTextAlign } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getMaskI18nDescription, getMaskI18nValue, Mask } from '../../../../layers/vector_layer/mask';
 
@@ -49,11 +49,22 @@ export class MaskLegend extends Component<Props, State> {
     }
   }
 
+  _getBucketName() {
+    const source = this.props.esAggField.getSource();
+    return 'getBucketName' in source
+      ? source.getBucketName()
+      : i18n.translate('xpack.maps.maskLegend.bucketLabel', {
+          defaultMessage: 'bucket',
+        });
+  }
+
   render() {
     return (
-      <EuiTextAlign textAlign="left">
-        <p>{`${getMaskI18nDescription('bucket', this.state.aggLabel)} ${getMaskI18nValue(this.props.operator, this.props.value)}`}</p>
-      </EuiTextAlign>
+      <EuiText size="xs" textAlign="left" color="subdued">
+        <small>
+          <strong>{`${getMaskI18nDescription(this._getBucketName(), this.state.aggLabel)} ${getMaskI18nValue(this.props.operator, this.props.value)}`}</strong>
+        </small>
+      </EuiText>
     );
   }
 }
