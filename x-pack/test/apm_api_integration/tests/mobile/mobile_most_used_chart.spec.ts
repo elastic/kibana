@@ -92,6 +92,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(deviceOptions?.length).to.eql(6);
         expect(deviceOptions?.find((option) => option.key === 'other')).to.not.be(undefined);
       });
+
+      it('should get network connection type object from span events', () => {
+        const nctOptions = response.mostUsedCharts.find(
+          (chart) => chart.key === 'netConnectionType'
+        )?.options;
+        expect(nctOptions?.length).to.eql(2);
+      });
     });
   });
 }

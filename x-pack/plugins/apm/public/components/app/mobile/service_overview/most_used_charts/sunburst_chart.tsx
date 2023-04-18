@@ -67,6 +67,7 @@ export function SunburstChart({
         hasData={Boolean(isDataAvailable)}
         status={fetchStatus}
         height={200}
+        id={`mostUsedChart-${chartKey}`}
       >
         {isDataAvailable ? (
           <Chart>

@@ -14,19 +14,15 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
-  NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
   SERVICE_VERSION,
   TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+} from '../../../../common/es_fields/apm';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { mergeCountWithOther } from './merge_other_count';
 
-type MobileMostUsedChartTypes =
-  | 'device'
-  | 'appVersion'
-  | 'osVersion'
-  | 'netConnectionType';
+type MobileMostUsedChartTypes = 'device' | 'appVersion' | 'osVersion';
 
 export type MobileMostUsedChartResponse = Array<{
   key: MobileMostUsedChartTypes;
@@ -35,7 +31,6 @@ export type MobileMostUsedChartResponse = Array<{
     docCount: number;
   }>;
 }>;
-
 export async function getMobileMostUsedCharts({
   kuery,
   apmEventClient,
@@ -91,12 +86,6 @@ export async function getMobileMostUsedCharts({
             size: MAX_ITEMS_PER_CHART,
           },
         },
-        netConnectionTypes: {
-          terms: {
-            field: NETWORK_CONNECTION_TYPE,
-            size: MAX_ITEMS_PER_CHART,
-          },
-        },
       },
     },
   });
@@ -105,7 +94,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'device',
       options:
-        calculateTotalCounts(
+        mergeCountWithOther(
           response.aggregations?.devices?.buckets,
           response.aggregations?.devices?.sum_other_doc_count
         ) || [],
@@ -113,7 +102,7 @@ export async function getMobileMostUsedCharts({
     {
       key: 'osVersion',
       options:
-        calculateTotalCounts(
+        mergeCountWithOther(
           response.aggregations?.osVersions?.buckets,
           response.aggregations?.osVersions?.sum_other_doc_count
         ) || [],
@@ -121,36 +110,10 @@ export async function getMobileMostUsedCharts({
     {
       key: 'appVersion',
       options:
-        calculateTotalCounts(
+        mergeCountWithOther(
           response.aggregations?.appVersions?.buckets,
           response.aggregations?.appVersions?.sum_other_doc_count
         ) || [],
     },
-    {
-      key: 'netConnectionType',
-      options:
-        calculateTotalCounts(
-          response.aggregations?.netConnectionTypes?.buckets,
-          response.aggregations?.netConnectionTypes?.sum_other_doc_count
-        ) || [],
-    },
   ];
-}
-
-function calculateTotalCounts(
-  buckets: Array<{ key: string | number; doc_count: number }> = [],
-  otherCount: number = 0
-) {
-  const options = buckets.map(({ key, doc_count: docCount }) => ({
-    key,
-    docCount,
-  }));
-  if (otherCount > 0) {
-    options.push({
-      key: 'other',
-      docCount: otherCount,
-    });
-  }
-
-  return options;
 }

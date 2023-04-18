@@ -29,7 +29,11 @@ import {
 import {
   getMobileMostUsedCharts,
   MobileMostUsedChartResponse,
-} from './get_mobile_most_used_charts';
+} from './get_mobile_most_used_charts/get_device_os_app_charts';
+import {
+  getMobileMostUsedNCTCharts,
+  MobileMostUsedNCTChartResponse,
+} from './get_mobile_most_used_charts/get_nct_chart';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -89,14 +93,20 @@ const mobileChartsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    mostUsedCharts: MobileMostUsedChartResponse;
+    mostUsedCharts: Array<{
+      key:
+        | MobileMostUsedChartResponse[number]['key']
+        | MobileMostUsedNCTChartResponse['key'];
+      options: MobileMostUsedChartResponse[number]['options'] &
+        MobileMostUsedNCTChartResponse['options'];
+    }>;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { kuery, environment, start, end, transactionType } = params.query;
 
-    const charts = await getMobileMostUsedCharts({
+    const deviceOsAndAppVersionChart = await getMobileMostUsedCharts({
       kuery,
       environment,
       transactionType,
@@ -105,7 +115,17 @@ const mobileChartsRoute = createApmServerRoute({
       serviceName,
       apmEventClient,
     });
-    return { mostUsedCharts: charts };
+
+    const nctChart = await getMobileMostUsedNCTCharts({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+    });
+
+    return { mostUsedCharts: [...deviceOsAndAppVersionChart, nctChart] };
   },
 });
 
