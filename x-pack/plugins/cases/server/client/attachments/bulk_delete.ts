@@ -94,16 +94,9 @@ export const bulkDeleteFileAttachments = async (
       user,
     });
   } catch (error) {
-    let errorToTrack = error;
-
-    // if it's an error from the file service let's put it in a boom so we don't loose the status code of a 404
-    if (error instanceof FileNotFoundError) {
-      errorToTrack = Boom.notFound(error.message);
-    }
-
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,
-      error: errorToTrack,
+      error,
       logger,
     });
   }
@@ -147,7 +140,7 @@ const getFiles = async ({
     }
   );
 
-  const files = retrieveFilesAndLogFailures(fileSettleResults, fileIds, logger);
+  const files = retrieveFilesIgnoringNotFound(fileSettleResults, fileIds, logger);
 
   const [validFiles, invalidFiles] = partition(files, (file) => {
     return (
@@ -167,7 +160,7 @@ const getFiles = async ({
   return validFiles.map((fileInfo) => fileInfo.data);
 };
 
-const retrieveFilesAndLogFailures = (
+export const retrieveFilesIgnoringNotFound = (
   results: Array<PromiseResult<File<unknown>>>,
   fileIds: BulkDeleteFileArgs['fileIds'],
   logger: Logger
@@ -177,8 +170,12 @@ const retrieveFilesAndLogFailures = (
   results.forEach((result, index) => {
     if (result.isFulfilled) {
       files.push(result.value);
+    } else if (result.reason instanceof FileNotFoundError) {
+      logger.warn(`Failed to find file id: ${fileIds[index]}: ${result.reason}`);
+    } else if (result.reason instanceof Error) {
+      throw result.reason;
     } else {
-      logger.warn(`Failed to retrieve file id: ${fileIds[index]}: ${result.reason}`);
+      throw new Error(`Failed to retrieve file id: ${fileIds[index]}: ${result.reason}`);
     }
   });
 
