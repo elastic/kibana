@@ -378,6 +378,7 @@ export const TABLE_ALERTS = i18n.translate('xpack.alerting.maintenanceWindows.ta
   defaultMessage: 'Alerts',
 });
 
+// Add this tooltip to the Alerts column heading on the MW table
 export const TABLE_ALERTS_TOOLTIP = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.alertsTooltip',
   {

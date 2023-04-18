@@ -26,7 +26,7 @@ export const RRuleFrequencyMap = {
 
 export type MaintenanceWindow = Pick<MaintenanceWindowServerSide, 'title' | 'duration' | 'rRule'>;
 
-export type MaintenanceWindowResponse = MaintenanceWindowServerSide &
+export type MaintenanceWindowFindResponse = MaintenanceWindowServerSide &
   MaintenanceWindowModificationMetadata & {
     total: number;
   };

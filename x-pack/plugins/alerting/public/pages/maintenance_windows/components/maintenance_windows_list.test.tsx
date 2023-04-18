@@ -9,12 +9,12 @@ import React from 'react';
 import moment from 'moment';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
-import { MaintenanceWindowResponse } from '../types';
+import { MaintenanceWindowFindResponse } from '../types';
 import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-05').toISOString();
-  const items: MaintenanceWindowResponse[] = [
+  const items: MaintenanceWindowFindResponse[] = [
     {
       id: '1',
       total: 100,

@@ -11,41 +11,27 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButton,
-  formatNumber,
   useEuiBackgroundColor,
-  EuiToolTip,
-  EuiIcon,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowResponse, SortDirection } from '../types';
+import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-import { StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
+import { StatusFilter } from './status_filter';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
-  items: MaintenanceWindowResponse[];
+  items: MaintenanceWindowFindResponse[];
 }
 
-const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'title',
     name: i18n.NAME,
     truncateText: true,
-  },
-  {
-    field: 'total',
-    name: (
-      <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
-        <span>
-          {i18n.TABLE_ALERTS}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
-    ),
-    render: (alerts: number) => formatNumber(alerts, 'integer'),
   },
   {
     field: 'status',
@@ -93,7 +79,7 @@ const sorting = {
   },
 };
 
-const rowProps = (item: MaintenanceWindowResponse) => ({
+const rowProps = (item: MaintenanceWindowFindResponse) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
@@ -101,11 +87,8 @@ const rowProps = (item: MaintenanceWindowResponse) => ({
 const search: { filters: SearchFilterConfig[] } = {
   filters: [
     {
-      type: 'field_value_selection',
-      field: 'status',
-      name: 'Status',
-      multiSelect: 'or',
-      options: STATUS_OPTIONS,
+      type: 'custom_component',
+      component: StatusFilter,
     },
   ],
 };
