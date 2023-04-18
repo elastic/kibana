@@ -239,7 +239,7 @@ export class CommonPageObject extends FtrService {
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}/app/${appName}/${path}`,
+        pathname: `${basePath}/app/${appName}` + (path ? `/${path}` : ''),
         hash,
         search,
       });
