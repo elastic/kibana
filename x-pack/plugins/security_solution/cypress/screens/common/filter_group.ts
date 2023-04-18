@@ -49,6 +49,9 @@ export const FILTER_GROUP_CONTEXT_EDIT_CONTROLS = '[data-test-subj="filter_group
 
 export const FILTER_GROUP_CONTEXT_SAVE_CONTROLS = '[data-test-subj="filter_group__context--save"]';
 
+export const FILTER_GROUP_CONTEXT_DISCARD_CHANGES =
+  '[data-test-subj="filter_group__context--discard"]';
+
 export const FILTER_GROUP_ADD_CONTROL = '[data-test-subj="filter-group__add-control"]';
 
 export const FILTER_GROUP_SAVE_CHANGES = '[data-test-subj="filter-group__save"]';

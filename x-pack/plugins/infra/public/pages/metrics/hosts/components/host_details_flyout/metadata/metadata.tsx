@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingChart } from '@elastic/eui';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
@@ -31,17 +30,13 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
-    error,
+    error: fetchMetadataError,
     metadata,
   } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
-  if (metadataLoading) {
-    return <LoadingPlaceholder />;
-  }
-
-  if (error) {
+  if (fetchMetadataError) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
@@ -71,33 +66,5 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
     );
   }
 
-  return fields.length > 0 ? (
-    <Table rows={fields} />
-  ) : (
-    <EuiCallOut
-      data-test-subj="infraMetadataNoData"
-      title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-        defaultMessage: 'Sorry, there is no metadata related to this host.',
-      })}
-      size="m"
-      iconType="iInCircle"
-    />
-  );
-};
-
-const LoadingPlaceholder = () => {
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '200px',
-        padding: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
-    </div>
-  );
+  return <Table rows={fields} loading={metadataLoading} />;
 };

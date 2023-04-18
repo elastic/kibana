@@ -88,7 +88,7 @@ const TruncatedTextInfo = memo<TruncatedTextInfoProps>(
             <EuiIcon size={alertIconSize} type="warning" color="warning" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size={textSize} data-test-subj={dataTestSubj}>
+            <EuiText size={textSize} color="warning" data-test-subj={dataTestSubj}>
               {FILE_TRUNCATED_MESSAGE}
             </EuiText>
           </EuiFlexItem>
@@ -159,7 +159,11 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     // Check if file is no longer available
     if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
       return (
-        <EuiText size={textSize} data-test-subj={getTestId('fileNoLongerAvailable')}>
+        <EuiText
+          size={textSize}
+          color="warning"
+          data-test-subj={getTestId('fileNoLongerAvailable')}
+        >
           {FILE_NO_LONGER_AVAILABLE_MESSAGE}
         </EuiText>
       );
@@ -187,7 +191,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         >
           {FILE_PASSCODE_INFO_MESSAGE}
         </EuiText>
-        <EuiText size={textSize} data-test-subj={getTestId('fileDeleteMessage')}>
+        <EuiText size={textSize} color="warning" data-test-subj={getTestId('fileDeleteMessage')}>
           {FILE_DELETED_MESSAGE}
         </EuiText>
         {isTruncatedFile && (
