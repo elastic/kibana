@@ -85,7 +85,7 @@ export interface RegisterExtensionsContext {
   stateContainer: DiscoverStateContainer;
 }
 
-export type RegisterExtensions = (options: RegisterExtensionsContext) => void;
+export type RegisterExtensions = (options: RegisterExtensionsContext) => void | (() => void);
 
 /**
  * @public
