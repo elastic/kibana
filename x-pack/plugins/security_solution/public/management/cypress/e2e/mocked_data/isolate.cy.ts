@@ -68,7 +68,9 @@ describe('Isolate command', () => {
       closeAllToasts();
       cy.getByTestSubj('adminSearchBar')
         .click()
-        .type('united.endpoint.Endpoint.state.isolation: true {enter}');
+        .type('united.endpoint.Endpoint.state.isolation: true');
+      cy.getByTestSubj('querySubmitButton').click();
+      cy.contains('Showing 2 endpoints');
       cy.getByTestSubj('endpointListTable').within(() => {
         cy.get('tbody tr').each(($tr) => {
           cy.wrap($tr).within(() => {
