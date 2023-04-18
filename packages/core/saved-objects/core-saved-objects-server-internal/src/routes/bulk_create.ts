@@ -54,7 +54,6 @@ export const registerBulkCreateRoute = (
               )
             ),
             initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            managed: schema.maybe(schema.boolean()),
           })
         ),
       },
@@ -77,10 +76,8 @@ export const registerBulkCreateRoute = (
       if (!allowHttpApiAccess) {
         throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
       }
-      // strip `managed` from req.body if provided. Setting `managed` is not permitted through HTTP APIs
-      const cleanedBodyItems = req.body.map(({ managed, ...rest }) => rest);
 
-      const result = await savedObjects.client.bulkCreate(cleanedBodyItems, {
+      const result = await savedObjects.client.bulkCreate(req.body, {
         overwrite,
         migrationVersionCompatibility: 'compatible',
       });

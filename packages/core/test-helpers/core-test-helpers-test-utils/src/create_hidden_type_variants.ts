@@ -16,14 +16,12 @@ export const createHiddenTypeVariants = (createOptions: {
   name: string;
   hide?: boolean;
   hideFromHttpApis?: boolean;
-  managed?: boolean;
 }): SavedObjectsTypeWithManaged => {
   return {
     name: createOptions.name,
     hidden: createOptions.hide ?? false,
     hiddenFromHttpApis: createOptions.hideFromHttpApis ?? undefined,
     namespaceType: createOptions.name === 'index-pattern' ? 'multiple' : 'single',
-    managed: createOptions.managed,
     mappings: {
       properties: {},
     },

@@ -54,7 +54,6 @@ export const registerCreateRoute = (
             )
           ),
           initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          managed: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -67,7 +66,6 @@ export const registerCreateRoute = (
       });
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      // ignore managed if provided
       const {
         attributes,
         migrationVersion,

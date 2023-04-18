@@ -25,14 +25,12 @@ describe('importDashboards(req)', () => {
         attributes: { panelJSON: '{}' },
         references: [],
         version: 'foo',
-        managed: false,
       },
       {
         id: 'panel-01',
         type: 'visualization',
         attributes: { visState: '{}' },
         references: [],
-        managed: false,
       },
     ];
   });

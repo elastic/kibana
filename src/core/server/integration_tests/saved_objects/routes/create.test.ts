@@ -27,7 +27,6 @@ const testTypes = [
   { name: 'index-pattern', hide: false },
   { name: 'hidden-type', hide: true },
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
-  { name: 'something-managed', hide: false, managed: true },
 ];
 describe('POST /api/saved_objects/{type}', () => {
   let server: SetupServerReturn['server'];
@@ -168,26 +167,5 @@ describe('POST /api/saved_objects/{type}', () => {
       })
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('ignores managed if specified', async () => {
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/something-managed')
-      .send({
-        attributes: {
-          title: 'managed1',
-        },
-        managed: true,
-      })
-      .expect(200);
-
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-
-    const args = savedObjectsClient.create.mock.calls[0];
-    expect(args).toEqual([
-      'something-managed',
-      { title: 'managed1' },
-      { overwrite: false, migrationVersionCompatibility: 'compatible' },
-    ]);
   });
 });
