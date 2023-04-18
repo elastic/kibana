@@ -9,30 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 
 import { useKibana } from '../utils/kibana_react';
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
-import { updateMaintenanceWindow } from '../services/maintenance_windows_api/update';
+import { finishMaintenanceWindow } from '../services/maintenance_windows_api/finish';
 
-export function useUpdateMaintenanceWindow() {
+export function useFinishMaintenanceWindow() {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = ({
-    maintenanceWindowId,
-    maintenanceWindow,
-  }: {
-    maintenanceWindowId: string;
-    maintenanceWindow: MaintenanceWindow;
-  }) => {
-    return updateMaintenanceWindow({ http, maintenanceWindowId, maintenanceWindow });
+  const mutationFn = (maintenanceWindowId: string) => {
+    return finishMaintenanceWindow({ http, maintenanceWindowId });
   };
 
   return useMutation(mutationFn, {
     onSuccess: (data) => {
       toasts.addSuccess(
-        i18n.translate('xpack.alerting.maintenanceWindowsUpdateSuccess', {
-          defaultMessage: "Updated maintenance window '{title}'",
+        i18n.translate('xpack.alerting.maintenanceWindowsFinishedSuccess', {
+          defaultMessage: "Cancelled running maintenance window '{title}'",
           values: {
             title: data.title,
           },
@@ -41,8 +34,8 @@ export function useUpdateMaintenanceWindow() {
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsUpdateFailure', {
-          defaultMessage: 'Failed to update maintenance window.',
+        i18n.translate('xpack.alerting.maintenanceWindowsFinishedFailure', {
+          defaultMessage: 'Failed to cancel maintenance window.',
         })
       );
     },

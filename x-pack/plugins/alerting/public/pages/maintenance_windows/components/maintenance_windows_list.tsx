@@ -21,10 +21,15 @@ import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigati
 import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
 import { StatusFilter } from './status_filter';
+import { TableActionsPopover } from './table_actions_popover';
+import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
+import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
   items: MaintenanceWindowFindResponse[];
+  refreshData: () => void;
 }
 
 const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
@@ -94,24 +99,36 @@ const search: { filters: SearchFilterConfig[] } = {
 };
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ loading, items }) => {
-    const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
+  ({ loading, items, refreshData }) => {
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
+
+    const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
+
+    const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
+    const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
+    const { mutate: finishAndArchiveMaintenanceWindow } = useFinishAndArchiveMaintenanceWindow();
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
         name: '',
-        actions: [
-          {
-            name: i18n.TABLE_ACTION_EDIT,
-            isPrimary: true,
-            description: 'Edit maintenance window',
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (mw: MaintenanceWindowFindResponse) => navigateToEditMaintenanceWindows(mw.id),
-            'data-test-subj': 'action-edit',
-          },
-        ],
+        render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
+          return (
+            <TableActionsPopover
+              status={status}
+              onEdit={() => navigateToEditMaintenanceWindows(id)}
+              onCancel={() => finishMaintenanceWindow(id, { onSuccess: () => refreshData() })}
+              onArchive={(archive: boolean) =>
+                archiveMaintenanceWindow(
+                  { maintenanceWindowId: id, archive },
+                  { onSuccess: () => refreshData() }
+                )
+              }
+              onCancelAndArchive={() =>
+                finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() })
+              }
+            />
+          );
+        },
       },
     ];
     return (

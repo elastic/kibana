@@ -30,7 +30,11 @@ export const useFindMaintenanceWindows = () => {
     }
   };
 
-  const { isLoading, data = [] } = useQuery({
+  const {
+    isLoading,
+    data = [],
+    refetch,
+  } = useQuery({
     queryKey: ['findMaintenanceWindows'],
     queryFn,
     onError: onErrorFn,
@@ -41,5 +45,6 @@ export const useFindMaintenanceWindows = () => {
   return {
     maintenanceWindows: data,
     isLoading,
+    refetch,
   };
 };

@@ -446,3 +446,31 @@ export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
     defaultMessage: 'Save maintenance window',
   }
 );
+
+export const TABLE_ACTION_CANCEL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const TABLE_ACTION_CANCEL_AND_ARCHIVE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.cancelAndArchive',
+  {
+    defaultMessage: 'Cancel and Archive',
+  }
+);
+
+export const TABLE_ACTION_ARCHIVE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.archive',
+  {
+    defaultMessage: 'Archive',
+  }
+);
+
+export const TABLE_ACTION_UNARCHIVE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.unarchive',
+  {
+    defaultMessage: 'Unarchive',
+  }
+);
