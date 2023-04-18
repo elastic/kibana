@@ -11,8 +11,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { i18n } from '@kbn/i18n';
+import { getMlClient } from '@kbn/ml-plugin/server/lib/ml_client';
+import { mlSavedObjectServiceFactory } from '@kbn/ml-plugin/server/saved_objects';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -37,6 +40,8 @@ import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
+import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
@@ -977,6 +982,111 @@ export function registerIndexRoutes({
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const scopedClusterClient = client as unknown as IScopedClusterClient;
+
+      // TODO : double check params for spaces and authorization
+      const savedObjectService = mlSavedObjectServiceFactory(
+        savedObjectsClient,
+        savedObjectsClient,
+        true,
+        undefined,
+        scopedClusterClient,
+        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+      );
+
+      const mlClient = savedObjectService
+        ? await getMlClient(scopedClusterClient, savedObjectService)
+        : undefined;
+
+      try {
+        const deployResult = await startMlModelDeployment(
+          modelName,
+          client.asCurrentUser,
+          mlClient,
+          trainedModelsProvider,
+          savedObjectService
+        );
+
+        return response.ok({
+          body: deployResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      try {
+        const getStatusResult = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
+
+        return response.ok({
+          body: getStatusResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: error.meta?.body?.error?.reason,
