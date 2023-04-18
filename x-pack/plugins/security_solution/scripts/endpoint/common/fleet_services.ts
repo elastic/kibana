@@ -27,6 +27,7 @@ import type {
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
 } from '@kbn/fleet-plugin/common/types';
+import nodeFetch from 'node-fetch';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -235,4 +236,55 @@ export const getAgentVersionMatchingCurrentStack = async (
   }
 
   return version;
+};
+
+interface ElasticArtifactSearchResponse {
+  manifest: {
+    'last-update-time': string;
+    'seconds-since-last-update': number;
+  };
+  packages: {
+    [packageFileName: string]: {
+      architecture: string;
+      os: string[];
+      type: string;
+      asc_url: string;
+      sha_url: string;
+      url: string;
+    };
+  };
+}
+
+/**
+ * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
+ * @param version
+ * @param log
+ */
+export const getAgentDownloadUrl = async (version: string, log?: ToolingLog): Promise<string> => {
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
+  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
+
+  log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
+
+  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
+    (response) => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status})`
+        );
+      }
+
+      return response.json();
+    }
+  );
+
+  log?.verbose(searchResult);
+
+  if (!searchResult.packages[agentFile]) {
+    throw new Error(`Unable to find an Agent download URL for version [${version}]`);
+  }
+
+  return searchResult.packages[agentFile].url;
 };
