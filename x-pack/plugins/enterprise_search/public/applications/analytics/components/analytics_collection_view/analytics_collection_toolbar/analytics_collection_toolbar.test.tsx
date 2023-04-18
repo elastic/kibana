@@ -37,7 +37,7 @@ describe('AnalyticsCollectionToolbar', () => {
         events_datastream: 'test-events',
         name: 'test',
       } as AnalyticsCollection,
-      dataViewId: 'data-view-test',
+      dataView: { id: 'data-view-test' },
       isLoading: false,
       refreshInterval: { pause: false, value: 10000 },
       timeRange: { from: 'now-90d', to: 'now' },
