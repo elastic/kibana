@@ -23,6 +23,7 @@ import {
 } from './test_fixtures/8.7.0';
 import { httpUI as httpUI850 } from './test_fixtures/8.5.0';
 import { LegacyConfigKey } from '../../../../../../common/constants/monitor_management';
+import { omit } from 'lodash';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -198,7 +199,22 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
       };
       // @ts-ignore specifically testing monitors with invalid values
       const actual = migration880(encryptedSavedObjectsSetup)(invalidTestMonitor, context);
-      expect(actual).toEqual(invalidTestMonitor);
+      expect(actual).toEqual({
+        ...invalidTestMonitor,
+        attributes: omit(
+          {
+            ...invalidTestMonitor.attributes,
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
+          },
+          [
+            LegacyConfigKey.THROTTLING_CONFIG,
+            LegacyConfigKey.IS_THROTTLING_ENABLED,
+            LegacyConfigKey.DOWNLOAD_SPEED,
+            LegacyConfigKey.UPLOAD_SPEED,
+            LegacyConfigKey.LATENCY,
+          ]
+        ),
+      });
     });
   });
 
