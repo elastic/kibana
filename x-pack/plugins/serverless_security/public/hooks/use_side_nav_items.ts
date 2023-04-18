@@ -108,9 +108,9 @@ const useAddExternalSideNavItems = (securitySideNavItems: SolutionSideNavItem[])
     () => [
       ...securitySideNavItems,
       {
-        id: 'discover',
-        label: 'Discover',
-        ...getLinkProps({ appId: 'discover' }),
+        id: 'ml',
+        label: 'Machine Learning',
+        ...getLinkProps({ appId: 'ml' }),
       },
     ],
     [securitySideNavItems, getLinkProps]

@@ -174,7 +174,7 @@ export const getSecurityAppFeaturesConfig = (
     rulesResponseActionsSubFeatures.push(executeActionSubFeature);
   }
 
-  // TODO: establish some naming convention for these ui and api privileges
+  // TODO: establish some naming convention for these api and ui capabilities
   return {
     rules_load_prepackaged: {
       privileges: {
