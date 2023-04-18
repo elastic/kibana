@@ -23,7 +23,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineAPI } from './engine_api/engine_api';
 import { EngineError } from './engine_error';
 import { EngineIndices } from './engine_indices';
-import { EngineOverview } from './engine_overview';
 import { EngineSchema } from './engine_schema';
 import { EngineSearchPreview } from './engine_search_preview/engine_search_preview';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
@@ -39,7 +38,7 @@ export const EngineView: React.FC = () => {
     isDeleteModalVisible,
     isLoadingEngine,
   } = useValues(EngineViewLogic);
-  const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
+  const { tabId = EngineViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
@@ -73,17 +72,12 @@ export const EngineView: React.FC = () => {
       <Switch>
         <Route
           exact
-          path={`${ENGINE_PATH}/${EngineViewTabs.OVERVIEW}`}
-          component={EngineOverview}
+          path={`${ENGINE_PATH}/${EngineViewTabs.PREVIEW}`}
+          component={EngineSearchPreview}
         />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.SCHEMA}`} component={EngineSchema} />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.API}`} component={EngineAPI} />
-        <Route
-          exact
-          path={`${ENGINE_PATH}/${EngineViewTabs.PREVIEW}`}
-          component={EngineSearchPreview}
-        />
         <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
           render={() => (
             <EnterpriseSearchEnginesPageTemplate

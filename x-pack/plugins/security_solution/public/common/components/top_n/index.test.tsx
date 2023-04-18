@@ -25,7 +25,7 @@ import { createStore } from '../../store';
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { detectionAlertsTables } from './helpers';
 
 jest.mock('react-router-dom', () => {
