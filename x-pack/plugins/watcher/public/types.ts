@@ -6,6 +6,7 @@
  */
 
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
@@ -15,6 +16,7 @@ import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/p
 export interface Dependencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
+  share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginSetup;

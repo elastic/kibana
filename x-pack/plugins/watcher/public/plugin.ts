@@ -14,6 +14,7 @@ import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
+import { WatcherManagementLocatorDefinition } from './locator';
 import { Dependencies } from './types';
 
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
@@ -29,7 +30,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
 
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home, charts, licenseManagement }: Dependencies
+    { licensing, management, share, data, home, charts, licenseManagement }: Dependencies
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
 
@@ -83,6 +84,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         };
       },
     });
+
+    share.url.locators.create(new WatcherManagementLocatorDefinition());
 
     // TODO: Fix the below dependency on `home` plugin inner workings
     // Because the home feature catalogue does not have enable/disable functionality we pass

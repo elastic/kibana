@@ -24,3 +24,4 @@ export { WATCH_HISTORY } from './watch_history';
 export { WATCH_STATES } from './watch_states';
 export { WATCH_TYPES } from './watch_types';
 export { ERROR_CODES } from './error_codes';
+export { LOCATOR } from './locator';
