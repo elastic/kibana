@@ -497,10 +497,10 @@ describe.skip('Case View Page activity tab', () => {
         appMockRender = createAppMockRenderer();
         const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-        const description = within(result.getByTestId('description-action'));
+        const description = within(result.getByTestId('description'));
 
         await waitFor(() => {
-          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+          expect(description.getByText(caseData.description)).toBeInTheDocument();
         });
       });
 
@@ -556,8 +556,7 @@ describe.skip('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction('description', 'create'),
-              getUserAction('description', 'update', {
+              getUserAction('status', 'update', {
                 createdBy: {
                   ...caseUsers.participants[0].user,
                   fullName: caseUsers.participants[0].user.full_name,
@@ -571,7 +570,7 @@ describe.skip('Case View Page activity tab', () => {
                   profileUid: caseUsers.participants[1].uid,
                 },
               }),
-              getUserAction('description', 'update', {
+              getUserAction('severity', 'update', {
                 createdBy: {
                   ...caseUsers.participants[2].user,
                   fullName: caseUsers.participants[2].user.full_name,

@@ -56,7 +56,7 @@ describe('helpers', () => {
     const types: Array<[string, boolean]> = [
       ['comment', true],
       ['connector', true],
-      ['description', true],
+      ['description', false],
       ['pushed', true],
       ['tags', true],
       ['title', true],

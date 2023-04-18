@@ -61,9 +61,9 @@ describe(`UserActionsList`, () => {
     appMockRender.render(<UserActionsList {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId(`description-create-action-${caseUserActions[0].id}`));
-      expect(screen.getByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
-      expect(screen.getByTestId(`description-update-action-${caseUserActions[2].id}`));
+      expect(screen.getByTestId(`comment-create-action-${caseUserActions[0].commentId}`));
+      expect(screen.getByTestId('comment-update-action-comment-update'));
+      expect(screen.getByTestId('comment-delete-action-comment-delete'));
     });
   });
 

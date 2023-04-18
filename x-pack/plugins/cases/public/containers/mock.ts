@@ -844,9 +844,9 @@ export const getHostIsolationUserAction = (
 });
 
 export const caseUserActions: CaseUserActions[] = [
-  getUserAction('description', Actions.create),
   getUserAction('comment', Actions.create),
-  getUserAction('description', Actions.update),
+  getUserAction('comment', Actions.update),
+  getUserAction('comment', Actions.delete),
 ];
 
 export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [

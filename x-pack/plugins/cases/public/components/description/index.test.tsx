@@ -6,78 +6,118 @@
  */
 
 import React from 'react';
-import { EuiCommentList } from '@elastic/eui';
-import { render, screen, waitFor } from '@testing-library/react';
-
-import { Actions } from '../../../common/api';
-import { getUserAction } from '../../containers/mock';
-import { TestProviders } from '../../common/mock';
-import { createDescriptionUserActionBuilder, getDescriptionUserAction } from '.';
-import { getMockBuilderArgs } from '../user_actions/mock';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { basicCase } from '../../containers/mock';
+import { userProfilesMap } from '../../containers/user_profiles/api.mock';
+
+import { Description } from '.';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-describe('createDescriptionUserActionBuilder ', () => {
+const defaultProps = {
+  appId: 'testAppId',
+  isLoadingDescription: false,
+  caseData: {
+    ...basicCase,
+  },
+  userProfiles: userProfilesMap,
+};
+
+describe('Description ', () => {
   const onUpdateField = jest.fn();
-  const builderArgs = getMockBuilderArgs();
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
-  it('renders correctly description', async () => {
-    const descriptionUserAction = getDescriptionUserAction({
-      ...builderArgs,
-      onUpdateField,
-      isLoadingDescription: false,
-    });
+  it('renders description correctly', async () => {
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    render(
-      <TestProviders>
-        <EuiCommentList comments={[descriptionUserAction]} />
-      </TestProviders>
-    );
-
-    expect(screen.getByText('added description')).toBeInTheDocument();
+    expect(screen.getByTestId('description')).toBeInTheDocument();
     expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
   });
 
-  it('edits the description correctly', async () => {
-    const descriptionUserAction = getDescriptionUserAction({
-      ...builderArgs,
-      onUpdateField,
-      isLoadingDescription: false,
-    });
-
-    const res = render(
-      <TestProviders>
-        <EuiCommentList comments={[descriptionUserAction]} />
-      </TestProviders>
+  it('renders loading state correctly', async () => {
+    appMockRender.render(
+      <Description {...defaultProps} isLoadingDescription={true} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('editable-description-edit-icon'));
+    expect(screen.getByTestId('description-loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('description')).not.toBeInTheDocument();
+    expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
+  });
+
+  it('hides and shows the description correctly when collapse button clicked', async () => {
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-collapse-icon'));
 
     await waitFor(() => {
-      expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('description');
+      expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
+    });
+
+    userEvent.click(res.getByTestId('description-collapse-icon'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     });
   });
 
-  it('renders correctly when editing a description', async () => {
-    const userAction = getUserAction('description', Actions.update);
-    const builder = createDescriptionUserActionBuilder({
-      ...builderArgs,
-      userAction,
-    });
-
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
+  it('shows textarea on edit click', async () => {
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    expect(screen.getByText('edited description')).toBeInTheDocument();
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
+    });
+  });
+
+  it('edits the description correctly when saved', async () => {
+    const editedDescription = 'New updated description';
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+
+    userEvent.click(screen.getByTestId('user-action-save-markdown'));
+
+    await waitFor(() => {
+      expect(onUpdateField).toHaveBeenCalledWith({ key: 'description', value: editedDescription });
+    });
+  });
+
+  it('keeps the old description correctly when canceled', async () => {
+    const editedDescription = 'New updated description';
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+
+    userEvent.click(screen.getByTestId('user-action-cancel-markdown'));
+
+    await waitFor(() => {
+      expect(onUpdateField).not.toHaveBeenCalled();
+      expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    });
   });
 });

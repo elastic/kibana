@@ -189,7 +189,7 @@ describe('CaseViewPage', () => {
     expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
-      within(result.getByTestId('description-action')).getByTestId('user-action-markdown')
+      within(result.getByTestId('description')).getByTestId('user-action-markdown')
     ).toHaveTextContent(data.description);
 
     expect(result.getByTestId('case-view-status-action-button')).toHaveTextContent(
@@ -606,7 +606,7 @@ describe('CaseViewPage', () => {
       it('renders the descriptions user correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        const description = within(screen.getByTestId('description-action'));
+        const description = within(screen.getByTestId('description'));
 
         expect(await description.findByText('Leslie Knope')).toBeInTheDocument();
       });
@@ -622,7 +622,7 @@ describe('CaseViewPage', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('description-loading')).toBeInTheDocument();
-          expect(screen.queryByTestId('description-action')).not.toBeInTheDocument();
+          expect(screen.queryByTestId('description')).not.toBeInTheDocument();
         });
       });
 
@@ -635,7 +635,7 @@ describe('CaseViewPage', () => {
 
         userEvent.type(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
 
-        userEvent.click(await screen.findByTestId('editable-description-edit-icon'));
+        userEvent.click(await screen.findByTestId('description-edit-icon'));
 
         userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
 

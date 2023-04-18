@@ -104,7 +104,7 @@ export const Description = React.memo(
     const descriptionCommentListObj: EuiCommentProps = {
       username: null,
       event: i18n.DESCRIPTION,
-      'data-test-subj': 'description-action',
+      'data-test-subj': 'description',
       timestamp: null,
       children: !isCollapsed ? (
         <>
