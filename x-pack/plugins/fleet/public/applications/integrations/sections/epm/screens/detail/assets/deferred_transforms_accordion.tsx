@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import type { FunctionComponent, MouseEvent } from 'react';
 
 import {
@@ -51,7 +51,7 @@ export const getDeferredAssetDescription = (assetType: string, assetCount: numbe
         'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsDescription',
         {
           defaultMessage:
-            '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. You must have the transform_admin built-in role or manage_transform cluster privileges to start operations.',
+            '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Contact your administrator to request the required privileges.',
           values: { assetCount: assetCount ?? 1 },
         }
       );
@@ -88,33 +88,31 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
     useAuthz().packagePrivileges?.transform?.actions?.canStartStopTransform?.executePackageAction ??
     false;
 
-  const [transformsToAuthorize, setTransformsToAuthorize] = useState<Array<{
-    transformId: string;
-  }> | null>(null);
-
-  useEffect(() => {
-    async function authorizeTransforms(transformIds: Array<{ transformId: string }>) {
+  const authorizeTransforms = useCallback(
+    async (transformIds: Array<{ transformId: string }>) => {
       setIsLoading(true);
+      notifications.toasts.addInfo(
+        i18n.translate('xpack.fleet.epm.packageDetails.assets.authorizeTransformsAcknowledged', {
+          defaultMessage:
+            'Request to authorize {count, plural, one {# transform} other {# transforms}} acknowledged.',
+          values: { count: transformIds.length },
+        }),
+        { toastLifeTimeMs: 500 }
+      );
 
       try {
-        notifications.toasts.addInfo(
-          i18n.translate('xpack.fleet.epm.packageDetails.assets.authorizeTransformsAcknowledged', {
-            defaultMessage:
-              'Request to authorize {count, plural, one {# transform} other {# transforms}} acknowledged.',
-            values: { count: transformIds.length },
-          }),
-          { toastLifeTimeMs: 500 }
-        );
-
-        const resp = await sendRequestReauthorizeTransforms(
+        const reauthorizeTransformResp = await sendRequestReauthorizeTransforms(
           packageInfo.name,
           packageInfo.version,
           transformIds
         );
-        if (Array.isArray(resp.data)) {
-          const error = resp.data.find((d) => d.error)?.error;
+        if (reauthorizeTransformResp.error) {
+          throw reauthorizeTransformResp.error;
+        }
+        if (Array.isArray(reauthorizeTransformResp.data)) {
+          const error = reauthorizeTransformResp.data.find((d) => d.error)?.error;
 
-          const cntAuthorized = resp.data.filter((d) => d.success).length;
+          const cntAuthorized = reauthorizeTransformResp.data.filter((d) => d.success).length;
           if (error) {
             const errorBody = error.meta?.body as ElasticsearchErrorDetails;
             const errorMsg = errorBody
@@ -162,14 +160,9 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
         }
       }
       setIsLoading(false);
-    }
-
-    if (transformsToAuthorize && transformsToAuthorize.length > 0) {
-      authorizeTransforms(transformsToAuthorize);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transformsToAuthorize]);
-
+    },
+    [notifications.toasts, packageInfo.name, packageInfo.version]
+  );
   if (deferredTransforms.length === 0) return null;
   return (
     <EuiAccordion
@@ -203,7 +196,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
           size={'m'}
           onClick={(e: MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
-            setTransformsToAuthorize(deferredTransforms.map((t) => ({ transformId: t.id })));
+            authorizeTransforms(deferredTransforms.map((t) => ({ transformId: t.id })));
           }}
           aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
         >
@@ -217,7 +210,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {deferredTransforms.map(({ id: transformId }, idx) => {
             return (
-              <>
+              <Fragment key={transformId}>
                 <EuiSplitPanel.Inner grow={false} key={`${transformId}-${idx}`}>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={8}>
@@ -240,7 +233,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
                           size={'s'}
                           onClick={(e: MouseEvent<HTMLButtonElement>) => {
                             e.preventDefault();
-                            setTransformsToAuthorize([{ transformId }]);
+                            authorizeTransforms([{ transformId }]);
                           }}
                         >
                           {i18n.translate(
@@ -255,7 +248,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
                   </EuiFlexGroup>
                 </EuiSplitPanel.Inner>
                 {idx + 1 < deferredTransforms.length && <EuiHorizontalRule margin="none" />}
-              </>
+              </Fragment>
             );
           })}
         </EuiSplitPanel.Outer>

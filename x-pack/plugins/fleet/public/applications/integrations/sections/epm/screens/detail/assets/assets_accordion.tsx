@@ -6,6 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
+import { Fragment } from 'react';
 import React from 'react';
 
 import {
@@ -73,7 +74,7 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
             });
             const title = soTitle ?? id;
             return (
-              <>
+              <Fragment key={id}>
                 <EuiSplitPanel.Inner grow={false} key={idx}>
                   <EuiText size="m">
                     <p>
@@ -94,7 +95,7 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
                   )}
                 </EuiSplitPanel.Inner>
                 {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
-              </>
+              </Fragment>
             );
           })}
         </EuiSplitPanel.Outer>

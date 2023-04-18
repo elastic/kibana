@@ -297,6 +297,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     }
   );
 
+  // Update transforms with es-secondary-authorization headers,
+  // append authorized_by to transform's _meta, and start transforms
   router.post(
     {
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,

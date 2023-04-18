@@ -11,13 +11,14 @@ import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 import type { Logger } from '@kbn/logging';
 
+import { appContextService } from '..';
+
 import type { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type {
   TransformAPIKey,
   SecondaryAuthorizationHeader,
 } from '../../../common/types/models/transform_api_key';
-import { appContextService } from '..';
 
 export function isTransformApiKey(arg: any): arg is TransformAPIKey {
   return (
@@ -76,9 +77,14 @@ export async function generateTransformSecondaryAuthHeaders({
     ? `${pkgName}${pkgVersion ? '-' + pkgVersion : ''}-transform${user ? '-by-' + user : ''}`
     : `fleet-transform-api-key`;
 
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(
+  const security = appContextService.getSecurity();
+
+  // If security is not enabled or available, we can't generate api key
+  // but that's ok, cause all the index and transform commands should work
+  if (!security) return;
+
+  try {
+    const apiKeyWithCurrentUserPermission = await security?.authc.apiKeys.grantAsInternalUser(
       fakeKibanaRequest,
       createParams ?? {
         name,
@@ -91,24 +97,28 @@ export async function generateTransformSecondaryAuthHeaders({
       }
     );
 
-  logger.debug(`Created api_key with name: 'auto-generated-transform-api-key'`);
-  let encodedApiKey: TransformAPIKey['encoded'] | null = null;
+    logger.debug(`Created api_key name: ${name}`);
+    let encodedApiKey: TransformAPIKey['encoded'] | null = null;
 
-  // Property 'encoded' does exist in the resp coming back from request
-  // and is required to use in authentication headers
-  // It's just not defined in returned GrantAPIKeyResult type
-  if (isTransformApiKey(apiKeyWithCurrentUserPermission)) {
-    encodedApiKey = apiKeyWithCurrentUserPermission.encoded;
+    // Property 'encoded' does exist in the resp coming back from request
+    // and is required to use in authentication headers
+    // It's just not defined in returned GrantAPIKeyResult type
+    if (isTransformApiKey(apiKeyWithCurrentUserPermission)) {
+      encodedApiKey = apiKeyWithCurrentUserPermission.encoded;
+    }
+
+    const secondaryAuth =
+      encodedApiKey !== null
+        ? {
+            headers: {
+              'es-secondary-authorization': `ApiKey ${encodedApiKey}`,
+            },
+          }
+        : undefined;
+
+    return secondaryAuth;
+  } catch (e) {
+    logger.debug(`Failed to create api_key: ${name} because ${e}`);
+    return undefined;
   }
-
-  const secondaryAuth =
-    encodedApiKey !== null
-      ? {
-          headers: {
-            'es-secondary-authorization': `ApiKey ${encodedApiKey}`,
-          },
-        }
-      : undefined;
-
-  return secondaryAuth;
 }

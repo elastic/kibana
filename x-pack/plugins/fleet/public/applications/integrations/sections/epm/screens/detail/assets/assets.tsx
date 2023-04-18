@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -235,10 +235,14 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         }
 
         return (
-          <>
-            <AssetsAccordion savedObjects={sectionAssetSavedObjects} type={assetType} />
+          <Fragment key={assetType}>
+            <AssetsAccordion
+              savedObjects={sectionAssetSavedObjects}
+              type={assetType}
+              key={assetType}
+            />
             <EuiSpacer size="l" />
-          </>
+          </Fragment>
         );
       }),
       // Ensure we add any custom assets provided via UI extension to the end of the list of other assets

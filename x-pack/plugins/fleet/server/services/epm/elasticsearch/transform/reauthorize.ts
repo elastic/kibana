@@ -95,7 +95,8 @@ export async function handleTransformReauthorizeAndStart({
 }) {
   if (!secondaryAuth) {
     throw Error(
-      'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms.'
+      'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +
+        'This could be because security is not enabled, or API key cannot be generated.'
     );
   }
 

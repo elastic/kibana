@@ -42,7 +42,7 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
+import { getAsset } from './common';
 import { getDestinationIndexAliases } from './transform_utils';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
@@ -401,7 +401,6 @@ const installTransformsAssets = async (
       transforms,
       destinationIndexTemplates,
       transformsSpecifications,
-      aliasesRefs,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
     } = processTransformAssetsPerModule(
@@ -423,14 +422,6 @@ const installTransformsAssets = async (
       pkgVersion: installablePackage.version,
       username,
     });
-
-    // ensure the .latest alias points to only the latest
-    // by removing any associate of old destination indices
-    await Promise.all(
-      aliasesRefs
-        .filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
-        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias }))
-    );
 
     // delete all previous transform
     await Promise.all([
@@ -639,37 +630,6 @@ export const isTransform = (path: string) => {
   const pathParts = getPathParts(path);
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
-
-async function deleteAliasFromIndices({
-  esClient,
-  logger,
-  alias,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  alias: string;
-}) {
-  try {
-    const resp = await esClient.indices.getAlias({ name: alias });
-    const indicesMatchingAlias = Object.keys(resp);
-    logger.debug(`Deleting alias: '${alias}' matching indices ${indicesMatchingAlias}`);
-
-    if (indicesMatchingAlias.length > 0) {
-      await retryTransientEsErrors(
-        () =>
-          // defer validation on put if the source index is not available
-          esClient.indices.deleteAlias(
-            { index: indicesMatchingAlias, name: alias },
-            { ignore: [404] }
-          ),
-        { logger }
-      );
-      logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
-    }
-  } catch (err) {
-    logger.error(`Error deleting alias: ${alias} because ${err}`);
-  }
-}
 
 interface TransformEsAssetReference extends EsAssetReference {
   version?: string;

@@ -451,6 +451,13 @@ export const getVerificationKeyIdHandler: FleetRequestHandler = async (
   }
 };
 
+/**
+ * Create transform and optionally start transform
+ * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+ * If API Key has insufficient permissions, it should still create the transforms but not start it
+ * Instead of failing, we need to allow package to continue installing other assets
+ * and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
+ */
 export const reauthorizeTransformsHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
@@ -470,28 +477,33 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
       username = user.username;
     }
   } catch (e) {
-    // User might not have permission to get username, and that's okay.
+    // User might not have permission to get username, or security is not enabled, and that's okay.
   }
-  const logger = appContextService.getLogger();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
-  const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-    authorizationHeader,
-    logger,
-    username,
-    pkgName,
-    pkgVersion,
-  });
 
-  const resp = await handleTransformReauthorizeAndStart({
-    esClient,
-    savedObjectsClient,
-    logger,
-    pkgName,
-    pkgVersion,
-    transforms,
-    secondaryAuth,
-    username,
-  });
+  try {
+    const logger = appContextService.getLogger();
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
+    const secondaryAuth = await generateTransformSecondaryAuthHeaders({
+      authorizationHeader,
+      logger,
+      username,
+      pkgName,
+      pkgVersion,
+    });
 
-  return response.ok({ body: resp });
+    const resp = await handleTransformReauthorizeAndStart({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName,
+      pkgVersion,
+      transforms,
+      secondaryAuth,
+      username,
+    });
+
+    return response.ok({ body: resp });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
 };
