@@ -16,6 +16,7 @@ import type { Case } from '../../../common/ui/types';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesToast } from '../../common/use_cases_toast';
+import { AttachmentActionType } from '../../client/attachment_framework/types';
 
 interface CaseViewActions {
   caseData: Case;
@@ -40,6 +41,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const propertyActions = useMemo(
     () => [
       {
+        type: AttachmentActionType.BUTTON as const,
         iconType: 'copyClipboard',
         label: i18n.COPY_ID_ACTION_LABEL,
         onClick: () => {
@@ -50,6 +52,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
               iconType: 'popout',
               label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
               onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
@@ -59,6 +62,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
       ...(permissions.delete
         ? [
             {
+              type: AttachmentActionType.BUTTON as const,
               iconType: 'trash',
               label: i18n.DELETE_CASE(),
               color: 'danger' as const,

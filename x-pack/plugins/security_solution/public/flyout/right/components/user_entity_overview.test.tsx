@@ -9,12 +9,13 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { UserEntityOverview } from './user_entity_overview';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { useUserDetails } from '../../../explore/users/containers/users/details';
+
 import {
   ENTITIES_USER_OVERVIEW_IP_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
+import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
 const userName = 'user';
 const ip = '10.200.000.000';
@@ -38,8 +39,8 @@ jest.mock('../../../common/containers/sourcerer', () => {
   };
 });
 
-const mockUseUserDetails = useUserDetails as jest.Mock;
-jest.mock('../../../explore/users/containers/users/details');
+const mockUseUserDetails = useObservedUserDetails as jest.Mock;
+jest.mock('../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
 jest.mock('../../../explore/containers/risk_score');
