@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { DeleteMonitor } from './delete_monitor';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
@@ -52,7 +51,6 @@ export const MonitorList = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const isXl = useIsWithinMinBreakpoint('xxl');
-  const canEditSynthetics = useCanEditSynthetics();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] =
     useState<EncryptedSyntheticsSavedMonitor | null>(null);
@@ -96,7 +94,6 @@ export const MonitorList = ({
   });
 
   const columns = useMonitorListColumns({
-    canEditSynthetics,
     loading,
     overviewStatus,
     setMonitorPendingDeletion,

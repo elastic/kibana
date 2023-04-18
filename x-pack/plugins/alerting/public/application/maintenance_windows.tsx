@@ -7,7 +7,7 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
+import { Redirect, Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
@@ -46,6 +46,7 @@ const App = React.memo(() => {
             <MaintenanceWindowsEditLazy />
           </Suspense>
         </Route>
+        <Redirect from={'/edit'} to="/" />
       </Switch>
     </>
   );

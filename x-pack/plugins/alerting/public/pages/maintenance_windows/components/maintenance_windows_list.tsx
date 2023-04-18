@@ -11,44 +11,30 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButton,
-  formatNumber,
   useEuiBackgroundColor,
-  EuiToolTip,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowResponse, SortDirection } from '../types';
+import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
+import { StatusFilter } from './status_filter';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
-  items: MaintenanceWindowResponse[];
+  items: MaintenanceWindowFindResponse[];
 }
 
-const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'title',
     name: i18n.NAME,
     truncateText: true,
-  },
-  {
-    field: 'total',
-    name: (
-      <EuiToolTip content={i18n.TABLE_ALERTS_TOOLTIP}>
-        <span>
-          {i18n.TABLE_ALERTS}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
-    ),
-    render: (alerts: number) => formatNumber(alerts, 'integer'),
   },
   {
     field: 'status',
@@ -78,13 +64,13 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string, item: MaintenanceWindowResponse) => {
+    render: (startDate: string, item: MaintenanceWindowFindResponse) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
-              <UpcomingEventsPopover maintenanceWindowResponse={item} />
+              <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -107,7 +93,7 @@ const sorting = {
   },
 };
 
-const rowProps = (item: MaintenanceWindowResponse) => ({
+const rowProps = (item: MaintenanceWindowFindResponse) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
@@ -115,11 +101,8 @@ const rowProps = (item: MaintenanceWindowResponse) => ({
 const search: { filters: SearchFilterConfig[] } = {
   filters: [
     {
-      type: 'field_value_selection',
-      field: 'status',
-      name: 'Status',
-      multiSelect: 'or',
-      options: STATUS_OPTIONS,
+      type: 'custom_component',
+      component: StatusFilter,
     },
   ],
 };
@@ -129,7 +112,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
         name: '',
         actions: [
@@ -139,7 +122,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             description: 'Edit maintenance window',
             icon: 'pencil',
             type: 'icon',
-            onClick: (mw: MaintenanceWindowResponse) => navigateToEditMaintenanceWindows(mw.id),
+            onClick: (mw: MaintenanceWindowFindResponse) => navigateToEditMaintenanceWindows(mw.id),
             'data-test-subj': 'action-edit',
           },
         ],

@@ -14,14 +14,14 @@ import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { AlertingDeepLinkId } from '../../config';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
-import { useGetMaintenanceWindowsList } from '../../hooks/use_get_maintenance_windows_list';
+import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows } = useGetMaintenanceWindowsList();
+  const { isLoading, maintenanceWindows } = useFindMaintenanceWindows();
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 

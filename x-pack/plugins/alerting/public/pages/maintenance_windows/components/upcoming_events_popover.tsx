@@ -23,15 +23,15 @@ import {
 import * as i18n from '../translations';
 import { recurringSummary } from '../helpers/recurring_summary';
 import { getPresets } from '../helpers/get_presets';
-import { MaintenanceWindowResponse } from '../types';
-import { convertFromMaintenanceWindow } from '../helpers/convert_from_maintenance_window';
+import { MaintenanceWindowFindResponse } from '../types';
+import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 
 interface UpcomingEventsPopoverProps {
-  maintenanceWindowResponse: MaintenanceWindowResponse;
+  maintenanceWindowFindResponse: MaintenanceWindowFindResponse;
 }
 
 export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React.memo(
-  ({ maintenanceWindowResponse }) => {
+  ({ maintenanceWindowFindResponse }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onButtonClick = useCallback(() => {
@@ -42,24 +42,24 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
     }, []);
 
     const { startDate, recurringSchedule, topEvents, presets } = useMemo(() => {
-      const maintenanceWindow = convertFromMaintenanceWindow(maintenanceWindowResponse);
+      const maintenanceWindow = convertFromMaintenanceWindowToForm(maintenanceWindowFindResponse);
       const date = moment(maintenanceWindow.startDate);
       const currentEventIndex = findIndex(
-        maintenanceWindowResponse.events,
+        maintenanceWindowFindResponse.events,
         (event) =>
-          event.gte === maintenanceWindowResponse.eventStartTime &&
-          event.lte === maintenanceWindowResponse.eventEndTime
+          event.gte === maintenanceWindowFindResponse.eventStartTime &&
+          event.lte === maintenanceWindowFindResponse.eventEndTime
       );
       return {
         startDate: date,
         recurringSchedule: maintenanceWindow.recurringSchedule,
-        topEvents: maintenanceWindowResponse.events.slice(
+        topEvents: maintenanceWindowFindResponse.events.slice(
           currentEventIndex + 1,
           currentEventIndex + 4
         ),
         presets: getPresets(date),
       };
-    }, [maintenanceWindowResponse]);
+    }, [maintenanceWindowFindResponse]);
 
     return (
       <EuiPopover

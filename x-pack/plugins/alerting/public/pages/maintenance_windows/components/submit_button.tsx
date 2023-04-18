@@ -12,18 +12,19 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import * as i18n from '../translations';
 
 interface SubmitButtonProps {
+  isLoading: boolean;
   editMode?: boolean;
 }
 
-export const SubmitButton: React.FC<SubmitButtonProps> = React.memo((editMode) => {
+export const SubmitButton: React.FC<SubmitButtonProps> = React.memo(({ isLoading, editMode }) => {
   const { submit, isSubmitting } = useFormContext();
 
   return (
     <EuiButton
       data-test-subj="create-submit"
       fill
-      isDisabled={isSubmitting}
-      isLoading={isSubmitting}
+      isDisabled={isLoading || isSubmitting}
+      isLoading={isLoading || isSubmitting}
       onClick={submit}
     >
       {editMode ? i18n.SAVE_MAINTENANCE_WINDOW : i18n.CREATE_MAINTENANCE_WINDOW}

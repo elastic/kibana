@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { getMaintenanceWindow } from '../services/maintenance_windows_api/get';
-import { convertFromMaintenanceWindow } from '../pages/maintenance_windows/helpers/convert_from_maintenance_window';
+import { convertFromMaintenanceWindowToForm } from '../pages/maintenance_windows/helpers/convert_from_maintenance_window_to_form';
 
 export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   const {
@@ -19,7 +19,7 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
 
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
-    return convertFromMaintenanceWindow(maintenanceWindow);
+    return convertFromMaintenanceWindowToForm(maintenanceWindow);
   };
 
   const onErrorFn = () => {

@@ -21,7 +21,7 @@ describe('rule_actions_popover', () => {
   it('renders the top 3 events', () => {
     const result = appMockRenderer.render(
       <UpcomingEventsPopover
-        maintenanceWindowResponse={{
+        maintenanceWindowFindResponse={{
           title: 'test MW',
           enabled: true,
           duration: 0,

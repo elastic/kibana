@@ -46,8 +46,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const timezone = useTimeZone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
-    const { mutate: createMaintenanceWindow } = useCreateMaintenanceWindow();
-    const { mutate: updateMaintenanceWindow } = useUpdateMaintenanceWindow();
+    const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
+      useCreateMaintenanceWindow();
+    const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
+      useUpdateMaintenanceWindow();
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
@@ -162,7 +164,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SubmitButton editMode={isEditMode} />
+            <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Form>
