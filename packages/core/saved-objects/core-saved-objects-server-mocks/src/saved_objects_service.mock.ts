@@ -42,6 +42,10 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createExporter: jest.fn(),
     createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
+    getDefaultIndex: jest.fn(),
+    getIndexForType: jest.fn(),
+    getIndicesForTypes: jest.fn(),
+    getAllIndices: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
@@ -50,6 +54,10 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
   startContrat.createExporter.mockReturnValue(savedObjectsExporterMock.create());
   startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
+  startContrat.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndexForType.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndicesForTypes.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
+  startContrat.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return startContrat;
 };
@@ -69,9 +77,11 @@ const createSetupContractMock = () => {
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
+    getAllIndices: jest.fn(),
   };
 
   setupContract.getKibanaIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  setupContract.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return setupContract;
 };
