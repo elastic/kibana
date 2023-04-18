@@ -38,13 +38,13 @@ export function SloEditPage() {
     },
   ]);
 
-  const { slo, isLoading } = useFetchSloDetails({ sloId });
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  if (sloId && isLoading) {
+  if (sloId && isInitialLoading) {
     return null;
   }
 

@@ -4389,7 +4389,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
+              "<unknown, unknown, any>[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4397,7 +4397,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>) => void; }"
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4626,7 +4626,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; has: (id: string) => boolean; register: (objectType: ",
+              ">[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4642,7 +4642,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">) => void; }"
+              ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -10272,7 +10272,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -10314,7 +10314,7 @@
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11074,7 +11074,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          ", { sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
           {
             "pluginId": "@kbn/core-saved-objects-common",
             "scope": "common",
@@ -11116,7 +11116,7 @@
           "PublicLicenseJSON",
           "; userPrivileges: ",
           "SecurityGetUserPrivilegesResponse",
-          "; sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; }, ",
+          "; sloResources: { [x: string]: string; \".slo-observability.sli\": string; \".slo-observability.sli-mappings\": string; \".slo-observability.sli-settings\": string; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -15048,6 +15048,21 @@
         "description": [],
         "signature": [
           "\"SYNTHETICS_MONITOR_DETAIL_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.syntheticsSettingsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "syntheticsSettingsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SYNTHETICS_SETTINGS\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

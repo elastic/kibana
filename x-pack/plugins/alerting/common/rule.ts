@@ -77,6 +77,12 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export interface RuleActionFrequency extends SavedObjectAttributes {
+  summary: boolean;
+  notifyWhen: RuleNotifyWhenType;
+  throttle: string | null;
+}
+
 export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   days: IsoWeekday[];
@@ -103,11 +109,7 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  frequency?: {
-    summary: boolean;
-    notifyWhen: RuleNotifyWhenType;
-    throttle: string | null;
-  };
+  frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
 }
 
