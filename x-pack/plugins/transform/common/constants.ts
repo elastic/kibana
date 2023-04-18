@@ -212,3 +212,8 @@ export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;
 
 // Used in the transform list's expanded row for the messages and issues table.
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+
+/**
+ * The ID of the Locator registered with the Share service for cross-app linking
+ */
+export const TRANSFORMS_MANAGEMENT_LOCATOR = 'TRANSFORMS_MANAGEMENT_LOCATOR';

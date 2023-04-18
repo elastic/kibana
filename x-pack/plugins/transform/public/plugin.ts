@@ -23,6 +23,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
+import { TransformsManagementLocatorDefinition } from './locator';
 
 export interface PluginsDependencies {
   charts: ChartsPluginStart;
@@ -58,6 +59,8 @@ export class TransformUiPlugin {
       },
     });
     registerFeature(home);
+
+    pluginsSetup.share.url.locators.create(new TransformsManagementLocatorDefinition());
 
     if (triggersActionsUi) {
       triggersActionsUi.ruleTypeRegistry.register(getTransformHealthRuleType());
