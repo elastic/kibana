@@ -11,7 +11,6 @@ import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
-import { Env } from '@kbn/config';
 
 /**
  * The `core` context provided to route handler.
@@ -33,7 +32,6 @@ export interface CoreRequestHandlerContext {
   elasticsearch: ElasticsearchRequestHandlerContext;
   uiSettings: UiSettingsRequestHandlerContext;
   deprecations: DeprecationsRequestHandlerContext;
-  env: Pick<Env, 'mode'>;
 }
 
 /**

@@ -12,35 +12,35 @@ import { createCoreRouteHandlerContextParamsMock } from './test_helpers';
 
 describe('#elasticsearch', () => {
   describe('#client', () => {
-    test('returns the results of params.elasticsearch.client.asScoped', () => {
+    test('returns the results of coreStart.elasticsearch.client.asScoped', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client = context.elasticsearch.client;
-      expect(client).toBe(params.elasticsearch.client.asScoped.mock.results[0].value);
+      expect(client).toBe(coreStart.elasticsearch.client.asScoped.mock.results[0].value);
     });
 
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
-      expect(params.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+      expect(coreStart.elasticsearch.client.asScoped).not.toHaveBeenCalled();
       const client = context.elasticsearch.client;
-      expect(params.elasticsearch.client.asScoped).toHaveBeenCalled();
+      expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client1 = context.elasticsearch.client;
       const client2 = context.elasticsearch.client;
-      expect(params.elasticsearch.client.asScoped.mock.calls.length).toBe(1);
-      const mockResult = params.elasticsearch.client.asScoped.mock.results[0].value;
+      expect(coreStart.elasticsearch.client.asScoped.mock.calls.length).toBe(1);
+      const mockResult = coreStart.elasticsearch.client.asScoped.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });
@@ -49,71 +49,71 @@ describe('#elasticsearch', () => {
 
 describe('#savedObjects', () => {
   describe('#client', () => {
-    test('returns the results of params.savedObjects.getScopedClient', () => {
+    test('returns the results of coreStart.savedObjects.getScopedClient', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client = context.savedObjects.client;
-      expect(client).toBe(params.savedObjects.getScopedClient.mock.results[0].value);
+      expect(client).toBe(coreStart.savedObjects.getScopedClient.mock.results[0].value);
     });
 
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const savedObjects = context.savedObjects;
-      expect(params.savedObjects.getScopedClient).not.toHaveBeenCalled();
+      expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
       const client = savedObjects.client;
-      expect(params.savedObjects.getScopedClient).toHaveBeenCalled();
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client1 = context.savedObjects.client;
       const client2 = context.savedObjects.client;
-      expect(params.savedObjects.getScopedClient.mock.calls.length).toBe(1);
-      const mockResult = params.savedObjects.getScopedClient.mock.results[0].value;
+      expect(coreStart.savedObjects.getScopedClient.mock.calls.length).toBe(1);
+      const mockResult = coreStart.savedObjects.getScopedClient.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });
   });
 
   describe('#typeRegistry', () => {
-    test('returns the results of params.savedObjects.getTypeRegistry', () => {
+    test('returns the results of coreStart.savedObjects.getTypeRegistry', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const typeRegistry = context.savedObjects.typeRegistry;
-      expect(typeRegistry).toBe(params.savedObjects.getTypeRegistry.mock.results[0].value);
+      expect(typeRegistry).toBe(coreStart.savedObjects.getTypeRegistry.mock.results[0].value);
     });
 
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
-      expect(params.savedObjects.getTypeRegistry).not.toHaveBeenCalled();
+      expect(coreStart.savedObjects.getTypeRegistry).not.toHaveBeenCalled();
       const typeRegistry = context.savedObjects.typeRegistry;
-      expect(params.savedObjects.getTypeRegistry).toHaveBeenCalled();
+      expect(coreStart.savedObjects.getTypeRegistry).toHaveBeenCalled();
       expect(typeRegistry).toBeDefined();
     });
 
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const typeRegistry1 = context.savedObjects.typeRegistry;
       const typeRegistry2 = context.savedObjects.typeRegistry;
-      expect(params.savedObjects.getTypeRegistry.mock.calls.length).toBe(1);
-      const mockResult = params.savedObjects.getTypeRegistry.mock.results[0].value;
+      expect(coreStart.savedObjects.getTypeRegistry.mock.calls.length).toBe(1);
+      const mockResult = coreStart.savedObjects.getTypeRegistry.mock.results[0].value;
       expect(typeRegistry1).toBe(mockResult);
       expect(typeRegistry2).toBe(mockResult);
     });
@@ -122,35 +122,35 @@ describe('#savedObjects', () => {
 
 describe('#uiSettings', () => {
   describe('#client', () => {
-    test('returns the results of params.uiSettings.asScopedToClient', () => {
+    test('returns the results of coreStart.uiSettings.asScopedToClient', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client = context.uiSettings.client;
-      expect(client).toBe(params.uiSettings.asScopedToClient.mock.results[0].value);
+      expect(client).toBe(coreStart.uiSettings.asScopedToClient.mock.results[0].value);
     });
 
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
-      expect(params.uiSettings.asScopedToClient).not.toHaveBeenCalled();
+      expect(coreStart.uiSettings.asScopedToClient).not.toHaveBeenCalled();
       const client = context.uiSettings.client;
-      expect(params.uiSettings.asScopedToClient).toHaveBeenCalled();
+      expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client1 = context.uiSettings.client;
       const client2 = context.uiSettings.client;
-      expect(params.uiSettings.asScopedToClient.mock.calls.length).toBe(1);
-      const mockResult = params.uiSettings.asScopedToClient.mock.results[0].value;
+      expect(coreStart.uiSettings.asScopedToClient.mock.calls.length).toBe(1);
+      const mockResult = coreStart.uiSettings.asScopedToClient.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });
@@ -159,35 +159,35 @@ describe('#uiSettings', () => {
 
 describe('#deprecations', () => {
   describe('#client', () => {
-    test('returns the results of params.deprecations.asScopedToClient', () => {
+    test('returns the results of coreStart.deprecations.asScopedToClient', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client = context.deprecations.client;
-      expect(client).toBe(params.deprecations.asScopedToClient.mock.results[0].value);
+      expect(client).toBe(coreStart.deprecations.asScopedToClient.mock.results[0].value);
     });
 
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
-      expect(params.deprecations.asScopedToClient).not.toHaveBeenCalled();
+      expect(coreStart.deprecations.asScopedToClient).not.toHaveBeenCalled();
       const client = context.deprecations.client;
-      expect(params.deprecations.asScopedToClient).toHaveBeenCalled();
+      expect(coreStart.deprecations.asScopedToClient).toHaveBeenCalled();
       expect(client).toBeDefined();
     });
 
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
-      const params = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(params, request);
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
 
       const client1 = context.deprecations.client;
       const client2 = context.deprecations.client;
-      expect(params.deprecations.asScopedToClient.mock.calls.length).toBe(1);
-      const mockResult = params.deprecations.asScopedToClient.mock.results[0].value;
+      expect(coreStart.deprecations.asScopedToClient.mock.calls.length).toBe(1);
+      const mockResult = coreStart.deprecations.asScopedToClient.mock.results[0].value;
       expect(client1).toBe(mockResult);
       expect(client2).toBe(mockResult);
     });
