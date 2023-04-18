@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { LensServerPlugin } from './plugin';
 
 export type { LensServerPluginSetup } from './plugin';
-export * from './plugin';
-export * from './migrations/types';
 
 export const plugin = () => new LensServerPlugin();
+
+export type { LensDocShape715 } from './migrations/types';

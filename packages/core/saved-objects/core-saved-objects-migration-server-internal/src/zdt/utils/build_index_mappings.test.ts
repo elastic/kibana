@@ -78,6 +78,9 @@ describe('buildIndexMeta', () => {
         bar: 1,
         dolly: 3,
       },
+      migrationState: {
+        convertingDocuments: false,
+      },
     });
   });
 });

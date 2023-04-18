@@ -107,7 +107,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
-          readOnly
+          readOnly={readOnly}
         />
       ),
     },
@@ -130,7 +130,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
-          readOnly
+          readOnly={readOnly}
         />
       ),
     },
@@ -153,7 +153,7 @@ export const RequestBodyField = ({
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
-          readOnly
+          readOnly={readOnly}
         />
       ),
     },
@@ -169,10 +169,11 @@ export const RequestBodyField = ({
               defaultMessage="Add form field"
             />
           }
+          data-test-subj={'syntheticsFormField'}
           defaultPairs={defaultFormPairs}
           onChange={onChangeFormFields}
           onBlur={() => onBlur?.()}
-          readOnly
+          readOnly={readOnly}
         />
       ),
     },

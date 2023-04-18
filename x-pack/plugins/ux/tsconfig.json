@@ -36,6 +36,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/i18n-react",
     "@kbn/es-query",
+    "@kbn/exploratory-view-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -134,8 +134,9 @@ export function MobileServiceOverview() {
                   values={{
                     feedbackLink: (
                       <EuiLink
+                        target={'_blank'}
                         data-test-subj="apmMobileServiceOverviewGiveFeedbackLink"
-                        href="https://ela.st/feedback-mobile-apm"
+                        href="https://ela.st/feedback-apm-mobile"
                       >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.mobileCallOutLink',

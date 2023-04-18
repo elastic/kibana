@@ -17,7 +17,10 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { BulkResolveError } from '@kbn/core-saved-objects-server';
+import type {
+  BulkResolveError,
+  SavedObjectsRawDocParseOptions,
+} from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -46,6 +49,7 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
@@ -54,6 +58,7 @@ import type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
@@ -303,12 +308,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const {
       migrationVersion,
       coreMigrationVersion,
+      typeMigrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
       initialNamespaces,
       version,
     } = options;
+    const { migrationVersionCompatibility } = options;
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
@@ -381,6 +388,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ),
       migrationVersion,
       coreMigrationVersion,
+      typeMigrationVersion,
       created_at: time,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
@@ -416,7 +424,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     return this.optionallyDecryptAndRedactSingleResult(
-      this._rawToSavedObject<T>({ ...raw, ...body }),
+      this._rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
       authorizationResult?.typeMap,
       attributes
     );
@@ -430,7 +438,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
-    const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      migrationVersionCompatibility,
+      overwrite = false,
+      refresh = DEFAULT_REFRESH_SETTING,
+    } = options;
     const time = getCurrentTime();
 
     let preflightCheckIndexCounter = 0;
@@ -591,6 +603,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           ),
           migrationVersion: object.migrationVersion,
           coreMigrationVersion: object.coreMigrationVersion,
+          typeMigrationVersion: object.typeMigrationVersion,
           ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
           updated_at: time,
@@ -664,10 +677,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         // When method == 'index' the bulkResponse doesn't include the indexed
         // _source so we return rawMigratedDoc but have to spread the latest
         // _seq_no and _primary_term values from the rawResponse.
-        return this._rawToSavedObject({
-          ...rawMigratedDoc,
-          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
-        });
+        return this._rawToSavedObject(
+          {
+            ...rawMigratedDoc,
+            ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+          },
+          { migrationVersionCompatibility }
+        );
       }),
     };
 
@@ -1292,6 +1308,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       filter,
       preference,
       aggs,
+      migrationVersionCompatibility,
     } = options;
 
     if (!type) {
@@ -1441,7 +1458,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       saved_objects: body.hits.hits.map(
         (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
           // @ts-expect-error @elastic/elasticsearch _source is optional
-          ...this._rawToSavedObject(hit),
+          ...this._rawToSavedObject(hit, { migrationVersionCompatibility }),
           score: hit._score!,
           sort: hit.sort,
         })
@@ -1477,9 +1494,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
+    const { migrationVersionCompatibility } = options;
 
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -1625,7 +1643,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }
 
         // @ts-expect-error MultiGetHit._source is optional
-        return getSavedObjectFromSource(this._registry, type, id, doc);
+        return getSavedObjectFromSource(this._registry, type, id, doc, {
+          migrationVersionCompatibility,
+        });
       }),
     };
 
@@ -1642,7 +1662,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
@@ -1678,9 +1698,10 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
+    const { migrationVersionCompatibility } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1716,7 +1737,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
+    const result = getSavedObjectFromSource<T>(this._registry, type, id, body, {
+      migrationVersionCompatibility,
+    });
 
     return this.optionallyDecryptAndRedactSingleResult(result, authorizationResult?.typeMap);
   }
@@ -1727,7 +1750,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
     const namespace = this.getCurrentNamespace(options.namespace);
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
@@ -2311,6 +2334,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObject<T>> {
     const {
       migrationVersion,
+      typeMigrationVersion,
       refresh = DEFAULT_REFRESH_SETTING,
       initialize = false,
       upsertAttributes,
@@ -2384,6 +2408,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }, {} as Record<string, number>),
       },
       migrationVersion,
+      typeMigrationVersion,
       updated_at: time,
     });
 
@@ -2549,6 +2574,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
+   * {@inheritDoc ISavedObjectsRepository.getCurrentNamespace}
+   */
+  getCurrentNamespace(namespace?: string) {
+    if (this._spacesExtension) {
+      return this._spacesExtension.getCurrentNamespace(namespace);
+    }
+    return normalizeNamespace(namespace);
+  }
+
+  /**
    * Returns index specified by the given type or the default index
    *
    * @param type - the type
@@ -2573,12 +2608,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     return unique(types.map((t) => this.getIndexForType(t)));
   }
 
-  private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
-    const savedObject = this._serializer.rawToSavedObject(raw);
+  private _rawToSavedObject<T = unknown>(
+    raw: SavedObjectsRawDoc,
+    options?: SavedObjectsRawDocParseOptions
+  ): SavedObject<T> {
+    const savedObject = this._serializer.rawToSavedObject(raw, options);
     const { namespace, type } = savedObject;
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
+
     return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
@@ -2657,20 +2696,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createConflictError(type, id);
     }
     // any other error from this check does not matter
-  }
-
-  /**
-   * If the spaces extension is enabled, we should use that to get the current namespace (and optionally throw an error if a consumer
-   * attempted to specify the namespace option).
-   *
-   * If the spaces extension is *not* enabled, we should simply normalize the namespace option so that `'default'` can be used
-   * interchangeably with `undefined`.
-   */
-  private getCurrentNamespace(namespace?: string) {
-    if (this._spacesExtension) {
-      return this._spacesExtension.getCurrentNamespace(namespace);
-    }
-    return normalizeNamespace(namespace);
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */

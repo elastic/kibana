@@ -6,15 +6,16 @@
  */
 
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 
 export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
   logger: Logger,
-  ruleDataClient: IRuleDataClient
+  ruleDataClient: IRuleDataClient,
+  basePath: IBasePath
 ) {
   const createLifecycleRuleExecutor = createLifecycleExecutor(logger.get('rules'), ruleDataClient);
-  alertingPlugin.registerType(sloBurnRateRuleType(createLifecycleRuleExecutor));
+  alertingPlugin.registerType(sloBurnRateRuleType(createLifecycleRuleExecutor, basePath));
 }

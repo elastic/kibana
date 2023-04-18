@@ -20,6 +20,21 @@ Array [
       test - Elastic
     </div>
   </div>,
+  <button
+    class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    tabindex="0"
+    type="button"
+  >
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate"
+      >
+        Skip to main content
+      </span>
+    </span>
+  </button>,
   <header
     class="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"

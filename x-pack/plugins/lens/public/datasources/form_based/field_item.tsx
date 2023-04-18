@@ -27,10 +27,9 @@ import {
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DatasourceDataPanelProps } from '../../types';
-import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
-import { APP_ID } from '../../../common/constants';
+import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {

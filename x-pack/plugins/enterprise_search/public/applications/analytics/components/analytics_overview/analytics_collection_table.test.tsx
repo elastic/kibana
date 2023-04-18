@@ -49,7 +49,7 @@ describe('AnalyticsCollectionTable', () => {
     ).find(EuiButtonGroup);
 
     expect(buttonGroup).toHaveLength(1);
-    expect(buttonGroup.prop('options')).toHaveLength(2);
+    expect(buttonGroup.prop('options')).toHaveLength(4);
     expect(buttonGroup.prop('idSelected')).toEqual('Searches');
   });
 

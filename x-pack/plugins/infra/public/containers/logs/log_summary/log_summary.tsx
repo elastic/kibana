@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { exhaustMap, map, Observable } from 'rxjs';
 import { HttpHandler } from '@kbn/core-http-browser';
+import { LogViewReference } from '../../../../common/log_views';
 import { useObservableState, useReplaySubject } from '../../../utils/use_observable';
 import { fetchLogSummary } from './api/fetch_log_summary';
 import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
@@ -17,7 +18,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 
 export const useLogSummary = (
-  sourceId: string,
+  logViewReference: LogViewReference,
   startTimestamp: number | null,
   endTimestamp: number | null,
   filterQuery: string | null
@@ -35,7 +36,7 @@ export const useLogSummary = (
 
     pushLogSummaryBucketsArgs([
       {
-        logView: { type: 'log-view-reference', logViewId: sourceId },
+        logView: logViewReference,
         startTimestamp,
         endTimestamp,
         bucketSize,
@@ -49,7 +50,7 @@ export const useLogSummary = (
     filterQuery,
     pushLogSummaryBucketsArgs,
     services.http.fetch,
-    sourceId,
+    logViewReference,
     startTimestamp,
   ]);
 

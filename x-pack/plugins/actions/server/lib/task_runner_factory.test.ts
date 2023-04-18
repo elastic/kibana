@@ -12,14 +12,22 @@ import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { savedObjectsClientMock, loggingSystemMock, httpServiceMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  httpServiceMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
-import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  isRetryableError,
+  isUnrecoverableError,
+} from '@kbn/task-manager-plugin/server/task_running';
 
 const executeParamsFields = [
   'actionId',
@@ -86,15 +94,12 @@ const taskRunnerFactoryInitializerParams = {
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),
-  getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  savedObjectsRepository: savedObjectsRepositoryMock.create(),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
-  taskRunnerFactoryInitializerParams.getUnsecuredSavedObjectsClient.mockReturnValue(
-    services.savedObjectsClient
-  );
 });
 
 test(`throws an error if factory isn't initialized`, () => {
@@ -410,36 +415,18 @@ test('executes the task by calling the executor with proper parameters when noti
   );
 });
 
-test('cleans up action_task_params object', async () => {
+test('cleans up action_task_params object through the cleanup runner method', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-    ],
-  });
+  await taskRunner.cleanup();
 
-  await taskRunner.run();
-
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
-    refresh: false,
-  });
+  expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { refresh: false }
+  );
 });
 
 test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
@@ -474,37 +461,22 @@ test('task runner should implement CancellableTask cancel method with logging wa
   );
 });
 
-test('runs successfully when cleanup fails and logs the error', async () => {
+test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-    ],
-  });
-  services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
+  taskRunnerFactoryInitializerParams.savedObjectsRepository.delete.mockRejectedValueOnce(
+    new Error('Fail')
+  );
 
-  await taskRunner.run();
+  await taskRunner.cleanup();
 
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
-    refresh: false,
-  });
+  expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { refresh: false }
+  );
   expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
     'Failed to cleanup action_task_params object [id="3"]: Fail'
   );
@@ -814,15 +786,12 @@ test(`doesn't use API key when not provided`, async () => {
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {
-  const taskRunner = taskRunnerFactory.create(
-    {
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 1,
-      },
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 1,
     },
-    2
-  );
+  });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -849,7 +818,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
     await taskRunner.run();
     throw new Error('Should have thrown');
   } catch (e) {
-    expect(isRetryableError(e)).toEqual(true);
+    expect(isUnrecoverableError(e)).toEqual(true);
   }
 });
 
@@ -895,56 +864,11 @@ test(`will throw an error with retry: false if the task is not retryable`, async
   expect(err).toBeDefined();
   expect(isRetryableError(err)).toEqual(false);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will not retry: Error message`
+    `Action '2' failed: Error message`
   );
 });
 
-test(`treats errors as successes if the task is not retryable`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: {
-      ...mockedTaskInstance,
-      attempts: 1,
-    },
-  });
-
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-    ],
-  });
-  mockedActionExecutor.execute.mockResolvedValueOnce({
-    status: 'error',
-    actionId: '2',
-    message: 'Error message',
-    data: { foo: true },
-    retry: false,
-  });
-
-  let err;
-  try {
-    await taskRunner.run();
-  } catch (e) {
-    err = e;
-  }
-  expect(err).toBeUndefined();
-  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will not retry: Error message`
-  );
-});
-
-test('will throw a retry error if the error is thrown instead of returned', async () => {
+test('will rethrow the error if the error is thrown instead of returned', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -969,7 +893,8 @@ test('will throw a retry error if the error is thrown instead of returned', asyn
       },
     ],
   });
-  mockedActionExecutor.execute.mockRejectedValueOnce({});
+  const thrownError = new Error('Fail');
+  mockedActionExecutor.execute.mockRejectedValueOnce(thrownError);
 
   let err;
   try {
@@ -978,10 +903,10 @@ test('will throw a retry error if the error is thrown instead of returned', asyn
     err = e;
   }
   expect(err).toBeDefined();
-  expect(isRetryableError(err)).toEqual(true);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will retry: undefined`
+    `Action '2' failed: Fail`
   );
+  expect(thrownError).toEqual(err);
 });
 
 test('increments monitoring metrics after execution', async () => {

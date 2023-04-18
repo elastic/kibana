@@ -24,6 +24,7 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   ALERT_FLAPPING,
+  TAGS,
 } from '../../common/technical_rule_data_field_names';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
@@ -73,11 +74,11 @@ describe('createLifecycleExecutor', () => {
     )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
       services.alertWithLifecycle({
         id: 'TEST_ALERT_0',
-        fields: {},
+        fields: { [TAGS]: ['source-tag1', 'source-tag2'] },
       });
       services.alertWithLifecycle({
         id: 'TEST_ALERT_1',
-        fields: {},
+        fields: { [TAGS]: ['source-tag3', 'source-tag4'] },
       });
 
       return { state };
@@ -101,6 +102,7 @@ describe('createLifecycleExecutor', () => {
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
+            [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
           }),
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
@@ -108,6 +110,7 @@ describe('createLifecycleExecutor', () => {
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
+            [TAGS]: ['source-tag3', 'source-tag4', 'rule-tag1', 'rule-tag2'],
           }),
         ],
       })
@@ -273,6 +276,7 @@ describe('createLifecycleExecutor', () => {
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
+              [TAGS]: ['source-tag1', 'source-tag2'],
             },
           },
           {
@@ -289,6 +293,7 @@ describe('createLifecycleExecutor', () => {
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              [TAGS]: ['source-tag3', 'source-tag4'],
             },
           },
         ],
@@ -346,6 +351,7 @@ describe('createLifecycleExecutor', () => {
             [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
             labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
+            [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
             [EVENT_ACTION]: 'close',
             [EVENT_KIND]: 'signal',
           }),
@@ -355,6 +361,7 @@ describe('createLifecycleExecutor', () => {
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
+            [TAGS]: ['source-tag3', 'source-tag4', 'rule-tag1', 'rule-tag2'],
           }),
         ]),
       })

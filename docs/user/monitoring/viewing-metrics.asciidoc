@@ -48,6 +48,11 @@ must provide a user ID and password so {kib} can retrieve the data.
 
 .. Create a user that has the `monitoring_user`
 {ref}/built-in-roles.html[built-in role] on the monitoring cluster.
++
+NOTE: Make sure the `monitoring_user` role has read privileges on `metrics-*`
+indices. If it doesn't, create a new role with `read` and `read_cross_cluster`
+index privileges on `metrics-*`, then assign the new role (along with
+`monitoring_user`) to your user.
 
 .. Add the `monitoring.ui.elasticsearch.username` and
 `monitoring.ui.elasticsearch.password` settings in the `kibana.yml` file.
@@ -70,7 +75,8 @@ remote monitoring cluster, you must use credentials that are valid on both the
 --
 
 .. Create users that have the `monitoring_user` and `kibana_admin`
-{ref}/built-in-roles.html[built-in roles].
+{ref}/built-in-roles.html[built-in roles]. If you created a new role with
+read privileges on `metrics-*` indices, also assign that role to the users.
 
 . Open {kib} in your web browser.
 +

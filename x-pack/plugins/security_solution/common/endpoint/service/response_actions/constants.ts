@@ -76,6 +76,6 @@ export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseCon
     execute: 'writeExecuteOperations',
   });
 
-// 4 hrs in milliseconds
-// 4 * 60 * 60 * 1000
-export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400000;
+// 4 hrs in seconds
+// 4 * 60 * 60
+export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400;

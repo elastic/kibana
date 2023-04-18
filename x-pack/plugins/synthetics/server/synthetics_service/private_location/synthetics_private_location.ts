@@ -47,7 +47,8 @@ export class SyntheticsPrivateLocation {
     privateLocation: PrivateLocation,
     savedObjectsClient: SavedObjectsClientContract,
     newPolicyTemplate: NewPackagePolicy,
-    spaceId: string
+    spaceId: string,
+    globalParams: Record<string, string>
   ): NewPackagePolicy | null {
     if (!savedObjectsClient) {
       throw new Error('Could not find savedObjectsClient');
@@ -67,13 +68,18 @@ export class SyntheticsPrivateLocation {
       }
       newPolicy.namespace = config[ConfigKey.NAMESPACE];
 
-      const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
-        ...(config as Partial<MonitorFields>),
-        config_id: config.fields?.config_id,
-        location_name: privateLocation.label,
-        'monitor.project.id': config.fields?.['monitor.project.name'],
-        'monitor.project.name': config.fields?.['monitor.project.name'],
-      });
+      const { formattedPolicy } = formatSyntheticsPolicy(
+        newPolicy,
+        config.type,
+        {
+          ...(config as Partial<MonitorFields>),
+          config_id: config.fields?.config_id,
+          location_name: privateLocation.label,
+          'monitor.project.id': config.fields?.['monitor.project.name'],
+          'monitor.project.name': config.fields?.['monitor.project.name'],
+        },
+        globalParams
+      );
 
       return formattedPolicy;
     } catch (e) {
@@ -93,7 +99,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async createMonitors(
-    configs: HeartbeatConfig[],
+    configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     privateLocations: PrivateLocation[],
@@ -112,7 +118,7 @@ export class SyntheticsPrivateLocation {
       throw new Error(`Unable to create Synthetics package policy for private location`);
     }
 
-    for (const config of configs) {
+    for (const { config, globalParams } of configs) {
       try {
         const { locations } = config;
 
@@ -132,7 +138,8 @@ export class SyntheticsPrivateLocation {
             location,
             savedObjectsClient,
             newPolicyTemplate,
-            spaceId
+            spaceId,
+            globalParams
           );
 
           if (!newPolicy) {
@@ -163,7 +170,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async editMonitors(
-    configs: HeartbeatConfig[],
+    configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocation[],
@@ -189,13 +196,13 @@ export class SyntheticsPrivateLocation {
     const policiesToDelete: string[] = [];
 
     const existingPolicies = await this.getExistingPolicies(
-      configs,
+      configs.map(({ config }) => config),
       allPrivateLocations,
       savedObjectsClient,
       spaceId
     );
 
-    for (const config of configs) {
+    for (const { config, globalParams } of configs) {
       const { locations } = config;
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
@@ -211,7 +218,8 @@ export class SyntheticsPrivateLocation {
               privateLocation,
               savedObjectsClient,
               newPolicyTemplate,
-              spaceId
+              spaceId,
+              globalParams
             );
 
             if (!newPolicy) {

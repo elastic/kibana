@@ -63,7 +63,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   const [sortField, setSortField] = useState<string>(DEFAULT_SORTING.field);
   const [sortDirection, setSortDirection] = useState<Direction>(DEFAULT_SORTING.direction);
 
-  const { fieldItems, showDescriptionColumn } = useMemo(
+  const { fieldItems } = useMemo(
     () =>
       getFieldItemsData({
         browserFields: filteredBrowserFields,
@@ -125,9 +125,8 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
         highlight: searchInput,
         onHide,
         onToggleColumn,
-        showDescriptionColumn,
       }),
-    [getFieldTableColumns, searchInput, onHide, onToggleColumn, showDescriptionColumn]
+    [getFieldTableColumns, searchInput, onHide, onToggleColumn]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 

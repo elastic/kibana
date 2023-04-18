@@ -18,7 +18,7 @@ import type {
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
-import type { FormatFactory } from '../../../../common';
+import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
 

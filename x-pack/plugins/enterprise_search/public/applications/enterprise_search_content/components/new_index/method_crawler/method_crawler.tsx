@@ -18,7 +18,10 @@ import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
-import { LicensingCallout, LICENSING_FEATURE } from '../licensing_callout';
+import {
+  LicensingCallout,
+  LICENSING_FEATURE,
+} from '../../shared/licensing_callout/licensing_callout';
 import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 

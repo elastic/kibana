@@ -80,6 +80,8 @@ import { AlertSummary } from './pages/alert_details/components/alert_summary';
 import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
 export type { TopAlert, AlertSummary, AlertSummaryField };
 
+export { observabilityFeatureId, observabilityAppId } from '../common';
+
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';

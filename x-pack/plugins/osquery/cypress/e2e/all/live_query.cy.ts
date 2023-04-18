@@ -110,7 +110,7 @@ describe('ALL - Live Query', () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-    cy.react('Cell', { props: { columnIndex: 0 } })
+    cy.react('Cell', { props: { colIndex: 0 } })
       .should('exist')
       .first()
       .click();

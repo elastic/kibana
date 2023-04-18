@@ -27,10 +27,15 @@ export interface SimpleSavedObject<T = unknown> {
   id: SavedObjectType<T>['id'];
   /** Type of the saved object */
   type: SavedObjectType<T>['type'];
-  /** Migration version of the saved object */
+  /**
+   * Migration version of the saved object
+   * @deprecated
+   */
   migrationVersion: SavedObjectType<T>['migrationVersion'];
   /** Core migration version of the saved object */
   coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
+  /** Core migration version of the saved object */
+  typeMigrationVersion: SavedObjectType<T>['typeMigrationVersion'];
   /** Error associated with this object, undefined if no error */
   error: SavedObjectType<T>['error'];
   /** References to other saved objects  */

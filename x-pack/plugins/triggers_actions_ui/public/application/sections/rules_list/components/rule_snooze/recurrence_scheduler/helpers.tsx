@@ -16,7 +16,7 @@ import { i18nFreqSummary, i18nNthWeekdayShort } from './translations';
 export interface CustomFrequencyState {
   freq: RRuleFrequency;
   interval: number;
-  byweekday: string[];
+  byweekday?: string[];
   bymonthday: number[];
   bymonth: number[];
 }
@@ -37,7 +37,7 @@ export const getInitialByweekday = (
     (result, n) => ({
       ...result,
       [n]:
-        initialStateByweekday?.length > 0
+        initialStateByweekday && initialStateByweekday.length > 0
           ? initialStateByweekday
               // Sanitize nth day strings, e.g. +2MO, -1FR, into just days of the week
               .map((w) => w.replace(/[0-9+\-]/g, ''))
