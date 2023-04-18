@@ -264,6 +264,10 @@ export class DiscoverExtenderPlugin implements Plugin {
           },
         ],
       });
+
+      return () => {
+        console.log('Cleaning up Discover extensions');
+      };
     });
   }
 }
