@@ -23,7 +23,9 @@ export class ContentRegistry {
    * @param contentType The content type to register
    * @param config The content configuration
    */
-  register<S extends ContentStorage<any> = ContentStorage>(definition: ContentTypeDefinition<S>) {
+  register<S extends ContentStorage<any, any, any> = ContentStorage>(
+    definition: ContentTypeDefinition<S>
+  ) {
     if (this.types.has(definition.id)) {
       throw new Error(`Content [${definition.id}] is already registered`);
     }
