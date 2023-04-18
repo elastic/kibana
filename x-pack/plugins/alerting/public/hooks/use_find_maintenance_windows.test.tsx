@@ -8,7 +8,7 @@ import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/dom';
 
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
-import { useGetMaintenanceWindowsList } from './use_get_maintenance_windows_list';
+import { useFindMaintenanceWindows } from './use_find_maintenance_windows';
 
 const mockAddDanger = jest.fn();
 
@@ -27,15 +27,15 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/maintenance_windows_api/list', () => ({
-  getMaintenanceWindowsList: jest.fn(),
+jest.mock('../services/maintenance_windows_api/find', () => ({
+  findMaintenanceWindows: jest.fn(),
 }));
 
-const { getMaintenanceWindowsList } = jest.requireMock('../services/maintenance_windows_api/list');
+const { findMaintenanceWindows } = jest.requireMock('../services/maintenance_windows_api/find');
 
 let appMockRenderer: AppMockRenderer;
 
-describe('useGetMaintenanceWindowsList', () => {
+describe('useFindMaintenanceWindows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -43,9 +43,9 @@ describe('useGetMaintenanceWindowsList', () => {
   });
 
   it('should call onError if api fails', async () => {
-    getMaintenanceWindowsList.mockRejectedValue('This is an error.');
+    findMaintenanceWindows.mockRejectedValue('This is an error.');
 
-    renderHook(() => useGetMaintenanceWindowsList(), {
+    renderHook(() => useFindMaintenanceWindows(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 

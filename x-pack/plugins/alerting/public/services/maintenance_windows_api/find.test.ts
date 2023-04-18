@@ -7,15 +7,15 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { MaintenanceWindowResponse } from '../../pages/maintenance_windows/types';
-import { getMaintenanceWindowsList } from './list';
+import { findMaintenanceWindows } from './find';
 import { MaintenanceWindowStatus } from '../../../common';
 
 const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('getMaintenanceWindowsList', () => {
-  test('should call list maintenance windows api', async () => {
+describe('findMaintenanceWindows', () => {
+  test('should call find maintenance windows api', async () => {
     const apiResponse = {
       data: [
         {
@@ -72,7 +72,7 @@ describe('getMaintenanceWindowsList', () => {
       },
     ];
 
-    const result = await getMaintenanceWindowsList({ http });
+    const result = await findMaintenanceWindows({ http });
     expect(result).toEqual(maintenanceWindow);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
-import { getMaintenanceWindowsList } from '../services/maintenance_windows_api/list';
+import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
 
-export const useGetMaintenanceWindowsList = () => {
+export const useFindMaintenanceWindows = () => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
   const queryFn = () => {
-    return getMaintenanceWindowsList({ http });
+    return findMaintenanceWindows({ http });
   };
 
   const onErrorFn = (error: Error) => {
@@ -31,7 +31,7 @@ export const useGetMaintenanceWindowsList = () => {
   };
 
   const { isLoading, data = [] } = useQuery({
-    queryKey: ['getMaintenanceWindowsList'],
+    queryKey: ['findMaintenanceWindows'],
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,

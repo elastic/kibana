@@ -39,7 +39,7 @@ const transform: RewriteRequestCase<MaintenanceWindowResponse> = ({
   updatedAt,
 });
 
-export async function getMaintenanceWindowsList({
+export async function findMaintenanceWindows({
   http,
 }: {
   http: HttpSetup;
