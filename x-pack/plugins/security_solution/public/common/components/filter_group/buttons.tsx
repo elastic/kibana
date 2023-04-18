@@ -10,23 +10,31 @@ import React from 'react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
-import { DISCARD_CHANGES, PENDING_CHANGES_REMINDER } from './translations';
+import {
+  ADD_CONTROLS,
+  ADD_CONTROLS_MAX_LIMIT,
+  DISCARD_CHANGES,
+  PENDING_CHANGES_REMINDER,
+} from './translations';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
 }
 
 export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
+  const { isDisabled } = rest;
   return (
-    <EuiButtonIcon
-      size="s"
-      iconSize="m"
-      display="base"
-      data-test-subj={'filter-group__add-control'}
-      onClick={onClick}
-      {...rest}
-      iconType={'plusInCircle'}
-    />
+    <EuiToolTip content={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}>
+      <EuiButtonIcon
+        size="s"
+        iconSize="m"
+        display="base"
+        data-test-subj={'filter-group__add-control'}
+        onClick={onClick}
+        {...rest}
+        iconType={'plusInCircle'}
+      />
+    </EuiToolTip>
   );
 };
 
