@@ -34,6 +34,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       api_key_id: null,
       configuration: {
         foo: {
+          depends_on: [],
           display: 'textbox',
           key: 'foo',
           label: 'bar',
@@ -141,6 +142,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       api_key_id: null,
       configuration: {
         foo: {
+          depends_on: [],
           display: 'textbox',
           key: 'foo',
           label: 'bar',
