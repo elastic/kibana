@@ -8,15 +8,11 @@
 import type { SecurityAppStore } from '../../../common/store/types';
 import { TimelineId } from '../../../../common/types';
 import { addProvider } from '../../../timelines/store/timeline/actions';
-import { createAddToTimelineCellActionFactory, getToastMessage } from './add_to_timeline';
+import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-const mockId = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-}));
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
 
@@ -130,115 +126,6 @@ describe('createAddToTimelineCellAction', () => {
         });
         expect(mockWarningToast).not.toHaveBeenCalled();
       });
-    });
-
-    it('should clear the timeline if andFilters are included', async () => {
-      await addToTimelineAction.execute({
-        ...context,
-        metadata: {
-          andFilters: [{ field: 'kibana.alert.severity', value: 'low' }],
-        },
-      });
-
-      expect(mockDispatch.mock.calls[0][0].type).toEqual(
-        'x-pack/security_solution/local/timeline/CREATE_TIMELINE'
-      );
-
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
-        ...defaultDataProvider,
-        payload: {
-          ...defaultDataProvider.payload,
-          providers: [
-            {
-              ...defaultDataProvider.payload.providers[0],
-              id: mockId,
-              queryMatch: {
-                ...defaultDataProvider.payload.providers[0].queryMatch,
-                displayValue: 'the-value',
-              },
-              and: [
-                {
-                  enabled: true,
-                  excluded: false,
-                  id: mockId,
-                  kqlQuery: '',
-                  name: 'kibana.alert.severity',
-                  queryMatch: {
-                    displayValue: 'low',
-                    field: 'kibana.alert.severity',
-                    operator: ':',
-                    value: 'low',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      });
-    });
-  });
-
-  describe('getToastMessage', () => {
-    it('handles empty input', () => {
-      const result = getToastMessage([], null);
-      expect(result).toEqual('');
-    });
-    it('handles array input', () => {
-      const result = getToastMessage([], ['hello', 'world']);
-      expect(result).toEqual('hello, world');
-    });
-
-    it('handles single filter', () => {
-      const result = getToastMessage(
-        [{ field: 'kibana.alert.severity', value: 'critical' }],
-        value
-      );
-      expect(result).toEqual(`critical severity alerts from ${value}`);
-    });
-
-    it('handles multiple filters', () => {
-      const result = getToastMessage(
-        [
-          { field: 'kibana.alert.workflow_status', value: 'open' },
-          { field: 'kibana.alert.severity', value: 'critical' },
-        ],
-        value
-      );
-      expect(result).toEqual(`open, critical severity alerts from ${value}`);
-    });
-
-    it('ignores unrelated filters', () => {
-      const result = getToastMessage(
-        [
-          { field: 'kibana.alert.workflow_status', value: 'open' },
-          { field: 'kibana.alert.severity', value: 'critical' },
-          // currently only supporting the above fields
-          { field: 'user.name', value: 'something' },
-        ],
-        value
-      );
-      expect(result).toEqual(`open, critical severity alerts from ${value}`);
-    });
-
-    it('returns entity only when unrelated filters are passed', () => {
-      const result = getToastMessage([{ field: 'user.name', value: 'something' }], value);
-      expect(result).toEqual(`${value} alerts`);
-    });
-
-    it('returns entity only when no filters are passed', () => {
-      const result = getToastMessage([], value);
-      expect(result).toEqual(`${value} alerts`);
-    });
-
-    it('returns entity only when wildcard filters are passed', () => {
-      const result = getToastMessage(
-        [
-          { field: 'kibana.alert.severity', value: '*' },
-          { field: 'kibana.alert.workflow_status', value: '*' },
-        ],
-        value
-      );
-      expect(result).toEqual(`${value} alerts`);
     });
   });
 });
