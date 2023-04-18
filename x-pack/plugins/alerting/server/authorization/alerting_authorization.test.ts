@@ -198,7 +198,7 @@ beforeEach(() => {
     },
     producer: 'myApp',
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   }));
   features.getKibanaFeatures.mockReturnValue([

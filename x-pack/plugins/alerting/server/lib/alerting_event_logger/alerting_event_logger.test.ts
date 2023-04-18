@@ -44,7 +44,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   ruleTaskTimeout: '1m',
   validate: {
-    params: schema.object({}),
+    params: schema.any(),
   },
 };
 

@@ -364,7 +364,7 @@ describe('find()', () => {
       },
       producer: 'myApp',
       validate: {
-        params: schema.object({}),
+        params: schema.any(),
       },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -384,7 +384,7 @@ describe('find()', () => {
         injectReferences: injectReferencesFn,
       },
       validate: {
-        params: { validate: (params) => params },
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -570,7 +570,7 @@ describe('find()', () => {
       },
       producer: 'myApp',
       validate: {
-        params: { validate: (params) => params },
+        params: schema.any(),
       },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
@@ -590,7 +590,7 @@ describe('find()', () => {
         injectReferences: injectReferencesFn,
       },
       validate: {
-        params: { validate: (params) => params },
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({

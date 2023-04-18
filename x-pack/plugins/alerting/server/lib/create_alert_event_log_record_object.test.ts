@@ -22,7 +22,7 @@ describe('createAlertEventLogRecordObject', () => {
     executor: jest.fn(),
     producer: 'alerts',
     validate: {
-      params: schema.object({}),
+      params: schema.any(),
     },
   };
 

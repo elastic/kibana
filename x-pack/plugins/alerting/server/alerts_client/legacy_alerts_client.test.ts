@@ -88,7 +88,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   validate: {
-    params: schema.object({}),
+    params: schema.any(),
   },
 };
 
