@@ -14,6 +14,7 @@ import type {
   ManagementSetup,
 } from '@kbn/management-plugin/public';
 import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
@@ -42,6 +43,7 @@ describe('ManagementService', () => {
         },
         locator: {} as any,
       };
+      const shareSetup = sharePluginMock.createSetupContract();
 
       const service = new ManagementService();
       service.setup({
@@ -50,6 +52,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
+        share: shareSetup,
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -104,6 +107,7 @@ describe('ManagementService', () => {
         },
         locator: {} as any,
       };
+      const shareSetup = sharePluginMock.createSetupContract();
 
       service.setup({
         getStartServices: getStartServices as any,
@@ -111,6 +115,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc: securityMock.createSetup().authc,
         management: managementSetup,
+        share: shareSetup,
       });
 
       const getMockedApp = (id: string) => {
