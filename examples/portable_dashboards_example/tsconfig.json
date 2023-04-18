@@ -25,6 +25,7 @@
     "@kbn/embeddable-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-utility",
-    "@kbn/controls-plugin"
+    "@kbn/controls-plugin",
+    "@kbn/shared-ux-router"
   ]
 }
