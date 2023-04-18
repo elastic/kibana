@@ -387,7 +387,7 @@ export function getDiscoverStateContainer({
     const savedSearchDataView = nextSavedSearch.searchSource.getField('index');
     if (savedSearchDataView) {
       setDataView(savedSearchDataView);
-      if (!actualDataView.isPersisted()) {
+      if (!savedSearchDataView.isPersisted()) {
         internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
       }
     }
