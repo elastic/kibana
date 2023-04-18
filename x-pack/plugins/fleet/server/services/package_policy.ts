@@ -1738,6 +1738,8 @@ async function _compilePackageStreams(
 }
 
 // temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
+// TODO: Move this logic into `package_policies_to_agent_permissions.ts` since this is not a package policy concern
+// and is based entirely on the package contents
 export function _applyIndexPrivileges(
   packageDataStream: RegistryDataStream,
   stream: PackagePolicyInputStream
