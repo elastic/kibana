@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { config, expectedValues, generateData } from './generate_data';
+import { config, generateData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
