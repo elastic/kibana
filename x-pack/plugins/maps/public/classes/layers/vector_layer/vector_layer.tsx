@@ -64,7 +64,7 @@ import { syncBoundsData } from './bounds_data';
 import { JoinState } from './types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
-import { getAlphaExpression } from './get_alpha_expression';
+import { Mask } from './mask';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
@@ -107,6 +107,7 @@ export interface IVectorLayer extends ILayer {
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
+  getMasks(): Mask[];
 }
 
 export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
@@ -693,11 +694,59 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return undefined;
   }
 
+  getMasks() {
+    const masks: Mask[] = [];
+    const source = this.getSource();
+    if ('getMetricFields' in (source as IESAggSource)) {
+      const metricFields = (source as IESAggSource).getMetricFields();
+      metricFields.forEach((metricField) => {
+        const mask = metricField.getMask();
+        if (mask) {
+          masks.push(new Mask({
+            isFeatureState: false,
+            mbFieldName: metricField.getMbFieldName(),
+            operator: mask.operator,
+            value: mask.value,
+          }));
+        }
+      });
+    }
+
+    this.getValidJoins().forEach((join) => {
+      const rightSource = join.getRightJoinSource();
+      if ('getMetricFields' in (rightSource as IESAggSource)) {
+        const metricFields = (rightSource as IESAggSource).getMetricFields();
+        metricFields.forEach((metricField) => {
+          const mask = metricField.getMask();
+          if (mask) {
+            masks.push(new Mask({
+              isFeatureState: true, // joins add properties via feature state
+              mbFieldName: metricField.getMbFieldName(),
+              operator: mask.operator,
+              value: mask.value,
+            }));
+          }
+        });
+      }
+    });
+
+    return masks;
+  }
+
   // feature-state is not supported in filter expressions
   // https://github.com/mapbox/mapbox-gl-js/issues/8487
-  // therefore, metric masking must be accomplished via setting opacity paint property - hack
+  // therefore, masking must be accomplished via setting opacity paint property (hack)
   _getAlphaExpression() {
-    return getAlphaExpression(this.getAlpha(), this.getSource(), this.getValidJoins());
+    const maskCaseExpressions = [];
+    this.getMasks().forEach(mask => {
+      // case expressions require 2 parts
+      // 1) condition expression
+      maskCaseExpressions.push(mask.getConditionExpression());
+      // 2) output. 0 opacity styling "hides" feature
+      maskCaseExpressions.push(0);
+    });
+
+    return maskCaseExpressions.length ? ['case', ...maskCaseExpressions, this.getAlpha()] : this.getAlpha();
   }
 
   _setMbPointsProperties(
