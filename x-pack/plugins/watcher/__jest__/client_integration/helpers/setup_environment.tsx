@@ -11,13 +11,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { init as initHttpRequests } from './http_requests';
 import { mockContextValue } from './app_context.mock';
 import { AppContextProvider } from '../../../public/application/app_context';
-import { setHttpClient, setSavedObjectsClient } from '../../../public/application/lib/api';
-
-const mockSavedObjectsClient = () => {
-  return {
-    find: (_params?: any) => {},
-  };
-};
+import { setHttpClient } from '../../../public/application/lib/api';
 
 export const WithAppDependencies =
   (Component: any, httpSetup: HttpSetup) => (props: Record<string, unknown>) => {
@@ -31,7 +25,5 @@ export const WithAppDependencies =
   };
 
 export const setupEnvironment = () => {
-  setSavedObjectsClient(mockSavedObjectsClient() as any);
-
   return initHttpRequests();
 };

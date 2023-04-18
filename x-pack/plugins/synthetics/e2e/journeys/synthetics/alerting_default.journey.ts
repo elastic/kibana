@@ -50,7 +50,9 @@ journey('AlertingDefaults', async ({ page, params }) => {
   step(
     'Fill text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
     async () => {
-      await page.click(byTestId('webhookButton'));
+      if (await page.isVisible(byTestId('webhookButton'))) {
+        await page.click(byTestId('webhookButton'));
+      }
       await page.fill(
         'text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
         'https://www.slack.com'

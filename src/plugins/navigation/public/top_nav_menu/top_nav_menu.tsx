@@ -7,7 +7,14 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiBadgeProps,
+  EuiHeaderLinks,
+  EuiToolTip,
+  EuiToolTipProps,
+} from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -18,11 +25,16 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
+type Badge = EuiBadgeProps & {
+  badgeText: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
+};
+
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
   StatefulSearchBarProps<QT> &
     Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
       config?: TopNavMenuData[];
-      badges?: Array<EuiBadgeProps & { badgeText: string }>;
+      badges?: Badge[];
       showSearchBar?: boolean;
       showQueryInput?: boolean;
       showDatePicker?: boolean;
@@ -69,18 +81,28 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     return null;
   }
 
+  function createBadge({ badgeText, toolTipProps, ...badgeProps }: Badge, i: number): ReactElement {
+    const Badge = ({ key, ...rest }: { key?: string }) => (
+      <EuiBadge key={key} tabIndex={0} {...rest} {...badgeProps}>
+        {badgeText}
+      </EuiBadge>
+    );
+
+    const key = `nav-menu-badge-${i}`;
+    return toolTipProps ? (
+      <EuiToolTip key={key} {...toolTipProps}>
+        <Badge />
+      </EuiToolTip>
+    ) : (
+      <Badge key={key} />
+    );
+  }
+
   function renderBadges(): ReactElement | null {
     if (!badges || badges.length === 0) return null;
     return (
       <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
-        {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-          const { badgeText, ...badgeProps } = badge;
-          return (
-            <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
-              {badgeText}
-            </EuiBadge>
-          );
-        })}
+        {badges.map(createBadge)}
       </EuiBadgeGroup>
     );
   }

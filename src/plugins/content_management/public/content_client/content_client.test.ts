@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs/operators';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentClient } from './content_client';
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
+import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, MSearchIn } from '../../common';
 import { ContentTypeRegistry } from '../registry';
 
 const setup = () => {
@@ -180,5 +180,20 @@ describe('#search', () => {
 
     expect(loadedState.isLoading).toBe(false);
     expect(loadedState.data).toEqual(output);
+  });
+});
+
+describe('#mSearch', () => {
+  it('calls rpcClient.mSearch with input and returns output', async () => {
+    const { crudClient, contentClient } = setup();
+    const input: MSearchIn = { contentTypes: [{ contentTypeId: 'testType' }], query: {} };
+    const output = { hits: [{ id: 'test' }] };
+    // @ts-ignore
+    crudClient.mSearch.mockResolvedValueOnce(output);
+    expect(await contentClient.mSearch(input)).toEqual(output);
+    expect(crudClient.mSearch).toBeCalledWith({
+      contentTypes: [{ contentTypeId: 'testType', version: 3 }], // latest version added
+      query: {},
+    });
   });
 });

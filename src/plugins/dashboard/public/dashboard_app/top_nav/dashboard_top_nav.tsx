@@ -18,7 +18,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -252,7 +252,12 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
                 {
                   'data-test-subj': 'dashboardUnsavedChangesBadge',
                   badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-                  color: 'success',
+                  title: '',
+                  color: 'warning',
+                  toolTipProps: {
+                    content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
+                    position: 'bottom',
+                  } as EuiToolTipProps,
                 },
               ]
             : undefined

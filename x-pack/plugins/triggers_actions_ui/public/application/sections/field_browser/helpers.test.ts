@@ -9,13 +9,45 @@ import { mockBrowserFields } from './mock';
 
 import {
   categoryHasFields,
+  getCategory,
+  getDescription,
   getFieldCount,
   filterBrowserFieldsByFieldName,
   filterSelectedBrowserFields,
 } from './helpers';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { EcsFlat } from '@kbn/ecs';
 
 describe('helpers', () => {
+  describe('getCategory', () => {
+    test('it returns "host" category for given name host.hostname', () => {
+      const category = getCategory('host.hostname');
+      expect(category).toEqual('host');
+    });
+    test('it returns "base" category for given name _id', () => {
+      const category = getCategory('_id');
+      expect(category).toEqual('base');
+    });
+    test('it returns "base" category for given name @timestamp', () => {
+      const category = getCategory('@timestamp');
+      expect(category).toEqual('base');
+    });
+    test('it returns "(unknown)" category for null field', () => {
+      // @ts-expect-error cannot have 'null' for parameter
+      const category = getCategory(null);
+      expect(category).toEqual('(unknown)');
+    });
+  });
+  describe('getDescription', () => {
+    test('it returns description for given name', () => {
+      const description = getDescription('host.hostname', EcsFlat);
+      expect(description).toMatchInlineSnapshot(`
+        "Hostname of the host.
+        It normally contains what the \`hostname\` command returns on the host machine."
+      `);
+    });
+  });
+
   describe('categoryHasFields', () => {
     test('it returns false if the category fields property is undefined', () => {
       expect(categoryHasFields({})).toBe(false);

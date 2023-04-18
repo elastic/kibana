@@ -32,7 +32,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          depends_on: [],
+          display: 'textbox',
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -102,6 +114,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       language: 'en',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'connector',
@@ -127,7 +140,19 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          depends_on: [],
+          display: 'textbox',
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -197,6 +222,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       language: 'en',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'crawler',

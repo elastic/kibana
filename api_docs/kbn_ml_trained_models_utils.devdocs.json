@@ -1,0 +1,149 @@
+{
+  "id": "@kbn/ml-trained-models-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.BUILT_IN_MODEL_TAG",
+        "type": "string",
+        "tags": [],
+        "label": "BUILT_IN_MODEL_TAG",
+        "description": [],
+        "signature": [
+          "\"prepackaged\""
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.BUILT_IN_MODEL_TYPE",
+        "type": "Any",
+        "tags": [],
+        "label": "BUILT_IN_MODEL_TYPE",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.DeploymentState",
+        "type": "Type",
+        "tags": [],
+        "label": "DeploymentState",
+        "description": [],
+        "signature": [
+          "\"started\" | \"starting\" | \"stopping\""
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.SupportedPytorchTasksType",
+        "type": "Type",
+        "tags": [],
+        "label": "SupportedPytorchTasksType",
+        "description": [],
+        "signature": [
+          "\"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\" | \"text_expansion\""
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.TrainedModelType",
+        "type": "Type",
+        "tags": [],
+        "label": "TrainedModelType",
+        "description": [],
+        "signature": [
+          "\"pytorch\" | \"tree_ensemble\" | \"lang_ident\""
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.DEPLOYMENT_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEPLOYMENT_STATE",
+        "description": [],
+        "signature": [
+          "{ readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPING: \"stopping\"; }"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.SUPPORTED_PYTORCH_TASKS",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_PYTORCH_TASKS",
+        "description": [],
+        "signature": [
+          "{ readonly NER: \"ner\"; readonly QUESTION_ANSWERING: \"question_answering\"; readonly ZERO_SHOT_CLASSIFICATION: \"zero_shot_classification\"; readonly TEXT_CLASSIFICATION: \"text_classification\"; readonly TEXT_EMBEDDING: \"text_embedding\"; readonly FILL_MASK: \"fill_mask\"; readonly TEXT_EXPANSION: \"text_expansion\"; }"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.TRAINED_MODEL_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "TRAINED_MODEL_TYPE",
+        "description": [],
+        "signature": [
+          "{ readonly PYTORCH: \"pytorch\"; readonly TREE_ENSEMBLE: \"tree_ensemble\"; readonly LANG_IDENT: \"lang_ident\"; }"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

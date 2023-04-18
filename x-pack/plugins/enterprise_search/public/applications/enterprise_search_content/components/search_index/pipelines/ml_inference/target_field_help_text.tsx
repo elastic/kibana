@@ -12,10 +12,9 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import {
-  getMlModelTypesForModelConfig,
-  SUPPORTED_PYTORCH_TASKS,
-} from '../../../../../../../common/ml_inference_pipeline';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
+import { getMlModelTypesForModelConfig } from '../../../../../../../common/ml_inference_pipeline';
 import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
 import { getMLType } from '../../../shared/ml_inference/utils';
 

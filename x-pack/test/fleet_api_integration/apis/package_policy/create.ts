@@ -446,6 +446,31 @@ export default function (providerContext: FtrProviderContext) {
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
 
+    it('should return a 200 when a package has no variables or data streams', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'no-variables-or-data-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'single_input_no_streams',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
     describe('input only packages', () => {
       it('should default dataset if not provided for input only pkg', async function () {
         await supertest

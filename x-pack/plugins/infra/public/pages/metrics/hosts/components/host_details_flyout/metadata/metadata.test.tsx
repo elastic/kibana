@@ -23,8 +23,9 @@ const metadataProps: TabProps = {
     to: 1679585836087,
     interval: '1m',
   },
+  nodeType: 'host',
   node: {
-    uuid: 'b9c06da0-b9b0-4c7e-830c-05128cb34396',
+    id: 'host-1-0',
     name: 'host-1',
     os: 'iOS',
     title: {
@@ -109,13 +110,23 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ metadata: [] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraHostMetadataNoData')).toBeInTheDocument();
   });
 
-  it('should return spinner if loading', async () => {
+  it('should show the metadata table if metadata is returned', async () => {
+    mockUseMetadata({ metadata: [{ name: 'host.os.name', value: 'Ubuntu' }] });
+    const result = renderHostMetadata();
+
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
+  });
+
+  it('should return loading text if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 
+    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
   });
 });

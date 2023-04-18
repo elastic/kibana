@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import {
@@ -26,7 +26,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
 }) => {
   const {
     services: {
-      observability: {
+      observabilityShared: {
         navigation: { PageTemplate },
       },
       docLinks,

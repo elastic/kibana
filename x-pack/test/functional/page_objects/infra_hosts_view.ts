@@ -21,11 +21,27 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickTableOpenFlyoutButton() {
-      return await testSubjects.click('hostsView-flyout-button');
+      return testSubjects.click('hostsView-flyout-button');
     },
 
     async clickCloseFlyoutButton() {
-      return await testSubjects.click('euiFlyoutCloseButton');
+      return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async clickProcessesFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-processes');
+    },
+
+    async clickProcessesTableExpandButton() {
+      return testSubjects.click('infraProcessRowButton');
+    },
+
+    async clickFlyoutUptimeLink() {
+      return testSubjects.click('hostsView-flyout-uptime-link');
+    },
+
+    async clickFlyoutApmServicesLink() {
+      return testSubjects.click('hostsView-flyout-apm-services-link');
     },
 
     async getHostsLandingPageDisabled() {
@@ -123,7 +139,26 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async getMetadataTabName() {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
-      return await tabTitle.getVisibleText();
+      return tabTitle.getVisibleText();
+    },
+
+    async getProcessesTabContentTitle(index: number) {
+      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
+      return processesListElements[index].findByCssSelector('dt');
+    },
+
+    async getProcessesTabContentTotalValue() {
+      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
+      return processesListElements[0].findByCssSelector('dd');
+    },
+
+    getProcessesTable() {
+      return testSubjects.find('infraProcessesTable');
+    },
+
+    async getProcessesTableBody() {
+      const processesTable = await this.getProcessesTable();
+      return processesTable.findByCssSelector('tbody');
     },
 
     // Logs Tab
