@@ -661,13 +661,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     const { gridData } = this.getPanelState(id) as DashboardPanelState;
 
+    // Height of the controls group
     const controlsOffset = document.getElementsByClassName('dshDashboardViewport-controls')[0]
       .scrollHeight;
 
+    // Height of all the bars above the dashboard container
     const topNavOffset = document
       .getElementsByClassName('dashboardViewport')[0]
       .getBoundingClientRect().top;
 
+    // Height of the dashboard viewport
     const viewportHeight = window.innerHeight - topNavOffset;
 
     // Estimated scroll position
