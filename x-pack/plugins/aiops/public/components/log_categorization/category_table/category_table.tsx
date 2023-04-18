@@ -167,7 +167,9 @@ export const CategoryTable: FC<Props> = ({
       ),
     },
     {
-      name: 'Actions',
+      name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
+        defaultMessage: 'Actions',
+      }),
       sortable: false,
       width: '60px',
       actions: [
