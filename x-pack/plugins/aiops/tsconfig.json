@@ -51,6 +51,7 @@
     "@kbn/ml-route-utils",
     "@kbn/unified-field-list-plugin",
     "@kbn/ml-random-sampler-utils",
+    "@kbn/ml-plugin",
   ],
   "exclude": [
     "target/**/*",
