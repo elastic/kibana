@@ -50,6 +50,9 @@ const context = {
   ruleTypeRegistry: {
     get: () => ruleType,
   },
+  logger: {
+    error: jest.fn(),
+  },
 } as unknown as RulesClientContext;
 
 const ruleId = 'rule_id_1';
@@ -117,6 +120,24 @@ describe('migrateLegacyActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  it('should return empty migratedActions when error is thrown within method', async () => {
+    (retrieveMigratedLegacyActions as jest.Mock).mockRejectedValueOnce(new Error('test failure'));
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId,
+      attributes,
+    });
+
+    expect(migratedActions).toEqual({
+      resultedActions: [],
+      hasLegacyActions: false,
+      resultedReferences: [],
+    });
+    expect(context.logger.error).toHaveBeenCalledWith(
+      `migrateLegacyActions(): Failed to migrate legacy actions for SIEM rule ${ruleId}: test failure`
+    );
+  });
+
   it('should return earley empty migratedActions when consumer is not SIEM', async () => {
     (retrieveMigratedLegacyActions as jest.Mock).mockResolvedValue({
       legacyActions: [],
