@@ -59,7 +59,7 @@ import type { FleetConfigType } from '../common/types';
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import { FleetAppLocatorDefinition, IntegrationsLocatorDefinition } from './locators';
+import { FleetAppLocatorDefinition, IntegrationsAppLocatorDefinition } from './locators';
 import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
@@ -257,7 +257,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register locators for global navigation
     deps.share.url.locators.create(new FleetAppLocatorDefinition());
-    deps.share.url.locators.create(new IntegrationsLocatorDefinition());
+    deps.share.url.locators.create(new IntegrationsAppLocatorDefinition());
 
     if (deps.globalSearch) {
       deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
