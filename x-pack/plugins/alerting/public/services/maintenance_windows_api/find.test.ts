@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { MaintenanceWindowResponse } from '../../pages/maintenance_windows/types';
+import { MaintenanceWindowFindResponse } from '../../pages/maintenance_windows/types';
 import { findMaintenanceWindows } from './find';
 import { MaintenanceWindowStatus } from '../../../common';
 
@@ -46,7 +46,7 @@ describe('findMaintenanceWindows', () => {
     };
     http.get.mockResolvedValueOnce(apiResponse);
 
-    const maintenanceWindow: MaintenanceWindowResponse[] = [
+    const maintenanceWindow: MaintenanceWindowFindResponse[] = [
       {
         id: '1',
         title: 'test',

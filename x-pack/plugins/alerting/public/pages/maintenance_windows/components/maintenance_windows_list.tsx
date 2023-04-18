@@ -15,7 +15,7 @@ import {
   SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MaintenanceWindowResponse, SortDirection } from '../types';
+import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
@@ -23,10 +23,10 @@ import { StatusFilter } from './status_filter';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
-  items: MaintenanceWindowResponse[];
+  items: MaintenanceWindowFindResponse[];
 }
 
-const columns: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'title',
     name: i18n.NAME,
@@ -78,7 +78,7 @@ const sorting = {
   },
 };
 
-const rowProps = (item: MaintenanceWindowResponse) => ({
+const rowProps = (item: MaintenanceWindowFindResponse) => ({
   className: item.status,
   'data-test-subj': 'list-item',
 });
