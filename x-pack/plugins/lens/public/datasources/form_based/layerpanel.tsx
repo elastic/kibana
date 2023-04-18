@@ -29,7 +29,7 @@ export function LayerPanel({
   const layer = state.layers[layerId];
   const { euiTheme } = useEuiTheme();
   const { randomSampling } = useKibana<LensAppServices>().services;
-  const RandomSamplingIcon = randomSampling.ui.RandomSamplingIcon;
+  const RandomSamplingIcon = randomSampling.ui.SamplingIcon;
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
