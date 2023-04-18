@@ -16,7 +16,8 @@
     "@kbn/field-types",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-string-hash",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/ml-random-sampler-utils",
   ],
   "exclude": [
     "target/**/*",

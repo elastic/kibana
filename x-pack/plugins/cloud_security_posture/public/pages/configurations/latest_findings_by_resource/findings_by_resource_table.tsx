@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiBasicTable,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
@@ -18,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { generatePath, Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -28,6 +28,7 @@ import {
   type OnAddFilter,
   baseFindingsColumns,
 } from '../layout/findings_layout';
+import { EmptyState } from '../../../components/empty_state';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -41,6 +42,7 @@ interface Props {
   sorting: Sorting;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
   onAddFilter: OnAddFilter;
+  onResetFilters: () => void;
 }
 
 export const getResourceId = (resource: FindingsByResourcePage) => {
@@ -55,6 +57,7 @@ const FindingsByResourceTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
+  onResetFilters,
 }: Props) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
@@ -88,21 +91,9 @@ const FindingsByResourceTableComponent = ({
     [onAddFilter]
   );
 
-  if (!loading && !items.length)
-    return (
-      <EuiEmptyPrompt
-        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE}
-        iconType="logoKibana"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.findings.findingsByResource.noFindingsTitle"
-              defaultMessage="There are no Findings"
-            />
-          </h2>
-        }
-      />
-    );
+  if (!loading && !items.length) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
 
   return (
     <EuiBasicTable
@@ -188,10 +179,19 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
-      <ComplianceScoreBar
-        totalPassed={data.findings.passed_findings}
-        totalFailed={data.findings.failed_findings}
-      />
+      <div
+        css={css`
+          width: 100%;
+          .cspComplianceScoreBarTooltip {
+            width: 100%;
+          }
+        `}
+      >
+        <ComplianceScoreBar
+          totalPassed={data.findings.passed_findings}
+          totalFailed={data.findings.failed_findings}
+        />
+      </div>
     ),
     dataType: 'number',
   },
