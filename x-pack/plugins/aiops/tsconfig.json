@@ -50,6 +50,7 @@
     "@kbn/ml-is-defined",
     "@kbn/ml-route-utils",
     "@kbn/ml-random-sampler-utils",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
