@@ -8,7 +8,6 @@
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import { type Field } from '@kbn/ml-plugin/common/types/fields';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -25,19 +24,23 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
 
     const { renderOption } = fieldStats!.useFieldStatsTrigger();
 
-    const options = useMemo<Array<EuiComboBoxOptionOption<DataViewField>>>(() => {
+    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
       return metricFieldOptions.map((v) => {
-        return { value: v, label: v.displayName, field: { id: v.name, type: v.type } as Field };
+        return {
+          value: v.name,
+          label: v.displayName,
+          field: { id: v.name, type: v.type } as Field,
+        };
       });
     }, [metricFieldOptions]);
 
-    const selection = options.filter((v) => v.label === value);
+    const selection = options.filter((v) => v.value === value);
 
     const onChangeCallback = useCallback(
-      (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
+      (selectedOptions: EuiComboBoxOptionOption[]) => {
         const option = selectedOptions[0];
         if (typeof option !== 'undefined') {
-          onChange(option.label);
+          onChange(option.value as string);
         }
       },
       [onChange]
@@ -46,7 +49,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     return (
       <>
         <EuiFormRow>
-          <EuiComboBox<DataViewField>
+          <EuiComboBox
             compressed
             prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
               defaultMessage: 'Metric field',
