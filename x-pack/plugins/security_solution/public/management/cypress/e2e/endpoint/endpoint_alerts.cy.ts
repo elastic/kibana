@@ -6,5 +6,18 @@
  */
 
 describe('Endpoint generated alerts', () => {
-  // FIXME:PT implement
+  before(() => {
+    // 1. Create agent policy with endpoint policy with all protections enabled
+    // 2. create and enroll new host with above agent policy
+  });
+
+  after(() => {
+    // 1. delete VM created
+    // 2, Force-delete host from fleet (so we can delete policy)
+    // 3, Removed policy created
+  });
+
+  it('should create an alert', () => {
+    // FIXME:PT implement test
+  });
 });
