@@ -204,7 +204,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
     <div>
@@ -255,7 +255,7 @@ Array [
         </div>
       </div>
       <table
-        class="euiTable css-0 euiTable--responsive"
+        class="euiTable css-0 euiTable--responsive euiTable--auto"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -546,7 +546,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
     <div>
@@ -597,7 +597,7 @@ Array [
         </div>
       </div>
       <table
-        class="euiTable css-0 euiTable--responsive"
+        class="euiTable css-0 euiTable--responsive euiTable--auto"
         id="__table_generated-id"
         tabindex="-1"
       >
