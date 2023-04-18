@@ -19,6 +19,8 @@
     "@kbn/monaco",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

@@ -52,7 +52,8 @@
     "@kbn/field-types",
     "@kbn/ecs",
     "@kbn/alerts-as-data-utils",
-    "@kbn/core-ui-settings-common"
+    "@kbn/core-ui-settings-common",
+    "@kbn/share-plugin"
   ],
   "exclude": ["target/**/*"]
 }

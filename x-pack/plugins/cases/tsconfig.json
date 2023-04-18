@@ -59,6 +59,7 @@
     "@kbn/shared-ux-file-types",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

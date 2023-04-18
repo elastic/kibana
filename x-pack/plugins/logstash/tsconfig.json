@@ -24,6 +24,8 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
