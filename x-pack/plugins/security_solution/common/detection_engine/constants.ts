@@ -33,4 +33,10 @@ export const PREBUILT_RULES_PACKAGE_NAME = 'security_detection_engine';
  */
 export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
-export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY = 'singleAlertForAllDocuments' as const;
+export enum AlertSuppressionMissingFieldsStrategy {
+  SingleAlertForAllDocuments = 'singleAlertForAllDocuments',
+  OneAlertPerDocument = 'oneAlertPerDocument',
+}
+
+export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
+  AlertSuppressionMissingFieldsStrategy.SingleAlertForAllDocuments;

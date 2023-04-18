@@ -18,7 +18,7 @@ import type { TimestampOverride } from '../../../../../common/detection_engine/r
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
-interface SingleSearchAfterParams {
+export interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];

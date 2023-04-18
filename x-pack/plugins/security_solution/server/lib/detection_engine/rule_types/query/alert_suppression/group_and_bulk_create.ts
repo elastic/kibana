@@ -9,25 +9,19 @@ import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import type { ESSearchResponse } from '@kbn/es-types';
-
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';
-import type {
-  RuleServices,
-  RunOpts,
-  SearchAfterAndBulkCreateReturnType,
-  SignalSource,
-} from '../../types';
+import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
 import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../../utils/utils';
-import type { SuppressionBuckets } from './wrap_suppressed_alerts';
+import type { SuppressionBucket } from './wrap_suppressed_alerts';
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
+import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
-
+import { prepareBucketsToSuppression } from './prepare_buckets_to_supppresion';
 export interface BucketHistory {
   key: Record<string, string | number | null>;
   endDate: string;
@@ -48,15 +42,6 @@ export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateRe
     suppressionGroupHistory: BucketHistory[];
   };
 }
-
-type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
-  SignalSource,
-  {
-    body: {
-      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
-    };
-  }
->;
 
 /**
  * Builds a filter that excludes documents from existing buckets.
@@ -176,7 +161,7 @@ export const groupAndBulkCreate = async ({
         aggregatableTimestampField: runOpts.aggregatableTimestampField,
       });
 
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+      const eventsSearchParams = {
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
         index: runOpts.inputIndex,
@@ -190,7 +175,11 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-      });
+      };
+      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
+        eventsSearchParams
+      );
+
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
 
@@ -206,7 +195,16 @@ export const groupAndBulkCreate = async ({
         return toReturn;
       }
 
-      const suppressionBuckets: SuppressionBuckets[] = buckets.map((bucket) => ({
+      const bucketsToSuppress = (await prepareBucketsToSuppression({
+        groupByFields,
+        buckets,
+        strategy: runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy,
+        searchParams: eventsSearchParams,
+        maxSignals: tuple.maxSignals,
+        aggregatableTimestampField: runOpts.aggregatableTimestampField,
+      })) as typeof eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+
+      const suppressionBuckets: SuppressionBucket[] = bucketsToSuppress.map((bucket) => ({
         event: bucket.topHits.hits.hits[0],
         count: bucket.doc_count,
         start: bucket.min_timestamp.value_as_string

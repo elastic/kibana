@@ -5,16 +5,30 @@
  * 2.0.
  */
 
+import type { ESSearchResponse } from '@kbn/es-types';
+import type { SignalSource } from '../../types';
+
+export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
+    };
+  }
+>;
+
 interface GetGroupByFieldAggregationArgs {
   groupByFields: string[];
   maxSignals: number;
   aggregatableTimestampField: string;
+  topHitsSize?: number;
 }
 
 export const buildGroupByFieldAggregation = ({
   groupByFields,
   maxSignals,
   aggregatableTimestampField,
+  topHitsSize = 1,
 }: GetGroupByFieldAggregationArgs) => ({
   eventGroups: {
     composite: {
@@ -23,6 +37,7 @@ export const buildGroupByFieldAggregation = ({
           terms: {
             field,
             missing_bucket: true,
+            missing_order: 'last' as const,
           },
         },
       })),
@@ -31,7 +46,7 @@ export const buildGroupByFieldAggregation = ({
     aggs: {
       topHits: {
         top_hits: {
-          size: 1,
+          size: topHitsSize,
           sort: [
             {
               [aggregatableTimestampField]: {
