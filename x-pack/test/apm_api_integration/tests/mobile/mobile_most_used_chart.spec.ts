@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should get only 5 items and everything else under other', () => {
+      it('should get only 5+1 items with everything after 5 under other', () => {
         const deviceOptions = response.mostUsedCharts.find(
           (chart) => chart.key === 'device'
         )?.options;
