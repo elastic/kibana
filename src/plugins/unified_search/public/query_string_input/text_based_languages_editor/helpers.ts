@@ -102,15 +102,15 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
   if (language === 'esql') {
-    const { commands, operators, mathematicalFunctions, initialSection, aggregateFunctions } =
+    const { sourceCommands, processingCommands, initialSection, functions } =
       await import('./esql_documentation_sections');
     groups.push({
       label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
-        defaultMessage: 'How it works',
+        defaultMessage: 'ESQL',
       }),
       items: [],
     });
-    groups.push(commands, operators, mathematicalFunctions, aggregateFunctions);
+    groups.push(sourceCommands, processingCommands, functions);
     return {
       groups,
       initialSection,
