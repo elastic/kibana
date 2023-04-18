@@ -307,7 +307,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
+            validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
           />
 
@@ -318,7 +318,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               showOnlyIntegration={integrationInfo?.name}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
             />
           )}

@@ -44,11 +44,13 @@ export const connectorIndex: ConnectorViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
+        depends_on: [],
         display: 'textbox',
         key: 'foo',
         label: 'bar',
         options: [],
         order: 1,
+        required: false,
         sensitive: false,
         value: 'barbar',
       },
@@ -154,11 +156,13 @@ export const crawlerIndex: CrawlerViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
+        depends_on: [],
         display: 'textbox',
         key: 'foo',
         label: 'bar',
         options: [],
         order: 1,
+        required: false,
         sensitive: false,
         value: 'barbar',
       },
