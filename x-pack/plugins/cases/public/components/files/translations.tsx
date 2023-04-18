@@ -83,7 +83,7 @@ export const COMPRESSED_MIME_TYPE = i18n.translate(
 );
 
 export const PDF_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.pdfMimeType', {
-  defaultMessage: 'Pdf',
+  defaultMessage: 'PDF',
 });
 
 export const SUCCESSFUL_UPLOAD_FILE_NAME = (fileName: string) =>

@@ -62,7 +62,7 @@ describe('parseMimeType', () => {
   );
 
   it.each(pdfMimeTypes)('should return "Pdf" for text mime type: %s', (mimeType) => {
-    expect(parseMimeType(mimeType)).toBe('Pdf');
+    expect(parseMimeType(mimeType)).toBe('PDF');
   });
 });
 
