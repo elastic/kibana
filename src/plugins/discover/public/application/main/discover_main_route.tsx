@@ -205,8 +205,15 @@ export function DiscoverMainRoute(props: Props) {
     loadSavedSearch();
   }, [loadSavedSearch, id]);
 
-  // secondary fetch: in case URL is set to `/`, used to reset the 'new' state
-  useUrl({ history, savedSearchId: id, onNewUrl: () => loadSavedSearch() });
+  // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
+  useUrl({
+    history,
+    savedSearchId: id,
+    onNewUrl: () => {
+      const dataView = stateContainer.internalState.getState().dataView;
+      loadSavedSearch(dataView);
+    },
+  });
 
   if (showNoDataPage) {
     const analyticsServices = {
