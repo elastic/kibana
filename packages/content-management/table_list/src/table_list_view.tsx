@@ -42,6 +42,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
+import { RowActions, TableItemsRowActions } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -67,6 +68,11 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   headingId?: string;
   /** An optional id for the listing. Used to generate unique data-test-subj. Default: "userContent" */
   id?: string;
+  /**
+   * Configuration of the table row item actions. Disable specific action for a table row item.
+   * Currently only the "delete" ite action can be disabled.
+   */
+  rowItemActions?: (obj: T) => RowActions | undefined;
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
@@ -241,6 +247,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
+  rowItemActions,
   findItems,
   createItem,
   editItem,
@@ -579,6 +586,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const selectedItems = useMemo(() => {
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
+
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      return {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+    }, {});
+  }, [items, rowItemActions]);
 
   // ------------
   // Callbacks
@@ -929,6 +945,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             tagsToTableItemMap={tagsToTableItemMap}
             deleteItems={deleteItems}
             tableCaption={tableListTitle}
+            tableItemsRowActions={tableItemsRowActions}
             onTableChange={onTableChange}
             onTableSearchChange={onTableSearchChange}
             onSortChange={onSortChange}
