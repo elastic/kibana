@@ -84,6 +84,7 @@
     "@kbn/exploratory-view-plugin",
     "@kbn/logging-mocks",
     "@kbn/chart-icons",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

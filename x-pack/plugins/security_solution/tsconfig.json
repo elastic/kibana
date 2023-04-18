@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -19,7 +19,7 @@
     "target/**/*",
     "**/cypress/**",
     "public/management/cypress_endpoint.config.ts",
-    "public/management/cypress.config.ts",
+    "public/management/cypress.config.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -147,10 +147,11 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
+    "@kbn/securitysolution-data-table",
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
-    "@kbn/core-lifecycle-browser",
+    "@kbn/core-lifecycle-browser"
   ]
 }
