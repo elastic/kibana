@@ -59,10 +59,6 @@ export const createActionHandler = async (
     throw new Error('No agents found for selection');
   }
 
-  if (error) {
-    throw new Error(error);
-  }
-
   let packSO;
 
   if (params.pack_id) {
@@ -113,19 +109,21 @@ export const createActionHandler = async (
       : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
   };
 
-  const fleetActions = map(
-    filter(osqueryAction.queries, (query) => !query.error),
-    (query) => ({
-      action_id: query.action_id,
-      '@timestamp': moment().toISOString(),
-      expiration: moment().add(5, 'minutes').toISOString(),
-      type: 'INPUT_ACTION',
-      input_type: 'osquery',
-      agents: query.agents,
-      user_id: metadata?.currentUser,
-      data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-    })
-  );
+  const fleetActions = !error
+    ? map(
+        filter(osqueryAction.queries, (query) => !query.error),
+        (query) => ({
+          action_id: query.action_id,
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agents: query.agents,
+          user_id: metadata?.currentUser,
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+        })
+      )
+    : [];
   if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',

@@ -104,8 +104,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           }
         );
         if (!fleetActionsCount) {
-          console.log('0');
-
           return response.badRequest({
             body: PARAMETER_NOT_FOUND,
           });

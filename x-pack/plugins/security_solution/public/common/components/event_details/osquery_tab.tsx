@@ -108,7 +108,6 @@ export const useOsqueryTab = ({
     return;
   }
 
-  console.log({ actionsData });
   const actionItems = actionsData?.data.items || [];
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
