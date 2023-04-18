@@ -12,6 +12,8 @@ export type ApmApplicationMetricFields = Partial<{
   'system.process.memory.size': number;
   'system.memory.actual.free': number;
   'system.memory.total': number;
+  'system.process.cgroup.memory.mem.limit.bytes': number;
+  'system.process.cgroup.memory.mem.usage.bytes': number;
   'system.cpu.total.norm.pct': number;
   'system.process.memory.rss.bytes': number;
   'system.process.cpu.total.norm.pct': number;
