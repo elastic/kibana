@@ -40,59 +40,74 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
   context: RulesClientContext,
   { ruleId, actions = [], references = [], attributes, skipActionsValidation }
 ) => {
-  if (attributes.consumer !== AlertConsumers.SIEM) {
+  try {
+    if (attributes.consumer !== AlertConsumers.SIEM) {
+      return {
+        resultedActions: [],
+        hasLegacyActions: false,
+        resultedReferences: [],
+      };
+    }
+
+    const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(
+      context,
+      {
+        ruleId,
+      }
+    );
+
+    // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
+    if (skipActionsValidation !== true) {
+      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+      await validateActions(context, ruleType, {
+        ...attributes,
+        // set to undefined to avoid both per-actin and rule level values clashing
+        throttle: undefined,
+        notifyWhen: undefined,
+        actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
+      });
+    }
+
+    // fix references for a case when actions present in a rule
+    if (actions.length) {
+      legacyActions.forEach((legacyAction, i) => {
+        const oldReference = legacyAction.actionRef;
+        const legacyReference = legacyActionsReferences.find(({ name }) => name === oldReference);
+        const newReference = `action_${actions.length + i}`;
+        legacyAction.actionRef = newReference;
+
+        if (legacyReference) {
+          legacyReference.name = newReference;
+        }
+      });
+    }
+
+    // put frequencies into existing actions
+    // the situation when both action in rule nad legacy exist should be rare one
+    // but if it happens, we put frequency in existing actions per-action level
+    const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
+      ...action,
+      frequency: {
+        summary: true,
+        notifyWhen: attributes.notifyWhen ?? 'onActiveAlert',
+        throttle: attributes.throttle ?? null,
+      },
+    }));
+
+    return {
+      resultedActions: [...existingActionsWithFrequencies, ...legacyActions],
+      hasLegacyActions: legacyActions.length > 0,
+      resultedReferences: [...references, ...legacyActionsReferences],
+    };
+  } catch (e) {
+    context.logger.error(
+      `migrateLegacyActions(): Failed to migrate legacy actions for SIEM rule ${ruleId}: ${e.message}`
+    );
+
     return {
       resultedActions: [],
       hasLegacyActions: false,
       resultedReferences: [],
     };
   }
-
-  const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(context, {
-    ruleId,
-  });
-
-  // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
-  if (skipActionsValidation !== true) {
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
-    await validateActions(context, ruleType, {
-      ...attributes,
-      // set to undefined to avoid both per-actin and rule level values clashing
-      throttle: undefined,
-      notifyWhen: undefined,
-      actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
-    });
-  }
-
-  // fix references for a case when actions present in a rule
-  if (actions.length) {
-    legacyActions.forEach((legacyAction, i) => {
-      const oldReference = legacyAction.actionRef;
-      const legacyReference = legacyActionsReferences.find(({ name }) => name === oldReference);
-      const newReference = `action_${actions.length + i}`;
-      legacyAction.actionRef = newReference;
-
-      if (legacyReference) {
-        legacyReference.name = newReference;
-      }
-    });
-  }
-
-  // put frequencies into existing actions
-  // the situation when both action in rule nad legacy exist should be rare one
-  // but if it happens, we put frequency in existing actions per-action level
-  const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
-    ...action,
-    frequency: {
-      summary: true,
-      notifyWhen: attributes.notifyWhen ?? 'onActiveAlert',
-      throttle: attributes.throttle ?? null,
-    },
-  }));
-
-  return {
-    resultedActions: [...existingActionsWithFrequencies, ...legacyActions],
-    hasLegacyActions: legacyActions.length > 0,
-    resultedReferences: [...references, ...legacyActionsReferences],
-  };
 };

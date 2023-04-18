@@ -119,27 +119,35 @@ export const formatLegacyActions = async <T extends Rule>(
   rules: T[],
   { logger, savedObjectsClient }: Omit<LegacyGetBulkRuleActionsSavedObject, 'alertIds'>
 ): Promise<T[]> => {
-  const res = await legacyGetBulkRuleActionsSavedObject({
-    alertIds: rules.map((rule) => rule.id),
-    savedObjectsClient,
-    logger,
-  });
+  try {
+    const res = await legacyGetBulkRuleActionsSavedObject({
+      alertIds: rules.map((rule) => rule.id),
+      savedObjectsClient,
+      logger,
+    });
 
-  return rules.map((rule) => {
-    const legacyRuleActionsMatch = res[rule.id];
-    if (!legacyRuleActionsMatch) {
-      return rule;
-    }
+    return rules.map((rule) => {
+      const legacyRuleActionsMatch = res[rule.id];
+      if (!legacyRuleActionsMatch) {
+        return rule;
+      }
 
-    const { legacyRuleActions, ruleThrottle } = legacyRuleActionsMatch;
-    return {
-      ...rule,
-      actions: [...rule.actions, ...legacyRuleActions],
-      throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
-      notifyWhen: transformToNotifyWhen(ruleThrottle),
-      // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
-      // So it should be safe to set it as false, so it won't be displayed to user as w/o actions see transformFromAlertThrottle method
-      muteAll: legacyRuleActions.length ? false : rule.muteAll,
-    };
-  });
+      const { legacyRuleActions, ruleThrottle } = legacyRuleActionsMatch;
+      return {
+        ...rule,
+        actions: [...rule.actions, ...legacyRuleActions],
+        throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
+        notifyWhen: transformToNotifyWhen(ruleThrottle),
+        // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
+        // So it should be safe to set it as false, so it won't be displayed to user as w/o actions see transformFromAlertThrottle method
+        muteAll: legacyRuleActions.length ? false : rule.muteAll,
+      };
+    });
+  } catch (e) {
+    const ruleIds = rules.map((rule) => rule.id).join(', ');
+    logger.error(
+      `formatLegacyActions(): Failed to read legacy actions for SIEM rules: ${ruleIds}: ${e.message}`
+    );
+    return rules;
+  }
 };
