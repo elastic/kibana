@@ -86,31 +86,6 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       attributes,
     });
 
-    // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
-    // we call create with overwrite=true first(where actions will be saved) and
-    // use updated attributes for partial update of rule
-    if (migratedActions.hasLegacyActions) {
-      const updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-        'alert',
-        {
-          ...attributes,
-          actions: migratedActions.resultedActions,
-          throttle: undefined,
-          notifyWhen: undefined,
-        },
-        {
-          id,
-          overwrite: true,
-          version,
-          references: migratedActions.resultedReferences,
-        }
-      );
-      existingApiKey = updatedObject.attributes.apiKey;
-      attributes = updatedObject.attributes;
-      version = updatedObject.version;
-      references = updatedObject.references;
-    }
-
     const username = await context.getUserName();
     const now = new Date();
 
@@ -142,9 +117,29 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     try {
-      await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
-        version,
-      });
+      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
+      // we call create with overwrite=true
+      if (migratedActions.hasLegacyActions) {
+        await context.unsecuredSavedObjectsClient.create<RawRule>(
+          'alert',
+          {
+            ...updateAttributes,
+            actions: migratedActions.resultedActions,
+            throttle: undefined,
+            notifyWhen: undefined,
+          },
+          {
+            id,
+            overwrite: true,
+            version,
+            references: migratedActions.resultedReferences,
+          }
+        );
+      } else {
+        await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
+          version,
+        });
+      }
     } catch (e) {
       throw e;
     }

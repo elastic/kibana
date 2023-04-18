@@ -686,19 +686,7 @@ describe('enable()', () => {
         attributes: { ...existingRule.attributes, consumer: AlertConsumers.SIEM },
       };
 
-      const migratedSIEMRule = {
-        ...existingDecryptedSiemRule,
-        attributes: {
-          ...existingDecryptedSiemRule.attributes,
-          actions: ['fake-action-1'],
-          throttle: undefined,
-          notifyWhen: undefined,
-        },
-        version: 'migrated',
-      };
-
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
-      unsecuredSavedObjectsClient.create.mockResolvedValue(migratedSIEMRule);
       (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
       await rulesClient.enable({ id: '1' });
@@ -723,24 +711,17 @@ describe('enable()', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          ...migratedSIEMRule.attributes,
-        }),
-        {
-          id: migratedSIEMRule.id,
-          overwrite: true,
-          references: ['fake-ref-1'],
-          version: existingDecryptedSiemRule.version,
-        }
-      );
-      // update with enabling rule should be called afterwards
-      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-        'alert',
-        migratedSIEMRule.id,
-        expect.objectContaining({
+          ...existingDecryptedSiemRule.attributes,
+          actions: ['fake-action-1'],
+          throttle: undefined,
+          notifyWhen: undefined,
           enabled: true,
         }),
         {
-          version: migratedSIEMRule.version,
+          id: existingDecryptedSiemRule.id,
+          overwrite: true,
+          references: ['fake-ref-1'],
+          version: existingDecryptedSiemRule.version,
         }
       );
     });
