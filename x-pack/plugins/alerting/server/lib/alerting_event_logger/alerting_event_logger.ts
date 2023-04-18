@@ -163,7 +163,7 @@ export class AlertingEventLogger {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
-    
+
     this.eventLogger.logEvent(createAlertRecord(this.ruleContext, alert));
   }
 
