@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
 
 export class Mask {
@@ -34,5 +35,19 @@ export class Mask {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
     const lookup = this._isFeatureState ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
     return [comparisionOperator, [lookup, this._mbFieldName], this._value];
+  }
+
+  isFeatureMasked(feature: MapGeoJSONFeature) {
+    console.log(JSON.stringify(feature, null, ' '));
+    const featureValue = this._isFeatureState
+      ? feature?.state[this._mbFieldName]
+      : feature?.properties[this._mbFieldName];
+    console.log(featureValue);
+    if (featureValue === undefined || typeof featureValue !== 'number') {
+      return false;
+    }
+    return this._operator === MASK_OPERATOR.BELOW 
+      ? featureValue < this._value
+      : featureValue > this._value;
   }
 }
