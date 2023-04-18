@@ -107,7 +107,6 @@ export class PolicyWatcher {
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
         updatePolicy.inputs[0].config.policy.value.meta.license = license.type || '';
         // add cloud info to policy meta
-        this.logger.error('cloud info update in watcher ' + this.cloud?.isCloudEnabled);
         updatePolicy.inputs[0].config.policy.value.meta.cloud = this.cloud?.isCloudEnabled;
 
         try {
