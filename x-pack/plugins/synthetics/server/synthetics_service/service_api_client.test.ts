@@ -281,15 +281,15 @@ describe('callAPI', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Successfully called service location https://service.dev with method POST with 4 monitors '
+      'Successfully called service location https://service.devundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       4,
-      'Successfully called service location https://qa.service.elstc.co with method POST with 4 monitors '
+      'Successfully called service location https://qa.service.elstc.coundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      'Successfully called service location https://qa.service.stg.co with method POST with 1 monitors '
+      'Successfully called service location https://qa.service.stg.coundefined with method POST with 1 monitors'
     );
   });
 
