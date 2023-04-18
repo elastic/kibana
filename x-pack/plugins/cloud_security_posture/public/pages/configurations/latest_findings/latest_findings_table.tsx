@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiBasicTable,
   useEuiTheme,
   type Pagination,
@@ -15,7 +14,6 @@ import {
   type EuiTableActionsColumnType,
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
@@ -26,6 +24,7 @@ import {
   type OnAddFilter,
 } from '../layout/findings_layout';
 import { getSelectedRowStyle } from '../utils/utils';
+import { EmptyState } from '../../../components/empty_state';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
@@ -40,6 +39,7 @@ interface Props {
   onCloseFlyout: () => void;
   onOpenFlyout: (finding: CspFinding) => void;
   flyoutFindingIndex: number;
+  onResetFilters: () => void;
 }
 
 const FindingsTableComponent = ({
@@ -53,6 +53,7 @@ const FindingsTableComponent = ({
   flyoutFindingIndex,
   onPaginateFlyout,
   onCloseFlyout,
+  onResetFilters,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
@@ -85,23 +86,9 @@ const FindingsTableComponent = ({
     [onOpenFlyout, onAddFilter]
   );
 
-  // Show "zero state"
-  if (!loading && !items.length)
-    // TODO: use our own logo
-    return (
-      <EuiEmptyPrompt
-        iconType="logoKibana"
-        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.findings.latestFindings.noFindingsTitle"
-              defaultMessage="There are no Findings"
-            />
-          </h2>
-        }
-      />
-    );
+  if (!loading && !items.length) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
 
   return (
     <>

@@ -129,12 +129,17 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
   label?: string;
 }
 
-export interface UseLensAttributesProps {
-  applyGlobalQueriesAndFilters?: boolean;
-  extraOptions?: ExtraOptions;
-  getLensAttributes?: GetLensAttributes;
-  lensAttributes?: LensAttributes | null;
-  scopeId?: SourcererScopeName;
-  stackByField?: string;
-  title?: string;
+export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
+  took: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
 }
