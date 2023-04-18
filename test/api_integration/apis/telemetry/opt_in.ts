@@ -8,10 +8,10 @@
 
 import expect from '@kbn/expect';
 
-import { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
 import SuperTest from 'supertest';
-import { KbnClient } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { KbnClient } from '@kbn/test';
+import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
