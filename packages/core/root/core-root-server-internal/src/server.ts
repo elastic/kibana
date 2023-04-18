@@ -444,8 +444,7 @@ export class Server {
       coreId,
       'core',
       (context, req) => {
-        const env = { mode: this.env.mode };
-        return new CoreRouteHandlerContext({ ...this.coreStart!, env }, req);
+        return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }

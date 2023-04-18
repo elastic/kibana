@@ -151,7 +151,6 @@
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/tooling-log",
     "@kbn/stdio-dev-helpers",
-    "@kbn/core-http-request-handler-context-server-internal",
   ],
   "exclude": [
     "target/**/*",
