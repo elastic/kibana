@@ -706,8 +706,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         if (mask) {
           masks.push(
             new Mask({
+              esAggField: metricField,
               isFeatureState: false,
-              mbFieldName: metricField.getMbFieldName(),
               operator: mask.operator,
               value: mask.value,
             })

@@ -21,26 +21,18 @@ import {
 import { MASK_OPERATOR } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { panelStrings } from '../../../connected_components/panel_strings';
+import { ABOVE, BELOW } from '../../../classes/layers/vector_layer/mask';
 
 const operatorOptions = [
   {
     value: MASK_OPERATOR.BELOW,
-    text: i18n.translate('xpack.maps.maskEditor.belowLabel', {
-      defaultMessage: 'below',
-    }),
+    text: BELOW,
   },
   {
     value: MASK_OPERATOR.ABOVE,
-    text: i18n.translate('xpack.maps.maskEditor.aboveLabel', {
-      defaultMessage: 'above',
-    }),
+    text: ABOVE,
   },
 ];
-
-export function getOperatorLabel(operator: MASK_OPERATOR): string {
-  const option = operatorOptions.find((option) => operator === option.value);
-  return option ? option.text : operator;
-}
 
 interface Props {
   metric: AggDescriptor;

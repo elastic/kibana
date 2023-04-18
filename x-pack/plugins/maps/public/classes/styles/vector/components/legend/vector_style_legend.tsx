@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { Mask } from '../../../../layers/vector_layer/mask';
 import { IStyleProperty } from '../../properties/style_property';
+import { MaskLegend } from './mask_legend';
 
 interface Props {
   isLinesOnly: boolean;
   isPointsOnly: boolean;
+  masks: Mask[];
   styles: Array<IStyleProperty<any>>;
   symbolId?: string;
   svg?: string;
 }
 
-export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId, svg }: Props) {
+export function VectorStyleLegend({ isLinesOnly, isPointsOnly, masks, styles, symbolId, svg }: Props) {
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
@@ -34,5 +38,23 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId,
     );
   }
 
-  return <>{legendRows}</>;
+  const masksLegend = masks.length 
+    ? <EuiText size="xs">
+        {masks.map(mask => (
+          <MaskLegend
+            key={mask.getEsAggField().getMbFieldName()}
+            esAggField={mask.getEsAggField()}
+            operator={mask.getOperator()}
+            value={mask.getValue()}
+          />
+        ))}
+      </EuiText>
+    : null;
+
+  return (
+    <>
+      {masksLegend}
+      {legendRows}
+    </>
+  );
 }

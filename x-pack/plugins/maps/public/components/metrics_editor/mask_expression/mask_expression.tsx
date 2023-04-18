@@ -11,8 +11,9 @@ import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { getOperatorLabel, MaskEditor } from './mask_editor';
+import { MaskEditor } from './mask_editor';
 import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
+import { getMaskI18nDescription, getMaskI18nValue } from '../../../classes/layers/vector_layer/mask';
 
 interface Props {
   bucketName: string;
@@ -45,7 +46,7 @@ export class MaskExpression extends Component<Props, State> {
   _getMaskExpressionValue() {
     return this.props.metric.mask === undefined
       ? '--'
-      : `${getOperatorLabel(this.props.metric.mask.operator)} ${this.props.metric.mask.value}`;
+      : getMaskI18nValue(this.props.metric.mask.operator, this.props.metric.mask.value);
   }
 
   _getAggLabel() {
@@ -71,13 +72,7 @@ export class MaskExpression extends Component<Props, State> {
         button={
           <EuiExpression
             color={this.props.metric.mask === undefined ? 'subdued' : 'danger'}
-            description={i18n.translate('xpack.maps.maskEditor.maskDescription', {
-              defaultMessage: 'hide {bucketName} when {aggLabel} is ',
-              values: {
-                bucketName: this.props.bucketName,
-                aggLabel: this._getAggLabel(),
-              },
-            })}
+            description={getMaskI18nDescription(this.props.bucketName, this._getAggLabel())}
             value={this._getMaskExpressionValue()}
             onClick={this._togglePopover}
             uppercase={false}

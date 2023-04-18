@@ -5,28 +5,64 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
+import { MaskLegend } from '../'
+
+export const BELOW = i18n.translate('xpack.maps.mask.belowLabel', {
+  defaultMessage: 'below',
+});
+
+export const ABOVE = i18n.translate('xpack.maps.mask.aboveLabel', {
+  defaultMessage: 'above',
+});
+
+function getOperatorLabel(operator: MASK_OPERATOR): string {
+  if (operator === MASK_OPERATOR.BELOW) {
+    return BELOW;
+  }
+
+  if (operator === MASK_OPERATOR.ABOVE) {
+    return ABOVE;
+  }
+
+  return operator as string;
+}
+
+export function getMaskI18nValue(operator: MASK_OPERATOR, value: number): string {
+  return `${getOperatorLabel(operator)} ${value}`;
+}
+
+export function getMaskI18nDescription(bucketName: string, aggLabel: string): string {
+  return i18n.translate('xpack.maps.mask.maskDescription', {
+    defaultMessage: 'hide {bucketName} when {aggLabel} is ',
+    values: {
+      bucketName: bucketName,
+      aggLabel: aggLabel,
+    },
+  })
+}
 
 export class Mask {
   private readonly _isFeatureState: boolean;
-  private readonly _mbFieldName: string;
+  private readonly _esAggField: IESAggField;
   private readonly _operator: MASK_OPERATOR;
   private readonly _value: number;
 
   constructor({
+    esAggField,
     isFeatureState,
-    mbFieldName,
     operator,
     value,
   }: {
+    esAggField: IESAggField;
     isFeatureState: boolean;
-    mbFieldName: string;
     operator: MASK_OPERATOR;
     value: number;
   }) {
+    this._esAggField = esAggField;
     this._isFeatureState = isFeatureState;
-    this._mbFieldName = mbFieldName;
     this._operator = operator;
     this._value = value;
   }
@@ -34,14 +70,26 @@ export class Mask {
   getConditionExpression() {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
     const lookup = this._isFeatureState ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
-    return [comparisionOperator, [lookup, this._mbFieldName], this._value];
+    return [comparisionOperator, [lookup, this._esAggField.getMbFieldName()], this._value];
+  }
+
+  getEsAggField() {
+    return this._esAggField;
+  }
+
+  getOperator() {
+    return this._operator;
+  }
+
+  getValue() {
+    return this._value;
   }
 
   isFeatureMasked(feature: MapGeoJSONFeature) {
     console.log(JSON.stringify(feature, null, ' '));
     const featureValue = this._isFeatureState
-      ? feature?.state[this._mbFieldName]
-      : feature?.properties[this._mbFieldName];
+      ? feature?.state[this._esAggField.getMbFieldName()]
+      : feature?.properties[this._esAggField.getMbFieldName()];
     console.log(featureValue);
     if (typeof featureValue !== 'number') {
       return false;

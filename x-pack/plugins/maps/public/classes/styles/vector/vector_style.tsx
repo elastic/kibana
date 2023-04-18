@@ -730,6 +730,7 @@ export class VectorStyle implements IVectorStyle {
 
     return (
       <VectorStyleLegend
+        masks={this._layer.getMasks()}
         styles={this._getLegendDetailStyleProperties()}
         isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
