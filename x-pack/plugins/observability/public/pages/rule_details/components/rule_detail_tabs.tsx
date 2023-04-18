@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -29,7 +29,6 @@ import {
   SEARCH_BAR_URL_STORAGE_KEY,
   TabId,
 } from '../rule_details';
-import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 import { fromQuery, toQuery } from '../../../utils/url';
 import { observabilityFeatureId } from '../../../../common';
 
@@ -40,6 +39,7 @@ interface RuleDetailTabsProps {
   ruleId: string;
   ruleType: RuleType<string, string> | undefined;
   onChangeTab: (tabId: TabId) => void;
+  onChangeEsQuery: (bool: { bool: BoolQuery } | undefined) => void;
 }
 
 export function RuleDetailTabs({
@@ -49,6 +49,7 @@ export function RuleDetailTabs({
   ruleId,
   ruleType,
   onChangeTab,
+  onChangeEsQuery,
 }: RuleDetailTabsProps) {
   const {
     triggersActionsUi: {
@@ -64,13 +65,6 @@ export function RuleDetailTabs({
   ]);
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
-    getDefaultAlertSummaryTimeRange
-  );
-
-  useEffect(() => {
-    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
-  }, [esQuery]);
 
   const updateUrl = (nextQuery: { tabId: TabId }) => {
     const newTabId = nextQuery.tabId;
@@ -88,9 +82,17 @@ export function RuleDetailTabs({
     });
   };
 
-  const onTabIdChange = (newTabId: TabId) => {
+  const handleTabIdChange = (newTabId: TabId) => {
     onChangeTab(newTabId);
     updateUrl({ tabId: newTabId });
+  };
+
+  const handleEsQueryChange = (newQuery: { bool: BoolQuery } | undefined) => {
+    setEsQuery(newQuery);
+
+    if (newQuery) {
+      onChangeEsQuery(newQuery);
+    }
   };
 
   const tabs: EuiTabbedContentTab[] = [
@@ -119,7 +121,7 @@ export function RuleDetailTabs({
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            onEsQueryChange={setEsQuery}
+            onEsQueryChange={handleEsQueryChange}
             urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
             defaultSearchQueries={ruleQuery.current}
           />
@@ -150,8 +152,8 @@ export function RuleDetailTabs({
       data-test-subj="rule-detail-tabs"
       tabs={tabs}
       selectedTab={tabs.find((tab) => tab.id === activeTab)}
-      onTabClick={(tab) => {
-        onTabIdChange(tab.id as TabId);
+      onTabClick={({ id }) => {
+        handleTabIdChange(id as TabId);
       }}
     />
   );

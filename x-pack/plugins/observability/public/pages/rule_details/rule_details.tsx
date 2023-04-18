@@ -16,6 +16,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useGetRuleTypeDefinitionFromRuleType } from '../../hooks/use_get_rule_type_definition_from_rule_type';
 import { DeleteConfirmationModal } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { PageTitle } from './components/page_title';
@@ -23,6 +24,7 @@ import { NoRuleFoundPanel } from './components/no_rule_found_panel';
 import { RuleDetailTabs } from './components/rule_detail_tabs';
 import { HeaderActions } from './components/header_actions';
 import { getHealthColor } from './helpers/get_health_color';
+import { canEditRule } from './helpers/can_edit_rule';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
@@ -32,8 +34,6 @@ import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { ruleDetailsLocatorID } from '../../../common';
 import type { AlertStatus } from '../../../common/typings';
-import { useGetRuleTypeDefinitionFromRuleType } from '../../hooks/use_get_rule_type_definition_from_rule_type';
-import { canEditRule } from './helpers/can_edit_rule';
 
 export const EXECUTION_TAB = 'execution';
 export const ALERTS_TAB = 'alerts';
@@ -140,8 +140,21 @@ export function RuleDetailsPage() {
     tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleChangeTab = (newTab: TabId) => {
+    setActiveTab(newTab);
+  };
+
   const handleEditRule = () => {
     setEditRuleFlyoutVisible(true);
+  };
+
+  const handleCloseRuleFlyout = () => {
+    setEditRuleFlyoutVisible(false);
+  };
+
+  const handleDeleteRule = () => {
+    setRuleToDelete(rule?.id);
+    setEditRuleFlyoutVisible(false);
   };
 
   const handleIsDeletingRule = () => {
@@ -154,13 +167,8 @@ export function RuleDetailsPage() {
     navigateToUrl(http.basePath.prepend(paths.observability.rules));
   };
 
-  const handleDeleteRule = () => {
-    setRuleToDelete(rule?.id);
-    setEditRuleFlyoutVisible(false);
-  };
-
-  const handleChangeTab = (newTab: TabId) => {
-    setActiveTab(newTab);
+  const handleChangeEsQuery = () => {
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   };
 
   const featureIds = (
@@ -201,10 +209,10 @@ export function RuleDetailsPage() {
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel
-            rule={rule}
             isEditable={isRuleEditable}
-            requestRefresh={reloadRule}
             healthColor={getHealthColor(rule.executionStatus.status)}
+            requestRefresh={reloadRule}
+            rule={rule}
             statusMessage={
               rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
                 ? i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
@@ -216,6 +224,7 @@ export function RuleDetailsPage() {
             }
           />
         </EuiFlexItem>
+
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             chartProps={chartProps}
@@ -225,11 +234,12 @@ export function RuleDetailsPage() {
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
+
         <RuleDefinition
-          rule={rule}
-          onEditRule={reloadRule}
-          ruleTypeRegistry={ruleTypeRegistry}
           actionTypeRegistry={actionTypeRegistry}
+          rule={rule}
+          ruleTypeRegistry={ruleTypeRegistry}
+          onEditRule={reloadRule}
         />
       </EuiFlexGroup>
 
@@ -245,17 +255,12 @@ export function RuleDetailsPage() {
           ruleType={ruleTypeDefinition}
           activeTab={activeTab}
           onChangeTab={handleChangeTab}
+          onChangeEsQuery={handleChangeEsQuery}
         />
       ) : null}
 
       {editRuleFlyoutVisible ? (
-        <EditRuleFlyout
-          initialRule={rule}
-          onClose={() => {
-            setEditRuleFlyoutVisible(false);
-          }}
-          onSave={reloadRule}
-        />
+        <EditRuleFlyout initialRule={rule} onClose={handleCloseRuleFlyout} onSave={reloadRule} />
       ) : null}
 
       {ruleToDelete ? (
