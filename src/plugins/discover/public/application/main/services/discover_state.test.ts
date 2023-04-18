@@ -15,6 +15,7 @@ import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
+  savedSearchAdHoc,
   savedSearchMock,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
@@ -470,6 +471,15 @@ describe('actions', () => {
     expect(discoverServiceMock.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       filters
     );
+  });
+
+  test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
+    const savedSearchAdHocCopy = copySavedSearch(savedSearchAdHoc);
+    const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
+    const { state } = await getState('/', savedSearchAdHocCopy);
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchAdHoc.id });
+    expect(state.appState.getState().index).toBe(adHocDataViewId);
+    expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
   });
 
   test('onChangeDataView', async () => {
