@@ -19,7 +19,7 @@ import {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
-import { deleteKibanaIndices } from './kibana_index';
+import { deleteSavedObjectIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -110,10 +110,10 @@ export function createCreateIndexStream({
     async function attemptToCreate(attemptNumber = 1) {
       try {
         if (isKibana && !kibanaIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, log }); // delete all .kibana* indices
+          await deleteSavedObjectIndices({ client, stats, log }); // delete all .kibana* indices
           kibanaIndexAlreadyDeleted = kibanaTaskManagerIndexAlreadyDeleted = true;
         } else if (isKibanaTaskManager && !kibanaTaskManagerIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
+          await deleteSavedObjectIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
           kibanaTaskManagerIndexAlreadyDeleted = true;
         }
 

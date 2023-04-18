@@ -23,7 +23,7 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 /**
  * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
  */
-export async function deleteKibanaIndices({
+export async function deleteSavedObjectIndices({
   client,
   stats,
   onlyTaskManager = false,
@@ -66,7 +66,7 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex(kbnClient: KbnClient) {
+export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
   await kbnClient.savedObjects.migrate();
 }
 
@@ -107,7 +107,7 @@ async function fetchSavedObjectIndices(client: Client) {
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
 
-export async function cleanKibanaIndices({
+export async function cleanSavedObjectIndices({
   client,
   stats,
   log,

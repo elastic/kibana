@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 
 import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
-import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
+import { migrateSavedObjectIndices, createStats, cleanSavedObjectIndices } from '../lib';
 
 export async function emptyKibanaIndexAction({
   client,
@@ -24,8 +24,8 @@ export async function emptyKibanaIndexAction({
 }) {
   const stats = createStats('emptyKibanaIndex', log);
 
-  await cleanKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex(kbnClient);
+  await cleanSavedObjectIndices({ client, stats, log });
+  await migrateSavedObjectIndices(kbnClient);
   SavedObjectsIndexPatterns.forEach((indexPattern) => stats.createdIndex(indexPattern));
   return stats.toJSON();
 }

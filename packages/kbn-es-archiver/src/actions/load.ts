@@ -25,7 +25,7 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
-  migrateKibanaIndex,
+  migrateSavedObjectIndices,
   Progress,
   createDefaultSpace,
 } from '../lib';
@@ -107,7 +107,7 @@ export async function loadAction({
 
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
-    await migrateKibanaIndex(kbnClient);
+    await migrateSavedObjectIndices(kbnClient);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
