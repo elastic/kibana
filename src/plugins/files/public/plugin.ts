@@ -35,7 +35,9 @@ export interface FilesSetup {
   registerFileKind(fileKind: FileKindBrowser): void;
 }
 
-export type FilesStart = Pick<FilesSetup, 'filesClientFactory'>;
+export type FilesStart = Pick<FilesSetup, 'filesClientFactory'> & {
+  getFileKindDefinition: (id: string) => FileKindBrowser;
+};
 
 /**
  * Bringing files to Kibana
@@ -77,6 +79,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
   start(core: CoreStart): FilesStart {
     return {
       filesClientFactory: this.filesClientFactory!,
+      getFileKindDefinition: (id: string): FileKindBrowser => {
+        return this.registry.get(id);
+      },
     };
   }
 }

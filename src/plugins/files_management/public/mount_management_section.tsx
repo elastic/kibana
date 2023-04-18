@@ -42,6 +42,7 @@ export const mountManagementSection = (
         >
           <FilesManagementAppContextProvider
             filesClient={startDeps.files.filesClientFactory.asUnscoped()}
+            getFileKindDefinition={startDeps.files.getFileKindDefinition}
           >
             <Router history={history}>
               <Route path="/" component={App} />

@@ -12,18 +12,25 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
+
 import { useFilesManagementContext } from './context';
 import { i18nTexts } from './i18n_texts';
 import { EmptyPrompt, DiagnosticsFlyout, FileFlyout } from './components';
 
-type FilesUserContentSchema = UserContentCommonSchema;
+type FilesUserContentSchema = Omit<UserContentCommonSchema, 'attributes'> & {
+  attributes: {
+    title: string;
+    description?: string;
+    fileKind: string;
+  };
+};
 
 function naivelyFuzzify(query: string): string {
   return query.includes('*') ? query : `*${query}*`;
 }
 
 export const App: FunctionComponent = () => {
-  const { filesClient } = useFilesManagementContext();
+  const { filesClient, getFileKindDefinition } = useFilesManagementContext();
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<undefined | FileJSON>(undefined);
   return (
@@ -71,6 +78,12 @@ export const App: FunctionComponent = () => {
             {i18nTexts.diagnosticsFlyoutTitle}
           </EuiButtonEmpty>,
         ]}
+        rowItemActions={({ attributes }) => {
+          const definition = getFileKindDefinition(attributes.fileKind);
+          return {
+            delete: definition?.managementUiActions?.delete,
+          };
+        }}
       />
       {showDiagnosticsFlyout && (
         <DiagnosticsFlyout onClose={() => setShowDiagnosticsFlyout(false)} />
