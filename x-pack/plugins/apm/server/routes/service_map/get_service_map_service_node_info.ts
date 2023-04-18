@@ -358,14 +358,7 @@ function getMemoryStats({
 
     let memoryUsage = await getMemoryUsage({
       script: percentCgroupMemoryUsedScript,
-      additionalFilters: [
-        {
-          bool: {
-            should: [cgroupMemoryFilter],
-            minimum_should_match: 1,
-          },
-        },
-      ],
+      additionalFilters: [cgroupMemoryFilter],
     });
 
     if (!memoryUsage) {
