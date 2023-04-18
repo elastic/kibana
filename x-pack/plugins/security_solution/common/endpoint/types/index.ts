@@ -924,6 +924,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
 export interface PolicyConfig {
   meta: {
     license: string;
+    cloud: boolean;
   };
   windows: {
     advanced?: {
