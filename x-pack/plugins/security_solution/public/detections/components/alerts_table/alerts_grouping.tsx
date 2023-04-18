@@ -16,7 +16,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { groupSelectors } from '../../../common/store/grouping';
 import type { State } from '../../../common/store';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
-import type { TableIdLiteral } from '../../../../common/types';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';

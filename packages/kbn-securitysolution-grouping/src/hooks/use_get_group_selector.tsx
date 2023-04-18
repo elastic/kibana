@@ -7,13 +7,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import React, { useCallback, useEffect } from 'react';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { GroupSelector, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
+import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {

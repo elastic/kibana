@@ -15,6 +15,7 @@ export interface ConnectorConfigProperties {
   label: string;
   options: SelectOptions[];
   order?: number | null;
+  required: boolean;
   sensitive: boolean;
   value: string | number | boolean | null;
 }
