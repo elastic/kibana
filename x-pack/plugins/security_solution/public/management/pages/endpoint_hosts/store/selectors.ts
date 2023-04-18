@@ -11,7 +11,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { Immutable } from '../../../../../common/endpoint/types';
+import type { Immutable, EndpointPendingActions } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -276,3 +276,24 @@ export const metadataTransformStats = (state: Immutable<EndpointState>) =>
 
 export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
   isLoadingResourceState(state.metadataTransformStats);
+
+/**
+ * Returns a function (callback) that can be used to retrieve the list of pending actions against
+ * an endpoint currently displayed in the endpoint list
+ */
+export const getEndpointPendingActionsCallback: (
+  state: Immutable<EndpointState>
+) => (endpointId: string) => EndpointPendingActions['pending_actions'] = createSelector(
+  getEndpointPendingActionsState,
+  (pendingActionsState) => {
+    return (endpointId: string) => {
+      let response: EndpointPendingActions['pending_actions'] = {};
+
+      if (isLoadedResourceState(pendingActionsState)) {
+        response = pendingActionsState.data.get(endpointId) ?? {};
+      }
+
+      return response;
+    };
+  }
+);

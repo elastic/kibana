@@ -69,6 +69,7 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEndpointPendingActionsCallback } from '../store/selectors';
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -127,6 +128,7 @@ export const EndpointList = () => {
     patternsError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
+  const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
     canReadEndpointList,
     canAccessFleet,
@@ -370,7 +372,11 @@ export const EndpointList = () => {
         }),
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EndpointAgentStatus endpointHostInfo={endpointInfo} data-test-subj="rowHostStatus" />
+            <EndpointAgentStatus
+              endpointHostInfo={endpointInfo}
+              pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
+              data-test-subj="rowHostStatus"
+            />
           );
         },
       },
@@ -536,7 +542,15 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
+  }, [
+    queryParams,
+    search,
+    getAppUrl,
+    getHostPendingActions,
+    canReadPolicyManagement,
+    backToEndpointList,
+    PAD_LEFT,
+  ]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {
