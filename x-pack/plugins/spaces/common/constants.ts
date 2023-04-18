@@ -31,3 +31,8 @@ export const MAX_SPACE_INITIALS = 2;
  * The path to enter a space.
  */
 export const ENTER_SPACE_PATH = '/spaces/enter';
+
+/**
+ * The ID of the Locator registered with the Share service for cross-app linking
+ */
+export const SPACES_MANAGEMENT_LOCATOR = 'SPACES_MANAGEMENT_LOCATOR';

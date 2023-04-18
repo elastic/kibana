@@ -13,7 +13,8 @@
     ],
     "requiredPlugins": [
       "features",
-      "licensing"
+      "licensing",
+      "share"
     ],
     "optionalPlugins": [
       "advancedSettings",

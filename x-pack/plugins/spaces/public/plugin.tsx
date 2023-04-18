@@ -10,9 +10,11 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
 import { AdvancedSettingsService } from './advanced_settings';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
+import { SpacesManagementLocatorDefinition } from './locator';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
@@ -24,6 +26,7 @@ export interface PluginsSetup {
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
@@ -84,6 +87,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       application: core.application,
       spacesManager: this.spacesManager,
     });
+
+    plugins.share.url.locators.create(new SpacesManagementLocatorDefinition());
 
     return {};
   }
