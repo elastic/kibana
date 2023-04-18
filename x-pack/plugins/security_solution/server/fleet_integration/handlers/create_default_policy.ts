@@ -33,7 +33,7 @@ export const createDefaultPolicy = (
 
   // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
-  factoryPolicy.meta.cloud = cloud?.isCloudEnabled ? cloud.cloudId : '';
+  factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
 
   const defaultPolicyPerType =
     config?.type === 'cloud'

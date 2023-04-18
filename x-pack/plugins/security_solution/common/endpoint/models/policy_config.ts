@@ -11,7 +11,7 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (license = '', cloud = ''): PolicyConfig => {
+export const policyFactory = (license = '', cloud = false): PolicyConfig => {
   return {
     meta: {
       license,

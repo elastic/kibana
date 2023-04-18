@@ -106,12 +106,9 @@ export class PolicyWatcher {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
         updatePolicy.inputs[0].config.policy.value.meta.license = license.type || '';
-        // add cloud id to policy meta
-        // TODO: remove this logger after checking with cloud deployment
-        this.logger.error(this.cloud?.isCloudEnabled as unknown as string);
-        updatePolicy.inputs[0].config.policy.value.meta.cloud = this.cloud?.isCloudEnabled
-          ? this.cloud.cloudId
-          : '';
+        // add cloud info to policy meta
+        this.logger.error('cloud info update in watcher ' + this.cloud?.isCloudEnabled);
+        updatePolicy.inputs[0].config.policy.value.meta.cloud = this.cloud?.isCloudEnabled;
 
         try {
           if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
