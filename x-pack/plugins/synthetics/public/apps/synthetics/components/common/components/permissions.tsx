@@ -100,7 +100,7 @@ const CANNOT_PERFORM_ACTION_FLEET = i18n.translate(
   }
 );
 
-const CANNOT_PERFORM_ACTION_SYNTHETICS = i18n.translate(
+export const CANNOT_PERFORM_ACTION_SYNTHETICS = i18n.translate(
   'xpack.synthetics.monitorManagement.noSyntheticsPermissions',
   {
     defaultMessage: 'You do not have sufficient permissions to perform this action.',
