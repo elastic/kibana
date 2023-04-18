@@ -119,6 +119,8 @@ export const getVisualizationInstanceFromInput = async (
     savedVis,
     embeddableHandler,
     savedSearch,
+    panelTitle: input?.title ?? '',
+    panelDescription: input?.description ?? '',
   };
 };
 
