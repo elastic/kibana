@@ -18,9 +18,10 @@ describe('saved_objects_count_collector', () => {
   const fetchContextMock = createCollectorFetchContextMock();
 
   const kibanaIndex = '.kibana-tests';
+  const getAllIndices = () => Promise.resolve([kibanaIndex]);
 
   beforeAll(() =>
-    registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex, () =>
+    registerSavedObjectsCountUsageCollector(usageCollectionMock, getAllIndices, () =>
       Promise.resolve(['type_one', 'type_two', 'type-three', 'type-four'])
     )
   );
@@ -82,7 +83,7 @@ describe('saved_objects_count_collector', () => {
 
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       fetchContextMock.esClient,
-      kibanaIndex,
+      [kibanaIndex],
       ['type_one', 'type_two', 'type-three', 'type-four'],
       false
     );
