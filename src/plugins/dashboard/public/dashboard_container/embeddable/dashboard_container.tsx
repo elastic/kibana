@@ -692,7 +692,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public scrollToTop = () => {
-    document.getElementsByClassName(`controlGroup`)[0]?.scrollIntoView({ behavior: 'smooth' });
+    window.scroll(0, 0);
   };
 
   public setHighlightPanelId = (id: string | undefined) => {
