@@ -25,7 +25,7 @@ import {
 import { useDiscoverLinks } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import type { AiOpsIndexBasedAppState } from '../../../application/utils/url_state';
 import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
 import { useTableState } from './use_table_state';
 
