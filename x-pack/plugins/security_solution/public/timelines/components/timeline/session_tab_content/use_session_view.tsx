@@ -10,7 +10,8 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } 
 import styled from 'styled-components';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { useDispatch } from 'react-redux';
-import type { TableId } from '../../../../../common/types/data_table';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -38,8 +39,6 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { dataTableSelectors } from '../../../../common/store/data_table';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
