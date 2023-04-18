@@ -42,7 +42,12 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
-import { ExportTypesRegistry } from './export_registry';
+import { ExportTypesRegistry } from './export_types_registry';
+import {
+  ExportTypesPlugin,
+  ExportTypesPluginSetup,
+  ExportTypesPluginStart,
+} from '../server/export_registry/plugin';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -78,7 +83,7 @@ export interface ReportingPublicPluginSetupDendencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
-  exportTypeRegistry: ExportTypesRegistry;
+  exportTypesPlugin: ExportTypesPluginSetup;
 }
 
 export interface ReportingPublicPluginStartDendencies {
@@ -88,6 +93,7 @@ export interface ReportingPublicPluginStartDendencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  exportTypesPlugin: ExportTypesPluginStart;
 }
 
 /**
@@ -114,7 +120,6 @@ export class ReportingPublicPlugin
   });
   private config: ClientConfigType;
   private contract?: ReportingSetup;
-  private exportTypeRegistry = new ExportTypesRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -151,14 +156,12 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const { home, management, screenshotMode, share, uiActions } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions, exportTypesPlugin } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-
-    this.exportTypeRegistry.register(apiClient.list(await apiClient.total()));
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -223,6 +226,12 @@ export class ReportingPublicPlugin
       CONTEXT_MENU_TRIGGER,
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
+
+    // creates the export type definitions
+    exportTypesPlugin.register({ id: '' });
+
+    // this also creates the et registry
+    exportTypesRegistry.set();
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;

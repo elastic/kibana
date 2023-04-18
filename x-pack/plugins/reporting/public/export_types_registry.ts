@@ -18,10 +18,15 @@ export interface ExportType {
   jobs: Job[];
 }
 
+export interface ExportTypeProvider {
+  readonly id: string;
+  getExportTypeItems: () => ExportType[];
+}
+
 // this is created by the reporting plugin from the setup and registerExportType()
 export class ExportTypesRegistry {
-  // what data structure should the registry be
-  private exportTypeRegistry: ExportType[] = [];
+  // what data structure should the registry be share_menu_registry is a Map
+  private exportTypeRegistry = new Map<string, ExportTypeProvider>();
 
   public register(et: ExportType) {
     // validation of export type

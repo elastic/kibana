@@ -6,15 +6,16 @@
  */
 
 export interface CSVExportType {
-  locator: string;
+  // locator or id
+  id: string;
 }
 
 export interface PNGExportType {
-  locator: string;
+  id: string;
 }
 
 export interface PDFExportType {
-  locator: string;
+  id: string;
 }
 
-// ExportType in export_registry.ts should be the umbrella type for each of these
+export type ExportTypeEntry = Partial<CSVExportType | PNGExportType | PDFExportType>;

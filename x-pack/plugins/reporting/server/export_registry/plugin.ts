@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import type { ReportingPublicPluginSetupDendencies } from '../../public/plugin';
-import type { ExportType } from '../../public/export_registry';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ExportType } from '../../public/export_types_registry';
+import { CSVExportType, ExportTypeEntry } from './export_definitions';
 
-interface ExportTypesPluginSetupContract {
-  // depends on the Reporting Plugin x-pack/plugins/reporting/public/plugin.ts
-  getReportingPlugin(): ReportingPublicPluginSetupDendencies;
+export interface ExportTypesPluginSetup {
+  /** added to the reporting plugin and registers in the public reporting setup() */
 }
 
-interface ExportTypesPluginStartContract {}
+export interface ExportTypesPluginStart {
+  /** Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle */
+}
 
-export class ExportTypesPlugin
-  implements Plugin<ExportTypesPluginSetupContract, ExportTypesPluginStartContract>
-{
-  private type: any;
+export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportTypesPluginStart> {
   private exportType?: ExportType;
   // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
 
-  private getExportType() {
-    if (!this.exportType) throw new Error('');
-    return this.getExportType;
+  public setup(core: CoreSetup<ExportTypesPluginSetup>, plugins: object) {
+    return {
+      register: (type: ExportTypeEntry) => {
+        // does the entry need to be independent or is it just one of the three types
+        // is this where we could see if it's serverless and needs to be disabled etc or is that probably in the reporting plugin itself
+        if (this.exportType.has(id)) {
+          throw new Error(``);
+        }
+        return {} as CSVExportType;
+      },
+    };
   }
-
-  public setup(core: CoreSetup<object, unknown>, plugins: object) {
-    this.getExportType(this.type);
-  }
-  public start() {
-    return this.exportType;
+  public start(core: CoreStart) {
+    // return this.getContract()
+    return this.exportTypeStart;
   }
 }
