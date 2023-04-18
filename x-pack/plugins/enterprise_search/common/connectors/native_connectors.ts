@@ -13,6 +13,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mongodb: {
     configuration: {
       host: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -25,9 +26,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 1,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       user: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -40,9 +43,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 2,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       password: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -55,9 +60,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 3,
         required: true,
         sensitive: true,
+        tooltip: '',
         value: '',
       },
       database: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -70,9 +77,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       collection: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -85,9 +94,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 5,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       direct_connection: {
+        default_value: true,
         depends_on: [],
         display: 'toggle',
         label: i18n.translate(
@@ -100,6 +111,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 6,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: true,
       },
     },
@@ -119,6 +131,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mysql: {
     configuration: {
       host: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -131,9 +144,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 1,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       port: {
+        default_value: null,
         depends_on: [],
         display: 'numeric',
         label: i18n.translate(
@@ -146,9 +161,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 2,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       user: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -161,9 +178,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 3,
         required: false,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       password: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -176,9 +195,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: false,
         sensitive: true,
+        tooltip: '',
         value: '',
       },
       database: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         label: i18n.translate(
@@ -191,9 +212,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 5,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       tables: {
+        default_value: '',
         depends_on: [],
         display: 'textarea',
         label: i18n.translate(
@@ -206,9 +229,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 6,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
       ssl_enabled: {
+        default_value: false,
         depends_on: [],
         display: 'toggle',
         label: i18n.translate(
@@ -221,9 +246,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 7,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: false,
       },
       ssl_ca: {
+        default_value: '',
         depends_on: [{ field: 'ssl_enabled', value: true }],
         display: 'textbox',
         label: i18n.translate(
@@ -236,6 +263,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 8,
         required: true,
         sensitive: false,
+        tooltip: '',
         value: '',
       },
     },

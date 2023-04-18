@@ -10,13 +10,14 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -56,13 +57,33 @@ export const ConnectorConfigurationForm = () => {
       component="form"
     >
       {localConfigView.map((configEntry) => {
-        const { depends_on: dependencies, key, label } = configEntry;
+        const {
+          default_value: defaultValue,
+          depends_on: dependencies,
+          key,
+          display,
+          label,
+          tooltip,
+        } = configEntry;
+        // toggle label goes next to the element, not in the row
         const hasDependencies = dependencies.length > 0;
+        const helpText = defaultValue
+          ? `If left empty, the default value ${defaultValue} will be used.`
+          : '';
+
+        const rowLabel =
+          display !== 'toggle' ? (
+            <EuiToolTip content={tooltip}>
+              <p>{label}</p>
+            </EuiToolTip>
+          ) : (
+            <></>
+          );
 
         return hasDependencies ? (
           dependenciesSatisfied(dependencies, dependencyLookup) ? (
             <EuiPanel color="subdued" borderRadius="none">
-              <EuiFormRow label={label ?? ''} key={key}>
+              <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
                 <ConnectorConfigurationField configEntry={configEntry} />
               </EuiFormRow>
             </EuiPanel>
@@ -70,7 +91,7 @@ export const ConnectorConfigurationForm = () => {
             <></>
           )
         ) : (
-          <EuiFormRow label={label ?? ''} key={key}>
+          <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );

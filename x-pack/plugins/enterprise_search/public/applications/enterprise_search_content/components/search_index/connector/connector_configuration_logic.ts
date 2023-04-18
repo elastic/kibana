@@ -55,6 +55,7 @@ interface ConnectorConfigurationValues {
 }
 
 export interface ConfigEntry {
+  default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: string;
   key: string;
@@ -63,6 +64,7 @@ export interface ConfigEntry {
   order?: number;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
   value: string | number | boolean | null;
 }
 
@@ -103,6 +105,14 @@ export function ensureStringType(value: string | number | boolean | null): strin
 export function ensureNumberType(value: string | number | boolean | null): number {
   const numberValue = Number(value);
   return isNaN(numberValue) ? 0 : numberValue;
+}
+
+export function ensureOptionalNumberType(value: string | number | boolean | null): number | string {
+  const numberValue = Number(value);
+  if (value === '' || isNaN(numberValue)) {
+    return '';
+  }
+  return numberValue;
 }
 
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
@@ -229,11 +239,35 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          { key, depends_on, display, label, options, order, required, sensitive, value }
+          {
+            key,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            default_value,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          }
         ) => ({
           ...configState,
-          [key]: { depends_on, display, label, options, order, required, sensitive, value },
+          [key]: {
+            default_value,
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },

@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
@@ -42,7 +43,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { key, display, label, options, required, sensitive, value } = configEntry;
+  const { key, display, label, options, required, sensitive, tooltip, value } = configEntry;
 
   switch (display) {
     case 'dropdown':
@@ -101,11 +102,17 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case 'toggle':
+      const toggleLabel = (
+        <EuiToolTip content={tooltip}>
+          <p>{label}</p>
+        </EuiToolTip>
+      );
+
       return (
         <EuiSwitch
           checked={ensureBooleanType(value)}
           disabled={status === Status.LOADING}
-          label={label}
+          label={toggleLabel}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.checked });
           }}

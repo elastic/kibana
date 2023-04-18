@@ -44,6 +44,7 @@ export const connectorIndex: ConnectorViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         key: 'foo',
@@ -52,6 +53,7 @@ export const connectorIndex: ConnectorViewIndex = {
         order: 1,
         required: false,
         sensitive: false,
+        tooltip: '',
         value: 'barbar',
       },
     },
@@ -156,6 +158,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
+        default_value: '',
         depends_on: [],
         display: 'textbox',
         key: 'foo',
@@ -164,6 +167,7 @@ export const crawlerIndex: CrawlerViewIndex = {
         order: 1,
         required: false,
         sensitive: false,
+        tooltip: '',
         value: 'barbar',
       },
     },

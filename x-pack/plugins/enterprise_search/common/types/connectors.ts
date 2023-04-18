@@ -18,6 +18,7 @@ export interface Dependency {
 export type DependencyLookup = Record<string, string | number | boolean | null>;
 
 export interface ConnectorConfigProperties {
+  default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: string;
   label: string;
@@ -25,6 +26,7 @@ export interface ConnectorConfigProperties {
   order?: number | null;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
   value: string | number | boolean | null;
 }
 

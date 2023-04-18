@@ -52,6 +52,7 @@ describe('ConnectorConfigurationLogic', () => {
       ConnectorConfigurationApiLogic.actions.apiSuccess({
         configuration: {
           foo: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'newBar',
@@ -59,6 +60,7 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'oldBar',
           },
         },
@@ -68,6 +70,7 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'newBar',
@@ -75,11 +78,13 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'oldBar',
           },
         },
         configView: [
           {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             key: 'foo',
@@ -88,6 +93,7 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'oldBar',
           },
         ],
@@ -96,6 +102,7 @@ describe('ConnectorConfigurationLogic', () => {
     it('should set config on setConfigState', () => {
       ConnectorConfigurationLogic.actions.setConfigState({
         foo: {
+          default_value: '',
           depends_on: [],
           display: 'textbox',
           label: 'thirdBar',
@@ -103,6 +110,7 @@ describe('ConnectorConfigurationLogic', () => {
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
           value: 'fourthBar',
         },
       });
@@ -110,6 +118,7 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
@@ -117,11 +126,13 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'fourthBar',
           },
         },
         configView: [
           {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             key: 'foo',
@@ -130,6 +141,7 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'fourthBar',
           },
         ],
@@ -139,6 +151,7 @@ describe('ConnectorConfigurationLogic', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'foo',
@@ -146,9 +159,11 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'foofoo',
           },
           password: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
@@ -156,11 +171,13 @@ describe('ConnectorConfigurationLogic', () => {
             order: 2,
             required: false,
             sensitive: true,
+            tooltip: '',
             value: 'fourthBar',
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           bar: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'foo',
@@ -168,9 +185,11 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: false,
+            tooltip: '',
             value: 'foofoo',
           },
           password: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
@@ -178,10 +197,12 @@ describe('ConnectorConfigurationLogic', () => {
             order: 2,
             required: false,
             sensitive: true,
+            tooltip: '',
             value: 'fourthBar',
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
+          default_value: '',
           depends_on: [],
           display: 'textbox',
           key: 'bar',
@@ -190,12 +211,14 @@ describe('ConnectorConfigurationLogic', () => {
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
           value: 'fafa',
         });
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: {
             bar: {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               label: 'foo',
@@ -203,9 +226,11 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'foofoo',
             },
             password: {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
@@ -213,11 +238,13 @@ describe('ConnectorConfigurationLogic', () => {
               order: 2,
               required: false,
               sensitive: true,
+              tooltip: '',
               value: 'fourthBar',
             },
           },
           configView: [
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'bar',
@@ -226,9 +253,11 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'foofoo',
             },
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'password',
@@ -237,11 +266,13 @@ describe('ConnectorConfigurationLogic', () => {
               order: 2,
               required: false,
               sensitive: true,
+              tooltip: '',
               value: 'fourthBar',
             },
           ],
           localConfigState: {
             bar: {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               label: 'foo',
@@ -249,9 +280,11 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'fafa',
             },
             password: {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
@@ -259,11 +292,13 @@ describe('ConnectorConfigurationLogic', () => {
               order: 2,
               required: false,
               sensitive: true,
+              tooltip: '',
               value: 'fourthBar',
             },
           },
           localConfigView: [
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'bar',
@@ -272,9 +307,11 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'fafa',
             },
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'password',
@@ -283,6 +320,7 @@ describe('ConnectorConfigurationLogic', () => {
               order: 2,
               required: false,
               sensitive: true,
+              tooltip: '',
               value: 'fourthBar',
             },
           ],
@@ -297,6 +335,7 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'foo',
@@ -305,6 +344,7 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'barbar',
             },
           ],
@@ -331,6 +371,7 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'foo',
@@ -339,6 +380,7 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'barbar',
             },
           ],
@@ -350,6 +392,7 @@ describe('ConnectorConfigurationLogic', () => {
           localConfigState: connectorIndex.connector.configuration,
           localConfigView: [
             {
+              default_value: '',
               depends_on: [],
               display: 'textbox',
               key: 'foo',
@@ -358,6 +401,7 @@ describe('ConnectorConfigurationLogic', () => {
               order: 1,
               required: false,
               sensitive: false,
+              tooltip: '',
               value: 'barbar',
             },
           ],
@@ -371,6 +415,7 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.fetchIndexApiSuccess(connectorIndex);
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           foo: {
+            default_value: '',
             depends_on: [],
             display: 'textbox',
             label: 'bar',
@@ -378,6 +423,7 @@ describe('ConnectorConfigurationLogic', () => {
             order: 1,
             required: false,
             sensitive: true,
+            tooltip: '',
             value: 'Barbara',
           },
         });
