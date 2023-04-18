@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { alertMappings } from './mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { getMigrations } from './migrations';
@@ -74,6 +75,7 @@ export function setupSavedObjects(
 ) {
   savedObjects.registerType({
     name: 'alert',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -104,6 +106,7 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: 'api_key_pending_invalidation',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {
@@ -120,6 +123,7 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
