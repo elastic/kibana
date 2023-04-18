@@ -5454,7 +5454,7 @@
                 }
               }
             },
-            "findings_vuln_mgmt": {
+            "vulnerabilities": {
               "properties": {
                 "doc_count": {
                   "type": "long"
@@ -5470,7 +5470,7 @@
                 }
               }
             },
-            "latest_findings_vuln_mgmt": {
+            "latest_vulnerabilities": {
               "properties": {
                 "doc_count": {
                   "type": "long"

@@ -38,7 +38,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'date',
       },
     },
-    findings_vuln_mgmt: {
+    vulnerabilities: {
       doc_count: {
         type: 'long',
       },
@@ -52,7 +52,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'date',
       },
     },
-    latest_findings_vuln_mgmt: {
+    latest_vulnerabilities: {
       doc_count: {
         type: 'long',
       },

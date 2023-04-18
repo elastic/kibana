@@ -104,8 +104,8 @@ export const getIndicesStats = async (
   return {
     findings,
     latest_findings: latestFindings,
-    findings_vuln_mgmt: vulMng,
-    latest_findings_vuln_mgmt: vulMngLatest,
+    vulnerabilities: vulMng,
+    latest_vulnerabilities: vulMngLatest,
     score,
 
     latestPackageVersion: status.latestPackageVersion,
