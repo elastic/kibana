@@ -122,6 +122,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
   protected readonly _descriptor: VectorLayerDescriptor;
+  private readonly _masks: Mask[];
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -165,6 +166,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       customIcons,
       chartsPaletteServiceGetColor
     );
+    this._masks = this._createMasks();
   }
 
   async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
@@ -694,7 +696,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return undefined;
   }
 
-  getMasks() {
+  _createMasks() {
     const masks: Mask[] = [];
     const source = this.getSource();
     if ('getMetricFields' in (source as IESAggSource)) {
@@ -735,6 +737,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
 
     return masks;
+  }
+
+  getMasks() {
+    return this._masks;
   }
 
   // feature-state is not supported in filter expressions
