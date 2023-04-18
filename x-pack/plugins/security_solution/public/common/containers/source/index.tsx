@@ -10,7 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -114,6 +114,7 @@ interface FetchIndexReturn {
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
+  dataView: DataView | undefined;
 }
 
 /**
@@ -135,6 +136,7 @@ export const useFetchIndex = (
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
+    dataView: undefined,
   });
   const { addError } = useAppToasts();
 
@@ -152,6 +154,7 @@ export const useFetchIndex = (
           );
 
           setState({
+            dataView: dv,
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,

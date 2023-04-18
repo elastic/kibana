@@ -28,5 +28,6 @@ export const getSourcererDataView = async (
     indexFields: dataViewData.fields,
     fields: dataViewData.fields,
     patternList,
+    dataView: dataViewData,
   };
 };

@@ -32,7 +32,6 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -263,12 +262,6 @@ const InsightEditorComponent = ({
       }),
     ];
   }, [uiSettings]);
-  const kibanaDataProvider = useMemo(() => {
-    return {
-      ...sourcererDataView,
-      fields: sourcererDataView?.indexFields,
-    } as DataView;
-  }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
     description: string;
@@ -426,12 +419,16 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              <FiltersBuilderLazy
-                filters={filtersStub}
-                onChange={onChange}
-                dataView={kibanaDataProvider}
-                maxDepth={2}
-              />
+              {sourcererDataView ? (
+                <FiltersBuilderLazy
+                  filters={filtersStub}
+                  onChange={onChange}
+                  dataView={sourcererDataView}
+                  maxDepth={2}
+                />
+              ) : (
+                <></>
+              )}
             </EuiFormRow>
             <EuiFormRow
               label={i18n.RELATIVE_TIMERANGE}

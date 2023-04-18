@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
@@ -76,6 +77,10 @@ export interface SourcererDataView extends KibanaDataView {
    * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
    */
   runtimeMappings: MappingRuntimeFields;
+  /**
+   * @type DataView @kbn/data-views-plugin/common
+   */
+  dataView: DataView | undefined;
 }
 
 /**
@@ -115,7 +120,12 @@ export interface SelectedDataView {
    * active patterns when dataViewId == null
    */
   activePatterns?: string[];
-  sourcererDataView?: SourcererDataView | (Omit<SourcererDataView, 'id'> & { id: string | null });
+
+  /**
+   * Easier to add this additional data rather than
+   * try to extend the SelectedDataView type from DataView.
+   */
+  sourcererDataView: DataView | undefined;
 }
 
 /**
@@ -154,6 +164,7 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
   patternList: [],
   runtimeMappings: {},
   title: '',
+  dataView: undefined,
 };
 
 export const initialSourcererState: SourcererModel = {

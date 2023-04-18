@@ -395,16 +395,17 @@ export const useSourcererDataView = (
   const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
     () => ({
       ...fetchIndexReturn,
-      runtimeMappings: {},
-      title: '',
-      id: selectedDataView?.id ?? null,
+      dataView: fetchIndexReturn.dataView,
+      runtimeMappings: fetchIndexReturn.dataView?.getRuntimeMappings() ?? {},
+      title: fetchIndexReturn.dataView?.getIndexPattern() ?? '',
+      id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
       fields: fetchIndexReturn.indexPatterns.fields as DataViewFieldBase[],
     }),
-    [fetchIndexReturn, indexPatternsLoading, selectedDataView]
+    [fetchIndexReturn, indexPatternsLoading]
   );
 
   useEffect(() => {
@@ -461,7 +462,7 @@ export const useSourcererDataView = (
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
-      sourcererDataView,
+      sourcererDataView: sourcererDataView.dataView,
     }),
     [
       browserFields,
