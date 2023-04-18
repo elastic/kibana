@@ -21,11 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  CustomPresaveTransform,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
@@ -34,10 +30,15 @@ import {
   ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
+
+const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
+
+const EXCLUDE_NUMBER_FIELD = 'Exclude Number fields';
 
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -91,6 +92,7 @@ export const EditExample = () => {
         setToggleIconIdToSelectedMapIcon({
           [ACTION_EDIT_CONTROL]: disabledActions.includes(ACTION_EDIT_CONTROL),
           [ACTION_DELETE_CONTROL]: disabledActions.includes(ACTION_DELETE_CONTROL),
+          [WITH_CUSTOM_PLACEHOLDER]: false,
         });
       } catch (e) {
         // ignore parse errors
@@ -100,9 +102,8 @@ export const EditExample = () => {
     return input;
   }
 
-  const customPresaveControlsTransform: CustomPresaveTransform = (newState, type) => {
-    // TODO, need to see how to get an instance of embeddable being added
-    if (type === OPTIONS_LIST_CONTROL) {
+  const controlInputTransform: ControlInputTransform = (newState, type) => {
+    if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
       return {
         ...newState,
         placeholder: 'Custom Placeholder',
@@ -136,7 +137,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroup === undefined}
               onClick={() => {
-                controlGroup!.openAddDataControlFlyout(customPresaveControlsTransform);
+                controlGroup!.openAddDataControlFlyout(controlInputTransform);
               }}
             >
               Add control
@@ -156,6 +157,11 @@ export const EditExample = () => {
                   id: ACTION_DELETE_CONTROL,
                   label: 'Disable delete action',
                   value: ACTION_DELETE_CONTROL,
+                },
+                {
+                  id: WITH_CUSTOM_PLACEHOLDER,
+                  label: WITH_CUSTOM_PLACEHOLDER,
+                  value: WITH_CUSTOM_PLACEHOLDER,
                 },
               ]}
               idToSelectedMap={toggleIconIdToSelectedMapIcon}
@@ -189,7 +195,6 @@ export const EditExample = () => {
                 ...initialInput,
                 ...persistedInput,
                 viewMode: ViewMode.EDIT,
-                fieldFilterPredicate: (f) => f.type !== 'number',
               },
             };
           }}
