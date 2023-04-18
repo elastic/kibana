@@ -152,10 +152,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     });
   }, [additionalFilters, from, pageIndex, pageSize, runtimeMappings, selectedGroup, to]);
 
+  const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
+
   useInvalidFilterQuery({
     id: tableId,
-    filterQuery: getGlobalQuery([])?.filterQuery,
-    kqlError: getGlobalQuery([])?.kqlError,
+    filterQuery: emptyGlobalQuery?.filterQuery,
+    kqlError: emptyGlobalQuery?.kqlError,
     query: globalQuery,
     startDate: from,
     endDate: to,

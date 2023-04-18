@@ -23,7 +23,7 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT } from './translations';
-import type { GroupingAggregation, GroupPanelRenderer, RawBucket } from './types';
+import type { GroupingAggregation, GroupPanelRenderer } from './types';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
@@ -75,9 +75,9 @@ const GroupingComponent = <T,>({
   tracker,
   unit = defaultUnit,
 }: GroupingProps<T>) => {
-  const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
-  >({});
+  const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
+    {}
+  );
 
   const unitCount = data?.unitsCount?.value ?? 0;
   const unitCountText = useMemo(() => {
@@ -127,7 +127,6 @@ const GroupingComponent = <T,>({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
                   [groupKey]: {
                     state: isOpen ? 'open' : 'closed',
-                    selectedBucket: groupBucket,
                   },
                 });
                 onGroupToggle?.({ isOpen, groupName: group, groupNumber, groupingId });
@@ -208,7 +207,7 @@ const GroupingComponent = <T,>({
         {groupCount > 0 ? (
           <>
             {groupPanels}
-            {groupingLevel > 0 && pageCount === 1 ? null : (
+            {groupCount > 0 && (
               <>
                 <EuiSpacer size="m" />
                 <EuiTablePagination
