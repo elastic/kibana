@@ -13,11 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
-import {
-  useFieldStatsTrigger,
-  FieldStatsInfoButton,
-  FieldStatsFlyoutProvider,
-} from '../components/field_stats_flyout';
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
 import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -66,7 +62,7 @@ export const ChangePointDetectionPage: FC = () => {
               'theme',
               'lens',
             ]),
-            fieldStats: { useFieldStatsTrigger, FieldStatsInfoButton, FieldStatsFlyoutProvider },
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}
         />
       ) : null}

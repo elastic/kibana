@@ -40,7 +40,6 @@ export interface AiopsAppDependencies {
   // deps for unified field stats
   fieldStats?: {
     useFieldStatsTrigger: GetMlSharedImportsReturnType['useFieldStatsTrigger'];
-    FieldStatsInfoButton: GetMlSharedImportsReturnType['FieldStatsInfoButton'];
     FieldStatsFlyoutProvider: GetMlSharedImportsReturnType['FieldStatsFlyoutProvider'];
   };
 }
