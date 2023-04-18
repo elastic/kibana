@@ -33,11 +33,11 @@ export const AnalyticsCollectionExplorer: React.FC = ({}) => {
       restrictWidth
       pageChrome={[analyticsCollection?.name]}
       analyticsName={analyticsCollection?.name}
-      pageViewTelemetry={`View Analytics Collection - integrate`}
+      pageViewTelemetry={`View Analytics Collection - explorer`}
       pageHeader={{
         bottomBorder: false,
         pageTitle: i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsView.explorer.title',
+          'xpack.enterpriseSearch.analytics.collectionsView.explorerView.title',
           {
             defaultMessage: 'Explorer',
           }

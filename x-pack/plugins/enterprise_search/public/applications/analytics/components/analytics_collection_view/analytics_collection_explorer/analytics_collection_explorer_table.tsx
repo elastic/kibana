@@ -13,9 +13,9 @@ import {
   Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiSearchBar,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -267,18 +267,18 @@ export const AnalyticsCollectionExplorerTable = () => {
 
       {table && (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiSearchBar
-            query={search}
-            box={{
-              incremental: true,
-              placeholder: i18n.translate(
-                'xpack.enterpriseSearch.analytics.collectionsView.explorer.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              ),
-            }}
-            onChange={({ queryText }) => setSearch(queryText)}
+          <EuiFieldSearch
+            placeholder={i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.explorer.searchPlaceholder',
+              {
+                defaultMessage: 'Search',
+              }
+            )}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            isClearable
+            incremental
+            fullWidth
           />
 
           <EuiSpacer size="xl" />
