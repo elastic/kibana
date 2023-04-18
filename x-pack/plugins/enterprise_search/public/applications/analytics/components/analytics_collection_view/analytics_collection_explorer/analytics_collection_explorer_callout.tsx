@@ -13,21 +13,17 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { KibanaLogic } from '../../../../shared/kibana';
+import { getDiscoverLink } from '../../../utils/get_discover_link';
 import { AnalyticsCollectionDataViewLogic } from '../analytics_collection_data_view_logic';
 
 export const AnalyticsCollectionExplorerCallout: React.FC = () => {
   const { application } = useValues(KibanaLogic);
   const { dataView } = useValues(AnalyticsCollectionDataViewLogic);
-  const exploreLink =
-    dataView &&
-    application.getUrlForApp('discover', {
-      path: `#/?_a=(index:'${dataView.id}')`,
-    });
 
-  return exploreLink ? (
+  return dataView ? (
     <EuiCallOut
       title={i18n.translate(
         'xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.title',
@@ -42,10 +38,10 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
         />
       </p>
 
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks coreStart={{ application }}>
         <EuiButton
           fill
-          href={exploreLink}
+          href={getDiscoverLink(application, dataView)}
           data-telemetry-id="entSearch-analytics-explorer-callout-exploreLink"
         >
           <FormattedMessage
