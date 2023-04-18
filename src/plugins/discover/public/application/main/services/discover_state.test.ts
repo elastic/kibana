@@ -40,6 +40,7 @@ async function getState(url: string, savedSearch?: SavedSearch) {
     services: discoverServiceMock,
     history: nextHistory,
   });
+  jest.spyOn(nextState.dataState, 'fetch');
   await nextState.actions.loadDataViewList();
   if (savedSearch) {
     nextState.savedSearchState.load = jest.fn(() => {
@@ -584,28 +585,41 @@ describe('actions', () => {
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
-  test('undoChanges', async () => {
+  test('undoSavedSearchChanges - when changing data views', async () => {
     const { state, getCurrentUrl } = await getState('/', savedSearchMock);
+    // Load a given persisted saved search
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
-    );
+    const initialUrlState =
+      '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())';
+    expect(getCurrentUrl()).toBe(initialUrlState);
+    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
+
+    // Change the data view, this should change the URL and trigger a fetch
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
     );
-    await state.actions.undoChanges();
+    await waitFor(() => {
+      expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
+    });
+    expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id!);
+
+    // Undo all changes to the saved search, this should trigger a fetch, again
+    await state.actions.undoSavedSearchChanges();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
-    );
+    expect(getCurrentUrl()).toBe(initialUrlState);
+    await waitFor(() => {
+      expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
+    });
+    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
+
     unsubscribe();
   });
 
-  test('undoChanges with timeRestore', async () => {
+  test('undoSavedSearchChanges with timeRestore', async () => {
     const { state } = await getState('/', {
       ...savedSearchMock,
       timeRestore: true,
@@ -617,7 +631,7 @@ describe('actions', () => {
     discoverServiceMock.data.query.timefilter.timefilter.setTime = setTime;
     discoverServiceMock.data.query.timefilter.timefilter.setRefreshInterval = setRefreshInterval;
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    await state.actions.undoChanges();
+    await state.actions.undoSavedSearchChanges();
     expect(setTime).toHaveBeenCalledTimes(1);
     expect(setTime).toHaveBeenCalledWith({ from: 'now-15d', to: 'now-10d' });
     expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });

@@ -52,7 +52,7 @@ export const DiscoverHistogramLayout = ({
       resizeRef={resizeRef}
       appendHitsCounter={
         savedSearchState.getId() ? (
-          <ResetSearchButton resetSavedSearch={stateContainer.actions.undoChanges} />
+          <ResetSearchButton resetSavedSearch={stateContainer.actions.undoSavedSearchChanges} />
         ) : undefined
       }
       css={histogramLayoutCss}
