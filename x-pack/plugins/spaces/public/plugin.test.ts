@@ -12,6 +12,7 @@ import {
   createManagementSectionMock,
   managementPluginMock,
 } from '@kbn/management-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
 
@@ -21,7 +22,7 @@ describe('Spaces plugin', () => {
       const coreSetup = coreMock.createSetup();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, {});
+      plugin.setup(coreSetup, { share: sharePluginMock.createSetupContract() });
 
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -45,6 +46,7 @@ describe('Spaces plugin', () => {
 
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {
+        share: sharePluginMock.createSetupContract(),
         management,
         home,
       });
@@ -68,7 +70,7 @@ describe('Spaces plugin', () => {
       const advancedSettings = advancedSettingsMock.createSetupContract();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, { advancedSettings });
+      plugin.setup(coreSetup, { advancedSettings, share: sharePluginMock.createSetupContract() });
 
       expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -93,7 +95,7 @@ describe('Spaces plugin', () => {
       const coreStart = coreMock.createStart();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, {});
+      plugin.setup(coreSetup, { share: sharePluginMock.createSetupContract() });
 
       plugin.start(coreStart);
 
