@@ -128,9 +128,12 @@ export const processingCommands = {
   label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.processingCommands', {
     defaultMessage: 'Processing commands',
   }),
-  description: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.processingCommandsDescription', {
-    defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ESQL supports the following processing commands.`,
-  }),
+  description: i18n.translate(
+    'unifiedSearch.query.textBasedLanguagesEditor.processingCommandsDescription',
+    {
+      defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ESQL supports the following processing commands.`,
+    }
+  ),
   items: [
     {
       label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.dissect', {

@@ -102,8 +102,9 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
   if (language === 'esql') {
-    const { sourceCommands, processingCommands, initialSection, functions } =
-      await import('./esql_documentation_sections');
+    const { sourceCommands, processingCommands, initialSection, functions } = await import(
+      './esql_documentation_sections'
+    );
     groups.push({
       label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
         defaultMessage: 'ESQL',
