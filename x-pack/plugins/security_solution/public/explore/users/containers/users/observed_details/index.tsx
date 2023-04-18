@@ -11,9 +11,11 @@ import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
 import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
+import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
-export const ID = 'usersDetailsQuery';
+export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
 export interface UserDetailsArgs {
   id: string;
@@ -33,22 +35,23 @@ interface UseUserDetails {
   startDate: string;
 }
 
-export const useUserDetails = ({
+export const useObservedUserDetails = ({
   endDate,
   userName,
   indexNames,
-  id = ID,
+  id = OBSERVED_USER_QUERY_ID,
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
+  const isNewUserDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
   const {
     loading,
     result: response,
     search,
     refetch,
     inspect,
-  } = useSearchStrategy<UsersQueries.details>({
-    factoryQueryType: UsersQueries.details,
+  } = useSearchStrategy<UsersQueries.observedDetails>({
+    factoryQueryType: UsersQueries.observedDetails,
     initialResult: {
       userDetails: {},
     },
@@ -62,7 +65,6 @@ export const useUserDetails = ({
       userDetails: response.userDetails,
       id,
       inspect,
-      isInspected: false,
       refetch,
       startDate,
     }),
@@ -72,15 +74,16 @@ export const useUserDetails = ({
   const userDetailsRequest = useMemo(
     () => ({
       defaultIndex: indexNames,
-      factoryQueryType: UsersQueries.details,
+      factoryQueryType: UsersQueries.observedDetails,
       userName,
       timerange: {
         interval: '12h',
         from: startDate,
         to: endDate,
       },
+      filterQuery: isNewUserDetailsFlyoutEnabled ? NOT_EVENT_KIND_ASSET_FILTER : undefined,
     }),
-    [endDate, indexNames, startDate, userName]
+    [endDate, indexNames, startDate, userName, isNewUserDetailsFlyoutEnabled]
   );
 
   useEffect(() => {

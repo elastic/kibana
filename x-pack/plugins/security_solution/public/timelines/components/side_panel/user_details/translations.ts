@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export interface UserDetailsProps {
-  contextID: string;
-  userName: string;
-  handleOnClose: () => void;
-  isFlyoutView?: boolean;
-  isDraggable?: boolean;
-  isNewUserDetailsFlyoutEnable?: boolean;
-}
+import { i18n } from '@kbn/i18n';
+
+export const CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.closeButton',
+  {
+    defaultMessage: 'close',
+  }
+);

@@ -11,12 +11,12 @@ import type { Inspect, Maybe, TimerangeInput } from '../../../common';
 import type { UserItem } from '../common';
 import type { RequestBasicOptions } from '../..';
 
-export interface UserDetailsStrategyResponse extends IEsSearchResponse {
+export interface ObservedUserDetailsStrategyResponse extends IEsSearchResponse {
   userDetails: UserItem;
   inspect?: Maybe<Inspect>;
 }
 
-export interface UserDetailsRequestOptions extends Partial<RequestBasicOptions> {
+export interface ObservedUserDetailsRequestOptions extends Partial<RequestBasicOptions> {
   userName: string;
   skip?: boolean;
   timerange: TimerangeInput;

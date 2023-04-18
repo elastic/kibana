@@ -9,25 +9,25 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
-import { buildUserDetailsQuery } from './query.user_details.dsl';
+import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
-  UserDetailsRequestOptions,
-  UserDetailsStrategyResponse,
-} from '../../../../../../common/search_strategy/security_solution/users/details';
+  ObservedUserDetailsRequestOptions,
+  ObservedUserDetailsStrategyResponse,
+} from '../../../../../../common/search_strategy/security_solution/users/observed_details';
 import { formatUserItem } from './helpers';
 
-export const userDetails: SecuritySolutionFactory<UsersQueries.details> = {
-  buildDsl: (options: UserDetailsRequestOptions) => buildUserDetailsQuery(options),
+export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
+  buildDsl: (options: ObservedUserDetailsRequestOptions) => buildObservedUserDetailsQuery(options),
   parse: async (
-    options: UserDetailsRequestOptions,
+    options: ObservedUserDetailsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<UserDetailsStrategyResponse> => {
+  ): Promise<ObservedUserDetailsStrategyResponse> => {
     const aggregations = response.rawResponse.aggregations;
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildUserDetailsQuery(options))],
+      dsl: [inspectStringifyObject(buildObservedUserDetailsQuery(options))],
     };
 
     if (aggregations == null) {

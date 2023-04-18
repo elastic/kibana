@@ -117,6 +117,25 @@ Object {
       \\"bool\\": {
         \\"filter\\": [
           {
+            \\"bool\\": {
+              \\"must\\": [],
+              \\"filter\\": [
+                {
+                  \\"match_all\\": {}
+                },
+                {
+                  \\"match_phrase\\": {
+                    \\"user.name\\": {
+                      \\"query\\": \\"test_user\\"
+                    }
+                  }
+                }
+              ],
+              \\"should\\": [],
+              \\"must_not\\": []
+            }
+          },
+          {
             \\"term\\": {
               \\"user.name\\": \\"bastion00.siem.estc.dev\\"
             }
@@ -149,10 +168,6 @@ Object {
       "total": 2,
     },
     "aggregations": Object {
-      "first_seen": Object {
-        "value": 1644837532000,
-        "value_as_string": "2022-02-14T11:18:52.000Z",
-      },
       "host_ip": Object {
         "buckets": Array [
           Object {
@@ -267,10 +282,6 @@ Object {
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0,
       },
-      "last_seen": Object {
-        "value": 1644837532000,
-        "value_as_string": "2022-02-14T11:18:52.000Z",
-      },
       "user_domain": Object {
         "buckets": Array [
           Object {
@@ -323,7 +334,6 @@ Object {
   },
   "total": 2,
   "userDetails": Object {
-    "firstSeen": "2022-02-14T11:18:52.000Z",
     "host": Object {
       "ip": Array [
         "11.245.5.152",
@@ -346,7 +356,6 @@ Object {
         ],
       },
     },
-    "lastSeen": "2022-02-14T11:18:52.000Z",
     "user": Object {
       "domain": Array [
         "NT AUTHORITY",
