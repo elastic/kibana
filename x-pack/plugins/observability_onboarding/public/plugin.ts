@@ -62,6 +62,12 @@ export class ObservabilityOnboardingPlugin
           core.getStartServices(),
         ]);
 
+        const { createCallApi } = await import(
+          './services/rest/create_call_api'
+        );
+
+        createCallApi(core);
+
         return renderApp({
           core: coreStart,
           deps: pluginSetupDeps,

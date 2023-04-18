@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { ComponentType, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { ComponentType, useRef, useState } from 'react';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FilmstripFrame,
+  FilmstripTransition,
+  TransitionState,
+} from '../../shared/filmstrip_transition';
 import {
   Provider as WizardProvider,
   Step as WizardStep,
 } from './logs_onboarding_wizard';
-import {
-  FilmstripTransition,
-  FilmstripFrame,
-  TransitionState,
-} from '../../shared/filmstrip_transition';
 import { HorizontalSteps } from './logs_onboarding_wizard/horizontal_steps';
 import { PageTitle } from './logs_onboarding_wizard/page_title';
 
@@ -43,6 +44,12 @@ const TRANSITION_DURATION = 180;
 function AnimatedTransitionsWizard() {
   const [transition, setTransition] = useState<TransitionState>('ready');
   const TransitionComponent = useRef<ComponentType>(() => null);
+
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/observability/onboarding/hello_world');
+  }, []);
+
+  console.log(data);
 
   function onChangeStep({
     direction,

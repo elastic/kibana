@@ -4,20 +4,20 @@
   "owner": "@elastic/apm-ui",
   "plugin": {
     "id": "observabilityOnboarding",
-    "server": false,
+    "server": true,
     "browser": true,
     "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "data",
+      "observability",
     ],
     "optionalPlugins": [
       "cloud",
       "usageCollection",
-      "observability",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "observability",
-    ]
+      "kibanaReact"
+    ],
+    "extraPublicDirs": ["common"]
   }
 }
