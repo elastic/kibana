@@ -24,7 +24,6 @@ import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-serv
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
- *    - {@link Env | Env.mode} - containing the current environment mode
  * @public
  */
 export interface CoreRequestHandlerContext {
