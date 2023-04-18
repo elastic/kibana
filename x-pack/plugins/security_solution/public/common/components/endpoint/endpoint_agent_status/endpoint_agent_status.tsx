@@ -17,6 +17,7 @@ import {
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_POLL_INTERVAL } from '../../../../management/common/constants';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoint_hosts/view/host_constants';
 import { getEmptyValue } from '../../empty_value';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -29,7 +30,6 @@ import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
 
 const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
-const AUTO_REFRESH_INTERVAL = 10000;
 const ISOLATING_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.agentAndActionsStatus.isIsolating',
   { defaultMessage: 'Isolating' }
@@ -55,7 +55,7 @@ export interface EndpointAgentStatusProps {
    * If set to `true` (Default), then the endpoint isolation state and response actions count
    * will be kept up to date by querying the API periodically
    */
-  autoFresh?: boolean;
+  autoRefresh?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -64,12 +64,12 @@ export interface EndpointAgentStatusProps {
  * response actions against it.
  */
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
-  ({ endpointHostInfo, autoFresh = true, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointHostInfo, autoRefresh = true, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
       [endpointHostInfo.metadata.agent.id],
       {
-        refetchInterval: autoFresh ? AUTO_REFRESH_INTERVAL : false,
+        refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
       }
     );
 
@@ -139,7 +139,7 @@ export interface EndpointAgentStatusByIdProps {
 export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
   ({ endpointAgentId, autoFresh, 'data-test-subj': dataTestSubj }) => {
     const { data } = useGetEndpointDetails(endpointAgentId, {
-      refetchInterval: autoFresh ? AUTO_REFRESH_INTERVAL : false,
+      refetchInterval: autoFresh ? DEFAULT_POLL_INTERVAL : false,
     });
 
     const emptyValue = (
@@ -156,7 +156,7 @@ export const EndpointAgentStatusById = memo<EndpointAgentStatusByIdProps>(
       <EndpointAgentStatus
         endpointHostInfo={data}
         data-test-subj={dataTestSubj}
-        autoFresh={autoFresh}
+        autoRefresh={autoFresh}
       />
     );
   }

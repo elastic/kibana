@@ -258,7 +258,7 @@ describe('When showing Endpoint Agent Status', () => {
 
     describe('and `autoRefresh` prop is set to true', () => {
       beforeEach(() => {
-        renderProps.autoFresh = true;
+        renderProps.autoRefresh = true;
         jest.useFakeTimers();
       });
 

@@ -184,7 +184,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     return merge(hostMetadataDoc, overrides);
   }
 
-  /** Generates the complete `HostInfo` as return by a call to the Endpoint host details api */
+  /** Generates the complete `HostInfo` as returned by a call to the Endpoint host details api */
   generateHostInfo(overrides: DeepPartial<HostInfoInterface> = {}): HostInfoInterface {
     const hostInfo: HostInfoInterface = {
       metadata: this.generate(),

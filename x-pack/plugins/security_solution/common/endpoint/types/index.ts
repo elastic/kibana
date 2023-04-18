@@ -473,9 +473,8 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-// Host Information as return by the Host Details API.
-// NOTE:  `HostInfo` type is the original and defined as Immutable. If needing to
-//        work with data that is not mutable, use `HostInfo` instead
+// Host Information as returned by the Host Details API.
+// NOTE:  `HostInfo` type is the original and defined as Immutable.
 export interface HostInfoInterface {
   metadata: HostMetadataInterface;
   host_status: HostStatus;
