@@ -54,7 +54,7 @@ describe('getSelectorConditions', () => {
 
     // check that process specific conditions are not included
     expect(options.includes('processExecutable')).toBeFalsy();
-    expect(options.includes('processUserId')).toBeFalsy();
+    expect(options.includes('sessionLeaderInteractive')).toBeFalsy();
   });
 
   it('grabs process conditions for process selectors', () => {
@@ -70,7 +70,6 @@ describe('getSelectorConditions', () => {
 
     // check that process specific conditions are not included
     expect(options.includes('processExecutable')).toBeTruthy();
-    expect(options.includes('processUserId')).toBeTruthy();
     expect(options.includes('sessionLeaderInteractive')).toBeTruthy();
   });
 });

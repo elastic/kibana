@@ -10,8 +10,6 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createRule } from './api_calls/rules';
-import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -115,28 +113,7 @@ export const addIndexToDefault = (index: string) => {
     });
 };
 
-export const deleteAlertsIndex = () => {
-  const alertsIndexUrl = `${Cypress.env(
-    'ELASTICSEARCH_URL'
-  )}/.internal.alerts-security.alerts-default-000001`;
-
-  cy.request({
-    url: alertsIndexUrl,
-    method: 'GET',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        url: alertsIndexUrl,
-        method: 'DELETE',
-        headers: { 'kbn-xsrf': 'cypress-creds' },
-      });
-    }
-  });
-};
-
-const refreshUntilAlertsIndexExists = async () => {
+export const refreshUntilAlertsIndexExists = async () => {
   cy.waitUntil(
     () => {
       cy.reload();
@@ -151,11 +128,6 @@ const refreshUntilAlertsIndexExists = async () => {
     },
     { interval: 500, timeout: 12000 }
   );
-};
-
-export const waitForAlertsIndexToExist = () => {
-  createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
-  refreshUntilAlertsIndexExists();
 };
 
 export const deleteRuntimeField = (dataView: string, fieldName: string) => {

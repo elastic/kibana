@@ -128,7 +128,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.logs.alerts-default",
+    "index": ".alerts-observability.logs.alerts-000001",
     "id": "123456789XYZ",
     "source": {
       "event.kind": "signal",
@@ -149,7 +149,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.logs.alerts-default",
+    "index": ".alerts-observability.logs.alerts-000001",
     "id": "space1alertLogs",
     "source": {
       "event.kind": "signal",
