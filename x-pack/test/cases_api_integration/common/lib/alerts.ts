@@ -120,13 +120,11 @@ export const createCaseAttachAlertAndDeleteAlert = async ({
   });
 
   const alertAfterDeletion = await getAlerts(alerts);
-
-  const caseIdsWithoutRemovedCase =
-    expectedHttpCode === 204
-      ? updatedCases
-          .filter((theCase) => theCase.id !== caseToDelete.id)
-          .map((theCase) => theCase.id)
-      : updatedCases.map((theCase) => theCase.id);
+  const caseIdsWithoutRemovedCase = getCaseIdsWithoutRemovedCases({
+    expectedHttpCode,
+    updatedCases,
+    caseIdsToDelete: [caseToDelete.id],
+  });
 
   for (const alert of alertAfterDeletion) {
     expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
@@ -174,13 +172,11 @@ export const createCaseAttachAlertAndDeleteCase = async ({
   });
 
   const alertAfterDeletion = await getAlerts(alerts);
-
-  const caseIdsWithoutRemovedCase =
-    expectedHttpCode === 204
-      ? updatedCases
-          .filter((theCase) => !caseIdsToDelete.some((id) => theCase.id === id))
-          .map((theCase) => theCase.id)
-      : updatedCases.map((theCase) => theCase.id);
+  const caseIdsWithoutRemovedCase = getCaseIdsWithoutRemovedCases({
+    expectedHttpCode,
+    updatedCases,
+    caseIdsToDelete,
+  });
 
   for (const alert of alertAfterDeletion) {
     expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
@@ -246,4 +242,20 @@ export const createCaseAndAttachAlert = async ({
   }
 
   return updatedCases;
+};
+
+export const getCaseIdsWithoutRemovedCases = ({
+  updatedCases,
+  caseIdsToDelete,
+  expectedHttpCode,
+}: {
+  expectedHttpCode: number;
+  updatedCases: Array<{ id: string }>;
+  caseIdsToDelete: string[];
+}) => {
+  return expectedHttpCode === 204
+    ? updatedCases
+        .filter((theCase) => !caseIdsToDelete.some((id) => theCase.id === id))
+        .map((theCase) => theCase.id)
+    : updatedCases.map((theCase) => theCase.id);
 };

@@ -915,10 +915,13 @@ export class AlertsClient {
       const SCRIPT_PARAMS_ID = 'caseIds';
 
       const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
-        for (int i=0; i < params['${SCRIPT_PARAMS_ID}'].length; i++) {
-          if (ctx._source['${ALERT_CASE_IDS}'].contains(params['${SCRIPT_PARAMS_ID}'][i])) {
-            int index = ctx._source['${ALERT_CASE_IDS}'].indexOf(params['${SCRIPT_PARAMS_ID}'][i]);
-            ctx._source['${ALERT_CASE_IDS}'].remove(index);
+        List storedCaseIds = ctx._source['${ALERT_CASE_IDS}'];
+        List caseIdsToRemove = params['${SCRIPT_PARAMS_ID}'];
+
+        for (int i=0; i < caseIdsToRemove.length; i++) {
+          if (storedCaseIds.contains(caseIdsToRemove[i])) {
+            int index = storedCaseIds.indexOf(caseIdsToRemove[i]);
+            storedCaseIds.remove(index);
           }
         }
       }`;
