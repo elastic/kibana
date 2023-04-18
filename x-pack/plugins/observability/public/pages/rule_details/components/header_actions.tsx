@@ -47,27 +47,28 @@ export function HeaderActions({ loading, onDeleteRule, onEditRule }: HeaderActio
       <EuiFlexItem>
         <EuiPopover
           id="contextRuleEditMenu"
-          isOpen={isRuleEditPopoverOpen}
-          closePopover={handleClosePopover}
           button={
             <EuiButton
+              data-test-subj="actions"
+              disabled={loading}
               fill
               iconSide="right"
-              onClick={togglePopover}
               iconType="arrowDown"
-              data-test-subj="actions"
+              onClick={togglePopover}
             >
               {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
                 defaultMessage: 'Actions',
               })}
             </EuiButton>
           }
+          closePopover={handleClosePopover}
+          isOpen={isRuleEditPopoverOpen}
         >
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
             <EuiButtonEmpty
               data-test-subj="editRuleButton"
-              size="s"
               iconType="pencil"
+              size="s"
               onClick={handleEditRule}
             >
               <EuiText size="s">
@@ -77,11 +78,11 @@ export function HeaderActions({ loading, onDeleteRule, onEditRule }: HeaderActio
               </EuiText>
             </EuiButtonEmpty>
             <EuiButtonEmpty
-              size="s"
-              iconType="trash"
               color="danger"
-              onClick={handleRemoveRule}
               data-test-subj="deleteRuleButton"
+              iconType="trash"
+              size="s"
+              onClick={handleRemoveRule}
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
