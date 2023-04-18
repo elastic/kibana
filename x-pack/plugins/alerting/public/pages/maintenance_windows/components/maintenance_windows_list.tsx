@@ -98,7 +98,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
-    const actions: Array<EuiBasicTableColumn<MaintenanceWindowResponse>> = [
+    const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
         name: '',
         actions: [
@@ -108,7 +108,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             description: 'Edit maintenance window',
             icon: 'pencil',
             type: 'icon',
-            onClick: (mw: MaintenanceWindowResponse) => navigateToEditMaintenanceWindows(mw.id),
+            onClick: (mw: MaintenanceWindowFindResponse) => navigateToEditMaintenanceWindows(mw.id),
             'data-test-subj': 'action-edit',
           },
         ],
