@@ -100,6 +100,7 @@ const GroupSelectorComponent = ({
             currentOptions={options.map((o) => ({ text: o.label, field: o.key }))}
             onSubmit={(field: string) => {
               onGroupChange(field);
+              setIsPopoverOpen(false);
             }}
             fields={fields}
           />

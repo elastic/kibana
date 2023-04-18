@@ -183,7 +183,7 @@ describe('useGetGroupSelector', () => {
         activeGroups: ['host.name'],
       },
     };
-    const { result } = renderHook((props) => useGetGroupSelector(props), {
+    const { result, rerender } = renderHook((props) => useGetGroupSelector(props), {
       initialProps: {
         ...defaultArgs,
         groupingState: {
@@ -192,17 +192,54 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange(customField));
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    rerender({
+      ...defaultArgs,
+      groupingState: {
+        groupById: {
+          [groupingId]: {
+            ...defaultGroup,
+            options: defaultGroupingOptions,
+            activeGroups: ['host.name', customField],
+          },
+        },
+      },
+    });
     expect(dispatch).toHaveBeenCalledTimes(2);
     expect(dispatch).toHaveBeenNthCalledWith(2, {
       payload: {
-        id: groupingId,
+        newOptionList: [...defaultGroupingOptions, { label: customField, key: customField }],
+        id: 'test-table',
+      },
+      type: ActionType.updateGroupOptions,
+    });
+  });
+
+  it('Supports multiple custom fields on initial load', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroups: ['host.name', customField, 'another.custom'],
+      },
+    };
+    renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
+        },
+      },
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith({
+      payload: {
         newOptionList: [
           ...defaultGroupingOptions,
-          {
-            label: customField,
-            key: customField,
-          },
+          { label: customField, key: customField },
+          { label: 'another.custom', key: 'another.custom' },
         ],
+        id: 'test-table',
       },
       type: ActionType.updateGroupOptions,
     });

@@ -87,49 +87,46 @@ export const useGetGroupSelector = ({
       );
 
       onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
-
-      // only update options if the new selection is a custom field
-      if (
-        !isNoneGroup([groupSelection]) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      }
     },
-    [
-      defaultGroupingOptions,
-      groupingId,
-      onGroupChange,
-      options,
-      selectedGroups,
-      setOptions,
-      setSelectedGroups,
-      tracker,
-    ]
+    [groupingId, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );
 
   useEffect(() => {
-    // only set options the first time, all other updates will be taken care of by onGroupChange
-    if (options.length > 0) return;
-    setOptions(
-      defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
-        ? defaultGroupingOptions
-        : [
-            ...defaultGroupingOptions,
-            ...(!isNoneGroup(selectedGroups)
-              ? selectedGroups.map((selectedGroup) => ({
-                  key: selectedGroup,
-                  label: selectedGroup,
-                }))
-              : []),
-          ]
-    );
+    if (options.length === 0) {
+      return setOptions(
+        defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
+          ? defaultGroupingOptions
+          : [
+              ...defaultGroupingOptions,
+              ...(!isNoneGroup(selectedGroups)
+                ? selectedGroups.map((selectedGroup) => ({
+                    key: selectedGroup,
+                    label: selectedGroup,
+                  }))
+                : []),
+            ]
+      );
+    }
+    if (isNoneGroup(selectedGroups)) {
+      return;
+    }
+
+    const currentOptionKeys = options.map((o) => o.key);
+    const newOptions = [...options];
+    selectedGroups.forEach((groupSelection) => {
+      if (currentOptionKeys.includes(groupSelection)) {
+        return;
+      }
+      // these are custom fields
+      newOptions.push({
+        label: groupSelection,
+        key: groupSelection,
+      });
+    });
+
+    if (newOptions.length !== options.length) {
+      setOptions(newOptions);
+    }
   }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
 
   return (
