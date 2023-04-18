@@ -9,15 +9,19 @@ import { kea, MakeLogicType } from 'kea';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 
-import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
+import { findOrCreateDataView } from '../../utils/find_or_create_data_view';
 
-import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
+import {
+  FetchAnalyticsCollectionActions,
+  FetchAnalyticsCollectionLogic,
+} from './fetch_analytics_collection_logic';
 
 interface AnalyticsCollectionDataViewLogicValues {
   dataView: DataView | null;
 }
 
 interface AnalyticsCollectionDataViewLogicActions {
+  fetchedAnalyticsCollection: FetchAnalyticsCollectionActions['apiSuccess'];
   setDataView(dataView: DataView): { dataView: DataView };
 }
 
@@ -27,25 +31,12 @@ export const AnalyticsCollectionDataViewLogic = kea<
   actions: {
     setDataView: (dataView) => ({ dataView }),
   },
+  connect: {
+    actions: [FetchAnalyticsCollectionLogic, ['apiSuccess as fetchedAnalyticsCollection']],
+  },
   listeners: ({ actions }) => ({
-    [FetchAnalyticsCollectionLogic.actionTypes.apiSuccess]: async (collection) => {
-      let dataView = (
-        await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
-      )?.[0];
-
-      if (!dataView) {
-        dataView = await KibanaLogic.values.data.dataViews.createAndSave(
-          {
-            allowNoIndex: true,
-            name: `behavioral_analytics.events-${collection.name}`,
-            timeFieldName: '@timestamp',
-            title: collection.events_datastream,
-          },
-          true
-        );
-      }
-
-      actions.setDataView(dataView);
+    fetchedAnalyticsCollection: async (collection) => {
+      actions.setDataView(await findOrCreateDataView(collection));
     },
   }),
   path: ['enterprise_search', 'analytics', 'collections', 'dataView'],

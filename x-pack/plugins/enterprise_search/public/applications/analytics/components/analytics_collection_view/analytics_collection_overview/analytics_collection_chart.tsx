@@ -43,7 +43,6 @@ const HOVER_STROKE_WIDTH = 3;
 const CHART_HEIGHT = 490;
 
 interface AnalyticsCollectionChartProps extends WithLensDataInputProps {
-  dataViewQuery: string;
   selectedChart: FilterBy | null;
   setSelectedChart(chart: FilterBy): void;
 }
@@ -303,6 +302,5 @@ export const AnalyticsCollectionChartWithLens = withLensData<
       visualizationType: 'lnsXY',
     };
   },
-  getDataViewQuery: (props) => props.dataViewQuery,
   initialValues,
 });

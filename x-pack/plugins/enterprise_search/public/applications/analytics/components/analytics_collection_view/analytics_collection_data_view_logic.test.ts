@@ -16,19 +16,6 @@ import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
-jest.mock('../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: {
-    values: {
-      data: {
-        dataViews: {
-          find: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
-          createAndSave: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
-        },
-      },
-    },
-  },
-}));
-
 describe('AnalyticsCollectionDataViewLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionDataViewLogic);
 

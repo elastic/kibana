@@ -106,7 +106,7 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
 
                 setFilterBy(id);
               }}
-              dataViewQuery={analyticsCollection.events_datastream}
+              collection={analyticsCollection}
               timeRange={timeRange}
               searchSessionId={searchSessionId}
               getFormula={getFormulaByFilter.bind(null, id)}
@@ -116,7 +116,7 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
 
         <AnalyticsCollectionChartWithLens
           id={'analytics-collection-chart-' + analyticsCollection.name}
-          dataViewQuery={analyticsCollection.events_datastream}
+          collection={analyticsCollection}
           timeRange={timeRange}
           setTimeRange={setTimeRange}
           searchSessionId={searchSessionId}
