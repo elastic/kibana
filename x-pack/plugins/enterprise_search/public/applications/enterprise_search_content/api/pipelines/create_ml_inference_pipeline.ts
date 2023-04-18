@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
+
 import {
   CreateMlInferencePipelineParameters,
   CreateMLInferencePipelineDefinition,
@@ -23,9 +25,10 @@ interface CreateMlInferencePipelineApiLogicArgsWithPipelineParameters {
 }
 
 interface CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition {
+  fieldMappings: FieldMapping[];
   indexName: string;
-  pipelineName: string;
   pipelineDefinition: MlInferencePipeline;
+  pipelineName: string;
 }
 
 export type CreateMlInferencePipelineApiLogicArgs =
@@ -64,14 +67,15 @@ export const createMlInferencePipeline = async (
       destination_field: args.destinationField,
       inference_config: args.inferenceConfig,
       model_id: args.modelId,
-      pipeline_name: args.pipelineName,
       pipeline_definition: undefined,
+      pipeline_name: args.pipelineName,
       source_field: args.sourceField,
     };
   } else if (isArgsWithPipelineDefinition(args)) {
     params = {
-      pipeline_name: args.pipelineName,
+      field_mappings: args.fieldMappings,
       pipeline_definition: args.pipelineDefinition,
+      pipeline_name: args.pipelineName,
     };
   }
   return await HttpLogic.values.http.post<CreateMlInferencePipelineResponse>(route, {

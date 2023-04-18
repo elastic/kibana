@@ -116,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             'generalCases',
             'infrastructure',
             'logs',
+            'maintenanceWindow',
             'maps',
             'osquery',
             'rulesSettings',
