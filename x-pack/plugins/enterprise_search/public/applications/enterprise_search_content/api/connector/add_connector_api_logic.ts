@@ -18,7 +18,7 @@ export interface AddConnectorApiLogicArgs {
   indexName: string;
   isNative: boolean;
   language: string | null;
-  serviceType: string;
+  serviceType?: string;
 }
 
 export interface AddConnectorApiLogicResponse {
