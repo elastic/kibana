@@ -69,6 +69,7 @@ describe('ingest_integration tests ', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const generator = new EndpointDocGenerator();
+  const cloudService = cloudMock.createSetup();
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -93,13 +94,17 @@ describe('ingest_integration tests ', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const createNewEndpointPolicyInput = (manifest: ManifestSchema, license = 'platinum') => ({
+    const createNewEndpointPolicyInput = (
+      manifest: ManifestSchema,
+      license = 'platinum',
+      cloud = cloudService.cloudId
+    ) => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory(license)) },
+        policy: { value: disableProtections(policyFactory(license, cloud)) },
         artifact_manifest: { value: manifest },
       },
     });
@@ -113,7 +118,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient,
-        cloudMock.createSetup()
+        cloudService
       );
 
       return callback(
