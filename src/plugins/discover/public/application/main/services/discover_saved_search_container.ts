@@ -7,7 +7,7 @@
  */
 
 import {
-  getEmptySavedSearch,
+  getNewSavedSearch,
   getSavedSearch,
   SavedSearch,
   saveSavedSearch,
@@ -111,7 +111,7 @@ export function getSavedSearchContainer({
 }: {
   services: DiscoverServices;
 }): DiscoverSavedSearchContainer {
-  const initialSavedSearch = getEmptySavedSearch(services.data);
+  const initialSavedSearch = getNewSavedSearch(services.data);
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
@@ -196,6 +196,7 @@ export function getSavedSearchContainer({
   };
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
+    addLog('[savedSearch] load', { id, dataView });
     const loadedSavedSearch = await getSavedSearch(id, {
       search: services.data.search,
       savedObjectsClient: services.core.savedObjects.client,
