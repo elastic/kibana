@@ -246,6 +246,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getKibanaIndex: deps.savedObjects.getKibanaIndex,
+      getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      getAllIndices: deps.savedObjects.getAllIndices,
     },
     status: {
       core$: deps.status.core$,
@@ -313,6 +315,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createExporter: deps.savedObjects.createExporter,
       createImporter: deps.savedObjects.createImporter,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
+      getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      getIndexForType: deps.savedObjects.getIndexForType,
+      getIndicesForTypes: deps.savedObjects.getIndicesForTypes,
+      getAllIndices: deps.savedObjects.getAllIndices,
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
