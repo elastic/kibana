@@ -27,8 +27,9 @@ describe('kibana_usage', () => {
   });
 
   const kibanaIndex = '.kibana-tests';
+  const getIndexForTypes = (index: string) => (types: string[]) => Promise.resolve([index]);
 
-  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, kibanaIndex));
+  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, getIndexForTypes(kibanaIndex)));
   afterAll(() => jest.clearAllTimers());
 
   afterEach(() => getSavedObjectsCountsMock.mockReset());
@@ -61,7 +62,7 @@ describe('getKibanaSavedObjectCounts', () => {
       non_expected_types: [],
       others: 0,
     });
-    const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
+    const results = await getKibanaSavedObjectCounts(esClient, ['.kibana']);
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -83,7 +84,7 @@ describe('getKibanaSavedObjectCounts', () => {
       others: 0,
     });
 
-    const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
+    const results = await getKibanaSavedObjectCounts(esClient, ['.kibana']);
     expect(results).toStrictEqual({
       dashboard: { total: 1 },
       visualization: { total: 0 },
@@ -94,7 +95,7 @@ describe('getKibanaSavedObjectCounts', () => {
 
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       esClient,
-      '.kibana',
+      ['.kibana'],
       ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'],
       true
     );

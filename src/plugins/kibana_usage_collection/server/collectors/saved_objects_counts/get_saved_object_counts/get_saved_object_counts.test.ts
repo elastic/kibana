@@ -20,7 +20,7 @@ describe('getSavedObjectsCounts', () => {
   test('should not fail if no body returned', async () => {
     const esClient = mockGetSavedObjectsCounts({});
 
-    const results = await getSavedObjectsCounts(esClient, '.kibana', ['type-a']);
+    const results = await getSavedObjectsCounts(esClient, ['.kibana'], ['type-a']);
     // Make sure ES.search is triggered (we'll test the actual params in other specific tests)
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(results).toStrictEqual({ total: 0, per_type: [], non_expected_types: [], others: 0 });
@@ -28,9 +28,9 @@ describe('getSavedObjectsCounts', () => {
 
   test('should match all and request the `missing` bucket (size + 1) when `exclusive === false`', async () => {
     const esClient = mockGetSavedObjectsCounts({});
-    await getSavedObjectsCounts(esClient, '.kibana', ['type-a', 'type_2']);
+    await getSavedObjectsCounts(esClient, ['.kibana'], ['type-a', 'type_2']);
     expect(esClient.search).toHaveBeenCalledWith({
-      index: '.kibana',
+      index: ['.kibana'],
       ignore_unavailable: true,
       filter_path: [
         'aggregations.types.buckets',
@@ -56,9 +56,9 @@ describe('getSavedObjectsCounts', () => {
 
   test('should apply the terms query and aggregation with the size matching the length of the list when `exclusive === true`', async () => {
     const esClient = mockGetSavedObjectsCounts({});
-    await getSavedObjectsCounts(esClient, '.kibana', ['type_one', 'type_two'], true);
+    await getSavedObjectsCounts(esClient, ['.kibana'], ['type_one', 'type_two'], true);
     expect(esClient.search).toHaveBeenCalledWith({
-      index: '.kibana',
+      index: ['.kibana'],
       ignore_unavailable: true,
       filter_path: [
         'aggregations.types.buckets',
@@ -85,11 +85,11 @@ describe('getSavedObjectsCounts', () => {
       aggregations: { types: { buckets, sum_other_doc_count: 10 } },
     });
 
-    const results = await getSavedObjectsCounts(esClient, '.kibana', [
-      'type_one',
-      'type-two',
-      'type-3',
-    ]);
+    const results = await getSavedObjectsCounts(
+      esClient,
+      ['.kibana'],
+      ['type_one', 'type-two', 'type-3']
+    );
     expect(results).toStrictEqual({
       total: 13,
       per_type: [
@@ -112,7 +112,7 @@ describe('getSavedObjectsCounts', () => {
       aggregations: { types: { buckets, sum_other_doc_count: 10 } },
     });
 
-    const results = await getSavedObjectsCounts(esClient, '.kibana', ['type_one', 'type-two']);
+    const results = await getSavedObjectsCounts(esClient, ['.kibana'], ['type_one', 'type-two']);
     expect(results).toStrictEqual({
       total: 13,
       per_type: [
@@ -137,7 +137,7 @@ describe('getSavedObjectsCounts', () => {
       aggregations: { types: { buckets, sum_other_doc_count: 6 } },
     });
 
-    const results = await getSavedObjectsCounts(esClient, '.kibana', ['type_one', 'type-two']);
+    const results = await getSavedObjectsCounts(esClient, ['.kibana'], ['type_one', 'type-two']);
     expect(results).toStrictEqual({
       total: 13,
       per_type: [
