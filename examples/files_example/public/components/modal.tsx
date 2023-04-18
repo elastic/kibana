@@ -9,16 +9,17 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
-import { exampleFileKind, MyImageMetadata } from '../../common';
+import type { MyImageMetadata } from '../../common';
 import { FilesClient, FileUpload } from '../imports';
 
 interface Props {
   client: FilesClient<MyImageMetadata>;
+  fileKind: string;
   onDismiss: () => void;
   onUploaded: () => void;
 }
 
-export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client }) => {
+export const Modal: FunctionComponent<Props> = ({ fileKind, onDismiss, onUploaded, client }) => {
   return (
     <EuiModal onClose={onDismiss}>
       <EuiModalHeader>
@@ -27,12 +28,7 @@ export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client 
         </EuiText>
       </EuiModalHeader>
       <EuiModalBody>
-        <FileUpload
-          multiple
-          kind={exampleFileKind.id}
-          onDone={onUploaded}
-          meta={{ custom: 'meta' }}
-        />
+        <FileUpload multiple kind={fileKind} onDone={onUploaded} meta={{ custom: 'meta' }} />
       </EuiModalBody>
     </EuiModal>
   );

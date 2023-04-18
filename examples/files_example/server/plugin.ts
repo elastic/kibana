@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import { exampleFileKind } from '../common';
+import { exampleFileKind, exampleFileKindNotDeletableInMangementUI } from '../common';
 import type { FilesExamplePluginsSetup, FilesExamplePluginsStart } from './types';
 
 export class FilesExamplePlugin
@@ -23,6 +23,7 @@ export class FilesExamplePlugin
     this.logger.debug('filesExample: Setup');
 
     files.registerFileKind(exampleFileKind);
+    files.registerFileKind(exampleFileKindNotDeletableInMangementUI);
 
     return {};
   }

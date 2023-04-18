@@ -9,8 +9,12 @@
 import type { FileKind } from '@kbn/files-plugin/common';
 import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
-export const PLUGIN_ID = 'filesExample';
+export const PLUGIN_ID = 'filesExample' as const;
 export const PLUGIN_NAME = 'Files example';
+export const NO_MGT_DELETE_FILE_KIND = `${PLUGIN_ID}NoMgtDelete` as const;
+export const FILE_KIND_IDS = [PLUGIN_ID, NO_MGT_DELETE_FILE_KIND] as const;
+
+export type FileTypeId = typeof FILE_KIND_IDS[number];
 
 const httpTags = {
   tags: [`access:${PLUGIN_ID}`],
@@ -28,6 +32,11 @@ export const exampleFileKind: FileKind = {
     share: httpTags,
     update: httpTags,
   },
+};
+
+export const exampleFileKindNotDeletableInMangementUI: FileKind = {
+  ...exampleFileKind,
+  id: NO_MGT_DELETE_FILE_KIND,
 };
 
 export type MyImageMetadata = FileImageMetadata;

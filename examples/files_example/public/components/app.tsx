@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { FC, useState, type Dispatch, type SetStateAction } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
@@ -19,11 +19,14 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
 import { MyFilePicker } from './file_picker';
-import type { MyImageMetadata } from '../../common';
+import type { FileTypeId, MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
 import { DetailsFlyout } from './details_flyout';
 import { ConfirmButtonIcon } from './confirm_button';
@@ -36,16 +39,27 @@ interface FilesExampleAppDeps {
 
 type ListResponse = FilesClientResponses<MyImageMetadata>['list'];
 
-export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) => {
-  const { data, isLoading, error, refetch } = useQuery<ListResponse>(
-    ['files'],
-    () => files.example.list(),
-    { refetchOnWindowFocus: false }
-  );
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showFilePickerModal, setShowFilePickerModal] = useState(false);
+interface FilesTableProps extends FilesExampleAppDeps {
+  data?: ListResponse;
+  isLoading: boolean;
+  error: unknown;
+  refetch: () => Promise<unknown>;
+  setShowUploadModal: Dispatch<SetStateAction<boolean>>;
+  setShowFilePickerModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedItem: Dispatch<SetStateAction<undefined | FileJSON<MyImageMetadata>>>;
+}
+
+const FilesTable: FC<FilesTableProps> = ({
+  files,
+  data,
+  isLoading,
+  error,
+  refetch,
+  setSelectedItem,
+  setShowFilePickerModal,
+  setShowUploadModal,
+}) => {
   const [isDeletingFile, setIsDeletingFile] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<undefined | FileJSON<MyImageMetadata>>();
 
   const renderToolsRight = () => {
     return [
@@ -131,21 +145,98 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
+    <EuiInMemoryTable
+      columns={columns}
+      items={items}
+      itemId="id"
+      loading={isLoading || isDeletingFile}
+      error={error ? JSON.stringify(error) : undefined}
+      sorting
+      search={{
+        toolsRight: renderToolsRight(),
+      }}
+      pagination
+    />
+  );
+};
+
+export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) => {
+  const exampleFilesQuery = useQuery<ListResponse>(['files'], () => files.example.list(), {
+    refetchOnWindowFocus: false,
+  });
+
+  const exampleFilesNotDeletableQuery = useQuery<ListResponse>(
+    ['filesNotDeletable'],
+    () => files.exampleNotDeletable.list(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFilePickerModal, setShowFilePickerModal] = useState(false);
+  const [activeFileTypeId, setActiveFileTypeId] = useState<FileTypeId>('filesExample');
+  const [selectedItem, setSelectedItem] = useState<undefined | FileJSON<MyImageMetadata>>();
+
+  return (
     <>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
-          <EuiInMemoryTable
-            columns={columns}
-            items={items}
-            itemId="id"
-            loading={isLoading || isDeletingFile}
-            error={error ? JSON.stringify(error) : undefined}
-            sorting
-            search={{
-              toolsRight: renderToolsRight(),
+          <EuiTitle size="s">
+            <h2>All UI actions in management UI</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <FilesTable
+            {...{
+              files,
+              notifications,
+              data: exampleFilesQuery.data,
+              isLoading: exampleFilesQuery.isLoading,
+              error: exampleFilesQuery.error,
+              refetch: exampleFilesQuery.refetch,
+              setSelectedItem,
+              setShowFilePickerModal: (value) => {
+                setActiveFileTypeId('filesExample');
+                setShowFilePickerModal(value);
+              },
+              setShowUploadModal: (value) => {
+                setActiveFileTypeId('filesExample');
+                setShowUploadModal(value);
+              },
             }}
-            pagination
+          />
+
+          <EuiSpacer size="xl" />
+
+          <EuiTitle size="s">
+            <h2>Files not deletable in management UI</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText>
+            The files uploaded in this table are not deletable in the Kibana {'>'} Management {'>'}{' '}
+            Files UI
+          </EuiText>
+          <EuiSpacer size="s" />
+
+          <FilesTable
+            {...{
+              files,
+              notifications,
+              data: exampleFilesNotDeletableQuery.data,
+              isLoading: exampleFilesNotDeletableQuery.isLoading,
+              error: exampleFilesNotDeletableQuery.error,
+              refetch: exampleFilesNotDeletableQuery.refetch,
+              setSelectedItem,
+              setShowFilePickerModal: (value) => {
+                setActiveFileTypeId('filesExampleNoMgtDelete');
+                setShowFilePickerModal(value);
+              },
+              setShowUploadModal: (value) => {
+                setActiveFileTypeId('filesExampleNoMgtDelete');
+                setShowUploadModal(value);
+              },
+            }}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -159,10 +250,15 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       {showUploadModal && (
         <Modal
           client={files.unscoped}
+          fileKind={activeFileTypeId}
           onDismiss={() => setShowUploadModal(false)}
           onUploaded={() => {
             notifications.toasts.addSuccess('Uploaded file!');
-            refetch();
+            if (activeFileTypeId === 'filesExample') {
+              exampleFilesQuery.refetch();
+            } else {
+              exampleFilesNotDeletableQuery.refetch();
+            }
             setShowUploadModal(false);
           }}
         />
@@ -170,11 +266,16 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       {showFilePickerModal && (
         <MyFilePicker
           onClose={() => setShowFilePickerModal(false)}
+          fileKind={activeFileTypeId}
           onUpload={() => {
             notifications.toasts.addSuccess({
               title: 'Uploaded files',
             });
-            refetch();
+            if (activeFileTypeId === 'filesExample') {
+              exampleFilesQuery.refetch();
+            } else {
+              exampleFilesNotDeletableQuery.refetch();
+            }
           }}
           onDone={(ids) => {
             notifications.toasts.addSuccess({

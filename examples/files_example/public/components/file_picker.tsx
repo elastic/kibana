@@ -9,20 +9,19 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 
-import { exampleFileKind } from '../../common';
-
 import { FilePicker } from '../imports';
 
 interface Props {
+  fileKind: string;
   onClose: () => void;
   onUpload: (ids: string[]) => void;
   onDone: (ids: string[]) => void;
 }
 
-export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
+export const MyFilePicker: FunctionComponent<Props> = ({ fileKind, onClose, onDone, onUpload }) => {
   return (
     <FilePicker
-      kind={exampleFileKind.id}
+      kind={fileKind}
       onClose={onClose}
       onDone={(files) => onDone(files.map((f) => f.id))}
       onUpload={(n) => onUpload(n.map(({ id }) => id))}
