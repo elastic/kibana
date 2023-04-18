@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
-import { waitForHostToEnroll } from './fleet_services';
+import assert from 'assert';
+import {
+  fetchAgentPolicyEnrollmentKey,
+  fetchFleetServerUrl,
+  getAgentDownloadUrl,
+  waitForHostToEnroll,
+} from './fleet_services';
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
@@ -23,8 +30,6 @@ export interface CreateAndEnrollEndpointHostOptions
 }
 
 interface CreateAndEnrollEndpointHostResponse {
-  /** The virtualization software used to create the new VM */
-  provider: 'multipass';
   hostname: string;
   agentId: string;
 }
@@ -32,11 +37,56 @@ interface CreateAndEnrollEndpointHostResponse {
 /**
  * Creates a new virtual machine (host) and enrolls that with Fleet
  */
-export const createAndEnrollEndpointHost = async (
-  options: CreateAndEnrollEndpointHostOptions
-): Promise<CreateAndEnrollEndpointHostResponse> => {
-  // FIXME:PT implement
+export const createAndEnrollEndpointHost = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  cpus,
+  disk,
+  memory,
+  hostname,
+  version = kibanaPackageJson.version,
+}: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
+  const [vm, agentDownloadUrl, fleetServerUrl, enrollmentToken] = await Promise.all([
+    createMultipassVm({
+      vmName: hostname ?? `test.host.${Math.random().toString().substring(2, 6)}`,
+      disk,
+      cpus,
+      memory,
+    }),
+
+    getAgentDownloadUrl(version, log),
+
+    fetchFleetServerUrl(kbnClient),
+
+    fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
+  ]);
+
+  // Some validations before we proceed
+  assert(agentDownloadUrl, 'Missing agent download URL');
+  assert(fleetServerUrl, 'Fleet server URL not set');
+  assert(enrollmentToken, 'No enrollment token');
+
+  log.verbose(`Enrolling host [${vm.vmName}]
+  with fleet-server [${fleetServerUrl}]
+  using enrollment token [${enrollmentToken}]`);
+
+  const { agentId } = await enrollHostWithFleet({
+    kbnClient,
+    log,
+    fleetServerUrl,
+    agentDownloadUrl,
+    enrollmentToken,
+    vmName: vm.vmName,
+  });
+
+  return {
+    hostname: vm.vmName,
+    agentId,
+  };
 };
+
+// FIXME:PT create function to remove endpoint host
 
 interface CreateMultipassVmOptions {
   vmName: string;
@@ -86,7 +136,7 @@ const enrollHostWithFleet = async ({
   fleetServerUrl,
   agentDownloadUrl,
   enrollmentToken,
-}: EnrollHostWithFleetOptions): Promise<void> => {
+}: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
   const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
   const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
@@ -129,5 +179,9 @@ const enrollHostWithFleet = async ({
   await execa(`multipass`, agentInstallArguments);
 
   log.info(`Waiting for Agent to check-in with Fleet`);
-  await waitForHostToEnroll(kbnClient, vmName);
+  const agent = await waitForHostToEnroll(kbnClient, vmName, 120000);
+
+  return {
+    agentId: agent.id,
+  };
 };
