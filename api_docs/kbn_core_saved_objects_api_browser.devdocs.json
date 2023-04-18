@@ -1483,10 +1483,6 @@
                 "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/hooks/use_create_saved_object.tsx"
               },
@@ -1872,11 +1868,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
+                "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
               },
               {
                 "plugin": "infra",
@@ -2172,14 +2164,6 @@
                 "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/list_page/load_list_and_render.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -2414,6 +2398,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/custom_urls/custom_url_editor/utils.ts"
               },
               {
                 "plugin": "ml",
@@ -2689,10 +2677,6 @@
                 "path": "x-pack/plugins/lens/public/persistence/saved_object_store.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
               },
@@ -2965,10 +2949,6 @@
               {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
               },
               {
                 "plugin": "infra",
@@ -3881,11 +3861,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
             "plugin": "lens",
@@ -3910,18 +3890,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/maps_vis_type_alias.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/maps_vis_type_alias.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/maps_vis_type_alias.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -4110,14 +4078,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
           }
         ],
         "children": [

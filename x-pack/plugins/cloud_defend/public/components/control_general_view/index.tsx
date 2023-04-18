@@ -338,6 +338,10 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
       </EuiFlexItem>
 
       {selectors.map((selector, i) => {
+        const usedByResponse = !!responses.find((response) =>
+          response.match.includes(selector.name)
+        );
+
         return (
           <EuiFlexItem key={i}>
             <ControlGeneralViewSelector
@@ -345,6 +349,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
               index={i}
               selector={selector}
               selectors={selectors}
+              usedByResponse={usedByResponse}
               onDuplicate={onDuplicateSelector}
               onRemove={onRemoveSelector}
               onChange={onSelectorChange}
