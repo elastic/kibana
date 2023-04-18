@@ -75,11 +75,8 @@ export function disableUICapabilitiesFactory(
     return featureSet.some((feature) => (feature.catalogue ?? []).includes(catalogueEntry));
   }
 
-  const shouldDisableFeatureUICapability = (
-    featureId: keyof UICapabilities,
-    uiCapability: string
-  ) => {
-    // This method answers: 'Do we wish to disable a feature based on privileges?'
+  const shouldAffectCapability = (featureId: keyof UICapabilities, uiCapability: string) => {
+    // This method answers: 'Should we affect a capability based on privileges?'
 
     // 'spaces' and 'fileUpload' feature ID's are handled independently
     // The spaces and file_upload plugins have their own capabilites switchers
@@ -120,7 +117,7 @@ export function disableUICapabilitiesFactory(
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) =>
       mapValues(featureUICapabilities, (value, uiCapability) => {
         if (typeof value === 'boolean') {
-          if (shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+          if (shouldAffectCapability(featureId!, uiCapability!)) {
             return false;
           }
           return value;
@@ -270,7 +267,7 @@ export function disableUICapabilitiesFactory(
         featureUICapabilities,
         (value: boolean | Record<string, boolean>, uiCapability) => {
           if (typeof value === 'boolean') {
-            if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+            if (!shouldAffectCapability(featureId!, uiCapability!)) {
               return value;
             }
             return checkPrivilegesForCapability(value, featureId!, uiCapability!);
