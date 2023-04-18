@@ -33,10 +33,16 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import {
+  tableDefaults,
+  dataTableActions,
+  dataTableSelectors,
+  FILTER_OPEN,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
-import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -48,8 +54,6 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
