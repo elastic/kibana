@@ -32,11 +32,22 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
   );
 
   const unwrappedButton = !isDisabled ? (
-    <EuiLink onClick={onClick} color={'text'} aria-label={message}>
+    <EuiLink
+      data-test-subj="aiopsTableActionButtonEnabled"
+      onClick={onClick}
+      color={'text'}
+      aria-label={message}
+    >
       {buttonContent}
     </EuiLink>
   ) : (
-    <EuiText size="s" color={'subdued'} aria-label={message} css={{ fontWeight: 500 }}>
+    <EuiText
+      data-test-subj="aiopsTableActionButtonDisabled"
+      size="s"
+      color={'subdued'}
+      aria-label={message}
+      css={{ fontWeight: 500 }}
+    >
       {buttonContent}
     </EuiText>
   );
