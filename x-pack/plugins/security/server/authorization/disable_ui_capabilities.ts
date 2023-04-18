@@ -81,10 +81,18 @@ export function disableUICapabilitiesFactory(
   ) => {
     // This method answers: 'Do we wish to disable a feature based on privileges?'
 
-    // If the feature is 'catalogue', return true if we have a feature that references it
+    // 'spaces' and 'fileUpload' feature ID's are handled independently
+    // The spaces and file_upload plugins have their own capabilites switchers
+
+    // Always affect global settings
+    if (featureId === 'globalSettings') return true;
+
+    // If the feature is 'catalogue', return true if it is the 'spaces' capability
+    // (we always want to affect that) or if we have a feature that references it
     // (i.e. found in the 'catalogue' property of a registered Kibana or ES feature)
     if (featureId === 'catalogue') {
       return (
+        uiCapability === 'spaces' ||
         isCatalogueItemReferencedByFeatureSet(uiCapability, features) ||
         isCatalogueItemReferencedByFeatureSet(uiCapability, elasticsearchFeatures)
       );
