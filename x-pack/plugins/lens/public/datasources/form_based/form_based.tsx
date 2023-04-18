@@ -38,7 +38,6 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
-  DatasourceLayerSettingsProps,
   DataSourceInfo,
   UserMessage,
   FrameDatasourceAPI,
@@ -432,10 +431,7 @@ export function getFormBasedDatasource({
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
       toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
-    renderLayerSettings(
-      domElement: Element,
-      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
-    ) {
+    renderLayerSettings(domElement, props) {
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>

@@ -46,6 +46,7 @@ export const storybookAliases = {
   random_sampling: 'src/plugins/random_sampling/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'packages/security-solution/storybook/config',
+  security_solution_data_table: 'x-pack/packages/kbn-securitysolution-data-table/.storybook',
   shared_ux: 'packages/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
