@@ -33,8 +33,6 @@ import {
   dependenciesSatisfied,
 } from './connector_configuration_logic';
 
-import './connector_configuration_form.scss';
-
 export const ConnectorConfigurationForm = () => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
