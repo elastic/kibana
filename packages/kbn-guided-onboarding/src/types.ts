@@ -95,6 +95,18 @@ export interface StepConfig {
   description?: string | StepDescriptionWithLink;
   // description list is displayed as an unordered list, can be combined with description
   descriptionList?: Array<string | StepDescriptionWithLink>;
+  /*
+   * Kibana location where the user will be redirected when starting or continuing a guide step.
+   * The property `path` can use dynamic parameters, for example `testPath/{indexID}/{pageID}.
+   * All dynamic parameters used in the property `path` needs to be listed in the property `params`,
+   * for example ['indexID', 'pageID'].
+   * For the dynamic path to be configured correctly, the values of the parameters need to be passed to
+   * the api service when completing one of the previous steps.
+   * For example, if step 2 has a dynamic parameter `indexID` in its location path
+   * { appID: 'test', path: 'testPath/{indexID}', params: ['indexID'] },
+   * its value needs to be passed to the api service when completing step 1. For example,
+   * `guidedOnboardingAPI.completeGuideStep('testGuide', 'step1', { indexID: 'testIndex' })
+   */
   location?: {
     appID: string;
     path: string;
