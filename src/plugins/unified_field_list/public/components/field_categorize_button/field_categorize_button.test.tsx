@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
@@ -53,7 +53,6 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
           dataView={dataView}
           originatingApp={ORIGINATING_APP}
           uiActions={uiActions}
-          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         />
       );
     });
@@ -74,7 +73,7 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
       originatingApp: ORIGINATING_APP,
     });
 
-    expect(wrapper!.find(EuiPopoverFooter).find(EuiButton).exists()).toBeTruthy();
+    expect(wrapper!.find(EuiButton).exists()).toBeTruthy();
   });
 
   it('should not render for non text field', async () => {
@@ -89,7 +88,6 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
           dataView={dataView}
           originatingApp={ORIGINATING_APP}
           uiActions={uiActions}
-          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         />
       );
     });
