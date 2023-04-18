@@ -120,6 +120,28 @@ export const testGuideStep3ActiveState: GuideState = {
   ],
 };
 
+export const testGuideStep4ActiveState: GuideState = {
+  ...testGuideStep1ActiveState,
+  steps: [
+    {
+      ...testGuideStep1ActiveState.steps[0],
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[1].id,
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[2].id,
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[3].id,
+      status: 'active',
+    },
+  ],
+};
+
 export const readyToCompleteGuideState: GuideState = {
   ...testGuideStep1ActiveState,
   steps: [

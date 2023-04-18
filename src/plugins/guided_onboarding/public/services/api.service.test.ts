@@ -29,6 +29,7 @@ import {
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
   testGuideStep2ReadyToCompleteState,
+  testGuideParams,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -391,6 +392,21 @@ describe('GuidedOnboarding ApiService', () => {
       // Verify the completed step now has a "complete" status, and the subsequent step is "active"
       expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({ guide: { ...testGuideStep2ActiveState } }),
+      });
+    });
+
+    it(`saves the params if present`, async () => {
+      httpClient.get.mockResolvedValue({
+        pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      apiService.setup(httpClient, true);
+
+      await apiService.completeGuideStep(testGuideId, testGuideFirstStep, testGuideParams);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // Verify the params were sent to the endpoint
+      expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ guide: { ...testGuideStep2ActiveState, params: testGuideParams } }),
       });
     });
 
