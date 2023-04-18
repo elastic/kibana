@@ -30,7 +30,6 @@ import {
 } from '@elastic/eui';
 import {
   PROFILE_OPTIONS,
-  ThrottlingConfigField,
   ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
 import {
@@ -55,6 +54,7 @@ import {
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
+  ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -1102,7 +1102,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
-    component: ThrottlingConfigField,
+    component: ThrottlingWrapper,
     label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
       defaultMessage: 'Connection profile',
     }),
