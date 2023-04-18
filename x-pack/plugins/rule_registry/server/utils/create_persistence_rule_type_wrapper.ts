@@ -22,7 +22,7 @@ import {
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 const augmentAlerts = <T>({
@@ -172,7 +172,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   .filter((_, idx) => response.body.items[idx].create?.status === 201);
 
                 createdAlerts.forEach((alert) =>
-                  options.services.alertFactory.create(alert._id).scheduleActions('default', {})
+                  options.services.alertFactory
+                    .create(alert._id)
+                    .scheduleActions(type.defaultActionGroupId)
                 );
 
                 return {
@@ -362,7 +364,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
         ruleDataClient,
         useNamespace: true,
         isLifecycleAlert: false,
-        formatAlert,
+        formatAlert: formatAlert as (alert: AlertDocument) => AlertDocument,
       })(),
     };
   };

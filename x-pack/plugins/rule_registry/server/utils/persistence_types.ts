@@ -94,8 +94,7 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
 }) => <
   TParams extends RuleTypeParams,
   TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
+  TInstanceContext extends AlertInstanceContext = {}
 >(
-  type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+  type: PersistenceAlertType<TParams, TState, TInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;

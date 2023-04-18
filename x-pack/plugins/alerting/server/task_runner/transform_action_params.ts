@@ -6,6 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import {
   RuleActionParams,
   AlertInstanceState,
@@ -147,7 +148,11 @@ export function transformSummaryActionParams({
     context: {
       alerts: alerts.all.data ?? [],
       results_link: ruleUrl,
-      rule: rule.params,
+      rule: mapKeys(snakeCase, {
+        ...rule.params,
+        name: rule.name,
+        id: rule.id,
+      }),
     },
     state: {
       signals_count: alerts.all.count ?? 0,
