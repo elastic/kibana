@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LOCATOR } from '../common/constants';
+import { LOCATOR, PLUGIN } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export interface WatcherManagementLocatorParams extends SerializableRecord {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
@@ -17,15 +22,18 @@ export type WatcherManagementLocator = LocatorPublic<WatcherManagementLocatorPar
 export class WatcherManagementLocatorDefinition
   implements LocatorDefinition<WatcherManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = LOCATOR.MANAGEMENT;
 
   public readonly getLocation = async (
     _params: WatcherManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/insightsAndAlerting/watcher',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'insightsAndAlerting',
+      appId: PLUGIN.ID,
+    });
+
+    return location;
   };
 }

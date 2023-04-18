@@ -164,12 +164,12 @@ interface PluginsStart {
 
 export class Plugin
   implements
-    CorePlugin<
-      TriggersAndActionsUIPublicPluginSetup,
-      TriggersAndActionsUIPublicPluginStart,
-      PluginsSetup,
-      PluginsStart
-    >
+  CorePlugin<
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+  PluginsSetup,
+  PluginsStart
+  >
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
@@ -333,8 +333,13 @@ export class Plugin
       },
     });
 
-    plugins.share.url.locators.create(new CasesManagementLocatorDefinition());
-    plugins.share.url.locators.create(new ConnectorsManagementLocatorDefinition());
+    const managementAppLocator = plugins.management.locator;
+    plugins.share.url.locators.create(
+      new CasesManagementLocatorDefinition({ managementAppLocator })
+    );
+    plugins.share.url.locators.create(
+      new ConnectorsManagementLocatorDefinition({ managementAppLocator })
+    );
 
     if (this.experimentalFeatures.internalAlertsTable) {
       registerAlertsTableConfiguration({
@@ -453,5 +458,5 @@ export class Plugin
     };
   }
 
-  public stop() {}
+  public stop() { }
 }

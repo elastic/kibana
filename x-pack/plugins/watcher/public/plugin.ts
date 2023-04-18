@@ -85,7 +85,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       },
     });
 
-    share.url.locators.create(new WatcherManagementLocatorDefinition());
+    share.url.locators.create(
+      new WatcherManagementLocatorDefinition({ managementAppLocator: management.locator })
+    );
 
     // TODO: Fix the below dependency on `home` plugin inner workings
     // Because the home feature catalogue does not have enable/disable functionality we pass

@@ -60,7 +60,9 @@ export class TransformUiPlugin {
     });
     registerFeature(home);
 
-    pluginsSetup.share.url.locators.create(new TransformsManagementLocatorDefinition());
+    pluginsSetup.share.url.locators.create(
+      new TransformsManagementLocatorDefinition({ managementAppLocator: management.locator })
+    );
 
     if (triggersActionsUi) {
       triggersActionsUi.ruleTypeRegistry.register(getTransformHealthRuleType());

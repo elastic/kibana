@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import { SPACES_MANAGEMENT_LOCATOR } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type SpacesManagementLocator = LocatorPublic<SpacesManagementLocatorParams>;
 
@@ -18,15 +23,18 @@ export interface SpacesManagementLocatorParams extends SerializableRecord {} // 
 export class SpacesManagementLocatorDefinition
   implements LocatorDefinition<SpacesManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = SPACES_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: SpacesManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/kibana/spaces',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'kibana',
+      appId: 'spaces',
+    });
+
+    return location;
   };
 }

@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import { ML_MANAGEMENT_LOCATOR } from '../../common/constants/locator';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type { MlManagementLocator } from '../../common/types/locator';
 
 export class MlManagementLocatorDefinition implements LocatorDefinition<{}> {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = ML_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (_params: {}): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/insightsAndAlerting/jobsListLink',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'insightsAndAlerting',
+      appId: 'jobsListLink',
+    });
+
+    return location;
   };
 }

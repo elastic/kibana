@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CCR_MANAGEMENT_LOCATOR } from '../common/constants';
+import { CCR_MANAGEMENT_LOCATOR, MANAGEMENT_ID } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type CcrManagementLocator = LocatorPublic<CcrManagementLocatorParams>;
 
@@ -17,15 +22,18 @@ export interface CcrManagementLocatorParams extends SerializableRecord {} // esl
 export class CcrManagementLocatorDefinition
   implements LocatorDefinition<CcrManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = CCR_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: CcrManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/data/cross_cluster_replication',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'data',
+      appId: MANAGEMENT_ID,
+    });
+
+    return location;
   };
 }

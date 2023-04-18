@@ -35,12 +35,12 @@ export class SnapshotRestoreLocatorDefinition
     });
 
     switch (params.page) {
-      case 'snapshots': {
+      case 'snapshots':
+      default:
         return {
           ...location,
           path: location.path + linkToSnapshots(),
         };
-      }
     }
   };
 }

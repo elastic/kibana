@@ -7,10 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { CASES_MANAGEMENT_LOCATOR, CONNECTORS_MANAGEMENT_LOCATOR } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type CasesManagementLocator = LocatorPublic<CasesManagementLocatorParams>;
 
@@ -19,16 +24,19 @@ export interface CasesManagementLocatorParams extends SerializableRecord {} // e
 export class CasesManagementLocatorDefinition
   implements LocatorDefinition<CasesManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = CASES_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: CasesManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/insightsAndAlerting/cases',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'insightsAndAlerting',
+      appId: 'cases',
+    });
+
+    return location;
   };
 }
 
@@ -37,15 +45,18 @@ export interface ConnectorsManagementLocatorParams extends SerializableRecord {}
 export class ConnectorsManagementLocatorDefinition
   implements LocatorDefinition<ConnectorsManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = CONNECTORS_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: ConnectorsManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'insightsAndAlerting',
+      appId: 'triggersActionsConnectors/connectors',
+    });
+
+    return location;
   };
 }

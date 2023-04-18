@@ -94,7 +94,9 @@ export class CasesUiPlugin
       },
     });
 
-    plugins.share.url.locators.create(new RulesManagementLocatorDefinition());
+    plugins.share.url.locators.create(
+      new RulesManagementLocatorDefinition({ managementAppLocator: plugins.management.locator })
+    );
 
     return {
       attachmentFramework: {

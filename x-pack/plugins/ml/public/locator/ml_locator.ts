@@ -113,7 +113,6 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
 
       default:
-        throw new Error('Page type is not provided or unknown');
     }
 
     return {

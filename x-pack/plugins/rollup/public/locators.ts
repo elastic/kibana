@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ROLLUP_MANAGEMENT_LOCATOR } from '../common';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type RollupManagementLocator = LocatorPublic<RollupManagementLocatorParams>;
 
@@ -17,15 +22,18 @@ export interface RollupManagementLocatorParams extends SerializableRecord {} // 
 export class RollupManagementLocatorDefinition
   implements LocatorDefinition<RollupManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = ROLLUP_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: RollupManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/data/rollup_jobs',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'data',
+      appId: 'rollup_jobs',
+    });
+
+    return location;
   };
 }

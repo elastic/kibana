@@ -53,7 +53,9 @@ export class ManagementService {
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     if (share) {
-      share.url.locators.create(new SecurityManagementLocatorDefinition());
+      share.url.locators.create(
+        new SecurityManagementLocatorDefinition({ managementAppLocator: management.locator })
+      );
     }
   }
 

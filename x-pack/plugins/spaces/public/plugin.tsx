@@ -72,6 +72,10 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         getStartServices: core.getStartServices,
         spacesManager: this.spacesManager,
       });
+
+      plugins.share.url.locators.create(
+        new SpacesManagementLocatorDefinition({ managementAppLocator: plugins.management.locator })
+      );
     }
 
     if (plugins.advancedSettings) {
@@ -87,8 +91,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       application: core.application,
       spacesManager: this.spacesManager,
     });
-
-    plugins.share.url.locators.create(new SpacesManagementLocatorDefinition());
 
     return {};
   }

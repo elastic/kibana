@@ -59,7 +59,10 @@ export class IndexMgmtUIPlugin {
           );
         },
       });
-      plugins.share.url.locators.create(new IndexManagementLocatorDefinition());
+
+      plugins.share.url.locators.create(
+        new IndexManagementLocatorDefinition({ managementAppLocator: management.locator })
+      );
     }
 
     return {

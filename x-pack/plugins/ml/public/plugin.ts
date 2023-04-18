@@ -151,9 +151,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-      this.managementSectionLocator = pluginsSetup.share.url.locators.create(
-        new MlManagementLocatorDefinition()
-      );
+
+      const managementAppLocator = pluginsSetup.management?.locator;
+      if (managementAppLocator) {
+        this.managementSectionLocator = pluginsSetup.share.url.locators.create(
+          new MlManagementLocatorDefinition({ managementAppLocator })
+        );
+      }
     }
 
     if (pluginsSetup.management) {

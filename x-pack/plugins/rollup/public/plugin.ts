@@ -93,7 +93,9 @@ export class RollupPlugin implements Plugin {
         },
       });
 
-      share.url.locators.create(new RollupManagementLocatorDefinition());
+      share.url.locators.create(
+        new RollupManagementLocatorDefinition({ managementAppLocator: management.locator })
+      );
     }
   }
 

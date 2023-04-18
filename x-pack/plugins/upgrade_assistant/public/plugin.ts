@@ -91,7 +91,11 @@ export class UpgradeAssistantUIPlugin
         },
       });
 
-      share.url.locators.create(new UpgradeAssistantManagementLocatorDefinition());
+      share.url.locators.create(
+        new UpgradeAssistantManagementLocatorDefinition({
+          managementAppLocator: management.locator,
+        })
+      );
     }
   }
 

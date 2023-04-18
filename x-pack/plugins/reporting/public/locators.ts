@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { REPORTING_MANAGEMENT_LOCATOR } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type ReportingManagementLocator = LocatorPublic<ReportingManagementLocatorParams>;
 
@@ -17,15 +22,18 @@ export interface ReportingManagementLocatorParams extends SerializableRecord {} 
 export class ReportingManagementLocatorDefinition
   implements LocatorDefinition<ReportingManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = REPORTING_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: ReportingManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/insightsAndAlerting/reporting',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'insightsAndAlerting',
+      appId: 'reporting',
+    });
+
+    return location;
   };
 }

@@ -75,7 +75,9 @@ export class CrossClusterReplicationPlugin implements Plugin {
       },
     });
 
-    share.url.locators.create(new CcrManagementLocatorDefinition());
+    share.url.locators.create(
+      new CcrManagementLocatorDefinition({ managementAppLocator: management.locator })
+    );
 
     // NOTE: We enable the plugin by default instead of disabling it by default because this
     // creates a race condition that causes functional tests to fail on CI (see #66781).

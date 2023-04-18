@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { MANAGEMENT_LOCATOR } from '../common/constants';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type LogstashManagementLocator = LocatorPublic<LogstashManagementLocatorParams>;
 
@@ -17,15 +22,18 @@ export interface LogstashManagementLocatorParams extends SerializableRecord {} /
 export class LogstashManagementLocatorDefinition
   implements LocatorDefinition<LogstashManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: LogstashManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/ingest/pipelines',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'ingest',
+      appId: 'pipelines',
+    });
+
+    return location;
   };
 }

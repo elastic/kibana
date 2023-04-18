@@ -37,15 +37,14 @@ export class LicenseManagementLocatorDefinition
     });
 
     switch (params.page) {
-      case 'upload_license': {
+      case 'upload_license':
         return {
           ...location,
           path: `${location.path}/${UPLOAD_LICENSE_ROUTE}`,
         };
-      }
-      case 'dashboard': {
+      case 'dashboard':
+      default:
         return location;
-      }
     }
   };
 }

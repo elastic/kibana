@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { INDEX_MANAGEMENT_LOCATOR } from '../common/constants';
+import { PLUGIN } from '../common/constants/plugin';
+
+interface LocatorDefinitionDependencies {
+  managementAppLocator: ManagementAppLocator;
+}
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 
@@ -17,15 +23,18 @@ export interface IndexManagementLocatorParams extends SerializableRecord {} // e
 export class IndexManagementLocatorDefinition
   implements LocatorDefinition<IndexManagementLocatorParams>
 {
+  constructor(protected readonly deps: LocatorDefinitionDependencies) {}
+
   public readonly id = INDEX_MANAGEMENT_LOCATOR;
 
   public readonly getLocation = async (
     _params: IndexManagementLocatorParams
   ): Promise<KibanaLocation> => {
-    return {
-      app: 'management',
-      path: '/data/index_management',
-      state: {},
-    };
+    const location = await this.deps.managementAppLocator.getLocation({
+      sectionId: 'data',
+      appId: PLUGIN.id,
+    });
+
+    return location;
   };
 }

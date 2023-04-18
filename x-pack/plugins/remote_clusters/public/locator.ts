@@ -33,12 +33,13 @@ export class RemoteClustersLocatorDefinition
     });
 
     switch (params.page) {
-      case 'remoteClusters': {
+      case 'remoteClusters':
         return {
           ...location,
           path: location.path,
         };
-      }
+      default:
+        return location;
     }
   };
 }

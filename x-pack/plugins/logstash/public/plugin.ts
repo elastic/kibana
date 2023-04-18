@@ -50,7 +50,10 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
         return renderApp(coreStart, params, isMonitoringEnabled, logstashLicense$);
       },
     });
-    plugins.share.url.locators.create(new LogstashManagementLocatorDefinition());
+
+    plugins.share.url.locators.create(
+      new LogstashManagementLocatorDefinition({ managementAppLocator: plugins.management.locator })
+    );
 
     this.licenseSubscription = combineLatest([logstashLicense$, this.capabilities$]).subscribe(
       ([license, capabilities]) => {

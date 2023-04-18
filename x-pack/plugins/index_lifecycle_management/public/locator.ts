@@ -56,6 +56,9 @@ export class IlmLocatorDefinition implements LocatorDefinition<IlmLocatorParams>
           path: location.path + getPoliciesListPath(),
         };
       }
+      default: {
+        return location;
+      }
     }
   };
 }

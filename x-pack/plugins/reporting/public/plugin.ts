@@ -95,12 +95,12 @@ export interface ReportingPublicPluginStartDendencies {
  */
 export class ReportingPublicPlugin
   implements
-    Plugin<
-      ReportingSetup,
-      ReportingStart,
-      ReportingPublicPluginSetupDendencies,
-      ReportingPublicPluginStartDendencies
-    >
+  Plugin<
+  ReportingSetup,
+  ReportingStart,
+  ReportingPublicPluginSetupDendencies,
+  ReportingPublicPluginStartDendencies
+  >
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
@@ -202,7 +202,9 @@ export class ReportingPublicPlugin
       },
     });
 
-    share.url.locators.create(new ReportingManagementLocatorDefinition());
+    share.url.locators.create(
+      new ReportingManagementLocatorDefinition({ managementAppLocator: management.locator })
+    );
 
     core.application.register({
       id: 'reportingRedirect',
