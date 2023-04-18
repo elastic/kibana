@@ -177,7 +177,6 @@ describe('callAPI', () => {
       1,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central')
         ),
@@ -192,7 +191,6 @@ describe('callAPI', () => {
       2,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
         ),
@@ -207,7 +205,6 @@ describe('callAPI', () => {
       3,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
         ),
@@ -284,15 +281,15 @@ describe('callAPI', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Successfully called service location https://service.dev with method POST with 4 monitors '
+      'Successfully called service location https://service.devundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       4,
-      'Successfully called service location https://qa.service.elstc.co with method POST with 4 monitors '
+      'Successfully called service location https://qa.service.elstc.coundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      'Successfully called service location https://qa.service.stg.co with method POST with 1 monitors '
+      'Successfully called service location https://qa.service.stg.coundefined with method POST with 1 monitors'
     );
   });
 
@@ -320,7 +317,6 @@ describe('callAPI', () => {
         coreStart: mockCoreStart,
       } as UptimeServerSetup
     );
-
     apiClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
@@ -352,6 +348,110 @@ describe('callAPI', () => {
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
+    });
+  });
+
+  it('Calls the `/run` endpoint when calling `runOnce`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.runOnce({
+      monitors: testMonitors,
+      output,
+      licenseLevel: 'trial',
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'POST',
+      url: 'https://service.dev/run',
+    });
+  });
+
+  it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.syncMonitors({
+      monitors: testMonitors,
+      output,
+      licenseLevel: 'trial',
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'PUT',
+      url: 'https://service.dev/monitors/sync',
     });
   });
 });
