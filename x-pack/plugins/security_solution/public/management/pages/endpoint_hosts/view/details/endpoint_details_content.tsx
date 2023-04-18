@@ -23,6 +23,7 @@ import type { HostInfo, HostMetadata, HostStatus } from '../../../../../../commo
 import { useEndpointSelector } from '../hooks';
 import {
   fullDetailsHostInfo,
+  getEndpointPendingActionsCallback,
   nonExistingPolicies,
   policyResponseStatus,
   uiQueryParams,
@@ -68,7 +69,7 @@ export const EndpointDetailsContent = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
-
+    const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
     const hostInfo = useEndpointSelector(fullDetailsHostInfo);
 
@@ -107,7 +108,14 @@ export const EndpointDetailsContent = memo(
               />
             </ColumnTitle>
           ),
-          description: hostInfo ? <EndpointAgentStatus endpointHostInfo={hostInfo} /> : <></>,
+          description: hostInfo ? (
+            <EndpointAgentStatus
+              pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
+              endpointHostInfo={hostInfo}
+            />
+          ) : (
+            <></>
+          ),
         },
         {
           title: (
@@ -220,7 +228,15 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [details, hostInfo, missingPolicies, policyInfo, policyStatus, policyStatusClickHandler]);
+    }, [
+      details,
+      getHostPendingActions,
+      hostInfo,
+      missingPolicies,
+      policyInfo,
+      policyStatus,
+      policyStatusClickHandler,
+    ]);
 
     return (
       <EndpointDetailsContentStyled>
