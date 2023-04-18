@@ -8,6 +8,8 @@
 import type SuperTest from 'supertest';
 import { apiRoutes as fileApiRoutes } from '@kbn/files-plugin/public/files_client/files_client';
 import { BaseFilesClient } from '@kbn/shared-ux-file-types';
+import { OWNERS } from '@kbn/cases-plugin/common/constants';
+import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
@@ -40,8 +42,27 @@ export const downloadFile = async ({
   return result;
 };
 
+export const deleteFileForFileKind = async ({
+  supertest,
+  fileKind,
+  id,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  fileKind: string;
+  id: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getDeleteRoute(fileKind, id)}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+};
+
 export interface FileDescriptor {
-  kind: string;
   id: string;
 }
 
@@ -52,28 +73,19 @@ export const deleteFiles = async ({
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  files: FileDescriptor[];
+  files: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }) => {
-  await Promise.all(
-    files.map(async (fileInfo) => {
-      return await supertest
-        .delete(
-          `${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getDeleteRoute(
-            fileInfo.kind,
-            fileInfo.id
-          )}`
-        )
-        .set('kbn-xsrf', 'true')
-        .auth(auth.user.username, auth.user.password)
-        .send()
-        .expect(expectedHttpCode);
-    })
-  );
+  await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getBulkDeleteRoute()}`)
+    .set('kbn-xsrf', 'true')
+    .send({ ids: files })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
 };
 
-export const deleteAllFiles = async ({
+export const deleteAllFilesForKind = async ({
   supertest,
   kind,
   auth = { user: superUser, space: null },
@@ -84,14 +96,66 @@ export const deleteAllFiles = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }) => {
-  const files = await listFiles({ supertest, params: { kind }, auth, expectedHttpCode });
+  const { body: files } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getFindRoute()}`)
+    .set('kbn-xsrf', 'true')
+    .query({ perPage: 10000 })
+    .auth(auth.user.username, auth.user.password)
+    .send({
+      kind,
+    })
+    .expect(expectedHttpCode);
 
-  await deleteFiles({
-    supertest,
-    files: files.files.map((fileInfo) => ({ kind, id: fileInfo.id })),
-    auth,
-    expectedHttpCode,
-  });
+  const castedFiles = files as Awaited<ReturnType<BaseFilesClient['find']>>;
+
+  if (castedFiles.files.length > 0) {
+    await deleteFiles({
+      supertest,
+      files: castedFiles.files.map((fileInfo) => fileInfo.id),
+      auth,
+      expectedHttpCode,
+    });
+  }
+};
+
+export const deleteAllFiles = async ({
+  supertest,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+  ignoreErrors = true,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+  ignoreErrors?: boolean;
+}) => {
+  const fileKindOwners = OWNERS.map((owner) => constructFileKindIdByOwner(owner));
+
+  try {
+    const { body: files } = await supertest
+      .post(`${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getFindRoute()}`)
+      .set('kbn-xsrf', 'true')
+      .query({ perPage: 10000 })
+      .auth(auth.user.username, auth.user.password)
+      .send({
+        kind: fileKindOwners,
+      })
+      .expect(expectedHttpCode);
+    const castedFiles = files as Awaited<ReturnType<BaseFilesClient['find']>>;
+
+    if (castedFiles.files.length > 0) {
+      await deleteFiles({
+        supertest,
+        files: castedFiles.files.map((fileInfo) => fileInfo.id),
+        auth,
+        expectedHttpCode,
+      });
+    }
+  } catch (error) {
+    if (!ignoreErrors) {
+      throw error;
+    }
+  }
 };
 
 export const getFileById = async ({

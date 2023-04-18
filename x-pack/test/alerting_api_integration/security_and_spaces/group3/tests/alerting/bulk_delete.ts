@@ -13,6 +13,7 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
   apiKey: response.body.rules[0].apiKey,
+  apiKeyCreatedByUser: false,
   notifyWhen: 'onThrottleInterval',
   enabled: true,
   name: 'abc',
@@ -46,6 +47,7 @@ const getThreeRules = (response: any) => {
     rules.push({
       id: response.body.rules[i].id,
       apiKey: response.body.rules[i].apiKey,
+      apiKeyCreatedByUser: false,
       notifyWhen: 'onThrottleInterval',
       enabled: true,
       name: 'abc',

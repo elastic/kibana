@@ -136,6 +136,11 @@ export interface Context {
     isLastDoc: boolean;
   };
   reset: () => void;
+  validation: {
+    setScriptEditorValidation: React.Dispatch<
+      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
+    >;
+  };
 }
 
 export type PainlessExecuteContext =

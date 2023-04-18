@@ -73,8 +73,6 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
-
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
   children,
@@ -113,6 +111,12 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
+  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  }>({ isValidating: false, isValid: true, message: null });
+
   /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
@@ -125,10 +129,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
     useStateSelector(controller.state$, documentsSelector);
-  const scriptEditorValidation = useStateSelector(
-    controller.state$,
-    scriptEditorValidationSelector
-  );
 
   let isPreviewAvailable = true;
 
@@ -464,6 +464,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       panel: {
         isVisible: isPanelVisible,
         setIsVisible: setIsPanelVisible,
+      },
+      validation: {
+        setScriptEditorValidation,
       },
       reset,
     }),

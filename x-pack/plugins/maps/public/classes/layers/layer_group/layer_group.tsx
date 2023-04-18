@@ -330,10 +330,6 @@ export class LayerGroup implements ILayer {
     return 'layers';
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return true;
-  }
-
   async getBounds(
     getDataRequestContext: (layerId: string) => DataRequestContext
   ): Promise<MapExtent | null> {

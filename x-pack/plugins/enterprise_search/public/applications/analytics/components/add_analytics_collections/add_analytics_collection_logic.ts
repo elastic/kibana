@@ -24,7 +24,7 @@ import {
   AddAnalyticsCollectionApiLogicArgs,
   AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
-import { COLLECTION_VIEW_PATH } from '../../routes';
+import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 
 const SERVER_ERROR_CODE = 500;
 
@@ -102,7 +102,7 @@ export const AddAnalyticsCollectionLogic = kea<
         })
       );
       KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(COLLECTION_VIEW_PATH, {
+        generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
           name,
         })
       );
