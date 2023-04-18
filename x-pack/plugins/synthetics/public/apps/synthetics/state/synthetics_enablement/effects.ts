@@ -6,6 +6,7 @@
  */
 
 import { takeLatest, takeLeading } from 'redux-saga/effects';
+import { i18n } from '@kbn/i18n';
 import {
   getSyntheticsEnablement,
   getSyntheticsEnablementSuccess,
@@ -17,8 +18,8 @@ import {
   enableSyntheticsSuccess,
   enableSyntheticsFailure,
 } from './actions';
-import { fetchGetSyntheticsEnablement, fetchDisableSynthetics, fetchEnableSynthetics } from './api';
 import { fetchEffectFactory } from '../utils/fetch_effect';
+import { fetchGetSyntheticsEnablement, fetchDisableSynthetics, fetchEnableSynthetics } from './api';
 
 export function* fetchSyntheticsEnablementEffect() {
   yield takeLeading(
@@ -35,6 +36,20 @@ export function* fetchSyntheticsEnablementEffect() {
   );
   yield takeLatest(
     enableSynthetics,
-    fetchEffectFactory(fetchEnableSynthetics, enableSyntheticsSuccess, enableSyntheticsFailure)
+    fetchEffectFactory(
+      fetchEnableSynthetics,
+      enableSyntheticsSuccess,
+      enableSyntheticsFailure,
+      successMessage,
+      failureMessage
+    )
   );
 }
+
+const successMessage = i18n.translate('xpack.synthetics.settings.enablement.success', {
+  defaultMessage: 'Monitor Management enabled successfully',
+});
+
+const failureMessage = i18n.translate('xpack.synthetics.settings.enablement.fail', {
+  defaultMessage: 'Failed to enable Monitor Management',
+});

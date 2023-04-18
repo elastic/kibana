@@ -65,7 +65,6 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
       state.loading = false;
       state.error = action.payload;
     })
-
     .addCase(enableSynthetics, (state) => {
       state.loading = true;
       state.enablement = null;

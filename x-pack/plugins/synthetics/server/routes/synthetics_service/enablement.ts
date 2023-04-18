@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
-import {
-  SyntheticsRestApiRouteFactory,
-  UMRestApiRouteFactory,
-} from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {
   generateAndSaveServiceAPIKey,
   SyntheticsForbiddenError,
 } from '../../synthetics_service/get_api_key';
 
-export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
+export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
@@ -65,13 +62,34 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
   },
 });
 
-export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
+export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'POST',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ request, response, server }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    server,
+    syntheticsMonitorClient,
+    savedObjectsClient,
+  }): Promise<any> => {
     const { authSavedObjectsClient, logger } = server;
     try {
+      const { security } = server;
+      const { syntheticsService } = syntheticsMonitorClient;
+      const { canEnable } = await libs.requests.getSyntheticsEnablement({ server });
+      if (!canEnable) {
+        return response.forbidden();
+      }
+      await syntheticsService.deleteAllConfigs();
+
+      const { apiKey } = await libs.requests.getAPIKeyForSyntheticsService({
+        server,
+      });
+      if (apiKey) {
+        await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+        await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
+      }
       await generateAndSaveServiceAPIKey({
         request,
         authSavedObjectsClient,
@@ -87,7 +105,10 @@ export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
       if (e instanceof SyntheticsForbiddenError) {
         return response.forbidden();
       }
-      throw e;
+      return response.customError({
+        statusCode: 500,
+        body: e,
+      });
     }
   },
 });

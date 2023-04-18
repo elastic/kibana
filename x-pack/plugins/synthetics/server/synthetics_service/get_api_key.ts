@@ -56,7 +56,8 @@ export const getAPIKeyForSyntheticsService = async ({
       const hasPermissions =
         indexPermissions.auto_configure &&
         indexPermissions.create_doc &&
-        indexPermissions.view_index_metadata;
+        indexPermissions.view_index_metadata &&
+        indexPermissions.read;
 
       if (!hasPermissions) {
         return { isValid: false, apiKey };
