@@ -128,3 +128,134 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana_analyst_experience_$KIBANA_PACKAGE_VERSION": {},
+      ".kibana_analyst_experience": {}
+    },
+    "index": ".kibana_analyst_experience_$KIBANA_PACKAGE_VERSION_001",
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "indexTypesMap": {
+          ".kibana": [
+            "action",
+            "action_task_params",
+            "alert",
+            "api_key_pending_invalidation",
+            "apm-indices",
+            "apm-server-schema",
+            "apm-service-group",
+            "apm-telemetry",
+            "app_search_telemetry",
+            "application_usage_daily",
+            "application_usage_totals",
+            "canvas-element",
+            "canvas-workpad",
+            "canvas-workpad-template",
+            "cases",
+            "cases-comments",
+            "cases-configure",
+            "cases-connector-mappings",
+            "cases-telemetry",
+            "cases-user-actions",
+            "config",
+            "config-global",
+            "connector_token",
+            "core-usage-stats",
+            "dashboard",
+            "enterprise_search_telemetry",
+            "epm-packages",
+            "epm-packages-assets",
+            "event_loop_delays_daily",
+            "file",
+            "file-upload-usage-collection-telemetry",
+            "fileShare",
+            "fleet-fleet-server-host",
+            "fleet-message-signing-keys",
+            "fleet-preconfiguration-deletion-record",
+            "fleet-proxy",
+            "graph-workspace",
+            "guided-onboarding-guide-state",
+            "guided-onboarding-plugin-state",
+            "index-pattern",
+            "infrastructure-monitoring-log-view",
+            "infrastructure-ui-source",
+            "ingest-agent-policies",
+            "ingest-download-sources",
+            "ingest-outputs",
+            "ingest-package-policies",
+            "ingest_manager_settings",
+            "inventory-view",
+            "kql-telemetry",
+            "legacy-url-alias",
+            "lens",
+            "lens-ui-telemetry",
+            "map",
+            "metrics-explorer-view",
+            "ml-job",
+            "ml-module",
+            "ml-trained-model",
+            "monitoring-telemetry",
+            "query",
+            "rules-settings",
+            "sample-data-telemetry",
+            "search",
+            "search-session",
+            "search-telemetry",
+            "slo",
+            "space",
+            "spaces-usage-stats",
+            "synthetics-monitor",
+            "synthetics-param",
+            "synthetics-privates-locations",
+            "tag",
+            "telemetry",
+            "ui-metric",
+            "upgrade-assistant-ml-upgrade-operation",
+            "upgrade-assistant-reindex-operation",
+            "uptime-dynamic-settings",
+            "uptime-synthetics-api-key",
+            "url",
+            "usage-counters",
+            "visualization",
+            "workplace_search_telemetry"
+          ],
+          ".kibana_analyst_experience": [
+            "canvas-element",
+            "canvas-workpad-template",
+            "canvas-workpad",
+            "dashboard",
+            "graph-workspace",
+            "index-pattern",
+            "kql-telemetry",
+            "lens",
+            "lens-ui-telemetry",
+            "map",
+            "search",
+            "search-session",
+            "search-telemetry",
+            "url",
+            "visualization"
+          ],
+          ".kibana_task_manager": [
+            "task"
+          ]
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "mapping": {
+          "total_fields": { "limit": 1500 }
+        }
+      }
+    }
+  }
+}
