@@ -12,27 +12,40 @@ import { useActions, useValues } from 'kea';
 import {
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldPassword,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { DependencyLookup } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
-import { ConnectorConfigurationLogic } from './connector_configuration_logic';
+import { ConnectorConfigurationField } from './connector_configuration_field';
+import {
+  ConfigEntry,
+  ConnectorConfigurationLogic,
+  dependenciesSatisfied,
+} from './connector_configuration_logic';
 
 export const ConnectorConfigurationForm = () => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
-  const { saveConfig, setIsEditing, setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
+  const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
+
+  const dependencyLookup: DependencyLookup = localConfigView.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
 
   return (
     <EuiForm
@@ -43,26 +56,22 @@ export const ConnectorConfigurationForm = () => {
       component="form"
     >
       {localConfigView.map((configEntry) => {
-        const { key, isPasswordField, label, value } = configEntry;
-        return (
+        const { depends_on: dependencies, key, label } = configEntry;
+        const hasDependencies = dependencies.length > 0;
+
+        return hasDependencies ? (
+          dependenciesSatisfied(dependencies, dependencyLookup) ? (
+            <EuiPanel color="subdued" borderRadius="none">
+              <EuiFormRow label={label ?? ''} key={key}>
+                <ConnectorConfigurationField configEntry={configEntry} />
+              </EuiFormRow>
+            </EuiPanel>
+          ) : (
+            <></>
+          )
+        ) : (
           <EuiFormRow label={label ?? ''} key={key}>
-            {isPasswordField ? (
-              <EuiFieldPassword
-                value={value}
-                disabled={status === Status.LOADING}
-                onChange={(event) => {
-                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
-                }}
-              />
-            ) : (
-              <EuiFieldText
-                value={value}
-                disabled={status === Status.LOADING}
-                onChange={(event) => {
-                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
-                }}
-              />
-            )}
+            <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );
       })}

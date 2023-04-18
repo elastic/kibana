@@ -4241,6 +4241,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/generate-csv@link:packages/kbn-generate-csv":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -4553,6 +4561,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-plugin@link:x-pack/plugins/ml":
   version "0.0.0"
   uid ""
@@ -4745,6 +4757,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-common@link:packages/kbn-reporting/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
   version "0.0.0"
   uid ""
@@ -4829,6 +4845,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
@@ -4894,6 +4914,10 @@
   uid ""
 
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
   version "0.0.0"
   uid ""
 
@@ -14255,7 +14279,7 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.44.0:
+elastic-apm-node@^3.44.1:
   version "3.44.1"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.44.1.tgz#8a6e88fa9f3401455dddb87f9d5559f6d894964d"
   integrity sha512-hSf+S6GtQ+Ff5ueyQ1n2BAgAdiDOZ+XmHKFurzpB5/rvRFz6JbXLq+pcI11HMlK3ImiMVG9LQxHWMN6gqkqzYQ==
