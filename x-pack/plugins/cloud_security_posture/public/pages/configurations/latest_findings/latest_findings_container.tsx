@@ -49,6 +49,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     urlQuery,
     setUrlQuery,
     filters,
+    onResetFilters,
   } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
@@ -167,6 +168,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           )}
           <EuiSpacer />
           <FindingsTable
+            onResetFilters={onResetFilters}
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}
