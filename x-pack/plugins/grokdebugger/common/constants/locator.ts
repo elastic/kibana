@@ -6,5 +6,5 @@
  */
 
 export const LOCATOR = {
-  APP: 'GROK_DEBUGGER_APP_LOCATOR',
+  APP: 'GROKDEBUGGER_APP_LOCATOR',
 };
