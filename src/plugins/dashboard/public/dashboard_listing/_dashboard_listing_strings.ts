@@ -92,13 +92,13 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Continue editing',
     }),
   getDiscardAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.discardAria', {
-      defaultMessage: 'Discard changes to {title}',
+    i18n.translate('dashboard.listing.unsaved.resetAria', {
+      defaultMessage: 'Reset changes to {title}',
       values: { title },
     }),
   getDiscardTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.discardTitle', {
-      defaultMessage: 'Discard changes',
+    i18n.translate('dashboard.listing.unsaved.resetTitle', {
+      defaultMessage: 'Reset changes',
     }),
 };
 
