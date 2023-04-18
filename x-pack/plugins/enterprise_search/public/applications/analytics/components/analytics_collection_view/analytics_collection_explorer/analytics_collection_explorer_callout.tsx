@@ -43,7 +43,11 @@ export const AnalyticsCollectionExplorerCallout: React.FC = () => {
       </p>
 
       <RedirectAppLinks application={application}>
-        <EuiButton fill href={exploreLink}>
+        <EuiButton
+          fill
+          href={exploreLink}
+          data-telemetry-id="entSearch-analytics-explorer-callout-exploreLink"
+        >
           <FormattedMessage
             id="xpack.enterpriseSearch.analytics.collectionsView.explorer.callout.button"
             defaultMessage="Explore"
