@@ -28,6 +28,7 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import { registerInternalAttachments } from './internal_attachments';
 import { RulesManagementLocatorDefinition } from './locators';
 
 /**
@@ -54,6 +55,7 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
+    registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
 
@@ -127,6 +129,7 @@ export class CasesUiPlugin
     const getCasesContext = getCasesContextLazy({
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
     return {
@@ -137,6 +140,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
         getCasesContext,
         getRecentCases: (props) =>
@@ -144,6 +148,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
         // @deprecated Please use the hook useCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
@@ -151,6 +156,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
         // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
@@ -158,6 +164,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
       },
       hooks: {

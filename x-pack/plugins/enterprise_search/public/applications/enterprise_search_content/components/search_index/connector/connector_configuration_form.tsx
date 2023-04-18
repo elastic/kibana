@@ -16,22 +16,36 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { DependencyLookup } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
 import { ConnectorConfigurationField } from './connector_configuration_field';
-import { ConnectorConfigurationLogic } from './connector_configuration_logic';
+import {
+  ConfigEntry,
+  ConnectorConfigurationLogic,
+  dependenciesSatisfied,
+} from './connector_configuration_logic';
 
 export const ConnectorConfigurationForm = () => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
   const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
+
+  const dependencyLookup: DependencyLookup = localConfigView.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
 
   return (
     <EuiForm
@@ -42,9 +56,20 @@ export const ConnectorConfigurationForm = () => {
       component="form"
     >
       {localConfigView.map((configEntry) => {
-        const { key, label } = configEntry;
+        const { depends_on: dependencies, key, label } = configEntry;
+        const hasDependencies = dependencies.length > 0;
 
-        return (
+        return hasDependencies ? (
+          dependenciesSatisfied(dependencies, dependencyLookup) ? (
+            <EuiPanel color="subdued" borderRadius="none">
+              <EuiFormRow label={label ?? ''} key={key}>
+                <ConnectorConfigurationField configEntry={configEntry} />
+              </EuiFormRow>
+            </EuiPanel>
+          ) : (
+            <></>
+          )
+        ) : (
           <EuiFormRow label={label ?? ''} key={key}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>

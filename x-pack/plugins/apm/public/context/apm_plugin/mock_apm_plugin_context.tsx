@@ -94,6 +94,7 @@ const mockCorePlugins = {
   inspector: {},
   maps: {},
   observability: {},
+  observabilityShared: {},
   data: {},
 };
 

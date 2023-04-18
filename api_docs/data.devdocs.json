@@ -13035,7 +13035,7 @@
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
-            ", \"register\" | \"init\"> & { deserialize: ",
+            ", \"init\" | \"register\"> & { deserialize: ",
             {
               "pluginId": "fieldFormats",
               "scope": "common",
@@ -13738,18 +13738,6 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -13780,6 +13768,18 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "aiops",
@@ -21368,18 +21368,6 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -21410,6 +21398,18 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "aiops",
