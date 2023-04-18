@@ -49,8 +49,8 @@ export const MSearchTable = () => {
       findItems={findItems}
       listingLimit={LISTING_LIMIT}
       initialPageSize={50}
-      entityName={`Content item`}
-      entityNamePlural={`Content items`}
+      entityName={`ContentItem`}
+      entityNamePlural={`ContentItems`}
       tableListTitle={`MSearch Demo`}
       urlStateEnabled={false}
       onClickTitle={(item) => {

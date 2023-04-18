@@ -9,7 +9,6 @@
 import React from 'react';
 import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
-import { BrowserRouter } from 'react-router-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
@@ -24,21 +23,19 @@ export const MSearchApp = (props: {
   return (
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
-        <BrowserRouter>
-          <TableListViewKibanaProvider
-            core={{
-              application: props.core.application as any, // TODO: fix it on the TableListView side
-              notifications: props.core.notifications,
-              overlays: props.core.overlays,
-              http: props.core.http,
-            }}
-            toMountPoint={toMountPoint}
-            FormattedRelative={FormattedRelative}
-            savedObjectsTagging={props.savedObjectsTagging.getTaggingApi()}
-          >
-            <MSearchTable />
-          </TableListViewKibanaProvider>
-        </BrowserRouter>
+        <TableListViewKibanaProvider
+          core={{
+            application: props.core.application as any, // TODO: fix it on the TableListView side
+            notifications: props.core.notifications,
+            overlays: props.core.overlays,
+            http: props.core.http,
+          }}
+          toMountPoint={toMountPoint}
+          FormattedRelative={FormattedRelative}
+          savedObjectsTagging={props.savedObjectsTagging.getTaggingApi()}
+        >
+          <MSearchTable />
+        </TableListViewKibanaProvider>
       </I18nProvider>
     </ContentClientProvider>
   );
