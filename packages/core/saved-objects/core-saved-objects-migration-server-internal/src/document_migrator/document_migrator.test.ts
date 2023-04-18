@@ -643,6 +643,28 @@ describe('DocumentMigrator', () => {
       });
     });
 
+    test('extracts the latest non-deferred migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': {
+              deferred: true,
+              transform: (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ includeDeferred: false })).toHaveProperty(
+        'aaa',
+        '2.2.1'
+      );
+    });
+
     describe('conversion to multi-namespace type', () => {
       it('assumes documents w/ undefined typeMigrationVersion and correct coreMigrationVersion are up to date', () => {
         const migrator = new DocumentMigrator({

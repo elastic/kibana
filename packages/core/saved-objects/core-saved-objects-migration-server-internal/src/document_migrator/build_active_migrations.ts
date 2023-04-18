@@ -79,11 +79,9 @@ const buildTypeTransforms = ({
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({
       version,
+      deferred: !_.isFunction(transform) && !!transform.deferred,
       transform: convertMigrationFunction(version, type, transform, log),
-      transformType:
-        _.isFunction(transform) || !transform.deferred
-          ? TransformType.Migrate
-          : TransformType.Deferred,
+      transformType: TransformType.Migrate,
     })
   );
 
@@ -99,6 +97,16 @@ const buildTypeTransforms = ({
   ].sort(transformComparator);
 
   return {
+    immediateVersion: _.chain(transforms)
+      .groupBy('transformType')
+      .mapValues((items) =>
+        _.chain(items)
+          .filter(({ deferred }) => !deferred)
+          .last()
+          .get('version')
+          .value()
+      )
+      .value() as Record<TransformType, string>,
     latestVersion: _.chain(transforms)
       .groupBy('transformType')
       .mapValues((items) => _.last(items)?.version)

@@ -41,11 +41,6 @@ interface MigrationVersionParams {
  */
 export interface VersionedTransformer {
   /**
-   * Gets the latest pending version of each type.
-   */
-  getMigrationVersion(params?: MigrationVersionParams): SavedObjectsMigrationVersion;
-
-  /**
    * Migrates a document to its latest version.
    */
   migrate: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
@@ -93,18 +88,18 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
-      // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
-      const latestMigrationVersion = maxVersion(
-        latestVersion.migrate,
-        latestVersion.convert,
-        includeDeferred ? latestVersion.deferred : undefined
-      );
-      if (latestMigrationVersion) {
-        return { ...acc, [prop]: latestMigrationVersion };
-      }
-      return acc;
-    }, {});
+    return Object.entries(this.migrations).reduce(
+      (acc, [type, { latestVersion, immediateVersion }]) => {
+        const version = includeDeferred ? latestVersion : immediateVersion;
+        // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
+        const latestMigrationVersion = maxVersion(version.migrate, version.convert);
+        if (latestMigrationVersion) {
+          return { ...acc, [type]: latestMigrationVersion };
+        }
+        return acc;
+      },
+      {}
+    );
   }
 
   /**

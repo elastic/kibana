@@ -20,6 +20,8 @@ export interface ActiveMigrations {
  */
 export interface TypeTransforms {
   /** Derived from the related transforms */
+  immediateVersion: Record<TransformType, string>;
+  /** Derived from the related transforms */
   latestVersion: Record<TransformType, string>;
   /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
@@ -37,6 +39,8 @@ export interface Transform {
   transform: TransformFn;
   /** The (optional) downward transformation function */
   transformDown?: TransformFn;
+  /** Whether this transform is deferred */
+  deferred?: boolean;
 }
 
 export enum TransformType {
@@ -63,7 +67,6 @@ export enum TransformType {
    * types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
    */
   Reference = 'reference',
-  Deferred = 'deferred',
 }
 
 /**

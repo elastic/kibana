@@ -30,7 +30,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
   private migrations: ActiveMigrations;
   private kibanaVersion: string;
   private convertNamespaceTypes: boolean;
-  private targetTypeVersion?: string;
+  private targetTypeVersion: string;
 
   constructor({
     document,
@@ -50,7 +50,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     this.migrations = migrations;
     this.kibanaVersion = kibanaVersion;
     this.convertNamespaceTypes = convertNamespaceTypes;
-    this.targetTypeVersion = targetTypeVersion;
+    this.targetTypeVersion = targetTypeVersion || migrations[document.type]?.latestVersion.migrate;
   }
 
   protected *getPipeline(): Generator<Transform> {
@@ -78,8 +78,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     }
 
     return (
-      isGreater(latestVersion?.migrate, typeMigrationVersion) ||
-      isGreater(latestVersion?.deferred, typeMigrationVersion) ||
+      isGreater(this.targetTypeVersion, typeMigrationVersion) ||
       (this.convertNamespaceTypes && isGreater(latestVersion?.convert, typeMigrationVersion)) ||
       (this.convertNamespaceTypes && isGreater(latestVersion?.reference, coreMigrationVersion))
     );
@@ -109,12 +108,11 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
           this.convertNamespaceTypes &&
           isGreater(version, typeMigrationVersion)
         );
-      case TransformType.Deferred:
       case TransformType.Migrate:
         return (
           typeMigrationVersion != null &&
           isGreater(version, typeMigrationVersion) &&
-          (!this.targetTypeVersion || Semver.lte(version, this.targetTypeVersion))
+          Semver.lte(version, this.targetTypeVersion)
         );
     }
   }
@@ -128,8 +126,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     const { id, type, typeMigrationVersion: currentVersion } = this.document;
     const latestVersion = maxVersion(
       this.migrations[type]?.latestVersion.migrate,
-      this.migrations[type]?.latestVersion.convert,
-      this.migrations[type]?.latestVersion.deferred
+      this.migrations[type]?.latestVersion.convert
     );
 
     if (isGreater(currentVersion, latestVersion)) {
@@ -168,8 +165,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     const coreMigrationVersion =
       currentCoreMigrationVersion || maxVersion(latestVersion?.core, latestVersion?.reference);
     const typeMigrationVersion =
-      currentTypeMigrationVersion ||
-      maxVersion(latestVersion?.migrate, latestVersion?.convert, latestVersion?.deferred);
+      currentTypeMigrationVersion || maxVersion(latestVersion?.migrate, latestVersion?.convert);
 
     return {
       ...document,
