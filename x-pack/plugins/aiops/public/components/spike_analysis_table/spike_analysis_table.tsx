@@ -31,6 +31,7 @@ import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transa
 import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
+import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const ACTIONS_COLUMN_WIDTH = '60px';
@@ -71,6 +72,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const copyToClipBoardAction = useCopyToClipboardAction();
   const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
+  const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
 
   const columns: Array<EuiBasicTableColumn<SignificantTerm>> = [
     {
@@ -201,7 +203,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, copyToClipBoardAction],
+      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },
