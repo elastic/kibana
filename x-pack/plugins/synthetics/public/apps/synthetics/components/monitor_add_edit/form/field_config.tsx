@@ -1090,12 +1090,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
       defaultMessage: 'Text assertion',
     }),
-    required: true,
+    required: false,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.helpText', {
       defaultMessage: 'Consider the page loaded when the specified text is rendered.',
     }),
     validation: () => ({
-      required: true,
+      required: false,
     }),
     props: (): EuiFieldTextProps => ({
       readOnly,
@@ -1118,7 +1118,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         {
           value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
           inputDisplay: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+            <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText>
                   {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {

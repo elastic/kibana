@@ -16,7 +16,7 @@ export const StatusBadge = ({ status }: { status: MonitorStatus }) => {
   }
 
   return (
-    <EuiBadge color={getBadgeColorForMonitorStatus(status)}>
+    <EuiBadge color={getBadgeColorForMonitorStatus(status)} css={{ maxWidth: 'max-content' }}>
       {status === 'succeeded' ? COMPLETE_LABEL : status === 'failed' ? FAILED_LABEL : SKIPPED_LABEL}
     </EuiBadge>
   );
