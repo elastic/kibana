@@ -77,10 +77,12 @@ const createSetupContractMock = () => {
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
+    getDefaultIndex: jest.fn(),
     getAllIndices: jest.fn(),
   };
 
   setupContract.getKibanaIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  setupContract.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
   setupContract.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return setupContract;
