@@ -47,7 +47,7 @@ import {
   ExportTypesPlugin,
   ExportTypesPluginSetup,
   ExportTypesPluginStart,
-} from '../server/export_registry/plugin';
+} from '../server/export_types_registry/plugin';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -227,11 +227,11 @@ export class ReportingPublicPlugin
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
-    // creates the export type definitions
-    exportTypesPlugin.register({ id: '' });
+    // gets the reporting info entry to pass to the plugin to create the type
+    exportTypesPlugin.getTypes(core, type);
 
     // this also creates the et registry
-    exportTypesRegistry.set();
+    exportTypesPlugin.registry();
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;

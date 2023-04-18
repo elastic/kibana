@@ -6,11 +6,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { ExportType } from '../../public/export_types_registry';
+import type { ExportType, ExportTypesRegistry } from '../../public/export_types_registry';
 import { CSVExportType, ExportTypeEntry } from './export_definitions';
 
 export interface ExportTypesPluginSetup {
   /** added to the reporting plugin and registers in the public reporting setup() */
+  getTypes: (core: any, type: any) => ExportTypesPlugin['setup'];
+  // public reporting plugin also creates the et registry
+  registry: () => ExportTypesRegistry;
 }
 
 export interface ExportTypesPluginStart {
@@ -37,4 +40,8 @@ export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportT
     // return this.getContract()
     return this.exportTypeStart;
   }
+
+  public disablePngType(et: ExportTypeEntry) {}
+
+  public disablePdfType(et: ExportTypeEntry) {}
 }
