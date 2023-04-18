@@ -135,7 +135,6 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      hello xavier
       <EuiFlexGrid gutterSize="xl" columns={3}>
         {cardNodes}
       </EuiFlexGrid>

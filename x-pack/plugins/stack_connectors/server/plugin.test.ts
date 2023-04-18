@@ -65,14 +65,7 @@ describe('Stack Connectors Plugin', () => {
         6,
         expect.objectContaining({
           id: '.slack',
-          name: 'Slack Webhook',
-        })
-      );
-      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        7,
-        expect.objectContaining({
-          id: '.slack_api',
-          name: 'Slack API',
+          name: 'Slack',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(

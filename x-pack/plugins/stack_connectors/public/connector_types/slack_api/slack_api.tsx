@@ -23,6 +23,7 @@ import type {
   PostMessageParams,
 } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SlackActionParams } from '../types';
 
 export const getConnectorType = (): ConnectorTypeModel<
   unknown,
@@ -68,8 +69,8 @@ export const getConnectorType = (): ConnectorTypeModel<
   actionConnectorFields: lazy(() => import('./slack_connectors')),
   actionParamsFields: lazy(() => import('./slack_params')),
   resetParamsOnConnectorChange: (
-    params: WebhookParams | PostMessageParams
-  ): WebhookParams | PostMessageParams | {} => {
+    params: SlackActionParams | PostMessageParams
+  ): SlackActionParams | PostMessageParams | {} => {
     if ('message' in params) {
       return {
         subAction: 'postMessage',

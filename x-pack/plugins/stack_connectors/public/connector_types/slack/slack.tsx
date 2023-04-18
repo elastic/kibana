@@ -20,7 +20,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     group: [
       {
         id: '.slack',
-        name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+        name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
           defaultMessage: 'Webhook',
         }),
       },
