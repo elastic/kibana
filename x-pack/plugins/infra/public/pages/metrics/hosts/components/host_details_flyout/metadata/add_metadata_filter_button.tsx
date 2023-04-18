@@ -54,9 +54,12 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     return (
       <span>
         <EuiToolTip
-          content={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.setFilterTooltip', {
-            defaultMessage: 'Remove filter',
-          })}
+          content={i18n.translate(
+            'xpack.infra.hostsViewPage.flyout.metadata.setRemoveFilterTooltip',
+            {
+              defaultMessage: 'Remove filter',
+            }
+          )}
         >
           <EuiButtonIcon
             size="s"
@@ -80,18 +83,24 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   return (
     <span>
       <EuiToolTip
-        content={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.setFilterTooltip', {
-          defaultMessage: 'Filter by value',
-        })}
+        content={i18n.translate(
+          'xpack.infra.hostsViewPage.flyout.metadata.setFilterByValueTooltip',
+          {
+            defaultMessage: 'Filter by value',
+          }
+        )}
       >
         <EuiButtonIcon
           color="primary"
           size="s"
           iconType="filter"
           data-test-subj="hostsView-flyout-metadata-add-filter"
-          aria-label={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel', {
-            defaultMessage: 'Add Filter',
-          })}
+          aria-label={i18n.translate(
+            'xpack.infra.hostsViewPage.flyout.metadata.AddFilterAriaLabel',
+            {
+              defaultMessage: 'Add Filter',
+            }
+          )}
           onClick={() => {
             const newFilter = buildMetadataFilter({
               field: item.name,
