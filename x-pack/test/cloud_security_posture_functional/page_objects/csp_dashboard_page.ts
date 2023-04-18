@@ -35,7 +35,6 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   const index = {
     remove: () => es.indices.delete({ index: LATEST_FINDINGS_INDEX, ignore_unavailable: true }),
     add: async <T>(findingsMock: T[]) => {
-      // await waitForPluginInitialized();
       await Promise.all(
         findingsMock.map((finding) =>
           es.index({
