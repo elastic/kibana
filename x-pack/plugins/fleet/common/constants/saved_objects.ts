@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-
-export { INGEST_SAVED_OBJECT_INDEX }
+export const INGEST_SAVED_OBJECT_INDEX = '.kibana_ingest';
