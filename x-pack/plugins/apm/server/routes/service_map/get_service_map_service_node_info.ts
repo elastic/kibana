@@ -371,14 +371,7 @@ function getMemoryStats({
     if (!memoryUsage) {
       memoryUsage = await getMemoryUsage({
         script: percentSystemMemoryUsedScript,
-        additionalFilters: [
-          {
-            bool: {
-              should: [systemMemoryFilter],
-              minimum_should_match: 1,
-            },
-          },
-        ],
+        additionalFilters: [systemMemoryFilter],
       });
     }
 

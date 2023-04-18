@@ -193,12 +193,7 @@ export async function getMemoryChartData({
             memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
           },
           additionalFilters: [
-            {
-              bool: {
-                should: [systemMemoryFilter],
-                minimum_should_match: 1,
-              },
-            },
+            systemMemoryFilter,
             ...termQuery(FAAS_ID, serverlessId),
           ],
           operationName: 'get_system_memory_metrics_charts',
