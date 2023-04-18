@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useSavedViewContext } from '../../containers/saved_view/saved_view';
 import { SavedViewListModal } from './view_list_modal';
-import { useBoolean } from '../../hooks/useBoolean';
+import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 
 interface Props<ViewState> {
@@ -224,7 +224,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         <SavedViewListModal<any>
           currentView={currentView}
           views={views}
-          close={closeLoadModal}
+          onClose={closeLoadModal}
           setView={setCurrentView}
         />
       )}

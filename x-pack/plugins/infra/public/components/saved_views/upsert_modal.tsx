@@ -58,13 +58,7 @@ export const UpsertViewModal = ({
   return (
     <EuiModal onClose={onClose} data-test-subj="savedViews-upsertModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {title}
-          {/* <FormattedMessage
-            defaultMessage="Save View"
-            id="xpack.infra.waffle.savedView.createHeader"
-          /> */}
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFieldText
@@ -92,7 +86,7 @@ export const UpsertViewModal = ({
           onChange={handleTimeCheckChange}
         />
         <EuiSpacer size="s" />
-        <EuiText size={'xs'} grow={false} style={{ maxWidth: 400 }}>
+        <EuiText size="xs" grow={false} style={{ maxWidth: 400 }}>
           <FormattedMessage
             defaultMessage="This changes the time filter to the currently selected time each time the view is loaded"
             id="xpack.infra.waffle.savedViews.includeTimeHelpText"
@@ -109,7 +103,7 @@ export const UpsertViewModal = ({
         <EuiButton
           color="primary"
           disabled={viewName.length === 0}
-          fill={true}
+          fill
           onClick={saveView}
           data-test-subj="createSavedViewButton"
         >
