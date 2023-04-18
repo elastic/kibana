@@ -92,7 +92,7 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
-  it('does not show the property actions when hideDefaultActions', async () => {
+  it('does not show the property actions when hideDefaultActions is enabled', async () => {
     const result = appMock.render(
       <RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />
     );

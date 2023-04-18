@@ -63,7 +63,7 @@ describe('getFileType', () => {
       expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
     });
 
-    it('actions renders a download button', async () => {
+    it('getActions renders a download button', async () => {
       appMockRender = createAppMockRenderer();
 
       const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
@@ -87,7 +87,7 @@ describe('getFileType', () => {
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
     });
 
-    it('actions renders a delete button', async () => {
+    it('getActions renders a delete button', async () => {
       appMockRender = createAppMockRenderer();
 
       const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
@@ -101,7 +101,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete attachment',
+        label: 'Delete File',
         render: expect.any(Function),
       });
 
@@ -125,7 +125,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete attachment',
+        label: 'Delete File',
         render: expect.any(Function),
       });
 
@@ -146,9 +146,10 @@ describe('getFileType', () => {
         fileType.getAttachmentViewObject({ ...attachmentViewProps, externalReferenceMetadata: {} })
       ).toEqual({
         event: 'added an unknown file',
-        hideDefaultActions: false,
+        hideDefaultActions: true,
         timelineAvatar: 'document',
         type: 'regular',
+        getActions: expect.any(Function),
       });
     });
 

@@ -64,17 +64,25 @@ const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: 
 ];
 
 const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps) => {
+  const caseId = props.caseData.id;
+  const fileId = props.externalReferenceId;
+
   if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
     return {
       type: 'regular',
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
-      hideDefaultActions: false,
+      getActions: () => [
+        {
+          type: AttachmentActionType.CUSTOM as const,
+          render: () => getFileDeleteButton(caseId, fileId),
+          label: i18n.DELETE_FILE,
+          isPrimary: false,
+        },
+      ],
+      hideDefaultActions: true,
     };
   }
-
-  const fileId = props.externalReferenceId;
-  const caseId = props.caseData.id;
 
   const fileMetadata = props.externalReferenceMetadata.files[0];
   const file = {

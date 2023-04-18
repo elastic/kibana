@@ -27,7 +27,7 @@ const FileDownloadButtonComponent: React.FC<FileDownloadButtonProps> = ({ fileId
 
   const buttonProps = {
     iconType: 'download',
-    'aria-label': i18n.DOWNLOAD,
+    'aria-label': i18n.DOWNLOAD_FILE,
     href: filesClient.getDownloadHref({
       fileKind: constructFileKindIdByOwner(owner[0] as Owner),
       id: fileId,
@@ -38,7 +38,7 @@ const FileDownloadButtonComponent: React.FC<FileDownloadButtonProps> = ({ fileId
   return isIcon ? (
     <EuiButtonIcon {...buttonProps} />
   ) : (
-    <EuiButtonEmpty {...buttonProps}>{i18n.DOWNLOAD}</EuiButtonEmpty>
+    <EuiButtonEmpty {...buttonProps}>{i18n.DOWNLOAD_FILE}</EuiButtonEmpty>
   );
 };
 FileDownloadButtonComponent.displayName = 'FileDownloadButton';
