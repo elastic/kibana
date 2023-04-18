@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { type Field } from '@kbn/ml-plugin/common/types/fields';
 import { useChangePointDetectionContext } from './change_point_detection_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface MetricFieldSelectorProps {
   value: string;
@@ -17,16 +20,21 @@ interface MetricFieldSelectorProps {
 
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange }) => {
+    const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionContext();
 
-    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
-      return metricFieldOptions.map((v) => ({ value: v.name, label: v.displayName }));
+    const { renderOption } = fieldStats!.useFieldStatsTrigger();
+
+    const options = useMemo<Array<EuiComboBoxOptionOption<DataViewField>>>(() => {
+      return metricFieldOptions.map((v) => {
+        return { value: v, label: v.displayName, field: { id: v.name, type: v.type } as Field };
+      });
     }, [metricFieldOptions]);
 
-    const selection = options.filter((v) => v.value === value);
+    const selection = options.filter((v) => v.label === value);
 
     const onChangeCallback = useCallback(
-      (selectedOptions: EuiComboBoxOptionOption[]) => {
+      (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
         const option = selectedOptions[0];
         if (typeof option !== 'undefined') {
           onChange(option.label);
@@ -36,21 +44,25 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     );
 
     return (
-      <EuiFormRow>
-        <EuiComboBox
-          compressed
-          prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
-            defaultMessage: 'Metric field',
-          })}
-          singleSelection={{ asPlainText: true }}
-          options={options}
-          selectedOptions={selection}
-          onChange={onChangeCallback}
-          isClearable={false}
-          data-test-subj="aiopsChangePointMetricField"
-          onClick={(e) => e.stopPropagation()}
-        />
-      </EuiFormRow>
+      <>
+        <EuiFormRow>
+          <EuiComboBox<DataViewField>
+            compressed
+            prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
+              defaultMessage: 'Metric field',
+            })}
+            singleSelection={{ asPlainText: true }}
+            options={options}
+            selectedOptions={selection}
+            onChange={onChangeCallback}
+            isClearable={false}
+            data-test-subj="aiopsChangePointMetricField"
+            onClick={(e) => e.stopPropagation()}
+            // @ts-ignore
+            renderOption={renderOption}
+          />
+        </EuiFormRow>
+      </>
     );
   }
 );

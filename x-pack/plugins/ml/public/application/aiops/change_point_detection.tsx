@@ -13,6 +13,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
+import {
+  useFieldStatsTrigger,
+  FieldStatsInfoButton,
+  FieldStatsFlyoutProvider,
+} from '../components/field_stats_flyout';
 import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -46,20 +51,23 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
-          appDependencies={pick(services, [
-            'application',
-            'data',
-            'charts',
-            'fieldFormats',
-            'http',
-            'notifications',
-            'share',
-            'storage',
-            'uiSettings',
-            'unifiedSearch',
-            'theme',
-            'lens',
-          ])}
+          appDependencies={{
+            ...pick(services, [
+              'application',
+              'data',
+              'charts',
+              'fieldFormats',
+              'http',
+              'notifications',
+              'share',
+              'storage',
+              'uiSettings',
+              'unifiedSearch',
+              'theme',
+              'lens',
+            ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsInfoButton, FieldStatsFlyoutProvider },
+          }}
         />
       ) : null}
       <HelpMenu

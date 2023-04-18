@@ -22,6 +22,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { type GetMlSharedImportsReturnType } from '@kbn/ml-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -36,6 +37,12 @@ export interface AiopsAppDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   lens: LensPublicStart;
+  // deps for unified field stats
+  fieldStats?: {
+    useFieldStatsTrigger: GetMlSharedImportsReturnType['useFieldStatsTrigger'];
+    FieldStatsInfoButton: GetMlSharedImportsReturnType['FieldStatsInfoButton'];
+    FieldStatsFlyoutProvider: GetMlSharedImportsReturnType['FieldStatsFlyoutProvider'];
+  };
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);

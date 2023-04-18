@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -20,6 +20,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
 import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { FunctionPicker } from './function_picker';
@@ -206,6 +209,20 @@ interface FieldsControlsProps {
  */
 export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
   const { splitFieldsOptions } = useChangePointDetectionContext();
+  const { dataView } = useDataSource();
+  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
+
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [uiSettings, data, fieldFormats, charts]);
+
+  const FieldStatsFlyoutProvider = fieldStats!.FieldStatsFlyoutProvider;
 
   const onChangeFn = useCallback(
     (field: keyof FieldConfig, value: string) => {
@@ -216,27 +233,29 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
   );
 
   return (
-    <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
-      <EuiFlexItem grow={false} css={{ width: '200px' }}>
-        <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} css={selectControlCss}>
-        <MetricFieldSelector
-          value={fieldConfig.metricField!}
-          onChange={(v) => onChangeFn('metricField', v)}
-        />
-      </EuiFlexItem>
-      {splitFieldsOptions.length > 0 ? (
+    <FieldStatsFlyoutProvider fieldStatsServices={fieldStatsServices} dataView={dataView}>
+      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
+        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+          <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
+        </EuiFlexItem>
         <EuiFlexItem grow={true} css={selectControlCss}>
-          <SplitFieldSelector
-            value={fieldConfig.splitField}
-            onChange={(v) => onChangeFn('splitField', v!)}
+          <MetricFieldSelector
+            value={fieldConfig.metricField!}
+            onChange={(v) => onChangeFn('metricField', v)}
           />
         </EuiFlexItem>
-      ) : null}
+        {splitFieldsOptions.length > 0 ? (
+          <EuiFlexItem grow={true} css={selectControlCss}>
+            <SplitFieldSelector
+              value={fieldConfig.splitField}
+              onChange={(v) => onChangeFn('splitField', v!)}
+            />
+          </EuiFlexItem>
+        ) : null}
 
-      {children}
-    </EuiFlexGroup>
+        {children}
+      </EuiFlexGroup>
+    </FieldStatsFlyoutProvider>
   );
 };
 
