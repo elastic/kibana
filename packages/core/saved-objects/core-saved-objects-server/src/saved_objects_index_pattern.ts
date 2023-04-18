@@ -18,5 +18,5 @@ export const TASK_MANAGER_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_task_
 export const SavedObjectsIndexPatterns = [
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
-  `${MAIN_SAVED_OBJECT_INDEX}_cases`,
+  `${MAIN_SAVED_OBJECT_INDEX}_alerting_cases`,
 ];
