@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
@@ -208,9 +209,13 @@ interface FieldsControlsProps {
  * Renders controls for fields selection and emits updates on change.
  */
 export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
-  const { splitFieldsOptions } = useChangePointDetectionContext();
+  const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
+  const timefilter = useTimefilter();
+  // required in order to trigger state updates
+  useTimeRangeUpdates();
+  const timefilterActiveBounds = timefilter.getActiveBounds();
 
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     return {
@@ -233,7 +238,19 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
   );
 
   return (
-    <FieldStatsFlyoutProvider fieldStatsServices={fieldStatsServices} dataView={dataView}>
+    <FieldStatsFlyoutProvider
+      fieldStatsServices={fieldStatsServices}
+      dataView={dataView}
+      dslQuery={combinedQuery}
+      timeRangeMs={
+        timefilterActiveBounds
+          ? {
+              from: timefilterActiveBounds.min!.valueOf(),
+              to: timefilterActiveBounds.max!.valueOf(),
+            }
+          : undefined
+      }
+    >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
