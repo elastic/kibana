@@ -53,7 +53,7 @@ describe('8.8.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds license and cloud id to policy, defaulted to empty string', () => {
+  it('adds license and cloud status to policy, defaulted to empty string', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
