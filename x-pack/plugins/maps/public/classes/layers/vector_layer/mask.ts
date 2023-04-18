@@ -43,7 +43,7 @@ export class Mask {
       ? feature?.state[this._mbFieldName]
       : feature?.properties[this._mbFieldName];
     console.log(featureValue);
-    if (featureValue === undefined || typeof featureValue !== 'number') {
+    if (typeof featureValue !== 'number') {
       return false;
     }
     return this._operator === MASK_OPERATOR.BELOW

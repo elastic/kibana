@@ -74,12 +74,6 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
       : metrics;
   }
 
-  getMasks(): FilterSpecification[] {
-    return this.getMetricFields()
-      .filter((esAggField) => esAggField.hasMask())
-      .map((esAggField) => esAggField.getMaskFilterExpression());
-  }
-
   getAggKey(aggType: AGG_TYPE, fieldName: string): string {
     return getSourceAggKey({
       aggType,
