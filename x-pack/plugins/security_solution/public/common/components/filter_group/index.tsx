@@ -6,6 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { ControlPanelState, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
   controlGroupInputBuilder,
@@ -30,14 +31,14 @@ import { APP_ID } from '../../../../common/constants';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
-import { NUM_OF_CONTROLS } from './config';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
-import { AddControl, DiscardChanges, SaveControls } from './buttons';
+import { AddControl, SaveControls } from './buttons';
 import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
+import { NUM_OF_CONTROLS } from './config';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -212,8 +213,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const localInitialControls = cloneDeep(initialControls);
-    const resultControls = cloneDeep(initialControls);
+    const localInitialControls = cloneDeep(initialControls).filter(
+      (control) => control.persist === true
+    );
+    let resultControls = [] as FilterItemObj[];
 
     let overridingControls = initialUrlParam;
     if (!initialUrlParam || initialUrlParam.length === 0) {
@@ -231,40 +234,28 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
     // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
     if (overridingControls && !urlDataApplied.current) {
-      let maxInitialControlIdx = Math.max(
-        localInitialControls.length - 1,
-        (overridingControls?.length ?? 1) - 1
-      );
-      for (let counter = overridingControls.length - 1; counter >= 0; counter--) {
-        const urlControl = overridingControls[counter];
-        const idx = localInitialControls.findIndex(
-          (item) => item.fieldName === urlControl.fieldName
-        );
+      if (localInitialControls.length > 0) {
+        localInitialControls.forEach((persistControl) => {
+          const doesPersistControlAlreadyExist = overridingControls?.some(
+            (control) => control.fieldName === persistControl.fieldName
+          );
 
-        if (idx !== -1) {
-          // if index found, replace that with what was provided in the Url
-          resultControls[idx] = {
-            ...localInitialControls[idx],
-            fieldName: urlControl.fieldName,
-            title: urlControl.title ?? urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-        } else {
-          // if url param is not available in initialControl, start replacing the last slot in the
-          // initial Control with the last `not found` element in the Url Param
-          //
-          resultControls[maxInitialControlIdx] = {
-            fieldName: urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            title: urlControl.title ?? urlControl.fieldName,
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-          maxInitialControlIdx--;
-        }
+          if (!doesPersistControlAlreadyExist) {
+            resultControls.push(persistControl);
+          }
+        });
       }
+
+      resultControls = [
+        ...resultControls,
+        ...overridingControls.map((item) => ({
+          fieldName: item.fieldName,
+          title: item.title,
+          selectedOptions: item.selectedOptions ?? [],
+          existsSelected: item.existsSelected ?? false,
+          exclude: item.existsSelected,
+        })),
+      ];
     }
 
     return resultControls;
@@ -333,10 +324,58 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
+  const upsertPersistableControls = useCallback(() => {
+    const persistableControls = initialControls.filter((control) => control.persist === true);
+    if (persistableControls.length > 0) {
+      const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
+        ControlPanelState<OptionsListEmbeddableInput>
+      >;
+      const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
+      let filterControlsDeleted = false;
+      persistableControls.forEach((control) => {
+        const controlExists = currentPanels.some(
+          (currControl) => control.fieldName === currControl.explicitInput.fieldName
+        );
+        if (!controlExists) {
+          // delete current controls
+          if (!filterControlsDeleted) {
+            controlGroup?.updateInput({ panels: {} });
+            filterControlsDeleted = true;
+          }
+
+          // add persitable controls
+          controlGroup?.addOptionsListControl({
+            title: control.title,
+            hideExclude: true,
+            hideSort: true,
+            hidePanelTitles: true,
+            placeholder: '',
+            // option List controls will handle an invalid dataview
+            // & display an appropriate message
+            dataViewId: dataViewId ?? '',
+            selectedOptions: control.selectedOptions,
+            ...control,
+          });
+        }
+      });
+
+      orderedPanels.forEach((panel) => {
+        if (panel.explicitInput.fieldName)
+          controlGroup?.addOptionsListControl({
+            selectedOptions: [],
+            fieldName: panel.explicitInput.fieldName,
+            dataViewId: dataViewId ?? '',
+            ...panel.explicitInput,
+          });
+      });
+    }
+  }, [controlGroup, dataViewId, initialControls]);
+
   const saveChangesHandler = useCallback(() => {
+    upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
-  }, [switchToViewMode]);
+  }, [switchToViewMode, upsertPersistableControls]);
 
   const addControlsHandler = useCallback(() => {
     controlGroup?.openAddDataControlFlyout();
@@ -358,6 +397,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         openPendingChangesPopover,
         closePendingChangesPopover,
         setShowFiltersChangedBanner,
+        saveChangesHandler,
+        discardChangesHandler,
       }}
     >
       <FilterWrapper className="filter-group__wrapper">
@@ -371,18 +412,18 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
               {!controlGroup ? <FilterGroupLoading /> : null}
             </EuiFlexItem>
           ) : null}
-          {!isViewMode &&
-          (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
-            Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
+          {!isViewMode && !showFiltersChangedBanner ? (
             <>
               <EuiFlexItem grow={false}>
-                <AddControl onClick={addControlsHandler} />
+                <AddControl
+                  onClick={addControlsHandler}
+                  isDisabled={
+                    Object.values(controlGroupInputUpdates.panels).length >= NUM_OF_CONTROLS.MAX
+                  }
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SaveControls onClick={saveChangesHandler} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DiscardChanges onClick={discardChangesHandler} />
               </EuiFlexItem>
             </>
           ) : null}
@@ -393,7 +434,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         {showFiltersChangedBanner ? (
           <>
             <EuiSpacer size="l" />
-            <FiltersChangedBanner />
+            <FiltersChangedBanner
+              saveChangesHandler={saveChangesHandler}
+              discardChangesHandler={discardChangesHandler}
+            />
           </>
         ) : null}
       </FilterWrapper>

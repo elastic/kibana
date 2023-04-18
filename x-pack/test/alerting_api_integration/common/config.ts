@@ -27,6 +27,7 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
+  enableFooterInEmail?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -75,6 +76,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
+    enableFooterInEmail = true,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -173,6 +175,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'some.non.existent.com',
             'smtp.live.com',
           ])}`,
+          `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
