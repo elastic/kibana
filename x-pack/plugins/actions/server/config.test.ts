@@ -23,6 +23,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -57,6 +58,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -198,6 +200,7 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
