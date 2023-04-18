@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
-  type AddDslFilterHandler,
   useExistingFieldsFetcher,
   useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
@@ -75,10 +74,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Callback function when adding a filter from sidebar
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
-  /**
-   * Callback function when adding a dsl filter from sidebar
-   */
-  onAddDSLFilter?: AddDslFilterHandler;
   /**
    * Callback function when changing an data view
    */

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -49,7 +49,7 @@ interface Props {
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
-  onAddFilter?: AddDslFilterHandler;
+  onAddFilter?: (values: Filter, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
 }
@@ -83,7 +83,6 @@ export const CategoryTable: FC<Props> = ({
       typeof selectedField !== 'string'
     ) {
       onAddFilter(
-        selectedField,
         createFilter('', selectedField.name, selectedCategories, mode, category),
         `Categories - ${selectedField.name}`
       );

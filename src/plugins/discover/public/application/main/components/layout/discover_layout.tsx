@@ -19,11 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -154,23 +152,6 @@ export function DiscoverLayout({
       return filterManager.addFilters(newFilters);
     },
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
-  );
-
-  const onAddDSLFilter: AddDslFilterHandler = useCallback(
-    (field: DataViewField | string, values: Filter, alias?: string) => {
-      const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(dataView, fieldName, dataViews, capabilities);
-      const filter = buildEmptyFilter(false, dataView.id);
-      if (alias) {
-        filter.meta.alias = alias;
-      }
-      filter.query = values.query;
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-      }
-      return filterManager.addFilters([filter]);
-    },
-    [dataView, dataViews, capabilities, trackUiMetric, filterManager]
   );
 
   const onFieldEdited = useCallback(
@@ -337,7 +318,6 @@ export function DiscoverLayout({
               onAddField={onAddColumn}
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              onAddDSLFilter={onAddDSLFilter}
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}

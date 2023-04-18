@@ -13,7 +13,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldCategorizeButtonInner } from './field_categorize_button_inner';
 import { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';
-import type { AddDslFilterHandler } from '../../types';
 
 export interface FieldCategorizeButtonProps {
   field: DataViewField;
@@ -24,20 +23,10 @@ export interface FieldCategorizeButtonProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   buttonProps?: Partial<EuiButtonProps>;
   closePopover?: () => void;
-  onAddDSLFilter?: AddDslFilterHandler;
 }
 
 export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(
-  ({
-    field,
-    dataView,
-    trackUiMetric,
-    originatingApp,
-    uiActions,
-    buttonProps,
-    closePopover,
-    onAddDSLFilter,
-  }) => {
+  ({ field, dataView, trackUiMetric, originatingApp, uiActions, buttonProps, closePopover }) => {
     const [canCategorizeField, setCanCategorizeField] = useState<boolean>(false);
 
     useEffect(() => {
@@ -55,7 +44,7 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
       event.preventDefault();
       const triggerVisualization = (updatedDataView: DataView) => {
         trackUiMetric?.(METRIC_TYPE.CLICK, 'categorize_link_click');
-        triggerCategorizeActions(uiActions, field, originatingApp, updatedDataView, onAddDSLFilter);
+        triggerCategorizeActions(uiActions, field, originatingApp, updatedDataView);
       };
       triggerVisualization(dataView);
       if (closePopover) {

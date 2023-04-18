@@ -8,7 +8,6 @@
 
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
-import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
@@ -30,7 +29,6 @@ export interface CategorizeFieldContext {
   contextualFields?: string[];
   originatingApp?: string;
   query?: AggregateQuery;
-  onAddDSLFilter?: AddDslFilterHandler;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

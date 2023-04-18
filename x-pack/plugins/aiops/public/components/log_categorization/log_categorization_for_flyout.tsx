@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
-import type { AddDslFilterHandler } from '@kbn/unified-field-list-plugin/public';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { useData } from '../../hooks/use_data';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -30,11 +30,11 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { InformationText } from './information_text';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
+
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
-  onAddFilter?: AddDslFilterHandler;
   onClose: () => void;
 }
 
@@ -44,13 +44,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
   selectedField,
-  onAddFilter,
   onClose,
 }) => {
   const {
     notifications: { toasts },
     data: {
-      query: { getState },
+      query: { getState, filterManager },
     },
     uiSettings,
   } = useAiopsAppContext();
@@ -165,6 +164,18 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     intervalMs,
     toasts,
   ]);
+
+  const onAddFilter = useCallback(
+    (values: Filter, alias?: string) => {
+      const filter = buildEmptyFilter(false, dataView.id);
+      if (alias) {
+        filter.meta.alias = alias;
+      }
+      filter.query = values.query;
+      filterManager.addFilters([filter]);
+    },
+    [dataView, filterManager]
+  );
 
   useEffect(() => {
     if (documentStats.documentCountStats?.buckets) {
