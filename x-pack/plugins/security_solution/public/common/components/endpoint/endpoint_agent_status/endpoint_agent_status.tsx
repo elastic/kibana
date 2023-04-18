@@ -53,37 +53,50 @@ export interface EndpointAgentStatusProps {
   endpointHostInfo: HostInfo;
   /**
    * If set to `true` (Default), then the endpoint isolation state and response actions count
-   * will be kept up to date by querying the API periodically
+   * will be kept up to date by querying the API periodically.
+   * Only used if `pendingActions` is not defined.
    */
   autoRefresh?: boolean;
+  /**
+   * The pending actions for the host (as return by the pending actions summary api).
+   * If undefined, then this component will call the API to retrieve that list of pending actions.
+   * NOTE: if this prop is defined, it will invalidate `autoRefresh` prop.
+   */
+  pendingActions?: EndpointPendingActions['pending_actions'];
   'data-test-subj'?: string;
 }
 
 /**
  * Displays the status of an Endpoint agent along with its Isolation state or the number of pending
  * response actions against it.
+ *
+ * TIP: if you only have the Endpoint's `agent.id`, then consider using `EndpointAgentStatusById`,
+ * which will call the needed APIs to get the information necessary to display the status.
  */
 export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
-  ({ endpointHostInfo, autoRefresh = true, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointHostInfo, autoRefresh = true, pendingActions, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
       [endpointHostInfo.metadata.agent.id],
       {
         refetchInterval: autoRefresh ? DEFAULT_POLL_INTERVAL : false,
+        enabled: !pendingActions,
       }
     );
 
     const [hasPendingActions, hostPendingActions] = useMemo<
       [boolean, EndpointPendingActions['pending_actions']]
     >(() => {
-      if (!endpointPendingActions) {
+      if (!endpointPendingActions && !pendingActions) {
         return [false, {}];
       }
 
-      const pendingActions = endpointPendingActions.data[0].pending_actions ?? {};
+      const pending = pendingActions
+        ? pendingActions
+        : endpointPendingActions?.data[0].pending_actions ?? {};
 
-      return [Object.keys(pendingActions).length > 0, pendingActions];
-    }, [endpointPendingActions]);
+      return [Object.keys(pending).length > 0, pending];
+    }, [endpointPendingActions, pendingActions]);
 
     const status = endpointHostInfo.host_status;
     const isIsolated = Boolean(endpointHostInfo.metadata.Endpoint.state?.isolation);
