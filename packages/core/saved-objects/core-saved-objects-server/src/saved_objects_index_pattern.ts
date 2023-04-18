@@ -15,4 +15,9 @@
  */
 export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
 export const TASK_MANAGER_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_task_manager`;
-export const SavedObjectsIndexPatterns = [MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX];
+export const ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_analyst_experince`;
+export const SavedObjectsIndexPatterns = [
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+  ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
+];

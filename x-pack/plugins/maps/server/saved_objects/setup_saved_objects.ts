@@ -10,6 +10,7 @@ import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
@@ -23,6 +24,7 @@ export function setupSavedObjects(
 ) {
   core.savedObjects.registerType<MapSavedObjectAttributes>({
     name: 'map',
+    indexPattern: ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',

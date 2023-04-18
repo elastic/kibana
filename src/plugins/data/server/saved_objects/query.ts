@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
+  indexPattern: ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
