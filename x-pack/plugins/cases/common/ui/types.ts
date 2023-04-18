@@ -22,6 +22,7 @@ import type {
   CommentResponse,
   CaseResponse,
   UserActionFindResponse,
+  FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -30,6 +31,8 @@ import type {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
   GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
+  CaseUserActionStatsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -49,6 +52,10 @@ export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
   };
+  files: {
+    maxSize?: number;
+    allowedMimeTypes: string[];
+  };
 }
 
 export const StatusAll = 'all' as const;
@@ -58,6 +65,9 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
 
 export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
+
+export const UserActionTypeAll = 'all' as const;
+export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -81,12 +91,14 @@ export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: CaseUserActions[];
 };
+export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
   case: Case;
@@ -147,7 +159,7 @@ export enum SortFieldCase {
   title = 'title',
 }
 
-export type ElasticUser = SnakeToCamelCase<User>;
+export type CaseUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;

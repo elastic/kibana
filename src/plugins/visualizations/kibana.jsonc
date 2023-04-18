@@ -23,7 +23,9 @@
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
-      "usageCollection"
+      "usageCollection",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
     ],
     "optionalPlugins": [
       "home",

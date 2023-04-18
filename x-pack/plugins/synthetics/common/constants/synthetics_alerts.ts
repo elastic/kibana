@@ -31,3 +31,5 @@ export const SYNTHETICS_ALERT_RULE_TYPES = {
 };
 
 export const SYNTHETICS_RULE_TYPES = [SYNTHETICS_STATUS_RULE];
+
+export const SYNTHETICS_RULE_TYPES_ALERT_CONTEXT = 'observability.uptime';

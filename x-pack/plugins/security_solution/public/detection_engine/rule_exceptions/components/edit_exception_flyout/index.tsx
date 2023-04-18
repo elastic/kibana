@@ -400,12 +400,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           newCommentValue={newComment}
           newCommentOnChange={setComment}
         />
-        <EuiHorizontalRule />
-        <ExceptionsExpireTime
-          expireTime={expireTime}
-          setExpireTime={setExpireTime}
-          setExpireError={setExpireError}
-        />
+        {listType !== ExceptionListTypeEnum.ENDPOINT && (
+          <>
+            <EuiHorizontalRule />
+            <ExceptionsExpireTime
+              expireTime={expireTime}
+              setExpireTime={setExpireTime}
+              setExpireError={setExpireError}
+            />
+          </>
+        )}
         {showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />

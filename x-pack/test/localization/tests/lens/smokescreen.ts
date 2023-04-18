@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const config = getService('config');
+  const browser = getService('browser');
 
   function getTranslationFr(term: string) {
     switch (term) {
@@ -155,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
       const kbnServerLocale = getI18nLocaleFromServerArgs(serverArgs);
       termTranslator = getExpectedI18nTranslator(kbnServerLocale);
+      await browser.setWindowSize(1600, 1000);
     });
 
     it('should allow creation of lens xy chart', async () => {

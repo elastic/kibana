@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect, useMemo } from 'react';
 import { Switch, useParams } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';

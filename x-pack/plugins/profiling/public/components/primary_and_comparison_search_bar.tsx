@@ -61,15 +61,29 @@ export function PrimaryAndComparisonSearchBar() {
     }
   }
 
+  let baselineTitle: string;
+  let comparisonTitle: string;
+
+  if (routePath === '/flamegraphs/differential') {
+    baselineTitle = i18n.translate('xpack.profiling.comparisonSearch.baselineTitleFlamegraph', {
+      defaultMessage: 'Baseline flamegraph',
+    });
+    comparisonTitle = i18n.translate('xpack.profiling.comparisonSearch.comparisonTitleFlamegraph', {
+      defaultMessage: 'Comparison flamegraph',
+    });
+  } else {
+    baselineTitle = i18n.translate('xpack.profiling.comparisonSearch.baselineTitleFunctions', {
+      defaultMessage: 'Baseline functions',
+    });
+    comparisonTitle = i18n.translate('xpack.profiling.comparisonSearch.comparisonTitleFunctions', {
+      defaultMessage: 'Comparison functions',
+    });
+  }
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexEnd">
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h3>
-            {i18n.translate('xpack.profiling.comparisonSearch.baselineTitle', {
-              defaultMessage: 'Baseline flamegraph',
-            })}
-          </h3>
+          <h3>{baselineTitle}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <PrimaryProfilingSearchBar showSubmitButton={false} />
@@ -107,11 +121,7 @@ export function PrimaryAndComparisonSearchBar() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h3>
-            {i18n.translate('xpack.profiling.comparisonSearch.comparisonTitle', {
-              defaultMessage: 'Comparison flamegraph',
-            })}
-          </h3>
+          <h3>{comparisonTitle}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <ProfilingSearchBar

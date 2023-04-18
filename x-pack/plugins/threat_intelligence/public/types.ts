@@ -23,6 +23,7 @@ import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Policy } from './modules/block_list/hooks/use_policies';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -79,7 +80,8 @@ export interface UseInvestigateInTimelineProps {
 export interface BlockListFlyoutProps {
   apiClient: unknown;
   item: CreateExceptionListItemSchema;
-  policies: unknown[];
+  policies: Policy[];
+  policiesIsLoading: boolean;
   FormComponent: NamedExoticComponent<BlockListFormProps>;
   onClose: () => void;
 }

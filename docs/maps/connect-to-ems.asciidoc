@@ -32,8 +32,6 @@ If you cannot connect to Elastic Maps Service from the {kib} server or browser c
 
 {hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
 
-IMPORTANT: {hosted-ems} does not serve raster tiles, needed by Vega, coordinate, and region map visualizations.
-
 You can use +docker pull+ to download the {hosted-ems} image from the Elastic Docker registry.
 
 ifeval::["{release-state}"=="unreleased"]

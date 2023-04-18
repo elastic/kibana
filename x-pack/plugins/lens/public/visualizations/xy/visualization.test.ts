@@ -37,9 +37,9 @@ import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
 import { layerTypes, Visualization } from '../..';
 
+const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
   type: 'manual',
@@ -218,6 +218,88 @@ describe('xy_visualization', () => {
 
     it('loads from persisted state', () => {
       expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
+    });
+
+    it('should inject references on annotation layers', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.initialize!(
+          () => 'first',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          undefined,
+          [
+            {
+              type: 'index-pattern',
+              name: `xy-visualization-layer-annotation`,
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
+      });
+    });
+
+    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.initialize!(
+          () => 'first',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          undefined,
+          [
+            {
+              type: 'index-pattern',
+              name: 'something-else',
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
+      });
     });
   });
 
@@ -2541,8 +2623,6 @@ describe('xy_visualization', () => {
       });
 
       describe('Annotation layers', () => {
-        const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
-
         function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
           return {
             layers: [
@@ -2611,7 +2691,7 @@ describe('xy_visualization', () => {
                 layerType: layerTypes.ANNOTATIONS,
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation],
-                ignoreGlobalFilters: true,
+                ignoreGlobalFilters: false,
               },
             ],
           };
@@ -2797,6 +2877,57 @@ describe('xy_visualization', () => {
         `);
       });
     });
+
+    describe('info', () => {
+      function getFrameMock() {
+        const datasourceMock = createMockDatasource('testDatasource');
+        datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
+          id === DATE_HISTORGRAM_COLUMN_ID
+            ? ({
+                label: DATE_HISTORGRAM_COLUMN_ID,
+                dataType: 'date',
+                scale: 'interval',
+              } as OperationDescriptor)
+            : ({
+                dataType: 'number',
+                label: 'MyOperation',
+              } as OperationDescriptor)
+        );
+
+        return createMockFramePublicAPI({
+          datasourceLayers: { first: datasourceMock.publicAPIMock },
+          dataViews: createMockDataViewsState({
+            indexPatterns: { first: createMockedIndexPattern() },
+          }),
+        });
+      }
+
+      it('should return an info message if annotation layer is ignoring the global filters', () => {
+        const initialState = exampleState();
+        const state: State = {
+          ...initialState,
+          layers: [
+            ...initialState.layers,
+            {
+              layerId: 'annotation',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+              indexPatternId: 'myIndexPattern',
+            },
+          ],
+        };
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toContainEqual(
+          expect.objectContaining({
+            displayLocations: [{ id: 'embeddableBadge' }],
+            fixableInEditor: false,
+            severity: 'info',
+            shortMessage: 'Layers ignoring global filters',
+            uniqueId: 'ignoring-global-filters-layers',
+          })
+        );
+      });
+    });
   });
 
   describe('#getUniqueLabels', () => {
@@ -2883,86 +3014,6 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#fromPersistableState', () => {
-    it('should inject references on annotation layers', () => {
-      const baseState = exampleState();
-      expect(
-        xyVisualization.fromPersistableState!(
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-              },
-            ],
-          },
-          [
-            {
-              type: 'index-pattern',
-              name: `xy-visualization-layer-annotation`,
-              id: 'indexPattern1',
-            },
-          ]
-        )
-      ).toEqual({
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-          },
-        ],
-      });
-    });
-
-    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
-      const baseState = exampleState();
-      expect(
-        xyVisualization.fromPersistableState!(
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-              },
-            ],
-          },
-          [
-            {
-              type: 'index-pattern',
-              name: 'something-else',
-              id: 'indexPattern1',
-            },
-          ]
-        )
-      ).toEqual({
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-          },
-        ],
-      });
-    });
-  });
-
   describe('layer actions', () => {
     it('should return no actions for a data layer', () => {
       expect(xyVisualization.getSupportedActionsForLayer?.('first', exampleState())).toHaveLength(
@@ -2970,7 +3021,7 @@ describe('xy_visualization', () => {
       );
     });
 
-    it('should return one action for an annotation layer', () => {
+    it('should return no action for an annotation layer', () => {
       const baseState = exampleState();
       expect(
         xyVisualization.getSupportedActionsForLayer?.('annotation', {
@@ -2986,53 +3037,64 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).toEqual([
-        expect.objectContaining({
-          displayName: 'Keep global filters',
-          description:
-            'All the dimensions configured in this layer respect filters defined at kibana level.',
-          icon: 'filter',
-          isCompatible: true,
-          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
-        }),
-      ]);
+      ).toHaveLength(0);
     });
+  });
 
-    it('should handle an annotation action', () => {
-      const baseState = exampleState();
-      const state = {
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-            indexPatternId: 'myIndexPattern',
-          },
-        ],
-      };
+  describe('layer settings', () => {
+    describe('hasLayerSettings', () => {
+      it('should expose no settings for a data or reference lines layer', () => {
+        const baseState = exampleState();
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: baseState,
+            frame: createMockFramePublicAPI(),
+            layerId: 'first',
+          })
+        ).toEqual({ data: false, appearance: false });
 
-      const newState = xyVisualization.onLayerAction!(
-        'annotation',
-        KEEP_GLOBAL_FILTERS_ACTION_ID,
-        state
-      );
-
-      expect(newState).toEqual(
-        expect.objectContaining({
-          layers: expect.arrayContaining([
-            {
-              layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
-              ignoreGlobalFilters: false,
-              indexPatternId: 'myIndexPattern',
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: {
+              ...baseState,
+              layers: [
+                ...baseState.layers,
+                {
+                  layerId: 'referenceLine',
+                  layerType: layerTypes.REFERENCELINE,
+                  accessors: [],
+                  yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+                },
+              ],
             },
-          ]),
-        })
-      );
+            frame: createMockFramePublicAPI(),
+            layerId: 'referenceLine',
+          })
+        ).toEqual({ data: false, appearance: false });
+      });
+
+      it('should expose data settings for an annotation layer', () => {
+        const baseState = exampleState();
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: {
+              ...baseState,
+              layers: [
+                ...baseState.layers,
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
+                  indexPatternId: 'myIndexPattern',
+                },
+              ],
+            },
+            frame: createMockFramePublicAPI(),
+            layerId: 'annotation',
+          })
+        ).toEqual({ data: true, appearance: false });
+      });
     });
   });
 });

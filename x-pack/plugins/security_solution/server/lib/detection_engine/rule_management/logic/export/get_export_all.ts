@@ -10,9 +10,10 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getNonPackagedRules } from '../search/get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { transformAlertsToRules } from '../../utils/utils';
+import { transformAlertsToRules, transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
@@ -25,7 +26,8 @@ export const getExportAll = async (
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   logger: Logger,
   actionsExporter: ISavedObjectsExporter,
-  request: KibanaRequest
+  request: KibanaRequest,
+  actionsClient: ActionsClient
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -42,6 +44,7 @@ export const getExportAll = async (
     logger,
   });
   const rules = transformAlertsToRules(ruleAlertTypes, legacyActions);
+  const exportRules = rules.map((r) => transformRuleToExportableFormat(r));
 
   // Gather exceptions
   const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
@@ -52,10 +55,11 @@ export const getExportAll = async (
   const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
     rules,
     actionsExporter,
-    request
+    request,
+    actionsClient
   );
 
-  const rulesNdjson = transformDataToNdjson(rules);
+  const rulesNdjson = transformDataToNdjson(exportRules);
   const exportDetails = getExportDetailsNdjson(rules, [], exceptionDetails, actionConnectorDetails);
 
   return { rulesNdjson, exportDetails, exceptionLists, actionConnectors };

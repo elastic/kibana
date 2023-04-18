@@ -15,7 +15,7 @@ import {
 import { TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
-import { changeRowsPerPageTo } from '../../tasks/alerts_detection_rules';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 describe('Export timelines', () => {
   before(() => {
@@ -33,7 +33,7 @@ describe('Export timelines', () => {
 
   it('Exports a custom timeline template', function () {
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    changeRowsPerPageTo(20);
+    setRowsPerPageTo(20);
     exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {

@@ -18,7 +18,6 @@ export enum BUCKET_TYPES {
   RARE_TERMS = 'rare_terms',
   SIGNIFICANT_TERMS = 'significant_terms',
   SIGNIFICANT_TEXT = 'significant_text',
-  GEOHASH_GRID = 'geohash_grid',
   GEOTILE_GRID = 'geotile_grid',
   DATE_HISTOGRAM = 'date_histogram',
   SAMPLER = 'sampler',

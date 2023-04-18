@@ -190,7 +190,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         { defaultMessage: 'Upgrade Available' }
                       )}
                     >
-                      <EuiIcon type="alert" color="warning" />
+                      <EuiIcon type="warning" color="warning" />
                     </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

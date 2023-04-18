@@ -100,6 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             message: MonitorStatusTranslations.defaultRecoveryMessage,
           },
           id: 'my-slack1',
+          uuid: actions[0].uuid,
         },
         {
           actionTypeId: '.slack',
@@ -108,6 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             message: MonitorStatusTranslations.defaultActionMessage,
           },
           id: 'my-slack1',
+          uuid: actions[1].uuid,
         },
       ]);
       expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');

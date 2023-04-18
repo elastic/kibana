@@ -74,7 +74,8 @@ export class TelemetryNotifications {
    * Should the banner to opt-in be shown to the user?
    */
   public shouldShowOptInBanner = (): boolean => {
-    const isOptedIn = this.telemetryService.getIsOptedIn();
+    // Using `config.optIn` instead of the getter `getIsOptedIn()` because the latter only returns boolean, and we want to compare it against `null`.
+    const isOptedIn = this.telemetryService.config.optIn;
     const bannerOnScreen = typeof this.optInBannerId !== 'undefined';
     return !bannerOnScreen && isOptedIn === null;
   };

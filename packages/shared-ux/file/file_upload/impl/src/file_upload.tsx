@@ -19,7 +19,7 @@ import { context } from './context';
 /**
  * An object representing an uploaded file
  */
-interface UploadedFile<Meta = unknown> {
+export interface UploadedFile<Meta = unknown> {
   /**
    * The ID that was generated for the uploaded file
    */
@@ -88,7 +88,7 @@ export interface Props<Kind extends string = string> {
   onUploadStart?: () => void;
 
   /**
-   * Will be called when attempt ends, in error otherwise
+   * Will always be called when upload ends, whether success or failure
    */
   onUploadEnd?: () => void;
 

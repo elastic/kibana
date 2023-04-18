@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '../..';
+import Handlebars, { type HelperOptions } from '../..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('blocks', () => {
@@ -200,7 +200,7 @@ describe('blocks', () => {
   describe('decorators', () => {
     it('should apply mustache decorators', () => {
       expectTemplate('{{#helper}}{{*decorator}}{{/helper}}')
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn) {
@@ -212,7 +212,7 @@ describe('blocks', () => {
 
     it('should apply allow undefined return', () => {
       expectTemplate('{{#helper}}{{*decorator}}suc{{/helper}}')
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return options.fn() + (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn) {
@@ -223,7 +223,7 @@ describe('blocks', () => {
 
     it('should apply block decorators', () => {
       expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {
@@ -237,7 +237,7 @@ describe('blocks', () => {
       expectTemplate(
         '{{#helper}}{{#*decorator}}{{#*nested}}suc{{/nested}}cess{{/decorator}}{{/helper}}'
       )
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return (options.fn as any).run;
         })
         .withDecorators({
@@ -256,7 +256,7 @@ describe('blocks', () => {
       expectTemplate(
         '{{#helper}}{{#*decorator}}suc{{/decorator}}{{#*decorator}}cess{{/decorator}}{{/helper}}'
       )
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {
@@ -268,7 +268,7 @@ describe('blocks', () => {
 
     it('should access parent variables', () => {
       expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
-        .withHelper('helper', function (options: Handlebars.HelperOptions) {
+        .withHelper('helper', function (options: HelperOptions) {
           return (options.fn as any).run;
         })
         .withDecorator('decorator', function (fn, props, container, options) {

@@ -15,9 +15,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiText,
+  EuiSkeletonText,
   formatDate,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -134,7 +134,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
-  const errorIcon = <MarginedIcon type="alert" color="red" />;
+  const errorIcon = <MarginedIcon type="warning" color="red" />;
   const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
 
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
@@ -238,7 +238,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           title={
             <FormattedMessage
@@ -249,7 +249,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         >
           <FormattedMessage
             id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. Fleet will automatically remove old diagnostics files after 30 days."
+            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
           />
         </EuiCallOut>
       </EuiFlexItem>
@@ -272,7 +272,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       </FlexStartEuiFlexItem>
       <EuiFlexItem>
         {isLoading ? (
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         ) : (
           <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
         )}

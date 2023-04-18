@@ -141,6 +141,7 @@ export const importRules = async ({
                       exceptions_list: [...exceptions],
                     },
                     allowMissingConnectorSecrets,
+                    shouldIncrementRevision: false,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,

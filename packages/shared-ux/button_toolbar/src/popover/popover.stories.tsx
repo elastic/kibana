@@ -14,10 +14,17 @@ import { ToolbarPopover as Component } from './popover';
 import mdx from '../../README.mdx';
 
 const argTypes = {
-  iconSide: {
+  showIcon: {
+    defaultValue: true,
+    control: {
+      type: 'boolean',
+    },
+  },
+  buttonType: {
+    defaultValue: 'empty',
     control: {
       type: 'radio',
-      options: ['left', 'right', 'undefined'],
+      options: ['empty', 'primary'],
     },
   },
 };
@@ -35,12 +42,12 @@ export default {
   argTypes,
 };
 
-export const Popover = ({ iconSide }: Params) => {
+export const Popover = ({ showIcon, buttonType }: Params) => {
   return (
     <Component
+      type={buttonType}
       label="Add element"
-      iconType={iconSide === 'right' ? 'arrowDown' : 'plusInCircle'}
-      iconSide={iconSide}
+      iconType={showIcon ? 'plusInCircle' : undefined}
       panelPaddingSize="none"
     >
       {() => (
@@ -72,6 +79,4 @@ export const Popover = ({ iconSide }: Params) => {
   );
 };
 
-Popover.args = {
-  iconSide: 'left',
-};
+Popover.argTypes = argTypes;

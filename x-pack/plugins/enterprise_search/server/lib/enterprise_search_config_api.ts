@@ -43,7 +43,21 @@ export const callEnterpriseSearchConfigAPI = async ({
   log,
   request,
 }: Params): Promise<Return | ResponseError> => {
-  if (!config.host) return {};
+  if (!config.host)
+    // Return Access and Features for when running without `ent-search`
+    return {
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasConnectors: config.hasConnectors,
+        hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasNativeConnectors: config.hasNativeConnectors,
+        hasWebCrawler: config.hasWebCrawler,
+      },
+      kibanaVersion: kibanaPackageJson.version,
+    };
 
   const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
   const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
@@ -87,8 +101,13 @@ export const callEnterpriseSearchConfigAPI = async ({
       kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
-        hasSearchEnginesAccess: !!data?.current_user?.access?.search_engines,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
+      },
+      features: {
+        hasConnectors: config.hasConnectors,
+        hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasNativeConnectors: config.hasNativeConnectors,
+        hasWebCrawler: config.hasWebCrawler,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,

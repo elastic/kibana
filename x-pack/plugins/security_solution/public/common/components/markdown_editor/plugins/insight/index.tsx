@@ -7,6 +7,7 @@
 
 import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
+import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
@@ -32,20 +33,9 @@ import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import {
-  FILTERS,
-  isCombinedFilter,
-  isRangeFilter,
-  isPhraseFilter,
-  isPhrasesFilter,
-  isExistsFilter,
-  BooleanRelation,
-  FilterStateStore,
-} from '@kbn/es-query';
-import type { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -63,6 +53,8 @@ import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { filtersToInsightProviders } from './provider';
+import * as i18n from './translations';
 
 interface InsightComponentProps {
   label?: string;
@@ -72,11 +64,12 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
+const insightPrefix = '!{investigate';
+
 export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  const insightPrefix = '!{insight';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith(insightPrefix) === false) {
@@ -122,16 +115,10 @@ export const parser: Plugin = function () {
         });
       } catch (err) {
         const now = eat.now();
-        this.file.fail(
-          i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightConfigError', {
-            values: { err },
-            defaultMessage: 'Unable to parse insight JSON configuration: {err}',
-          }),
-          {
-            line: now.line,
-            column: now.column + insightPrefix.length,
-          }
-        );
+        this.file.fail(i18n.INVALID_FILTER_ERROR(err), {
+          line: now.line,
+          column: now.column + insightPrefix.length,
+        });
       }
     }
     return false;
@@ -141,78 +128,6 @@ export const parser: Plugin = function () {
   };
   tokenizers.insight = tokenizeInsight;
   methods.splice(methods.indexOf('text'), 0, 'insight');
-};
-
-const buildPrimitiveProvider = (filter: Filter): Provider => {
-  const field = filter.meta?.key ?? '';
-  const excluded = filter.meta?.negate ?? false;
-  const queryType = filter.meta?.type ?? FILTERS.PHRASE;
-  const baseFilter = {
-    field,
-    excluded,
-    queryType,
-  };
-  if (isRangeFilter(filter)) {
-    const gte = filter.query.range[field].gte;
-    const lt = filter.query.range[field].lt;
-    const value = JSON.stringify({ gte, lt });
-    return {
-      ...baseFilter,
-      value,
-      queryType: filter.meta.type ?? FILTERS.RANGE,
-    };
-  } else if (isPhrasesFilter(filter)) {
-    const typeOfParams: PhraseFilterValue = typeof filter.meta?.params[0];
-    return {
-      ...baseFilter,
-      value: JSON.stringify(filter.meta?.params ?? []),
-      valueType: typeOfParams,
-      queryType: filter.meta.type ?? FILTERS.PHRASES,
-    };
-  } else if (isExistsFilter(filter)) {
-    return {
-      ...baseFilter,
-      value: '',
-      queryType: filter.meta.type ?? FILTERS.EXISTS,
-    };
-  } else if (isPhraseFilter(filter)) {
-    const valueType: PhraseFilterValue = typeof filter.meta?.params?.query;
-    return {
-      ...baseFilter,
-      value: filter.meta?.params?.query ?? '',
-      valueType,
-      queryType: filter.meta.type ?? FILTERS.PHRASE,
-    };
-  } else {
-    return {
-      ...baseFilter,
-      value: '',
-      queryType: FILTERS.PHRASE,
-    };
-  }
-};
-
-const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
-  const providers = [];
-  for (let index = 0; index < filters.length; index++) {
-    const filter = filters[index];
-    if (isCombinedFilter(filter)) {
-      if (filter.meta.relation === BooleanRelation.AND) {
-        return filtersToInsightProviders(filter.meta?.params);
-      } else {
-        return filter.meta?.params.map((innerFilter) => {
-          if (isCombinedFilter(innerFilter)) {
-            return filtersToInsightProviders([innerFilter]).map(([provider]) => provider);
-          } else {
-            return [buildPrimitiveProvider(innerFilter)];
-          }
-        });
-      }
-    } else {
-      providers.push([buildPrimitiveProvider(filter)]);
-    }
-  }
-  return providers;
 };
 
 const resultFormat = '0,0.[000]a';
@@ -233,33 +148,49 @@ const InsightComponent = ({
     }
   } catch (err) {
     addError(err, {
-      title: i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightProviderError', {
-        defaultMessage: 'Unable to parse insight provider configuration',
-      }),
+      title: i18n.PARSE_ERROR,
     });
   }
-  const { data: alertData } = useContext(BasicAlertDataContext);
+  const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
   const { dataProviders, filters } = useInsightDataProviders({
     providers: parsedProviders,
     alertData,
   });
+  const relativeTimerange: TimeRange | null = useMemo(() => {
+    if (relativeFrom && relativeTo) {
+      const alertRelativeDate = timestamp ? moment(timestamp) : moment();
+      const from = parseDateWithDefault(
+        relativeFrom,
+        DEFAULT_FROM_MOMENT,
+        false,
+        moment,
+        alertRelativeDate.toDate()
+      ).toISOString();
+      const to = parseDateWithDefault(
+        relativeTo,
+        DEFAULT_TO_MOMENT,
+        true,
+        moment,
+        alertRelativeDate.toDate()
+      ).toISOString();
+      return {
+        kind: 'absolute',
+        from,
+        to,
+      };
+    } else {
+      return null;
+    }
+  }, [relativeFrom, relativeTo, timestamp]);
+
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
     filters,
+    relativeTimerange,
   });
   const timerange: TimeRange = useMemo(() => {
-    if (relativeFrom && relativeTo) {
-      const fromStr = relativeFrom;
-      const toStr = relativeTo;
-      const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
-      const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
-      return {
-        kind: 'relative',
-        from,
-        to,
-        fromStr,
-        toStr,
-      };
+    if (relativeTimerange) {
+      return relativeTimerange;
     } else if (oldestTimestamp != null) {
       return {
         kind: 'absolute',
@@ -276,7 +207,8 @@ const InsightComponent = ({
         toStr,
       };
     }
-  }, [oldestTimestamp, relativeFrom, relativeTo]);
+  }, [oldestTimestamp, relativeTimerange]);
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
   } else {
@@ -383,7 +315,7 @@ const InsightEditorComponent = ({
 
   const onSubmit = useCallback(() => {
     onSave(
-      `!{insight${JSON.stringify(
+      `${insightPrefix}${JSON.stringify(
         pickBy(
           {
             label: labelController.field.value,
@@ -416,6 +348,10 @@ const InsightEditorComponent = ({
     },
     [relativeTimerangeController.field]
   );
+  const disableSubmit = useMemo(() => {
+    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
+    return labelOrEmpty.trim() === '' || providers.length === 0;
+  }, [labelController.field.value, providers]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
@@ -455,13 +391,7 @@ const InsightEditorComponent = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                color={'hollow'}
-                label={i18n.translate('xpack.securitySolution.markdown.insight.technicalPreview', {
-                  defaultMessage: 'Technical Preview',
-                })}
-                size="s"
-              />
+              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
@@ -470,9 +400,13 @@ const InsightEditorComponent = ({
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
+            <EuiFormRow label={i18n.FORM_DESCRIPTION} fullWidth>
+              <></>
+            </EuiFormRow>
             <EuiFormRow
-              label="Label"
-              helpText="Label for the filter button rendered in the guide"
+              label={i18n.LABEL}
+              helpText={i18n.LABEL_TEXT}
+              isInvalid={labelController.field.value != null}
               fullWidth
             >
               <EuiFieldText
@@ -484,18 +418,14 @@ const InsightEditorComponent = ({
                 onChange={labelController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Description"
-              helpText="Description of the relevance of the query"
-              fullWidth
-            >
+            <EuiFormRow label={i18n.DESCRIPTION} helpText={i18n.DESCRIPTION_TEXT} fullWidth>
               <EuiFieldText
                 {...{ ...formMethods.register('description'), ref: null }}
                 name="description"
                 onChange={descriptionController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow fullWidth>
+            <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
               <FiltersBuilderLazy
                 filters={filtersStub}
                 onChange={onChange}
@@ -504,8 +434,8 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Relative time range"
-              helpText="Select a time range relative to the time of the alert (optional)"
+              label={i18n.RELATIVE_TIMERANGE}
+              helpText={i18n.RELATIVE_TIMERANGE_TEXT}
               fullWidth
             >
               <EuiSelect
@@ -519,12 +449,8 @@ const InsightEditorComponent = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
-          {i18n.translate('xpack.securitySolution.markdown.insight.modalCancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
+        <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL_FORM_BUTTON}</EuiButtonEmpty>
+        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill disabled={disableSubmit}>
           {isEditMode ? (
             <FormattedMessage
               id="xpack.securitySolution.markdown.insight.addModalConfirmButtonLabel"
@@ -543,7 +469,7 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `!{insight{
+const exampleInsight = `${insightPrefix}
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [

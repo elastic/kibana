@@ -32,7 +32,6 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardButtonHref } from '../../../../common/hooks/use_dashboard_button_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -86,12 +85,12 @@ const RiskDetailsTabBodyComponent: React.FC<
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,
-    skip: (!overTimeToggleStatus && !contributorsToggleStatus) || isChartEmbeddablesEnabled,
+    skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
   });
 

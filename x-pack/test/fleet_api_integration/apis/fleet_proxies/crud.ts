@@ -15,6 +15,21 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
+
+  async function getLatestFleetPolicies(policyId: string): Promise<any> {
+    const policyDocRes = await es.search({
+      index: '.fleet-policies',
+      query: {
+        term: {
+          policy_id: policyId,
+        },
+      },
+      sort: [{ '@timestamp': 'desc' }],
+    });
+
+    return policyDocRes.hits.hits[0]?._source;
+  }
 
   describe('fleet_proxies_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -25,6 +40,9 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     const existingId = 'test-default-123';
+    const fleetServerHostId = 'test-fleetserver-123';
+    const policyId = 'test-policy-123';
+    const outputId = 'test-output-123';
 
     before(async function () {
       await kibanaServer.savedObjects.clean({
@@ -39,10 +57,46 @@ export default function (providerContext: FtrProviderContext) {
           url: 'https://test.fr:3232',
         })
         .expect(200);
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: fleetServerHostId,
+          name: 'Test 123',
+          host_urls: ['https://fleetserverhost.fr:3232'],
+          proxy_id: existingId,
+        })
+        .expect(200);
+      await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: outputId,
+          name: 'Test 123',
+          type: 'elasticsearch',
+          hosts: ['http://es:9200'],
+          proxy_id: existingId,
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: policyId,
+          name: 'Test 123',
+          namespace: 'default',
+          fleet_server_host_id: fleetServerHostId,
+          data_output_id: outputId,
+        })
+        .expect(200);
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({
+        types: ['fleet-proxy'],
+      });
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
@@ -82,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test 123 updated',
+            url: 'https://testupdated.fr:3232',
           })
           .expect(200);
 
@@ -90,6 +145,12 @@ export default function (providerContext: FtrProviderContext) {
         } = await supertest.get(`/api/fleet/proxies/${existingId}`).expect(200);
 
         expect(fleetServerHost.name).to.eql('Test 123 updated');
+
+        const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
+        expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be('https://testupdated.fr:3232');
+        expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(
+          'https://testupdated.fr:3232'
+        );
       });
 
       it('should return a 404 when updating a non existing fleet proxy', async function () {
@@ -100,6 +161,19 @@ export default function (providerContext: FtrProviderContext) {
             name: 'new name',
           })
           .expect(404);
+      });
+    });
+
+    describe('DELETE /proxies/{itemId}', () => {
+      it('should allow to delete an existing fleet proxy', async function () {
+        await supertest
+          .delete(`/api/fleet/proxies/${existingId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
+        expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be(undefined);
+        expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(undefined);
       });
     });
   });

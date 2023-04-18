@@ -40,19 +40,25 @@ const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
   width: 60%;
 `;
 
+export interface MonitorDetailsPanelProps {
+  latestPing?: Ping;
+  loading: boolean;
+  configId: string;
+  monitor: EncryptedSyntheticsSavedMonitor | null;
+  hideEnabled?: boolean;
+  hideLocations?: boolean;
+  hasBorder?: boolean;
+}
+
 export const MonitorDetailsPanel = ({
   monitor,
   latestPing,
   loading,
   configId,
   hideEnabled = false,
-}: {
-  latestPing?: Ping;
-  loading: boolean;
-  configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
-  hideEnabled?: boolean;
-}) => {
+  hideLocations = false,
+  hasBorder = true,
+}: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
 
   if (!monitor) {
@@ -60,7 +66,13 @@ export const MonitorDetailsPanel = ({
   }
 
   return (
-    <PanelWithTitle paddingSize="m" title={MONITOR_DETAILS_LABEL} titleLeftAlign>
+    <PanelWithTitle
+      paddingSize="m"
+      margin="none"
+      title={MONITOR_DETAILS_LABEL}
+      titleLeftAlign
+      hasBorder={hasBorder}
+    >
       <WrapperStyle>
         <EuiSpacer size="s" />
         <EuiDescriptionList type="column" compressed align="left">
@@ -84,6 +96,7 @@ export const MonitorDetailsPanel = ({
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
             <EuiLink
+              data-test-subj="syntheticsMonitorDetailsPanelLink"
               href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
               external
             >
@@ -109,17 +122,22 @@ export const MonitorDetailsPanel = ({
             </>
           )}
           <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
+          <DescriptionLabel>{monitor.id}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
             <MonitorTypeBadge monitor={monitor} />
           </DescriptionLabel>
           <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
-          <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
-          </DescriptionLabel>
+
+          {!hideLocations && (
+            <>
+              <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
+              <DescriptionLabel>
+                <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              </DescriptionLabel>
+            </>
+          )}
 
           <TitleLabel>{TAGS_LABEL}</TitleLabel>
           <DescriptionLabel>

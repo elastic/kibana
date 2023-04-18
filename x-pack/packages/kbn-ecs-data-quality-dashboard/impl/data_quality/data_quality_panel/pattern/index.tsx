@@ -37,6 +37,7 @@ import {
 import { IndexProperties } from '../index_properties';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
+import { RemoteClustersCallout } from '../remote_clusters_callout';
 import { SummaryTable } from '../summary_table';
 import { getSummaryTableColumns } from '../summary_table/helpers';
 import * as i18n from './translations';
@@ -226,6 +227,13 @@ const PatternComponent: React.FC<Props> = ({
           />
           <EuiSpacer />
         </EuiFlexItem>
+
+        {!loading && pattern.includes(':') && (
+          <>
+            <RemoteClustersCallout />
+            <EuiSpacer size="s" />
+          </>
+        )}
 
         {!loading && error != null && (
           <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />

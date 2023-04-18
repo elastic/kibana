@@ -120,11 +120,11 @@ export class ProjectMonitorFormatter {
   }
 
   init = async () => {
-    const locationsPromise = getAllLocations(
-      this.server,
-      this.syntheticsMonitorClient,
-      this.savedObjectsClient
-    );
+    const locationsPromise = getAllLocations({
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+    });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 
     const [locations, existingMonitors] = await Promise.all([
@@ -157,6 +157,8 @@ export class ProjectMonitorFormatter {
 
       const normM = await this.validateProjectMonitor({
         monitor,
+        publicLocations: this.publicLocations,
+        privateLocations: this.privateLocations,
       });
       if (normM) {
         if (
@@ -208,7 +210,15 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  validateProjectMonitor = async ({ monitor }: { monitor: ProjectMonitor }) => {
+  validateProjectMonitor = async ({
+    monitor,
+    publicLocations,
+    privateLocations,
+  }: {
+    monitor: ProjectMonitor;
+    publicLocations: Locations;
+    privateLocations: PrivateLocation[];
+  }) => {
     try {
       await this.validatePermissions({ monitor });
 
@@ -228,10 +238,14 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the payload sent from the synthetics agent is valid */
       const { valid: isMonitorPayloadValid } = this.validateMonitor({
-        validationResult: validateProjectMonitor({
-          ...monitor,
-          type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
-        }),
+        validationResult: validateProjectMonitor(
+          {
+            ...monitor,
+            type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+          },
+          publicLocations,
+          privateLocations
+        ),
         monitorId: monitor.id,
       });
 

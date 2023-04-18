@@ -116,7 +116,7 @@ async function createSetupSideEffects(
     settingsService.settingsSetup(soClient),
   ]);
 
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
@@ -164,6 +164,14 @@ async function createSetupSideEffects(
 
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  logger.debug('Generating key pair for message signing');
+  if (!appContextService.getMessageSigningService()?.isEncryptionAvailable) {
+    logger.warn(
+      'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
+    );
+  }
+  await appContextService.getMessageSigningService()?.generateKeyPair();
 
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);

@@ -124,7 +124,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              wget -O- https://releases.prodfiler.com/stable/pf-host-agent_linux_amd64.tgz | tar xz
+              wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64&quot; && tar xzf
+              pf-host-agent.tgz
             </EuiCodeBlock>
           ),
         },
@@ -162,8 +163,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right DEB package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://releases.prodfiler.com/stable/index.html`}>
-              https://releases.prodfiler.com/stable/index.html
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
+              https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),
         },
@@ -212,8 +213,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right RPM package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://releases.prodfiler.com/stable/index.html`}>
-              https://releases.prodfiler.com/stable/index.html
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
+              https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),
         },
@@ -245,6 +246,49 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
+            </EuiCodeBlock>
+          ),
+        },
+      ],
+    },
+    {
+      key: 'symbols',
+      title: i18n.translate('xpack.profiling.tabs.symbols.title', {
+        defaultMessage: 'Upload Symbols',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
+            defaultMessage: 'Download the symbtool binary from the URL below:',
+          }),
+          content: (
+            <EuiLink target="_blank" href={`https://ela.st/symbtool-linux-amd64`}>
+              https://ela.st/symbtool-linux-amd64
+            </EuiLink>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
+            defaultMessage: 'Generate an Elasticsearch token:',
+          }),
+          content: (
+            <EuiLink
+              target="_blank"
+              href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+            >
+              {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
+                defaultMessage: 'Instructions here',
+              })}
+            </EuiLink>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
+            defaultMessage: 'Run:',
+          }),
+          content: (
+            <EuiCodeBlock paddingSize="s" isCopyable>
+              {`./symbtool push-symbols executable --url <symb service IP> --api-key {} --help`}
             </EuiCodeBlock>
           ),
         },

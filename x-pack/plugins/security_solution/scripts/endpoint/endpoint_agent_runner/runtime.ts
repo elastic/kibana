@@ -12,8 +12,9 @@ import type { RuntimeServices } from '../common/stack_services';
 import { createRuntimeServices } from '../common/stack_services';
 
 interface EndpointRunnerRuntimeServices extends RuntimeServices {
-  options: Required<
-    Omit<StartRuntimeServicesOptions, 'kibanaUrl' | 'elasticUrl' | 'username' | 'password' | 'log'>
+  options: Omit<
+    StartRuntimeServicesOptions,
+    'kibanaUrl' | 'elasticUrl' | 'username' | 'password' | 'log'
   >;
 }
 

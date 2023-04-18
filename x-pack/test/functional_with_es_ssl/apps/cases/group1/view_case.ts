@@ -307,11 +307,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('property-actions-description-ellipses');
-
-          await header.waitUntilLoadingHasFinished();
-
-          await testSubjects.click('property-actions-description-pencil');
+          await testSubjects.click('editable-description-edit-icon');
 
           await header.waitUntilLoadingHasFinished();
 
@@ -357,6 +353,123 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="severity-update-action"]');
+      });
+    });
+
+    describe('filter activity', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('filters by comment successfully', async () => {
+        const commentBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
+        );
+
+        expect(await commentBadge.getVisibleText()).equal('0');
+
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await commentBadge.getVisibleText()).equal('1');
+      });
+
+      it('filters by history successfully', async () => {
+        const historyBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
+        );
+
+        expect(await historyBadge.getVisibleText()).equal('1');
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('user-actions-filter-activity-button-history');
+
+        expect(await historyBadge.getVisibleText()).equal('3');
+      });
+
+      it('sorts by newest first successfully', async () => {
+        await testSubjects.click('user-actions-filter-activity-button-all');
+
+        const AllBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
+        );
+
+        expect(await AllBadge.getVisibleText()).equal('4');
+
+        const sortDesc = await find.byCssSelector(
+          '[data-test-subj="user-actions-sort-select"] [value="desc"]'
+        );
+
+        await sortDesc.click();
+
+        await header.waitUntilLoadingHasFinished();
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        const actionList = await userActionsLists[0].findAllByClassName('euiComment');
+
+        expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
+      });
+    });
+
+    describe('pagination', async () => {
+      let createdCase: any;
+
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        createdCase = await cases.api.createCase({ title: 'Pagination feature' });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('shows more actions on button click', async () => {
+        await cases.api.generateUserActions({
+          caseId: createdCase.id,
+          caseVersion: createdCase.version,
+          totalUpdates: 4,
+        });
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('case-refresh');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(2);
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+
+        testSubjects.click('cases-show-more-user-actions');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
       });
     });
 

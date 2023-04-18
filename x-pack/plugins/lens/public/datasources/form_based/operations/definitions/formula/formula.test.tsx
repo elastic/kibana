@@ -1520,7 +1520,10 @@ invalid: "
           operationDefinitionMap
         )
       ).toEqual([
-        'A layer with only static values will not show results, use at least one dynamic metric',
+        {
+          message:
+            'A layer with only static values will not show results, use at least one dynamic metric',
+        },
       ]);
     });
 
@@ -1855,6 +1858,18 @@ invalid: "
           )
         ).toEqual(undefined);
       }
+    });
+
+    it('returns deduped errors on inner operation validation', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('sum(clientip) + sum(clientip)', true),
+          'col1',
+          indexPattern,
+          undefined,
+          operationDefinitionMap
+        )
+      ).toHaveLength(1);
     });
   });
 });

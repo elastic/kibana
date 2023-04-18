@@ -11,7 +11,7 @@ import type {
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '../..';
 
 type KueryNode = any;
 
@@ -136,6 +136,8 @@ export interface SavedObjectsFindOptions {
    * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
    */
   pit?: SavedObjectsPitParams;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**

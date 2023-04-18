@@ -26,12 +26,16 @@ describe('AgentActivityFlyout', () => {
   const mockOnClose = jest.fn();
   const mockOnAbortSuccess = jest.fn();
   const mockAbortUpgrade = jest.fn();
+  const mockSetSearch = jest.fn();
+  const mockSetSelectedStatus = jest.fn();
 
   beforeEach(() => {
     mockOnClose.mockReset();
     mockOnAbortSuccess.mockReset();
     mockAbortUpgrade.mockReset();
     mockUseActionStatus.mockReset();
+    mockSetSearch.mockReset();
+    mockSetSelectedStatus.mockReset();
     mockUseGetAgentPolicies.mockReturnValue({
       data: {
         items: [
@@ -60,6 +64,8 @@ describe('AgentActivityFlyout', () => {
           onClose={mockOnClose}
           onAbortSuccess={mockOnAbortSuccess}
           refreshAgentActivity={false}
+          setSearch={mockSetSearch}
+          setSelectedStatus={mockSetSelectedStatus}
         />
       </IntlProvider>
     );
@@ -419,5 +425,73 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for policy change no agents', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 0,
+        nbAgentsAck: 0,
+        type: 'POLICY_CHANGE',
+        nbAgentsActioned: 0,
+        status: 'COMPLETE',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      'Policy changed'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for policy change with agents', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 3,
+        nbAgentsAck: 3,
+        type: 'POLICY_CHANGE',
+        nbAgentsActioned: 3,
+        status: 'COMPLETE',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '3 agents applied policy change'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
   });
 });

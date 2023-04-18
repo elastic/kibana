@@ -111,6 +111,8 @@ get:
   summary: Retrieves all the comments from a case.
   operationId: getAllCaseComments
   description: >
+    Deprecated in 8.1.0. This API is deprecated and will be removed in a future release;
+    instead, use the get case comment API, which requires a comment identifier in the path.
     You must have `read` privileges for the **Cases** feature in the **Management**,
     **Observability**, or **Security** section of the Kibana feature privileges,
     depending on the owner of the cases with the comments you're seeking.

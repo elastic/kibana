@@ -40,6 +40,7 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
+import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -63,6 +64,7 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
@@ -222,13 +224,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const tableProps =
     selectedTab === AllRulesTabs.management
       ? {
-          'data-test-subj': 'rules-table',
+          'data-test-subj': 'rules-management-table',
           columns: rulesColumns,
         }
-      : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+      : { 'data-test-subj': 'rules-monitoring-table', columns: monitoringColumns };
 
-  const shouldShowLinearProgress = isFetched && isRefetching;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
+  const numberOfSelectedRules = isAllSelected ? pagination.total : selectedRuleIds?.length ?? 1;
 
   return (
     <>
@@ -273,7 +276,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
-          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
+          rulesCount={numberOfSelectedRules}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

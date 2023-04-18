@@ -23,7 +23,7 @@ import { applyMetadataToLastPath } from './apply_metadata_to_last_path';
 const getMetricValue = (row: MetricsAPIRow) => {
   if (!isNumber(row.metric_0)) return null;
   const value = row.metric_0;
-  return isFinite(value) ? value : null;
+  return Number.isFinite(value) ? value : null;
 };
 
 const calculateMax = (rows: MetricsAPIRow[]) => {
@@ -31,7 +31,8 @@ const calculateMax = (rows: MetricsAPIRow[]) => {
 };
 
 const calculateAvg = (rows: MetricsAPIRow[]): number => {
-  return sum(rows.map(getMetricValue)) / rows.length || 0;
+  const values = rows.map(getMetricValue).filter(Number.isFinite);
+  return sum(values) / Math.max(values.length, 1);
 };
 
 const getLastValue = (rows: MetricsAPIRow[]) => {

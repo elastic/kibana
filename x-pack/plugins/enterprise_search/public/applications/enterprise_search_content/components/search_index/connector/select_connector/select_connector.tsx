@@ -125,9 +125,10 @@ export const SelectConnector: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="row">
             {NATIVE_CONNECTORS.map((nativeConnector) => (
-              <EuiFlexItem>
+              <EuiFlexItem key={nativeConnector.name}>
                 <ConnectorCheckable
-                  {...nativeConnector}
+                  name={nativeConnector.name}
+                  serviceType={nativeConnector.serviceType}
                   onChange={() => setSelectedConnector(nativeConnector)}
                   documentationUrl={nativeConnector.docsUrl}
                   checked={nativeConnector === selectedNativeConnector}

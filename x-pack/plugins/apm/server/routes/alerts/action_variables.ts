@@ -17,6 +17,7 @@ export const apmActionVariables = {
       }
     ),
     name: 'alertDetailsUrl' as const,
+    usesPublicBaseUrl: true,
   },
   environment: {
     description: i18n.translate(
@@ -84,5 +85,6 @@ export const apmActionVariables = {
       }
     ),
     name: 'viewInAppUrl' as const,
+    usesPublicBaseUrl: true,
   },
 };

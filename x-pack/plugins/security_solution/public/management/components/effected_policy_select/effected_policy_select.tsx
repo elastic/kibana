@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
@@ -104,6 +105,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     ...otherSelectableProps
   }) => {
     const { getAppUrl } = useAppUrl();
+    const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -145,25 +147,35 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               data-test-subj={`policy-${policy.id}-checkbox`}
             />
           ),
-          append: (
+          append: canReadPolicyManagement ? (
             <LinkToApp
               href={getAppUrl({ path: getPolicyDetailPath(policy.id) })}
               appPath={getPolicyDetailPath(policy.id)}
               target="_blank"
+              data-test-subj={getTestId('policyLink')}
             >
               <FormattedMessage
                 id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
                 defaultMessage="View policy"
               />
             </LinkToApp>
-          ),
+          ) : null,
           policy,
           checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
           disabled: isGlobal || !isPlatinumPlus || disabled,
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [disabled, getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
+    }, [
+      canReadPolicyManagement,
+      disabled,
+      getAppUrl,
+      getTestId,
+      isGlobal,
+      isPlatinumPlus,
+      options,
+      selected,
+    ]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']

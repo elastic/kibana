@@ -24,7 +24,10 @@ export default Handlebars;
 export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'compile' : 'compileAST';
 
 export type {
-  DecoratorFunction,
-  ExtendedCompileOptions,
-  ExtendedRuntimeOptions,
+  CompileOptions,
+  RuntimeOptions,
+  HelperDelegate,
+  TemplateDelegate,
+  DecoratorDelegate,
+  HelperOptions,
 } from './src/types';

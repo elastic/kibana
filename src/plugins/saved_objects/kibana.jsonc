@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "savedObjects",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": [
       "data",

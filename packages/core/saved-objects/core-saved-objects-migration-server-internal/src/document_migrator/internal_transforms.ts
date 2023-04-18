@@ -16,7 +16,19 @@ import {
   LEGACY_URL_ALIAS_TYPE,
   LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { Transform } from './types';
+import { migrations as coreMigrationsMap } from './migrations';
+import { type Transform, TransformType } from './types';
+
+/**
+ * Returns all available core transforms for all object types.
+ */
+export function getCoreTransforms(): Transform[] {
+  return Object.entries(coreMigrationsMap).map<Transform>(([version, transform]) => ({
+    version,
+    transform,
+    transformType: TransformType.Core,
+  }));
+}
 
 /**
  * Returns all applicable conversion transforms for a given object type.
@@ -30,7 +42,7 @@ export function getConversionTransforms(type: SavedObjectsType): Transform[] {
     {
       version: convertToMultiNamespaceTypeVersion,
       transform: convertNamespaceType,
-      transformType: 'convert',
+      transformType: TransformType.Convert,
     },
   ];
 }
@@ -68,7 +80,7 @@ export function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): 
       }
       return { transformedDoc: doc, additionalDocs: [] };
     },
-    transformType: 'reference',
+    transformType: TransformType.Reference,
   }));
 }
 

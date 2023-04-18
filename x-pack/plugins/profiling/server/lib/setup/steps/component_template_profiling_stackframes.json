@@ -30,7 +30,9 @@
       },
       "Stackframe.function.name": {
         "type": "keyword",
-        "index": false
+        "index": false,
+        "doc_values": false,
+        "store": false
       },
       "Stackframe.function.offset": {
         "type": "integer",

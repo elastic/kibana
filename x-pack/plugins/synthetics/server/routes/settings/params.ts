@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -17,7 +18,7 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const canSave =
       (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;

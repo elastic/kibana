@@ -32,7 +32,7 @@ export const PolicyResponseActionItem = memo(
       <StyledEuiCallout
         title={policyResponseActionFormatter.errorTitle}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="endpointPolicyResponseErrorCallOut"
       >
         <StyledEuiText size="s" data-test-subj="endpointPolicyResponseMessage">

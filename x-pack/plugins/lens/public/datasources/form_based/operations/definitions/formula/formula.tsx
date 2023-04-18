@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type { BaseIndexPatternColumn, OperationDefinition } from '..';
+import type {
+  BaseIndexPatternColumn,
+  FieldBasedOperationErrorMessage,
+  OperationDefinition,
+} from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../../../types';
 import { runASTValidation, tryToParse } from './validation';
@@ -94,22 +98,30 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }
 
       const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
-      const innerErrors = managedColumns
-        .flatMap(([id, col]) => {
-          const def = visibleOperationsMap[col.operationType];
-          if (def?.getErrorMessage) {
-            const messages = def.getErrorMessage(
-              layer,
-              id,
-              indexPattern,
-              dateRange,
-              visibleOperationsMap
-            );
-            return messages ? { message: messages.join(', ') } : [];
-          }
-          return [];
-        })
-        .filter(nonNullable);
+      const innerErrors = [
+        ...managedColumns
+          .flatMap(([id, col]) => {
+            const def = visibleOperationsMap[col.operationType];
+            if (def?.getErrorMessage) {
+              // TOOD: it would be nice to have nicer column names here rather than `Part of <formula content>`
+              const messages = def.getErrorMessage(
+                layer,
+                id,
+                indexPattern,
+                dateRange,
+                visibleOperationsMap
+              );
+              return messages || [];
+            }
+            return [];
+          })
+          .filter(nonNullable)
+          // dedup messages with the same content
+          .reduce((memo, message) => {
+            memo.add(message);
+            return memo;
+          }, new Set<FieldBasedOperationErrorMessage>()),
+      ];
       const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
       const hasOtherMetrics = layer.columnOrder.some((colId) => {
         const col = layer.columns[colId];
@@ -135,7 +147,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         });
       }
 
-      return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
+      return innerErrors.length ? innerErrors : undefined;
     },
     getPossibleOperation() {
       return {

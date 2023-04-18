@@ -7,6 +7,7 @@
 
 import { getSecuritySolutionNavTab as getSecuritySolutionCSPNavTab } from '@kbn/cloud-security-posture-plugin/public';
 import { getSecuritySolutionNavTab as getSecuritySolutionTINavTab } from '@kbn/threat-intelligence-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionCloudDefendNavTab } from '@kbn/cloud-defend-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -184,6 +185,10 @@ export const navTabs: SecurityNav = {
   },
   [SecurityPageName.cloudSecurityPostureBenchmarks]: {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
+    urlKey: 'administration',
+  },
+  [SecurityPageName.cloudDefendPolicies]: {
+    ...getSecuritySolutionCloudDefendNavTab<SecurityPageName>('policies', APP_PATH),
     urlKey: 'administration',
   },
   [SecurityPageName.entityAnalytics]: {

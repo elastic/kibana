@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DATASET_VAR_NAME } from '../constants';
 import type {
   RegistryPolicyTemplate,
   RegistryPolicyInputOnlyTemplate,
@@ -17,7 +18,7 @@ import type {
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
-  name: 'data_stream.dataset',
+  name: DATASET_VAR_NAME,
   type: 'text',
   title: 'Dataset name',
   description:
@@ -79,7 +80,7 @@ export const getNormalizedDataStreams = (
       streams: [
         {
           input: policyTemplate.input,
-          vars: addDatasetVarIfNotPresent(policyTemplate.vars),
+          vars: addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name),
           template_path: policyTemplate.template_path,
           title: policyTemplate.title,
           description: policyTemplate.title,
@@ -94,7 +95,10 @@ export const getNormalizedDataStreams = (
 
 // Input only packages must provide a dataset name in order to differentiate their data streams
 // here we add the dataset var if it is not defined in the package already.
-const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+const addDatasetVarIfNotPresent = (
+  vars?: RegistryVarsEntry[],
+  datasetName?: string
+): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
   const isDatasetAlreadyAdded = newVars.find(
@@ -104,7 +108,10 @@ const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntr
   if (isDatasetAlreadyAdded) {
     return newVars;
   } else {
-    return [...newVars, DATA_STREAM_DATASET_VAR];
+    return [
+      ...newVars,
+      { ...DATA_STREAM_DATASET_VAR, ...(datasetName && { default: datasetName }) },
+    ];
   }
 };
 

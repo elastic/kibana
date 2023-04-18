@@ -16,11 +16,12 @@ interface Props {
   from: string;
   to: string;
   monitorId: string[];
+  id: string;
 }
-export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const MonitorErrorSparklines = ({ from, to, monitorId, id }: Props) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
 
@@ -34,6 +35,7 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}

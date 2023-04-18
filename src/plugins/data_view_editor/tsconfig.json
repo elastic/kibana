@@ -17,6 +17,7 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/ui-theme",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",

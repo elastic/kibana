@@ -144,7 +144,13 @@
         ],
         "signature": [
           "(file: Blob | File) => Promise<",
-          "FileImageMetadata",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileImageMetadata",
+            "text": "FileImageMetadata"
+          },
           " | undefined>"
         ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",
@@ -264,7 +270,13 @@
         "description": [],
         "signature": [
           "(file: Blob | File) => Promise<",
-          "FileImageMetadata",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileImageMetadata",
+            "text": "FileImageMetadata"
+          },
           " | undefined>"
         ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",

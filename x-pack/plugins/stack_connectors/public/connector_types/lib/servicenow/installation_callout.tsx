@@ -21,7 +21,7 @@ const InstallationCalloutComponent: React.FC<Props> = ({ appId }) => {
       <EuiSpacer size="s" />
       <EuiCallOut
         size="m"
-        iconType="alert"
+        iconType="warning"
         color="warning"
         data-test-subj="snInstallationCallout"
         title={i18n.INSTALLATION_CALLOUT_TITLE}

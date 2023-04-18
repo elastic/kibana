@@ -14,7 +14,7 @@ import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/c
 import { getSignals } from './get_signals';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
 import { scheduleNotificationActions } from './schedule_notification_actions';
-import type { AlertAttributes } from '../../../signals/types';
+import type { AlertAttributes } from '../../../rule_types/types';
 
 interface ScheduleThrottledNotificationActionsOptions {
   id: SavedObject['id'];

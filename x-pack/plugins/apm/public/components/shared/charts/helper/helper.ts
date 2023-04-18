@@ -39,6 +39,7 @@ export const onBrushEnd = ({
 export function isTimeseriesEmpty(timeseries?: Array<TimeSeries<Coordinate>>) {
   return (
     !timeseries ||
+    timeseries.length === 0 ||
     timeseries
       .map((serie) => serie.data)
       .flat()

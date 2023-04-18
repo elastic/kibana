@@ -136,7 +136,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({
           defaultMessage: 'An error occurred getting the anomaly detection jobs list.',
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <pre>{errorMessage}</pre>
       </EuiCallOut>

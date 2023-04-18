@@ -13,64 +13,94 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mongodb: {
     configuration: {
       host: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.hostLabel',
           {
             defaultMessage: 'Host',
           }
         ),
-        order: 0,
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
         value: '',
       },
       user: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.usernameLabel',
           {
             defaultMessage: 'Username',
           }
         ),
-        order: 1,
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
         value: '',
       },
       password: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.passwordLabel',
           {
             defaultMessage: 'Password',
           }
         ),
-        order: 2,
+        options: [],
+        order: 3,
+        required: true,
+        sensitive: true,
         value: '',
       },
       database: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.databaseLabel',
           {
             defaultMessage: 'Database',
           }
         ),
-        order: 3,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
         value: '',
       },
       collection: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.collectionLabel',
           {
             defaultMessage: 'Collection',
           }
         ),
-        order: 4,
+        options: [],
+        order: 5,
+        required: true,
+        sensitive: false,
         value: '',
       },
       direct_connection: {
+        depends_on: [],
+        display: 'toggle',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.directConnectionLabel',
           {
-            defaultMessage: 'Direct connection (true/false)',
+            defaultMessage: 'Direct connection',
           }
         ),
-        order: 5,
-        value: '',
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        value: true,
       },
     },
     features: {
@@ -89,73 +119,123 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mysql: {
     configuration: {
       host: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.hostLabel',
           {
             defaultMessage: 'Host',
           }
         ),
-        order: 0,
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: false,
         value: '',
       },
       port: {
+        depends_on: [],
+        display: 'numeric',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.portLabel',
           {
             defaultMessage: 'Port',
           }
         ),
-        order: 1,
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
         value: '',
       },
       user: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel',
           {
             defaultMessage: 'Username',
           }
         ),
-        order: 2,
+        options: [],
+        order: 3,
+        required: false,
+        sensitive: false,
         value: '',
       },
       password: {
-        value: '',
-        order: 3,
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel',
           {
             defaultMessage: 'Password',
           }
         ),
-      },
-      database: {
-        label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databasesLabel',
-          {
-            defaultMessage: 'Databases',
-          }
-        ),
+        options: [],
         order: 4,
+        required: false,
+        sensitive: true,
         value: '',
       },
-      ssl_disabled: {
+      database: {
+        depends_on: [],
+        display: 'textbox',
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel',
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databaseLabel',
           {
-            defaultMessage: 'Disable SSL (true/false)',
+            defaultMessage: 'Database',
           }
         ),
+        options: [],
         order: 5,
-        value: 'true',
+        required: true,
+        sensitive: false,
+        value: '',
+      },
+      tables: {
+        depends_on: [],
+        display: 'textarea',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
+          {
+            defaultMessage: 'Tables',
+          }
+        ),
+        options: [],
+        order: 6,
+        required: true,
+        sensitive: false,
+        value: '',
+      },
+      ssl_enabled: {
+        depends_on: [],
+        display: 'toggle',
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslEnabledLabel',
+          {
+            defaultMessage: 'Enable SSL',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        value: false,
       },
       ssl_ca: {
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',
           {
             defaultMessage: 'SSL certificate',
           }
         ),
-        order: 6,
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
         value: '',
       },
     },

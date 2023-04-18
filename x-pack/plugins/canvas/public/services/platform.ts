@@ -13,9 +13,11 @@ import {
   ChromeBreadcrumb,
   IBasePath,
   ChromeStart,
+  HttpStart,
 } from '@kbn/core/public';
 
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;
@@ -37,4 +39,6 @@ export interface CanvasPlatformService {
   getSavedObjects: () => SavedObjectsStart;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettings: () => IUiSettingsClient;
+  getHttp: () => HttpStart;
+  getSavedObjectsManagement: () => SavedObjectsManagementPluginStart;
 }

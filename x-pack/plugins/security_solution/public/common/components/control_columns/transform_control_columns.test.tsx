@@ -19,7 +19,6 @@ describe('transformControlColumns', () => {
     setEventsDeleted: jest.fn(),
     columnHeaders: [],
     controlColumns: [],
-    disabledCellActions: [],
     selectedEventIds: {},
     tabType: '',
     isSelectAllChecked: false,

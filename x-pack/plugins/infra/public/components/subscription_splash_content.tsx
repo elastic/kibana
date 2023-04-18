@@ -11,7 +11,7 @@ import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
@@ -65,6 +65,7 @@ export const SubscriptionSplashPrompt: React.FC = () => {
 
     cta = (
       <EuiButton
+        data-test-subj="infraSubscriptionSplashPromptStartTrialButton"
         fullWidth={false}
         fill
         href={services.http.basePath.prepend('/app/management/stack/license_management')}
@@ -88,7 +89,12 @@ export const SubscriptionSplashPrompt: React.FC = () => {
     );
 
     cta = (
-      <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
+      <EuiButton
+        data-test-subj="infraSubscriptionSplashPromptUpgradeSubscriptionButton"
+        fullWidth={false}
+        fill
+        href="https://www.elastic.co/subscriptions"
+      >
         <FormattedMessage
           id="xpack.infra.ml.splash.updateSubscriptionCta"
           defaultMessage="Upgrade subscription"

@@ -9,7 +9,7 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { CellActions } from './cell_actions';
-import { CellActionsMode } from '../types';
+import { CellActionsMode } from '../constants';
 import { CellActionsProvider } from '../context/cell_actions_context';
 
 const TRIGGER_ID = 'test-trigger-id';

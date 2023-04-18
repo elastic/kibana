@@ -16,6 +16,7 @@ import {
   generateAlertMessage,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
@@ -227,4 +228,5 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     return { state: updateState(state, foundCerts) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

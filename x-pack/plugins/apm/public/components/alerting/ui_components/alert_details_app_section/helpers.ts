@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asPercent } from '@kbn/observability-plugin/common';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 export const getAggsTypeFromRule = (
@@ -17,3 +18,7 @@ export const getAggsTypeFromRule = (
 
 export const isLatencyThresholdRuleType = (ruleTypeId: string) =>
   ruleTypeId === 'apm.transaction_duration';
+
+export const yLabelFormat = (y?: number | null) => {
+  return asPercent(y || 0, 1);
+};

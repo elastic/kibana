@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type {
-  AuditAction,
-  AddAuditEventParams as SavedObjectEventParams,
-} from '@kbn/core-saved-objects-server';
 import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
+import type {
+  AuditAction,
+  AddAuditEventParams as SavedObjectEventParams,
+} from '../saved_objects/saved_objects_security_extension';
 
 /**
  * Audit kibana schema using ECS format
@@ -59,6 +59,14 @@ export interface AuditKibana {
    * Set of space IDs that a saved object was removed from.
    */
   delete_from_spaces?: readonly string[];
+  /**
+   * Set of space IDs that are not authorized for an action.
+   */
+  unauthorized_spaces?: readonly string[];
+  /**
+   * Set of types that are not authorized for an action.
+   */
+  unauthorized_types?: readonly string[];
 }
 
 type EcsHttp = Required<LogMeta>['http'];
@@ -375,6 +383,8 @@ export function savedObjectEvent({
   savedObject,
   addToSpaces,
   deleteFromSpaces,
+  unauthorizedSpaces,
+  unauthorizedTypes,
   outcome,
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
@@ -407,6 +417,8 @@ export function savedObjectEvent({
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
+      unauthorized_spaces: unauthorizedSpaces,
+      unauthorized_types: unauthorizedTypes,
     },
     error: error && {
       code: error.name,

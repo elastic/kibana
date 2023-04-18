@@ -35,7 +35,7 @@ export const AgentPolicySummaryLine = memo<{
       responsive={false}
       justifyContent={'flexStart'}
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiFlexGroup style={MIN_WIDTH} gutterSize="s" alignItems="baseline" responsive={false}>
           <EuiFlexItem grow={false} className="eui-textTruncate">
             <EuiLink

@@ -122,14 +122,25 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
       const field = index.fields.find((f) => f.name === timeFieldName);
-      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      const addTimeRangeField = buildRangeFilter(
+        field!,
+        { gt: latestTimestamp, format: 'strict_date_optional_time' },
+        index
+      );
       filters.push(addTimeRangeField);
     }
   }
 
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
-  searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
+  searchSourceChild.setField('sort', [
+    {
+      [timeFieldName]: {
+        order: SortDirection.desc,
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+    },
+  ]);
   searchSourceChild.setField(
     'aggs',
     buildAggregation({
@@ -188,7 +199,7 @@ async function generateLink(
 }
 
 function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
-  return filters.map((filter) => {
+  return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
         ...filter,

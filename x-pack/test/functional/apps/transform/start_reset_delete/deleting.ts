@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'pivot',
             mode: 'batch',
             progress: 100,
+            health: 'Healthy',
           },
         },
       },
@@ -39,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'pivot',
             mode: 'continuous',
             progress: undefined,
+            health: 'Healthy',
           },
         },
       },
@@ -55,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'latest',
             mode: 'batch',
             progress: 100,
+            health: 'Healthy',
           },
         },
       },
@@ -114,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
+            health: testData.expected.row.health,
           });
 
           await transform.testExecution.logTestStep('should show the delete modal');

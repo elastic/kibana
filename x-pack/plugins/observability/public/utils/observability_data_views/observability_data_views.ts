@@ -13,6 +13,7 @@ import type {
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
@@ -32,6 +33,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_metrics: infraMetricsFieldFormats,
   ux: rumFieldFormats,
   apm: apmFieldFormats,
+  uptime: syntheticsFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
   alerts: null,
@@ -42,6 +44,7 @@ const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: Runtime
   infra_metrics: null,
   ux: null,
   apm: null,
+  uptime: syntheticsRuntimeFields,
   synthetics: syntheticsRuntimeFields,
   mobile: null,
   alerts: null,
@@ -53,6 +56,7 @@ function getFieldFormatsForApp(app: AppDataType) {
 
 export const dataViewList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
+  uptime: 'uptime_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   ux: 'rum_static_index_pattern_id',
   infra_logs: 'infra_logs_static_index_pattern_id',
@@ -74,6 +78,11 @@ const getAppDataViewId = (app: AppDataType, indices: string) => {
 
 export async function getDataTypeIndices(dataType: AppDataType) {
   switch (dataType) {
+    case 'synthetics':
+      return {
+        hasData: true,
+        indices: 'synthetics-*',
+      };
     case 'mobile':
     case 'ux':
     case 'apm':
@@ -121,25 +130,38 @@ export class ObservabilityDataViews {
 
     const { runtimeFields } = getFieldFormatsForApp(app);
 
-    const dataView = await this.dataViews.create(
-      {
-        title: appIndicesPattern,
-        id: getAppDataViewId(app, indices),
-        timeFieldName: '@timestamp',
-        fieldFormats: this.getFieldFormats(app),
-        name: DataTypesLabels[app],
-      },
-      false,
-      false
-    );
+    const id = getAppDataViewId(app, indices);
 
-    if (runtimeFields !== null) {
-      runtimeFields.forEach(({ name, field }) => {
-        dataView.addRuntimeField(name, field);
-      });
+    try {
+      const dataView = await this.dataViews.create(
+        {
+          id,
+          title: appIndicesPattern,
+          timeFieldName: '@timestamp',
+          fieldFormats: this.getFieldFormats(app),
+          name: DataTypesLabels[app],
+          allowNoIndex: true,
+        },
+        false,
+        false
+      );
+
+      if (dataView.matchedIndices.length === 0) {
+        return;
+      }
+
+      if (runtimeFields !== null) {
+        runtimeFields.forEach(({ name, field }) => {
+          dataView.addRuntimeField(name, field);
+        });
+      }
+
+      return dataView;
+    } catch (e) {
+      if (e instanceof DataViewMissingIndices) {
+        this.dataViews.clearInstanceCache(id);
+      }
     }
-
-    return dataView;
   }
 
   async createAndSavedDataView(app: AppDataType, indices: string) {
@@ -153,6 +175,7 @@ export class ObservabilityDataViews {
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
       name: DataTypesLabels[app],
+      allowNoIndex: true,
     });
   }
   // we want to make sure field formats remain same

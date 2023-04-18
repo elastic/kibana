@@ -74,15 +74,15 @@
                 "id": "def-common.ElasticsearchClientsMetricsCollector.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "agentStore",
+                "label": "agentStatsProvider",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-elasticsearch-client-server-internal",
                     "scope": "common",
                     "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                    "section": "def-common.AgentStore",
-                    "text": "AgentStore"
+                    "section": "def-common.AgentStatsProvider",
+                    "text": "AgentStatsProvider"
                   }
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",

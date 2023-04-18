@@ -74,15 +74,6 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           )}
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.basicAuthenticationLabel',
-            {
-              defaultMessage: 'Basic authentication',
-            }
-          )}
-        </EuiText>
-        <EuiSpacer size="s" />
         <EuiLink target="_blank" href={documentationUrl}>
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',

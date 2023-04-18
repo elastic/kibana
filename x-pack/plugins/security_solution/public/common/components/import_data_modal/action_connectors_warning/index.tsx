@@ -30,7 +30,7 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
       data-test-subj="actionConnectorsWarningsCallOut"
       size="m"
       heading="h2"
-      iconType="alert"
+      iconType="warning"
       title={
         <span data-test-subj="actionConnectorsWarningsCallOutTitle">
           {i18n.ACTION_CONNECTORS_WARNING_TITLE(importedActionConnectorsCount)}

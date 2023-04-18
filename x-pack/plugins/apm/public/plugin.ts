@@ -23,6 +23,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -37,6 +38,10 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
@@ -72,12 +77,14 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
 }
@@ -94,6 +101,7 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   fleet?: FleetStart;
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
@@ -160,7 +168,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
+    plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
@@ -177,6 +185,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     matchPath(currentPath: string) {
                       return [
                         '/service-groups',
+                        '/mobile-services',
                         '/services',
                         '/service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
@@ -259,6 +268,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     plugins.observability.dashboard.register({
+      appName: 'apm',
+      hasData: async () => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.getHasData();
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.fetchObservabilityOverviewPageData(params);
+      },
+    });
+
+    plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
         const dataHelper = await getApmDataHelper();

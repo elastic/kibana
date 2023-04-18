@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// please try to keep this list sorted by module name (e.g. './bar' before './foo')
+
 export { Append } from './append';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
@@ -31,18 +33,19 @@ export { Kv } from './kv';
 export { Lowercase } from './lowercase';
 export { NetworkDirection } from './network_direction';
 export { Pipeline } from './pipeline';
+export { Redact } from './redact';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';
 export { Rename } from './rename';
 export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
-export { Split } from './split';
 export { Sort } from './sort';
+export { Split } from './split';
 export { Trim } from './trim';
 export { Uppercase } from './uppercase';
+export { UriParts } from './uri_parts';
 export { UrlDecode } from './url_decode';
 export { UserAgent } from './user_agent';
-export { UriParts } from './uri_parts';
 
 export type { FormFieldsComponent } from './shared';

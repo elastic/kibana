@@ -8,14 +8,46 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, RewriteRequestCase } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { API_PRIVILEGES } from '../../common';
+import {
+  API_PRIVILEGES,
+  RulesSettingsFlapping,
+  RulesSettingsFlappingProperties,
+} from '../../common';
 
 const bodySchema = schema.object({
   enabled: schema.boolean(),
-  lookBackWindow: schema.number(),
-  statusChangeThreshold: schema.number(),
+  look_back_window: schema.number(),
+  status_change_threshold: schema.number(),
+});
+
+const rewriteQueryReq: RewriteRequestCase<RulesSettingsFlappingProperties> = ({
+  look_back_window: lookBackWindow,
+  status_change_threshold: statusChangeThreshold,
+  ...rest
+}) => ({
+  ...rest,
+  lookBackWindow,
+  statusChangeThreshold,
+});
+
+const rewriteBodyRes: RewriteResponseCase<RulesSettingsFlapping> = ({
+  lookBackWindow,
+  statusChangeThreshold,
+  createdBy,
+  updatedBy,
+  createdAt,
+  updatedAt,
+  ...rest
+}) => ({
+  ...rest,
+  look_back_window: lookBackWindow,
+  status_change_threshold: statusChangeThreshold,
+  created_by: createdBy,
+  updated_by: updatedBy,
+  created_at: createdAt,
+  updated_at: updatedAt,
 });
 
 export const updateFlappingSettingsRoute = (
@@ -36,10 +68,12 @@ export const updateFlappingSettingsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
 
-        const updatedFlappingSettings = await rulesSettingsClient.flapping().update(req.body);
+        const updatedFlappingSettings = await rulesSettingsClient
+          .flapping()
+          .update(rewriteQueryReq(req.body));
 
         return res.ok({
-          body: updatedFlappingSettings,
+          body: updatedFlappingSettings && rewriteBodyRes(updatedFlappingSettings),
         });
       })
     )

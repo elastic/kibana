@@ -8,7 +8,7 @@
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import type { NotificationsSetup } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -23,7 +23,7 @@ export interface ChangePasswordProps {
 
 export interface ChangePasswordPropsInternal extends ChangePasswordProps {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
-  notifications: NotificationsSetup;
+  notifications: NotificationsStart;
 }
 
 export class ChangePassword extends Component<ChangePasswordPropsInternal, {}> {

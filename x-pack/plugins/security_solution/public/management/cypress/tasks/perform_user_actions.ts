@@ -25,7 +25,7 @@ const performAction = (action: FormAction) => {
   if (action.customSelector) {
     element = cy.get(action.customSelector);
   } else {
-    element = cy.getBySel(action.selector || '');
+    element = cy.getByTestSubj(action.selector || '');
   }
 
   if (action.type === 'click') {

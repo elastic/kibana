@@ -306,7 +306,102 @@ describe('showToasterMessage', () => {
       expect(addSuccess).toHaveBeenNthCalledWith(2, 'Successfully imported 1 connector.');
       expect(addError).not.toHaveBeenCalled();
     });
+    it('should display 1 error message has 2 invalid connectors in the title even when error array has one message but "id" field', () => {
+      const addError = jest.fn();
+      const addSuccess = jest.fn();
 
+      showToasterMessage({
+        importResponse: {
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          action_connectors_success: false,
+          errors: [
+            {
+              rule_id: 'rule_id',
+              error: {
+                status_code: 400,
+                message: 'an error message',
+              },
+            },
+          ],
+          action_connectors_errors: [
+            {
+              rule_id: 'rule_id',
+              id: 'connector1,connector2',
+              error: {
+                status_code: 400,
+                message: 'an error message',
+              },
+            },
+          ],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        },
+        exceptionsIncluded: false,
+        actionConnectorsIncluded: true,
+        successMessage: (msg) => `success: ${msg}`,
+        errorMessage: (msg) => `error: ${msg}`,
+        errorMessageDetailed: (msg) => `errorDetailed: ${msg}`,
+        addError,
+        addSuccess,
+      });
+
+      expect(addError).toHaveBeenCalledTimes(1);
+
+      expect(addError).toHaveBeenCalledWith(new Error('errorDetailed: an error message'), {
+        title: 'Failed to import 2 connectors',
+      });
+      expect(addSuccess).not.toHaveBeenCalled();
+    });
+    it('should display 1 error message has 1 invalid connectors in the title even when error array has one message but "id" field', () => {
+      const addError = jest.fn();
+      const addSuccess = jest.fn();
+
+      showToasterMessage({
+        importResponse: {
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          action_connectors_success: false,
+          errors: [
+            {
+              rule_id: 'rule_id',
+              error: {
+                status_code: 400,
+                message: 'an error message',
+              },
+            },
+          ],
+          action_connectors_errors: [
+            {
+              rule_id: 'rule_id',
+              id: 'connector1',
+              error: {
+                status_code: 400,
+                message: 'an error message',
+              },
+            },
+          ],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        },
+        exceptionsIncluded: false,
+        actionConnectorsIncluded: true,
+        successMessage: (msg) => `success: ${msg}`,
+        errorMessage: (msg) => `error: ${msg}`,
+        errorMessageDetailed: (msg) => `errorDetailed: ${msg}`,
+        addError,
+        addSuccess,
+      });
+
+      expect(addError).toHaveBeenCalledTimes(1);
+
+      expect(addError).toHaveBeenCalledWith(new Error('errorDetailed: an error message'), {
+        title: 'Failed to import 1 connector',
+      });
+      expect(addSuccess).not.toHaveBeenCalled();
+    });
     it('should display 1 error message for rules and connectors even when both fail', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();

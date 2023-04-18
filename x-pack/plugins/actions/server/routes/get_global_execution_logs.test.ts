@@ -39,6 +39,7 @@ describe('getRuleExecutionLogRoute', () => {
         timestamp: '2023-01-05T15:55:50.495Z',
         version: '8.7.0',
         timed_out: false,
+        source: 'SAVED_OBJECT',
       },
     ],
     total: 1,

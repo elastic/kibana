@@ -10,6 +10,7 @@ Array [
   <nav
     data-eui="EuiFlyout"
     data-test-subj="collapsibleNav"
+    role="dialog"
   >
     <button
       aria-label="Close this dialog"

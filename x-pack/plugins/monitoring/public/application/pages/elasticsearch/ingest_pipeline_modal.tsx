@@ -141,7 +141,7 @@ export const IngestPipelineModal = ({
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           />
           <EuiSpacer />
         </>

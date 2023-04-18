@@ -14,6 +14,7 @@ import type {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
 } from '@kbn/telemetry-collection-manager-plugin/server';
+import { v2 } from '../../common/types';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import {
   getTelemetrySavedObject,
@@ -109,7 +110,9 @@ export function registerTelemetryOptInRoutes({
           return res.forbidden();
         }
       }
-      return res.ok({ body: optInStatus });
+
+      const body: v2.OptInResponse = optInStatus;
+      return res.ok({ body });
     }
   );
 }

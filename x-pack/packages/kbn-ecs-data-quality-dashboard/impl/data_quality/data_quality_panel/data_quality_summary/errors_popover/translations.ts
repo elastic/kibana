@@ -56,13 +56,6 @@ export const READ = i18n.translate('ecsDataQualityDashboard.errors.read', {
   defaultMessage: 'read',
 });
 
-export const READ_CROSS_CLUSTER = i18n.translate(
-  'ecsDataQualityDashboard.errors.readCrossCluster',
-  {
-    defaultMessage: 'read_cross_cluster',
-  }
-);
-
 export const THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED = i18n.translate(
   'ecsDataQualityDashboard.errors.theFollowingPrivilegesLabel',
   {

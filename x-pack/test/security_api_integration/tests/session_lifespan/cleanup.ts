@@ -91,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, {
@@ -132,6 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
+
       const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',

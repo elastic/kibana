@@ -78,7 +78,13 @@ export function CompletedStatusBox({
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" onClick={goToAddLink}>
+          <EuiButtonEmpty
+            data-test-subj="o11yCompletedStatusBoxButton"
+            size="s"
+            iconType="plusInCircle"
+            flush="right"
+            onClick={goToAddLink}
+          >
             {addTitle}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -109,7 +115,11 @@ export function CompletedStatusBox({
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton color="primary" href={goToAppLink}>
+          <EuiButton
+            data-test-subj="o11yCompletedStatusBoxButton"
+            color="primary"
+            href={goToAppLink}
+          >
             {goToAppTitle}
           </EuiButton>
         </EuiFlexItem>
@@ -160,12 +170,22 @@ export function EmptyStatusBox({
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" onClick={goToAddLink} fill>
+          <EuiButton
+            data-test-subj="o11yEmptyStatusBoxButton"
+            color="primary"
+            onClick={goToAddLink}
+            fill
+          >
             {addTitle}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink color="primary" href={learnMoreLink} target="_blank">
+          <EuiLink
+            data-test-subj="o11yEmptyStatusBoxLearnMoreLink"
+            color="primary"
+            href={learnMoreLink}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.observability.status.learnMoreButton"
               defaultMessage="Learn more"

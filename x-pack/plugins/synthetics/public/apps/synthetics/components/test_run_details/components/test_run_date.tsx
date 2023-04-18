@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import React from 'react';
+import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { StepPageNavigation } from '../../step_details_page/step_page_nav';
 
 export const TestRunDate = () => {
-  const { data } = useJourneySteps();
-
-  const formatter = useDateFormat();
-  let startedAt: string | ReactElement = formatter(data?.details?.timestamp);
-
-  if (!startedAt) {
-    startedAt = <EuiLoadingContent lines={1} />;
-  }
-
-  return <EuiDescriptionList listItems={[{ title: ERROR_DURATION, description: startedAt }]} />;
+  return (
+    <EuiDescriptionList
+      listItems={[
+        { title: ERROR_DURATION, description: <StepPageNavigation testRunPage={true} /> },
+      ]}
+    />
+  );
 };
 
 const ERROR_DURATION = i18n.translate('xpack.synthetics.testDetails.date', {

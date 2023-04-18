@@ -16,7 +16,7 @@ export function ProfilingHeaderActionMenu() {
       <EuiHeaderLink href={router.link('/add-data-instructions')} color="primary">
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="listAdd" />
+            <EuiIcon type="indexOpen" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.profiling.headerActionMenu.addData', {

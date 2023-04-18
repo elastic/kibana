@@ -7,11 +7,12 @@
 import React from 'react';
 import type { VisualizationActionsProps } from '../types';
 
-export const VisualizationActions = (props: VisualizationActionsProps) => {
-  const { title, ...testProps } = props;
+export const VisualizationActions = jest.fn((props: VisualizationActionsProps) => {
+  const { title, className } = props;
+
   return (
-    <div data-test-subj="visualizationActions" {...testProps}>
+    <div data-test-subj="visualizationActions" className={className}>
       {title}
     </div>
   );
-};
+});

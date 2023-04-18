@@ -36,6 +36,10 @@ interface GetTimeFieldRangeOptions {
    * HTTP client
    */
   http: HttpStart;
+  /**
+   * API path ('/internal/file_upload/time_field_range')
+   */
+  path: string;
 }
 
 /**
@@ -44,10 +48,10 @@ interface GetTimeFieldRangeOptions {
  * @returns GetTimeFieldRangeResponse
  */
 export async function getTimeFieldRange(options: GetTimeFieldRangeOptions) {
-  const { http, ...body } = options;
+  const { http, path, ...body } = options;
 
   return await http.fetch<GetTimeFieldRangeResponse>({
-    path: `/internal/file_upload/time_field_range`,
+    path,
     method: 'POST',
     body: JSON.stringify(body),
   });

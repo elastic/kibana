@@ -6,8 +6,8 @@
  */
 
 import { journey, step, before, Page } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export { createFilterInAction as createDefaultFilterInAction } from './default/filter_in';
-export { createFilterOutAction as createDefaultFilterOutAction } from './default/filter_out';
-
-export { createFilterInAction as createTimelineFilterInAction } from './timeline/filter_in';
-export { createFilterOutAction as createTimelineFilterOutAction } from './timeline/filter_out';
+export { createFilterInCellActionFactory } from './cell_action/filter_in';
+export { createFilterOutCellActionFactory } from './cell_action/filter_out';

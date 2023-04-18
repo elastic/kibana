@@ -26,13 +26,14 @@ import {
   GetFieldComboBoxPropsReturn,
 } from './types';
 import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
+import { paramContainsSpace } from '../param_contains_space';
 
 const getExistingFields = (indexPattern: DataViewBase | undefined): DataViewFieldBase[] => {
   return indexPattern != null ? indexPattern.fields : [];
 };
 
 const getSelectedFields = (selectedField: DataViewField | undefined): DataViewFieldBase[] => {
-  return selectedField ? [selectedField] : [];
+  return selectedField && !paramContainsSpace(selectedField.name) ? [selectedField] : [];
 };
 
 const getAvailableFields = (
@@ -130,7 +131,7 @@ export const useField = ({
   const { availableFields, selectedFields } = useMemo(() => {
     const indexPatternsToUse =
       customOption != null && indexPattern != null
-        ? { ...indexPattern, fields: [...indexPattern?.fields, customOption] }
+        ? { ...indexPattern, fields: [customOption, ...indexPattern?.fields] }
         : indexPattern;
     return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
   }, [indexPattern, fieldTypeFilter, selectedField, customOption]);
@@ -183,9 +184,7 @@ export const useField = ({
   );
 
   const renderFields = (
-    option: EuiComboBoxOptionOption<string | number | string[] | undefined>,
-    searchValue: string,
-    contentClassName: string
+    option: EuiComboBoxOptionOption<string | number | string[] | undefined>
   ) => {
     const { label } = option;
 
@@ -227,12 +226,17 @@ export const useField = ({
         </>
       );
       return (
-        <EuiToolTip position="bottom" content={tooltipContent}>
+        <EuiToolTip
+          data-test-subj="mappingConflictsTooltip"
+          position="bottom"
+          content={tooltipContent}
+        >
           <>
             {label}
             <EuiIcon
+              data-test-subj="mappingConflictsWarningIcon"
               tabIndex={0}
-              type="alert"
+              type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"
               css={{ marginLeft: `${sPaddingSize}` }}

@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useLicense } from '../../../hooks/use_license';
-import { paths } from '../../../config';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { paths } from '../../../config/paths';
 import illustration from './assets/illustration.svg';
 
 export function SloListWelcomePrompt() {
@@ -28,6 +29,7 @@ export function SloListWelcomePrompt() {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
 
@@ -38,16 +40,12 @@ export function SloListWelcomePrompt() {
   };
 
   return (
-    <EuiPageTemplate
-      minHeight="0"
-      data-test-subj="slosPageWelcomePrompt"
-      style={{ paddingBlockStart: 0 }}
-    >
+    <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
             <h1>
-              {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.title', {
+              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.title', {
                 defaultMessage: 'Track and deliver on your SLOs',
               })}
             </h1>
@@ -60,14 +58,14 @@ export function SloListWelcomePrompt() {
         body={
           <>
             <p>
-              {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.messageParagraph1', {
+              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.messageParagraph1', {
                 defaultMessage:
                   'Measure key metrics important to the business, such as service-level indicators and service-level objectives (SLIs/SLOs) to deliver on SLAs.',
               })}
             </p>
 
             <p>
-              {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.messageParagraph2', {
+              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.messageParagraph2', {
                 defaultMessage:
                   'Easily report the uptime and reliability of your services to stakeholders with real-time insights.',
               })}
@@ -83,7 +81,7 @@ export function SloListWelcomePrompt() {
                   <EuiTitle size="xxs">
                     <span>
                       {i18n.translate(
-                        'xpack.observability.slos.sloList.welcomePrompt.getStartedMessage',
+                        'xpack.observability.slo.sloList.welcomePrompt.getStartedMessage',
                         {
                           defaultMessage: 'To get started, create your first SLO.',
                         }
@@ -94,13 +92,15 @@ export function SloListWelcomePrompt() {
 
                 <EuiFlexItem>
                   <span>
-                    <EuiButton fill color="primary" onClick={handleClickCreateSlo}>
-                      {i18n.translate(
-                        'xpack.observability.slos.sloList.welcomePrompt.buttonLabel',
-                        {
-                          defaultMessage: 'Create SLO',
-                        }
-                      )}
+                    <EuiButton
+                      data-test-subj="o11ySloListWelcomePromptCreateSloButton"
+                      fill
+                      color="primary"
+                      onClick={handleClickCreateSlo}
+                    >
+                      {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
+                        defaultMessage: 'Create SLO',
+                      })}
                     </EuiButton>
                   </span>
                 </EuiFlexItem>
@@ -111,7 +111,7 @@ export function SloListWelcomePrompt() {
                   <EuiTitle size="xxs">
                     <span>
                       {i18n.translate(
-                        'xpack.observability.slos.sloList.welcomePrompt.needLicenseMessage',
+                        'xpack.observability.slo.sloList.welcomePrompt.needLicenseMessage',
                         {
                           defaultMessage:
                             'You need an Elastic Cloud subscription or Platinum license to use SLOs.',
@@ -131,7 +131,7 @@ export function SloListWelcomePrompt() {
                         data-test-subj="slosPageWelcomePromptSignupForCloudButton"
                       >
                         {i18n.translate(
-                          'xpack.observability.slos.sloList.welcomePrompt.signupForCloud',
+                          'xpack.observability.slo.sloList.welcomePrompt.signupForCloud',
                           {
                             defaultMessage: 'Sign up for Elastic Cloud',
                           }
@@ -146,7 +146,7 @@ export function SloListWelcomePrompt() {
                         data-test-subj="slosPageWelcomePromptSignupForLicenseButton"
                       >
                         {i18n.translate(
-                          'xpack.observability.slos.sloList.welcomePrompt.signupForLicense',
+                          'xpack.observability.slo.sloList.welcomePrompt.signupForLicense',
                           {
                             defaultMessage: 'Sign up for license',
                           }
@@ -163,20 +163,24 @@ export function SloListWelcomePrompt() {
           <>
             <EuiTitle size="xxs">
               <span>
-                {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.learnMore', {
+                {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMore', {
                   defaultMessage: 'Want to learn more?',
                 })}
               </span>
             </EuiTitle>
             &nbsp;
-            <EuiLink href="#" target="_blank">
-              {i18n.translate('xpack.observability.slos.sloList.welcomePrompt.learnMoreLink', {
+            <EuiLink
+              data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
+              href="#"
+              target="_blank"
+            >
+              {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMoreLink', {
                 defaultMessage: 'Read the docs',
               })}
             </EuiLink>
           </>
         }
       />
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }

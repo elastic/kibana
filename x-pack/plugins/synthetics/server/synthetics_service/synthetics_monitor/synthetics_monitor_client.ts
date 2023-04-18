@@ -15,9 +15,12 @@ import { normalizeSecrets } from '../utils';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-import { formatHeartbeatRequest } from '../formatters/format_configs';
 import {
-  ConfigKey,
+  ConfigData,
+  formatHeartbeatRequest,
+  mixParamsWithGlobalParams,
+} from '../formatters/format_configs';
+import {
   MonitorFields,
   SyntheticsMonitorWithId,
   HeartbeatConfig,
@@ -30,7 +33,6 @@ import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/syn
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
-
   public privateLocationAPI: SyntheticsPrivateLocation;
 
   constructor(syntheticsService: SyntheticsService, server: UptimeServerSetup) {
@@ -45,23 +47,30 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
-    const privateConfigs: HeartbeatConfig[] = [];
-    const publicConfigs: HeartbeatConfig[] = [];
+    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
+      [];
+    const publicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
     for (const monitorObj of monitors) {
       const { monitor, id } = monitorObj;
-      const config = formatHeartbeatRequest({
+      const config = {
         monitor,
-        monitorId: id,
-        heartbeatId: monitor[ConfigKey.MONITOR_QUERY_ID],
+        configId: id,
         params: paramsBySpace[spaceId],
-      });
+      };
 
-      const { privateLocations, publicLocations } = this.parseLocations(config);
+      const { str: paramsString, params } = mixParamsWithGlobalParams(
+        paramsBySpace[spaceId],
+        monitor
+      );
+
+      const formattedConfig = formatHeartbeatRequest(config, paramsString);
+
+      const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
       if (privateLocations.length > 0) {
-        privateConfigs.push(config);
+        privateConfigs.push({ config: formattedConfig, globalParams: params });
       }
 
       if (publicLocations.length > 0) {
@@ -102,22 +111,30 @@ export class SyntheticsMonitorClient {
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
-    const privateConfigs: HeartbeatConfig[] = [];
-    const publicConfigs: HeartbeatConfig[] = [];
-    const deletedPublicConfigs: HeartbeatConfig[] = [];
+    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
+      [];
+
+    const publicConfigs: ConfigData[] = [];
+    const deletedPublicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
 
     for (const editedMonitor of monitors) {
-      const editedConfig = formatHeartbeatRequest({
-        monitor: editedMonitor.monitor,
-        monitorId: editedMonitor.id,
-        heartbeatId: (editedMonitor.monitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+      const { str: paramsString, params } = mixParamsWithGlobalParams(
+        paramsBySpace[spaceId],
+        editedMonitor.monitor
+      );
+
+      const configData = {
         params: paramsBySpace[spaceId],
-      });
+        monitor: editedMonitor.monitor,
+        configId: editedMonitor.id,
+      };
+
+      const editedConfig = formatHeartbeatRequest(configData, paramsString);
       const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
       if (publicLocations.length > 0) {
-        publicConfigs.push(editedConfig);
+        publicConfigs.push(configData);
       }
 
       const deletedPublicConfig = this.hasDeletedPublicLocations(
@@ -126,11 +143,11 @@ export class SyntheticsMonitorClient {
       );
 
       if (deletedPublicConfig) {
-        deletedPublicConfigs.push(deletedPublicConfig);
+        deletedPublicConfigs.push({ ...deletedPublicConfig, params: paramsBySpace[spaceId] });
       }
 
       if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
-        privateConfigs.push(editedConfig);
+        privateConfigs.push({ config: editedConfig, globalParams: params });
       }
     }
 
@@ -157,14 +174,14 @@ export class SyntheticsMonitorClient {
     spaceId: string
   ) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
-      monitors as SyntheticsMonitorWithId[],
+      monitors,
       request,
       savedObjectsClient,
       spaceId
     );
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
-      monitors as SyntheticsMonitorWithId[]
+      monitors.map((monitor) => ({ monitor, configId: monitor.config_id, params: {} }))
     );
     const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
 
@@ -192,12 +209,10 @@ export class SyntheticsMonitorClient {
       const { attributes: normalizedPreviousMonitor } = normalizeSecrets(decryptedPreviousMonitor);
       normalizedPreviousMonitor.locations = missingPublicLocations;
 
-      return formatHeartbeatRequest({
+      return {
         monitor: normalizedPreviousMonitor,
-        monitorId: normalizedPreviousMonitor.id,
-        heartbeatId: (normalizedPreviousMonitor as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
-        params: {},
-      });
+        configId: decryptedPreviousMonitor.id,
+      };
     }
   }
 
@@ -223,19 +238,23 @@ export class SyntheticsMonitorClient {
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
-    const privateConfigs: HeartbeatConfig[] = [];
-    const publicConfigs: HeartbeatConfig[] = [];
+    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
+      [];
+    const publicConfigs: ConfigData[] = [];
 
-    const monitors = await this.getAllMonitorConfigs({ encryptedSavedObjects, spaceId });
+    const { allConfigs: monitors, paramsBySpace } = await this.getAllMonitorConfigs({
+      encryptedSavedObjects,
+      spaceId,
+    });
 
     for (const monitor of monitors) {
       const { publicLocations, privateLocations } = this.parseLocations(monitor);
       if (publicLocations.length > 0) {
-        publicConfigs.push(monitor);
+        publicConfigs.push({ monitor, configId: monitor.config_id, params: {} });
       }
 
       if (privateLocations.length > 0) {
-        privateConfigs.push(monitor);
+        privateConfigs.push({ config: monitor, globalParams: paramsBySpace[monitor.namespace] });
       }
     }
     if (privateConfigs.length > 0) {
@@ -266,7 +285,10 @@ export class SyntheticsMonitorClient {
 
     const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
 
-    return this.mixParamsWithMonitors(spaceId, monitors, paramsBySpace);
+    return {
+      allConfigs: this.mixParamsWithMonitors(spaceId, monitors, paramsBySpace),
+      paramsBySpace,
+    };
   }
 
   async getAllMonitors({
@@ -310,13 +332,16 @@ export class SyntheticsMonitorClient {
 
     for (const monitor of monitors) {
       const attributes = monitor.attributes as unknown as MonitorFields;
+      const { str: paramsString } = mixParamsWithGlobalParams(paramsBySpace[spaceId], attributes);
+
       heartbeatConfigs.push(
-        formatHeartbeatRequest({
-          monitor: normalizeSecrets(monitor).attributes,
-          monitorId: monitor.id,
-          heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
-          params: paramsBySpace[spaceId],
-        })
+        formatHeartbeatRequest(
+          {
+            monitor: normalizeSecrets(monitor).attributes,
+            configId: monitor.id,
+          },
+          paramsString
+        )
       );
     }
 

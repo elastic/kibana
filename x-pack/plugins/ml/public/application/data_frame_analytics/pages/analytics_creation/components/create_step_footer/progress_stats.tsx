@@ -39,7 +39,7 @@ export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) 
               }
             )}
             color={'danger'}
-            iconType={'alert'}
+            iconType={'error'}
             size="s"
           >
             <p>{failedJobMessage}</p>

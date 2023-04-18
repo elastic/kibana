@@ -8,7 +8,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,10 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('_bulk_get', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
@@ -76,7 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
                     resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                 },
                 migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[0].typeMigrationVersion,
                 namespaces: ['default'],
                 references: [
                   {
@@ -107,12 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 namespaces: ['default'],
                 migrationVersion: resp.body.saved_objects[2].migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[2].typeMigrationVersion,
                 references: [],
               },
             ],
           });
           expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+          expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
         }));
   });
 }

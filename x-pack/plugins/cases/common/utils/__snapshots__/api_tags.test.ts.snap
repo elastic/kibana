@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api_tags getApiTags constructs the https tags for the owner: cases 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesFilesCasesCreate",
+    "casesFilesCasesRead",
+  ],
+  "delete": Array [
+    "casesFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "casesFilesCasesRead",
+  ],
+}
+`;
+
+exports[`api_tags getApiTags constructs the https tags for the owner: observability 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "observabilityFilesCasesCreate",
+    "observabilityFilesCasesRead",
+  ],
+  "delete": Array [
+    "observabilityFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "observabilityFilesCasesRead",
+  ],
+}
+`;
+
+exports[`api_tags getApiTags constructs the https tags for the owner: securitySolution 1`] = `
+Object {
+  "all": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "securitySolutionFilesCasesCreate",
+    "securitySolutionFilesCasesRead",
+  ],
+  "delete": Array [
+    "securitySolutionFilesCasesDelete",
+  ],
+  "read": Array [
+    "casesSuggestUserProfiles",
+    "bulkGetUserProfiles",
+    "securitySolutionFilesCasesRead",
+  ],
+}
+`;

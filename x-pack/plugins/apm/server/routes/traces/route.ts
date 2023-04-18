@@ -18,9 +18,15 @@ import {
 } from '../default_api_types';
 import { getTransaction } from '../transactions/get_transaction';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
-import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
+import {
+  getTopTracesPrimaryStats,
+  TopTracesPrimaryStatsResponse,
+} from './get_top_traces_primary_stats';
 import { getTraceItems, TraceItems } from './get_trace_items';
-import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import {
+  getTraceSamplesByQuery,
+  TraceSamplesResponse,
+} from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import {
@@ -28,6 +34,8 @@ import {
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
 import { getSpan } from '../transactions/get_span';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { Span } from '../../../typings/es_schemas/ui/span';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -35,20 +43,7 @@ const tracesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    items: Array<{
-      key: import('./get_top_traces_primary_stats').BucketKey;
-      serviceName: string;
-      transactionName: string;
-      averageResponseTime: number | null;
-      transactionsPerMinute: number;
-      transactionType: string;
-      impact: number;
-      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-    }>;
-  }> => {
+  handler: async (resources): Promise<TopTracesPrimaryStatsResponse> => {
     const {
       config,
       params,
@@ -96,7 +91,7 @@ const tracesByIdRoute = createApmServerRoute({
     resources
   ): Promise<{
     traceItems: TraceItems;
-    entryTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    entryTransaction?: Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
@@ -128,7 +123,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    transaction: Transaction;
   }> => {
     const { params } = resources;
     const { traceId } = params.path;
@@ -148,7 +143,7 @@ const transactionByIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    transaction: Transaction;
   }> => {
     const { params } = resources;
     const { transactionId } = params.path;
@@ -180,7 +175,7 @@ const findTracesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    traceSamples: Array<{ traceId: string; transactionId: string }>;
+    traceSamples: TraceSamplesResponse;
   }> => {
     const { start, end, environment, query, type } = resources.params.query;
 
@@ -246,11 +241,7 @@ const transactionFromTraceByIdRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../typings/es_schemas/ui/transaction').Transaction
-  > => {
+  handler: async (resources): Promise<Transaction> => {
     const { params } = resources;
     const { transactionId, traceId } = params.path;
     const apmEventClient = await getApmEventClient(resources);
@@ -275,8 +266,8 @@ const spanFromTraceByIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    span?: import('./../../../typings/es_schemas/ui/span').Span;
-    parentTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    span?: Span;
+    parentTransaction?: Transaction;
   }> => {
     const { params } = resources;
     const { spanId, traceId } = params.path;

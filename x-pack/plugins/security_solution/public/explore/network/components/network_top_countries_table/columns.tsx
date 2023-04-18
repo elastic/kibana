@@ -9,7 +9,11 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import type {
   NetworkTopCountriesEdges,
@@ -22,7 +26,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>,
@@ -55,20 +58,21 @@ export const getNetworkTopCountriesColumns = (
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-country-${geo}`);
       if (geo != null) {
         return (
-          <CellActions
+          <SecurityCellActions
             key={id}
             mode={CellActionsMode.HOVER}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
             field={{
               name: geoAttr,
               value: geo,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             <CountryFlagAndName countryCode={geo} />
-          </CellActions>
+          </SecurityCellActions>
         );
       } else {
         return getEmptyTagValue();

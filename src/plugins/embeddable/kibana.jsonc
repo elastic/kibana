@@ -10,8 +10,11 @@
     "requiredPlugins": [
       "data",
       "inspector",
-      "uiActions"
+      "uiActions",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
     ],
+    "optionalPlugins": ["savedObjectsTaggingOss"],
     "requiredBundles": [
       "savedObjects",
       "kibanaReact",

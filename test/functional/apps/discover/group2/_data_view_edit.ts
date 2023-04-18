@@ -45,9 +45,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: '/my-index-000002',
         method: 'DELETE',
       });
+      await es.transport.request({
+        path: '/my-index-000003',
+        method: 'DELETE',
+      });
     });
 
-    it('create data view', async function () {
+    it('create ad hoc data view', async function () {
       const initialPattern = 'my-index-';
       await es.transport.request({
         path: '/my-index-000001/_doc',
@@ -78,10 +82,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
     });
 
-    it('update data view', async function () {
+    it('create saved data view', async function () {
       const updatedPattern = 'my-index-000001';
       await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView(updatedPattern);
+      await PageObjects.unifiedSearch.createNewDataView(updatedPattern, false, true);
 
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(1);
@@ -89,6 +93,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.waitUntilSidebarHasLoaded();
       expect((await PageObjects.discover.getAllFieldNames()).length).to.be(2);
+    });
+
+    it('update data view with a different time field', async function () {
+      const updatedPattern = 'my-index-000003';
+      await es.transport.request({
+        path: '/my-index-000003/_doc',
+        method: 'POST',
+        body: {
+          timestamp: new Date('1970-01-01').toISOString(),
+          c: 'GET /search HTTP/1.1 200 1070000',
+          d: 'GET /search HTTP/1.1 200 1070000',
+        },
+      });
+      for (let i = 0; i < 3; i++) {
+        await es.transport.request({
+          path: '/my-index-000003/_doc',
+          method: 'POST',
+          body: {
+            timestamp: new Date().toISOString(),
+            c: 'GET /search HTTP/1.1 200 1070000',
+            d: 'GET /search HTTP/1.1 200 1070000',
+          },
+        });
+      }
+      await PageObjects.discover.clickIndexPatternActions();
+      await PageObjects.unifiedSearch.editDataView(updatedPattern, 'timestamp');
+      await retry.try(async () => {
+        expect(await PageObjects.discover.getHitCountInt()).to.be(3);
+      });
+      await PageObjects.discover.waitUntilSidebarHasLoaded();
+      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
+      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+      expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
+    });
+
+    it('update data view with no time field', async function () {
+      await PageObjects.discover.clickIndexPatternActions();
+      await PageObjects.unifiedSearch.editDataView(
+        undefined,
+        "--- I don't want to use the time filter ---"
+      );
+      await retry.try(async () => {
+        expect(await PageObjects.discover.getHitCountInt()).to.be(4);
+      });
+      await PageObjects.discover.waitUntilSidebarHasLoaded();
+      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
+      expect(await PageObjects.discover.isChartVisible()).to.be(false);
+      expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
     });
   });
 }

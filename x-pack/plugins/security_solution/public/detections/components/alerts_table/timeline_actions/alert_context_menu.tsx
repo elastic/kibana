@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -27,7 +28,6 @@ import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TableId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -53,6 +53,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   onRuleChange?: () => void;
   scopeId: string;
+  refetch: (() => void) | undefined;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -65,6 +66,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   scopeId,
   globalQuery,
   timelineQuery,
+  refetch,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
@@ -89,6 +91,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     isInDetections,
+    refetch,
   });
 
   const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
@@ -144,8 +147,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       }
     } else {
       refetchQuery(globalQuery);
+      if (refetch) refetch();
     }
-  }, [scopeId, globalQuery, timelineQuery, routeProps]);
+  }, [scopeId, globalQuery, timelineQuery, routeProps, refetch]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -245,6 +249,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ]
   );
 
+  const osqueryFlyout = useMemo(() => {
+    return (
+      <OsqueryFlyout
+        agentId={agentId}
+        defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+        onClose={handleOnOsqueryClick}
+        ecsData={ecsRowData}
+      />
+    );
+  }, [agentId, alertId, ecsRowData, handleOnOsqueryClick]);
+
   return (
     <>
       {items.length > 0 && (
@@ -285,14 +300,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
-      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout
-          agentId={agentId}
-          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
-          onClose={handleOnOsqueryClick}
-          ecsData={ecsRowData}
-        />
-      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && osqueryFlyout}
     </>
   );
 };

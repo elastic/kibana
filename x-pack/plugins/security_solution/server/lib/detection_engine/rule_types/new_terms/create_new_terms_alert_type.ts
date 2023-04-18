@@ -12,10 +12,10 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { NewTermsRuleParams } from '../../rule_schema';
 import { newTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { singleSearchAfter } from '../../signals/single_search_after';
-import { getFilter } from '../../signals/get_filter';
-import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
-import type { EventsAndTerms } from '../factories/utils/wrap_new_terms_alerts';
+import { singleSearchAfter } from '../utils/single_search_after';
+import { getFilter } from '../utils/get_filter';
+import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
+import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
   RecentTermsAggResult,
@@ -39,8 +39,8 @@ import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
-} from '../../signals/utils';
-import { createEnrichEventsFunction } from '../../signals/enrichments';
+} from '../utils/utils';
+import { createEnrichEventsFunction } from '../utils/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions

@@ -36,6 +36,7 @@ export const FieldStatsInfoButton = ({
           )}
         >
           <EuiButtonIcon
+            data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
             disabled={field.id === EVENT_RATE_FIELD_ID}
             size="xs"
             iconType="inspect"
@@ -56,7 +57,6 @@ export const FieldStatsInfoButton = ({
                 defaultMessage: 'Inspect field statistics',
               }
             )}
-            data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
           />
         </EuiToolTip>
       </EuiFlexItem>

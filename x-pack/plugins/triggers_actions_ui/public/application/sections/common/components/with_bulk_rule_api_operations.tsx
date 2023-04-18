@@ -24,40 +24,39 @@ import {
   BulkOperationResponse,
   BulkOperationAttributesWithoutHttp,
 } from '../../../../types';
-import {
-  muteRules,
-  unmuteRules,
-  muteRule,
-  unmuteRule,
-  muteAlertInstance,
-  unmuteAlertInstance,
-  loadRule,
-  loadRuleState,
-  loadRuleSummary,
-  loadRuleTypes,
-  alertingFrameworkHealth,
-  resolveRule,
-  loadExecutionLogAggregations,
-  loadGlobalExecutionLogAggregations,
+import type {
   LoadExecutionLogAggregationsProps,
   LoadGlobalExecutionLogAggregationsProps,
-  loadActionErrorLog,
   LoadActionErrorLogProps,
-  snoozeRule,
-  bulkSnoozeRules,
   BulkSnoozeRulesProps,
-  unsnoozeRule,
-  loadExecutionKPIAggregations,
   LoadExecutionKPIAggregationsProps,
-  loadGlobalExecutionKPIAggregations,
   LoadGlobalExecutionKPIAggregationsProps,
-  bulkUnsnoozeRules,
   BulkUnsnoozeRulesProps,
-  cloneRule,
-  bulkDeleteRules,
-  bulkEnableRules,
-  bulkDisableRules,
 } from '../../../lib/rule_api';
+import { alertingFrameworkHealth } from '../../../lib/rule_api/health';
+import { cloneRule } from '../../../lib/rule_api/clone';
+import { loadRule } from '../../../lib/rule_api/get_rule';
+import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
+import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
+import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
+import {
+  loadExecutionLogAggregations,
+  loadGlobalExecutionLogAggregations,
+} from '../../../lib/rule_api/load_execution_log_aggregations';
+import { muteRules, muteRule } from '../../../lib/rule_api/mute';
+import { unmuteRules, unmuteRule } from '../../../lib/rule_api/unmute';
+import { loadRuleState } from '../../../lib/rule_api/state';
+import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
+import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
+import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
+import { unmuteAlertInstance } from '../../../lib/rule_api/unmute_alert';
+import { resolveRule } from '../../../lib/rule_api/resolve_rule';
+import { snoozeRule, bulkSnoozeRules } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule, bulkUnsnoozeRules } from '../../../lib/rule_api/unsnooze';
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {

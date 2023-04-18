@@ -17,7 +17,8 @@
       "dataViews",
       "data",
       "uiActions",
-      "screenshotMode"
+      "screenshotMode",
+      "savedObjectsManagement"
     ],
     "optionalPlugins": [
       "usageCollection"

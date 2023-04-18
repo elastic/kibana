@@ -6,8 +6,8 @@
  */
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -56,7 +56,7 @@ journey('OverviewScrolling', async ({ page, params }) => {
     expect(count <= 32).toBe(true);
 
     await retry.tryForTime(90 * 1000, async () => {
-      await page.mouse.wheel(0, 100);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       const showingAllMonitorsNode = await page.$(`text="Showing all monitors"`);
       expect(showingAllMonitorsNode).toBeTruthy();
       expect(await showingAllMonitorsNode?.isVisible()).toBe(true);

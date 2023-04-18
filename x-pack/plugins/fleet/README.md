@@ -13,7 +13,7 @@
 
 ## Fleet Requirements
 
-Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.fleet.agents.tlsCheckDisabled=false`)
+Fleet needs to have Elasticsearch API keys enabled.
 
 Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
 
@@ -26,27 +26,53 @@ Also you need to configure the hosts your agent is going to use to comunication 
 
 ### Getting started
 
-See the Kibana docs for [how to set up your dev environment](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#setting-up-your-development-environment), [run Elasticsearch](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#running-elasticsearch), and [start Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md#running-kibana)
+See the [Contributing to Kibana documentation](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) or head straight to the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome) for setting up your dev environment, run Elasticsearch and start Kibana.
 
-One common development workflow is:
+This plugin follows the `common`, `server`, `public` structure described in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro). Refer to [The anatomy of a plugin](https://docs.elastic.dev/kibana-dev-docs/key-concepts/anatomy-of-a-plugin) in the guide for further details.
 
-- Bootstrap Kibana
+We follow the pattern of developing feature branches under your personal fork of Kibana. Refer to [Set up a Development Environment](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env) in the guide for further details. Other best practices including developer principles, standards and style guide can be found under the Contributing section of the guide.
+
+Note: The plugin was previously named Ingest Manager, it's possible that some variables are still named with that old plugin name.
+
+#### Dev environment setup
+
+These are some additional recommendations to the steps detailed in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env).
+
+1. Create a `config/kibana.dev.yml` file by copying the existing `config/kibana.yml` file.
+2. It is recommended to explicitly set a base path for Kibana (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To do this, add the following to your `kibana.dev.yml`:
+  ```yml
+  server.basePath: /<yourPath>
   ```
-  yarn kbn bootstrap
-  ```
-- Start Elasticsearch in one shell
+  where `yourPath` is a path of your choice (e.g. your name).
+3. Bootstrap Kibana:
+    ```
+    yarn kbn bootstrap
+    ```
+
+#### Running Elasticsearch and Kibana
+- Start Elasticsearch in one shell (NB: you might want to add other flags to enable data persistency and/or running Fleet Server locally, see below):
   ```
   yarn es snapshot -E xpack.security.authc.api_key.enabled=true -E xpack.security.authc.token.enabled=true
   ```
-- Start Kibana in another shell
+- Start Kibana in another shell:
   ```
-  yarn start --no-base-path
+  yarn start
   ```
+  If you don't have a base path set up, add `--no-base-path` to `yarn start`.
 
-This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
-](https://github.com/elastic/kibana/blob/main/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
+#### Useful tips
 
-Note: The plugin was previously named Ingest Manager it's possible that some variables are still named with that old plugin name.
+If Kibana fails to start, it is possible that your local setup got corrupted. An easy fix is to run:
+```
+yarn kbn clean && yarn kbn bootstrap
+```
+
+To avoid losing all your data when you restart Elasticsearch, you can provide a path to store the data when running the `yarn es snapshot ` command, e.g.:
+```
+-E path.data=/tmp/es-data
+```
+
+Refer to the [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html) page of the guide for other options.
 
 ### Running Fleet Server Locally in a Container
 
@@ -99,7 +125,7 @@ docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=e
 
 Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
 
-For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
+Explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent. Only released versions are shown by default: tick the `Include snapshots` checkbox to see the latest version, e.g. `8.8.0-SNAPSHOT`.
 
 Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `https://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
 
@@ -114,6 +140,18 @@ Once the Fleet Server container is running, you should be able to treat it as if
    ```
 
 ### Tests
+
+#### Unit tests
+
+Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
+```
+yarn jest --config x-pack/plugins/fleet/jest.config.js
+```
+
+You can also run a specific test by passing the filepath as an argument, e.g.:
+```
+yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/common/services/validate_package_policy.test.ts
+```
 
 #### API integration tests
 

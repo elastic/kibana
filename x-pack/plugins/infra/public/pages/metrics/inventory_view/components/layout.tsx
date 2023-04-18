@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -49,6 +50,8 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
+const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
+
 export const Layout = React.memo(
   ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
     const [showLoading, setShowLoading] = useState(true);
@@ -71,6 +74,12 @@ export const Layout = React.memo(
     const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
     const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+
+    const [hostsLinkClicked, setHostsLinkClicked] = useLocalStorage<boolean>(
+      HOSTS_LINK_LOCAL_STORAGE_KEY,
+      false
+    );
+    const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
 
     const options = {
       formatter: InfraFormatterType.percent,
@@ -150,7 +159,7 @@ export const Layout = React.memo(
                   responsive={false}
                   css={css`
                     margin: 0;
-                    justifycontent: 'end';
+                    justify-content: flex-end;
                   `}
                 >
                   {view === 'map' && (
@@ -172,17 +181,22 @@ export const Layout = React.memo(
               </EuiFlexGroup>
             </TopActionContainer>
             <EuiFlexItem grow={false}>
-              <TryItButton
-                data-test-subj="inventory-hostsView-link"
-                label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
-                  defaultMessage: 'Introducing a new Hosts analysis experience',
-                })}
-                link={{
-                  app: 'metrics',
-                  pathname: '/hosts',
-                }}
-                experimental
-              />
+              {!hostsLinkClickedRef.current && (
+                <TryItButton
+                  data-test-subj="inventory-hostsView-link"
+                  label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
+                    defaultMessage: 'Introducing a new Hosts analysis experience',
+                  })}
+                  link={{
+                    app: 'metrics',
+                    pathname: '/hosts',
+                  }}
+                  experimental
+                  onClick={() => {
+                    setHostsLinkClicked(true);
+                  }}
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
@@ -213,7 +227,7 @@ export const Layout = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </PageContent>
-        <BottomDrawer interval={interval} formatter={formatter} view={view} />
+        <BottomDrawer interval={interval} formatter={formatter} view={view} nodeType={nodeType} />
       </>
     );
   }

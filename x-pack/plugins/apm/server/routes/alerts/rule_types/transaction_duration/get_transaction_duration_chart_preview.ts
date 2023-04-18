@@ -29,6 +29,11 @@ import { averageOrPercentileAgg } from './average_or_percentile_agg';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type TransactionDurationChartPreviewResponse = Array<{
+  name: string;
+  data: Array<{ x: number; y: number | null }>;
+}>;
+
 export async function getTransactionDurationChartPreview({
   alertParams,
   config,
@@ -37,7 +42,7 @@ export async function getTransactionDurationChartPreview({
   alertParams: AlertParams;
   config: APMConfig;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<TransactionDurationChartPreviewResponse> {
   const {
     aggregationType = AggregationType.Avg,
     environment,

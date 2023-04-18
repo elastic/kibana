@@ -62,7 +62,7 @@ export const FieldStatsContent: FC<{
       toDate={timeRange.to}
       dataViewOrDataViewId={currentDataView}
       field={fieldForStats}
-      data-test-subj={`jobCreatorFieldStatsPopover ${fieldForStats.name}`}
+      data-test-subj={`mlFieldStatsFlyoutContent ${fieldForStats.name}`}
       color={DEFAULT_COLOR}
     />
   ) : null;

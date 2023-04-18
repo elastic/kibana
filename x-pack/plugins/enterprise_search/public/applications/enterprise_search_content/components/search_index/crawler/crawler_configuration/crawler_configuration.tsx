@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
@@ -78,7 +79,7 @@ export const CrawlerConfiguration: React.FC = () => {
                 label={i18n.translate(
                   'xpack.enterpriseSearch.content.crawler.crawlerConfiguration.extractHTML.extractionSwitchLabel',
                   {
-                    defaultMessage: 'Content extraction.',
+                    defaultMessage: 'Store full HTML',
                   }
                 )}
                 disabled={status === Status.LOADING}
@@ -88,7 +89,7 @@ export const CrawlerConfiguration: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiLink
-                href="TODO"
+                href={`${docLinks.crawlerManaging}#crawler-managing-html-storage`}
                 data-telemetry-id="entSearchContent-crawler-configuration-learnMoreExtraction"
               >
                 {i18n.translate(

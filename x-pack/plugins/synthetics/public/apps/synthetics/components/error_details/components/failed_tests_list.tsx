@@ -11,8 +11,10 @@ import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const FailedTestsList = ({
   failedTests,
@@ -33,6 +35,7 @@ export const FailedTestsList = ({
   const { basePath } = useSyntheticsSettingsContext();
 
   const history = useHistory();
+  const selectedLocation = useSelectedLocation();
 
   const formatter = useDateFormat();
 
@@ -44,6 +47,7 @@ export const FailedTestsList = ({
       render: (value: string, item: Ping) => {
         return (
           <EuiLink
+            data-test-subj="failed-test-link"
             href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
           >
             {formatter(value)}
@@ -72,7 +76,13 @@ export const FailedTestsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         },
       };
     }

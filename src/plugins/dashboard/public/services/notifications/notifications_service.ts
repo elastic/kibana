@@ -17,10 +17,11 @@ export type NotificationsServiceFactory = KibanaPluginServiceFactory<
 
 export const notificationsServiceFactory: NotificationsServiceFactory = ({ coreStart }) => {
   const {
-    notifications: { toasts },
+    notifications: { toasts, showErrorDialog },
   } = coreStart;
 
   return {
     toasts,
+    showErrorDialog,
   };
 };

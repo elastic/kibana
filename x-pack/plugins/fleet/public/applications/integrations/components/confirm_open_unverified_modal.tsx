@@ -53,7 +53,7 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
           },
         })}
         color="warning"
-        iconType="alert"
+        iconType="warning"
         children={
           <FormattedMessage
             id="xpack.fleet.ConfirmOpenUnverifiedModal.calloutBody"

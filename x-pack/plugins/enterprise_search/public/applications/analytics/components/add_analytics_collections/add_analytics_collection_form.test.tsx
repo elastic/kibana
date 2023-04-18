@@ -7,19 +7,18 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions, mockKibanaValues } from '../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty, EuiFieldText, EuiForm } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 
 import { AddAnalyticsCollectionForm } from './add_analytics_collection_form';
 
 const mockValues = {
   canSubmit: true,
-  hasInputError: false,
   inputError: false,
   isLoading: false,
   name: 'test',
@@ -31,7 +30,8 @@ const mockActions = {
 };
 
 describe('AddAnalyticsCollectionForm', () => {
-  const { navigateToUrl } = mockKibanaValues;
+  const formId = 'addAnalyticsCollectionFormId';
+  const collectionNameField = 'collectionNameField';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,25 +41,19 @@ describe('AddAnalyticsCollectionForm', () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<AddAnalyticsCollectionForm />);
+    const wrapper = shallow(
+      <AddAnalyticsCollectionForm formId={formId} collectionNameField={collectionNameField} />
+    );
     expect(wrapper.find(EuiForm)).toHaveLength(1);
-  });
-
-  it('navigates back to root when cancel is clicked', () => {
-    setMockValues(mockValues);
-    setMockActions(mockActions);
-
-    const wrapper = shallow(<AddAnalyticsCollectionForm />);
-
-    wrapper.find(EuiButtonEmpty).simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith('/');
   });
 
   it('submit form will call create analytics collection action', () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<AddAnalyticsCollectionForm />);
+    const wrapper = shallow(
+      <AddAnalyticsCollectionForm formId={formId} collectionNameField={collectionNameField} />
+    );
 
     wrapper.find(EuiForm).simulate('submit', { preventDefault: jest.fn() });
     expect(mockActions.createAnalyticsCollection).toHaveBeenCalled();
@@ -69,11 +63,12 @@ describe('AddAnalyticsCollectionForm', () => {
     setMockValues({
       ...mockValues,
       canSubmit: false,
-      hasInputError: true,
     });
     setMockActions(mockActions);
 
-    const wrapper = shallow(<AddAnalyticsCollectionForm />);
+    const wrapper = shallow(
+      <AddAnalyticsCollectionForm formId={formId} collectionNameField={collectionNameField} />
+    );
 
     wrapper.find(EuiForm).simulate('submit', { preventDefault: jest.fn() });
     expect(mockActions.createAnalyticsCollection).not.toHaveBeenCalled();
@@ -83,9 +78,27 @@ describe('AddAnalyticsCollectionForm', () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<AddAnalyticsCollectionForm />);
+    const wrapper = shallow(
+      <AddAnalyticsCollectionForm formId={formId} collectionNameField={collectionNameField} />
+    );
 
     wrapper.find(EuiFieldText).simulate('change', { target: { value: 'test' } });
     expect(mockActions.setNameValue).toHaveBeenCalledWith('test');
+  });
+
+  it('should show error when input error exists', () => {
+    const inputErrorMock = 'Already exists';
+    setMockValues({
+      ...mockValues,
+      inputError: inputErrorMock,
+    });
+    setMockActions(mockActions);
+
+    const wrapper = shallow(
+      <AddAnalyticsCollectionForm formId={formId} collectionNameField={collectionNameField} />
+    );
+    expect(wrapper.find(EuiFormRow).prop('error')).toEqual(inputErrorMock);
+    expect(wrapper.find(EuiFormRow).prop('isInvalid')).toBeTruthy();
+    expect(wrapper.find(EuiFieldText).prop('isInvalid')).toBeTruthy();
   });
 });

@@ -38,7 +38,7 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   );
 }
 
-export const createAddToTimelineAction = ({
+export const createAddToTimelineLensAction = ({
   store,
   order,
 }: {

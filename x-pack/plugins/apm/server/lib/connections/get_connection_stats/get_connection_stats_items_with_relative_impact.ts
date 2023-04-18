@@ -13,7 +13,7 @@ import {
 
 export function getConnectionStatsItemsWithRelativeImpact(
   items: ConnectionStatsItem[]
-) {
+): ConnectionStatsItemWithImpact[] {
   const latencySums = items
     .map(
       ({ stats }) => (stats.latency.value ?? 0) * (stats.throughput.value ?? 0)

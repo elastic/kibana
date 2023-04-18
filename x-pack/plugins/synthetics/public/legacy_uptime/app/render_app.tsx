@@ -77,6 +77,7 @@ export function renderApp(
   ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);
 
   return () => {
+    startPlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(appMountParameters.element);
   };
 }

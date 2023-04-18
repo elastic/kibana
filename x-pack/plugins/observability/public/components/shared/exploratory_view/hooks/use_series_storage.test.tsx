@@ -7,7 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { Route, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
 import { getHistoryFromUrl } from '../rtl_helpers';

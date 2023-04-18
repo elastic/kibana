@@ -8,16 +8,14 @@ import React, { ReactElement } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useErrorFailedTests } from '../hooks/use_last_error_state';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 
 export const ResolvedAt: React.FC = () => {
-  const { failedTests } = useErrorFailedTests();
-
-  const state = failedTests?.[0]?.state;
+  const { killerState } = useFindMyKillerState();
 
   const formatter = useDateFormat();
-  let endsAt: string | ReactElement = formatter(state?.ends ?? '');
+  let endsAt: string | ReactElement = formatter(killerState?.timestamp ?? '');
 
   if (!endsAt) {
     endsAt = 'N/A';

@@ -406,6 +406,7 @@ describe('When using Actions service utilities', () => {
           ])
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -441,7 +442,7 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {},
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -483,7 +484,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: something is no good'],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: expect.any(Object),
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',

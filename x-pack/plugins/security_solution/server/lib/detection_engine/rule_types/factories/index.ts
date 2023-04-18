@@ -7,4 +7,4 @@
 
 export * from './bulk_create_factory';
 export * from './wrap_hits_factory';
-export * from './wrap_sequences_factory';
+export * from '../eql/wrap_sequences_factory';

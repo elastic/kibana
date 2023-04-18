@@ -19,7 +19,6 @@ import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/li
 import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
 import type { Immutable } from '../common/endpoint/types';
-import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
 import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
@@ -41,7 +40,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
-  getQueryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

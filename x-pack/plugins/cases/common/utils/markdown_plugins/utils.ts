@@ -7,7 +7,7 @@
 
 import { filter } from 'lodash';
 import type { Node } from 'unist';
-import markdown from 'remark-parse';
+import markdown from 'remark-parse-no-trim';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 

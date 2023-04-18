@@ -8,6 +8,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
+import { SCHEMA_QUERY_V8_8_0 } from './schemas/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
@@ -29,18 +30,14 @@ export const querySavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      query: {
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
-      },
-      filters: {
-        dynamic: false,
-        properties: {},
-      },
-      timefilter: { dynamic: false, properties: {} },
     },
   },
   migrations: savedQueryMigrations,
+  schemas: {
+    '8.8.0': SCHEMA_QUERY_V8_8_0,
+  },
 };

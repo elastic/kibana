@@ -242,6 +242,7 @@ export function ApmIndices() {
                   fullWidth
                 >
                   <EuiFieldText
+                    data-test-subj="apmApmIndicesFieldText"
                     disabled={!canSave}
                     fullWidth
                     name={configurationName}
@@ -255,7 +256,10 @@ export function ApmIndices() {
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={refetch}>
+                <EuiButtonEmpty
+                  data-test-subj="apmApmIndicesCancelButton"
+                  onClick={refetch}
+                >
                   {i18n.translate(
                     'xpack.apm.settings.apmIndices.cancelButton',
                     { defaultMessage: 'Cancel' }
@@ -276,6 +280,7 @@ export function ApmIndices() {
                   }
                 >
                   <EuiButton
+                    data-test-subj="apmApmIndicesApplyChangesButton"
                     fill
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}

@@ -6,6 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { AlertWorkflowStatus } from '../../types';
@@ -14,7 +15,7 @@ import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 interface OwnProps {
-  tableId: string;
+  tableId: TableId;
   data: TimelineItem[];
   totalItems: number;
   indexNames: string[];
@@ -25,6 +26,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   selectedCount?: number;
 }
+
 export const useAlertBulkActions = ({
   tableId,
   data,

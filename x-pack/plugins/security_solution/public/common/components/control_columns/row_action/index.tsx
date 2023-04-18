@@ -8,6 +8,9 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { RightPanelKey } from '../../../../flyout/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -18,12 +21,12 @@ import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { dataTableActions } from '../../../store/data_table';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
-  data: TimelineItem[];
+  data: TimelineItem;
   disabled: boolean;
   index: number;
   isEventViewer: boolean;
@@ -38,6 +41,7 @@ type Props = EuiDataGridCellValueElementProps & {
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   pageRowIndex: number;
+  refetch?: () => void;
 };
 
 const RowActionComponent = ({
@@ -59,18 +63,14 @@ const RowActionComponent = ({
   setEventsLoading,
   setEventsDeleted,
   width,
+  refetch,
 }: Props) => {
-  const {
-    data: timelineNonEcsData,
-    ecs: ecsData,
-    _id: eventId,
-    _index: indexName,
-  } = useMemo(() => {
-    const rowData: Partial<TimelineItem> = data[pageRowIndex];
-    return rowData ?? {};
-  }, [data, pageRowIndex]);
+  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
+
+  const { openFlyout } = useExpandableFlyoutContext();
 
   const dispatch = useDispatch();
+  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
 
   const columnValues = useMemo(
     () =>
@@ -96,14 +96,27 @@ const RowActionComponent = ({
       },
     };
 
-    dispatch(
-      dataTableActions.toggleDetailPanel({
-        ...updatedExpandedDetail,
-        tabType,
-        id: tableId,
-      })
-    );
-  }, [dispatch, eventId, indexName, tabType, tableId]);
+    if (isSecurityFlyoutEnabled) {
+      openFlyout({
+        right: {
+          id: RightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+      });
+    } else {
+      dispatch(
+        dataTableActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType,
+          id: tableId,
+        })
+      );
+    }
+  }, [dispatch, eventId, indexName, isSecurityFlyoutEnabled, openFlyout, tabType, tableId]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -137,6 +150,7 @@ const RowActionComponent = ({
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
+          refetch={refetch}
         />
       )}
     </>

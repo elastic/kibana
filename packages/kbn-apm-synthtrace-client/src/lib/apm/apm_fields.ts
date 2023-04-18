@@ -116,6 +116,7 @@ export type ApmFields = Fields<{
     'kubernetes.pod.name': string;
     'kubernetes.pod.uid': string;
     'labels.name': string;
+    'labels.telemetry_auto_version': string;
     'metricset.name': string;
     'network.carrier.icc': string;
     'network.carrier.mcc': string;
@@ -140,6 +141,8 @@ export type ApmFields = Fields<{
       values: number[];
       counts: number[];
     };
+    'transaction.result': string;
+    'transaction.sampled': boolean;
     'service.environment': string;
     'service.framework.name': string;
     'service.framework.version': string;
@@ -163,8 +166,6 @@ export type ApmFields = Fields<{
     'span.self_time.sum.us': number;
     'span.subtype': string;
     'span.type': string;
-    'transaction.result': string;
-    'transaction.sampled': true;
     'span.links': Array<{
       trace: { id: string };
       span: { id: string };

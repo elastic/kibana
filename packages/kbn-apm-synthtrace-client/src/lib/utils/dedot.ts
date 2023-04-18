@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 export function dedot(source: Record<string, any>, target: Record<string, any>) {
   // eslint-disable-next-line guard-for-in

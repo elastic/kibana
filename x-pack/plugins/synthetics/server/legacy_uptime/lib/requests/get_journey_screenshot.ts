@@ -63,7 +63,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
   const screenshotsOrRefs =
     (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;
 
-  if (screenshotsOrRefs.length === 0) return null;
+  if (!screenshotsOrRefs || screenshotsOrRefs?.length === 0) return null;
 
   return {
     ...screenshotsOrRefs[0]._source,

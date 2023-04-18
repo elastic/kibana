@@ -9,7 +9,8 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +35,7 @@ import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,

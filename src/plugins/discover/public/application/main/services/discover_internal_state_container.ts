@@ -12,11 +12,13 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataTableRecord } from '../../../types';
 
 export interface InternalState {
   dataView: DataView | undefined;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
+  expandedDoc: DataTableRecord | undefined;
 }
 
 interface InternalStateTransitions {
@@ -30,9 +32,12 @@ interface InternalStateTransitions {
   replaceAdHocDataViewWithId: (
     state: InternalState
   ) => (id: string, dataView: DataView) => InternalState;
+  setExpandedDoc: (
+    state: InternalState
+  ) => (dataView: DataTableRecord | undefined) => InternalState;
 }
 
-export type InternalStateContainer = ReduxLikeStateContainer<
+export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
   InternalState,
   InternalStateTransitions
 >;
@@ -46,6 +51,7 @@ export function getInternalStateContainer() {
       dataView: undefined,
       adHocDataViews: [],
       savedDataViews: [],
+      expandedDoc: undefined,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -87,6 +93,10 @@ export function getInternalStateContainer() {
             dataView.id === prevId ? newDataView : dataView
           ),
         }),
+      setExpandedDoc: (prevState: InternalState) => (expandedDoc: DataTableRecord | undefined) => ({
+        ...prevState,
+        expandedDoc,
+      }),
     },
     {},
     { freeze: (state) => state }

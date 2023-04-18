@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import type {
   ExceptionListItemIdentifiers,
@@ -13,10 +13,8 @@ import type {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { ExceptionItems } from '@kbn/securitysolution-exception-list-components';
-import type {
-  ExceptionListItemSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Pagination } from '@elastic/eui';
 import { FormattedDate } from '../../../common/components/formatted_date';
@@ -60,6 +58,18 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onPaginationChange,
   onCreateExceptionListItem,
 }) => {
+  const editButtonText = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_ITEM_CARD_EDIT_ENDPOINT_LABEL
+      : i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL;
+  }, [listType]);
+
+  const deleteButtonText = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_ITEM_CARD_DELETE_ENDPOINT_LABEL
+      : i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL;
+  }, [listType]);
+
   return (
     <>
       <ExceptionItems
@@ -73,8 +83,8 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         emptyViewerButtonText={emptyViewerButtonText}
         pagination={pagination}
         lastUpdated={lastUpdated}
-        editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}
-        deleteActionLabel={i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL}
+        editActionLabel={editButtonText}
+        deleteActionLabel={deleteButtonText}
         onPaginationChange={onPaginationChange}
         onEditExceptionItem={onEditExceptionItem}
         onDeleteException={onDeleteException}

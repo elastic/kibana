@@ -8,4 +8,6 @@
 
 import { SavedSearchServerPlugin } from './plugin';
 
+export { getSavedSearch } from './services/saved_searches';
+
 export const plugin = () => new SavedSearchServerPlugin();

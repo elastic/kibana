@@ -427,7 +427,9 @@ describe('Field Renderers', () => {
       userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
 
       expect(
-        screen.getByText('You are in a dialog. To close this dialog, hit escape.')
+        screen.getByText(
+          'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'
+        )
       ).toBeInTheDocument();
       expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });

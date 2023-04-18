@@ -70,7 +70,7 @@ describe('Summary', () => {
 
       expect(banner.type).toEqual(EuiCallOut);
       expect(banner.props.color).toEqual('danger');
-      expect(banner.props.iconType).toEqual('alert');
+      expect(banner.props.iconType).toEqual('warning');
       expect(banner.props.title).toEqual(
         'Something went wrong. Please address the errors and try again.'
       );

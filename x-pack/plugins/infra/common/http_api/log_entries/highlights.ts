@@ -8,12 +8,13 @@
 import * as rt from 'io-ts';
 import { logEntryCursorRT, logEntryRT } from '../../log_entry';
 import { logViewColumnConfigurationRT } from '../../log_views';
+import { logViewReferenceRT } from '../../log_views';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 
 export const logEntriesHighlightsBaseRequestRT = rt.intersection([
   rt.type({
-    sourceId: rt.string,
+    logView: logViewReferenceRT,
     startTimestamp: rt.number,
     endTimestamp: rt.number,
     highlightTerms: rt.array(rt.string),

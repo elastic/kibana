@@ -49,7 +49,6 @@ import {
   type XYDataLayerConfig,
   type SeriesType,
   type PersistedState,
-  type XYAnnotationLayerConfig,
   visualizationTypes,
 } from './types';
 import {
@@ -57,6 +56,7 @@ import {
   getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
+  isPersistedState,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -102,11 +102,8 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import {
-  createAnnotationActions,
-  IGNORE_GLOBAL_FILTERS_ACTION_ID,
-  KEEP_GLOBAL_FILTERS_ACTION_ID,
-} from './annotations/actions';
+import { IgnoredGlobalFiltersEntries } from './info_badges';
+import { LayerSettings } from './layer_settings';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -210,10 +207,6 @@ export const getXyVisualization = ({
     return extractReferences(state);
   },
 
-  fromPersistableState(state, references, initialContext) {
-    return injectReferences(state, references, initialContext);
-  },
-
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State) {
@@ -228,9 +221,13 @@ export const getXyVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, _, references, initialContext) {
+    const finalState =
+      state && isPersistedState(state)
+        ? injectReferences(state, references, initialContext)
+        : state;
     return (
-      state || {
+      finalState || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         valueLabels: 'hide',
@@ -261,31 +258,27 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state) {
-    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[layerIndex];
-    const actions = [];
-    if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer }));
-    }
-    return actions;
+  getSupportedActionsForLayer() {
+    return [];
+  },
+
+  hasLayerSettings({ state, layerId: currentLayerId }) {
+    const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
+    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+  },
+
+  renderLayerSettings(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerSettings {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   onLayerAction(layerId, actionId, state) {
-    if ([IGNORE_GLOBAL_FILTERS_ACTION_ID, KEEP_GLOBAL_FILTERS_ACTION_ID].includes(actionId)) {
-      return {
-        ...state,
-        layers: state.layers.map((layer) =>
-          layer.layerId === layerId
-            ? {
-                ...layer,
-                ignoreGlobalFilters: !(layer as XYAnnotationLayerConfig).ignoreGlobalFilters,
-              }
-            : layer
-        ),
-      };
-    }
-
     return state;
   },
 
@@ -875,7 +868,9 @@ export const getXyVisualization = ({
       );
     }
 
-    return [...errors, ...warnings];
+    const info = getNotifiableFeatures(state, frame.dataViews);
+
+    return errors.concat(warnings, info);
   },
 
   getUniqueLabels(state) {
@@ -918,88 +913,7 @@ export const getXyVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: XYState) {
-    const isHorizontal = isHorizontalChart(state.layers);
-    const visualizationLayersInfo = state.layers.map((layer) => {
-      const dimensions = [];
-      let chartType: SeriesType | undefined;
-      let icon;
-      let label;
-      if (isDataLayer(layer)) {
-        chartType = layer.seriesType;
-        const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
-        icon = layerVisType?.icon;
-        label = layerVisType?.fullLabel || layerVisType?.label;
-        if (layer.xAccessor) {
-          dimensions.push({
-            name: getAxisName('x', { isHorizontal }),
-            id: layer.xAccessor,
-            dimensionType: 'x',
-          });
-        }
-        if (layer.accessors && layer.accessors.length) {
-          layer.accessors.forEach((accessor) => {
-            dimensions.push({
-              name: getAxisName('y', { isHorizontal }),
-              id: accessor,
-              dimensionType: 'y',
-            });
-          });
-        }
-        if (layer.splitAccessor) {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Breakdown',
-            }),
-            dimensionType: 'breakdown',
-            id: layer.splitAccessor,
-          });
-        }
-      }
-      if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
-        layer.accessors.forEach((accessor) => {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
-              defaultMessage: 'Reference line',
-            }),
-            dimensionType: 'reference_line',
-            id: accessor,
-          });
-        });
-        label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
-          defaultMessage: 'Reference lines',
-        });
-        icon = IconChartBarReferenceLine;
-      }
-      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
-        layer.annotations.forEach((annotation) => {
-          dimensions.push({
-            name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
-              defaultMessage: 'Annotation',
-            }),
-            dimensionType: 'annotation',
-            id: annotation.id,
-          });
-        });
-        label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-          defaultMessage: 'Annotations',
-        });
-        icon = IconChartBarAnnotations;
-      }
-
-      return {
-        layerId: layer.layerId,
-        layerType: layer.layerType,
-        chartType,
-        icon,
-        label,
-        dimensions,
-      };
-    });
-    return {
-      layers: visualizationLayersInfo,
-    };
-  },
+  getVisualizationInfo,
 });
 
 const getMappedAccessors = ({
@@ -1039,3 +953,118 @@ const getMappedAccessors = ({
   }
   return mappedAccessors;
 };
+
+function getVisualizationInfo(state: XYState) {
+  const isHorizontal = isHorizontalChart(state.layers);
+  const visualizationLayersInfo = state.layers.map((layer) => {
+    const dimensions = [];
+    let chartType: SeriesType | undefined;
+    let icon;
+    let label;
+    if (isDataLayer(layer)) {
+      chartType = layer.seriesType;
+      const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+      icon = layerVisType?.icon;
+      label = layerVisType?.fullLabel || layerVisType?.label;
+      if (layer.xAccessor) {
+        dimensions.push({
+          name: getAxisName('x', { isHorizontal }),
+          id: layer.xAccessor,
+          dimensionType: 'x',
+        });
+      }
+      if (layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({
+            name: getAxisName('y', { isHorizontal }),
+            id: accessor,
+            dimensionType: 'y',
+          });
+        });
+      }
+      if (layer.splitAccessor) {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+            defaultMessage: 'Breakdown',
+          }),
+          dimensionType: 'breakdown',
+          id: layer.splitAccessor,
+        });
+      }
+    }
+    if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
+      layer.accessors.forEach((accessor) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
+            defaultMessage: 'Reference line',
+          }),
+          dimensionType: 'reference_line',
+          id: accessor,
+        });
+      });
+      label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+        defaultMessage: 'Reference lines',
+      });
+      icon = IconChartBarReferenceLine;
+    }
+    if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+      layer.annotations.forEach((annotation) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
+            defaultMessage: 'Annotation',
+          }),
+          dimensionType: 'annotation',
+          id: annotation.id,
+        });
+      });
+      label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+        defaultMessage: 'Annotations',
+      });
+      icon = IconChartBarAnnotations;
+    }
+
+    return {
+      layerId: layer.layerId,
+      layerType: layer.layerType,
+      chartType,
+      icon,
+      label,
+      dimensions,
+    };
+  });
+  return {
+    layers: visualizationLayersInfo,
+  };
+}
+
+function getNotifiableFeatures(
+  state: XYState,
+  dataViews: FramePublicAPI['dataViews']
+): UserMessage[] {
+  const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
+    (layer) => layer.ignoreGlobalFilters
+  );
+  if (!annotationsWithIgnoreFlag.length) {
+    return [];
+  }
+  const visualizationInfo = getVisualizationInfo(state);
+
+  return [
+    {
+      uniqueId: 'ignoring-global-filters-layers',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
+        defaultMessage: 'Layers ignoring global filters',
+      }),
+      longMessage: (
+        <IgnoredGlobalFiltersEntries
+          layers={annotationsWithIgnoreFlag}
+          visualizationInfo={visualizationInfo}
+          dataViews={dataViews}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
+}

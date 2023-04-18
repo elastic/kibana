@@ -26,6 +26,7 @@ import {
   orchestratorActionVariableDescription,
   tagsActionVariableDescription,
 } from '../common/messages';
+import { LogsRulesTypeAlertDefinition } from '../register_rule_types';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -144,11 +145,18 @@ export async function registerLogThresholdRuleType(
           description: denominatorConditionsActionVariableDescription,
         },
         ...(getAlertDetailsPageEnabledForApp(config, 'logs')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
         },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
@@ -164,5 +172,6 @@ export async function registerLogThresholdRuleType(
       extractReferences,
       injectReferences,
     },
+    alerts: LogsRulesTypeAlertDefinition,
   });
 }

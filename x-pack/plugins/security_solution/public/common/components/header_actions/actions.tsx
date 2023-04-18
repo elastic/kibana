@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
 import {
   eventHasNotes,
   getEventType,
@@ -19,7 +20,7 @@ import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
-import { TableId, TimelineId, TimelineTabs } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
@@ -62,6 +63,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   showNotes,
   timelineId,
   toggleShowNotes,
+  refetch,
+  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -296,6 +299,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           scopeId={timelineId}
           disabled={isContextMenuDisabled}
           onRuleChange={onRuleChange}
+          refetch={refetch}
         />
         {isDisabled === false ? (
           <div>

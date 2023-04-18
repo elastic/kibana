@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import { networkInterfaces } from 'node:os';
 
 const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
   'localhost',
@@ -15,13 +15,21 @@ const POSSIBLE_LOCALHOST_VALUES: readonly string[] = [
   '0000:0000:0000:0000:0000:0000:0000:0000',
 ];
 
-export const getLocalhostRealIp = async (): Promise<string> => {
-  // TODO:PT find better way to get host machine public IP. Command below is not x-platform
-
-  return execa.commandSync(
-    "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",
-    { shell: true }
-  ).stdout;
+export const getLocalhostRealIp = (): string => {
+  for (const netInterfaceList of Object.values(networkInterfaces())) {
+    if (netInterfaceList) {
+      const netInterface = netInterfaceList.find(
+        (networkInterface) =>
+          networkInterface.family === 'IPv4' &&
+          networkInterface.internal === false &&
+          networkInterface.address
+      );
+      if (netInterface) {
+        return netInterface.address;
+      }
+    }
+  }
+  return '0.0.0.0';
 };
 
 export const isLocalhost = (hostname: string): boolean => {

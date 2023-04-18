@@ -50,6 +50,7 @@ export { dataStreamService } from './data_streams';
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+export { auditLoggingService } from './audit_logging';
 
 // Artifacts services
 export * from './artifacts';
@@ -67,3 +68,5 @@ export { migrateSettingsToFleetServerHost } from './fleet_server_host';
 export { FleetUsageSender } from './telemetry/fleet_usage_sender';
 
 export { checkAllowedPackages } from './check_allowed_packages';
+
+export type { MessageSigningServiceInterface } from './security';

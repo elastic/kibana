@@ -8,8 +8,8 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { changePoints as artificialLogChangePoints } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/change_points';
-import { finalChangePointGroups as artificialLogsChangePointGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_change_point_groups';
+import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
+import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups';
 
 import type { TestData } from './types';
 
@@ -31,36 +31,38 @@ export const explainLogRateSpikesTestData: TestData[] = [
     },
     expected: {
       chunksLength: 35,
+      chunksLengthGroupOnly: 5,
       actionsLength: 34,
+      actionsLengthGroupOnly: 4,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      changePointFilter: 'add_change_points',
-      groupFilter: 'add_change_point_group',
-      groupHistogramFilter: 'add_change_point_group_histogram',
-      histogramFilter: 'add_change_points_histogram',
+      significantTermFilter: 'add_significant_terms',
+      groupFilter: 'add_significant_terms_group',
+      groupHistogramFilter: 'add_significant_terms_group_histogram',
+      histogramFilter: 'add_significant_terms_histogram',
       errorFilter: 'add_error',
-      changePoints: [
-        {
-          fieldName: 'day_of_week',
-          fieldValue: 'Wednesday',
-          doc_count: 145,
-          bg_count: 142,
-          score: 36.31595998561873,
-          pValue: 1.6911377077437753e-16,
-          normalizedScore: 0.8055203624020835,
-          total_doc_count: 0,
-          total_bg_count: 0,
-        },
+      significantTerms: [
         {
           fieldName: 'day_of_week',
           fieldValue: 'Thursday',
           doc_count: 157,
           bg_count: 224,
+          total_doc_count: 480,
+          total_bg_count: 1328,
           score: 20.366950718358762,
           pValue: 1.428057484826135e-9,
           normalizedScore: 0.7661649691018979,
-          total_doc_count: 0,
-          total_bg_count: 0,
+        },
+        {
+          fieldName: 'day_of_week',
+          fieldValue: 'Wednesday',
+          doc_count: 145,
+          bg_count: 142,
+          total_doc_count: 480,
+          total_bg_count: 1328,
+          score: 36.31595998561873,
+          pValue: 1.6911377077437753e-16,
+          normalizedScore: 0.8055203624020835,
         },
       ],
       groups: [],
@@ -83,17 +85,19 @@ export const explainLogRateSpikesTestData: TestData[] = [
       grouping: true,
     },
     expected: {
-      chunksLength: 25,
-      actionsLength: 24,
+      chunksLength: 27,
+      chunksLengthGroupOnly: 11,
+      actionsLength: 26,
+      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      changePointFilter: 'add_change_points',
-      groupFilter: 'add_change_point_group',
-      groupHistogramFilter: 'add_change_point_group_histogram',
-      histogramFilter: 'add_change_points_histogram',
+      significantTermFilter: 'add_significant_terms',
+      groupFilter: 'add_significant_terms_group',
+      groupHistogramFilter: 'add_significant_terms_group_histogram',
+      histogramFilter: 'add_significant_terms_histogram',
       errorFilter: 'add_error',
-      changePoints: artificialLogChangePoints,
-      groups: artificialLogsChangePointGroups,
+      significantTerms: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantTermGroups,
       histogramLength: 20,
     },
   },

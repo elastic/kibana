@@ -41,31 +41,36 @@ export const getDetailsPageFilter = (pageName: string, detailName?: string): Fil
     : [];
 };
 
-export const hostNameExistsFilter: Filter[] = [
-  {
-    query: {
-      bool: {
-        should: [
-          {
-            exists: {
-              field: 'host.name',
+export const fieldNameExistsFilter = (pageName: string): Filter[] => {
+  const field = pageFilterFieldMap[pageName];
+
+  return field && pageName
+    ? [
+        {
+          query: {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: `${field}.name`,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    meta: {
-      alias: '',
-      disabled: false,
-      key: 'bool',
-      negate: false,
-      type: 'custom',
-      value:
-        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
-    },
-  },
-];
+          meta: {
+            alias: '',
+            disabled: false,
+            key: 'bool',
+            negate: false,
+            type: 'custom',
+            value: `{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "${field}.name"}}],"minimum_should_match": 1}}]}}}`,
+          },
+        },
+      ]
+    : [];
+};
 
 export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
   ipAddress

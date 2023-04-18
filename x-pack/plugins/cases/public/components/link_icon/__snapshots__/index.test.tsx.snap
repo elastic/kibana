@@ -9,7 +9,7 @@ exports[`LinkIcon it renders 1`] = `
 >
   <EuiIcon
     size="xxl"
-    type="alert"
+    type="warning"
   />
   <span
     className="casesLinkIcon__label"

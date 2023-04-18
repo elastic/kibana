@@ -63,6 +63,7 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
+  public crawlerExtractionRules: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
   public deployTrainedModels: string;
@@ -71,6 +72,7 @@ class DocLinks {
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
   public elasticsearchSecureCluster: string;
+  public elser: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
@@ -180,6 +182,7 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
+    this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
@@ -188,6 +191,7 @@ class DocLinks {
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
     this.elasticsearchSecureCluster = '';
+    this.elser = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
@@ -298,6 +302,7 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
@@ -306,6 +311,7 @@ class DocLinks {
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.elasticsearchSecureCluster = docLinks.links.elasticsearch.secureCluster;
+    this.elser = docLinks.links.enterpriseSearch.elser;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;

@@ -117,10 +117,12 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly elser: string;
     readonly engines: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
@@ -354,6 +356,7 @@ export interface DocLinks {
     createAlerts: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
+    syntheticsMigrateFromIntegration: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
@@ -381,6 +384,7 @@ export interface DocLinks {
     healthMonitoring: string;
   }>;
   readonly maps: Readonly<{
+    connectToEms: string;
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;
@@ -446,6 +450,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    api: string;
   }>;
   readonly ecs: {
     readonly guide: string;

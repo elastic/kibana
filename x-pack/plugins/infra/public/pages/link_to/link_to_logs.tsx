@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { match as RouteMatch, Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
@@ -25,11 +26,11 @@ export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
     <Switch>
       <Route
-        path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
+        path={`${props.match.url}/:logViewId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
         component={RedirectToNodeLogs}
       />
-      <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
-      <Route path={`${props.match.url}/:sourceId?`} component={RedirectToLogs} />
+      <Route path={`${props.match.url}/:logViewId?/logs`} component={RedirectToLogs} />
+      <Route path={`${props.match.url}/:logViewId?`} component={RedirectToLogs} />
       <Redirect to="/" />
     </Switch>
   );

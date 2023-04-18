@@ -78,4 +78,16 @@ describe('APM Transaction Error Rate Transform Generator', () => {
 
     expect(transform.source.index).toEqual(index);
   });
+
+  it('adds the custom kql filter to the query', async () => {
+    const filter = `"my.field" : "value" and ("foo" >= 12 or "bar" <= 100)`;
+    const anSLO = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator({
+        filter,
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.source.query).toMatchSnapshot();
+  });
 });

@@ -250,7 +250,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <FormattedMessage
               id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"

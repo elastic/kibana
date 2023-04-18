@@ -14,9 +14,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { set } from 'lodash/fp';
-
 import { EuiTab } from '@elastic/eui';
+import { set } from '@kbn/safer-lodash-set/fp';
 
 import { getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
 

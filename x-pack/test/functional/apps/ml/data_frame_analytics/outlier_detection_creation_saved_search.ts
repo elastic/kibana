@@ -35,6 +35,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const dateNow = Date.now();
+    const completedJobProgressEntries = [
+      'Phase 4/4',
+      'reindexing',
+      '100%',
+      'loading_data',
+      '100%',
+      'computing_outliers',
+      '100%',
+      'writing_results',
+      '100%',
+    ];
     const testDataList = [
       {
         suiteTitle: 'with lucene query',
@@ -51,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        modelMemory: '65mb',
+        modelMemory: '1mb',
         createIndexPattern: true,
         expected: {
           source: 'ft_farequote_small',
@@ -71,15 +82,51 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                  '8.8.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '1604',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_2_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1604,"test_docs_count":0,"skipped_docs_count":0}',
-                  description: 'Outlier detection job based on a saved search with lucene query',
+                  '': '',
+                  timestamp: 'March 1st 2023, 02:48:02',
+                  timing_stats: '{"elapsed_time":15}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -119,15 +166,51 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                  '8.8.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '1603',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_3_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1603,"test_docs_count":0,"skipped_docs_count":0}',
-                  description: 'Outlier detection job based on a saved search with kuery query',
+                  '': '',
+                  timestamp: 'March 1st 2023, 02:52:45',
+                  timing_stats: '{"elapsed_time":12}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -167,16 +250,51 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                  '8.8.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '290',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_4_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":290,"test_docs_count":0,"skipped_docs_count":0}',
-                  description:
-                    'Outlier detection job based on a saved search with filter and kuery query',
+                  '': '',
+                  timestamp: 'March 1st 2023, 02:52:45',
+                  timing_stats: '{"elapsed_time":12}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -217,16 +335,51 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                  '8.8.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '290',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: completedJobProgressEntries,
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: `fq_saved_search_5_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":290,"test_docs_count":0,"skipped_docs_count":0}',
-                  description:
-                    'Outlier detection job based on a saved search with filter and lucene query',
+                  '': '',
+                  timestamp: 'March 1st 2023, 02:52:45',
+                  timing_stats: '{"elapsed_time":12}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },

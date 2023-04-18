@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pickBy, get, isEmpty, isString, unset, set, intersection } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { pickBy, get, isEmpty, isString, unset, intersection } from 'lodash';
 import satisfies from 'semver/functions/satisfies';
 import {
   EuiFlexGroup,

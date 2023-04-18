@@ -45,12 +45,10 @@ export const REMOVED_TYPES: string[] = [
   'maps-telemetry',
   // Deprecated, no longer used since 8.7 https://github.com/elastic/kibana/pull/148530
   'csp_rule',
+  // Removed in 8.8 https://github.com/elastic/kibana/pull/151116
+  'upgrade-assistant-telemetry',
 ].sort();
 
-// When migrating from the outdated index we use a read query which excludes
-// saved objects which are no longer used. These saved objects will still be
-// kept in the outdated index for backup purposes, but won't be available in
-// the upgraded index.
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
     must_not: [
@@ -59,23 +57,6 @@ export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
           type: typeName,
         },
       })),
-      // https://github.com/elastic/kibana/issues/96131
-      {
-        bool: {
-          must: [
-            {
-              match: {
-                type: 'search-session',
-              },
-            },
-            {
-              match: {
-                'search-session.persisted': false,
-              },
-            },
-          ],
-        },
-      },
     ],
   },
 };

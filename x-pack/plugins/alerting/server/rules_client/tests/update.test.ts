@@ -37,6 +37,11 @@ jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -64,6 +69,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -85,6 +92,7 @@ describe('update()', () => {
       alertTypeId: 'myType',
       schedule: { interval: '1m' },
       consumer: 'myApp',
+      revision: 0,
       scheduledTaskId: 'task-123',
       params: {},
       actions: [
@@ -230,6 +238,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -325,6 +334,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -350,6 +360,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "100",
           },
           Object {
             "actionRef": "action_1",
@@ -358,6 +369,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "101",
           },
           Object {
             "actionRef": "action_2",
@@ -366,10 +378,12 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
@@ -387,6 +401,7 @@ describe('update()', () => {
           "risk_score": 40,
           "severity": "low",
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -519,6 +534,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -585,6 +601,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '103',
           },
           {
             group: 'default',
@@ -593,6 +610,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '104',
           },
           {
             group: 'custom',
@@ -601,17 +619,20 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '105',
           },
         ],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
         meta: { versionApiKeyLastmodified: 'v7.10.0' },
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -662,6 +683,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -736,6 +758,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -779,17 +802,25 @@ describe('update()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '106',
+          },
         ],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
         meta: { versionApiKeyLastmodified: 'v7.10.0' },
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -835,6 +866,7 @@ describe('update()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -872,6 +904,7 @@ describe('update()', () => {
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
+        revision: 1,
         scheduledTaskId: 'task-123',
       },
       updated_at: new Date().toISOString(),
@@ -925,6 +958,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -953,10 +987,12 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "107",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
@@ -968,6 +1004,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1026,6 +1063,7 @@ describe('update()', () => {
             },
           },
         ],
+        revision: 1,
         scheduledTaskId: 'task-123',
         apiKey: null,
       },
@@ -1081,6 +1119,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1101,10 +1140,12 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "108",
           },
         ],
         "alertTypeId": "myType",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": false,
@@ -1116,6 +1157,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -2060,6 +2102,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -2113,17 +2156,20 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '144',
           },
         ],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
         meta: { versionApiKeyLastmodified: 'v7.10.0' },
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -2158,6 +2204,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -2521,5 +2568,375 @@ describe('update()', () => {
         })
       );
     });
+  });
+
+  test('updates an action with uuid and adds uuid to an action without it', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '111-111',
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+          risk_score: 40,
+          severity: 'low',
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+            uuid: '123-456',
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+            frequency: {
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+          },
+        ],
+      },
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '123-456',
+          },
+          {
+            actionRef: '',
+            actionTypeId: '',
+            frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+            group: 'default',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        consumer: 'myApp',
+        enabled: true,
+        mapped_params: { risk_score: 40, severity: '20-low' },
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: null,
+        params: { bar: true, risk_score: 40, severity: 'low' },
+        revision: 1,
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+  });
+
+  it('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyCreatedByUser: true,
+        revision: 1,
+        scheduledTaskId: 'task-123',
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).not.toHaveBeenCalled();
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": "152",
+          },
+        ],
+        "alertTypeId": "myType",
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "apiKeyOwner": "elastic",
+        "consumer": "myApp",
+        "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "name": "abc",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
+        "updatedBy": "elastic",
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
+  });
+
+  test('throws when unsecuredSavedObjectsClient update fails and does not invalidate newly created API key if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: [],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

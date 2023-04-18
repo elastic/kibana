@@ -7,32 +7,27 @@
     "id": "infra",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "infra"
-    ],
+    "configPath": ["xpack", "infra"],
     "requiredPlugins": [
-      "share",
-      "features",
-      "usageCollection",
-      "spaces",
-      "embeddable",
+      "alerting",
+      "cases",
+      "charts",
       "data",
       "dataViews",
-      "visTypeTimeseries",
-      "alerting",
-      "lens",
-      "triggersActionsUi",
-      "observability",
-      "ruleRegistry",
-      "unifiedSearch"
-    ],
-    "optionalPlugins": [
-      "ml",
-      "home",
       "embeddable",
-      "osquery"
+      "features",
+      "lens",
+      "observability",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch",
+      "usageCollection",
+      "visTypeTimeseries"
     ],
+    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",

@@ -83,6 +83,7 @@ export const duplicateExceptionListAndItems = async ({
         comments: [],
         description: item.description,
         entries: item.entries,
+        expire_time: item.expire_time,
         item_id: newItemId,
         list_id: newlyCreatedList.list_id,
         meta: item.meta,

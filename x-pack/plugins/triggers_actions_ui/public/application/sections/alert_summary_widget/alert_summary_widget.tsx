@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
 import {
   AlertSummaryWidgetError,
-  AlertsSummaryWidgetCompact,
-  AlertsSummaryWidgetFullSize,
+  AlertSummaryWidgetCompact,
+  AlertSummaryWidgetFullSize,
+  AlertSummaryWidgetLoader,
 } from './components';
 
 export const AlertSummaryWidget = ({
+  chartProps,
   featureIds,
   filter,
   fullSize,
   onClick = () => {},
   timeRange,
-  chartThemes,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -33,40 +33,29 @@ export const AlertSummaryWidget = ({
     timeRange,
   });
 
-  if (isLoading)
-    return (
-      <div
-        style={{
-          minHeight: fullSize ? 238 : 224,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <EuiLoadingChart size="l" data-test-subj="alertSummaryWidgetLoading" />
-      </div>
-    );
+  if (isLoading) return <AlertSummaryWidgetLoader fullSize={fullSize} />;
+
   if (error) return <AlertSummaryWidgetError />;
 
   return fullSize ? (
     // Only show full size version if there is data
     activeAlertCount || recoveredAlertCount ? (
-      <AlertsSummaryWidgetFullSize
+      <AlertSummaryWidgetFullSize
         activeAlertCount={activeAlertCount}
         activeAlerts={activeAlerts}
-        recoveredAlertCount={recoveredAlertCount}
+        chartProps={chartProps}
         dateFormat={timeRange.dateFormat}
-        chartThemes={chartThemes}
+        recoveredAlertCount={recoveredAlertCount}
       />
     ) : null
   ) : (
-    <AlertsSummaryWidgetCompact
+    <AlertSummaryWidgetCompact
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}
+      chartProps={chartProps}
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
       timeRangeTitle={timeRange.title}
-      chartThemes={chartThemes}
     />
   );
 };

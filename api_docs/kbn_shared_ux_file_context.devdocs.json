@@ -99,7 +99,13 @@
               "\nA files client that will be used process uploads."
             ],
             "signature": [
-              "BaseFilesClient",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.BaseFilesClient",
+                "text": "BaseFilesClient"
+              },
               "<any>"
             ],
             "path": "packages/shared-ux/file/context/src/index.tsx",

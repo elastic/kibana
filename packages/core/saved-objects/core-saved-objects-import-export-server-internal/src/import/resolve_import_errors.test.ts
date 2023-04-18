@@ -28,12 +28,13 @@ import type {
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
+  SavedObject,
+  SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -84,6 +85,7 @@ describe('#importSavedObjectsFromStream', () => {
   const setupOptions = ({
     retries = [],
     createNewCopies = false,
+    compatibilityMode,
     getTypeImpl = (type: string) =>
       ({
         // other attributes aren't needed for the purposes of injecting metadata
@@ -93,6 +95,7 @@ describe('#importSavedObjectsFromStream', () => {
   }: {
     retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
+    compatibilityMode?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
   } = {}): ResolveSavedObjectsImportErrorsOptions => {
@@ -111,6 +114,7 @@ describe('#importSavedObjectsFromStream', () => {
       // namespace and createNewCopies don't matter, as they don't change the logic in this module, they just get passed to sub-module methods
       namespace,
       createNewCopies,
+      compatibilityMode,
     };
   };
 
@@ -448,6 +452,34 @@ describe('#importSavedObjectsFromStream', () => {
           savedObjectsClient,
           importStateMap,
           namespace,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
+          ...partialCreateSavedObjectsParams,
+          objects: objectsToOverwrite,
+          overwrite: true,
+        });
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(2, {
+          ...partialCreateSavedObjectsParams,
+          objects: objectsToNotOverwrite,
+        });
+      });
+
+      test('applies `compatibilityMode` if specified', async () => {
+        const objectsToOverwrite = [createObject()];
+        const objectsToNotOverwrite = [createObject()];
+        mockSplitOverwrites.mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
+        mockCreateSavedObjects.mockResolvedValueOnce({
+          errors: [createError()], // this error will NOT be passed to the second `mockCreateSavedObjects` call
+          createdObjects: [],
+        });
+
+        await resolveSavedObjectsImportErrors(setupOptions({ compatibilityMode: true }));
+        const partialCreateSavedObjectsParams = {
+          accumulatedErrors: [],
+          savedObjectsClient,
+          importStateMap: new Map(),
+          namespace,
+          compatibilityMode: true,
         };
         expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
           ...partialCreateSavedObjectsParams,

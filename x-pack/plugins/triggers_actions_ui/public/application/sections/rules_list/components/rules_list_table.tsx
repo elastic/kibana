@@ -342,7 +342,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: true,
-        width: '25%',
+        width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);

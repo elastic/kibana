@@ -8,6 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { LogStream } from '@kbn/infra-plugin/public';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -75,11 +76,10 @@ export function getInfrastructureKQLFilter({
   serviceName: string;
   environment: string;
 }) {
-  // correlate on service.name + service.environment
-  const serviceNameAndEnvironmentCorrelation = `(${SERVICE_NAME}: "${serviceName}" and ${SERVICE_ENVIRONMENT}: "${environment}")`;
-
-  // correlate on service.name
-  const serviceNameCorrelation = `(${SERVICE_NAME}: "${serviceName}" and not ${SERVICE_ENVIRONMENT}: *)`;
+  const serviceNameAndEnvironmentCorrelation =
+    environment === ENVIRONMENT_ALL.value
+      ? `${SERVICE_NAME}: "${serviceName}"` // correlate on service.name only
+      : `(${SERVICE_NAME}: "${serviceName}" and ${SERVICE_ENVIRONMENT}: "${environment}") or (${SERVICE_NAME}: "${serviceName}" and not ${SERVICE_ENVIRONMENT}: *)`; // correlate on service.name + service.environment
 
   // correlate on container.id
   const containerIdKql = (data?.containerIds ?? [])
@@ -89,9 +89,7 @@ export function getInfrastructureKQLFilter({
     ? [`((${containerIdKql}) and not ${SERVICE_NAME}: *)`]
     : [];
 
-  return [
-    serviceNameAndEnvironmentCorrelation,
-    serviceNameCorrelation,
-    ...containerIdCorrelation,
-  ].join(' or ');
+  return [serviceNameAndEnvironmentCorrelation, ...containerIdCorrelation].join(
+    ' or '
+  );
 }

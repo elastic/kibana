@@ -10,6 +10,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 
+import { IndexNameLogic } from '../index_name_logic';
+
 import {
   IndexPipelinesConfigurationsLogic,
   IndexPipelinesConfigurationsValues,
@@ -28,13 +30,15 @@ const DEFAULT_VALUES: IndexPipelinesConfigurationsValues = {
 
 describe('IndexPipelinesConfigurationsLogic', () => {
   const { mount } = new LogicMounter(IndexPipelinesConfigurationsLogic);
+  const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
   const { mount: mountFetchCustomPipelineApiLogic } = new LogicMounter(FetchCustomPipelineApiLogic);
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    const indexNameProps = { indexName };
+    const indexNameLogic = indexNameMount();
     mountFetchCustomPipelineApiLogic();
-    mount(undefined, indexNameProps);
+    mount();
+    indexNameLogic.actions.setIndexName(indexName);
   });
 
   it('has expected default values', () => {

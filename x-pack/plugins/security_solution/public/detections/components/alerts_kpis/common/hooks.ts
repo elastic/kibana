@@ -65,32 +65,48 @@ export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
   return !!subTypeNested?.nested?.path;
 }
 
-export function isKeyword(field: Partial<BrowserField>) {
-  return field.esTypes && field.esTypes?.indexOf('keyword') >= 0;
+export function isLensSupportedType(fieldType: string | undefined) {
+  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+  return fieldType ? supportedTypes.has(fieldType) : false;
 }
 
-export function getAggregatableFields(fields: {
+export interface GetAggregatableFields {
   [fieldName: string]: Partial<BrowserField>;
-}): EuiComboBoxOptionOption[] {
+}
+
+export function getAggregatableFields(
+  fields: GetAggregatableFields,
+  useLensCompatibleFields?: boolean
+): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
-    if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
-      result.push({ label: key, value: key });
+    if (useLensCompatibleFields) {
+      if (
+        !!field.aggregatable &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field)
+      ) {
+        result.push({ label: key, value: key });
+      }
+    } else {
+      if (field.aggregatable === true) {
+        result.push({ label: key, value: key });
+      }
     }
   }
   return result;
 }
 
-export const useStackByFields = () => {
+export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
-    getAggregatableFields(allFields)
+    getAggregatableFields(allFields, useLensCompatibleFields)
   );
   useEffect(() => {
-    setStackByFieldOptions(getAggregatableFields(allFields));
-  }, [allFields]);
+    setStackByFieldOptions(getAggregatableFields(allFields, useLensCompatibleFields));
+  }, [allFields, useLensCompatibleFields]);
   return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };

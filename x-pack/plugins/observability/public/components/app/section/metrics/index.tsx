@@ -30,7 +30,7 @@ import { useDatePickerContext } from '../../../../hooks/use_date_picker_context'
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
-import { BucketSize } from '../../../../pages/overview';
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 
 const COLOR_ORANGE = 7;
 const COLOR_BLUE = 1;

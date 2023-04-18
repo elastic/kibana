@@ -15,12 +15,12 @@ import { waitFor } from '@testing-library/dom';
 const MOCK_TAGS = ['a', 'b', 'c'];
 
 jest.mock('../../common/lib/kibana');
-jest.mock('../lib/rule_api', () => ({
+jest.mock('../lib/rule_api/aggregate', () => ({
   loadRuleTags: jest.fn(),
 }));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const { loadRuleTags } = jest.requireMock('../lib/rule_api');
+const { loadRuleTags } = jest.requireMock('../lib/rule_api/aggregate');
 
 const queryClient = new QueryClient({
   defaultOptions: {

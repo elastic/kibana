@@ -12,7 +12,7 @@ import {
   kueryBarPlaceholder,
 } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { DependenciesInventoryTable } from './dependencies_inventory_table';
 
 export function DependenciesInventory() {

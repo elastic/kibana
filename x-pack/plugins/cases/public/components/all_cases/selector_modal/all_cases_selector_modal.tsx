@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
@@ -56,6 +57,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
 
     return isModalOpen ? (
       <QueryClientProvider client={casesQueryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <Modal onClose={closeModal} data-test-subj="all-cases-modal">
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>

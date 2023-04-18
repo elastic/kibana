@@ -17,20 +17,18 @@ export interface IndexNameActions {
   setIndexName: (indexName: string) => { indexName: string };
 }
 
-export const IndexNameLogic = kea<MakeLogicType<IndexNameValues, IndexNameActions, IndexNameProps>>(
-  {
-    actions: {
-      setIndexName: (indexName) => ({ indexName }),
-    },
-    path: ['enterprise_search', 'content', 'index_name'],
-    reducers: ({ props }) => ({
-      indexName: [
-        // Short-circuiting this to empty string is necessary to enable testing logics relying on this
-        props.indexName ?? '',
-        {
-          setIndexName: (_, { indexName }) => indexName,
-        },
-      ],
-    }),
-  }
-);
+export const IndexNameLogic = kea<MakeLogicType<IndexNameValues, IndexNameActions>>({
+  actions: {
+    setIndexName: (indexName) => ({ indexName }),
+  },
+  path: ['enterprise_search', 'content', 'index_name'],
+  reducers: () => ({
+    indexName: [
+      // Short-circuiting this to empty string is necessary to enable testing logics relying on this
+      '',
+      {
+        setIndexName: (_, { indexName }) => indexName,
+      },
+    ],
+  }),
+});

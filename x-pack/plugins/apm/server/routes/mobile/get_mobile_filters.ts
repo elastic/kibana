@@ -28,7 +28,7 @@ type MobileFiltersTypes =
   | 'osVersion'
   | 'netConnectionType';
 
-type MobileFilters = Array<{
+export type MobileFiltersResponse = Array<{
   key: MobileFiltersTypes;
   options: string[];
 }>;
@@ -49,7 +49,7 @@ export async function getMobileFilters({
   environment: string;
   start: number;
   end: number;
-}): Promise<MobileFilters> {
+}): Promise<MobileFiltersResponse> {
   const response = await apmEventClient.search('get_mobile_filters', {
     apm: {
       events: [ProcessorEvent.transaction],

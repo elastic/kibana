@@ -23,6 +23,7 @@ interface FleetPackage {
   name: string;
   version: string;
   forceAlignStackVersion?: boolean;
+  allowSyncToPrerelease?: boolean;
 }
 
 export async function bundleFleetPackages(pkgDir: string, log: ToolingLog, config: Config) {

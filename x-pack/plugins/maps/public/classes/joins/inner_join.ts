@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
@@ -26,7 +27,7 @@ import { PropertiesMap } from '../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../sources/term_join_source';
 import { TableSource } from '../sources/table_source';
 
-function createJoinTermSource(
+export function createJoinTermSource(
   descriptor: Partial<TermJoinSourceDescriptor> | undefined
 ): ITermJoinSource | undefined {
   if (!descriptor) {
@@ -35,8 +36,8 @@ function createJoinTermSource(
 
   if (
     descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
-    'indexPatternId' in descriptor &&
-    'term' in descriptor
+    descriptor.indexPatternId !== undefined &&
+    descriptor.term !== undefined
   ) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
@@ -137,8 +138,11 @@ export class InnerJoin {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
-    return await this.getRightJoinSource().getTooltipProperties(properties);
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
+    return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
   }
 
   getIndexPatternIds() {

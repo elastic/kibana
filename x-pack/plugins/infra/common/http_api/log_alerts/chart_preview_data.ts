@@ -13,6 +13,7 @@ import {
   timeSizeRT,
   groupByRT,
 } from '../../alerting/logs/log_threshold/types';
+import { persistedLogViewReferenceRT } from '../../log_views';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';
 
@@ -58,7 +59,7 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 //
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT: any = rt.intersection([
   rt.type({
-    criteria: countCriteriaRT,
+    criteria: rt.union([countCriteriaRT, rt.array(countCriteriaRT)]),
     count: rt.intersection([
       rt.type({
         comparator: ThresholdRT.props.comparator,
@@ -81,9 +82,16 @@ export type GetLogAlertsChartPreviewDataAlertParamsSubset = rt.TypeOf<
 
 export const getLogAlertsChartPreviewDataRequestPayloadRT = rt.type({
   data: rt.type({
-    sourceId: rt.string,
+    logView: persistedLogViewReferenceRT,
     alertParams: getLogAlertsChartPreviewDataAlertParamsSubsetRT,
     buckets: rt.number,
+    executionTimeRange: rt.union([
+      rt.undefined,
+      rt.type({
+        gte: rt.number,
+        lte: rt.number,
+      }),
+    ]),
   }),
 });
 

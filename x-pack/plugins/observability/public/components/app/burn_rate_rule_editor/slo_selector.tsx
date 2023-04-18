@@ -23,7 +23,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { loading, sloList } = useFetchSloList({ name: searchValue, refetch: false });
+  const { isLoading, sloList } = useFetchSloList({ name: searchValue });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -31,17 +31,17 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   }, [initialSlo]);
 
   useEffect(() => {
-    const isLoadedWithData = !loading && sloList !== undefined;
+    const isLoadedWithData = !isLoading && sloList !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
       ? sloList.results.map((slo) => ({ value: slo.id, label: slo.name }))
       : [];
     setOptions(opts);
-  }, [loading, sloList]);
+  }, [isLoading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
     const selectedSlo =
-      opts.length === 1 ? sloList.results.find((slo) => slo.id === opts[0].value) : undefined;
+      opts.length === 1 ? sloList?.results.find((slo) => slo.id === opts[0].value) : undefined;
     onSelected(selectedSlo);
   };
 
@@ -66,7 +66,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
         options={options}
         selectedOptions={selectedOptions}
         async
-        isLoading={loading}
+        isLoading={isLoading}
         onChange={onChange}
         fullWidth
         onSearchChange={onSearchChange}

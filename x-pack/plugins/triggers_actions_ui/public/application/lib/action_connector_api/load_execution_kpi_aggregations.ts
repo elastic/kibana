@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
-import { getFilter } from '../rule_api';
+import { getFilter } from '../rule_api/get_filter';
 
 export interface LoadGlobalConnectorExecutionKPIAggregationsProps {
   outcomeFilter?: string[];

@@ -23,7 +23,8 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
-import { createRule, loadRuleTypes } from '../../lib/rule_api';
+import { createRule } from '../../lib/rule_api/create';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmRuleSave } from './confirm_rule_save';
 import { ConfirmRuleClose } from './confirm_rule_close';
@@ -47,6 +48,7 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
+  hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
   ...props
@@ -263,6 +265,7 @@ const RuleAdd = ({
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
+                hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>

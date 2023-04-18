@@ -16,6 +16,7 @@ import type {
   DeleteAgentPolicyResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
@@ -33,7 +34,7 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = '8.0.0',
+  endpointPackageVersion: string = kibanaPackageJson.version,
   agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {
@@ -47,6 +48,7 @@ export const indexFleetEndpointPolicy = async (
       agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
     description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
   };
 
   let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
@@ -86,7 +88,7 @@ export const indexFleetEndpointPolicy = async (
     namespace: 'default',
     package: {
       name: 'endpoint',
-      title: 'endpoint',
+      title: 'Elastic Defend',
       version: endpointPackageVersion,
     },
   };

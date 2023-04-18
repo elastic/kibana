@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const mockGetConvertedObjectId = jest.fn().mockReturnValue('uuidv5');
+export const mockGetConvertedObjectId = jest.fn().mockReturnValue('uuidv5');
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -19,4 +19,12 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-export { mockGetConvertedObjectId };
+export const validateTypeMigrationsMock = jest.fn();
+
+jest.doMock('./validate_migrations', () => {
+  const actual = jest.requireActual('./validate_migrations');
+  return {
+    ...actual,
+    validateTypeMigrations: validateTypeMigrationsMock,
+  };
+});

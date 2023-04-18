@@ -6,9 +6,10 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionType, ExecutorType } from './types';
-import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from './lib';
+import { ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -56,11 +57,16 @@ describe('actionTypeRegistry', () => {
   describe('register()', () => {
     test('able to register action types', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
+      actionTypeRegistry.register<{}, {}, {}, void>({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -70,7 +76,6 @@ describe('actionTypeRegistry', () => {
         Object {
           "actions:my-action-type": Object {
             "createTaskRunner": [Function],
-            "getRetry": [Function],
             "maxAttempts": 3,
             "title": "My action type",
           },
@@ -89,6 +94,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       };
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -104,6 +114,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       expect(() =>
@@ -112,6 +127,11 @@ describe('actionTypeRegistry', () => {
           name: 'My action type',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
           executor,
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -127,6 +147,11 @@ describe('actionTypeRegistry', () => {
           name: 'My action type',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: [],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
           executor,
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -142,50 +167,16 @@ describe('actionTypeRegistry', () => {
           name: 'My action type',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['foo'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
           executor,
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
       );
-    });
-
-    test('provides a getRetry function that handles ExecutorError', () => {
-      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        executor,
-      });
-      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
-      const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
-
-      const retryTime = new Date();
-      expect(getRetry(0, new Error())).toEqual(true);
-      expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
-      expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
-      expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
-      expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
-    });
-
-    test('provides a getRetry function that handles errors based on maxAttempts', () => {
-      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        executor,
-        maxAttempts: 2,
-      });
-      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
-      const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
-
-      expect(getRetry(1, new Error())).toEqual(true);
-      expect(getRetry(3, new Error())).toEqual(false);
     });
 
     test('registers gold+ action types to the licensing feature usage API', () => {
@@ -195,6 +186,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
@@ -210,6 +206,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
@@ -224,10 +225,16 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
-      const actionType = actionTypeRegistry.get('my-action-type');
-      expect(actionType).toMatchInlineSnapshot(`
+      const { validate, ...rest } = actionTypeRegistry.get('my-action-type');
+      expect(validate).toBeDefined();
+      expect(rest).toMatchInlineSnapshot(`
       Object {
         "executor": [Function],
         "id": "my-action-type",
@@ -257,6 +264,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       const actionTypes = actionTypeRegistry.list();
@@ -283,6 +295,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       actionTypeRegistry.register({
@@ -290,6 +307,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['cases'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       const actionTypes = actionTypeRegistry.list('alerting');
@@ -322,6 +344,11 @@ describe('actionTypeRegistry', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       expect(actionTypeRegistry.has('my-action-type'));
@@ -335,6 +362,11 @@ describe('actionTypeRegistry', () => {
       name: 'Foo',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor: async (options) => {
         return { status: 'ok', actionId: options.actionId };
       },
@@ -403,6 +435,11 @@ describe('actionTypeRegistry', () => {
       name: 'Foo',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor: async (options) => {
         return { status: 'ok', actionId: options.actionId };
       },
@@ -449,6 +486,11 @@ describe('actionTypeRegistry', () => {
       name: 'Foo',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor: async (options) => {
         return { status: 'ok', actionId: options.actionId };
       },
@@ -491,6 +533,11 @@ describe('actionTypeRegistry', () => {
         name: 'Foo',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor: async (options) => {
           return { status: 'ok', actionId: options.actionId };
         },

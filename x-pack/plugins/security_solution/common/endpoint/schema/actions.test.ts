@@ -22,6 +22,68 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it.each([true, false])('should accept withAutomatedActions param', (value) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ withAutomatedActions: value });
+      }).not.toThrow();
+    });
+
+    it('should require at least 1 alert ID', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [] });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID if not in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: uuidv4() });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: '' });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [uuidv4()] });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [''] });
+      }).toThrow();
+    });
+
+    it('should accept multiple alert IDs in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), uuidv4(), uuidv4()],
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept multiple alert IDs in an array if one is an empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), '', uuidv4()],
+        });
+      }).toThrow();
+    });
+
+    it('should not limit multiple alert IDs', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          agentIds: Array(255)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).not.toThrow();
+    });
+
     it('should require at least 1 agent ID', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ agentIds: [] }); // no agent_ids provided
@@ -230,6 +292,61 @@ describe('actions schemas', () => {
           startDate: 'now-1d', // yesterday
           endDate: 'now', // today
           statuses: ['failed', 'pending', 'successful'],
+        });
+      }).not.toThrow();
+    });
+
+    it('should not work with only spaces for a string in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: '  ',
+        });
+      }).toThrow();
+    });
+
+    it('should not work with empty string in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: '',
+        });
+      }).toThrow();
+    });
+
+    it('should not work with empty strings in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: ['action-id-1', '  ', 'action-id-2'],
+        });
+      }).toThrow();
+    });
+
+    it('should work with a single action id in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: 'action-id-1',
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with multiple `withOutputs` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: ['action-id-1', 'action-id-2'],
         });
       }).not.toThrow();
     });
@@ -450,7 +567,31 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should accept at least 1 valid endpoint id and a command', () => {
+    it('should not accept optional negative integers for timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: -1,
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should accept at least one valid endpoint id and a command', () => {
       expect(() => {
         ExecuteActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
@@ -470,18 +611,6 @@ describe('actions schemas', () => {
           },
         });
       }).not.toThrow();
-    });
-
-    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
-      expect(() => {
-        ExecuteActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            command: 'ls -al',
-            timeout: '',
-          },
-        });
-      }).toThrow();
     });
 
     it('should also accept a valid timeout with at least one endpoint_id and a command parameter', () => {

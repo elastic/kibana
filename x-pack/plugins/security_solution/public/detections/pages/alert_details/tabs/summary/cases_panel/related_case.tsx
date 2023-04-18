@@ -91,7 +91,7 @@ export const RelatedCasesList = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup dir="row">
-                    <StyledIcon type="alert" />
+                    <StyledIcon type="warning" />
                     <span>{totals.alerts}</span>
                   </EuiFlexGroup>
                 </EuiFlexItem>

@@ -98,7 +98,7 @@ export const FieldPreview = () => {
                 }
               )}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               role="alert"
               data-test-subj="previewNotAvailableCallout"
             >

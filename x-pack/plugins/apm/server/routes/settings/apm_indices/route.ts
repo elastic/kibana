@@ -6,8 +6,14 @@
  */
 
 import * as t from 'io-ts';
+import { SavedObject } from '@kbn/core/server';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getApmIndices, getApmIndexSettings } from './get_apm_indices';
+import {
+  getApmIndices,
+  getApmIndexSettings,
+  ApmIndexSettingsResponse,
+  ApmIndicesConfig,
+} from './get_apm_indices';
 import { saveApmIndices } from './save_apm_indices';
 import { APMConfig } from '../../..';
 
@@ -19,16 +25,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
     config,
     context,
   }): Promise<{
-    apmIndexSettings: Array<{
-      configurationName:
-        | 'transaction'
-        | 'span'
-        | 'error'
-        | 'metric'
-        | 'onboarding';
-      defaultValue: string;
-      savedValue: string | undefined;
-    }>;
+    apmIndexSettings: ApmIndexSettingsResponse;
   }> => {
     const apmIndexSettings = await getApmIndexSettings({ config, context });
     return { apmIndexSettings };
@@ -39,11 +36,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../../../observability/common/typings').ApmIndicesConfig
-  > => {
+  handler: async (resources): Promise<ApmIndicesConfig> => {
     const { context, config } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
     return await getApmIndices({
@@ -72,11 +65,7 @@ const saveApmIndicesRoute = createApmServerRoute({
       metric: t.string,
     } as SaveApmIndicesBodySchema),
   }),
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../../../../../src/core/types').SavedObject<{}>
-  > => {
+  handler: async (resources): Promise<SavedObject<{}>> => {
     const { params, context } = resources;
     const { body } = params;
     const savedObjectsClient = (await context.core).savedObjects.client;

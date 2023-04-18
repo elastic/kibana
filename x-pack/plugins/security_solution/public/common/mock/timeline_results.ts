@@ -7,6 +7,8 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
+import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
@@ -21,7 +23,6 @@ import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import type { DataTableModel } from '../store/data_table/model';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -2075,6 +2076,11 @@ export const mockDataTableModel: DataTableModel = {
   showCheckboxes: false,
   selectAll: false,
   totalCount: 0,
+  viewMode: VIEW_SELECTION.gridView,
+  additionalFilters: {
+    showOnlyThreatIndicatorAlerts: false,
+    showBuildingBlockAlerts: false,
+  },
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {

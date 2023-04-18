@@ -57,6 +57,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlExplorationDataGrid loaded', { timeout: 5000 });
     },
 
+    async selectResultsTablePage(page: number) {
+      await commonDataGrid.selectPage('mlExplorationDataGrid loaded', page);
+    },
+
     async assertResultsTableTrainingFiltersExist() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationQueryBarFilterButtons', {
         timeout: 5000,

@@ -7,6 +7,7 @@
 
 import { EuiCode } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+
 import styled from 'styled-components';
 
 export const CodeDanger = styled(EuiCode)`
@@ -15,4 +16,8 @@ export const CodeDanger = styled(EuiCode)`
 
 export const CodeSuccess = styled(EuiCode)`
   color: ${euiThemeVars.euiColorSuccess};
+`;
+
+export const CodeWarning = styled(EuiCode)`
+  color: ${euiThemeVars.euiColorWarning};
 `;

@@ -9,7 +9,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
-import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/enrichments/types';
+import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';

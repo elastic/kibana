@@ -100,11 +100,11 @@ export function* upsertMonitorEffect() {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {
           const monitorState = yield select(selectOverviewState);
           if (hasPageState(monitorState)) {
+            yield put(quietFetchOverviewAction.get(monitorState.pageState));
             yield put(
-              quietFetchOverviewAction.get(monitorState.pageState as MonitorOverviewPageState)
-            );
-            yield put(
-              quietFetchOverviewStatusAction.get(monitorState.pageState as MonitorOverviewPageState)
+              quietFetchOverviewStatusAction.get({
+                pageState: monitorState.pageState,
+              })
             );
           }
         }

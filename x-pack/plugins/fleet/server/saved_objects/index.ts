@@ -20,6 +20,7 @@ import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -53,7 +54,10 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import {
+  migratePackagePolicyToV870,
+  migratePackagePolicyToV880,
+} from './migrations/security_solution';
 
 /*
  * Saved object types and mappings
@@ -61,9 +65,7 @@ import { migratePackagePolicyToV870 } from './migrations/security_solution';
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-): { [key: string]: SavedObjectsType } => ({
+const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -213,6 +215,7 @@ const getSavedObjectTypes = (
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
       '8.7.0': migratePackagePolicyToV870,
+      '8.8.0': migratePackagePolicyToV880,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -366,13 +369,22 @@ const getSavedObjectTypes = (
       },
     },
   },
+  [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: {
+    name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    hidden: true,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      dynamic: false,
+      properties: {},
+    },
+  },
 });
 
-export function registerSavedObjects(
-  savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-) {
-  const savedObjectTypes = getSavedObjectTypes(encryptedSavedObjects);
+export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+  const savedObjectTypes = getSavedObjectTypes();
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
@@ -400,4 +412,8 @@ export function registerEncryptedSavedObjects(
     ]),
   });
   // Encrypted saved objects
+  encryptedSavedObjects.registerType({
+    type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['passphrase']),
+  });
 }

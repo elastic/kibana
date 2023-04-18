@@ -56,11 +56,12 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
     <Redirect to={MONITORS_ROUTE} />
   ) : (
     <>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" wrap={true}>
         <EuiFlexItem grow={true}>
           {isEdit && defaultValues && (
             <div>
               <EuiButton
+                data-test-subj="syntheticsActionBarButton"
                 color="danger"
                 onClick={() => {
                   setMonitorPendingDeletion(defaultValues as SyntheticsMonitor);
@@ -73,12 +74,17 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiLink href={history.createHref({ pathname: MONITORS_ROUTE })}>{CANCEL_LABEL}</EuiLink>
+          <EuiLink
+            data-test-subj="syntheticsActionBarLink"
+            href={history.createHref({ pathname: MONITORS_ROUTE })}
+          >
+            {CANCEL_LABEL}
+          </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <RunTestButton />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
           <NoPermissionsTooltip
             canEditSynthetics={canEditSynthetics}
             canAddPrivateMonitor={isEdit || canSavePrivateLocation}

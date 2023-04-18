@@ -95,6 +95,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -156,6 +157,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -164,7 +166,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -287,6 +289,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -348,6 +351,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -356,7 +360,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -420,6 +424,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -481,6 +486,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -489,7 +495,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>

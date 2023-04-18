@@ -44,11 +44,11 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('../../../lib/rule_api', () => ({
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
-  deleteRules: jest.fn(),
 }));
-const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api');
+
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -818,6 +818,7 @@ describe('rule_details', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 0,
       ...overloads,
     };
   }

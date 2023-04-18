@@ -219,7 +219,7 @@
             "tags": [],
             "label": "step",
             "description": [
-              "\nDefine a step of this Journey. Steps are only separated from each other\nto aid in reading/debuging the journey and reading it's logging output.\n\nIf a journey fails, a failure report will be created with a screenshot\nat the point of failure as well as a screenshot at the end of every\nstep."
+              "\nDefine a step of this Journey. Steps are only separated from each other\nto aid in reading/debugging the journey and reading it's logging output.\nThese services might be helpful:\n\npage: methods to interact with a single tab in a browser\n\nkbnUrl: get the URL for a Kibana plugin\n\nkibanaServer: basic Kibana server client\n\nes: basic Elasticsearch client\n\nIf a journey fails, a failure report will be created with a screenshot\nat the point of failure as well as a screenshot at the end of every\nstep."
             ],
             "signature": [
               "(name: string, fn: (ctx: ",
@@ -424,6 +424,22 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getFtrConfigPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getFtrConfigPath",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
             "id": "def-common.JourneyConfig.getEsArchives",
             "type": "Function",
             "tags": [],
@@ -617,6 +633,41 @@
                 "description": [],
                 "signature": [
                   "BaseStepCtx"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getBeforeStepsFn",
+            "type": "Function",
+            "tags": [],
+            "label": "getBeforeStepsFn",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              "BaseStepCtx",
+              " & CtxExt) => Promise<void>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyConfig.getBeforeStepsFn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  "BaseStepCtx",
+                  " & CtxExt"
                 ],
                 "path": "packages/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,

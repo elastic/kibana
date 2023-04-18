@@ -21,7 +21,7 @@ function title(t?: number) {
 export function OverviewStatus() {
   const { statusFilter } = useGetUrlParams();
 
-  const { status, error: statusError } = useOverviewStatus();
+  const { status, error: statusError } = useOverviewStatus({ scopeStatusByLocation: true });
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,
@@ -48,7 +48,7 @@ export function OverviewStatus() {
             up: status?.up || 0,
             down: 0,
             disabledCount: 0,
-            pending: status?.pending,
+            pending: 0,
           });
           break;
         case 'down': {
@@ -56,7 +56,7 @@ export function OverviewStatus() {
             up: 0,
             down: status?.down || 0,
             disabledCount: 0,
-            pending: status?.pending,
+            pending: 0,
           });
           break;
         }
@@ -65,7 +65,7 @@ export function OverviewStatus() {
             up: 0,
             down: 0,
             disabledCount: status?.disabledCount || 0,
-            pending: status?.pending,
+            pending: 0,
           });
           break;
         }

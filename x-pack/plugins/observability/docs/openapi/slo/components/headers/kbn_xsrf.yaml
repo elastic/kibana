@@ -1,0 +1,6 @@
+schema:
+  type: string
+in: header
+name: kbn-xsrf
+description: Cross-site request forgery protection
+required: true

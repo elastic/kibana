@@ -8,13 +8,14 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { BurnRateRuleParams } from '../../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 
 export default {
   component: Component,
   title: 'app/SLO/BurnRateRule',
-  argTypes: {},
+  decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = () => (

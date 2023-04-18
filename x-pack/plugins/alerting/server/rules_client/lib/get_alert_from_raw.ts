@@ -16,14 +16,14 @@ import {
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
 } from '../../types';
-import { ruleExecutionStatusFromRaw, convertMonitoringFromRawAndVerify } from '../../lib';
+import {
+  ruleExecutionStatusFromRaw,
+  convertMonitoringFromRawAndVerify,
+  getRuleSnoozeEndTime,
+} from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import {
-  calculateIsSnoozedUntil,
-  injectReferencesIntoActions,
-  injectReferencesIntoParams,
-} from '../common';
+import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
 
 export interface GetAlertFromRawParams {
@@ -34,6 +34,7 @@ export interface GetAlertFromRawParams {
   includeLegacyId?: boolean;
   excludeFromPublicApi?: boolean;
   includeSnoozeData?: boolean;
+  omitGeneratedValues?: boolean;
 }
 
 export function getAlertFromRaw<Params extends RuleTypeParams>(
@@ -44,7 +45,8 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
   references: SavedObjectReference[] | undefined,
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false
+  includeSnoozeData: boolean = false,
+  omitGeneratedValues: boolean = true
 ): Rule | RuleWithLegacyId {
   const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
   // In order to support the partial update API of Saved Objects we have to support
@@ -58,7 +60,8 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
     references,
     includeLegacyId,
     excludeFromPublicApi,
-    includeSnoozeData
+    includeSnoozeData,
+    omitGeneratedValues
   );
   // include to result because it is for internal rules client usage
   if (includeLegacyId) {
@@ -92,26 +95,27 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   references: SavedObjectReference[] | undefined,
   includeLegacyId: boolean = false,
   excludeFromPublicApi: boolean = false,
-  includeSnoozeData: boolean = false
+  includeSnoozeData: boolean = false,
+  omitGeneratedValues: boolean = true
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
     rRule: {
       ...s.rRule,
-      dtstart: new Date(s.rRule.dtstart),
-      ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      dtstart: new Date(s.rRule.dtstart).toISOString(),
+      ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
   const includeSnoozeSchedule =
     snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
   const isSnoozedUntil = includeSnoozeSchedule
-    ? calculateIsSnoozedUntil({
+    ? getRuleSnoozeEndTime({
         muteAll: partialRawRule.muteAll ?? false,
         snoozeSchedule,
       })
     : null;
   const includeMonitoring = monitoring && !excludeFromPublicApi;
-  const rule = {
+  const rule: PartialRule<Params> = {
     id,
     notifyWhen,
     ...omit(partialRawRule, excludeFromPublicApi ? [...context.fieldsToExcludeFromPublicApi] : ''),
@@ -152,7 +156,29 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       : {}),
   };
 
-  return includeLegacyId
-    ? ({ ...rule, legacyId } as PartialRuleWithLegacyId<Params>)
-    : (rule as PartialRule<Params>);
+  if (omitGeneratedValues) {
+    if (rule.actions) {
+      rule.actions = rule.actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+    }
+  }
+
+  // Need the `rule` object to build a URL
+  if (!excludeFromPublicApi) {
+    const viewInAppRelativeUrl =
+      ruleType.getViewInAppRelativeUrl &&
+      ruleType.getViewInAppRelativeUrl({ rule: rule as Rule<Params> });
+    if (viewInAppRelativeUrl) {
+      rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
+    }
+  }
+
+  if (includeLegacyId) {
+    const result: PartialRuleWithLegacyId<Params> = {
+      ...rule,
+      legacyId,
+    };
+    return result;
+  }
+
+  return rule;
 }

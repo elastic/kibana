@@ -16,7 +16,7 @@ import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { checkPermission } from '../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
@@ -37,7 +37,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
-  const canViewMlNodes = checkPermission('canViewMlNodes');
+  const canViewMlNodes = usePermissionCheck('canViewMlNodes');
 
   const [globalState] = useUrlState('_g');
 

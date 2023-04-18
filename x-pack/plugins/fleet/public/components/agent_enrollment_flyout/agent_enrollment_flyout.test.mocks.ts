@@ -13,6 +13,7 @@ jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
     useFleetStatus: jest.fn(),
+    useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });
@@ -106,7 +107,7 @@ jest.mock('./steps', () => {
   };
 });
 
-jest.mock('../../services/has_fleet_server', () => {
+jest.mock('../../../common/services/agent_policies_helpers', () => {
   return {
     policyHasFleetServer: jest.fn().mockReturnValue(true),
   };

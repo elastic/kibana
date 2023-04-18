@@ -18,10 +18,8 @@ import React, { useCallback, useMemo } from 'react';
 
 import { IncompatibleCallout } from '../callouts/incompatible_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
-import {
-  getIncompatibleMappingsTableColumns,
-  getIncompatibleValuesTableColumns,
-} from '../../../compare_fields_table/helpers';
+import { getIncompatibleMappingsTableColumns } from '../../../compare_fields_table/get_incompatible_mappings_table_columns';
+import { getIncompatibleValuesTableColumns } from '../../../compare_fields_table/helpers';
 import { EMPTY_STAT } from '../../../helpers';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';

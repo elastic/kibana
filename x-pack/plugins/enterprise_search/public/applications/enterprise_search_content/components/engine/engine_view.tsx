@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Route, Switch } from 'react-router-dom';
+import { useParams, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -21,8 +23,8 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineAPI } from './engine_api/engine_api';
 import { EngineError } from './engine_error';
 import { EngineIndices } from './engine_indices';
-import { EngineOverview } from './engine_overview';
 import { EngineSchema } from './engine_schema';
+import { EngineSearchPreview } from './engine_search_preview/engine_search_preview';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
@@ -36,7 +38,7 @@ export const EngineView: React.FC = () => {
     isDeleteModalVisible,
     isLoadingEngine,
   } = useValues(EngineViewLogic);
-  const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
+  const { tabId = EngineViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
@@ -70,8 +72,8 @@ export const EngineView: React.FC = () => {
       <Switch>
         <Route
           exact
-          path={`${ENGINE_PATH}/${EngineViewTabs.OVERVIEW}`}
-          component={EngineOverview}
+          path={`${ENGINE_PATH}/${EngineViewTabs.PREVIEW}`}
+          component={EngineSearchPreview}
         />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.SCHEMA}`} component={EngineSchema} />

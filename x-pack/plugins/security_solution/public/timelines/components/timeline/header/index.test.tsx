@@ -96,7 +96,7 @@ describe('Header', () => {
 
       expect(
         wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').first().prop('iconType')
-      ).toEqual('alert');
+      ).toEqual('warning');
     });
 
     test('it renders the unauthorized call out with correct message', async () => {
@@ -152,7 +152,7 @@ describe('Header', () => {
 
       expect(
         wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('iconType')
-      ).toEqual('alert');
+      ).toEqual('warning');
     });
 
     test('it renders the immutable timeline call out with correct message', async () => {

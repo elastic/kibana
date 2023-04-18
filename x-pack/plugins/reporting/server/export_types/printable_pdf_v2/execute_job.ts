@@ -8,8 +8,8 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { TaskRunResult } from '@kbn/reporting-common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, getCustomLogo } from '../common';
 import { generatePdfObservable } from './lib/generate_pdf';

@@ -48,7 +48,7 @@ export const AddToNewCase: VFC<AddToNewCaseProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const { cases } = useKibana().services;
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({});
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);

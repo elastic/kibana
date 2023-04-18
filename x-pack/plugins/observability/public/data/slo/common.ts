@@ -35,8 +35,8 @@ export const buildHealthySummary = (
     sliValue: 0.99872,
     errorBudget: {
       initial: 0.02,
-      consumed: 0.064,
-      remaining: 0.936,
+      consumed: 0.0642,
+      remaining: 0.93623,
       isEstimated: false,
     },
     ...params,
@@ -48,11 +48,11 @@ export const buildViolatedSummary = (
 ): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'VIOLATED',
-    sliValue: 0.97,
+    sliValue: 0.81232,
     errorBudget: {
       initial: 0.02,
       consumed: 1,
-      remaining: 0,
+      remaining: -3.1234,
       isEstimated: false,
     },
     ...params,
@@ -80,11 +80,11 @@ export const buildDegradingSummary = (
 ): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'DEGRADING',
-    sliValue: 0.97,
+    sliValue: 0.97982,
     errorBudget: {
-      initial: 0.02,
-      consumed: 0.88,
-      remaining: 0.12,
+      initial: 0.01,
+      consumed: 0.8822,
+      remaining: 0.1244,
       isEstimated: true,
     },
     ...params,

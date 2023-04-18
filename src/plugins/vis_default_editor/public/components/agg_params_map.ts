@@ -24,12 +24,6 @@ const buckets = {
   [BUCKET_TYPES.FILTERS]: {
     filters: controls.FiltersParamEditor,
   },
-  [BUCKET_TYPES.GEOHASH_GRID]: {
-    autoPrecision: controls.AutoPrecisionParamEditor,
-    precision: controls.PrecisionParamEditor,
-    useGeocentroid: controls.UseGeocentroidParamEditor,
-    isFilteredByCollar: controls.IsFilteredByCollarParamEditor,
-  },
   [BUCKET_TYPES.HISTOGRAM]: {
     interval: controls.NumberIntervalParamEditor,
     maxBars: controls.MaxBarsParamEditor,

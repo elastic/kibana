@@ -22,6 +22,7 @@ import type {
   CaseResolveResponse,
   SingleCaseMetricsResponse,
   User,
+  CaseUserActionStatsResponse,
 } from '../../common/api';
 import {
   CaseResponseRt,
@@ -33,6 +34,7 @@ import {
   CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
+  CaseUserActionStatsResponseRt,
 } from '../../common/api';
 import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -81,6 +83,14 @@ export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =
 export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsResponse) =>
   pipe(
     CaseUserActionsResponseRt.decode(respUserActions),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+export const decodeCaseUserActionStatsResponse = (
+  caseUserActionsStats: CaseUserActionStatsResponse
+) =>
+  pipe(
+    CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
     fold(throwErrors(createToasterPlainError), identity)
   );
 

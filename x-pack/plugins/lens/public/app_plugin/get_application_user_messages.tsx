@@ -33,10 +33,10 @@ export const getApplicationUserMessages = ({
   core,
 }: {
   visualizationType: string | null | undefined;
-  visualization: VisualizationState;
+  visualization: VisualizationState | undefined;
   visualizationMap: VisualizationMap;
-  activeDatasource: Datasource | null;
-  activeDatasourceState: { state: unknown } | null;
+  activeDatasource: Datasource | null | undefined;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }): UserMessage[] => {
@@ -46,7 +46,7 @@ export const getApplicationUserMessages = ({
     messages.push(getMissingVisTypeError());
   }
 
-  if (visualization.activeId && !visualizationMap[visualization.activeId]) {
+  if (visualization?.activeId && !visualizationMap[visualization.activeId]) {
     messages.push(getUnknownVisualizationTypeError(visualization.activeId));
   }
 
@@ -69,8 +69,8 @@ export const getApplicationUserMessages = ({
 
 function getMissingVisTypeError(): UserMessage {
   return {
-    severity: 'warning',
-    displayLocations: [{ id: 'visualization' }],
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
     shortMessage: '',
     longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
@@ -153,7 +153,7 @@ function getMissingIndexPatternsErrors(
                   href={core.application.getUrlForApp('management', {
                     path: '/kibana/indexPatterns/create',
                   })}
-                  style={{ display: 'block' }}
+                  style={{ width: '100%', textAlign: 'center' }}
                   data-test-subj="configuration-failure-reconfigure-indexpatterns"
                 >
                   {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
@@ -198,11 +198,7 @@ export const filterAndSortUserMessages = (
           return false;
         }
 
-        if (location.id === 'dimensionButton' && location.dimensionId !== dimensionId) {
-          return false;
-        }
-
-        return true;
+        return !(location.id === 'dimensionButton' && location.dimensionId !== dimensionId);
       });
 
       if (!hasMatch) {
@@ -221,11 +217,17 @@ export const filterAndSortUserMessages = (
 };
 
 function bySeverity(a: UserMessage, b: UserMessage) {
-  if (a.severity === 'warning' && b.severity === 'error') {
-    return 1;
-  } else if (a.severity === 'error' && b.severity === 'warning') {
-    return -1;
-  } else {
+  if (a.severity === b.severity) {
     return 0;
   }
+  if (a.severity === 'error') {
+    return -1;
+  }
+  if (b.severity === 'error') {
+    return 1;
+  }
+  if (a.severity === 'warning') {
+    return -1;
+  }
+  return 1;
 }

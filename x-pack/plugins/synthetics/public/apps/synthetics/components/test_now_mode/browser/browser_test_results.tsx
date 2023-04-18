@@ -92,7 +92,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 title={ERROR_RUNNING_TEST}
                 size="s"
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
               </EuiCallOut>
@@ -170,11 +170,11 @@ function getButtonContent({
   );
 }
 
-const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
+export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',
 });
 
-const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
   defaultMessage: 'Error running test',
 });
 

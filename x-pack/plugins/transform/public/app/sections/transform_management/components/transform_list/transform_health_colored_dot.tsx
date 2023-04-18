@@ -18,14 +18,33 @@ import {
 
 interface TransformHealthProps {
   healthStatus: TransformHealth;
+  compact?: boolean;
+  showToolTip?: boolean;
 }
 
-export const TransformHealthColoredDot: FC<TransformHealthProps> = ({ healthStatus }) => {
-  return (
-    <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}>
-      <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]}>
-        <small>{TRANSFORM_HEALTH_LABEL[healthStatus]}</small>
-      </EuiHealth>
-    </EuiToolTip>
+export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
+  healthStatus,
+  compact = true,
+  showToolTip = true,
+}) => {
+  const transformHealthDescription = TRANSFORM_HEALTH_DESCRIPTION[healthStatus];
+  const transformHealthColor = TRANSFORM_HEALTH_COLOR[healthStatus];
+  const transformHealthLabel = TRANSFORM_HEALTH_LABEL[healthStatus];
+
+  const health = (
+    <EuiHealth
+      color={transformHealthColor}
+      textSize={compact ? 'xs' : undefined}
+      data-test-subj="transformListHealth"
+    >
+      {transformHealthLabel}
+      {compact ? '' : `: ${transformHealthDescription}`}
+    </EuiHealth>
   );
+
+  if (showToolTip) {
+    return <EuiToolTip content={transformHealthDescription}>{health}</EuiToolTip>;
+  }
+
+  return health;
 };
