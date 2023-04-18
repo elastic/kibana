@@ -106,10 +106,14 @@ export const resetConfirmStrings = {
     i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
       defaultMessage: 'Reset dashboard?',
     }),
-  getResetSubtitle: () =>
-    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
-      defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
-    }),
+  getResetSubtitle: (viewMode: ViewMode) =>
+    viewMode === ViewMode.EDIT
+      ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+          defaultMessage: `Resetting will cause all unsaved changes to be lost.`,
+        })
+      : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
+          defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
+        }),
   getResetConfirmButtonText: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Reset',
@@ -119,20 +123,6 @@ export const resetConfirmStrings = {
 /*
   Dashboard Listing Page
 */
-export const discardConfirmStrings = {
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Reset dashboard?',
-    }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `Resetting will cause all unsaved changes to be lost.`,
-    }),
-  getDiscardConfirmButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Reset',
-    }),
-};
 
 export const createConfirmStrings = {
   getCreateTitle: () =>
@@ -232,13 +222,13 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Continue editing',
     }),
   getDiscardAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.discardAria', {
-      defaultMessage: 'Discard changes to {title}',
+    i18n.translate('dashboard.listing.unsaved.resetAria', {
+      defaultMessage: 'Reset changes to {title}',
       values: { title },
     }),
   getDiscardTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.discardTitle', {
-      defaultMessage: 'Discard changes',
+    i18n.translate('dashboard.listing.unsaved.resetTitle', {
+      defaultMessage: 'Reset changes',
     }),
 };
 
