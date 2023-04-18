@@ -498,22 +498,16 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   }
 );
 
-export const TABLE_ACTION_ARCHIVE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.table.archive',
-  {
-    defaultMessage: 'Archive',
-  }
-);
+export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive', {
+  defaultMessage: 'Archive',
+});
 
-export const ARCHIVE_MODAL_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.archiveModal.title',
-  {
-    defaultMessage: 'Archive maintenance window',
-  }
-);
+export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.archive.title', {
+  defaultMessage: 'Archive maintenance window',
+});
 
-export const ARCHIVE_MODAL_SUBTITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.archiveModal.subtitle',
+export const ARCHIVE_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archive.subtitle',
   {
     defaultMessage: 'Upcoming maintenance window events are canceled.',
   }
@@ -537,5 +531,13 @@ export const UNARCHIVE_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.unarchiveModal.subtitle',
   {
     defaultMessage: 'Upcoming maintenance window events are scheduled.',
+  }
+);
+
+export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archiveCallout.subtitle',
+  {
+    defaultMessage:
+      'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
   }
 );

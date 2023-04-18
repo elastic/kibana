@@ -61,8 +61,8 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           onConfirm: () => onCancelAndArchive(),
         },
         archive: {
-          title: i18n.ARCHIVE_MODAL_TITLE,
-          subtitle: i18n.ARCHIVE_MODAL_SUBTITLE,
+          title: i18n.ARCHIVE_TITLE,
+          subtitle: i18n.ARCHIVE_SUBTITLE,
           cancelButton: i18n.CANCEL,
           onConfirm: () => onArchive(true),
         },
@@ -98,18 +98,21 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
     }, [modalType, isModalVisible, closeModal, onArchive, onCancel, onCancelAndArchive]);
 
     const items = useMemo(() => {
-      const menuItems = [
-        <EuiContextMenuItem
-          key="edit"
-          icon="pencil"
-          onClick={() => {
-            closePopover();
-            onEdit();
-          }}
-        >
-          {i18n.TABLE_ACTION_EDIT}
-        </EuiContextMenuItem>,
-      ];
+      const menuItems = [];
+      if (status !== MaintenanceWindowStatus.Archived) {
+        menuItems.push(
+          <EuiContextMenuItem
+            key="edit"
+            icon="pencil"
+            onClick={() => {
+              closePopover();
+              onEdit();
+            }}
+          >
+            {i18n.TABLE_ACTION_EDIT}
+          </EuiContextMenuItem>
+        );
+      }
       if (status === MaintenanceWindowStatus.Running) {
         menuItems.push(
           <EuiContextMenuItem
@@ -149,7 +152,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
               showModal('archive');
             }}
           >
-            {i18n.TABLE_ACTION_ARCHIVE}
+            {i18n.ARCHIVE}
           </EuiContextMenuItem>
         );
       }
