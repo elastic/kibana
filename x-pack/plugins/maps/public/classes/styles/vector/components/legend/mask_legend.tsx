@@ -45,7 +45,7 @@ export class MaskLegend extends Component<Props, State> {
     if (this._isMounted && aggLabel !== this.state.aggLabel) {
       this.setState({ aggLabel });
     }
-  }
+  };
 
   _getBucketsName() {
     const source = this.props.esAggField.getSource();
@@ -56,14 +56,17 @@ export class MaskLegend extends Component<Props, State> {
 
   render() {
     const maskDescription = getMaskI18nDescription({
-      bucketsName: this._getBucketsName(), 
+      bucketsName: this._getBucketsName(),
       aggLabel: this.state.aggLabel,
-      isJoin: this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN
-    })
+      isJoin: this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN,
+    });
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          <strong>{`${maskDescription} ${getMaskI18nValue(this.props.operator, this.props.value)}`}</strong>
+          <strong>{`${maskDescription} ${getMaskI18nValue(
+            this.props.operator,
+            this.props.value
+          )}`}</strong>
         </small>
       </EuiText>
     );

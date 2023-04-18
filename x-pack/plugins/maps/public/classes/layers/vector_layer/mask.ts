@@ -64,7 +64,7 @@ export function getMaskI18nDescription({
           bucketsName: bucketsName ? bucketsName : BUCKETS,
           aggLabel: aggLabel ? aggLabel : VALUE,
         },
-      })
+      });
 }
 
 export class Mask {

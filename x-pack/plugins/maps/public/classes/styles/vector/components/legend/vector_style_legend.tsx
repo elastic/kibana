@@ -19,7 +19,14 @@ interface Props {
   svg?: string;
 }
 
-export function VectorStyleLegend({ isLinesOnly, isPointsOnly, masks, styles, symbolId, svg }: Props) {
+export function VectorStyleLegend({
+  isLinesOnly,
+  isPointsOnly,
+  masks,
+  styles,
+  symbolId,
+  svg,
+}: Props) {
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
@@ -37,18 +44,18 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, masks, styles, sy
     );
   }
 
-  const masksLegend = masks.length 
-    ? <>
-        {masks.map(mask => (
-          <MaskLegend
-            key={mask.getEsAggField().getMbFieldName()}
-            esAggField={mask.getEsAggField()}
-            operator={mask.getOperator()}
-            value={mask.getValue()}
-          />
-        ))}
-      </>
-    : null;
+  const masksLegend = masks.length ? (
+    <>
+      {masks.map((mask) => (
+        <MaskLegend
+          key={mask.getEsAggField().getMbFieldName()}
+          esAggField={mask.getEsAggField()}
+          operator={mask.getOperator()}
+          value={mask.getValue()}
+        />
+      ))}
+    </>
+  ) : null;
 
   return (
     <>

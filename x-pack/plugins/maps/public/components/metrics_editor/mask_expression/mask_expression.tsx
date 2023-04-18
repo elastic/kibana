@@ -12,7 +12,10 @@ import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
 import { MaskEditor } from './mask_editor';
 import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
-import { getMaskI18nDescription, getMaskI18nValue } from '../../../classes/layers/vector_layer/mask';
+import {
+  getMaskI18nDescription,
+  getMaskI18nValue,
+} from '../../../classes/layers/vector_layer/mask';
 
 interface Props {
   bucketsName?: string;
@@ -55,8 +58,12 @@ export class MaskExpression extends Component<Props, State> {
       return aggDisplayName;
     }
 
-    const targetField = this.props.fields.find((field) => field.name === (this.props.metric as FieldedAggDescriptor).field);
-    const fieldDisplayName = targetField?.displayName ? targetField?.displayName : this.props.metric.field;
+    const targetField = this.props.fields.find(
+      (field) => field.name === (this.props.metric as FieldedAggDescriptor).field
+    );
+    const fieldDisplayName = targetField?.displayName
+      ? targetField?.displayName
+      : this.props.metric.field;
     return `${aggDisplayName} ${fieldDisplayName}`;
   }
 

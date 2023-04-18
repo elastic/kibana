@@ -49,7 +49,10 @@ export class MaskEditor extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      operator: this.props.metric.mask !== undefined ? this.props.metric.mask.operator : MASK_OPERATOR.BELOW,
+      operator:
+        this.props.metric.mask !== undefined
+          ? this.props.metric.mask.operator
+          : MASK_OPERATOR.BELOW,
       value: this.props.metric.mask !== undefined ? this.props.metric.mask.value : '',
     };
   }

@@ -267,7 +267,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
 
   getSource = () => {
     return this._isClustered ? this._clusterSource : this._documentSource;
-  }
+  };
 
   getSourceForEditing() {
     // Layer is based on this._documentSource
