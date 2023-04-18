@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('context filters', function contextSize() {
     before(async function () {
       await kibanaServer.uiSettings.update({
-        'discover:rowHeightOption': 0, // to fit and show more grid rows
+        'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
     });
 
