@@ -97,7 +97,7 @@ describe('ingest_integration tests ', () => {
     const createNewEndpointPolicyInput = (
       manifest: ManifestSchema,
       license = 'platinum',
-      cloud = cloudService.cloudId
+      cloud = cloudService.isCloudEnabled
     ) => ({
       type: 'endpoint',
       enabled: true,

@@ -57,7 +57,7 @@ describe('8.8.0 Endpoint Package Policy migration', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
-      meta: { license: '', cloud: '' },
+      meta: { license: '', cloud: false },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
