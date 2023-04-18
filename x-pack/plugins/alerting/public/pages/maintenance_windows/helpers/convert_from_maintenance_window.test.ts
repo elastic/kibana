@@ -9,9 +9,9 @@ import moment from 'moment';
 
 import { Frequency } from '../constants';
 import { RRuleFrequency } from '../types';
-import { convertFromMaintenanceWindow } from './convert_from_maintenance_window';
+import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
 
-describe('convertFromMaintenanceWindow', () => {
+describe('convertFromMaintenanceWindowToForm', () => {
   const title = 'test';
   const today = '2023-03-22';
   const startDate = moment(today);
@@ -19,7 +19,7 @@ describe('convertFromMaintenanceWindow', () => {
   const duration = endDate.diff(startDate);
 
   test('should convert a maintenance window that is not recurring', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -39,7 +39,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a daily schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -68,7 +68,7 @@ describe('convertFromMaintenanceWindow', () => {
   test('should convert a maintenance window that is recurring on a daily schedule until', () => {
     const until = moment(today).add(1, 'month').toISOString();
 
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -97,7 +97,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a daily schedule after x', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -126,7 +126,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a weekly schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -153,7 +153,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a monthly schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -180,7 +180,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a yearly schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -207,7 +207,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom daily schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -233,7 +233,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom weekly schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -261,7 +261,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom monthly by day schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {
@@ -289,7 +289,7 @@ describe('convertFromMaintenanceWindow', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom yearly schedule', () => {
-    const maintenanceWindow = convertFromMaintenanceWindow({
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
       rRule: {

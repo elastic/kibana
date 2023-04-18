@@ -13,7 +13,9 @@ import { FormProps, RecurringScheduleFormProps } from '../components/schema';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 import { RRuleParams } from '../../../../common';
 
-export const convertFromMaintenanceWindow = (maintenanceWindow: MaintenanceWindow): FormProps => {
+export const convertFromMaintenanceWindowToForm = (
+  maintenanceWindow: MaintenanceWindow
+): FormProps => {
   const startDate = maintenanceWindow.rRule.dtstart;
   const endDate = moment(startDate).add(maintenanceWindow.duration);
   // maintenance window is considered recurring if interval is defined
