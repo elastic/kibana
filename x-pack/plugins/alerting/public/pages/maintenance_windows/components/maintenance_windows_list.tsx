@@ -17,8 +17,9 @@ import {
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
-import { StatusColor, STATUS_DISPLAY, STATUS_OPTIONS, STATUS_SORT } from '../constants';
+import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
+import { StatusFilter } from './status_filter';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;
@@ -85,11 +86,8 @@ const rowProps = (item: MaintenanceWindowResponse) => ({
 const search: { filters: SearchFilterConfig[] } = {
   filters: [
     {
-      type: 'field_value_selection',
-      field: 'status',
-      name: 'Status',
-      multiSelect: 'or',
-      options: STATUS_OPTIONS,
+      type: 'custom_component',
+      component: StatusFilter,
     },
   ],
 };
