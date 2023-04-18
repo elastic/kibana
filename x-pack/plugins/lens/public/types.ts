@@ -1292,7 +1292,9 @@ export interface Visualization<T = unknown, P = T> {
   ) => Suggestion<T> | undefined;
 
   getVisualizationInfo?: (state: T) => VisualizationInfo;
-
+  /**
+   * A visualization can return custom dimensions for the reporting tool
+   */
   getReportingLayout?: (state: T) => { height: number; width: number };
 }
 
