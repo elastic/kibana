@@ -10,8 +10,8 @@ export interface AnalyticsCollection {
   name: string;
 }
 
-export interface AnalyticsEventsIndexExists {
-  exists: boolean;
+export interface AnalyticsEventsExist {
+  exist: boolean;
 }
 
 export interface AnalyticsCollectionDataViewId {
