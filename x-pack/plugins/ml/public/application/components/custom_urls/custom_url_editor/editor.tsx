@@ -28,16 +28,13 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
-import {
-  isDataFrameAnalyticsConfigs,
-  type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { getQueryEntityFieldNames, getSupportedFieldNames } from './utils';
 import { useMlKibana } from '../../../contexts/kibana';
+import { getDropDownOptions } from './get_dropdown_options';
 
 function getLinkToOptions() {
   return [
@@ -60,19 +57,6 @@ function getLinkToOptions() {
       }),
     },
   ];
-}
-
-function getDropDownOptions(
-  isFirstRender: boolean,
-  job: Job | DataFrameAnalyticsConfig,
-  dataView?: DataView
-) {
-  if (isAnomalyDetectionJob(job) && isFirstRender) {
-    return getQueryEntityFieldNames(job);
-  } else if ((isDataFrameAnalyticsConfigs(job) || !isFirstRender) && dataView !== undefined) {
-    return getSupportedFieldNames(job, dataView);
-  }
-  return [];
 }
 
 interface CustomUrlEditorProps {

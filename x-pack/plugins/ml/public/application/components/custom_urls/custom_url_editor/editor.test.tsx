@@ -9,6 +9,18 @@
 import { shallow } from 'enzyme';
 
 jest.mock('../../../services/job_service', () => 'mlJobService');
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      application: {
+        navigateToApp: jest.fn(),
+      },
+      data: {
+        dataViews: [],
+      },
+    },
+  }),
+}));
 
 import React from 'react';
 
@@ -16,6 +28,7 @@ import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function prepareTest(
   customUrl: CustomUrlSettings,
@@ -54,7 +67,7 @@ function prepareTest(
     { id: 'pattern2', title: 'Data view 2' },
   ] as DataViewListItem[];
 
-  const queryEntityFieldNames = ['airline'];
+  const job = { job_id: 'id', analysis_config: { influencers: ['airline'] } } as Job;
 
   const props = {
     customUrl,
@@ -62,7 +75,7 @@ function prepareTest(
     savedCustomUrls,
     dashboards,
     dataViewListItems,
-    queryEntityFieldNames,
+    job,
   };
 
   return shallow(<CustomUrlEditor {...props} />);
