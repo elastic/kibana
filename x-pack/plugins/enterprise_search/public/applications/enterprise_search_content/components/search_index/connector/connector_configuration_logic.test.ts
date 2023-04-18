@@ -52,6 +52,7 @@ describe('ConnectorConfigurationLogic', () => {
       ConnectorConfigurationApiLogic.actions.apiSuccess({
         configuration: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'newBar',
             options: [],
@@ -67,6 +68,7 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'newBar',
             options: [],
@@ -78,6 +80,7 @@ describe('ConnectorConfigurationLogic', () => {
         },
         configView: [
           {
+            depends_on: [],
             display: 'textbox',
             key: 'foo',
             label: 'newBar',
@@ -93,6 +96,7 @@ describe('ConnectorConfigurationLogic', () => {
     it('should set config on setConfigState', () => {
       ConnectorConfigurationLogic.actions.setConfigState({
         foo: {
+          depends_on: [],
           display: 'textbox',
           label: 'thirdBar',
           options: [],
@@ -106,6 +110,7 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
@@ -117,6 +122,7 @@ describe('ConnectorConfigurationLogic', () => {
         },
         configView: [
           {
+            depends_on: [],
             display: 'textbox',
             key: 'foo',
             label: 'thirdBar',
@@ -133,6 +139,7 @@ describe('ConnectorConfigurationLogic', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: {
+            depends_on: [],
             display: 'textbox',
             label: 'foo',
             options: [],
@@ -142,6 +149,7 @@ describe('ConnectorConfigurationLogic', () => {
             value: 'foofoo',
           },
           password: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
@@ -153,6 +161,7 @@ describe('ConnectorConfigurationLogic', () => {
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           bar: {
+            depends_on: [],
             display: 'textbox',
             label: 'foo',
             options: [],
@@ -162,6 +171,7 @@ describe('ConnectorConfigurationLogic', () => {
             value: 'foofoo',
           },
           password: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
@@ -172,6 +182,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
+          depends_on: [],
           display: 'textbox',
           key: 'bar',
           label: 'foo',
@@ -185,6 +196,7 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: {
             bar: {
+              depends_on: [],
               display: 'textbox',
               label: 'foo',
               options: [],
@@ -194,6 +206,7 @@ describe('ConnectorConfigurationLogic', () => {
               value: 'foofoo',
             },
             password: {
+              depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
               options: [],
@@ -205,6 +218,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'bar',
               label: 'foo',
@@ -215,6 +229,7 @@ describe('ConnectorConfigurationLogic', () => {
               value: 'foofoo',
             },
             {
+              depends_on: [],
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
@@ -227,6 +242,7 @@ describe('ConnectorConfigurationLogic', () => {
           ],
           localConfigState: {
             bar: {
+              depends_on: [],
               display: 'textbox',
               label: 'foo',
               options: [],
@@ -236,6 +252,7 @@ describe('ConnectorConfigurationLogic', () => {
               value: 'fafa',
             },
             password: {
+              depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
               options: [],
@@ -247,6 +264,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
           localConfigView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'bar',
               label: 'foo',
@@ -257,6 +275,7 @@ describe('ConnectorConfigurationLogic', () => {
               value: 'fafa',
             },
             {
+              depends_on: [],
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
@@ -278,6 +297,7 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
@@ -311,6 +331,7 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
@@ -329,6 +350,7 @@ describe('ConnectorConfigurationLogic', () => {
           localConfigState: connectorIndex.connector.configuration,
           localConfigView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
@@ -349,6 +371,7 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.fetchIndexApiSuccess(connectorIndex);
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'bar',
             options: [],
