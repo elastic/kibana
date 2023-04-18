@@ -128,6 +128,7 @@ export class SecurityPlugin
       this.managementService.setup({
         license,
         management,
+        share,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,

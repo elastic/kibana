@@ -26,7 +26,7 @@ import { usersManagementApp } from './users';
 
 interface SetupParams {
   management: ManagementSetup;
-  share: SharePluginSetup;
+  share?: SharePluginSetup;
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
@@ -52,7 +52,9 @@ export class ManagementService {
     );
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
-    share.url.locators.create(new SecurityManagementLocatorDefinition());
+    if (share) {
+      share.url.locators.create(new SecurityManagementLocatorDefinition());
+    }
   }
 
   start({ capabilities }: StartParams) {
