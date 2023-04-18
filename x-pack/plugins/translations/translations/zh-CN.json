@@ -20422,7 +20422,6 @@
     "xpack.maps.addLayerPanel.changeDataSourceButtonLabel": "更改图层",
     "xpack.maps.addLayerPanel.footer.cancelButtonLabel": "取消",
     "xpack.maps.aggs.defaultCountLabel": "计数",
-    "xpack.maps.appTitle": "Maps",
     "xpack.maps.attribution.addBtnAriaLabel": "添加归因",
     "xpack.maps.attribution.addBtnLabel": "添加归因",
     "xpack.maps.attribution.applyBtnLabel": "应用",
