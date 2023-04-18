@@ -7,10 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +26,7 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { MLInferenceLogic } from './ml_inference_logic';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -75,6 +77,8 @@ export const useTextExpansionCallOutData = ({
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, dismissable, show } = useTextExpansionCallOutData(props);
+  const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
+  const { isCreateButtonDisabled } = useValues(TextExpansionCalloutLogic);
 
   if (!show) return null;
 
@@ -123,12 +127,27 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
               tagName="p"
             />
           </EuiText>
-          <EuiLink target="_blank" href={docLinks.elser}>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiButton
+                color="success"
+                disabled={isCreateButtonDisabled}
+                iconType="launch"
+                onClick={() => createTextExpansionModel(undefined)}
+              >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping',
+                {
+                  defaultMessage: 'Deploy',
+                }
+              )}
+            </EuiButton>
+            <EuiLink target="_blank" href={docLinks.elser}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
