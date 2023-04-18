@@ -12,7 +12,7 @@ import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchCreateJsonTestBed } from './helpers/watch_create_json_page.helpers';
-import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJsonPage;
 
