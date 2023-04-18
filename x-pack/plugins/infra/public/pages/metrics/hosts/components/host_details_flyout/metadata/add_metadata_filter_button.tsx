@@ -62,6 +62,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             color="primary"
             size="s"
             iconType="filter"
+            data-test-subj="hostsView-flyout-metadata-remove-filter"
             aria-label={i18n.translate(
               'xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel',
               {
@@ -86,6 +87,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           color="text"
           size="s"
           iconType="filter"
+          data-test-subj="hostsView-flyout-metadata-add-filter"
           aria-label={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel', {
             defaultMessage: 'Add Filter',
           })}
