@@ -14,7 +14,7 @@ import { DataView } from '@kbn/data-plugin/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
-import { CountAggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
+import { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -25,7 +25,7 @@ export class CountAggField implements IESAggField {
   protected readonly _source: IESAggSource;
   private readonly _origin: FIELD_ORIGIN;
   protected readonly _label?: string;
-  protected readonly _mask?: AbstractAggDescriptor['mask'];
+  protected readonly _mask?: AggDescriptor['mask'];
 
   constructor({ label, source, origin, mask }: CountAggFieldParams) {
     this._source = source;

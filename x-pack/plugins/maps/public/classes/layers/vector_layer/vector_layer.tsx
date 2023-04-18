@@ -58,6 +58,7 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
 import { ITermJoinSource } from '../../sources/term_join_source';
+import type { IESAggSource } from '../../sources/es_agg_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { syncBoundsData } from './bounds_data';
@@ -718,15 +719,15 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     this.getValidJoins().forEach((join) => {
       const rightSource = join.getRightJoinSource();
-      if ('getMetricFields' in (rightSource as IESAggSource)) {
-        const metricFields = (rightSource as IESAggSource).getMetricFields();
+      if ('getMetricFields' in (rightSource as unknown as IESAggSource)) {
+        const metricFields = (rightSource as unknown as IESAggSource).getMetricFields();
         metricFields.forEach((metricField) => {
           const mask = metricField.getMask();
           if (mask) {
             masks.push(
               new Mask({
+                esAggField: metricField,
                 isFeatureState: true, // joins add properties via feature state
-                mbFieldName: metricField.getMbFieldName(),
                 operator: mask.operator,
                 value: mask.value,
               })
@@ -747,7 +748,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   // https://github.com/mapbox/mapbox-gl-js/issues/8487
   // therefore, masking must be accomplished via setting opacity paint property (hack)
   _getAlphaExpression() {
-    const maskCaseExpressions = [];
+    const maskCaseExpressions: unknown[] = [];
     this.getMasks().forEach((mask) => {
       // case expressions require 2 parts
       // 1) condition expression

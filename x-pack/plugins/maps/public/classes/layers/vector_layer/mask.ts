@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
+import { IESAggField } from '../../fields/agg';
 import { MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
-import { MaskLegend } from '../'
 
 export const BELOW = i18n.translate('xpack.maps.mask.belowLabel', {
   defaultMessage: 'below',

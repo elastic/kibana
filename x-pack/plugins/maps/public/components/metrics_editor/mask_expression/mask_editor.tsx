@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -48,10 +48,9 @@ interface State {
 export class MaskEditor extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const hasMask = this.props.metric.mask !== undefined;
     this.state = {
-      operator: hasMask ? this.props.metric.mask.operator : MASK_OPERATOR.BELOW,
-      value: hasMask ? this.props.metric.mask.value : '',
+      operator: this.props.metric.mask !== undefined ? this.props.metric.mask.operator : MASK_OPERATOR.BELOW,
+      value: this.props.metric.mask !== undefined ? this.props.metric.mask.value : '',
     };
   }
 

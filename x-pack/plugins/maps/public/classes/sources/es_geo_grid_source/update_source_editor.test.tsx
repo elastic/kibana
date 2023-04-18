@@ -16,6 +16,7 @@ jest.mock('uuid', () => ({
 }));
 
 const defaultProps = {
+  bucketName: 'cluster',
   currentLayerType: LAYER_TYPE.GEOJSON_VECTOR,
   geoFieldName: 'myLocation',
   indexPatternId: 'foobar',

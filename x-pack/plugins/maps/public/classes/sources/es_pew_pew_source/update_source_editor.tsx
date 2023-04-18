@@ -6,12 +6,10 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-plugin/common';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
@@ -29,8 +27,10 @@ interface State {
 }
 
 export class UpdateSourceEditor extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   state = {
-    fields: null,
+    fields: [],
   };
 
   componentDidMount() {
@@ -47,11 +47,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
     try {
       indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
-      if (this._isMounted) {
-        this.setState({
-          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
-        });
-      }
       return;
     }
 

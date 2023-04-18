@@ -47,6 +47,10 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     }
   }
 
+  getBucketName() {
+    return 'bucket';
+  }
+
   getFieldByName(fieldName: string): IField | null {
     return this.getMetricFieldForName(fieldName);
   }

@@ -8,7 +8,10 @@
 import React, { Component } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getMaskI18nDescription, getMaskI18nValue, Mask } from '../../../../layers/vector_layer/mask';
+import { MASK_OPERATOR } from '../../../../../../common/constants';
+import type { IESAggField } from '../../../../fields/agg';
+import type { IESAggSource } from '../../../../sources/es_agg_source';
+import { getMaskI18nDescription, getMaskI18nValue } from '../../../../layers/vector_layer/mask';
 
 interface Props {
   esAggField: IESAggField;
@@ -51,8 +54,8 @@ export class MaskLegend extends Component<Props, State> {
 
   _getBucketName() {
     const source = this.props.esAggField.getSource();
-    return 'getBucketName' in source
-      ? source.getBucketName()
+    return 'getBucketName' in (source as IESAggSource)
+      ? (source as IESAggSource).getBucketName()
       : i18n.translate('xpack.maps.maskLegend.bucketLabel', {
           defaultMessage: 'bucket',
         });

@@ -6,11 +6,10 @@
  */
 
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { AGG_TYPE } from '../../../../common/constants';
-import { AggDescriptor } from '../../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
 import { MaskEditor } from './mask_editor';
 import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
 import { getMaskI18nDescription, getMaskI18nValue } from '../../../classes/layers/vector_layer/mask';
@@ -55,14 +54,14 @@ export class MaskExpression extends Component<Props, State> {
       return aggDisplayName;
     }
 
-    const field = this.props.fields.find((field) => field.name === this.props.metric.field);
+    const field = this.props.fields.find((field) => field.name === (this.props.metric as FieldedAggDescriptor).field);
     const fieldDisplayName = field?.displayName ? field?.displayName : this.props.metric.field;
     return `${aggDisplayName} ${fieldDisplayName}`;
   }
 
   render() {
     // masks only supported for numerical metrics
-    if (this.props.metric.aggType === AGG_TYPE.TERMS) {
+    if (this.props.metric.type === AGG_TYPE.TERMS) {
       return null;
     }
 

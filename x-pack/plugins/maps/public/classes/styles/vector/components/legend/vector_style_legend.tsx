@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { Mask } from '../../../../layers/vector_layer/mask';
 import { IStyleProperty } from '../../properties/style_property';
 import { MaskLegend } from './mask_legend';
