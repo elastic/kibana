@@ -9,25 +9,14 @@ import { TimeRange } from '@kbn/data-plugin/common';
 
 export const getSearchQueryRequestParams = (search: string): { include?: string } => {
   const createRegexQuery = (queryString: string) => {
-    let query = queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-    query = query
-      .split('')
-      .map((char) => {
-        if (/[a-z]/.test(char)) {
-          return `[${char}${char.toUpperCase()}]`;
-        }
-        return char;
-      })
-      .join('');
-    query = `.*${query}.*`;
-    if (queryString.length > 2) {
-      query = `([a-zA-Z]+ )+?${query}`;
-    }
+    const query = queryString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 
-    return query;
+    return `.*${query}.*`;
   };
 
-  return { include: search ? createRegexQuery(search) : undefined };
+  return {
+    include: search ? createRegexQuery(search) : undefined,
+  };
 };
 export const getTotalCountRequestParams = (field: string) => ({
   totalCount: {
