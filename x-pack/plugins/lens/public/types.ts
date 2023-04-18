@@ -245,6 +245,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchFilters?: Filter[];
   title?: string;
   description?: string;
+  panelTimeRange?: TimeRange;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
