@@ -5,19 +5,61 @@
  * 2.0.
  */
 
+import { navigateToEndpointList } from '../../screens/endpoints';
+import { getEndpointIntegrationVersion } from '../../tasks/fleet';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { login } from '../../tasks/login';
+
 describe('Endpoint generated alerts', () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
   before(() => {
-    // 1. Create agent policy with endpoint policy with all protections enabled
-    // 2. create and enroll new host with above agent policy
+    getEndpointIntegrationVersion().then((version) => {
+      const policyName = `alerts test ${Math.random().toString(36).substring(2, 7)}`;
+
+      cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
+        policyName,
+        endpointPackageVersion: version,
+        agentPolicyName: policyName,
+      }).then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return cy
+            .task(
+              'createEndpointHost',
+              {
+                agentPolicyId: policy.policy_id,
+              },
+              { timeout: 120000 }
+            )
+            .then((host) => {
+              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            });
+        });
+      });
+    });
   });
 
   after(() => {
+    // FIXME:PT implement
     // 1. delete VM created
     // 2, Force-delete host from fleet (so we can delete policy)
     // 3, Removed policy created
   });
 
+  beforeEach(() => {
+    login();
+  });
+
   it('should create an alert', () => {
-    // FIXME:PT implement test
+    navigateToEndpointList();
   });
 });
