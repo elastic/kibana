@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -14,8 +13,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
-import { InfraClientSetupDeps } from '../../../../../types';
 import { LensAttributes } from '../../../../../common/visualizations';
 
 export interface Props {
@@ -48,7 +47,7 @@ export const LensWrapper = ({
   >(lastReloadRequestTime);
   const {
     services: { lens },
-  } = useKibana<InfraClientSetupDeps>();
+  } = useKibanaContextForPlugin();
   const { intersectedOnce, intersection } = useIntersectedOnce(intersectionRef, {
     threshold: 1,
   });

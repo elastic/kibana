@@ -43,9 +43,10 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     visualizationType: 'lineChart',
   });
 
+  const filters = [...searchCriteria.filters, ...searchCriteria.panelFilters];
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
-    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
+    filters,
     query: searchCriteria.query,
   });
 
@@ -99,7 +100,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           extraActions={extraActions}
           lastReloadRequestTime={baseRequest.requestTs}
           dateRange={searchCriteria.dateRange}
-          filters={searchCriteria.filters}
+          filters={filters}
           query={searchCriteria.query}
           onBrushEnd={handleBrushEnd}
         />

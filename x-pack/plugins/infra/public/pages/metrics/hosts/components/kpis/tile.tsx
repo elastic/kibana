@@ -58,9 +58,10 @@ export const Tile = ({
     visualizationType: 'metricChart',
   });
 
+  const filters = [...searchCriteria.filters, ...searchCriteria.panelFilters];
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
-    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
+    filters,
     query: searchCriteria.query,
   });
 
@@ -118,7 +119,7 @@ export const Tile = ({
             extraActions={extraActions}
             lastReloadRequestTime={baseRequest.requestTs}
             dateRange={searchCriteria.dateRange}
-            filters={searchCriteria.filters}
+            filters={filters}
             query={searchCriteria.query}
             onBrushEnd={handleBrushEnd}
           />
