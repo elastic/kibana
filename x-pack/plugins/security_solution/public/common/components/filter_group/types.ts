@@ -33,7 +33,7 @@ export type FilterGroupHandler = ControlGroupContainer;
 export type FilterGroupProps = {
   dataViewId: string | null;
   onFilterChange?: (newFilters: Filter[]) => void;
-  initialControls: FilterItemObj[];
+  initialControls: Array<FilterItemObj & { persist?: boolean }>;
   spaceId: string;
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 } & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;
