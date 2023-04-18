@@ -14,6 +14,8 @@ import {
   EuiFieldText,
   EuiFieldNumber,
   EuiFieldPassword,
+  EuiRadioGroup,
+  EuiSelect,
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
@@ -40,14 +42,50 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { key, display, label, sensitive, value } = configEntry;
+  const { key, display, label, options, required, sensitive, value } = configEntry;
 
   switch (display) {
+    case 'dropdown':
+      return options.length > 3 ? (
+        <EuiSelect
+          disabled={status === Status.LOADING}
+          options={options.map((option) => ({ text: option.label, value: option.value }))}
+          required={required}
+          value={ensureStringType(value)}
+          onChange={(event) => {
+            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+          }}
+        />
+      ) : (
+        <EuiRadioGroup
+          disabled={status === Status.LOADING}
+          idSelected={ensureStringType(value)}
+          name="radio group"
+          options={options.map((option) => ({ id: option.value, label: option.label }))}
+          onChange={(id) => {
+            setLocalConfigEntry({ ...configEntry, value: id });
+          }}
+        />
+      );
+
+    case 'numeric':
+      return (
+        <EuiFieldNumber
+          disabled={status === Status.LOADING}
+          required={required}
+          value={ensureNumberType(value)}
+          onChange={(event) => {
+            setLocalConfigEntry({ ...configEntry, value: event.target.value });
+          }}
+        />
+      );
+
     case 'textarea':
       const textarea = (
         <EuiTextArea
-          value={ensureStringType(value)}
           disabled={status === Status.LOADING}
+          required={required}
+          value={ensureStringType(value)}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
@@ -60,17 +98,6 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         </EuiAccordion>
       ) : (
         textarea
-      );
-
-    case 'numeric':
-      return (
-        <EuiFieldNumber
-          value={ensureNumberType(value)}
-          disabled={status === Status.LOADING}
-          onChange={(event) => {
-            setLocalConfigEntry({ ...configEntry, value: event.target.value });
-          }}
-        />
       );
 
     case 'toggle':
@@ -88,17 +115,19 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     default:
       return sensitive ? (
         <EuiFieldPassword
-          value={ensureStringType(value)}
           disabled={status === Status.LOADING}
+          required={required}
           type="dual"
+          value={ensureStringType(value)}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
         />
       ) : (
         <EuiFieldText
-          value={ensureStringType(value)}
           disabled={status === Status.LOADING}
+          required={required}
+          value={ensureStringType(value)}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}

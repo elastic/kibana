@@ -1034,6 +1034,28 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
   });
 
+  it('tests processing field of aggregate_metric_double type', () => {
+    const fieldLiteralYaml = `
+    - name: aggregate_metric
+      type: aggregate_metric_double
+      metrics: ["min", "max", "sum", "value_count"]
+      default_metric: "max"
+    `;
+    const fieldMapping = {
+      properties: {
+        aggregate_metric: {
+          metrics: ['min', 'max', 'sum', 'value_count'],
+          default_metric: 'max',
+          type: 'aggregate_metric_double',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(fieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
+  });
+
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',
