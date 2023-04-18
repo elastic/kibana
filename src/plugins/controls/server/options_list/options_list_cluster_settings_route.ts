@@ -47,7 +47,7 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
            */
           return response.ok({
             body: {
-              allowExpensiveQueries: 'true',
+              allowExpensiveQueries: true,
             },
           });
         }
