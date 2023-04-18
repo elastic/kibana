@@ -7,13 +7,13 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
-const gigabytes = (value: number) => (value * 1024) ^ 3;
+const gigabytesToBytes = (value: number) => value * Math.pow(1024, 3);
 
 export const config = {
-  memoryTotal: gigabytes(64),
-  memoryFree: gigabytes(5.5),
-  cGroupMemoryLimit: gigabytes(8),
-  cGroupMemoryUsage: gigabytes(1.5),
+  memoryTotal: gigabytesToBytes(64),
+  memoryFree: gigabytesToBytes(5.5),
+  cGroupMemoryLimit: gigabytesToBytes(8),
+  cGroupMemoryUsage: gigabytesToBytes(1.5),
 };
 
 export const expectedValues = {
