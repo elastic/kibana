@@ -27,9 +27,9 @@ const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-w
 
 export async function getKibanaSavedObjectCounts(
   esClient: ElasticsearchClient,
-  kibanaIndex: string
+  kibanaIndices: string[]
 ): Promise<KibanaSavedObjectCounts> {
-  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES, true);
+  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndices, TYPES, true);
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])
@@ -44,7 +44,7 @@ export async function getKibanaSavedObjectCounts(
 
 export function registerKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  getIndexForTypes: (types: string[]) => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<KibanaUsage>({
@@ -81,9 +81,16 @@ export function registerKibanaUsageCollector(
         },
       },
       async fetch({ esClient }) {
+        const indices = await getIndexForTypes([
+          'dashboard',
+          'visualization',
+          'search',
+          'index_pattern',
+          'graph_workspace',
+        ]);
         return {
-          index: kibanaIndex,
-          ...(await getKibanaSavedObjectCounts(esClient, kibanaIndex)),
+          index: indices[0],
+          ...(await getKibanaSavedObjectCounts(esClient, indices)),
         };
       },
     })

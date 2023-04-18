@@ -40,19 +40,19 @@ export interface SavedObjectsCounts {
  * Finally, it completes the information with an `others` counter, that indicates the number of documents that do not match the SO type breakdown.
  *
  * @param esClient The {@link ElasticsearchClient} to use when performing the aggregation.
- * @param kibanaIndex The index where SOs are stored. Typically '.kibana'.
+ * @param kibanaIndices The index where SOs are stored. Typically '.kibana'.
  * @param soTypes The SO types we want to know about.
  * @param exclusive If `true`, the results will only contain the breakdown for the specified `soTypes`. Otherwise, it'll also return `missing` and `others` bucket.
  * @returns {@link SavedObjectsCounts}
  */
 export async function getSavedObjectsCounts(
   esClient: ElasticsearchClient,
-  kibanaIndex: string, // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
+  kibanaIndices: string[], // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
   soTypes: string[],
   exclusive: boolean = false
 ): Promise<SavedObjectsCounts> {
   const body = await esClient.search<void, { types: estypes.AggregationsStringTermsAggregate }>({
-    index: kibanaIndex,
+    index: kibanaIndices,
     ignore_unavailable: true,
     filter_path: [
       'aggregations.types.buckets',

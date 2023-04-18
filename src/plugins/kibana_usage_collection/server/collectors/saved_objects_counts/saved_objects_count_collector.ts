@@ -23,7 +23,7 @@ interface SavedObjectsCountUsage {
 
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string,
+  getAllIndices: () => Promise<string[]>,
   getAllSavedObjectTypes: () => Promise<string[]>
 ) {
   usageCollection.registerCollector(
@@ -69,13 +69,14 @@ export function registerSavedObjectsCountUsageCollector(
         },
       },
       async fetch({ esClient }) {
+        const allIndices = await getAllIndices();
         const allRegisteredSOTypes = await getAllSavedObjectTypes();
         const {
           total,
           per_type: buckets,
           non_expected_types: nonRegisteredTypes,
           others,
-        } = await getSavedObjectsCounts(esClient, kibanaIndex, allRegisteredSOTypes, false);
+        } = await getSavedObjectsCounts(esClient, allIndices, allRegisteredSOTypes, false);
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => ({ type, count })),

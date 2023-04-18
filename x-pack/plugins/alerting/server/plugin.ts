@@ -215,7 +215,6 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -281,7 +280,6 @@ export class AlertingPlugin {
         this.telemetryLogger,
         core,
         plugins.taskManager,
-        kibanaIndex,
         eventLogIndex
       );
     }
