@@ -10,6 +10,12 @@ import type {
   FileAttachmentMetadata,
 } from '../../../common/api';
 
+import {
+  compressionMimeTypes,
+  imageMimeTypes,
+  textMimeTypes,
+  pdfMimeTypes,
+} from '../../../common/constants/mime_types';
 import { FileAttachmentMetadataRt } from '../../../common/api';
 import * as i18n from './translations';
 
@@ -18,6 +24,22 @@ export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWit
 export const parseMimeType = (mimeType: string | undefined) => {
   if (typeof mimeType === 'undefined') {
     return i18n.UNKNOWN_MIME_TYPE;
+  }
+
+  if (imageMimeTypes.includes(mimeType)) {
+    return i18n.IMAGE_MIME_TYPE;
+  }
+
+  if (textMimeTypes.includes(mimeType)) {
+    return i18n.TEXT_MIME_TYPE;
+  }
+
+  if (compressionMimeTypes.includes(mimeType)) {
+    return i18n.COMPRESSED_MIME_TYPE;
+  }
+
+  if (pdfMimeTypes.includes(mimeType)) {
+    return i18n.PDF_MIME_TYPE;
   }
 
   const result = mimeType.split('/');

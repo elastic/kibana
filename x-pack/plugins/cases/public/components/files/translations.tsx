@@ -67,6 +67,25 @@ export const UNKNOWN_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.unkn
   defaultMessage: 'Unknown',
 });
 
+export const IMAGE_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.imageMimeType', {
+  defaultMessage: 'Image',
+});
+
+export const TEXT_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.textMimeType', {
+  defaultMessage: 'Text',
+});
+
+export const COMPRESSED_MIME_TYPE = i18n.translate(
+  'xpack.cases.caseView.files.compressedMimeType',
+  {
+    defaultMessage: 'Compressed',
+  }
+);
+
+export const PDF_MIME_TYPE = i18n.translate('xpack.cases.caseView.files.pdfMimeType', {
+  defaultMessage: 'Pdf',
+});
+
 export const SUCCESSFUL_UPLOAD_FILE_NAME = (fileName: string) =>
   i18n.translate('xpack.cases.caseView.files.successfulUploadFileName', {
     defaultMessage: 'File {fileName} uploaded successfully',

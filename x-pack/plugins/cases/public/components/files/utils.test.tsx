@@ -6,7 +6,12 @@
  */
 import type { JsonValue } from '@kbn/utility-types';
 
-import { imageMimeTypes, textMimeTypes } from '../../../common/constants/mime_types';
+import {
+  compressionMimeTypes,
+  imageMimeTypes,
+  pdfMimeTypes,
+  textMimeTypes,
+} from '../../../common/constants/mime_types';
 import { basicFileMock } from '../../containers/mock';
 import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './utils';
 
@@ -39,6 +44,25 @@ describe('parseMimeType', () => {
 
   it('should return capitalize first letter for valid strings', () => {
     expect(parseMimeType('foo/bar')).toBe('Foo');
+  });
+
+  it.each(imageMimeTypes)('should return "Image" for image mime type: %s', (mimeType) => {
+    expect(parseMimeType(mimeType)).toBe('Image');
+  });
+
+  it.each(textMimeTypes)('should return "Text" for text mime type: %s', (mimeType) => {
+    expect(parseMimeType(mimeType)).toBe('Text');
+  });
+
+  it.each(compressionMimeTypes)(
+    'should return "Compressed" for image mime type: %s',
+    (mimeType) => {
+      expect(parseMimeType(mimeType)).toBe('Compressed');
+    }
+  );
+
+  it.each(pdfMimeTypes)('should return "Pdf" for text mime type: %s', (mimeType) => {
+    expect(parseMimeType(mimeType)).toBe('Pdf');
   });
 });
 

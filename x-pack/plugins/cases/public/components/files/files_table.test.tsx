@@ -124,7 +124,7 @@ describe('FilesTable', () => {
     );
 
     expect((await screen.findAllByText('Unknown')).length).toBe(4);
-    expect(await screen.findByText('Application')).toBeInTheDocument();
+    expect(await screen.findByText('Compressed')).toBeInTheDocument();
     expect(await screen.findByText('Text')).toBeInTheDocument();
     expect(await screen.findByText('Image')).toBeInTheDocument();
   });
