@@ -8,7 +8,7 @@
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type {
   TableListProps,
   TableListViewProps,
@@ -20,6 +20,7 @@ export type TableListTabParentProps<T extends UserContentCommonSchema = UserCont
 
 export interface TableListTab<T extends UserContentCommonSchema = UserContentCommonSchema> {
   title: string;
+  id: string;
   getTableList: (
     propsFromParent: TableListTabParentProps<T>
   ) => Promise<React.ReactNode> | React.ReactNode;
@@ -28,7 +29,7 @@ export interface TableListTab<T extends UserContentCommonSchema = UserContentCom
 type TabbedTableListViewProps = Pick<
   TableListViewProps<UserContentCommonSchema>,
   'title' | 'description' | 'headingId' | 'children'
-> & { tabs: TableListTab[] };
+> & { tabs: TableListTab[]; activeTabId: string; changeActiveTab: (id: string) => void };
 
 export const TabbedTableListView = ({
   title,
@@ -36,16 +37,21 @@ export const TabbedTableListView = ({
   headingId,
   children,
   tabs,
+  activeTabId,
+  changeActiveTab,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
-  const [selectedTab, setSelectedTab] = useState(0);
+  const getActiveTab = useCallback(
+    () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0],
+    [activeTabId, tabs]
+  );
 
   const [tableList, setTableList] = useState<React.ReactNode>(null);
 
   useEffect(() => {
     async function loadTableList() {
-      const newTableList = await tabs[selectedTab].getTableList({
+      const newTableList = await getActiveTab().getTableList({
         onFetchSuccess: () => {
           if (!hasInitialFetchReturned) {
             setHasInitialFetchReturned(true);
@@ -56,7 +62,7 @@ export const TabbedTableListView = ({
     }
 
     loadTableList();
-  }, [hasInitialFetchReturned, selectedTab, tabs]);
+  }, [hasInitialFetchReturned, activeTabId, tabs, getActiveTab]);
 
   return (
     <KibanaPageTemplate panelled>
@@ -69,8 +75,8 @@ export const TabbedTableListView = ({
           {tabs.map((tab, index) => (
             <EuiTab
               key={index}
-              onClick={() => setSelectedTab(index)}
-              isSelected={index === selectedTab}
+              onClick={() => changeActiveTab(tab.id)}
+              isSelected={tab.id === getActiveTab().id}
             >
               {tab.title}
             </EuiTab>

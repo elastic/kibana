@@ -57,6 +57,7 @@ export class EventAnnotationPlugin
 
     dependencies.visualizations.listingViewRegistry.add({
       title: 'Annotation Groups',
+      id: 'annotations',
       getTableList: async (props) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -76,39 +77,6 @@ export class EventAnnotationPlugin
         return getTableList(props, services);
       },
     });
-
-    // core.application.register({
-    //   id: ANNOTATION_LIBRARY_APP_ID,
-    //   title: 'Event Annotation Library',
-    //   order: 8000,
-    //   euiIconType: 'logoKibana',
-    //   defaultPath: '#/',
-    //   category: DEFAULT_APP_CATEGORIES.kibana,
-    //   mount: async (params: AppMountParameters) => {
-    //     const [coreStart, pluginsStart] = await core.getStartServices();
-
-    //     const eventAnnotationService = await new EventAnnotationService(
-    //       coreStart,
-    //       pluginsStart.savedObjectsManagement
-    //     ).getService();
-
-    //     const services: EventAnnotationAppServices = {
-    //       core: coreStart,
-    //       history: params.history,
-    //       savedObjectsTagging: pluginsStart.savedObjectsTagging,
-    //       eventAnnotationService,
-    //       PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
-    //     };
-
-    //     const { renderApp } = await import('./render_app');
-
-    //     const unmount = renderApp(params, services);
-
-    //     return () => {
-    //       unmount();
-    //     };
-    //   },
-    // });
   }
 
   public start(

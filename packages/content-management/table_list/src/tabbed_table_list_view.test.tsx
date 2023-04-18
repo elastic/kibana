@@ -25,10 +25,12 @@ const children = <div>Test Children</div>;
 const tabs: TableListTab[] = [
   {
     title: 'Tab 1',
+    id: 'tab-1',
     getTableList: async (props: TableListTabParentProps) => <div>Test Table List 1</div>,
   },
   {
     title: 'Tab 2',
+    id: 'tab-2',
     getTableList: async (props: TableListTabParentProps) => <div>Test Table List 2</div>,
   },
 ];
@@ -42,6 +44,8 @@ describe('TabbedTableListView', () => {
         headingId={headingId}
         children={children}
         tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
       />
     );
     expect(wrapper.exists()).toBe(true);
@@ -55,6 +59,8 @@ describe('TabbedTableListView', () => {
         headingId={headingId}
         children={children}
         tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
       />
     );
     expect(wrapper.find(KibanaPageTemplate.Header).prop('pageTitle')).toMatchInlineSnapshot(`
@@ -75,12 +81,16 @@ describe('TabbedTableListView', () => {
         headingId={headingId}
         children={children}
         tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
       />
     );
     expect(wrapper.find(EuiTab).length).toEqual(tabs.length);
   });
 
   it('should switch tabs when a tab is clicked', () => {
+    const changeActiveTab = jest.fn();
+
     const wrapper = shallow(
       <TabbedTableListView
         title={title}
@@ -88,6 +98,8 @@ describe('TabbedTableListView', () => {
         headingId={headingId}
         children={children}
         tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={changeActiveTab}
       />
     );
 
@@ -98,6 +110,14 @@ describe('TabbedTableListView', () => {
 
     act(() => {
       getTab(1).simulate('click');
+    });
+
+    expect(changeActiveTab).toHaveBeenCalledWith('tab-2');
+
+    act(() => {
+      wrapper.setProps({
+        activeTabId: 'tab-2',
+      });
     });
 
     expect(getTab(0).prop('isSelected')).toBeFalsy();

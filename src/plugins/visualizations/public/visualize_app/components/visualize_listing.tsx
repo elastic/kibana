@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -344,6 +344,7 @@ export const VisualizeListing = () => {
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(
     () => ({
       title: 'Visualizations',
+      id: 'visualizations',
       getTableList: (propsFromParent) => (
         <TableList<VisualizeUserContent>
           id="vis"
@@ -383,11 +384,17 @@ export const VisualizeListing = () => {
     [listingViewRegistry, visualizeTab]
   );
 
+  const { activeTab } = useParams<{ activeTab: string }>();
+
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
       title={visualizeLibraryTitle}
       tabs={tabs}
+      activeTabId={activeTab}
+      changeActiveTab={(id) => {
+        application.navigateToUrl(`#/${id}`);
+      }}
     >
       {dashboardCapabilities.createNew && (
         <>
