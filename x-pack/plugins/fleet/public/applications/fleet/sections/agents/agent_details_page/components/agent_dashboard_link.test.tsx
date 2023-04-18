@@ -25,6 +25,17 @@ jest.mock('../../../../../../hooks/use_fleet_status', () => ({
 
 jest.mock('../../../../../../hooks/use_request/epm');
 
+jest.mock('../../../../../../hooks/use_locator', () => {
+  return {
+    useDashboardLocator: jest.fn().mockImplementation(() => {
+      return {
+        id: 'DASHBOARD_APP_LOCATOR',
+        getRedirectUrl: jest.fn().mockResolvedValue('app/dashboards#/view/elastic_agent-a0001'),
+      };
+    }),
+  };
+});
+
 describe('AgentDashboardLink', () => {
   it('should enable the button if elastic_agent package is installed and policy has monitoring enabled', async () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
