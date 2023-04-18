@@ -320,6 +320,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       responseObject: {
         roleRef: {
           kind: true,
+          resourceName: true,
         },
         rules: true,
         spec: {
