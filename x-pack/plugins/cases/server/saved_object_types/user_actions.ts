@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { CASES_INDEX, CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import type { UserActionsMigrationsDeps } from './migrations/user_actions';
 import { createUserActionsMigrations } from './migrations/user_actions';
 
@@ -19,7 +20,7 @@ export const createCaseUserActionSavedObjectType = (
   migrationDeps: UserActionsMigrationsDeps
 ): SavedObjectsType => ({
   name: CASE_USER_ACTION_SAVED_OBJECT,
-  indexPattern: CASES_INDEX,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

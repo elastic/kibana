@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
   CoreSetup,
   Logger,
@@ -12,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { CASES_INDEX, CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import type { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
@@ -22,7 +23,7 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
-  indexPattern: CASES_INDEX,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { CASES_INDEX, CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
 import { connectorMappingsMigrations } from './migrations';
 
 /**
@@ -16,7 +17,7 @@ import { connectorMappingsMigrations } from './migrations';
 
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  indexPattern: CASES_INDEX,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
