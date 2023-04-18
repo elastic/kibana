@@ -31,7 +31,7 @@ export class GrokDebuggerUIPlugin {
       },
     });
 
-    plugins.share.url.locators.register(new GrokDebuggerAppLocatorDefinition());
+    plugins.share.url.locators.create(new GrokDebuggerAppLocatorDefinition());
 
     plugins.licensing.license$.subscribe((license) => {
       if (!license.isActive && !devTool.isDisabled()) {
