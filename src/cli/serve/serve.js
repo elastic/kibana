@@ -110,9 +110,8 @@ function isServerlessCapableDistribution() {
  * @param {'push' | 'unshift'} method
  */
 function maybeAddConfig(name, configs, method) {
-  const path = resolve(getConfigDirectory(), name);
   if (configFileExists(name)) {
-    configs[method](path);
+    configs[method](resolve(getConfigDirectory(), name));
   }
 }
 
