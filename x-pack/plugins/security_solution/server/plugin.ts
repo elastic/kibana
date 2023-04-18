@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import LRU from 'lru-cache';
 import {
   QUERY_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -26,7 +27,6 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
-import LRU from '../node_modules/lru-cache';
 
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';

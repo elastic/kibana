@@ -8,7 +8,6 @@
 
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
@@ -27,7 +26,6 @@ export type ControlInput = EmbeddableInput & {
   timeslice?: [number, number];
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
-  fieldFilterPredicate?: (field: DataViewField) => boolean;
 };
 
 export type DataControlInput = ControlInput & {
@@ -35,7 +33,7 @@ export type DataControlInput = ControlInput & {
   dataViewId: string;
 };
 
-export type CustomPresaveTransform = (
+export type ControlInputTransform = (
   newState: Partial<ControlInput>,
   controlType: string
 ) => Partial<ControlInput>;

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { CustomPresaveTransform } from '../../../common/types';
+import { ControlInputTransform } from '../../../common/types';
 import type {
   AddDataControlProps,
   AddOptionsListControlProps,
@@ -27,7 +27,7 @@ import {
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
-  customPresaveTransform?: CustomPresaveTransform
+  controlInputTransform?: ControlInputTransform
 ) {
   const {
     overlays: { openFlyout, openConfirm },
@@ -80,8 +80,8 @@ export function openAddDataControlFlyout(
                 controlInput = factory.presaveTransformFunction(controlInput);
               }
 
-              if (customPresaveTransform) {
-                controlInput = customPresaveTransform({ ...controlInput }, type);
+              if (controlInputTransform) {
+                controlInput = controlInputTransform({ ...controlInput }, type);
               }
 
               if (type === OPTIONS_LIST_CONTROL) {

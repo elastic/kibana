@@ -97,7 +97,7 @@ export const ControlEditor = ({
 
   const { useEmbeddableSelector: select } = useControlGroupContainerContext();
   const editorConfig = select((state) => state.componentState.editorConfig);
-  const customFilterPredicate = select((state) => state.explicitInput.fieldFilterPredicate);
+  const customFilterPredicate = select((state) => state.componentState.fieldFilterPredicate);
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');
