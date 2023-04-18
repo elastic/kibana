@@ -89,6 +89,7 @@ export function registerTransactionErrorRateRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.threshold,
           apmActionVariables.transactionType,
+          apmActionVariables.transactionName,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],

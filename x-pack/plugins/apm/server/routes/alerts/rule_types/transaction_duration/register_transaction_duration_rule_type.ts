@@ -95,6 +95,7 @@ export function registerTransactionDurationRuleType({
         apmActionVariables.reason,
         apmActionVariables.serviceName,
         apmActionVariables.transactionType,
+        apmActionVariables.transactionName,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
         apmActionVariables.viewInAppUrl,
