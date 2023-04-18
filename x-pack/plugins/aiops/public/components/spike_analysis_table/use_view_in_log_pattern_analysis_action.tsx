@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-
 import { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +15,7 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
+import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
 
@@ -65,23 +64,29 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
   const logPatternAnalysisUrlError = undefined;
 
   return {
-    name: () => (
-      <EuiToolTip
-        content={
-          logPatternAnalysisUrlError ? logPatternAnalysisUrlError : viewInLogPatternAnalysisMessage
+    render: (tableItem: SignificantTerm | GroupTableItem) => {
+      const message = logPatternAnalysisUrlError
+        ? logPatternAnalysisUrlError
+        : viewInLogPatternAnalysisMessage;
+
+      const clickHandler = async () => {
+        const openInLogPatternAnalysisUrl = await generateLogPatternAnalysisUrl(tableItem);
+        if (typeof openInLogPatternAnalysisUrl === 'string') {
+          await application.navigateToUrl(openInLogPatternAnalysisUrl);
         }
-      >
-        <EuiIcon type="logstashQueue" />
-      </EuiToolTip>
-    ),
-    description: viewInLogPatternAnalysisMessage,
-    type: 'button',
-    onClick: async (tableItem) => {
-      const openInLogPatternAnalysisUrl = await generateLogPatternAnalysisUrl(tableItem);
-      if (typeof openInLogPatternAnalysisUrl === 'string') {
-        await application.navigateToUrl(openInLogPatternAnalysisUrl);
-      }
+      };
+
+      const isDisabled = logPatternAnalysisUrlError !== undefined;
+
+      return (
+        <TableActionButton
+          iconType="logstashQueue"
+          isDisabled={isDisabled}
+          label={viewInLogPatternAnalysisMessage}
+          message={message}
+          onClick={clickHandler}
+        />
+      );
     },
-    enabled: () => logPatternAnalysisUrlError === undefined,
   };
 };

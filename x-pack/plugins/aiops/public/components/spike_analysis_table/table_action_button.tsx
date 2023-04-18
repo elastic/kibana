@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { type FC } from 'react';
+
+import { EuiLink, EuiIcon, EuiText, EuiToolTip, type IconType } from '@elastic/eui';
+
+interface TableActionButtonProps {
+  iconType: IconType;
+  isDisabled: boolean;
+  label: string;
+  message?: string;
+  onClick: () => void;
+}
+
+export const TableActionButton: FC<TableActionButtonProps> = ({
+  iconType,
+  isDisabled,
+  label,
+  message,
+  onClick,
+}) => {
+  const buttonContent = (
+    <>
+      <EuiIcon type={iconType} css={{ marginRight: '8px' }} />
+      {label}
+    </>
+  );
+
+  const unwrappedButton = !isDisabled ? (
+    <EuiLink onClick={onClick} color={'text'} aria-label={message}>
+      {buttonContent}
+    </EuiLink>
+  ) : (
+    <EuiText size="s" color={'subdued'} aria-label={message} css={{ fontWeight: 500 }}>
+      {buttonContent}
+    </EuiText>
+  );
+
+  if (message) {
+    return <EuiToolTip content={message}>{unwrappedButton}</EuiToolTip>;
+  }
+
+  return unwrappedButton;
+};
