@@ -114,8 +114,15 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsAzureBlobStorage: string;
+    readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
+    readonly connectorsNetworkDrive: string;
+    readonly connectorsOracle: string;
+    readonly connectorsPostgreSQL: string;
+    readonly connectorsS3: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;

@@ -38,6 +38,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'mysql',
   },
   {
+    docsUrl: docLinks.connectorsAzureBlobStorage,
     externalAuthDocsUrl: 'https://learn.microsoft.com/azure/storage/common/authorize-data-access',
     externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
     icon: CONNECTOR_ICONS.azure_blob_storage,

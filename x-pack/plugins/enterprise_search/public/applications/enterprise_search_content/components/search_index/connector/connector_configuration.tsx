@@ -43,6 +43,7 @@ import { SearchIndexTabId } from '../search_index';
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
+import { CONNECTORS } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
@@ -59,6 +60,9 @@ export const ConnectorConfiguration: React.FC = () => {
   }
 
   const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
+  const docsUrl = CONNECTORS.find(
+    ({ serviceType }) => serviceType === index.connector.service_type
+  )?.docsUrl;
 
   return (
     <>
@@ -418,6 +422,31 @@ export const ConnectorConfiguration: React.FC = () => {
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
                         {
                           defaultMessage: 'Connector feedback',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  {docsUrl && (
+                    <EuiFlexItem>
+                      <EuiLink href={docsUrl} target="_blank">
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
+                          {
+                            defaultMessage: 'Deploy with Docker',
+                          }
+                        )}
+                      </EuiLink>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem>
+                    <EuiLink
+                      href="https://github.com/elastic/connectors-python/blob/main/docs/CONFIG.md#run-the-connector-service-for-a-custom-connector"
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
+                        {
+                          defaultMessage: 'Deploy without Docker',
                         }
                       )}
                     </EuiLink>
