@@ -451,6 +451,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    api: string;
   }>;
   readonly ecs: {
     readonly guide: string;
