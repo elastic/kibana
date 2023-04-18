@@ -6,31 +6,16 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { parseDuration } from '@kbn/alerting-plugin/common';
-import {
-  FieldOption,
-  buildAggregation,
-  parseAggregationResults,
-  isGroupAggregation,
-  isCountAggregation,
-  BUCKET_SELECTOR_FIELD,
-} from '@kbn/triggers-actions-ui-plugin/public/common';
-import { Comparator } from '../../../../common/comparator_types';
-import { getComparatorScript } from '../../../../common';
-import { hasExpressionValidationErrors } from '../validation';
-import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
-import { RuleCommonExpressions } from '../rule_common_expressions';
 import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;

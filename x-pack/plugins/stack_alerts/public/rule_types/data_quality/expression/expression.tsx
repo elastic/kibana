@@ -10,10 +10,8 @@ import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
-import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
+import { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { EsQueryExpression } from './es_query_expression';
-import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceRule } from '../util';
 import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
 
