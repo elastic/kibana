@@ -11,6 +11,7 @@ import { popupVersionsMap } from '@kbn/security-solution-plugin/public/managemen
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
+// Made a difference to build a PR
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const pageObjects = getPageObjects([
