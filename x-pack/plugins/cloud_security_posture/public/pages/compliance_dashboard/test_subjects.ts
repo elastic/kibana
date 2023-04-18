@@ -8,7 +8,7 @@
 export const MISSING_FINDINGS_NO_DATA_CONFIG = 'missing-findings-no-data-config';
 export const DASHBOARD_CONTAINER = 'dashboard-container';
 export const DASHBOARD_SUMMARY_CONTAINER = 'dashboard-summary-section';
-export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-section';
+export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-container';
 export const CLOUD_DASHBOARD_CONTAINER = 'cloud-dashboard-container';
 
 export const DASHBOARD_COUNTER_CARDS = {

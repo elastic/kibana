@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const data = [
     {
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: 'failed' },
       rule: {
@@ -24,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Upper case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
         },
       },
       cluster_id: 'Upper case cluster id',
@@ -37,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
+      await cspDashboard.waitForPluginInitialized();
 
       await cspDashboard.index.add(data);
       await cspDashboard.navigateToComplianceDashboardPage();
@@ -51,6 +54,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Kubernetes Dashboard', () => {
+      it('display the dashboard header', async () => {
+        const dashboardHeader = await dashboard.getDashboardPageHeader();
+        expect((await dashboardHeader.getVisibleText()) === 'Cloud Security Posture').to.be(true);
+      });
+
       it('displays accurate summary compliance score', async () => {
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 

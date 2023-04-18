@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -33,13 +33,13 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     });
 
   const index = {
-    remove: () => es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true }),
+    remove: () => es.indices.delete({ index: LATEST_FINDINGS_INDEX, ignore_unavailable: true }),
     add: async <T>(findingsMock: T[]) => {
-      await waitForPluginInitialized();
+      // await waitForPluginInitialized();
       await Promise.all(
         findingsMock.map((finding) =>
           es.index({
-            index: FINDINGS_INDEX,
+            index: LATEST_FINDINGS_INDEX,
             body: finding,
           })
         )
@@ -57,12 +57,12 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
 
     getCloudTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
-      return await tabs.findByXpath(`span[text()="Cloud"]`);
+      return await tabs.findByXpath(`//span[text()="Cloud"]`);
     },
 
     getKubernetesTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
-      return await tabs.findByXpath(`span[text()="Kubernetes"]`);
+      return await tabs.findByXpath(`//span[text()="Kubernetes"]`);
     },
 
     clickTab: async (tab: 'Cloud' | 'Kubernetes') => {
@@ -127,6 +127,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   };
 
   return {
+    waitForPluginInitialized,
     navigateToComplianceDashboardPage,
     dashboard,
     index,
