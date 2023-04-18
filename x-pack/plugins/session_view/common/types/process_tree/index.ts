@@ -191,7 +191,7 @@ export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string[];
+    category?: string | string[];
     action?: EventAction | EventAction[];
     id?: string;
   };
