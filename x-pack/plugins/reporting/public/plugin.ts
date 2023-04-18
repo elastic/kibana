@@ -42,12 +42,7 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
-import { ExportTypesRegistry } from './export_types_registry';
-import {
-  ExportTypesPlugin,
-  ExportTypesPluginSetup,
-  ExportTypesPluginStart,
-} from '../server/export_registry/plugin';
+import { ExportTypesPluginSetup, ExportTypesPluginStart } from '../server/export_registry/plugin';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
