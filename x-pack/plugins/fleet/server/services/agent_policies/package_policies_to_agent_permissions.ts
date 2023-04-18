@@ -135,28 +135,36 @@ export async function storedPackagePoliciesToAgentPermissions(
   return Object.fromEntries(await Promise.all(permissionEntries));
 }
 
-interface DataStreamMeta {
+export interface DataStreamMeta {
   type: string;
   dataset: string;
   dataset_is_prefix?: boolean;
   hidden?: boolean;
   elasticsearch?: {
     privileges?: RegistryDataStreamPrivileges;
+    dynamic_namespace?: boolean;
+    dynamic_dataset?: boolean;
   };
 }
 
 export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
-  let index = `${dataStream.type}-${dataStream.dataset}`;
+  let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
-  if (dataStream.dataset_is_prefix) {
-    index = `${index}.*`;
+  // Determine dataset
+  if (dataStream.elasticsearch?.dynamic_dataset) {
+    index += `*`;
+  } else if (dataStream.dataset_is_prefix) {
+    index += `${dataStream.dataset}.*`;
+  } else {
+    index += dataStream.dataset;
   }
 
-  if (dataStream.hidden) {
-    index = `.${index}`;
+  // Determine namespace
+  if (dataStream.elasticsearch?.dynamic_namespace) {
+    index += `-*`;
+  } else {
+    index += `-${namespace}`;
   }
-
-  index += `-${namespace}`;
 
   const privileges = dataStream?.elasticsearch?.privileges?.indices?.length
     ? dataStream.elasticsearch.privileges.indices

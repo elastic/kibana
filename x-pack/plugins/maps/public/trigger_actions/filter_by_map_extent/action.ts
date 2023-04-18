@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { isLegacyMap } from '../legacy_visualizations';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { getCore } from '../kibana_services';
+import type { FilterByMapExtentActionContext, FilterByMapExtentInput } from './types';
 
 export const FILTER_BY_MAP_EXTENT = 'FILTER_BY_MAP_EXTENT';
-
-interface FilterByMapExtentInput extends EmbeddableInput {
-  filterByMapExtent: boolean;
-}
-
-interface FilterByMapExtentActionContext {
-  embeddable: Embeddable<FilterByMapExtentInput>;
-}
 
 function getContainerLabel(embeddable: Embeddable<FilterByMapExtentInput>) {
   return embeddable.parent?.type === 'dashboard'
@@ -58,20 +46,12 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   getIconType: () => {
     return 'filter';
   },
-  isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
-    return (
-      (embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMap(embeddable)) &&
-      !embeddable.getInput().disableTriggers
-    );
+  isCompatible: async (context: FilterByMapExtentActionContext) => {
+    const { isCompatible } = await import('./is_compatible');
+    return isCompatible(context);
   },
   execute: async (context: FilterByMapExtentActionContext) => {
-    const { FilterByMapExtentModal } = await import('./filter_by_map_extent_modal');
-    const { openModal } = createReactOverlays(getCore());
-    const modalSession = openModal(
-      <FilterByMapExtentModal
-        onClose={() => modalSession.close()}
-        title={getDisplayName(context.embeddable)}
-      />
-    );
+    const { openModal } = await import('./modal');
+    openModal(getDisplayName(context.embeddable));
   },
 });
