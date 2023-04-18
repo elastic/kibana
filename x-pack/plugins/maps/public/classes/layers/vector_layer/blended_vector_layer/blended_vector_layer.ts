@@ -265,7 +265,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return [clonedDescriptor];
   }
 
-  getSource(): IVectorSource {
+  getSource = () => {
     return this._isClustered ? this._clusterSource : this._documentSource;
   }
 

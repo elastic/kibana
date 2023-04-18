@@ -86,11 +86,9 @@ export class Mask {
   }
 
   isFeatureMasked(feature: MapGeoJSONFeature) {
-    console.log(JSON.stringify(feature, null, ' '));
     const featureValue = this._isFeatureState
       ? feature?.state[this._esAggField.getMbFieldName()]
       : feature?.properties[this._esAggField.getMbFieldName()];
-    console.log(featureValue);
     if (typeof featureValue !== 'number') {
       return false;
     }

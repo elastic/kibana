@@ -54,8 +54,8 @@ export class MaskExpression extends Component<Props, State> {
       return aggDisplayName;
     }
 
-    const field = this.props.fields.find((field) => field.name === (this.props.metric as FieldedAggDescriptor).field);
-    const fieldDisplayName = field?.displayName ? field?.displayName : this.props.metric.field;
+    const targetField = this.props.fields.find((field) => field.name === (this.props.metric as FieldedAggDescriptor).field);
+    const fieldDisplayName = targetField?.displayName ? targetField?.displayName : this.props.metric.field;
     return `${aggDisplayName} ${fieldDisplayName}`;
   }
 
