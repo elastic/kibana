@@ -48,12 +48,20 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
-interface ConfigEntry {
-  isPasswordField: boolean;
+interface SelectOptions {
+  label: string;
+  value: string;
+}
+
+export interface ConfigEntry {
+  display: string;
   key: string;
   label: string;
+  options: SelectOptions[];
   order?: number;
-  value: string;
+  required: boolean;
+  sensitive: boolean;
+  value: string | number | boolean | null;
 }
 
 /**
@@ -84,6 +92,19 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+}
+
+export function ensureStringType(value: string | number | boolean | null): string {
+  return String(value);
+}
+
+export function ensureNumberType(value: string | number | boolean | null): number {
+  const numberValue = Number(value);
+  return isNaN(numberValue) ? 0 : numberValue;
+}
+
+export function ensureBooleanType(value: string | number | boolean | null): boolean {
+  return Boolean(value);
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -191,9 +212,12 @@ export const ConnectorConfigurationLogic = kea<
     localConfigState: [
       {},
       {
-        setLocalConfigEntry: (configState, { key, label, order, value }) => ({
+        setLocalConfigEntry: (
+          configState,
+          { key, display, label, options, order, required, sensitive, value }
+        ) => ({
           ...configState,
-          [key]: { label, order, value },
+          [key]: { display, label, options, order, required, sensitive, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
@@ -209,21 +233,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState) => sortConnectorConfiguration(configState),
     ],
   }),
 });
