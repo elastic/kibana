@@ -101,7 +101,7 @@ export const validatePackagePolicy = (
         (policyTemplate.inputs && policyTemplate.inputs.length > 0)
     )
   ) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
     return validationResults;
   }
 
@@ -199,7 +199,7 @@ export const validatePackagePolicy = (
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
   }
 
   return validationResults;
