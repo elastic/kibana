@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  useEuiBackgroundColor,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -40,7 +40,6 @@ export const ConnectorConfigurationForm = () => {
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
   const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
-  const subduedBackground = useEuiBackgroundColor('subdued');
 
   const dependencyLookup: DependencyLookup = localConfigView.reduce(
     (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
@@ -62,17 +61,20 @@ export const ConnectorConfigurationForm = () => {
         const { depends_on: dependencies, key, label } = configEntry;
         const hasDependencies = dependencies.length > 0;
 
-        return dependenciesSatisfied(dependencies, dependencyLookup) ? (
-          <EuiFormRow
-            label={label ?? ''}
-            key={key}
-            className={hasDependencies ? 'dependency' : ''}
-            style={hasDependencies ? { backgroundColor: subduedBackground } : {}}
-          >
+        return hasDependencies ? (
+          dependenciesSatisfied(dependencies, dependencyLookup) ? (
+            <EuiPanel color="subdued" borderRadius="none">
+              <EuiFormRow label={label ?? ''} key={key}>
+                <ConnectorConfigurationField configEntry={configEntry} />
+              </EuiFormRow>
+            </EuiPanel>
+          ) : (
+            <></>
+          )
+        ) : (
+          <EuiFormRow label={label ?? ''} key={key}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
-        ) : (
-          <></>
         );
       })}
       <EuiFormRow>
