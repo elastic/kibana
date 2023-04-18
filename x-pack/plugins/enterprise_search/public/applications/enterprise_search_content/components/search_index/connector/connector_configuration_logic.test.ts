@@ -52,10 +52,12 @@ describe('ConnectorConfigurationLogic', () => {
       ConnectorConfigurationApiLogic.actions.apiSuccess({
         configuration: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'newBar',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'oldBar',
           },
@@ -66,21 +68,25 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'newBar',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'oldBar',
           },
         },
         configView: [
           {
+            depends_on: [],
             display: 'textbox',
             key: 'foo',
             label: 'newBar',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'oldBar',
           },
@@ -90,10 +96,12 @@ describe('ConnectorConfigurationLogic', () => {
     it('should set config on setConfigState', () => {
       ConnectorConfigurationLogic.actions.setConfigState({
         foo: {
+          depends_on: [],
           display: 'textbox',
           label: 'thirdBar',
           options: [],
           order: 1,
+          required: false,
           sensitive: false,
           value: 'fourthBar',
         },
@@ -102,21 +110,25 @@ describe('ConnectorConfigurationLogic', () => {
         ...DEFAULT_VALUES,
         configState: {
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'fourthBar',
           },
         },
         configView: [
           {
+            depends_on: [],
             display: 'textbox',
             key: 'foo',
             label: 'thirdBar',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'fourthBar',
           },
@@ -127,46 +139,56 @@ describe('ConnectorConfigurationLogic', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: {
+            depends_on: [],
             display: 'textbox',
             label: 'foo',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'foofoo',
           },
           password: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
             order: 2,
+            required: false,
             sensitive: true,
             value: 'fourthBar',
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           bar: {
+            depends_on: [],
             display: 'textbox',
             label: 'foo',
             options: [],
             order: 1,
+            required: false,
             sensitive: false,
             value: 'foofoo',
           },
           password: {
+            depends_on: [],
             display: 'textbox',
             label: 'thirdBar',
             options: [],
             order: 2,
+            required: false,
             sensitive: true,
             value: 'fourthBar',
           },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
+          depends_on: [],
           display: 'textbox',
           key: 'bar',
           label: 'foo',
           options: [],
           order: 1,
+          required: false,
           sensitive: false,
           value: 'fafa',
         });
@@ -174,76 +196,92 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: {
             bar: {
+              depends_on: [],
               display: 'textbox',
               label: 'foo',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'foofoo',
             },
             password: {
+              depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
               options: [],
               order: 2,
+              required: false,
               sensitive: true,
               value: 'fourthBar',
             },
           },
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'bar',
               label: 'foo',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'foofoo',
             },
             {
+              depends_on: [],
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
               options: [],
               order: 2,
+              required: false,
               sensitive: true,
               value: 'fourthBar',
             },
           ],
           localConfigState: {
             bar: {
+              depends_on: [],
               display: 'textbox',
               label: 'foo',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'fafa',
             },
             password: {
+              depends_on: [],
               display: 'textbox',
               label: 'thirdBar',
               options: [],
               order: 2,
+              required: false,
               sensitive: true,
               value: 'fourthBar',
             },
           },
           localConfigView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'bar',
               label: 'foo',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'fafa',
             },
             {
+              depends_on: [],
               display: 'textbox',
               key: 'password',
               label: 'thirdBar',
               options: [],
               order: 2,
+              required: false,
               sensitive: true,
               value: 'fourthBar',
             },
@@ -259,11 +297,13 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'barbar',
             },
@@ -291,11 +331,13 @@ describe('ConnectorConfigurationLogic', () => {
           configState: connectorIndex.connector.configuration,
           configView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'barbar',
             },
@@ -308,11 +350,13 @@ describe('ConnectorConfigurationLogic', () => {
           localConfigState: connectorIndex.connector.configuration,
           localConfigView: [
             {
+              depends_on: [],
               display: 'textbox',
               key: 'foo',
               label: 'bar',
               options: [],
               order: 1,
+              required: false,
               sensitive: false,
               value: 'barbar',
             },
@@ -327,10 +371,12 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.fetchIndexApiSuccess(connectorIndex);
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           foo: {
+            depends_on: [],
             display: 'textbox',
             label: 'bar',
             options: [],
             order: 1,
+            required: false,
             sensitive: true,
             value: 'Barbara',
           },
