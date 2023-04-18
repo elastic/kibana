@@ -21,9 +21,9 @@ export interface ControlSliderProps {
   /** Current value set */
   currentValue: number | undefined;
   /** When set will show the control in a disabled state */
-  disabled: boolean;
+  disabled?: boolean;
   /** An explanation for the disabled state of the control */
-  disabledReason: string;
+  disabledReason?: string;
   /** A way to pass the test id parameter */
   'data-test-subj'?: string;
   /** A callback for when the slider value changes */
@@ -33,8 +33,8 @@ export interface ControlSliderProps {
 export function ControlSlider({
   values,
   currentValue,
-  disabled,
-  disabledReason,
+  disabled = false,
+  disabledReason = '',
   onChange,
   'data-test-subj': dataTestSubj,
 }: ControlSliderProps) {
