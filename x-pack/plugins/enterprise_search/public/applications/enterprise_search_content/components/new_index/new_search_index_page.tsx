@@ -45,11 +45,11 @@ function getTitle(method: string, serviceType: string): string {
           });
     }
     case INGESTION_METHOD_IDS.CRAWLER:
-      return i18n.translate('xpack.enterpriseSearch.content.new_index.', {
+      return i18n.translate('xpack.enterpriseSearch.content.new_index.crawlerTitle', {
         defaultMessage: 'New web crawler search index',
       });
     default:
-      return i18n.translate('xpack.enterpriseSearch.content.new_index.successToast.description', {
+      return i18n.translate('xpack.enterpriseSearch.content.new_index.genericTitle', {
         defaultMessage: 'New search index',
       });
   }
@@ -80,11 +80,11 @@ function getDescription(method: string, serviceType: string): string {
           });
     }
     case INGESTION_METHOD_IDS.CRAWLER:
-      return i18n.translate('xpack.enterpriseSearch.content.new_index.', {
+      return i18n.translate('xpack.enterpriseSearch.content.new_index.crawlerDescription', {
         defaultMessage: 'A search index is a place to hold the data for your web crawler.',
       });
     default:
-      return i18n.translate('xpack.enterpriseSearch.content.new_index.successToast.description', {
+      return i18n.translate('xpack.enterpriseSearch.content.new_index.defaultDescription', {
         defaultMessage: 'A search index is a place to hold your data.',
       });
   }

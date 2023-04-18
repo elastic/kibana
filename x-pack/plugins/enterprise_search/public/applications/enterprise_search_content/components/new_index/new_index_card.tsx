@@ -29,6 +29,13 @@ export interface MethodCardOptions {
   title: EuiCardProps['title'];
 }
 
+const NO_DEVELOPMENT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.content.newIndex.methodCard.noDevelopment.label',
+  {
+    defaultMessage: 'No development required',
+  }
+);
+
 const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   [INGESTION_METHOD_IDS.CRAWLER]: {
     description: i18n.translate(
@@ -44,9 +51,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a web crawler',
         }
       ),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label', {
-        defaultMessage: 'No development required',
-      }),
+      label: NO_DEVELOPMENT_LABEL,
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CRAWLER),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.title', {
@@ -68,9 +73,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a connector',
         }
       ),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.footer', {
-        defaultMessage: 'Development required',
-      }),
+      label: NO_DEVELOPMENT_LABEL,
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CONNECTOR),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.title', {
