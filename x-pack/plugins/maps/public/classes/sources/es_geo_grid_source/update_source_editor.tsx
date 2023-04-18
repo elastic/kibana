@@ -24,7 +24,7 @@ import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 import { isMvt } from './is_mvt';
 
 interface Props {
-  bucketName: string;
+  bucketsName: string;
   currentLayerType?: string;
   geoFieldName: string;
   indexPatternId: string;
@@ -148,7 +148,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <MetricsEditor
           key={this.state.metricsEditorKey}
           allowMultipleMetrics={this.props.currentLayerType !== LAYER_TYPE.HEATMAP}
-          bucketName={this.props.bucketName}
+          bucketsName={this.props.bucketsName}
+          isJoin={false}
           metricsFilter={this._getMetricsFilter()}
           fields={this.state.fields}
           metrics={this.props.metrics}

@@ -20,6 +20,10 @@ import { getAggDisplayName } from './get_agg_display_name';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
+export const BUCKETS = i18n.translate('xpack.maps.source.esAggSource.genericBucketsName', {
+  defaultMessage: 'buckets',
+});
+
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
 
@@ -47,8 +51,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     }
   }
 
-  getBucketName() {
-    return 'bucket';
+  getBucketsName() {
+    return BUCKETS;
   }
 
   getFieldByName(fieldName: string): IField | null {

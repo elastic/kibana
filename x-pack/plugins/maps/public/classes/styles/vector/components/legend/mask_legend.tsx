@@ -7,8 +7,7 @@
 
 import React, { Component } from 'react';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { MASK_OPERATOR } from '../../../../../../common/constants';
+import { FIELD_ORIGIN, MASK_OPERATOR } from '../../../../../../common/constants';
 import type { IESAggField } from '../../../../fields/agg';
 import type { IESAggSource } from '../../../../sources/es_agg_source';
 import { getMaskI18nDescription, getMaskI18nValue } from '../../../../layers/vector_layer/mask';
@@ -20,17 +19,13 @@ interface Props {
 }
 
 interface State {
-  aggLabel: string;
+  aggLabel?: string;
 }
 
 export class MaskLegend extends Component<Props, State> {
   private _isMounted = false;
 
-  state: State = {
-    aggLabel: i18n.translate('xpack.maps.maskLegend.valueLabel', {
-      defaultMessage: 'value',
-    })
-  };
+  state: State = {};
 
   componentDidMount() {
     this._isMounted = true;
@@ -52,20 +47,23 @@ export class MaskLegend extends Component<Props, State> {
     }
   }
 
-  _getBucketName() {
+  _getBucketsName() {
     const source = this.props.esAggField.getSource();
-    return 'getBucketName' in (source as IESAggSource)
-      ? (source as IESAggSource).getBucketName()
-      : i18n.translate('xpack.maps.maskLegend.bucketLabel', {
-          defaultMessage: 'bucket',
-        });
+    return 'getBucketsName' in (source as IESAggSource)
+      ? (source as IESAggSource).getBucketsName()
+      : undefined;
   }
 
   render() {
+    const maskDescription = getMaskI18nDescription({
+      bucketsName: this._getBucketsName(), 
+      aggLabel: this.state.aggLabel,
+      isJoin: this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN
+    })
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          <strong>{`${getMaskI18nDescription(this._getBucketName(), this.state.aggLabel)} ${getMaskI18nValue(this.props.operator, this.props.value)}`}</strong>
+          <strong>{`${maskDescription} ${getMaskI18nValue(this.props.operator, this.props.value)}`}</strong>
         </small>
       </EuiText>
     );

@@ -20,7 +20,7 @@ const defaultProps = {
   fields: [],
   onChange: () => {},
   allowMultipleMetrics: true,
-  bucketName: 'bucket',
+  isJoin: false,
 };
 
 test('should render metrics editor', () => {

@@ -15,8 +15,9 @@ import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
 import { getMaskI18nDescription, getMaskI18nValue } from '../../../classes/layers/vector_layer/mask';
 
 interface Props {
-  bucketName: string;
+  bucketsName?: string;
   fields: DataViewField[];
+  isJoin: boolean;
   metric: AggDescriptor;
   onChange: (metric: AggDescriptor) => void;
 }
@@ -71,7 +72,11 @@ export class MaskExpression extends Component<Props, State> {
         button={
           <EuiExpression
             color={this.props.metric.mask === undefined ? 'subdued' : 'danger'}
-            description={getMaskI18nDescription(this.props.bucketName, this._getAggLabel())}
+            description={getMaskI18nDescription({
+              bucketsName: this.props.bucketsName,
+              aggLabel: this._getAggLabel(),
+              isJoin: this.props.isJoin,
+            })}
             value={this._getMaskExpressionValue()}
             onClick={this._togglePopover}
             uppercase={false}

@@ -67,16 +67,16 @@ export class ESPewPewSource extends AbstractESAggSource {
     this._descriptor = descriptor;
   }
 
-  getBucketName() {
-    return i18n.translate('xpack.maps.source.pewPew.bucketName', {
-      defaultMessage: 'path',
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.pewPew.bucketsName', {
+      defaultMessage: 'paths',
     });
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
-        bucketName={this.getBucketName()}
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}

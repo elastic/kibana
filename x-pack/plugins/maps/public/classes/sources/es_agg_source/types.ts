@@ -15,9 +15,9 @@ export interface IESAggSource extends IESSource {
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
 
   /*
-   * Returns human readable name describing bucket, like "cluster" or "grid"
+   * Returns human readable name describing buckets, like "clusters" or "grids"
    */
-  getBucketName(): string;
+  getBucketsName(): string;
 
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;

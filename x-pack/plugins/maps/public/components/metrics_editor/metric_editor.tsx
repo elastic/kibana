@@ -44,7 +44,8 @@ function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
 }
 
 interface Props {
-  bucketName: string;
+  bucketsName?: string;
+  isJoin: boolean;
   metric: AggDescriptor;
   fields: DataViewField[];
   onChange: (metric: AggDescriptor) => void;
@@ -54,8 +55,9 @@ interface Props {
 }
 
 export function MetricEditor({
-  bucketName,
+  bucketsName,
   fields,
+  isJoin,
   metricsFilter,
   metric,
   onChange,
@@ -238,8 +240,9 @@ export function MetricEditor({
         display="columnCompressed"
       >
         <MaskExpression
-          bucketName={bucketName}
+          bucketsName={bucketsName}
           fields={fields}
+          isJoin={isJoin}
           metric={metric}
           onChange={onChange}
         />

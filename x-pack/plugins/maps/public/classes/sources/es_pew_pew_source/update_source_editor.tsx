@@ -16,7 +16,7 @@ import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
-  bucketName: string;
+  bucketsName: string;
   indexPatternId: string;
   metrics: AggDescriptor[];
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -78,7 +78,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
-            bucketName={this.props.bucketName}
+            bucketsName={this.props.bucketsName}
+            isJoin={false}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}
