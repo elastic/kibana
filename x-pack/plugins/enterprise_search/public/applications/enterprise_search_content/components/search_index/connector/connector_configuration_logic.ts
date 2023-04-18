@@ -107,14 +107,6 @@ export function ensureNumberType(value: string | number | boolean | null): numbe
   return isNaN(numberValue) ? 0 : numberValue;
 }
 
-export function ensureOptionalNumberType(value: string | number | boolean | null): number | string {
-  const numberValue = Number(value);
-  if (value === '' || isNaN(numberValue)) {
-    return '';
-  }
-  return numberValue;
-}
-
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
   return Boolean(value);
 }
