@@ -130,6 +130,45 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   return await apiService.get(API_URLS.RULES_FIND, data);
 };
 
+/**
+ * The following types and type guards are as a part of the fix in https://github.com/elastic/kibana/pull/155212,
+ * because the format for rule types has changed, but there don't seem to be corresponding type exports from the
+ * `triggers_actions_ui` plugin.
+ *
+ * Contribute type changes upstream to remove this code.
+ */
+interface UpdatedFrequency {
+  notify_when: string;
+}
+
+type UpdatedRule = Rule<NewAlertParams> & { rule_type_id: string };
+
+type UpdatedAction = Rule<NewAlertParams>['actions'][number] & {
+  connector_type_id?: string;
+  frequency: UpdatedFrequency;
+};
+
+type BaseAction = Rule<NewAlertParams>['actions'][number];
+
+function hasActions(p?: unknown): p is UpdatedRule {
+  return (
+    !!p &&
+    p instanceof Object &&
+    p.hasOwnProperty('actions') &&
+    p.hasOwnProperty('connector_type_id')
+  );
+}
+
+function isUpdatedRuleFormat(p?: unknown): p is UpdatedAction {
+  return (
+    !!p &&
+    p instanceof Object &&
+    p.hasOwnProperty('connector_type_id') &&
+    p.hasOwnProperty('frequency') &&
+    !!(p as UpdatedAction).frequency?.notify_when
+  );
+}
+
 export const fetchAnomalyAlertRecords = async ({
   monitorId,
 }: MonitorIdParam): Promise<Rule<NewAlertParams> | undefined> => {
@@ -144,12 +183,19 @@ export const fetchAnomalyAlertRecords = async ({
   const rawRules = await apiService.get<{
     data: Array<Rule<NewAlertParams> & { rule_type_id: string }>;
   }>(API_URLS.RULES_FIND, data);
-  const monitorRule = rawRules.data.find(
-    (rule) => rule.params.monitorId === monitorId
-  ) as Rule<NewAlertParams> & { rule_type_id: string };
-  if (monitorRule) {
+  const monitorRule = rawRules.data.find((rule) => rule.params.monitorId === monitorId) as unknown;
+  if (monitorRule && hasActions(monitorRule)) {
     return {
       ...monitorRule,
+      actions: monitorRule.actions.map((action) => {
+        if (!action.actionTypeId && isUpdatedRuleFormat(action))
+          return {
+            ...action,
+            actionTypeId: action.connector_type_id,
+            frequency: { ...action.frequency, notifyWhen: action.frequency.notify_when },
+          } as BaseAction;
+        return action as BaseAction;
+      }),
       ruleTypeId: monitorRule.rule_type_id,
     };
   }
