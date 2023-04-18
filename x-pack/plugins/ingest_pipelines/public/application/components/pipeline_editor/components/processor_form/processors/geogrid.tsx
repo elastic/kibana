@@ -37,7 +37,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.tileTypeRequiredError', {
-            defaultMessage: 'A type value is required.',
+            defaultMessage: 'A tile type value is required.',
           })
         ),
       },
@@ -178,7 +178,7 @@ export const GeoGrid: FunctionComponent = () => {
             }}
             config={fieldsConfig.tileType}
             component={SelectField}
-            path="fields.tileType"
+            path="fields.tile_type"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -205,7 +205,7 @@ export const GeoGrid: FunctionComponent = () => {
             }}
             config={fieldsConfig.target_format}
             component={SelectField}
-            path="fields.targetFormat"
+            path="fields.target_format"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
