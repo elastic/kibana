@@ -59,9 +59,10 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           })}
         >
           <EuiButtonIcon
-            color="primary"
             size="s"
+            color="text"
             iconType="filter"
+            display="base"
             data-test-subj="hostsView-flyout-metadata-remove-filter"
             aria-label={i18n.translate(
               'xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel',
@@ -77,14 +78,14 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   }
 
   return (
-    <span className="euiTableCellContent__hoverItem expandedItemActions__completelyHide">
+    <span>
       <EuiToolTip
         content={i18n.translate('xpack.infra.hostsViewPage.flyout.metadata.setFilterTooltip', {
-          defaultMessage: 'View event with filter',
+          defaultMessage: 'Filter by value',
         })}
       >
         <EuiButtonIcon
-          color="text"
+          color="primary"
           size="s"
           iconType="filter"
           data-test-subj="hostsView-flyout-metadata-add-filter"
