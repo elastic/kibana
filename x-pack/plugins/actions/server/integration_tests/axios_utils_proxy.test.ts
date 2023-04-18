@@ -592,6 +592,7 @@ const BaseActionsConfig: ActionsConfig = {
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
+  enableFooterInEmail: true,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

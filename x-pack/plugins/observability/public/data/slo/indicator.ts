@@ -51,6 +51,7 @@ export const buildCustomKqlIndicator = (
       good: 'latency < 300',
       total: 'latency > 0',
       filter: 'labels.eventId: event-0',
+      timestampField: '@timestamp',
       ...params,
     },
   };
