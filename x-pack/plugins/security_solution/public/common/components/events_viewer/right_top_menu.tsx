@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 import React, { useMemo } from 'react';
 import type { CSSProperties } from 'styled-components';
 import styled from 'styled-components';
-import type { ViewSelection } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
