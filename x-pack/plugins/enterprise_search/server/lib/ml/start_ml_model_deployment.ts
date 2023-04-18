@@ -6,40 +6,102 @@
  */
 
 import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 
-import { MlModelDeploymentStatus } from '../../../common/types/ml';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
+import { MLSavedObjectService, syncSavedObjectsFactory } from '@kbn/ml-plugin/server/saved_objects';
 
-import { isResourceNotFoundException } from '../../utils/identify_exceptions';
+import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
+
+import {
+  ElasticsearchResponseError,
+  isResourceNotFoundException,
+} from '../../utils/identify_exceptions';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 
+const acceptableModelNames = ['.elser_model_1_SNAPSHOT'];
+
 export const startMlModelDeployment = async (
   modelName: string,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  mlClient: MlClient | undefined,
+  trainedModelsProvider: MlTrainedModels | undefined,
+  savedObjectService: MLSavedObjectService | undefined
 ): Promise<MlModelDeploymentStatus> => {
-  // try and get the deployment status of the model first
-  // and see if it's already deployed or deploying...
-  try {
-    const deploymentStatus = await getMlModelDeploymentStatus(modelName, esClient);
+  if (!trainedModelsProvider || !mlClient) {
+    throw new Error('Machine Learning is not enabled');
+  }
 
-    if (deploymentStatus && deploymentStatus.deploymentState) {
+  let deploymentState: MlModelDeploymentState = MlModelDeploymentState.NotDeployed;
+
+  // before anything else, check our model name
+  // to ensure we only allow those names we want
+  if (!acceptableModelNames.includes(modelName)) {
+    const notFoundError: ElasticsearchResponseError = {
+      meta: {
+        statusCode: 404,
+      },
+      name: 'ResponseError',
+    };
+    throw notFoundError;
+  }
+
+  try {
+    // try and get the deployment status of the model first
+    // and see if it's already deployed or deploying...
+    const deploymentStatus = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
+
+    deploymentState = deploymentStatus?.deploymentState || MlModelDeploymentState.NotDeployed;
+
+    // if we're downloading or already started / starting / done
+    // return the status
+    if (
+      deploymentState !== MlModelDeploymentState.NotDeployed &&
+      deploymentState !== MlModelDeploymentState.Downloaded
+    ) {
       return deploymentStatus;
     }
   } catch (error) {
+    // don't rethrow the not found here -
+    // if it's not found there's a good chance it's not started
+    // downloading yet
     if (!isResourceNotFoundException(error)) {
-      // if we could not find a deployment status, we can try and start
-      // else some other error occured and we should bubble that up
       throw error;
     }
   }
 
-  // not deployed yet - let's deploy it
-  const startRequest: MlStartTrainedModelDeploymentRequest = {
-    model_id: modelName,
-    wait_for: 'starting',
-  };
+  if (deploymentState === MlModelDeploymentState.Downloaded) {
+    // we're downloaded already, but not deployed yet - let's deploy it
+    const startRequest: MlStartTrainedModelDeploymentRequest = {
+      model_id: modelName,
+      wait_for: 'starting',
+    };
 
-  await esClient.ml.startTrainedModelDeployment(startRequest);
-  return await getMlModelDeploymentStatus(modelName, esClient);
+    await mlClient.startTrainedModelDeployment(startRequest);
+    return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
+  }
+
+  if (!savedObjectService) {
+    throw new Error('Saved object service is not available');
+  }
+
+  // we're not downloaded yet - let's initiate that...
+  await mlClient.putTrainedModel({
+    input: {
+      field_names: ['text_field'],
+    },
+    model_id: modelName,
+  });
+
+  // and sync our objects
+  const clusterClient = esClient as unknown as IScopedClusterClient;
+  const { syncSavedObjects } = syncSavedObjectsFactory(clusterClient, savedObjectService);
+  await syncSavedObjects(false);
+
+  // TODO: create task to watch for completed download
+
+  // and return our status
+  return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
 };

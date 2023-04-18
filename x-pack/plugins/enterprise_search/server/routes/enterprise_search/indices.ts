@@ -11,8 +11,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { i18n } from '@kbn/i18n';
+import { getMlClient } from '@kbn/ml-plugin/server/lib/ml_client';
+import { mlSavedObjectServiceFactory } from '@kbn/ml-plugin/server/saved_objects';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -1003,10 +1006,38 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
-      const { client } = (await context.core).elasticsearch;
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const scopedClusterClient = client as unknown as IScopedClusterClient;
+
+      // TODO : double check params for spaces and authorization
+      const savedObjectService = mlSavedObjectServiceFactory(
+        savedObjectsClient,
+        savedObjectsClient,
+        true,
+        undefined,
+        scopedClusterClient,
+        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+      );
+
+      const mlClient = savedObjectService
+        ? await getMlClient(scopedClusterClient, savedObjectService)
+        : undefined;
 
       try {
-        const deployResult = await startMlModelDeployment(modelName, client.asCurrentUser);
+        const deployResult = await startMlModelDeployment(
+          modelName,
+          client.asCurrentUser,
+          mlClient,
+          trainedModelsProvider,
+          savedObjectService
+        );
 
         return response.ok({
           body: deployResult,
@@ -1039,10 +1070,15 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
-      const { client } = (await context.core).elasticsearch;
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
 
       try {
-        const getStatusResult = await getMlModelDeploymentStatus(modelName, client.asCurrentUser);
+        const getStatusResult = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
 
         return response.ok({
           body: getStatusResult,

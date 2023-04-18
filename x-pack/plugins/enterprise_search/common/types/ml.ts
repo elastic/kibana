@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+export enum MlModelDeploymentState {
+  NotDeployed = '',
+  Downloading = 'downloading',
+  Downloaded = 'is_fully_downloaded',
+  Starting = 'starting',
+  Started = 'started',
+  FullyAllocated = 'fully_allocated',
+  Error = 'error',
+}
+
 export interface MlModelDeploymentStatus {
-  deploymentState: string;
+  deploymentState: MlModelDeploymentState;
   modelId: string;
   nodeAllocationCount: number;
   startTime: number;
