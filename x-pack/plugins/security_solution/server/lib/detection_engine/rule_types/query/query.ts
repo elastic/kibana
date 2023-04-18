@@ -97,7 +97,6 @@ export const queryExecutor = async ({
           };
 
     if (
-      hasPlatinumLicense &&
       completeRule.ruleParams.responseActions?.length &&
       result.createdSignalsCount &&
       scheduleNotificationResponseActionsService

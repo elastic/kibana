@@ -30,6 +30,7 @@ interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields;
+  error?: string;
 }
 
 export const createActionHandler = async (
@@ -42,7 +43,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, alertData } = options;
+  const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -56,6 +57,10 @@ export const createActionHandler = async (
 
   if (!selectedAgents.length) {
     throw new Error('No agents found for selection');
+  }
+
+  if (error) {
+    throw new Error(error);
   }
 
   let packSO;
@@ -141,7 +146,7 @@ export const createActionHandler = async (
     }
 
     osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-      ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
+      ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
       agents: osqueryAction.agents.length,
     });
   }

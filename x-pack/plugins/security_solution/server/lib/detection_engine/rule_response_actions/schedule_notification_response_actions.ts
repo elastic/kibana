@@ -20,7 +20,7 @@ type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateAction: SetupPlugins['osquery']['createActionService'];
 }
 
 export const getScheduleNotificationResponseActionsService =

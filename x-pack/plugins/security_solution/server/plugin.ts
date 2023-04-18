@@ -249,7 +249,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+        osqueryCreateAction: plugins.osquery.createActionService,
       }),
     };
 
