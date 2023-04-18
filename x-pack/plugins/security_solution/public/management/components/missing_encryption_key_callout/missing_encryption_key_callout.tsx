@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useGetFleetStatus } from '../../hooks';
+import { useGetActionsState } from '../../hooks';
 
 export const MissingEncryptionKeyCallout = memo(() => {
-  const { data: fleetStatus } = useGetFleetStatus();
+  const { data: encryptionKeyState } = useGetActionsState();
   const [calloutDismiss, setCalloutDismiss] = useState(false);
 
-  if (!fleetStatus) {
+  const onClickDismissButton = useCallback(() => setCalloutDismiss(true), []);
+
+  if (!encryptionKeyState) {
     return null;
   }
 
-  if (
-    !calloutDismiss &&
-    fleetStatus.missing_optional_features.includes('encrypted_saved_object_encryption_key_required')
-  ) {
+  if (!calloutDismiss && encryptionKeyState.canEncrypt === true) {
     return (
       <>
         <EuiCallOut
@@ -44,7 +43,7 @@ export const MissingEncryptionKeyCallout = memo(() => {
           </p>
 
           <EuiButtonEmpty
-            onClick={() => setCalloutDismiss(true)}
+            onClick={onClickDismissButton}
             color="warning"
             data-test-subj="dismissEncryptionKeyCallout"
           >
