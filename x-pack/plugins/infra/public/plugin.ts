@@ -26,6 +26,7 @@ import { createLazyHostMetricsTable } from './components/infrastructure_node_met
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
+import { InfraLocators, LogsLocatorDefinition, NodeLogsLocatorDefinition } from './locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { LogViewsService } from './services/log_views';
@@ -45,6 +46,7 @@ export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private logViews: LogViewsService;
   private telemetry: TelemetryService;
+  private locators?: InfraLocators;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -260,6 +262,19 @@ export class Plugin implements InfraClientPluginClass {
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
+
+    // Register Locators
+    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition());
+    const nodeLogsLocator = pluginsSetup.share.url.locators.create(new NodeLogsLocatorDefinition());
+
+    this.locators = {
+      logsLocator,
+      nodeLogsLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
@@ -276,6 +291,7 @@ export class Plugin implements InfraClientPluginClass {
     const startContract: InfraClientStartExports = {
       logViews,
       telemetry,
+      locators: this.locators!,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
       HostMetricsTable: createLazyHostMetricsTable(getStartServices),
       PodMetricsTable: createLazyPodMetricsTable(getStartServices),

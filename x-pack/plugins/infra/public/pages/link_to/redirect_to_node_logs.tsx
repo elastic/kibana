@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { LinkDescriptor, useFetcher } from '@kbn/observability-plugin/public';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { flowRight } from 'lodash';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useLogView } from '../../hooks/use_log_view';
-import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
-import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
-import { replaceLogViewInQueryString } from '../../observability_logs/log_view_state';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -43,6 +40,15 @@ export const RedirectToNodeLogs = ({
     load();
   });
 
+  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
+  const userFilter = getFilterFromLocation(location);
+  const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+  const time = getTimeFromLocation(location);
+
+  const { data } = useFetcher(async () => {
+    return services.locators.logsLocator.getLocation({ time, filter, logViewId });
+  }, []);
+
   if (isLoading) {
     return (
       <LoadingPage
@@ -57,18 +63,11 @@ export const RedirectToNodeLogs = ({
     );
   }
 
-  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
-  const userFilter = getFilterFromLocation(location);
-  const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
-  const time = getTimeFromLocation(location);
+  if (!data) {
+    return <EuiSkeletonText lines={1} />;
+  }
 
-  const searchString = flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
-    replaceLogPositionInQueryString(time),
-    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
-  )('');
-
-  return <Redirect to={`/stream?${searchString}`} />;
+  return <Redirect to={data.path} />;
 };
 
 export const getNodeLogsUrl = ({

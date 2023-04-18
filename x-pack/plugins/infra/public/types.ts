@@ -40,13 +40,17 @@ import type {
 } from './components/infrastructure_node_metrics_tables/shared';
 import { LogViewsServiceStart } from './services/log_views';
 import { ITelemetryClient } from './services/telemetry';
+import { InfraLocators } from './locators';
 
 // Our own setup and start contract values
-export type InfraClientSetupExports = void;
+export interface InfraClientSetupExports {
+  locators: InfraLocators;
+}
 
 export interface InfraClientStartExports {
   logViews: LogViewsServiceStart;
   telemetry: ITelemetryClient;
+  locators: InfraLocators;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
   ) => JSX.Element;
