@@ -102,7 +102,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { ActionCreateService } from './endpoint/services/actions';
+import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -503,9 +503,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      actionCreateService: new ActionCreateService(
+      actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
-        this.endpointContext
+        this.endpointContext,
+        licenseService
       ),
     });
 

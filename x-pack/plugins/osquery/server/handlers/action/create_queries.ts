@@ -28,7 +28,6 @@ interface CreateDynamicQueriesParams {
   alertData?: ParsedTechnicalFields;
   agents: string[];
   osqueryContext: OsqueryAppContext;
-  error?: string;
 }
 export const createDynamicQueries = async ({
   params,
