@@ -10,9 +10,7 @@
       "dynamic": "false",
       "_meta": {
         "indexTypesMap": {
-          ".kibana_task_manager": [
-              "task"
-          ],
+          ".kibana_task_manager": ["task"],
           ".kibana": [
             "action_task_params",
             "action",
@@ -28,6 +26,12 @@
             "canvas-element",
             "canvas-workpad-template",
             "canvas-workpad",
+            "cases-comments",
+            "cases-configure",
+            "cases-connector-mappings",
+            "cases-telemetry",
+            "cases-user-actions",
+            "cases",
             "config-global",
             "config",
             "connector_token",
@@ -104,14 +108,6 @@
             "usage-counters",
             "visualization",
             "workplace_search_telemetry"
-          ],
-          ".kibana_cases": [
-            "cases-comments",
-            "cases-configure",
-            "cases-connector-mappings",
-            "cases",
-            "cases-user-actions",
-            "cases-telemetry"
           ]
         }
       },
