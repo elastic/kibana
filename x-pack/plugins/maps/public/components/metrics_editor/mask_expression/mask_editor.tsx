@@ -54,11 +54,19 @@ interface State {
 }
 
 export class MaskEditor extends Component<Props, State> {
-  state: State = {
-    operator: MASK_OPERATOR.BELOW,
-    value: '',
-  };
-
+  constructor(props: Props) {
+    super(props);
+    const hasMask = this.props.metric.mask !== undefined
+    this.state = {
+      operator: hasMask
+        ? this.props.metric.mask.operator
+        : MASK_OPERATOR.BELOW,
+      value: hasMask
+        ? this.props.metric.mask.value
+        : '',
+    };
+  }
+  
   _onSet = () => {
     if (this._isValueInValid()) {
       return;
