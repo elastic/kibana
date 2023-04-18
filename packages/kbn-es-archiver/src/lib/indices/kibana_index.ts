@@ -34,8 +34,7 @@ export async function deleteKibanaIndices({
   onlyTaskManager?: boolean;
   log: ToolingLog;
 }) {
-  // WARNING note that we are deleting ALL .kibana* indices here, NOT only the saved object ones
-  const indexNames = (await fetchKibanaIndices(client)).filter(
+  const indexNames = (await fetchSavedObjectIndices(client)).filter(
     (indexName) => !onlyTaskManager || indexName.includes(TASK_MANAGER_SAVED_OBJECT_INDEX)
   );
   if (!indexNames.length) {
@@ -87,11 +86,11 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
 const LEGACY_INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})(:?_\\d*)?$`);
 const INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})_(pre)?\\d+.\\d+.\\d+`);
 
-function isKibanaIndex(index?: string): index is string {
+function isSavedObjectIndex(index?: string): index is string {
   return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
 }
 
-async function fetchKibanaIndices(client: Client) {
+async function fetchSavedObjectIndices(client: Client) {
   const resp = await client.cat.indices(
     { index: `${MAIN_SAVED_OBJECT_INDEX}*`, format: 'json' },
     {
@@ -103,7 +102,7 @@ async function fetchKibanaIndices(client: Client) {
     throw new Error(`expected response to be an array ${inspect(resp)}`);
   }
 
-  return resp.map((x: { index?: string }) => x.index).filter(isKibanaIndex);
+  return resp.map((x: { index?: string }) => x.index).filter(isSavedObjectIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
