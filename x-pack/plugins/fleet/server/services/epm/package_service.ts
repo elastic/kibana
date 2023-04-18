@@ -143,6 +143,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async readBundledPackage(bundledPackage: BundledPackage) {
+    await this.#runPreflight();
     return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
   }
 
