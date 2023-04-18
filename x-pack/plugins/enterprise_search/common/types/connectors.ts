@@ -5,15 +5,39 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface SelectOption {
   label: string;
-  order?: number | null;
+  value: string;
+}
+
+export interface Dependency {
+  field: string;
   value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
+export interface ConnectorConfigProperties {
+  depends_on: Dependency[];
+  display: string;
+  label: string;
+  options: SelectOption[];
+  order?: number | null;
+  required: boolean;
+  sensitive: boolean;
+  value: string | number | boolean | null;
+}
+
+export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
   extract_full_html?: { label: string; value: boolean };
 };
+
+export interface ConnectorSyncConfigProperties {
+  label: string;
+  value: string | number | boolean | null;
+}
+
+export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -170,7 +194,7 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorConfiguration;
+    configuration: ConnectorSyncConfiguration;
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
