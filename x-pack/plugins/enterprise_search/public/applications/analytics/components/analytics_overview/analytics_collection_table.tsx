@@ -7,15 +7,13 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { useActions } from 'kea';
-
 import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSuperDatePicker,
   EuiSuperDatePickerCommonRange,
-  EuiSearchBar,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiSpacer,
   EuiButtonGroup,
@@ -34,8 +32,6 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
 import { AnalyticsCollectionTableStyles } from './analytics_collection_table.styles';
-import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
-import { increment } from 'fp-ts/lib/function';
 
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   {
@@ -82,7 +78,7 @@ interface AnalyticsCollectionTableProps {
 
 export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
   collections,
-  onSearch
+  onSearch,
 }) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);

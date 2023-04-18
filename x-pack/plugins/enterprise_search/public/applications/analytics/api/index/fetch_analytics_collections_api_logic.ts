@@ -12,11 +12,20 @@ import { HttpLogic } from '../../../shared/http';
 
 export type FetchAnalyticsCollectionsApiLogicResponse = AnalyticsCollection[];
 
-export const fetchAnalyticsCollections = async (query = '') => {
+interface FetchAnalyticsCollectionsApiLogicArgs {
+  query: string;
+}
+
+export const fetchAnalyticsCollections = async ({
+  query = '',
+}: FetchAnalyticsCollectionsApiLogicArgs) => {
   const { http } = HttpLogic.values;
-  const route =
-    '/internal/enterprise_search/analytics/collections' + query ? `?query=${query}` : '';
-  const response = await http.get<FetchAnalyticsCollectionsApiLogicResponse>(route);
+  const route = '/internal/enterprise_search/analytics/collections';
+  const response = await http.get<FetchAnalyticsCollectionsApiLogicResponse>(route, {
+    query: {
+      query,
+    },
+  });
 
   return response;
 };
