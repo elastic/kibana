@@ -64,7 +64,9 @@ export const DetailPanelAlertListItem = ({
   const { args, name: processName } = event.process ?? {};
   const { event: processEvent } = event;
   const forceState = !isInvestigated ? 'open' : undefined;
-  const category = processEvent?.category?.[0];
+  const category = Array.isArray(processEvent?.category)
+    ? processEvent?.category?.[0]
+    : processEvent?.category;
   const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
   const alertCategoryDetailDisplayText =
     category !== ProcessEventAlertCategory.process

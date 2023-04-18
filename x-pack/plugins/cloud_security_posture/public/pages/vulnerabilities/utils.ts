@@ -7,6 +7,7 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { VectorScoreBase, Vector } from './types';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
@@ -84,4 +85,30 @@ export const getVulnerabilitiesColumnsGrid = (): EuiDataGridColumn[] => {
       }),
     },
   ];
+};
+
+export const getVectorScoreList = (vectorBaseScore: VectorScoreBase) => {
+  const result: Vector[] = [];
+  const v2Vector = vectorBaseScore?.V2Vector;
+  const v2Score = vectorBaseScore?.V2Score;
+  const v3Vector = vectorBaseScore?.V3Vector;
+  const v3Score = vectorBaseScore?.V3Score;
+
+  if (v2Vector) {
+    result.push({
+      version: '2.0',
+      vector: v2Vector,
+      score: v2Score,
+    });
+  }
+
+  if (v3Vector) {
+    result.push({
+      version: '2.0',
+      vector: v3Vector,
+      score: v3Score,
+    });
+  }
+
+  return result;
 };

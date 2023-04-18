@@ -4841,6 +4841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
@@ -4906,6 +4910,10 @@
   uid ""
 
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
   version "0.0.0"
   uid ""
 

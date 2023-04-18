@@ -201,6 +201,10 @@ export const SessionView = ({
     [onProcessSelected, searchResults]
   );
 
+  useEffect(() => {
+    onSearchIndexChange(0);
+  }, [onSearchIndexChange, searchResults]);
+
   const handleOnAlertDetailsClosed = useCallback((alertUuid: string) => {
     setFetchAlertStatus([alertUuid]);
   }, []);
