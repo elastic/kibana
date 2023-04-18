@@ -895,7 +895,27 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       isEditFlow: isEdit,
     }),
     validation: () => ({
-      validate: (value) => Boolean(value.script),
+      validate: (value) => {
+        // return false if script contains import or require statement
+        if (
+          value.script?.includes('import ') ||
+          value.script?.includes('require(') ||
+          value.script?.includes('journey(')
+        ) {
+          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid', {
+            defaultMessage:
+              'Monitor script is invalid. Inline scripts cannot be full journey scripts. It must be only steps definitions.',
+          });
+        }
+        // should contain at least one step
+        if (value.script && !value.script?.includes('step(')) {
+          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.oneStep', {
+            defaultMessage:
+              'Monitor script is invalid. Inline scripts must contain at least one step definition.',
+          });
+        }
+        return Boolean(value.script);
+      },
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.error', {
       defaultMessage: 'Monitor script is required',
