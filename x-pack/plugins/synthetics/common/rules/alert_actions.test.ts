@@ -436,7 +436,7 @@ describe('Alert Actions factory', () => {
           message:
             'The alert for the monitor {{context.monitorName}} checking {{{context.monitorUrl}}} from {{context.locationName}} is no longer active: {{context.recoveryReason}}.',
           subject:
-            'The monitor {{context.monitorName}} checking {{{context.monitorUrl}}} has recoverd.',
+            'The monitor {{context.monitorName}} checking {{{context.monitorUrl}}} has recovered.',
           to: ['test@email.com'],
         },
       },
