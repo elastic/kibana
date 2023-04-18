@@ -424,6 +424,52 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
       );
     });
 
+    it('handles migrating with defined throttling value', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.UPLOAD_SPEED]: '0.75',
+          [LegacyConfigKey.DOWNLOAD_SPEED]: '9',
+          [LegacyConfigKey.LATENCY]: '170',
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: '4g',
+        label: '4G',
+        value: {
+          download: '9',
+          upload: '0.75',
+          latency: '170',
+        },
+      });
+    });
+
+    it('handles migrating with custom throttling value', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.UPLOAD_SPEED]: '5',
+          [LegacyConfigKey.DOWNLOAD_SPEED]: '10',
+          [LegacyConfigKey.LATENCY]: '30',
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: 'custom',
+        label: 'Custom',
+        value: {
+          download: '10',
+          upload: '5',
+          latency: '30',
+        },
+      });
+    });
+
     it('handles migrating with disabled throttling', () => {
       const testMonitor = {
         ...browserUI,
