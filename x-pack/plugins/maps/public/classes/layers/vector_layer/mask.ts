@@ -46,7 +46,7 @@ export class Mask {
     if (featureValue === undefined || typeof featureValue !== 'number') {
       return false;
     }
-    return this._operator === MASK_OPERATOR.BELOW 
+    return this._operator === MASK_OPERATOR.BELOW
       ? featureValue < this._value
       : featureValue > this._value;
   }

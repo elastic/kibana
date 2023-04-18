@@ -702,12 +702,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       metricFields.forEach((metricField) => {
         const mask = metricField.getMask();
         if (mask) {
-          masks.push(new Mask({
-            isFeatureState: false,
-            mbFieldName: metricField.getMbFieldName(),
-            operator: mask.operator,
-            value: mask.value,
-          }));
+          masks.push(
+            new Mask({
+              isFeatureState: false,
+              mbFieldName: metricField.getMbFieldName(),
+              operator: mask.operator,
+              value: mask.value,
+            })
+          );
         }
       });
     }
@@ -719,12 +721,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         metricFields.forEach((metricField) => {
           const mask = metricField.getMask();
           if (mask) {
-            masks.push(new Mask({
-              isFeatureState: true, // joins add properties via feature state
-              mbFieldName: metricField.getMbFieldName(),
-              operator: mask.operator,
-              value: mask.value,
-            }));
+            masks.push(
+              new Mask({
+                isFeatureState: true, // joins add properties via feature state
+                mbFieldName: metricField.getMbFieldName(),
+                operator: mask.operator,
+                value: mask.value,
+              })
+            );
           }
         });
       }
@@ -738,7 +742,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   // therefore, masking must be accomplished via setting opacity paint property (hack)
   _getAlphaExpression() {
     const maskCaseExpressions = [];
-    this.getMasks().forEach(mask => {
+    this.getMasks().forEach((mask) => {
       // case expressions require 2 parts
       // 1) condition expression
       maskCaseExpressions.push(mask.getConditionExpression());
@@ -746,7 +750,9 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       maskCaseExpressions.push(0);
     });
 
-    return maskCaseExpressions.length ? ['case', ...maskCaseExpressions, this.getAlpha()] : this.getAlpha();
+    return maskCaseExpressions.length
+      ? ['case', ...maskCaseExpressions, this.getAlpha()]
+      : this.getAlpha();
   }
 
   _setMbPointsProperties(
