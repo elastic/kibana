@@ -18,6 +18,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type {
   getLazyOsqueryResults,
   getLazyLiveQueryField,
@@ -25,7 +26,6 @@ import type {
   getLazyOsqueryResponseActionTypeForm,
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}

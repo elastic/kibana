@@ -119,6 +119,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
     );
   }
 
-  public start() { }
-  public stop() { }
+  public start() {}
+  public stop() {}
 }

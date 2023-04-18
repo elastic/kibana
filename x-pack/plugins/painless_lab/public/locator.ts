@@ -14,7 +14,9 @@ export type PainlessLabAppLocator = LocatorPublic<PainlessLabAppLocatorParams>;
 
 export interface PainlessLabAppLocatorParams extends SerializableRecord {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-export class PainlessLabAppLocatorDefinition implements LocatorDefinition<PainlessLabAppLocatorParams> {
+export class PainlessLabAppLocatorDefinition
+  implements LocatorDefinition<PainlessLabAppLocatorParams>
+{
   public readonly id = PAINLESS_LAB_APP_LOCATOR;
 
   public readonly getLocation = async (
