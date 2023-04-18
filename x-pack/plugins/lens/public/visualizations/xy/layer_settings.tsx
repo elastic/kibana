@@ -17,8 +17,8 @@ export function LayerSettings({
   setState,
   section,
   layerId,
-}: VisualizationLayerSettingsProps<XYState> & { section: 'data' | 'appereance' }) {
-  if (section === 'appereance') {
+}: VisualizationLayerSettingsProps<XYState> & { section: 'data' | 'appearance' }) {
+  if (section === 'appearance') {
     return null;
   }
   const layer = state.layers.find((l) => l.layerId === layerId);

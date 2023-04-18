@@ -3051,7 +3051,7 @@ describe('xy_visualization', () => {
             frame: createMockFramePublicAPI(),
             layerId: 'first',
           })
-        ).toEqual({ data: false, appereance: false });
+        ).toEqual({ data: false, appearance: false });
 
         expect(
           xyVisualization.hasLayerSettings?.({
@@ -3070,7 +3070,7 @@ describe('xy_visualization', () => {
             frame: createMockFramePublicAPI(),
             layerId: 'referenceLine',
           })
-        ).toEqual({ data: false, appereance: false });
+        ).toEqual({ data: false, appearance: false });
       });
 
       it('should expose data settings for an annotation layer', () => {
@@ -3093,7 +3093,7 @@ describe('xy_visualization', () => {
             frame: createMockFramePublicAPI(),
             layerId: 'annotation',
           })
-        ).toEqual({ data: true, appereance: false });
+        ).toEqual({ data: true, appearance: false });
       });
     });
   });

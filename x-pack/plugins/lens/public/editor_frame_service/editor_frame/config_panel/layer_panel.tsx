@@ -324,7 +324,7 @@ export function LayerPanel(
         layerId,
         state: visualizationState,
         frame: props.framePublicAPI,
-      }) || { data: false, appereance: false },
+      }) || { data: false, appearance: false },
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
@@ -724,7 +724,7 @@ export function LayerPanel(
                   }}
                 />
               ) : null}
-              {visualizationLayerSettings.appereance ? (
+              {visualizationLayerSettings.appearance ? (
                 <EuiText
                   size="s"
                   css={css`
@@ -732,8 +732,8 @@ export function LayerPanel(
                   `}
                 >
                   <h4>
-                    {i18n.translate('xpack.lens.editorFrame.layerSettings.headingAppereance', {
-                      defaultMessage: 'Appereance',
+                    {i18n.translate('xpack.lens.editorFrame.layerSettings.headingAppearance', {
+                      defaultMessage: 'Appearance',
                     })}
                   </h4>
                 </EuiText>
@@ -745,7 +745,7 @@ export function LayerPanel(
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
-                    section: 'appereance',
+                    section: 'appearance',
                   }}
                 />
               )}

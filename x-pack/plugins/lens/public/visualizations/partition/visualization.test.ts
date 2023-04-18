@@ -657,7 +657,7 @@ describe('pie_visualization', () => {
               frame: mockFrame(),
               layerId: state.layers[0].layerId,
             })
-          ).toEqual({ data: type !== PieChartTypes.MOSAIC, appereance: false });
+          ).toEqual({ data: type !== PieChartTypes.MOSAIC, appearance: false });
         }
       });
     });

@@ -26,7 +26,7 @@ describe('layer settings', () => {
 
     const layerId = 'layer-id';
     const props: VisualizationLayerSettingsProps<PieVisualizationState> & {
-      section: 'data' | 'appereance';
+      section: 'data' | 'appearance';
     } = {
       setState: jest.fn(),
       layerId,
@@ -94,8 +94,8 @@ describe('layer settings', () => {
       ).toBeTruthy();
     });
 
-    test('should not render anything for the appereance section', () => {
-      expect(shallow(<LayerSettings {...props} section="appereance" />).isEmptyRender());
+    test('should not render anything for the appearance section', () => {
+      expect(shallow(<LayerSettings {...props} section="appearance" />).isEmptyRender());
     });
   });
 });

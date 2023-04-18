@@ -504,7 +504,7 @@ export const getPieVisualization = ({
   },
 
   hasLayerSettings(props) {
-    return { data: props.state.shape !== PieChartTypes.MOSAIC, appereance: false };
+    return { data: props.state.shape !== PieChartTypes.MOSAIC, appearance: false };
   },
 
   renderLayerSettings(domElement, props) {

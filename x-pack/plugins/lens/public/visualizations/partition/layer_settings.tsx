@@ -13,9 +13,9 @@ import { PieVisualizationState } from '../..';
 import { VisualizationLayerSettingsProps } from '../../types';
 
 export function LayerSettings(
-  props: VisualizationLayerSettingsProps<PieVisualizationState> & { section: 'data' | 'appereance' }
+  props: VisualizationLayerSettingsProps<PieVisualizationState> & { section: 'data' | 'appearance' }
 ) {
-  if (props.section === 'appereance') {
+  if (props.section === 'appearance') {
     return null;
   }
   if (props.state.shape === PieChartTypes.MOSAIC) {

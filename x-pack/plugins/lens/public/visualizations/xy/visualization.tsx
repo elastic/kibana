@@ -264,7 +264,7 @@ export const getXyVisualization = ({
 
   hasLayerSettings({ state, layerId: currentLayerId }) {
     const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
-    return { data: Boolean(layer && isAnnotationsLayer(layer)), appereance: false };
+    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
   },
 
   renderLayerSettings(domElement, props) {
