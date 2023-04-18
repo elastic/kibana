@@ -73,8 +73,6 @@ export const ConnectorConfigurationForm = () => {
           <EuiFormRow label={label ?? ''} key={key}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
-        ) : (
-          <></>
         );
       })}
       <EuiFormRow>
