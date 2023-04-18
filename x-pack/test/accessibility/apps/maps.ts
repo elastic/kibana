@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
-  describe('Maps app Accessibility', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/154913
+  describe.skip('Maps app Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
