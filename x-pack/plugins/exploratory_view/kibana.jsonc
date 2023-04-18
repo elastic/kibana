@@ -18,7 +18,6 @@
       "guidedOnboarding",
       "inspector",
       "lens",
-      "observability",
       "observabilityShared",
       "security",
       "share",
@@ -33,7 +32,6 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "observability",
       "unifiedSearch",
       "visualizations"
     ],

@@ -25,4 +25,9 @@ export const plugin = () => {
   return new ObservabilitySharedPlugin();
 };
 
-export { observabilityFeatureId, casesFeatureId, sloFeatureId } from '../common';
+export {
+  observabilityFeatureId,
+  observabilityAppId,
+  casesFeatureId,
+  sloFeatureId,
+} from '../common';

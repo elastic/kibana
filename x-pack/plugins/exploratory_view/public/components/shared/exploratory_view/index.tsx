@@ -15,7 +15,7 @@ import {
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { ExploratoryView } from './exploratory_view';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';

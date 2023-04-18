@@ -37,10 +37,6 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '@kbn/observability-plugin/public';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
@@ -49,7 +45,6 @@ import { APP_ROUTE } from './constants';
 
 export interface ExploratoryViewPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -67,7 +62,6 @@ export interface ExploratoryViewPublicPluginsStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
-  observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;

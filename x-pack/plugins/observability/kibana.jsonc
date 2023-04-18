@@ -18,16 +18,17 @@
       "files",
       "guidedOnboarding",
       "inspector",
+      "lens",
+      "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
-      "inspector",
-      "unifiedSearch",
       "security",
       "share",
-      "observabilityShared"
+      "unifiedSearch",
+      "visualizations"
     ],
     "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
-    "requiredBundles": ["unifiedSearch", "data", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }
 }
