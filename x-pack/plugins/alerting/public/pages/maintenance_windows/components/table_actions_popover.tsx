@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -24,10 +25,13 @@ interface TableActionsPopoverProps {
   onArchive: (archive: boolean) => void;
   onCancelAndArchive: () => void;
 }
+type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive';
 
 export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
   ({ status, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalType, setModalType] = useState<ModalType>();
 
     const onButtonClick = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -35,6 +39,63 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
     }, []);
+
+    const closeModal = useCallback(() => setIsModalVisible(false), []);
+    const showModal = useCallback((type: ModalType) => {
+      setModalType(type);
+      setIsModalVisible(true);
+    }, []);
+
+    const modal = useMemo(() => {
+      const modals = {
+        cancel: {
+          title: i18n.CANCEL_MODAL_TITLE,
+          subtitle: i18n.CANCEL_MODAL_SUBTITLE,
+          cancelButton: i18n.CANCEL_MODAL_BUTTON,
+          onConfirm: () => onCancel(),
+        },
+        cancelAndArchive: {
+          title: i18n.CANCEL_AND_ARCHIVE_MODAL_TITLE,
+          subtitle: i18n.CANCEL_AND_ARCHIVE_MODAL_SUBTITLE,
+          cancelButton: i18n.CANCEL_MODAL_BUTTON,
+          onConfirm: () => onCancelAndArchive(),
+        },
+        archive: {
+          title: i18n.ARCHIVE_MODAL_TITLE,
+          subtitle: i18n.ARCHIVE_MODAL_SUBTITLE,
+          cancelButton: i18n.CANCEL,
+          onConfirm: () => onArchive(true),
+        },
+        unarchive: {
+          title: i18n.UNARCHIVE_MODAL_TITLE,
+          subtitle: i18n.UNARCHIVE_MODAL_SUBTITLE,
+          cancelButton: i18n.CANCEL,
+          onConfirm: () => onArchive(false),
+        },
+      };
+      let m;
+      if (isModalVisible && modalType) {
+        const modalProps = modals[modalType];
+        m = (
+          <EuiConfirmModal
+            style={{ width: 600 }}
+            title={modalProps.title}
+            onCancel={closeModal}
+            onConfirm={() => {
+              closeModal();
+              modalProps.onConfirm();
+            }}
+            cancelButtonText={modalProps.cancelButton}
+            confirmButtonText={modalProps.title}
+            defaultFocusedButton="confirm"
+            buttonColor="danger"
+          >
+            <p>{modalProps.subtitle}</p>
+          </EuiConfirmModal>
+        );
+      }
+      return m;
+    }, [modalType, isModalVisible, closeModal, onArchive, onCancel, onCancelAndArchive]);
 
     const items = useMemo(() => {
       const menuItems = [
@@ -56,7 +117,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             icon="stopSlash"
             onClick={() => {
               closePopover();
-              onCancel();
+              showModal('cancel');
             }}
           >
             {i18n.TABLE_ACTION_CANCEL}
@@ -68,7 +129,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             icon="trash"
             onClick={() => {
               closePopover();
-              onCancelAndArchive();
+              showModal('cancelAndArchive');
             }}
           >
             {i18n.TABLE_ACTION_CANCEL_AND_ARCHIVE}
@@ -85,7 +146,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             icon="trash"
             onClick={() => {
               closePopover();
-              onArchive(true);
+              showModal('archive');
             }}
           >
             {i18n.TABLE_ACTION_ARCHIVE}
@@ -99,7 +160,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             icon="exit"
             onClick={() => {
               closePopover();
-              onArchive(false);
+              showModal('unarchive');
             }}
           >
             {i18n.TABLE_ACTION_UNARCHIVE}
@@ -107,30 +168,33 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         );
       }
       return menuItems;
-    }, [status, closePopover, onArchive, onCancel, onCancelAndArchive, onEdit]);
+    }, [status, onEdit, closePopover, showModal]);
 
     return (
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="upcoming-events-icon-button"
-                iconType="boxesHorizontal"
-                size="s"
-                aria-label="Upcoming events"
-                onClick={onButtonClick}
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-          >
-            <EuiContextMenuPanel items={items} />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  data-test-subj="upcoming-events-icon-button"
+                  iconType="boxesHorizontal"
+                  size="s"
+                  aria-label="Upcoming events"
+                  onClick={onButtonClick}
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downCenter"
+            >
+              <EuiContextMenuPanel items={items} />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {modal}
+      </>
     );
   }
 );

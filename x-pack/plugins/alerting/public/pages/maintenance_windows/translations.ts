@@ -454,10 +454,47 @@ export const TABLE_ACTION_CANCEL = i18n.translate(
   }
 );
 
+export const CANCEL_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.title',
+  {
+    defaultMessage: 'Cancel maintenance window',
+  }
+);
+
+export const CANCEL_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.subtitle',
+  {
+    defaultMessage:
+      'Rule notifications resume immediately. Running maintenance window events are canceled.',
+  }
+);
+
+export const CANCEL_MODAL_BUTTON = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelModal.button',
+  {
+    defaultMessage: 'Keep running',
+  }
+);
+
 export const TABLE_ACTION_CANCEL_AND_ARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.cancelAndArchive',
   {
     defaultMessage: 'Cancel and Archive',
+  }
+);
+
+export const CANCEL_AND_ARCHIVE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.title',
+  {
+    defaultMessage: 'Cancel and archive maintenance window',
+  }
+);
+
+export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle',
+  {
+    defaultMessage:
+      'Rule notifications resume immediately. Running and upcoming maintenance window events are canceled.',
   }
 );
 
@@ -468,9 +505,37 @@ export const TABLE_ACTION_ARCHIVE = i18n.translate(
   }
 );
 
+export const ARCHIVE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archiveModal.title',
+  {
+    defaultMessage: 'Archive maintenance window',
+  }
+);
+
+export const ARCHIVE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.archiveModal.subtitle',
+  {
+    defaultMessage: 'Upcoming maintenance window events are canceled.',
+  }
+);
+
 export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {
     defaultMessage: 'Unarchive',
+  }
+);
+
+export const UNARCHIVE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.unarchiveModal.title',
+  {
+    defaultMessage: 'Unarchive maintenance window',
+  }
+);
+
+export const UNARCHIVE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.unarchiveModal.subtitle',
+  {
+    defaultMessage: 'Upcoming maintenance window events are scheduled.',
   }
 );
