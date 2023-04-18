@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   useEuiBackgroundColor,
@@ -30,6 +29,7 @@ import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
 import { useTableState } from './use_table_state';
+import { getLabels } from './labels';
 
 const QUERY_MODE = {
   INCLUDE: 'should',
@@ -75,6 +75,11 @@ export const CategoryTable: FC<Props> = ({
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+
+  const labels = useMemo(
+    () => getLabels(onAddFilter !== undefined && onClose !== undefined),
+    [onAddFilter, onClose]
+  );
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     if (
@@ -167,23 +172,15 @@ export const CategoryTable: FC<Props> = ({
       width: '60px',
       actions: [
         {
-          name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in Discover',
-          }),
-          description: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in Discover',
-          }),
+          name: labels.singleSelect.in,
+          description: labels.singleSelect.in,
           icon: 'plusInCircle',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
         {
-          name: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in Discover',
-          }),
-          description: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in Discover',
-          }),
+          name: labels.singleSelect.out,
+          description: labels.singleSelect.out,
           icon: 'minusInCircle',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
@@ -231,10 +228,7 @@ export const CategoryTable: FC<Props> = ({
                 iconType="plusInCircle"
                 iconSide="left"
               >
-                <FormattedMessage
-                  id="xpack.aiops.logCategorization.showInDiscover"
-                  defaultMessage="Show these in Discover"
-                />
+                {labels.multiSelect.in}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -244,10 +238,7 @@ export const CategoryTable: FC<Props> = ({
                 iconType="minusInCircle"
                 iconSide="left"
               >
-                <FormattedMessage
-                  id="xpack.aiops.logCategorization.filterOutInDiscover"
-                  defaultMessage="Filter out in Discover"
-                />
+                {labels.multiSelect.out}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
