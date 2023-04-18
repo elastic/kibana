@@ -294,7 +294,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
               capabilities: {
                 add: true,
               },
-              privilaged: true,
+              privileged: true,
               procMount: true,
               runAsGroup: true,
               runAsUser: true,
