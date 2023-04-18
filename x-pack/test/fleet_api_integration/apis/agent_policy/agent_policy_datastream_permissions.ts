@@ -89,6 +89,15 @@ export default function (providerContext: FtrProviderContext) {
                   },
                 },
               },
+              'dynamic_datastream-system/metrics': {
+                enabled: true,
+                streams: {
+                  'dynamic_datastream.test_metrics': {
+                    enabled: true,
+                    vars: {},
+                  },
+                },
+              },
             },
           })
           .expect(200);
@@ -103,6 +112,7 @@ export default function (providerContext: FtrProviderContext) {
         // Check that the privileges are correct
         expect(fullAgentPolicy.output_permissions.default[packagePolicyId].indices).to.eql([
           { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
+          { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
         ]);
 
         // Cleanup agent and package policy

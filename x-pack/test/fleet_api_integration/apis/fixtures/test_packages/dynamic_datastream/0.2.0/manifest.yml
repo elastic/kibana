@@ -17,3 +17,5 @@ policy_templates:
     inputs:
       - type: logfile
         title: Test dynamic logs
+      - type: system/metrics
+        title: Test dynamic metrics
