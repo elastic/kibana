@@ -914,6 +914,7 @@ function TableListComp<T extends UserContentCommonSchema>({
         <Table<T>
           dispatch={dispatch}
           items={items}
+          renderCreateButton={renderCreateButton}
           isFetchingItems={isFetchingItems}
           searchQuery={searchQuery}
           tableColumns={tableColumns}

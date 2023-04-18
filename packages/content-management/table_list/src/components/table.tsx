@@ -17,6 +17,7 @@ import {
   SearchFilterConfig,
   Direction,
   Query,
+  Search,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -51,6 +52,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   deleteItems: TableListProps<T>['deleteItems'];
+  renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
@@ -71,6 +73,7 @@ export function Table<T extends UserContentCommonSchema>({
   entityNamePlural,
   tagsToTableItemMap,
   deleteItems,
+  renderCreateButton,
   tableCaption,
   onTableChange,
   onTableSearchChange,
@@ -177,10 +180,11 @@ export function Table<T extends UserContentCommonSchema>({
     return [tableSortSelectFilter, tagFilterPanel];
   }, [tableSortSelectFilter, tagFilterPanel]);
 
-  const search = useMemo(() => {
+  const search = useMemo((): Search => {
     return {
       onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
+      toolsRight: renderCreateButton(),
       query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
@@ -188,7 +192,7 @@ export function Table<T extends UserContentCommonSchema>({
       },
       filters: searchFilters,
     };
-  }, [onTableSearchChange, renderToolsLeft, searchFilters, searchQuery.query]);
+  }, [onTableSearchChange, renderCreateButton, renderToolsLeft, searchFilters, searchQuery.query]);
 
   const noItemsMessage = (
     <FormattedMessage
