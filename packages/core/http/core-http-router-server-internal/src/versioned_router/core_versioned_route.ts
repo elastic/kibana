@@ -19,7 +19,7 @@ import type {
   IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { HandlerResolutionStrategy, Method } from './types';
+import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
@@ -79,8 +79,8 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   /** This method assumes that one or more versions handlers are registered  */
-  private getDefaultVersion(strategy: HandlerResolutionStrategy = 'oldest'): ApiVersion {
-    return resolvers[strategy]([...this.handlers.keys()]);
+  private getDefaultVersion(): ApiVersion {
+    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
   private getAvailableVersionsMessage(): string {
@@ -171,12 +171,9 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   };
 
-  private getVersion(
-    request: KibanaRequest,
-    strategy: HandlerResolutionStrategy = 'oldest'
-  ): ApiVersion {
+  private getVersion(request: KibanaRequest): ApiVersion {
     const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
-    return Array.isArray(versions) ? versions[0] : versions ?? this.getDefaultVersion(strategy);
+    return Array.isArray(versions) ? versions[0] : versions ?? this.getDefaultVersion();
   }
 
   private validateVersion(version: string) {
