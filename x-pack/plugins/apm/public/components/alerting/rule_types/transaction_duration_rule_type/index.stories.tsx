@@ -11,6 +11,8 @@ import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuleParams, TransactionDurationRuleType } from '.';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import { AlertMetadata } from '../../utils/helper';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
@@ -68,7 +70,10 @@ CreatingInApmServiceOverview.args = {
     windowSize: 5,
     windowUnit: 'm',
   },
-  metadata: undefined,
+  metadata: {
+    environment: ENVIRONMENT_ALL.value,
+    serviceName: undefined,
+  },
 };
 
 export const CreatingInStackManagement: Story<Args> = ({
