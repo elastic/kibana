@@ -24,7 +24,6 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ExportTypesPluginSetup, ExportTypesPluginStart } from '@kbn/reporting-export-types';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from '.';
@@ -78,7 +77,6 @@ export interface ReportingPublicPluginSetupDendencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
-  exportTypesPlugin: ExportTypesPluginSetup;
 }
 
 export interface ReportingPublicPluginStartDendencies {
@@ -88,7 +86,6 @@ export interface ReportingPublicPluginStartDendencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
-  exportTypesPlugin: ExportTypesPluginStart;
 }
 
 /**
@@ -151,7 +148,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const { home, management, screenshotMode, share, uiActions, exportTypesPlugin } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -221,13 +218,6 @@ export class ReportingPublicPlugin
       CONTEXT_MENU_TRIGGER,
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
-
-    // gets the reporting info entry to pass to the plugin to create the type
-    // exportTypesPlugin.getTypes(core, type);
-    console.log(apiClient);
-
-    // this also creates the et registry
-    // exportTypesPlugin.registry();
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;

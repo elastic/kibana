@@ -30,6 +30,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import { ExportTypesPluginSetup } from '@kbn/reporting-export-types/server';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
@@ -103,6 +104,7 @@ export interface ReportingSetupDeps {
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  exportTypes: ExportTypesPluginSetup;
 }
 
 export interface ReportingStartDeps {

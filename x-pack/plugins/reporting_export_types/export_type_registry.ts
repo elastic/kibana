@@ -8,7 +8,7 @@
 
 import { Subscription } from 'rxjs';
 import type { Job } from '@kbn/reporting-plugin/public/lib/job';
-import { ExportTypeEntry } from './public/export_definitions';
+import { ExportTypeEntry } from './server/export_definitions';
 
 /**
  * The entries after being registered should have these properties

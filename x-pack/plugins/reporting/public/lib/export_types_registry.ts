@@ -6,7 +6,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import type { ExportTypeEntry } from '@kbn/reporting-export-types';
+import type { ExportTypeEntry } from '@kbn/reporting-export-types/server';
 import type { Job } from './job';
 /**
  * The entries after being registered should have these properties
