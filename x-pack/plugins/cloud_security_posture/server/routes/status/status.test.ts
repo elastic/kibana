@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { calculateCspStatusCode } from './status';
+import { calculateIntegrationStatus } from './status';
 import { CSPM_POLICY_TEMPLATE, VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 
-describe('calculateCspStatusCode for cspm', () => {
+describe('calculateIntegrationStatus for cspm', () => {
   it('Verify status when there are no permission for cspm', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'unprivileged',
-        findings: 'unprivileged',
+        latest: 'unprivileged',
+        stream: 'unprivileged',
         score: 'unprivileged',
       },
       1,
@@ -26,11 +26,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are no findings, no healthy agents and no installed policy templates', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       0,
@@ -42,11 +42,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are findings and installed policies but no healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'not-empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'not-empty',
       },
       0,
@@ -58,11 +58,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are findings ,installed policies and healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'not-empty',
-        findings: 'not-empty',
+        latest: 'not-empty',
+        stream: 'not-empty',
         score: 'not-empty',
       },
       1,
@@ -74,11 +74,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are no findings ,installed policies and no healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       0,
@@ -90,11 +90,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents and no findings', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       1,
@@ -106,11 +106,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents and no findings and been more than 10 minutes', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       1,
@@ -122,11 +122,11 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents past findings but no recent findings', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       CSPM_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'not-empty',
+        latest: 'empty',
+        stream: 'not-empty',
         score: 'not-empty',
       },
       1,
@@ -138,13 +138,13 @@ describe('calculateCspStatusCode for cspm', () => {
   });
 });
 
-describe('calculateCspStatusCode for vul_mgmt', () => {
+describe('calculateIntegrationStatus for vul_mgmt', () => {
   it('Verify status when there are no permission for vul_mgmt', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'unprivileged',
-        findings: 'unprivileged',
+        latest: 'unprivileged',
+        stream: 'unprivileged',
         score: 'unprivileged',
       },
       1,
@@ -156,11 +156,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are no vul_mgmt findings, no healthy agents and no installed policy templates', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       0,
@@ -172,11 +172,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are vul_mgmt findings and installed policies but no healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'not-empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'not-empty',
       },
       0,
@@ -188,11 +188,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are vul_mgmt findings ,installed policies and healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'not-empty',
-        findings: 'not-empty',
+        latest: 'not-empty',
+        stream: 'not-empty',
         score: 'not-empty',
       },
       1,
@@ -204,11 +204,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are no vul_mgmt findings ,installed policies and no healthy agents', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       0,
@@ -220,11 +220,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents and no vul_mgmt findings', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       1,
@@ -236,11 +236,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents and no vul_mgmt findings and been more than 10 minutes', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'empty',
+        latest: 'empty',
+        stream: 'empty',
         score: 'empty',
       },
       1,
@@ -252,11 +252,11 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
   });
 
   it('Verify status when there are installed policies, healthy agents past vul_mgmt findings but no recent findings', async () => {
-    const statusCode = calculateCspStatusCode(
+    const statusCode = calculateIntegrationStatus(
       VULN_MGMT_POLICY_TEMPLATE,
       {
-        findingsLatest: 'empty',
-        findings: 'not-empty',
+        latest: 'empty',
+        stream: 'not-empty',
         score: 'not-empty',
       },
       1,

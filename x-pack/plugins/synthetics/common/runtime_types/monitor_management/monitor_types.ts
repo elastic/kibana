@@ -192,15 +192,6 @@ export const HTTPFieldsCodec = t.intersection([
 
 export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
 
-// Browser Fields
-export const ThrottlingConfigKeyCodec = t.union([
-  t.literal(ConfigKey.DOWNLOAD_SPEED),
-  t.literal(ConfigKey.UPLOAD_SPEED),
-  t.literal(ConfigKey.LATENCY),
-]);
-
-export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
-
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.intersection([
     t.interface({
@@ -225,16 +216,28 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
+export const ThrottlingConfigValueCodec = t.interface({
+  download: t.string,
+  upload: t.string,
+  latency: t.string,
+});
+
+export type ThrottlingConfigValue = t.TypeOf<typeof ThrottlingConfigValueCodec>;
+
+export const ThrottlingConfigCodec = t.interface({
+  value: t.union([ThrottlingConfigValueCodec, t.null]),
+  label: t.string,
+  id: t.string,
+});
+
+export type ThrottlingConfig = t.TypeOf<typeof ThrottlingConfigCodec>;
+
 export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.SCREENSHOTS]: t.string,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
-  [ConfigKey.IS_THROTTLING_ENABLED]: t.boolean,
-  [ConfigKey.DOWNLOAD_SPEED]: t.string,
-  [ConfigKey.UPLOAD_SPEED]: t.string,
-  [ConfigKey.LATENCY]: t.string,
-  [ConfigKey.THROTTLING_CONFIG]: t.string,
+  [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfigCodec,
 });
 
 export const BrowserSimpleFieldsCodec = t.intersection([

@@ -50,6 +50,7 @@ describe('<ControlGeneralViewSelector />', () => {
           onChange={onChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
+          usedByResponse={false}
         />
       </TestProvider>
     );
@@ -66,6 +67,12 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(getByTestId('cloud-defend-selectorcondition-name')).toBeTruthy();
     expect(getByTestId('cloud-defend-selectorcondition-operation')).toBeTruthy();
+  });
+
+  it('renders a badge to show that the selector is unused', () => {
+    const { getByText } = render(<WrappedComponent />);
+
+    expect(getByText(i18n.unusedSelector)).toBeTruthy();
   });
 
   it('allows the user to add a limited set of operations', () => {
