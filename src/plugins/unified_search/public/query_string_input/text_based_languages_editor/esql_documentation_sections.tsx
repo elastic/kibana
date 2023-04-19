@@ -17,11 +17,11 @@ export const initialSection = (
         defaultMessage: `## ESQL
 The Elasticsearch Query Language (ESQL) is a query language that enables the iterative exploration of data.
 
-An ESQL query consists of a series of commands, separated by pipes. Each query starts with a source command. A source command produces a table, typically with data from Elasticsearch. 
+An ESQL query consists of a series of commands, separated by pipes. Each query starts with a source command, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more processing commands. Processing commands change an input table by adding, removing, or changing rows and columns. 
 
-You can chain processing commands, separated by a pipe character: \`|\`. Each processing command works on the output table of the previous command. 
+To chain processing commands, use the pipe character: \`|\`. Each processing command works on the output table of the previous command. 
 
 The result of a query is the table produced by the final processing command.
 
