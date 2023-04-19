@@ -72,13 +72,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const [initialConnector, setInitialConnector] = useState({
+  let initialConnector = {
     actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
     config: {},
     secrets: {},
     isMissingSecrets: false,
-  });
+  };
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
@@ -111,13 +111,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
       setActionType(allActionTypes[id]);
-      setInitialConnector({
+      initialConnector = {
         actionTypeId: id,
         isDeprecated: false,
         config: {},
         secrets: {},
         isMissingSecrets: false,
-      });
+      };
       if (resetConnectorForm.current) {
         resetConnectorForm.current({
           resetValues: true,
