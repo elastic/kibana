@@ -11,63 +11,28 @@ import { ESSearchRequest } from '@kbn/es-types';
 import { InfraStaticSourceConfiguration } from '../../../lib/sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
+import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION } from './constants';
 import {
-  BUCKET_KEY,
-  COMPOSITE_DEFAULT_SIZE,
-  METADATA_AGGREGATION,
-  COMPOSITE_KEY,
-} from './constants';
-import {
-  AfterKey,
   GetHostsArgs,
-  HostsMetricsSearchCompositeAggregationResponse,
-  HostsMetricsSearchCompositeAggregationResponseRT,
+  HostsMetricsSearchAggregationResponse,
+  HostsMetricsSearchAggregationResponseRT,
 } from './types';
-import {
-  createFilters,
-  getAfterKey,
-  getInventoryModelAggregations,
-  runQuery,
-} from './helpers/query';
+import { createFilters, getInventoryModelAggregations, runQuery } from './helpers/query';
 
 export const getAllHosts = async (
   { searchClient, sourceConfig, params }: GetHostsArgs,
-  hostNamesShortList: string[] = [],
-  response?: HostsMetricsSearchCompositeAggregationResponse,
-  afterKey?: AfterKey | null
-): Promise<HostsMetricsSearchCompositeAggregationResponse> => {
-  const limitReached = params.limit && (response?.hosts.buckets.length ?? 0) >= params.limit;
-  if (response && (!afterKey || limitReached)) {
-    return response;
-  }
-
-  const query = createQuery(params, sourceConfig, hostNamesShortList, afterKey);
-  const current = await lastValueFrom(
-    runQuery(searchClient, query, decodeOrThrow(HostsMetricsSearchCompositeAggregationResponseRT))
-  );
-
-  const combined: HostsMetricsSearchCompositeAggregationResponse = {
-    ...current,
-    hosts: {
-      ...response?.hosts,
-      buckets: [...(response?.hosts.buckets ?? []), ...(current?.hosts.buckets ?? [])],
-      after_key: current?.hosts.after_key,
-    },
-  };
-
-  return getAllHosts(
-    { searchClient, sourceConfig, params },
-    hostNamesShortList,
-    combined,
-    current?.hosts.after_key
+  hostNamesShortList: string[] = []
+): Promise<HostsMetricsSearchAggregationResponse> => {
+  const query = createQuery(params, sourceConfig, hostNamesShortList);
+  return lastValueFrom(
+    runQuery(searchClient, query, decodeOrThrow(HostsMetricsSearchAggregationResponseRT))
   );
 };
 
 const createQuery = (
   params: GetHostsRequestBodyPayload,
   sourceConfig: InfraStaticSourceConfiguration,
-  hostNamesShortList: string[],
-  afterKey?: AfterKey
+  hostNamesShortList: string[]
 ): ESSearchRequest => {
   const metricAggregations = getInventoryModelAggregations(params.metrics.map((p) => p.type));
 
@@ -85,28 +50,23 @@ const createQuery = (
           }),
         },
       },
-      aggs: createCompositeAggregations(params, metricAggregations, afterKey),
+      aggs: createAggregations(params, metricAggregations),
     },
   };
 };
 
-const createCompositeAggregations = (
+const createAggregations = (
   { limit }: GetHostsRequestBodyPayload,
-  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
-  afterKey?: AfterKey
+  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   return {
     hosts: {
-      composite: {
-        size: limit ?? COMPOSITE_DEFAULT_SIZE,
-        sources: [
-          {
-            [COMPOSITE_KEY]: {
-              terms: { field: BUCKET_KEY },
-            },
-          },
-        ],
-        ...(getAfterKey(COMPOSITE_KEY, afterKey) ?? {}),
+      terms: {
+        field: BUCKET_KEY,
+        size: limit ?? MAX_SIZE,
+        order: {
+          _key: 'asc',
+        },
       },
       aggs: {
         ...metricAggregations,

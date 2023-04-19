@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in limit: 0 does not match expected type IsGreaterOrEqual'
+          '[request body]: Failed to validate: in limit: 0 does not match expected type InRange in limit: 0 does not match expected type pipe(undefined, BooleanFromString)'
         );
       });
 
@@ -219,7 +219,16 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in limit: -2 does not match expected type IsGreaterOrEqual'
+          '[request body]: Failed to validate: in limit: -2 does not match expected type InRange in limit: -2 does not match expected type pipe(undefined, BooleanFromString)'
+        );
+      });
+
+      it('should fail when limit above 500', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 501 };
+        const response = await makeRequest({ body, expectedHTTPCode: 400 });
+
+        expect(normalizeNewLine(response.body.message)).to.be(
+          '[request body]: Failed to validate: in limit: 501 does not match expected type InRange in limit: 501 does not match expected type pipe(undefined, BooleanFromString)'
         );
       });
 
@@ -230,6 +239,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
         );
+      });
+
+      it('should pass when limit is 1', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 1 };
+        await makeRequest({ body, expectedHTTPCode: 200 });
+      });
+
+      it('should pass when limit is 500', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 500 };
+        await makeRequest({ body, expectedHTTPCode: 200 });
       });
 
       it('should fail when timeRange is not informed', async () => {

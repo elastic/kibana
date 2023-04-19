@@ -9,11 +9,9 @@ import { estypes } from '@elastic/elasticsearch';
 import { ES_SEARCH_STRATEGY, ISearchClient } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
-import { afterKeyObjectRT } from '../../../../../common/http_api';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import { GetHostsRequestBodyPayload, HostMetricType } from '../../../../../common/http_api/hosts';
 import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
-import { AfterKey } from '../types';
 
 export const createFilters = ({
   params,
@@ -103,15 +101,4 @@ export const getInventoryModelAggregations = (
     }),
     {}
   );
-};
-
-export const getAfterKey = (groupName: string, afterKey?: AfterKey) => {
-  if (!afterKey) {
-    return null;
-  }
-  if (afterKeyObjectRT.is(afterKey)) {
-    return { after: afterKey };
-  } else {
-    return { after: { [groupName]: afterKey } };
-  }
 };

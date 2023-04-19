@@ -8,7 +8,6 @@
 import { estypes } from '@elastic/elasticsearch';
 import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
-import { afterKeyObjectRT } from '../../../../common/http_api';
 import { InfraStaticSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
@@ -37,13 +36,11 @@ export const HostsMetricsSearchBucketRT = rt.record(
 );
 
 export const HostsNameBucketRT = rt.type({
-  key: rt.record(rt.string, rt.string),
+  key: rt.string,
   doc_count: rt.number,
 });
 
-export const AfterKeyRT = rt.union([rt.string, rt.null, afterKeyObjectRT]);
-
-export const HostsMetricsSearchCompositeAggregationResponseRT = rt.union([
+export const HostsMetricsSearchAggregationResponseRT = rt.union([
   rt.type({
     hosts: rt.intersection([
       rt.partial({
@@ -51,25 +48,6 @@ export const HostsMetricsSearchCompositeAggregationResponseRT = rt.union([
         doc_count_error_upper_bound: rt.number,
       }),
       rt.type({ buckets: rt.array(HostsMetricsSearchBucketRT) }),
-      rt.partial({
-        after_key: AfterKeyRT,
-      }),
-    ]),
-  }),
-  rt.undefined,
-]);
-
-export const HostsMetricsSearchTermsAggregationResponseRT = rt.union([
-  rt.type({
-    hosts: rt.intersection([
-      rt.partial({
-        sum_other_doc_count: rt.number,
-        doc_count_error_upper_bound: rt.number,
-      }),
-      rt.type({ buckets: rt.array(HostsMetricsSearchBucketRT) }),
-      rt.partial({
-        after_key: AfterKeyRT,
-      }),
     ]),
   }),
   rt.undefined,
@@ -84,9 +62,6 @@ export const FilteredHostsSearchAggregationResponseRT = rt.union([
       }),
       rt.type({
         buckets: rt.array(HostsNameBucketRT),
-      }),
-      rt.partial({
-        after_key: AfterKeyRT,
       }),
     ]),
   }),
@@ -105,7 +80,6 @@ export interface GetHostsArgs {
   params: GetHostsRequestBodyPayload;
 }
 
-export type AfterKey = rt.TypeOf<typeof AfterKeyRT>;
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;
 export type HostsMetricsSearchBucket = rt.TypeOf<typeof HostsMetricsSearchBucketRT>;
 
@@ -113,9 +87,6 @@ export type FilteredHostsSearchAggregationResponse = rt.TypeOf<
   typeof FilteredHostsSearchAggregationResponseRT
 >;
 
-export type HostsMetricsSearchCompositeAggregationResponse = rt.TypeOf<
-  typeof HostsMetricsSearchCompositeAggregationResponseRT
->;
-export type HostsMetricsSearchTermsAggregationResponse = rt.TypeOf<
-  typeof HostsMetricsSearchTermsAggregationResponseRT
+export type HostsMetricsSearchAggregationResponse = rt.TypeOf<
+  typeof HostsMetricsSearchAggregationResponseRT
 >;

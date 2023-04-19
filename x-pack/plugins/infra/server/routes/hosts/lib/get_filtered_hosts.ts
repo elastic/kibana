@@ -12,50 +12,28 @@ import { InfraStaticSourceConfiguration } from '../../../lib/sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import {
-  AfterKey,
-  FilteredHostsSearchAggregationResponse,
   FilteredHostsSearchAggregationResponseRT,
+  FilteredHostsSearchAggregationResponse,
   GetHostsArgs,
 } from './types';
-import { BUCKET_KEY, COMPOSITE_KEY, COMPOSITE_DEFAULT_SIZE } from './constants';
+import { BUCKET_KEY, MAX_SIZE } from './constants';
 import { assertQueryStructure } from './utils';
-import { createFilters, getAfterKey, runQuery } from './helpers/query';
+import { createFilters, runQuery } from './helpers/query';
 
-export const getFilteredHosts = async (
-  { searchClient, sourceConfig, params }: GetHostsArgs,
-  response?: FilteredHostsSearchAggregationResponse,
-  afterKey?: AfterKey | null
-): Promise<FilteredHostsSearchAggregationResponse> => {
-  const limitReached = params.limit && (response?.hosts.buckets.length ?? 0) >= params.limit;
-  if (response && (!afterKey || limitReached)) {
-    return response;
-  }
-
-  const query = createQuery(params, sourceConfig, afterKey);
-  const current = await lastValueFrom(
+export const getFilteredHosts = async ({
+  searchClient,
+  sourceConfig,
+  params,
+}: GetHostsArgs): Promise<FilteredHostsSearchAggregationResponse> => {
+  const query = createQuery(params, sourceConfig);
+  return lastValueFrom(
     runQuery(searchClient, query, decodeOrThrow(FilteredHostsSearchAggregationResponseRT))
-  );
-
-  const combined: FilteredHostsSearchAggregationResponse = {
-    ...current,
-    hosts: {
-      ...response?.hosts,
-      buckets: [...(response?.hosts.buckets ?? []), ...(current?.hosts.buckets ?? [])],
-      after_key: current?.hosts.after_key,
-    },
-  };
-
-  return getFilteredHosts(
-    { searchClient, sourceConfig, params },
-    combined,
-    current?.hosts.after_key
   );
 };
 
 const createQuery = (
   params: GetHostsRequestBodyPayload,
-  sourceConfig: InfraStaticSourceConfiguration,
-  afterKey?: AfterKey
+  sourceConfig: InfraStaticSourceConfiguration
 ): ESSearchRequest => {
   assertQueryStructure(params.query);
 
@@ -73,16 +51,12 @@ const createQuery = (
       },
       aggs: {
         hosts: {
-          composite: {
-            size: params.limit ?? COMPOSITE_DEFAULT_SIZE,
-            sources: [
-              {
-                [COMPOSITE_KEY]: {
-                  terms: { field: BUCKET_KEY },
-                },
-              },
-            ],
-            ...(getAfterKey(COMPOSITE_KEY, afterKey) ?? {}),
+          terms: {
+            size: params.limit ?? MAX_SIZE,
+            field: BUCKET_KEY,
+            order: {
+              _key: 'asc',
+            },
           },
         },
       },

@@ -12,8 +12,7 @@ export const METADATA_AGGREGATION_NAME = 'metadata';
 export const FILTER_AGGREGATION_SUB_AGG_NAME = 'result';
 export const INVENTORY_MODEL_NODE_TYPE = 'host';
 
-export const COMPOSITE_KEY = 'hostGroup';
-export const COMPOSITE_DEFAULT_SIZE = 2000;
+export const MAX_SIZE = 500;
 
 export const METADATA_AGGREGATION: Record<string, estypes.AggregationsAggregationContainer> = {
   [METADATA_AGGREGATION_NAME]: {

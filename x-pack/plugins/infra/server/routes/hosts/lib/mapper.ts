@@ -19,7 +19,7 @@ import {
   HostsMetricsSearchValue,
   HostsMetricsSearchValueRT,
 } from './types';
-import { COMPOSITE_KEY, METADATA_AGGREGATION_NAME } from './constants';
+import { METADATA_AGGREGATION_NAME } from './constants';
 
 export const mapToApiResponse = (
   params: GetHostsRequestBodyPayload,
@@ -35,7 +35,7 @@ export const mapToApiResponse = (
     const metrics = convertMetricBucket(params, bucket);
     const metadata = convertMetadataBucket(bucket);
 
-    return { name: (bucket.key as any)[COMPOSITE_KEY] as string, metrics, metadata };
+    return { name: bucket.key as string, metrics, metadata };
   });
 
   return {
