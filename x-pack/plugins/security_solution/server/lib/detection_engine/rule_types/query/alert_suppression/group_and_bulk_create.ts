@@ -174,7 +174,9 @@ export const groupAndBulkCreate = async ({
         primaryTimestamp: runOpts.primaryTimestamp,
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
-        additionalFilters: bucketHistoryFilter,
+        // TODO: https://github.com/elastic/kibana/issues/155242
+        // additionalFilters: bucketHistoryFilter,
+        additionalFilters: [],
       };
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
         eventsSearchParams

@@ -50,10 +50,15 @@ export const prepareBucketsToSuppression: PrepareSuppressionBuckets = async ({
     return buckets;
   }
 
+  const nullBucketsSize = maxSignals - bucketsWithValues.length;
+  // TODO: fix it
+  const minNumberOfTopHits = Math.ceil((maxSignals - bucketsWithValues.length) / nullBucketsSize);
+
   const groupingAggregation = buildGroupByFieldAggregation({
     groupByFields,
-    maxSignals: maxSignals - bucketsWithValues.length,
+    maxSignals: nullBucketsSize,
     aggregatableTimestampField,
+    // ???
     topHitsSize: 100,
   });
 
@@ -82,10 +87,11 @@ export const prepareBucketsToSuppression: PrepareSuppressionBuckets = async ({
       };
     })
   );
-  return [...bucketsWithValues, ...flattenedBuckets];
+  return [...bucketsWithValues, ...flattenedBuckets].slice(0, maxSignals);
 };
 
 /**
+ * TODO: rewrite/rename
  * builds filter that excludes from result all docs that have value for groupByFields
  * @param groupByFields
  * @returns
@@ -94,12 +100,19 @@ const buildExcludeDocsWithValuesFilter = (groupByFields: string[]): QueryDslQuer
   if (groupByFields.length === 0) {
     return [];
   }
+
   return [
     {
       bool: {
-        must_not: groupByFields.map((field) => ({
-          exists: {
-            field,
+        should: groupByFields.map((field) => ({
+          bool: {
+            must_not: [
+              {
+                exists: {
+                  field,
+                },
+              },
+            ],
           },
         })),
       },
