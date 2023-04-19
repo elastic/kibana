@@ -7,16 +7,8 @@
 
 import { getGroupByTerms } from './get_groupby_terms';
 
-describe('get terms fields based on group-by', () => {
-  it('returns single terms field', () => {
-    const ruleParams = { groupBy: 'service.name' };
-    const terms = getGroupByTerms(ruleParams.groupBy);
-    expect(terms).toEqual([
-      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
-    ]);
-  });
-
-  it('returns multiple terms fields', () => {
+describe('get terms fields for multi-terms aggregation', () => {
+  it('returns terms array based on the group-by fields', () => {
     const ruleParams = {
       groupBy: [
         'service.name',
@@ -37,7 +29,7 @@ describe('get terms fields based on group-by', () => {
     ]);
   });
 
-  it('returns an empty array', () => {
+  it('returns an empty terms array when group-by is undefined', () => {
     const ruleParams = { groupBy: undefined };
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([]);
