@@ -148,7 +148,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getAllTypes()
         .map(({ name }) => name);
     };
-    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex, getAllSavedObjectTypes);
+    registerSavedObjectsCountUsageCollector(usageCollection, getAllSavedObjectTypes);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

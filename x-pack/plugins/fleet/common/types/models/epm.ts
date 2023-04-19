@@ -363,6 +363,8 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+  dynamic_dataset?: boolean;
+  dynamic_namespace?: boolean;
 }
 
 export interface RegistryDataStreamProperties {

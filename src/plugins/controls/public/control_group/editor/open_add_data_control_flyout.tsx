@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { ControlInputTransform } from '../../../common/types';
 import type {
   AddDataControlProps,
   AddOptionsListControlProps,
@@ -24,7 +25,10 @@ import {
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
 
-export function openAddDataControlFlyout(this: ControlGroupContainer) {
+export function openAddDataControlFlyout(
+  this: ControlGroupContainer,
+  controlInputTransform?: ControlInputTransform
+) {
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
@@ -74,6 +78,10 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
               const factory = getControlFactory(type) as IEditableControlFactory;
               if (factory.presaveTransformFunction) {
                 controlInput = factory.presaveTransformFunction(controlInput);
+              }
+
+              if (controlInputTransform) {
+                controlInput = controlInputTransform({ ...controlInput }, type);
               }
 
               if (type === OPTIONS_LIST_CONTROL) {

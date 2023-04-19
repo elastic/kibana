@@ -8,7 +8,7 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 
 import type { SearchQuery } from '../../../common';
 import { validate } from '../../utils';
@@ -17,6 +17,20 @@ import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { search } from './search';
+
+const storageContextGetTransforms = jest.fn();
+const spy = () => storageContextGetTransforms;
+
+jest.mock('@kbn/object-versioning', () => {
+  const original = jest.requireActual('@kbn/object-versioning');
+  return {
+    ...original,
+    getContentManagmentServicesTransforms: (...args: any[]) => {
+      spy()(...args);
+      return original.getContentManagmentServicesTransforms(...args);
+    },
+  };
+});
 
 const { fn, schemas } = search;
 
@@ -163,7 +177,8 @@ describe('RPC -> search()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: getServiceObjectTransformFactory,
+        getTransformsFactory: (contentTypeId: string, version: Version) =>
+          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };
@@ -206,6 +221,31 @@ describe('RPC -> search()', () => {
         { text: 'Hello' },
         undefined
       );
+    });
+
+    test('should implicitly set the requestVersion in storageContext -> utils -> getTransforms()', async () => {
+      const { ctx, storage } = setup();
+
+      const requestVersion = 1;
+      await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        query: { text: 'Hello' },
+        version: requestVersion,
+      });
+
+      const [storageContext] = storage.search.mock.calls[0];
+      storageContext.utils.getTransforms({ 1: {} });
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith(
+        { 1: {} },
+        requestVersion,
+        expect.any(Object)
+      );
+
+      // We can still pass custom version
+      storageContext.utils.getTransforms({ 1: {} }, 1234);
+
+      expect(storageContextGetTransforms).toHaveBeenCalledWith({ 1: {} }, 1234, expect.any(Object));
     });
 
     describe('validation', () => {
@@ -254,7 +294,7 @@ describe('RPC -> search()', () => {
           2: {},
         };
 
-        const transforms = getTransforms(definitions, 1);
+        const transforms = getTransforms(definitions);
 
         // Some smoke tests for the getTransforms() utils. Complete test suite is inside
         // the package @kbn/object-versioning
