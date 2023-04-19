@@ -137,7 +137,7 @@ describe('UserSettingService', () => {
         userSettingServiceStart.getCurrentUserProfileSettings(mockRequest)
       ).resolves.toEqual({});
 
-      expect(logger.warn).toHaveBeenCalledWith('User Settings not found.');
+      expect(logger.debug).toHaveBeenCalledWith('User Settings not found.');
     });
   });
 });

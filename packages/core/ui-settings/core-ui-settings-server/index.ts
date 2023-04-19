@@ -8,7 +8,6 @@
 
 export type {
   IUiSettingsClient,
-  IUserUiSettingsClient,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UiSettingsRequestHandlerContext,

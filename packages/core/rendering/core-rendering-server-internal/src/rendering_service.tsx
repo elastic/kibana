@@ -15,10 +15,10 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import type { IUiSettingsClient, IUserUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -35,7 +35,12 @@ import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
   | RenderingSetupDeps
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; customBranding?: never });
+  | (RenderingPrebootDeps & {
+      status?: never;
+      elasticsearch?: never;
+      customBranding?: never;
+      userSettings?: never;
+    });
 
 /** @internal */
 export class RenderingService {
@@ -68,6 +73,7 @@ export class RenderingService {
     status,
     uiPlugins,
     customBranding,
+    userSettings,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -80,7 +86,14 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, customBranding }),
+      render: this.render.bind(this, {
+        elasticsearch,
+        http,
+        uiPlugins,
+        status,
+        customBranding,
+        userSettings,
+      }),
     };
   }
 
@@ -90,11 +103,10 @@ export class RenderingService {
     uiSettings: {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
-      userClient: IUserUiSettingsClient;
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -106,18 +118,15 @@ export class RenderingService {
 
     let settingsUserValues: Record<string, UserProvidedValues> = {};
     let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
-    let userSettingsUserValues: Record<string, string> = {};
 
     if (!isAnonymousPage) {
       const userValues = await Promise.all([
         uiSettings.client?.getUserProvided(),
         uiSettings.globalClient?.getUserProvided(),
-        uiSettings.userClient?.getUserProfileSettings(request),
       ]);
 
       settingsUserValues = userValues[0];
       globalSettingsUserValues = userValues[1];
-      userSettingsUserValues = userValues[2];
     }
 
     const settings = {
@@ -127,10 +136,6 @@ export class RenderingService {
     const globalSettings = {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: globalSettingsUserValues,
-    };
-    const userSettings = {
-      defaults: uiSettings.userClient?.getRegistered() ?? {},
-      user: userSettingsUserValues,
     };
 
     let clusterInfo = {};
@@ -153,7 +158,15 @@ export class RenderingService {
       // swallow error
     }
 
-    const darkMode = isDarkMode(userSettings, settings);
+    const userSettingDarkMode: string = (await userSettings?.getUserSettingDarkMode(request)) || '';
+
+    let darkMode: boolean;
+
+    if (userSettingDarkMode) {
+      darkMode = userSettingDarkMode === 'dark';
+    } else {
+      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    }
 
     const themeVersion: ThemeVersion = 'v8';
 
@@ -243,26 +256,3 @@ const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
   // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
   return authStatus !== 'unauthenticated';
 };
-
-function isDarkMode(
-  userSettings: {
-    defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
-    user: Record<string, string>;
-  },
-  settings: {
-    user?: Record<string, UserProvidedValues<unknown>> | undefined;
-    defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
-  }
-): boolean {
-  const userTheme: string = userSettings?.user?.darkMode;
-
-  let result;
-
-  if (userTheme) {
-    result = userTheme === 'dark';
-  } else {
-    result = getSettingValue('theme:darkMode', settings, Boolean);
-  }
-
-  return result;
-}

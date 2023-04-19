@@ -16,7 +16,6 @@ import {
   MockUiSettingsGlobalClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
-  MockUiSettingsUserClientConstructor,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -56,7 +55,6 @@ describe('uiSettings', () => {
   afterEach(() => {
     MockUiSettingsClientConstructor.mockClear();
     MockUiSettingsGlobalClientConstructor.mockClear();
-    MockUiSettingsUserClientConstructor.mockClear();
     getCoreSettingsMock.mockClear();
   });
 
@@ -275,63 +273,6 @@ describe('uiSettings', () => {
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual({});
-      });
-    });
-
-    describe('#asScopedToUserClient', () => {
-      it('passes saved object type "config-user" to UiSettingsUserClient', async () => {
-        await service.setup(setupDeps);
-        const start = await service.start();
-        start.userAsScopedToClient(savedObjectsClient);
-
-        expect(MockUiSettingsUserClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsUserClientConstructor.mock.calls[0][0].type).toBe('config-user');
-      });
-
-      it('passes overrides to UiSettingsUserClient', async () => {
-        await service.setup(setupDeps);
-        const start = await service.start();
-        start.userAsScopedToClient(savedObjectsClient);
-
-        expect(MockUiSettingsUserClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsUserClientConstructor.mock.calls[0][0].overrides).toEqual({});
-      });
-
-      it('passes a copy of set defaults to UiSettingsUserClient', async () => {
-        const setup = await service.setup(setupDeps);
-        setup.register(defaults);
-        const start = await service.start();
-        start.userAsScopedToClient(savedObjectsClient);
-
-        expect(MockUiSettingsUserClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsUserClientConstructor.mock.calls[0][0].defaults).toEqual({});
-      });
-    });
-
-    describe('#setUserProfileSettingsClientFactoryProvider', () => {
-      it('sets the UserProfileSettingsClientFactoryProvider', async () => {
-        await service.setup(setupDeps);
-        const start = await service.start();
-
-        const userProfileSettingsClientMock = {
-          get: jest.fn(),
-        };
-
-        userProfileSettingsClientMock.get.mockResolvedValue({});
-
-        start.userAsScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsUserClientConstructor).toBeCalledWith(
-          expect.not.objectContaining({ userProfileSettingsClient: userProfileSettingsClientMock })
-        );
-
-        start.setUserProfileSettingsClientFactoryProvider(() => () => {
-          return userProfileSettingsClientMock;
-        });
-
-        start.userAsScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsUserClientConstructor).toBeCalledWith(
-          expect.objectContaining({ userProfileSettingsClient: userProfileSettingsClientMock })
-        );
       });
     });
   });

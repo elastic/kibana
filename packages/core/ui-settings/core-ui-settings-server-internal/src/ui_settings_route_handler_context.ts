@@ -10,7 +10,6 @@ import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-object
 import type {
   UiSettingsRequestHandlerContext,
   IUiSettingsClient,
-  IUserUiSettingsClient,
 } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsServiceStart } from './types';
 
@@ -21,7 +20,6 @@ import type { InternalUiSettingsServiceStart } from './types';
 export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandlerContext {
   #client?: IUiSettingsClient;
   #globalClient?: IUiSettingsClient;
-  #userClient?: IUserUiSettingsClient;
 
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
@@ -44,14 +42,5 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
       );
     }
     return this.#globalClient;
-  }
-
-  public get userClient() {
-    if (this.#userClient == null) {
-      this.#userClient = this.uiSettingsStart.userAsScopedToClient(
-        this.savedObjectsRouterHandlerContext.client
-      );
-    }
-    return this.#userClient;
   }
 }

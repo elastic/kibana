@@ -26,6 +26,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -53,6 +54,7 @@ export function createCoreSetupMock({
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
+    userSettings: userSettingsServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,

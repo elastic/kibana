@@ -14,6 +14,7 @@ import type { IContextProvider, IRouterWithVersion } from '@kbn/core-http-server
 import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server-internal';
 import { PluginWrapper } from './plugin';
 import {
   PluginsServicePrebootSetupDeps,
@@ -259,6 +260,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
       registerGlobal: deps.uiSettings.registerGlobal,
     },
+    userSettings: {
+      setUserProfileSettings: (client: UserProfileSettingsClientContract) =>
+        deps.userSettings.setUserProfileSettings(client),
+    },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
@@ -321,9 +326,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
-      userAsScopedToClient: deps.uiSettings.userAsScopedToClient,
-      setUserProfileSettingsClientFactoryProvider:
-        deps.uiSettings.setUserProfileSettingsClientFactoryProvider,
     },
     coreUsageData: deps.coreUsageData,
   };

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { UserProfileSettingsClientContract } from '@kbn/core-ui-settings-server/src/contracts';
+import type { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server-internal/user_settings_service';
 
 import type { UserSettingServiceStart } from './user_setting_service';
 

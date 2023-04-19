@@ -44,7 +44,7 @@ export class UserSettingService {
         if (currentUserProfile?.data?.userSettings) {
           result = currentUserProfile?.data?.userSettings as Record<string, string>;
         } else {
-          this.logger.warn('User Settings not found.');
+          this.logger.debug('User Settings not found.');
         }
         return result;
       },

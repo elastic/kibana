@@ -8,8 +8,7 @@
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IUiSettingsClient, IUserUiSettingsClient } from './ui_settings_client';
+import type { IUiSettingsClient } from './ui_settings_client';
 
 /** @public */
 export interface UiSettingsServiceSetup {
@@ -84,44 +83,4 @@ export interface UiSettingsServiceStart {
    * ```
    */
   globalAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-
-  /**
-   * Creates an IUserUiSettingsClient (which extends IUiSettingsClient so that settings in the user's
-   * profile can be retrieved.
-   *
-   * @param savedObjectsClient This client is not currently used by the underlying client, but is included so that
-   * future user specific settings/migrations will be able to be created in SO, if necessary, rather than UserProfiles
-   */
-  userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
-
-  /**
-   * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileSettingsClients
-   *
-   * @example The SecurityPlugin currently utilizes this on start
-   *
-   * the UserProfilesClientContract
-   * @param userProfileSettingsClientFactoryProvider
-   */
-  setUserProfileSettingsClientFactoryProvider(
-    userProfileSettingsClientFactoryProvider: UserProfileSettingsClientFactoryProvider
-  ): void;
-}
-
-/**
- * Provider to invoke to retrieve a UserProfilesClientFactory.
- */
-export type UserProfileSettingsClientFactoryProvider = () => UserProfileSettingsClientFactory;
-
-// Describes the factory used to create instances of the UserProfileSettingsClient
-export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientContract;
-
-/**
- * Describes the functions that will be provided by a UserProfileSettingsClient
- */
-export interface UserProfileSettingsClientContract {
-  /**
-   * This function returns the user's settings from their User Profile
-   * @param request a Kibana Request
-   */
-  get(request: KibanaRequest): Promise<Record<string, string>>;
 }

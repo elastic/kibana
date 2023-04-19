@@ -16,6 +16,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('Security Plugin', () => {
   let plugin: SecurityPlugin;
@@ -36,7 +37,9 @@ describe('Security Plugin', () => {
       )
     );
 
-    mockCoreSetup = coreMock.createSetup();
+    mockCoreSetup = coreMock.createSetup({
+      pluginStartContract: { userProfiles: userProfileServiceMock.createStart() },
+    });
     mockCoreSetup.http.getServerInfo.mockReturnValue({
       hostname: 'localhost',
       name: 'kibana',

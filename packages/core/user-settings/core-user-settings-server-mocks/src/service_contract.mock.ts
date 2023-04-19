@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 
-export { UiSettingsClient } from './ui_settings_client';
-export { UiSettingsGlobalClient } from './ui_settings_global_client';
-export { UiSettingsClientFactory } from './ui_settings_client_factory';
-export { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
-export { BaseUiSettingsClient } from './base_ui_settings_client';
+export const serviceContractMock = (): jest.Mocked<UserSettingsService> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  } as unknown as jest.Mocked<UserSettingsService>;
+};

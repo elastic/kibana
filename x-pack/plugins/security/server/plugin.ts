@@ -57,11 +57,9 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
-import {
-  setupUserProfilesClientOnUiSettingsServiceStart,
-  UserProfileService,
-} from './user_profile';
+import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
+import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_profile/user_setting_service';
 import { UserSettingService } from './user_profile/user_setting_service';
 
@@ -238,7 +236,7 @@ export class SecurityPlugin
   }
 
   public setup(
-    core: CoreSetup<PluginStartDependencies>,
+    core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getKibanaIndex();
@@ -257,10 +255,25 @@ export class SecurityPlugin
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.
-    const startServicesPromise = core.getStartServices().then(([coreServices, depsServices]) => ({
-      elasticsearch: coreServices.elasticsearch,
-      features: depsServices.features,
-    }));
+    const startServicesPromise = core
+      .getStartServices()
+      .then(([coreServices, depsServices, startServices]) => ({
+        elasticsearch: coreServices.elasticsearch,
+        features: depsServices.features,
+        userProfiles: startServices.userProfiles,
+      }));
+
+    /**
+     * Once the UserProfileServiceStart is available, use it to start the SecurityPlugin > UserSettingService.
+     *
+     * Then the UserProfileSettingsClient is created with the SecurityPlugin > UserSettingServiceStart and set on
+     * the Core > UserSettingsServiceSetup
+     */
+    startServicesPromise.then(({ userProfiles }) => {
+      this.userSettingServiceStart = this.userSettingService.start(userProfiles);
+      const client = new UserProfileSettingsClient(this.userSettingServiceStart);
+      core.userSettings.setUserProfileSettings(client);
+    });
 
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -394,11 +407,6 @@ export class SecurityPlugin
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
     this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
-
-    setupUserProfilesClientOnUiSettingsServiceStart({
-      userSettingsServiceStart: this.userSettingServiceStart,
-      uiSettingServiceStart: core.uiSettings,
-    });
 
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({

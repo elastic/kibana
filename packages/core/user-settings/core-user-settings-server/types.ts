@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { UiSettingsClient } from './ui_settings_client';
-export { UiSettingsGlobalClient } from './ui_settings_global_client';
-export { UiSettingsClientFactory } from './ui_settings_client_factory';
-export { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
-export { BaseUiSettingsClient } from './base_ui_settings_client';
+import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server-internal';
+
+/** @public */
+export interface UserSettingsServiceSetup {
+  setUserProfileSettings: (client: UserProfileSettingsClientContract) => void;
+}

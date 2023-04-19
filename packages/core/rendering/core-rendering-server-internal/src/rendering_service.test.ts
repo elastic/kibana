@@ -61,14 +61,12 @@ function renderTestCases(
     let uiSettings: {
       client: ReturnType<typeof uiSettingsServiceMock.createClient>;
       globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
-      userClient: ReturnType<typeof uiSettingsServiceMock.createUserClient>;
     };
 
     beforeEach(async () => {
       uiSettings = {
         client: uiSettingsServiceMock.createClient(),
         globalClient: uiSettingsServiceMock.createClient(),
-        userClient: uiSettingsServiceMock.createUserClient(),
       };
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
@@ -183,9 +181,39 @@ function renderTestCases(
         buildNum: expect.any(Number),
       });
     });
+  });
+}
+
+function renderDarkModeTestCases(
+  getRender: () => Promise<
+    [
+      InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
+    ]
+  >
+) {
+  describe('render() Dark Mode tests', () => {
+    let uiSettings: {
+      client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    };
+
+    beforeEach(async () => {
+      uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title' },
+      });
+    });
 
     describe('Dark Mode', () => {
       it('User settings should override the space setting', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve('dark')
+        );
+
         getSettingValueMock.mockImplementation((settingName: string) => {
           if (settingName === 'theme:darkMode') {
             return false;
@@ -195,7 +223,7 @@ function renderTestCases(
 
         const settings = { 'theme:darkMode': { userValue: false } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
-        uiSettings.userClient.getUserProfileSettings.mockResolvedValue({ darkMode: 'dark' });
+
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
@@ -207,7 +235,10 @@ function renderTestCases(
         });
       });
 
-      it('Space setting should if User Setting is undefined', async () => {
+      it('Space setting should if UsersSettings is undefined', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(undefined)
+        );
         getSettingValueMock.mockImplementation((settingName: string) => {
           if (settingName === 'theme:darkMode') {
             return false;
@@ -217,7 +248,6 @@ function renderTestCases(
 
         const settings = { 'theme:darkMode': { userValue: false } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
-        uiSettings.userClient.getUserProfileSettings.mockResolvedValue({});
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
@@ -230,6 +260,9 @@ function renderTestCases(
       });
 
       it('Space setting should if User Setting is `empty`', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve('')
+        );
         getSettingValueMock.mockImplementation((settingName: string) => {
           if (settingName === 'theme:darkMode') {
             return true;
@@ -239,7 +272,6 @@ function renderTestCases(
 
         const settings = { 'theme:darkMode': { userValue: true } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
-        uiSettings.userClient.getUserProfileSettings.mockResolvedValue({ darkMode: '' });
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
@@ -298,6 +330,10 @@ describe('RenderingService', () => {
     });
 
     renderTestCases(async () => {
+      await service.preboot(mockRenderingPrebootDeps);
+      return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
+    });
+    renderDarkModeTestCases(async () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });
