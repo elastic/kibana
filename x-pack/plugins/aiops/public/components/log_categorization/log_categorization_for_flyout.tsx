@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
@@ -30,6 +31,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { InformationText } from './information_text';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
+import { TechnicalPreviewBadge } from './technical_preview_badge';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -53,6 +55,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
+  const { euiTheme } = useEuiTheme();
 
   const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
@@ -204,8 +207,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 {i18n.translate('xpack.aiops.categorizeFlyout.title', {
@@ -215,6 +218,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
+            <TechnicalPreviewBadge />
+          </EuiFlexItem>
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
           </EuiFlexItem>
