@@ -16,6 +16,11 @@ const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
 } as unknown as Partial<CoreStart>);
 
+interface Args {
+  ruleParams: RuleParams;
+  metadata?: AlertMetadata;
+}
+
 export default {
   title: 'alerting/TransactionDurationRuleType',
   component: TransactionDurationRuleType,
@@ -87,6 +92,12 @@ export const CreatingInStackManagement: Story<Args> = ({
 };
 
 CreatingInStackManagement.args = {
-  ruleParams: {},
+  ruleParams: {
+    aggregationType: AggregationType.Avg,
+    environment: 'testEnvironment',
+    threshold: 1500,
+    windowSize: 5,
+    windowUnit: 'm',
+  },
   metadata: undefined,
 };
