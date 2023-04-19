@@ -116,7 +116,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
-          defaultMessage: `Count of {indexPatternLabel}`,
+          defaultMessage: `count of {indexPatternLabel}`,
           values: { indexPatternLabel },
         })
       : super.getAggLabel(aggType, fieldLabel);
