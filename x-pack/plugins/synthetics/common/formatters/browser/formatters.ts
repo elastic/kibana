@@ -17,13 +17,13 @@ import { tlsFormatters } from '../tls/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
-const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
+export const throttlingFormatter: Formatter = (fields) => {
+  const throttling = fields[ConfigKey.THROTTLING_CONFIG];
 
   return JSON.stringify({
-    download: Number(fields[ConfigKey.DOWNLOAD_SPEED]),
-    upload: Number(fields[ConfigKey.UPLOAD_SPEED]),
-    latency: Number(fields[ConfigKey.LATENCY]),
+    download: Number(throttling.value.download),
+    upload: Number(throttling.value.upload),
+    latency: Number(throttling.value.latency),
   });
 };
 
@@ -31,10 +31,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
-  [ConfigKey.IS_THROTTLING_ENABLED]: null,
-  [ConfigKey.DOWNLOAD_SPEED]: null,
-  [ConfigKey.UPLOAD_SPEED]: null,
-  [ConfigKey.LATENCY]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
