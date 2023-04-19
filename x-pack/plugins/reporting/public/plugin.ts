@@ -226,10 +226,11 @@ export class ReportingPublicPlugin
     );
 
     // gets the reporting info entry to pass to the plugin to create the type
-    exportTypesPlugin.getTypes(core, type);
+    // exportTypesPlugin.getTypes(core, type);
+    console.log(apiClient);
 
     // this also creates the et registry
-    exportTypesPlugin.registry();
+    // exportTypesPlugin.registry();
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
