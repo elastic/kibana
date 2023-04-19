@@ -154,7 +154,26 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useObservabilityTourContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservabilityTourContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          "ObservabilityTourContextValue"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/tour/tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "observabilityShared",
@@ -372,6 +391,21 @@
           " | undefined; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.observabilityAppId",
+        "type": "string",
+        "tags": [],
+        "label": "observabilityAppId",
+        "description": [],
+        "signature": [
+          "\"observability-overview\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
