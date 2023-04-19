@@ -15,7 +15,7 @@ import {
   deleteAllRules,
   createRule,
   waitForSignalsToBePresent,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   getRuleForSignalTesting,
 } from '../../utils';
 import { dataGeneratorFactory } from '../../utils/data_generator';
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         : {}),
     });
-    await waitForRuleSuccessOrStatus(supertest, log, id);
+    await waitForRuleSuccess({ supertest, log, id });
     await waitForSignalsToBePresent(supertest, log, alerts, [id]);
   };
 
