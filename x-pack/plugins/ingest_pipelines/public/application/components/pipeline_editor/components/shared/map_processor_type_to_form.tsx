@@ -14,6 +14,7 @@ import { LicenseType } from '../../../../../types';
 
 import {
   Append,
+  Attachment,
   Bytes,
   Circle,
   CommunityId,
@@ -96,6 +97,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
           value,
+        },
+      }),
+  },
+  attachment: {
+    FieldsComponent: Attachment,
+    docLinkPath: '/attachment.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.attachment', {
+      defaultMessage: 'Attachment',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.attachment', {
+      defaultMessage: 'Extract file attachments in common formats (such as PPT, XLS, and PDF).',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.attachment', {
+        defaultMessage: 'Extracts attachment from "{field}"',
+        values: {
+          field,
         },
       }),
   },
