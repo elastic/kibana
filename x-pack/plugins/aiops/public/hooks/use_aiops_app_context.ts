@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, type FC, useContext } from 'react';
 
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
@@ -15,14 +15,17 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
-  CoreStart,
   CoreSetup,
+  CoreStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { type GetMlSharedImportsReturnType } from '@kbn/ml-plugin/public';
+import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -39,8 +42,13 @@ export interface AiopsAppDependencies {
   lens: LensPublicStart;
   // deps for unified field stats
   fieldStats?: {
-    useFieldStatsTrigger: GetMlSharedImportsReturnType['useFieldStatsTrigger'];
-    FieldStatsFlyoutProvider: GetMlSharedImportsReturnType['FieldStatsFlyoutProvider'];
+    useFieldStatsTrigger: () => { renderOption: EuiComboBoxProps<string>['renderOption'] };
+    FieldStatsFlyoutProvider: FC<{
+      dataView: DataView;
+      fieldStatsServices: FieldStatsServices;
+      timeRangeMs?: TimeRangeMs;
+      dslQuery?: FieldStatsProps['dslQuery'];
+    }>;
   };
 }
 

@@ -8,7 +8,6 @@
 import React, { FC, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { type Field } from '@kbn/ml-plugin/common/types/fields';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 
@@ -34,7 +33,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
       ...splitFieldsOptions.map((v) => ({
         value: v.name,
         label: v.displayName,
-        ...(v.name ? { field: { id: v.name, type: v?.type } as Field } : {}),
+        ...(v.name ? { field: { id: v.name, type: v?.type } } : {}),
       })),
     ];
   }, [splitFieldsOptions]);

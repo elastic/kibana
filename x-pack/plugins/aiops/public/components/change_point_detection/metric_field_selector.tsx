@@ -8,7 +8,6 @@
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { type Field } from '@kbn/ml-plugin/common/types/fields';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -29,7 +28,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
         return {
           value: v.name,
           label: v.displayName,
-          field: { id: v.name, type: v.type } as Field,
+          field: { id: v.name, type: v.type },
         };
       });
     }, [metricFieldOptions]);
