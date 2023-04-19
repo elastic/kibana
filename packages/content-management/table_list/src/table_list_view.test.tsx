@@ -18,8 +18,8 @@ import type { LocationDescriptor, History } from 'history';
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
 import {
-  TableList,
-  TableListProps as TableListProps,
+  TableListView,
+  Props as TableListViewProps,
   UserContentCommonSchema,
 } from './table_list_view';
 
@@ -49,7 +49,7 @@ interface Router {
   };
 }
 
-const requiredProps: TableListProps = {
+const requiredProps: TableListViewProps = {
   entityName: 'test',
   entityNamePlural: 'tests',
   listingLimit: 500,
@@ -66,6 +66,12 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
+const getActions = (testBed: TestBed) => ({
+  openSortSelect() {
+    testBed.find('tableSortSelectBtn').at(0).simulate('click');
+  },
+});
+
 describe('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -75,10 +81,13 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  const setup = registerTestBed<string, TableListProps>(WithServices<TableListProps>(TableList), {
-    defaultProps: { ...requiredProps },
-    memoryRouter: { wrapComponent: true },
-  });
+  const setup = registerTestBed<string, TableListViewProps>(
+    WithServices<TableListViewProps>(TableListView),
+    {
+      defaultProps: { ...requiredProps },
+      memoryRouter: { wrapComponent: true },
+    }
+  );
 
   test('render default empty prompt', async () => {
     let testBed: TestBed;
@@ -303,6 +312,36 @@ describe('TableListView', () => {
       expect(lastRowTitle).toBe('Item 19');
     });
 
+    test('should allow changing the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
+
+      // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
+      // We test that the "sort by" column has not changed before and after changing the number of rows
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+
+      // Open the "Rows per page" drop down
+      find('tablePaginationPopoverButton').simulate('click');
+      find('tablePagination-10-rows').simulate('click');
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      expect(tableCellsValues.length).toBe(10);
+
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+    });
+
     test('should navigate to page 2', async () => {
       let testBed: TestBed;
 
@@ -337,8 +376,8 @@ describe('TableListView', () => {
   });
 
   describe('column sorting', () => {
-    const setupColumnSorting = registerTestBed<string, TableListProps>(
-      WithServices<TableListProps>(TableList, {
+    const setupColumnSorting = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
         TagList: getTagList({ references: [] }),
       }),
       {
@@ -346,12 +385,6 @@ describe('TableListView', () => {
         memoryRouter: { wrapComponent: true },
       }
     );
-
-    const getActions = (testBed: TestBed) => ({
-      openSortSelect() {
-        testBed.find('tableSortSelectBtn').at(0).simulate('click');
-      },
-    });
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -546,8 +579,8 @@ describe('TableListView', () => {
   });
 
   describe('content editor', () => {
-    const setupInspector = registerTestBed<string, TableListProps>(
-      WithServices<TableListProps>(TableList),
+    const setupInspector = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView),
       {
         defaultProps: { ...requiredProps },
         memoryRouter: { wrapComponent: true },
@@ -597,8 +630,8 @@ describe('TableListView', () => {
   });
 
   describe('tag filtering', () => {
-    const setupTagFiltering = registerTestBed<string, TableListProps>(
-      WithServices<TableListProps>(TableList, {
+    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
@@ -749,8 +782,8 @@ describe('TableListView', () => {
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListProps>(
-      WithServices<TableListProps>(TableList, {
+    const setupTagFiltering = registerTestBed<string, TableListViewProps>(
+      WithServices<TableListViewProps>(TableListView, {
         getTagList: () => [
           { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
           { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },

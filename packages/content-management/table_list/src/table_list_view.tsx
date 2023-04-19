@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useReducer,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-  ReactNode,
-  useState,
-} from 'react';
+import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -56,7 +48,7 @@ interface ContentEditorConfig
   enabled?: boolean;
 }
 
-export interface TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> {
+export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
   entityNamePlural: string;
   tableListTitle: string;
@@ -107,30 +99,6 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
 }
-
-type TableListProps<T extends UserContentCommonSchema> = Pick<
-  TableListViewProps<T>,
-  | 'tableListTitle'
-  | 'entityName'
-  | 'entityNamePlural'
-  | 'initialFilter'
-  | 'headingId'
-  | 'initialPageSize'
-  | 'listingLimit'
-  | 'urlStateEnabled'
-  | 'customTableColumn'
-  | 'emptyPrompt'
-  | 'findItems'
-  | 'createItem'
-  | 'editItem'
-  | 'deleteItems'
-  | 'getDetailViewLink'
-  | 'onClickTitle'
-  | 'id'
-  | 'contentEditor'
-  | 'titleColumnName'
-  | 'withoutPageTemplateWrapper'
-> & { onFetchSuccess: () => void };
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
@@ -250,8 +218,20 @@ const urlStateSerializer = (updated: {
   return updatedQueryParams;
 };
 
-function TableListComp<T extends UserContentCommonSchema>({
+const tableColumnMetadata = {
+  title: {
+    field: 'attributes.title',
+    name: 'Name, description, tags',
+  },
+  updatedAt: {
+    field: 'updatedAt',
+    name: 'Last updated',
+  },
+} as const;
+
+function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
+  tableListDescription,
   entityName,
   entityNamePlural,
   initialFilter: initialQuery,
@@ -269,10 +249,11 @@ function TableListComp<T extends UserContentCommonSchema>({
   onClickTitle,
   id: listingId = 'userContent',
   contentEditor = { enabled: false },
+  children,
   titleColumnName,
+  additionalRightSideActions = [],
   withoutPageTemplateWrapper,
-  onFetchSuccess: onInitialFetchReturned,
-}: TableListProps<T>) {
+}: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
       `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
@@ -401,7 +382,6 @@ function TableListComp<T extends UserContentCommonSchema>({
             response,
           },
         });
-        onInitialFetchReturned();
       }
     } catch (err) {
       dispatch({
@@ -409,7 +389,7 @@ function TableListComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onInitialFetchReturned]);
+  }, [searchQueryParser, findItems, searchQuery.text]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -468,7 +448,7 @@ function TableListComp<T extends UserContentCommonSchema>({
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
-        field: 'attributes.title',
+        field: tableColumnMetadata.title.field,
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
@@ -502,7 +482,7 @@ function TableListComp<T extends UserContentCommonSchema>({
 
     if (hasUpdatedAtMetadata) {
       columns.push({
-        field: 'updatedAt',
+        field: tableColumnMetadata.updatedAt.field,
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
@@ -661,8 +641,17 @@ function TableListComp<T extends UserContentCommonSchema>({
       } = {};
 
       if (criteria.sort) {
+        // We need to serialise the field as the <EuiInMemoryTable /> return either (1) the field _name_ (e.g. "Last updated")
+        // when changing the "Rows per page" select value or (2) the field _value_ (e.g. "updatedAt") when clicking the column title
+        let fieldSerialized: unknown = criteria.sort.field;
+        if (fieldSerialized === tableColumnMetadata.title.name) {
+          fieldSerialized = tableColumnMetadata.title.field;
+        } else if (fieldSerialized === tableColumnMetadata.updatedAt.name) {
+          fieldSerialized = tableColumnMetadata.updatedAt.field;
+        }
+
         data.sort = {
-          field: criteria.sort.field as SortColumnField,
+          field: fieldSerialized as SortColumnField,
           direction: criteria.sort.direction,
         };
       }
@@ -895,144 +884,79 @@ function TableListComp<T extends UserContentCommonSchema>({
     : 'table-is-loading';
 
   return (
-    <>
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
-      {/* Error while fetching items */}
-      {showFetchError && renderFetchError()}
-
-      {/* Table of items */}
-      <div data-test-subj={testSubjectState}>
-        <Table<T>
-          dispatch={dispatch}
-          items={items}
-          isFetchingItems={isFetchingItems}
-          searchQuery={searchQuery}
-          tableColumns={tableColumns}
-          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-          tableSort={tableSort}
-          pagination={pagination}
-          selectedIds={selectedIds}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          tagsToTableItemMap={tagsToTableItemMap}
-          deleteItems={deleteItems}
-          tableCaption={tableListTitle}
-          onTableChange={onTableChange}
-          onTableSearchChange={onTableSearchChange}
-          onSortChange={onSortChange}
-          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
-          clearTagSelection={clearTagSelection}
-        />
-
-        {/* Delete modal */}
-        {showDeleteModal && (
-          <ConfirmDeleteModal<T>
-            isDeletingItems={isDeletingItems}
-            entityName={entityName}
-            entityNamePlural={entityNamePlural}
-            items={selectedItems}
-            onConfirm={deleteSelectedItems}
-            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
-          />
-        )}
-      </div>
-    </>
-  );
-}
-
-const TableList = React.memo(TableListComp) as typeof TableListComp;
-
-export const TableListView = <T extends UserContentCommonSchema>({
-  tableListTitle,
-  tableListDescription,
-  entityName,
-  entityNamePlural,
-  initialFilter,
-  headingId,
-  initialPageSize,
-  listingLimit,
-  urlStateEnabled = true,
-  customTableColumn,
-  emptyPrompt,
-  findItems,
-  createItem,
-  editItem,
-  deleteItems,
-  getDetailViewLink,
-  onClickTitle,
-  id: listingId,
-  contentEditor,
-  children,
-  titleColumnName,
-  additionalRightSideActions,
-  withoutPageTemplateWrapper,
-}: TableListViewProps<T>) => {
-  const PageTemplate = withoutPageTemplateWrapper
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
-    : KibanaPageTemplate;
-
-  const pageDataTestSubject = `${entityName}LandingPage`;
-
-  const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
-
-  if (!hasInitialFetchReturned) {
-    return null;
-  }
-
-  return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
         description={tableListDescription}
-        rightSideItems={additionalRightSideActions?.slice(0, 2)}
+        rightSideItems={[
+          renderCreateButton() ?? <span />,
+          ...additionalRightSideActions?.slice(0, 2),
+        ]}
         data-test-subj="top-nav"
       />
       <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
         {/* Any children passed to the component */}
         {children}
 
-        <TableList
-          tableListTitle={tableListTitle}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          initialFilter={initialFilter}
-          headingId={headingId}
-          initialPageSize={initialPageSize}
-          listingLimit={listingLimit}
-          urlStateEnabled={urlStateEnabled}
-          customTableColumn={customTableColumn}
-          emptyPrompt={emptyPrompt}
-          findItems={findItems}
-          createItem={createItem}
-          editItem={editItem}
-          deleteItems={deleteItems}
-          getDetailViewLink={getDetailViewLink}
-          onClickTitle={onClickTitle}
-          id={listingId}
-          contentEditor={contentEditor}
-          titleColumnName={titleColumnName}
-          withoutPageTemplateWrapper={withoutPageTemplateWrapper}
-          onFetchSuccess={() => {
-            if (!hasInitialFetchReturned) {
-              setHasInitialFetchReturned(true);
-            }
-          }}
-        />
+        {/* Too many items error */}
+        {showLimitError && (
+          <ListingLimitWarning
+            canEditAdvancedSettings={canEditAdvancedSettings}
+            advancedSettingsLink={getListingLimitSettingsUrl()}
+            entityNamePlural={entityNamePlural}
+            totalItems={totalItems}
+            listingLimit={listingLimit}
+          />
+        )}
+
+        {/* Error while fetching items */}
+        {showFetchError && renderFetchError()}
+
+        {/* Table of items */}
+        <div data-test-subj={testSubjectState}>
+          <Table<T>
+            dispatch={dispatch}
+            items={items}
+            isFetchingItems={isFetchingItems}
+            searchQuery={searchQuery}
+            tableColumns={tableColumns}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            tableSort={tableSort}
+            pagination={pagination}
+            selectedIds={selectedIds}
+            entityName={entityName}
+            entityNamePlural={entityNamePlural}
+            tagsToTableItemMap={tagsToTableItemMap}
+            deleteItems={deleteItems}
+            tableCaption={tableListTitle}
+            onTableChange={onTableChange}
+            onTableSearchChange={onTableSearchChange}
+            onSortChange={onSortChange}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            clearTagSelection={clearTagSelection}
+          />
+
+          {/* Delete modal */}
+          {showDeleteModal && (
+            <ConfirmDeleteModal<T>
+              isDeletingItems={isDeletingItems}
+              entityName={entityName}
+              entityNamePlural={entityNamePlural}
+              items={selectedItems}
+              onConfirm={deleteSelectedItems}
+              onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            />
+          )}
+        </div>
       </KibanaPageTemplate.Section>
     </PageTemplate>
   );
-};
+}
+
+const TableListView = React.memo(TableListViewComp) as typeof TableListViewComp;
+
+export { TableListView };
 
 // eslint-disable-next-line import/no-default-export
 export default TableListView;
