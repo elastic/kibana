@@ -165,6 +165,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                       alias: null,
                       index: dataView.id!,
                       key: `${item.group.name}_${item.group.value}`,
+                      // @ts-ignore FilterMeta type definition misses the field property
                       field: item.group.name,
                       params: {
                         query: item.group.value,
