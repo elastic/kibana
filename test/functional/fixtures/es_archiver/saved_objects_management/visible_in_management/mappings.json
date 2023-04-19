@@ -121,7 +121,7 @@
             "visualization",
             "workplace_search_telemetry"
           ],
-          ".kibana_analyst_experience": [
+          ".kibana_analytics": [
             "canvas-element",
             "canvas-workpad-template",
             "canvas-workpad",
@@ -588,10 +588,10 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana_analyst_experience_$KIBANA_PACKAGE_VERSION": {},
-      ".kibana_analyst_experience": {}
+      ".kibana_analytics_$KIBANA_PACKAGE_VERSION": {},
+      ".kibana_analytics": {}
     },
-    "index": ".kibana_analyst_experience_$KIBANA_PACKAGE_VERSION_001",
+    "index": ".kibana_analytics_$KIBANA_PACKAGE_VERSION_001",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {
@@ -707,7 +707,7 @@
             "visualization",
             "workplace_search_telemetry"
           ],
-          ".kibana_analyst_experience": [
+          ".kibana_analytics": [
             "canvas-element",
             "canvas-workpad-template",
             "canvas-workpad",

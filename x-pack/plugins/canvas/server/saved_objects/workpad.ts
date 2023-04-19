@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
-import { ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { workpadMigrationsFactory } from './migrations';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './migrations';
@@ -15,7 +15,7 @@ export const workpadTypeFactory = (
   deps: CanvasSavedObjectTypeMigrationsDeps
 ): SavedObjectsType => ({
   name: CANVAS_TYPE,
-  indexPattern: ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

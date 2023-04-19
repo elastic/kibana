@@ -9,33 +9,35 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { CoreVersionedRoute } from './core_versioned_route';
-import { Method, VersionedRouterRoute } from './types';
+import { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
   public static from({
     router,
     validateResponses,
+    defaultHandlerResolutionStrategy = 'oldest',
   }: {
     router: IRouter;
     validateResponses?: boolean;
+    defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   }) {
-    return new CoreVersionedRouter(router, validateResponses);
+    return new CoreVersionedRouter(router, validateResponses, defaultHandlerResolutionStrategy);
   }
   private constructor(
-    private readonly router: IRouter,
-    private readonly validateResponses: boolean = false
+    public readonly router: IRouter,
+    public readonly validateResponses: boolean = false,
+    public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest'
   ) {}
 
   private registerVersionedRoute =
     (routeMethod: Method) =>
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
-        router: this.router,
+        router: this,
         method: routeMethod,
         path: options.path,
         options,
-        validateResponses: this.validateResponses,
       });
       this.routes.add(route);
       return route;

@@ -11,7 +11,7 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { LocatorData } from '../../../common/url_service';
 import type { ServerUrlService } from '..';
 
@@ -21,7 +21,7 @@ export const registerUrlServiceSavedObjectType = (
 ) => {
   const urlSavedObjectType: SavedObjectsType = {
     name: 'url',
-    indexPattern: ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     namespaceType: 'single',
     hidden: false,
     management: {

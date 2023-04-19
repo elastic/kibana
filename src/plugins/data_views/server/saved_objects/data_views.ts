@@ -7,13 +7,13 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,
-  indexPattern: ANALYST_EXPERIENCE_SAVED_OBJECT_INDEX,
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',

@@ -121,7 +121,7 @@
             "visualization",
             "workplace_search_telemetry"
           ],
-          ".kibana_analyst_experience": [
+          ".kibana_analytics": [
             "canvas-element",
             "canvas-workpad-template",
             "canvas-workpad",
