@@ -8,7 +8,7 @@
 
 .domDragDrop_ghost {
   @include mixinDomDraggable;
-  border: $euiBorderWidthThick dashed $euiBorderColor;
+  border: $euiBorderWidthThin dashed $euiBorderColor;
   position: absolute !important;  // sass-lint:disable-line no-important
   margin: 0 !important;  // sass-lint:disable-line no-important
   top: 0;
@@ -77,7 +77,7 @@
 
 .domDragDrop-notCompatible:not(.domDragDrop__dropOverlayWrapper) {
   background-color: $euiColorHighlight !important;
-  border: $euiBorderWidthThick dashed $euiColorVis5 !important;
+  border: $euiBorderWidthThin dashed $euiColorVis5 !important;
   &.domDragDrop-isActiveDropTarget {
     background-color: rgba(251, 208, 17, .25) !important;
     border-color: $euiColorVis5 !important;
@@ -225,11 +225,11 @@ $reorderItemMargin: 8px;
   transition-property: background-color, border-color, opacity;
 
   .domDragDrop-isDropTarget & {
-    @include mixinDomDroppable;
-    @include mixinDomDroppableActive;
+    @include mixinDomDroppable($euiBorderWidthThick);
+    @include mixinDomDroppableActive($euiBorderWidthThick);
   }
 
   .domDragDrop-isActiveDropTarget & {
-    @include mixinDomDroppableActiveHover;
+    @include mixinDomDroppableActiveHover($euiBorderWidthThick);
   }
 }

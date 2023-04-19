@@ -72,7 +72,6 @@
 
 .lnsLayerPanel__dimension {
   @include euiFontSizeS;
-  border: $euiBorderWidthThick dashed transparent; // it will get color during drag & drop
   border-radius: $euiBorderRadius;
   display: flex;
   align-items: center;
@@ -96,7 +95,7 @@
 }
 
 .lnsLayerPanel__dimension--empty {
-  border: $euiBorderWidthThick dashed $euiBorderColor !important;
+  border: $euiBorderWidthThin dashed $euiBorderColor !important;
 
   &:focus,
   &:focus-within {
@@ -152,6 +151,7 @@
 }
 
 .lnsLayerPanel__palette {
+  height: $euiSizeXS / 2;
   border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
 
   &::after {
