@@ -6,6 +6,7 @@
  */
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -28,6 +29,7 @@ export interface AiopsPluginStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
   licensing: LicensingPluginStart;
+  executionContext: ExecutionContextStart;
 }
 
 /**

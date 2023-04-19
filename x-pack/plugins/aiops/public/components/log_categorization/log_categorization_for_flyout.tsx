@@ -93,6 +93,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
+    'log_categorization',
     undefined,
     undefined,
     BAR_TARGET,
