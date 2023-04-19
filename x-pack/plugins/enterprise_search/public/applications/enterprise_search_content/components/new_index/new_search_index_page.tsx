@@ -68,8 +68,7 @@ function getDescription(method: string, serviceType: string): string {
         ? i18n.translate(
             'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType',
             {
-              defaultMessage:
-                'A search index stores the data for your {name} connector.',
+              defaultMessage: 'A search index stores the data for your {name} connector.',
               values: {
                 name: connector.name,
               },
