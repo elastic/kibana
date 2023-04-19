@@ -117,6 +117,7 @@ export interface RulesListProps {
   searchFilter?: string;
   showActionFilter?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
+  showSearchBar?: boolean;
   showRuleParamFilter?: boolean;
   statusFilter?: RuleStatus[];
   typeFilter?: string[];
@@ -155,7 +156,8 @@ export const RulesList = ({
   searchFilter = '',
   showActionFilter = true,
   showCreateRuleButtonInPrompt = false,
-  showRuleParamFilter = true,
+  showRuleParamFilter = false,
+  showSearchBar = true,
   statusFilter,
   typeFilter,
   visibleColumns,
@@ -805,28 +807,33 @@ export const RulesList = ({
         <EuiSpacer size="xs" />
         {showRulesList && (
           <>
-            <RulesListFiltersBar
-              actionTypes={actionTypes}
-              filterOptions={filterOptions}
-              filters={filters}
-              inputText={inputText}
-              items={tableItems}
-              lastUpdate={lastUpdate}
-              ruleParamText={ruleParamText}
-              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
-              rulesStatusesTotal={rulesStatusesTotal}
-              setInputText={setInputText}
-              setRuleParamText={setRuleParamText}
-              showActionFilter={showActionFilter}
-              showErrors={showErrors}
-              showRuleParamFilter={showRuleParamFilter}
-              tags={tags}
-              updateFilters={updateFilters}
-              onClearSelection={onClearSelection}
-              onRefreshRules={refreshRules}
-              onToggleRuleErrors={toggleRuleErrors}
-            />
-            <EuiSpacer size="s" />
+            {showSearchBar ? (
+              <>
+                <RulesListFiltersBar
+                  actionTypes={actionTypes}
+                  filterOptions={filterOptions}
+                  filters={filters}
+                  inputText={inputText}
+                  items={tableItems}
+                  lastUpdate={lastUpdate}
+                  ruleParamText={ruleParamText}
+                  rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
+                  rulesStatusesTotal={rulesStatusesTotal}
+                  setInputText={setInputText}
+                  setRuleParamText={setRuleParamText}
+                  showActionFilter={showActionFilter}
+                  showErrors={showErrors}
+                  showRuleParamFilter={showRuleParamFilter}
+                  tags={tags}
+                  updateFilters={updateFilters}
+                  onClearSelection={onClearSelection}
+                  onRefreshRules={refreshRules}
+                  onToggleRuleErrors={toggleRuleErrors}
+                />
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+
             <RulesListTable
               items={tableItems}
               isLoading={isRulesTableLoading}
