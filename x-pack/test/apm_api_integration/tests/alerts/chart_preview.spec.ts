@@ -136,12 +136,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(
-        response.body.latencyChartPreview.some(
-          (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
-            item.data.some((coordinate) => coordinate.x && coordinate.y)
-        )
-      ).to.equal(true);
+      expect(response.body.latencyChartPreview[0].data[0]).to.eql({
+        x: 1627974600000,
+        y: 18485.85714285714,
+      });
     });
 
     it('transaction_duration with nonexistent transaction name', async () => {
