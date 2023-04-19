@@ -122,3 +122,4 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+data2.json
