@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-export interface SelectOptions {
+export interface SelectOption {
   label: string;
   value: string;
 }
 
+export interface Dependency {
+  field: string;
+  value: string | number | boolean | null;
+}
+
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
 export interface ConnectorConfigProperties {
+  depends_on: Dependency[];
   display: string;
   label: string;
-  options: SelectOptions[];
+  options: SelectOption[];
   order?: number | null;
   required: boolean;
   sensitive: boolean;
