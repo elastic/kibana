@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import moment from 'moment';
 import {
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -14,11 +15,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
-import {
-  FIELD_TYPES,
-  getUseField,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import {
@@ -136,25 +133,18 @@ export const RecurringSchedule: React.FC = React.memo(() => {
               </EuiFlexItem>
               {timezone ? (
                 <EuiFlexItem grow={1}>
-                  <UseField
-                    config={{
-                      type: FIELD_TYPES.COMBO_BOX,
-                      defaultValue: timezone,
-                    }}
-                    componentProps={{
-                      'data-test-subj': 'disabled-timezone-field',
-                      id: 'disabled-timezone',
-                      euiFieldProps: {
-                        isDisabled: true,
-                        singleSelection: { asPlainText: true },
-                        placeholder: '',
-                        prepend: (
-                          <EuiFormLabel htmlFor={'disabled-timezone'}>
-                            {i18n.CREATE_FORM_TIMEZONE}
-                          </EuiFormLabel>
-                        ),
-                      },
-                    }}
+                  <EuiComboBox
+                    data-test-subj="disabled-timezone-field"
+                    id="disabled-timezone"
+                    isDisabled
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={[{ label: timezone[0] }]}
+                    isClearable={false}
+                    prepend={
+                      <EuiFormLabel htmlFor={'disabled-timezone'}>
+                        {i18n.CREATE_FORM_TIMEZONE}
+                      </EuiFormLabel>
+                    }
                   />
                 </EuiFlexItem>
               ) : null}
