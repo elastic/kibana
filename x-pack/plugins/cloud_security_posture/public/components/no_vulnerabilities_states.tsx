@@ -129,13 +129,13 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
           values={{
             docs: (
               <EuiLink href="https://ela.st/findings" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="docs"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
