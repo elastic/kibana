@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { map } from 'lodash';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
@@ -85,7 +86,11 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful } = action;
+    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+
+    if (errors) {
+      return <>{map(errors, (error) => error)}</>;
+    }
 
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;

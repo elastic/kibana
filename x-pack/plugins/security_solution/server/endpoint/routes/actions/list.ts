@@ -33,7 +33,9 @@ export function registerActionListRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { any: ['canReadActionsLogManagement', 'canAccessEndpointActionsLogManagement'] },
+      // TODO for testing purposes - bring back when we have an RBAC decision
+      // { any: ['canReadActionsLogManagement', 'canAccessEndpointActionsLogManagement'] },
+      {},
       endpointContext.logFactory.get('endpointActionList'),
       actionListHandler(endpointContext)
     )

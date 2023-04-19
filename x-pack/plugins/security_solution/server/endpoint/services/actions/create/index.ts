@@ -17,6 +17,8 @@ import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EcsError } from '@kbn/ecs';
+import { validateAgents, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../../common/constants';
@@ -52,29 +54,35 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
-
+type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
+  command: ResponseActionsApiCommandNames;
+  user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+  rule_id?: string;
+  rule_name?: string;
+  error?: string;
+};
+interface CreateActionMetadata {
+  casesClient?: CasesClient;
+  license?: LicenseService;
+}
 export const actionCreateService = (
   esClient: ElasticsearchClient,
   endpointContext: EndpointAppContext,
-  license: LicenseService
+  licenseService: LicenseService
 ) => {
-  const hasEnterpriseLicense = license.isAtLeast('enterprise');
+  const createActionFromAlert = (payload: CreateActionPayload) => {
+    return createAction({ ...payload }, { license: licenseService });
+  };
 
   const createAction = async (
-    payload: TypeOf<typeof ResponseActionBodySchema> & {
-      command: ResponseActionsApiCommandNames;
-      user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
-      rule_id?: string;
-      rule_name?: string;
-    },
-    casesClient?: CasesClient
+    payload: CreateActionPayload,
+    { casesClient, license }: CreateActionMetadata
   ): Promise<ActionDetails> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
 
-    console.log({ hasEnterpriseLicense });
     const logger = endpointContext.logFactory.get('hostIsolation');
 
     // fetch the Agent IDs to send the commands to
@@ -105,6 +113,8 @@ export const actionCreateService = (
       return payload.parameters ?? undefined;
     };
 
+    const alertActionError = checkForAlertErrors(agents, license);
+
     const doc = {
       '@timestamp': moment().toISOString(),
       agent: {
@@ -125,6 +135,14 @@ export const actionCreateService = (
       user: {
         id: payload.user ? payload.user.username : 'unknown',
       },
+      ...(alertActionError
+        ? {
+            error: {
+              code: '400',
+              message: alertActionError,
+            } as EcsError,
+          }
+        : {}),
       ...(payload.rule_id && payload.rule_name
         ? { rule: { id: payload.rule_id, name: payload.rule_name } }
         : {}),
@@ -162,106 +180,109 @@ export const actionCreateService = (
       }
     }
 
-    // add signature to doc
-    const fleetActionDoc = {
-      ...doc.EndpointActions,
-      '@timestamp': doc['@timestamp'],
-      agents,
-      timeout: 300, // 5 minutes
-      user_id: doc.user.id,
-    };
-    const fleetActionDocSignature = await endpointContext.service
-      .getMessageSigningService()
-      .sign(fleetActionDoc);
-    const signedFleetActionDoc = {
-      ...fleetActionDoc,
-      signed: {
-        data: fleetActionDocSignature.data.toString('base64'),
-        signature: fleetActionDocSignature.signature,
-      },
-    };
+    if (!doc.error) {
+      // add signature to doc
 
-    // write actions to .fleet-actions index
-    try {
-      fleetActionIndexResult = await esClient.index<EndpointAction>(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: signedFleetActionDoc,
-          refresh: 'wait_for',
+      const fleetActionDoc = {
+        ...doc.EndpointActions,
+        '@timestamp': doc['@timestamp'],
+        agents,
+        timeout: 300, // 5 minutes
+        user_id: doc.user.id,
+      };
+      const fleetActionDocSignature = await endpointContext.service
+        .getMessageSigningService()
+        .sign(fleetActionDoc);
+      const signedFleetActionDoc = {
+        ...fleetActionDoc,
+        signed: {
+          data: fleetActionDocSignature.data.toString('base64'),
+          signature: fleetActionDocSignature.signature,
         },
-        {
-          meta: true,
-        }
-      );
+      };
 
-      if (fleetActionIndexResult.statusCode !== 201) {
-        throw new Error(fleetActionIndexResult.body.result);
-      }
-    } catch (e) {
-      // create entry in .logs-endpoint.action.responses-default data stream
-      // when writing to .fleet-actions fails
-      if (doesLogsEndpointActionsDsExist) {
-        await createFailedActionResponseEntry({
-          esClient,
-          doc: {
-            '@timestamp': moment().toISOString(),
-            agent: doc.agent,
-            EndpointActions: {
-              action_id: doc.EndpointActions.action_id,
-              completed_at: moment().toISOString(),
-              started_at: moment().toISOString(),
-              data: doc.EndpointActions.data,
-            },
+      // write actions to .fleet-actions index
+      try {
+        fleetActionIndexResult = await esClient.index<EndpointAction>(
+          {
+            index: AGENT_ACTIONS_INDEX,
+            body: signedFleetActionDoc,
+            refresh: 'wait_for',
           },
-          logger,
-        });
-      }
-
-      throw e;
-    }
-
-    if (casesClient) {
-      // convert any alert IDs into cases
-      let caseIDs: string[] = payload.case_ids?.slice() || [];
-      if (payload.alert_ids && payload.alert_ids.length > 0) {
-        const newIDs: string[][] = await Promise.all(
-          payload.alert_ids.map(async (alertID: string) => {
-            const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
-              alertID,
-              options: { owner: APP_ID },
-            });
-            return cases.map((caseInfo): string => {
-              return caseInfo.id;
-            });
-          })
+          {
+            meta: true,
+          }
         );
-        caseIDs = caseIDs.concat(...newIDs);
-      }
-      caseIDs = [...new Set(caseIDs)];
 
-      // Update all cases with a comment
-      if (caseIDs.length > 0) {
-        const targets = endpointData.map((endpt: HostMetadata) => ({
-          hostname: endpt.host.hostname,
-          endpointId: endpt.agent.id,
-        }));
-
-        await Promise.all(
-          caseIDs.map((caseId) =>
-            casesClient.attachments.add({
-              caseId,
-              comment: {
-                type: CommentType.actions,
-                comment: payload.comment || '',
-                actions: {
-                  targets,
-                  type: payload.command,
-                },
-                owner: APP_ID,
+        if (fleetActionIndexResult.statusCode !== 201) {
+          throw new Error(fleetActionIndexResult.body.result);
+        }
+      } catch (e) {
+        // create entry in .logs-endpoint.action.responses-default data stream
+        // when writing to .fleet-actions fails
+        if (doesLogsEndpointActionsDsExist) {
+          await createFailedActionResponseEntry({
+            esClient,
+            doc: {
+              '@timestamp': moment().toISOString(),
+              agent: doc.agent,
+              EndpointActions: {
+                action_id: doc.EndpointActions.action_id,
+                completed_at: moment().toISOString(),
+                started_at: moment().toISOString(),
+                data: doc.EndpointActions.data,
               },
+            },
+            logger,
+          });
+        }
+
+        throw e;
+      }
+
+      if (casesClient) {
+        // convert any alert IDs into cases
+        let caseIDs: string[] = payload.case_ids?.slice() || [];
+        if (payload.alert_ids && payload.alert_ids.length > 0) {
+          const newIDs: string[][] = await Promise.all(
+            payload.alert_ids.map(async (alertID: string) => {
+              const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
+                alertID,
+                options: { owner: APP_ID },
+              });
+              return cases.map((caseInfo): string => {
+                return caseInfo.id;
+              });
             })
-          )
-        );
+          );
+          caseIDs = caseIDs.concat(...newIDs);
+        }
+        caseIDs = [...new Set(caseIDs)];
+
+        // Update all cases with a comment
+        if (caseIDs.length > 0) {
+          const targets = endpointData.map((endpt: HostMetadata) => ({
+            hostname: endpt.host.hostname,
+            endpointId: endpt.agent.id,
+          }));
+
+          await Promise.all(
+            caseIDs.map((caseId) =>
+              casesClient.attachments.add({
+                caseId,
+                comment: {
+                  type: CommentType.actions,
+                  comment: payload.comment || '',
+                  actions: {
+                    targets,
+                    type: payload.command,
+                  },
+                  owner: APP_ID,
+                },
+              })
+            )
+          );
+        }
       }
     }
 
@@ -281,6 +302,7 @@ export const actionCreateService = (
 
   return {
     createAction,
+    createActionFromAlert,
   };
 };
 
@@ -307,4 +329,11 @@ const createFailedActionResponseEntry = async ({
   } catch (e) {
     logger.error(e);
   }
+};
+
+const checkForAlertErrors = (agents: string[], license?: LicenseService) => {
+  if (!license) {
+    return;
+  }
+  return validateEndpointLicense(license) || validateAgents(agents);
 };

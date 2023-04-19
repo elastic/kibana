@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EcsError } from '@kbn/ecs';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -61,6 +62,7 @@ interface NormalizedActionRequest {
   alertIds?: string[];
   ruleId?: string;
   ruleName?: string;
+  error?: EcsError;
 }
 
 /**
@@ -89,6 +91,7 @@ export const mapToNormalizedActionRequest = (
       alertIds: actionRequest.EndpointActions.data.alert_id,
       ruleId: actionRequest.rule?.id,
       ruleName: actionRequest.rule?.name,
+      error: actionRequest.error,
     };
   }
 

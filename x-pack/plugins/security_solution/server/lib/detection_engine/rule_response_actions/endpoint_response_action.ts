@@ -16,7 +16,7 @@ export const endpointResponseAction = (
   { alertIds, agentIds, ruleId, ruleName }: AlertsWithAgentType
 ) =>
   each(agentIds, (agent) =>
-    endpointAppContextService.getActionCreateService().createAction({
+    endpointAppContextService.getActionCreateService().createActionFromAlert({
       endpoint_ids: [agent],
       alert_ids: alertIds,
       comment: responseAction.params.comment,
