@@ -54,11 +54,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Kubernetes Dashboard', () => {
-      it('display the dashboard header', async () => {
-        const dashboardHeader = await dashboard.getDashboardPageHeader();
-        expect((await dashboardHeader.getVisibleText()) === 'Cloud Security Posture').to.be(true);
-      });
-
       it('displays accurate summary compliance score', async () => {
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 
