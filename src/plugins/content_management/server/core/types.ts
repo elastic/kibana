@@ -7,7 +7,11 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { ContentManagementGetTransformsFn, Version } from '@kbn/object-versioning';
+import type {
+  Version,
+  ContentManagementServiceTransforms,
+  ContentManagementServiceDefinitionVersioned,
+} from '@kbn/object-versioning';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
 import type {
@@ -20,6 +24,11 @@ import type {
   SearchResult,
 } from '../../common';
 
+export type StorageContextGetTransformFn = (
+  definitions: ContentManagementServiceDefinitionVersioned,
+  requestVersion?: Version
+) => ContentManagementServiceTransforms;
+
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
@@ -28,7 +37,7 @@ export interface StorageContext {
     latest: Version;
   };
   utils: {
-    getTransforms: ContentManagementGetTransformsFn;
+    getTransforms: StorageContextGetTransformFn;
   };
 }
 
