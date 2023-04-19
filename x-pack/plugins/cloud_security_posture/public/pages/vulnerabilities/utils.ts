@@ -11,12 +11,12 @@ import { VectorScoreBase, Vector } from './types';
 
 export const vulnerabilitiesColumns = {
   actions: 'actions',
-  vulnerability: 'vulnerability',
-  cvss: 'cvss',
-  resource: 'resource',
-  severity: 'severity',
-  package_version: 'package_version',
-  fix_version: 'fix_version',
+  vulnerability: 'vulnerability.id',
+  cvss: 'vulnerability.score.base',
+  resource: 'resource.name',
+  severity: 'vulnerability.severity',
+  package_version: 'vulnerability.package.name',
+  fix_version: 'vulnerability.package.fixed_version',
 };
 
 const defaultColumnProps = () => ({
