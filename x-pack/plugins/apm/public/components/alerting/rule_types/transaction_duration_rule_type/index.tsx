@@ -39,10 +39,10 @@ import { PopoverExpression } from '../../ui_components/popover_expression';
 export interface RuleParams {
   aggregationType: AggregationType;
   environment: string;
-  serviceName: string;
   threshold: number;
-  transactionType: string;
-  transactionName: string;
+  transactionType?: string;
+  transactionName?: string;
+  serviceName?: string;
   windowSize: number;
   windowUnit: string;
 }

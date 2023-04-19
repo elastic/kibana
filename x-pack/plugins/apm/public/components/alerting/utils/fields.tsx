@@ -40,7 +40,7 @@ export function ServiceField({
     >
       <SuggestionsSelect
         customOptions={
-          allowAll ? [{ label: allOptionText, value: '' }] : undefined
+          allowAll ? [{ label: allOptionText, value: undefined }] : undefined
         }
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
@@ -104,7 +104,7 @@ export function TransactionNameField({
   onChange,
   serviceName,
 }: {
-  currentValue: string;
+  currentValue?: string;
   onChange: (value?: string) => void;
   serviceName?: string;
 }) {
@@ -115,7 +115,7 @@ export function TransactionNameField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        customOptions={[{ label: allOptionText, value: '' }]}
+        customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate(
           'xpack.apm.alerting.transaction.name.custom.text',
           {
@@ -154,7 +154,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        customOptions={[{ label: allOptionText, value: '' }]}
+        customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {

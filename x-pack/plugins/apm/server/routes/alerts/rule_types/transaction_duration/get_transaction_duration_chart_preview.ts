@@ -63,15 +63,9 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName, {
-          queryEmptyString: false,
-        }),
-        ...termQuery(TRANSACTION_TYPE, transactionType, {
-          queryEmptyString: false,
-        }),
-        ...termQuery(TRANSACTION_NAME, transactionName, {
-          queryEmptyString: false,
-        }),
+        ...termQuery(SERVICE_NAME, serviceName),
+        ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(TRANSACTION_NAME, transactionName),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),

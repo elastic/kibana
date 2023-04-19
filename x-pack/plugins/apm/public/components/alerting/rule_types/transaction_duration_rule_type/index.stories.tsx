@@ -32,17 +32,11 @@ export default {
   ],
 };
 
-export const Example: Story = () => {
-  const [params, setParams] = useState<RuleParams>({
-    aggregationType: AggregationType.Avg,
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
-    threshold: 1500,
-    transactionType: 'testTransactionType',
-    transactionName: 'GET /api/customer/:id',
-    windowSize: 5,
-    windowUnit: 'm',
-  });
+export const CreatingInApmServiceOverview: Story<Args> = ({
+  ruleParams,
+  metadata,
+}) => {
+  const [params, setParams] = useState<RuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -51,8 +45,48 @@ export const Example: Story = () => {
   return (
     <TransactionDurationRuleType
       ruleParams={params}
+      metadata={metadata}
       setRuleParams={setRuleParams}
       setRuleProperty={() => {}}
     />
   );
+};
+
+CreatingInApmServiceOverview.args = {
+  ruleParams: {
+    aggregationType: AggregationType.Avg,
+    environment: 'testEnvironment',
+    serviceName: 'testServiceName',
+    threshold: 1500,
+    transactionType: 'testTransactionType',
+    transactionName: 'GET /api/customer/:id',
+    windowSize: 5,
+    windowUnit: 'm',
+  },
+  metadata: undefined,
+};
+
+export const CreatingInStackManagement: Story<Args> = ({
+  ruleParams,
+  metadata,
+}) => {
+  const [params, setParams] = useState<RuleParams>(ruleParams);
+
+  function setRuleParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
+  return (
+    <TransactionDurationRuleType
+      ruleParams={params}
+      metadata={metadata}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
+    />
+  );
+};
+
+CreatingInStackManagement.args = {
+  ruleParams: {},
+  metadata: undefined,
 };
