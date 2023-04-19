@@ -16,9 +16,6 @@ export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
 export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
-    created: {
-      type: 'date',
-    },
     schemaVersion: {
       type: 'keyword',
     },
