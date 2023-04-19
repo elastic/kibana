@@ -40,7 +40,7 @@ import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 interface RulesSnoozeSettings {
-  data?: Record<string, RuleSnoozeSettings>; // The key is a rule SO's id (not ruleId)
+  data: Record<string, RuleSnoozeSettings>; // The key is a rule SO's id (not ruleId)
   isLoading: boolean;
   isError: boolean;
 }

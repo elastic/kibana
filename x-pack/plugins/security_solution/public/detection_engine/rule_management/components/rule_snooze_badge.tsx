@@ -27,7 +27,7 @@ export function RuleSnoozeBadge({ id }: RuleSnoozeBadgeProps): JSX.Element {
   } = useRulesTableContext();
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const rule = useMemo(() => {
-    const ruleSnoozeSettings = rulesSnoozeSettings.data?.[id];
+    const ruleSnoozeSettings = rulesSnoozeSettings.data[id];
 
     return {
       id: ruleSnoozeSettings?.id ?? '',
