@@ -19,7 +19,7 @@ import { createInventoryViewMock } from '../../../common/inventory_views/invento
 describe('InventoryViewsClient class', () => {
   const mockFindInventoryList = (savedObjectsClient: jest.Mocked<SavedObjectsClientContract>) => {
     const inventoryViewListMock = [
-      createInventoryViewMock('static', {
+      createInventoryViewMock('0', {
         isDefault: true,
       } as InventoryViewAttributes),
       createInventoryViewMock('default_id', {
@@ -67,7 +67,7 @@ describe('InventoryViewsClient class', () => {
         createInventoryViewsClient();
 
       const inventoryViewListMock = [
-        createInventoryViewMock('static', {
+        createInventoryViewMock('0', {
           isDefault: true,
         } as InventoryViewAttributes),
       ];
@@ -244,7 +244,7 @@ const basicTestSourceConfiguration: InfraSource = {
       message: [],
     },
     metricAlias: 'METRIC_ALIAS',
-    inventoryDefaultView: 'static',
+    inventoryDefaultView: '0',
     metricsExplorerDefaultView: 'METRICS_EXPLORER_DEFAULT_VIEW',
     anomalyThreshold: 0,
   },
