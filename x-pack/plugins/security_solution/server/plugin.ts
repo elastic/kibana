@@ -120,7 +120,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = createConfig(context);
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.appFeatures = new AppFeatures(this.config.experimentalFeatures);
+    this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
 
     // Cache up to three artifacts with a max retention of 5 mins each
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });

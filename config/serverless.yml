@@ -3,6 +3,9 @@ xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
 
+# Ess plugins
+xpack.ess.security.enabled: false
+
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
 xpack.rollup.enabled: false

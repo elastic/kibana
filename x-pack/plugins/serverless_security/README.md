@@ -1,3 +1,3 @@
 # serverlessSecurity
 
-A witty, fitting description to come.
+This plugin contains the serverless customizations for Security Solution.

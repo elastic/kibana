@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  KibanaFeatureConfig,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AppFeatureKey, AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import type { AppFeatureKibanaConfig, AppFeaturesConfig } from './types';
 import {
@@ -19,48 +17,57 @@ import {
   getCasesBaseKibanaFeature,
   getCasesAppFeaturesConfig,
 } from './security_cases_kibana_features';
-import { getMergedAppFeatureConfigs } from './app_features_config_merger';
+import { AppFeaturesConfigMerger } from './app_features_config_merger';
 
 type AppFeaturesMap = Map<AppFeatureKey, boolean>;
 
 export class AppFeatures {
-  private experimentalFeatures: ExperimentalFeatures;
-  private appFeatures: AppFeaturesMap;
+  private merger: AppFeaturesConfigMerger;
+  private appFeatures?: AppFeaturesMap;
   private featuresSetup?: FeaturesPluginSetup;
 
-  constructor(experimentalFeatures: ExperimentalFeatures) {
-    this.experimentalFeatures = experimentalFeatures;
-    // Set all feature keys to true by default
-    this.appFeatures = new Map(
-      Object.keys({
-        ...getSecurityAppFeaturesConfig(this.experimentalFeatures),
-        ...getCasesAppFeaturesConfig(),
-      }).map((appFeatureKey) => [appFeatureKey as AppFeatureKey, true])
-    );
+  constructor(
+    private readonly logger: Logger,
+    private readonly experimentalFeatures: ExperimentalFeatures
+  ) {
+    this.merger = new AppFeaturesConfigMerger(this.logger);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
-    this.registerEnabledKibanaFeatures();
   }
 
   public set(appFeatureKeys: AppFeatureKeys) {
+    if (this.appFeatures) {
+      throw new Error('AppFeatures has already been initialized');
+    }
     this.appFeatures = new Map(Object.entries(appFeatureKeys) as Array<[AppFeatureKey, boolean]>);
     this.registerEnabledKibanaFeatures();
   }
 
   public isEnabled(appFeatureKey: AppFeatureKey): boolean {
+    if (!this.appFeatures) {
+      throw new Error('AppFeatures has not been initialized');
+    }
     return this.appFeatures.get(appFeatureKey) ?? false;
   }
 
   private registerEnabledKibanaFeatures() {
+    if (this.featuresSetup == null) {
+      throw new Error(
+        'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
+      );
+    }
     // register main security Kibana features
     const securityBaseKibanaFeature = getSecurityBaseKibanaFeature(this.experimentalFeatures);
     const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getSecurityAppFeaturesConfig(this.experimentalFeatures)
     );
-    this.registerKibanaFeatures(
-      getMergedAppFeatureConfigs(securityBaseKibanaFeature, enabledSecurityAppFeaturesConfigs)
+    this.featuresSetup.registerKibanaFeature(
+      this.merger.mergeAppFeatureConfigs(
+        securityBaseKibanaFeature,
+        enabledSecurityAppFeaturesConfigs
+      )
     );
 
     // register security cases Kibana features
@@ -68,8 +75,11 @@ export class AppFeatures {
     const enabledCasesAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getCasesAppFeaturesConfig()
     );
-    this.registerKibanaFeatures(
-      getMergedAppFeatureConfigs(securityCasesBaseKibanaFeature, enabledCasesAppFeaturesConfigs)
+    this.featuresSetup.registerKibanaFeature(
+      this.merger.mergeAppFeatureConfigs(
+        securityCasesBaseKibanaFeature,
+        enabledCasesAppFeaturesConfigs
+      )
     );
   }
 
@@ -85,15 +95,5 @@ export class AppFeatures {
       },
       []
     );
-  }
-
-  private registerKibanaFeatures(kibanaFeatureConfig: KibanaFeatureConfig) {
-    if (this.featuresSetup == null) {
-      throw new Error(
-        'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
-      );
-    }
-    this.featuresSetup.unregisterKibanaFeature(kibanaFeatureConfig.id);
-    this.featuresSetup.registerKibanaFeature(kibanaFeatureConfig);
   }
 }
