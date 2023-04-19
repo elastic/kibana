@@ -31,7 +31,9 @@ export const transformToActionFrequency = <T extends ActionWithFrequency>(
   throttle: string | null | undefined
 ): T[] => {
   const frequency = transformToFrequency(throttle);
-  const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+if (actions.every((action) => action.frequency)) {
+  return actions;
+}
   if (!actionsWithoutFrequency.length) {
     return actions;
   }
