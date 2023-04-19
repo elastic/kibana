@@ -592,14 +592,14 @@ describe.skip('Case View Page activity tab', () => {
                   profileUid: caseUsers.participants[1].uid,
                 },
               }),
-              getUserAction('severity', 'update', {
+              getUserAction('description', 'update', {
                 createdBy: {
                   ...caseUsers.participants[2].user,
                   fullName: caseUsers.participants[2].user.full_name,
                   profileUid: caseUsers.participants[2].uid,
                 },
               }),
-              getUserAction('description', 'update', {
+              getUserAction('title', 'update', {
                 createdBy: {
                   ...caseUsers.participants[3].user,
                   fullName: caseUsers.participants[3].user.full_name,
