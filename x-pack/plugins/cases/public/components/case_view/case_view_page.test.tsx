@@ -603,12 +603,12 @@ describe('CaseViewPage', () => {
     });
 
     describe('description', () => {
-      it('renders the descriptions user correctly', async () => {
+      it('renders the description correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
         const description = within(screen.getByTestId('description'));
 
-        expect(await description.findByText('Leslie Knope')).toBeInTheDocument();
+        expect(await description.findByText(caseData.description)).toBeInTheDocument();
       });
 
       it('should display description isLoading', async () => {

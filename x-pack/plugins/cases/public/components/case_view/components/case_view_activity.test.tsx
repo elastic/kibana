@@ -493,7 +493,7 @@ describe.skip('Case View Page activity tab', () => {
     });
 
     describe('User actions', () => {
-      it('renders the descriptions user correctly', async () => {
+      it('renders the description correctly', async () => {
         appMockRender = createAppMockRenderer();
         const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
@@ -502,6 +502,27 @@ describe.skip('Case View Page activity tab', () => {
         await waitFor(() => {
           expect(description.getByText(caseData.description)).toBeInTheDocument();
         });
+      });
+
+      it('renders description user action correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [
+              getUserAction('description', 'create'),
+              getUserAction('description', 'update'),
+            ],
+          },
+        });
+
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
+
+        expect(
+          userActions.getByTestId('description-update-action-description-update')
+        ).toBeInTheDocument();
       });
 
       it('renders the unassigned users correctly', async () => {
@@ -556,7 +577,8 @@ describe.skip('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction('status', 'update', {
+              getUserAction('description', 'create'),
+              getUserAction('description', 'update', {
                 createdBy: {
                   ...caseUsers.participants[0].user,
                   fullName: caseUsers.participants[0].user.full_name,
@@ -577,7 +599,7 @@ describe.skip('Case View Page activity tab', () => {
                   profileUid: caseUsers.participants[2].uid,
                 },
               }),
-              getUserAction('title', 'update', {
+              getUserAction('description', 'update', {
                 createdBy: {
                   ...caseUsers.participants[3].user,
                   fullName: caseUsers.participants[3].user.full_name,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
@@ -22,14 +22,12 @@ import type { UserActionBuilderArgs, UserActionTreeProps } from '../user_actions
 import { UserActionMarkdown } from '../user_actions/markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from '../user_actions/translations';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { useUserActionsHandler } from '../user_actions/use_user_actions_handler';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const DESCRIPTION_ID = 'description';
 
-type GetDescriptionUserActionArgs = Pick<
-  UserActionBuilderArgs,
-  'caseData' | 'userProfiles' | 'appId'
-> &
+type GetDescriptionUserActionArgs = Pick<UserActionBuilderArgs, 'caseData' | 'userProfiles'> &
   Pick<UserActionTreeProps, 'onUpdateField'> & { isLoadingDescription: boolean };
 
 const MyEuiCommentFooter = styled(EuiText)`
@@ -80,26 +78,21 @@ const MyEuiCommentList = styled(EuiCommentList)`
 `;
 
 export const Description = React.memo(
-  ({ appId, caseData, isLoadingDescription, onUpdateField }: GetDescriptionUserActionArgs) => {
+  ({ caseData, isLoadingDescription, onUpdateField }: GetDescriptionUserActionArgs) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-    const [isEdit, setIsEdit] = useState<boolean>(false);
 
-    const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
+    const { appId } = useCasesContext();
 
-    if (hasIncomingLensState && draftComment?.commentId && !isEdit) {
-      setIsEdit(true);
-    }
+    const { commentRefs, manageMarkdownEditIds, handleManageMarkdownEditId } =
+      useUserActionsHandler();
+
+    const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
 
     const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
       const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
       return Boolean(sessionStorage.getItem(draftStorageKey));
     };
-
-    const handleOnChangeEditable = useCallback(() => {
-      clearDraftComment();
-      setIsEdit(false);
-    }, [clearDraftComment]);
 
     const descriptionCommentListObj: EuiCommentProps = {
       username: null,
@@ -109,21 +102,18 @@ export const Description = React.memo(
       children: !isCollapsed ? (
         <>
           <UserActionMarkdown
-            key={isEdit ? DESCRIPTION_ID : undefined}
+            key={isEditable ? DESCRIPTION_ID : undefined}
             caseId={caseData.id}
             id={DESCRIPTION_ID}
-            content={
-              draftComment?.commentId && hasIncomingLensState
-                ? draftComment.comment
-                : caseData.description
-            }
-            isEditable={isEdit}
+            ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
+            content={caseData.description}
+            isEditable={isEditable}
             onSaveContent={(content: string) => {
               onUpdateField({ key: DESCRIPTION_ID, value: content });
             }}
-            onChangeEditable={handleOnChangeEditable}
+            onChangeEditable={handleManageMarkdownEditId}
           />
-          {!isEdit &&
+          {!isEditable &&
           !isLoadingDescription &&
           hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
             <MyEuiCommentFooter>
@@ -138,9 +128,11 @@ export const Description = React.memo(
       ) : null,
       timelineAvatar: null,
       className: classNames({
-        isEdit,
+        isEditable,
         draftFooter:
-          !isEdit && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
+          !isEditable &&
+          !isLoadingDescription &&
+          hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
         collapsedList: isCollapsed,
       }),
       actions: (
@@ -149,7 +141,7 @@ export const Description = React.memo(
             aria-label={i18n.EDIT_DESCRIPTION}
             iconType="pencil"
             onClick={() => {
-              setIsEdit(!isEdit);
+              handleManageMarkdownEditId(DESCRIPTION_ID);
             }}
             data-test-subj="description-edit-icon"
           />
