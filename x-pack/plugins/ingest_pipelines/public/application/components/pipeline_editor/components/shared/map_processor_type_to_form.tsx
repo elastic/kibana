@@ -375,7 +375,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
-  geogrid: {
+  geo_grid: {
     FieldsComponent: GeoGrid,
     docLinkPath: '/ingest-geo-grid-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.geogrid', {

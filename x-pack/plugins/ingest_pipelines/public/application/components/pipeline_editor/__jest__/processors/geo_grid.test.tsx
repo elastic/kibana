@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
-const GEO_GRID_TYPE = 'geogrid';
+const GEO_GRID_TYPE = 'geo_grid';
 
 describe('Processor: GeoGrid', () => {
   let onUpdate: jest.Mock;
