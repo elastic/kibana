@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { waitForEndpointAlerts } from '../../tasks/alerts';
+import { request } from '../../tasks/common';
 import { navigateToEndpointList } from '../../screens/endpoints';
 import { getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
-import type { PolicyData } from '../../../../../common/endpoint/types';
+import type { PolicyData, ResponseActionApiResponse } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { login } from '../../tasks/login';
+import { EXECUTE_ROUTE } from '../../../../../common/endpoint/constants';
+import { waitForActionToComplete } from '../../tasks/response_actions';
 
 describe('Endpoint generated alerts', () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -53,13 +57,38 @@ describe('Endpoint generated alerts', () => {
     // 1. delete VM created
     // 2, Force-delete host from fleet (so we can delete policy)
     // 3, Removed policy created
+    //
+    //
+    // ?. Clean up:
+    //      created action
+    //      created action response
+    //      alerts/events
+    //      files created by potential endpoint actions
   });
 
   beforeEach(() => {
     login();
   });
 
-  it('should create an alert', () => {
+  it('should create a Detection Engine alert from an endpoint alert', () => {
+    // FIXME:PT remove this (only for dev)
     navigateToEndpointList();
+
+    // 1. send `execute` command that triggers malicious behaviour
+    request<ResponseActionApiResponse>({
+      method: 'POST',
+      url: EXECUTE_ROUTE,
+      body: {
+        endpoint_ids: [createdHost.agentId],
+        parameters: {
+          // Triggers a Malicious Behaviour alert on Linux system
+          command: 'bash -c cat /dev/tcp/foo',
+        },
+      },
+    })
+      .then((response) => waitForActionToComplete(response.body.data.id))
+      .then(() => waitForEndpointAlerts(createdHost.agentId));
+
+    // 4. check that alert show up on alerts list
   });
 });
