@@ -87,9 +87,8 @@ export async function mountManagementSection(
                 enableSaving={{
                   namespace: canSaveAdvancedSettings,
                   global: canSaveGlobalSettings,
-                  user: false,
                 }}
-                enableShowing={{ namespace: true, global: canShowGlobalSettings, user: false }}
+                enableShowing={{ namespace: true, global: canShowGlobalSettings }}
                 toasts={notifications.toasts}
                 docLinks={docLinks.links}
                 settingsService={settings}
