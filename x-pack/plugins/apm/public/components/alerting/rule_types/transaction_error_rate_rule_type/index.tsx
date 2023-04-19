@@ -23,6 +23,7 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
@@ -33,6 +34,7 @@ interface RuleParams {
   threshold?: number;
   serviceName?: string;
   transactionType?: string;
+  transactionName?: string;
   environment?: string;
 }
 
@@ -102,7 +104,8 @@ export function TransactionErrorRateRuleType(props: Props) {
       onChange={(value) => {
         if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
-          setRuleParams('transactionType', '');
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
           setRuleParams('environment', ENVIRONMENT_ALL.value);
         }
       }}
@@ -115,6 +118,11 @@ export function TransactionErrorRateRuleType(props: Props) {
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
+      serviceName={params.serviceName}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
     <IsAboveField
