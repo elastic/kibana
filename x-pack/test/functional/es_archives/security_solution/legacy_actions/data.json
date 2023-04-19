@@ -1,7 +1,39 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index" : ".kibana_alerting_cases",
+    "id" : "action:c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "action" : {
+        "actionTypeId" : ".email",
+        "name" : "test",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "a@a.com",
+          "host" : "gmail",
+          "port" : 56,
+          "service" : "other",
+          "secure" : null
+        },
+        "secrets" : "jCv0fZczCM+rlWXIkI6Qo/ZqasgxPhplokCaNeXJrJlJYjKeCgbZgiLAEue4bpq4GUDohfye8o1BlJCQi+3HJPb2Qp6lhbcvXn+C6wUzxj9ZitwY8ZTDo34e22TX7qHFs/1mVfO4stjZ6X86ufRZttjTNu4qjchfi3Jao7nWbw=="
+      },
+      "type" : "action",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "typeMigrationVersion": "8.0.0",
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:07:27.777Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
     "id": "action:207fa0e0-c04e-11ec-8a52-4fb92379525a",
     "source": {
       "action": {
@@ -16,9 +48,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "action": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:07:27.777Z"
     }
@@ -28,7 +58,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:9095ee90-b075-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -111,9 +141,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-31T19:53:39.885Z"
     }
@@ -123,7 +151,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:dc6595f0-b075-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -225,9 +253,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-31T19:55:46.202Z"
     }
@@ -237,7 +263,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:064e3160-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -320,9 +346,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-31T19:56:46.314Z"
     }
@@ -332,7 +356,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:27639570-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -415,9 +439,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-31T19:58:16.503Z"
     }
@@ -427,7 +449,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:61ec7a40-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -510,9 +532,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-31T19:54:25.054Z"
     }
@@ -522,7 +542,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:64492ef0-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -591,9 +611,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:11:51.707Z"
     }
@@ -603,7 +621,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:d42e8210-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -684,9 +702,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:15:12.135Z"
     }
@@ -696,7 +712,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
+    "index": ".kibana_alerting_cases",
     "id": "alert:29ba2fa0-b076-11ec-bb3f-1f063f8e06cf",
     "source": {
       "alert": {
@@ -788,9 +804,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "alert": "8.0.1"
-      },
+      "typeMigrationVersion": "8.0.1",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-04-01T22:10:16.467Z"
     }
@@ -819,9 +833,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:05:55.563Z"
     }
@@ -868,9 +880,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:08:02.207Z"
     }
@@ -930,9 +940,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:09:12.300Z"
     }
@@ -979,9 +987,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:10:08.399Z"
     }
@@ -1028,9 +1034,7 @@
       "namespaces": [
         "default"
       ],
-      "migrationVersion": {
-        "siem-detection-engine-rule-actions": "8.0.0"
-      },
+      "typeMigrationVersion": "8.0.0",
       "coreMigrationVersion": "8.1.2",
       "updated_at": "2022-03-30T22:11:46.643Z"
     }
