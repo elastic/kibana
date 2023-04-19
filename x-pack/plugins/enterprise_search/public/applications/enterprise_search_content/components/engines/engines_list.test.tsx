@@ -176,16 +176,16 @@ describe('CreateEngineButton', () => {
       expect(popover.text()).toMatch('Search Applications require a Platinum license');
     });
   });
-  describe('isDisabled={false}', () => {
+  describe('disabled={false}', () => {
     it('renders a button and does not show a popover when focused', () => {
       const wrapper = mount(<CreateEngineButton disabled={false} />);
-      console.log('wrapper', wrapper);
-      const button = wrapper.find(
-        'buttonTo[data-test-subj="enterprise-search-content-engines-creation-button"]'
+
+      const anchor = wrapper.find(
+        'a[data-test-subj="enterprise-search-content-engines-creation-button"]'
       );
-      console.log('button', button);
-      expect(button).toHaveLength(1);
-      expect(button.prop('isDisabled')).toBeFalsy();
+
+      expect(anchor).toHaveLength(1);
+      expect(anchor.prop('disabled')).toBeFalsy();
 
       let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
 
@@ -206,12 +206,12 @@ describe('CreateEngineButton', () => {
     it('renders a button and does not show a popover when hovered', () => {
       const wrapper = mount(<CreateEngineButton disabled={false} />);
 
-      const button = wrapper.find(
-        'button[data-test-subj="enterprise-search-content-engines-creation-button"]'
+      const anchor = wrapper.find(
+        'a[data-test-subj="enterprise-search-content-engines-creation-button"]'
       );
 
-      expect(button).toHaveLength(1);
-      expect(button.prop('isDisabled')).toBeFalsy();
+      expect(anchor).toHaveLength(1);
+      expect(anchor.prop('disabled')).toBeFalsy();
 
       let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
 
