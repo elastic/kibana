@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import moment, { Moment } from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import {
@@ -24,6 +24,8 @@ interface DatePickerRangeFieldProps {
 
 export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.memo(
   ({ fields, showTimeSelect = true, ...rest }) => {
+    const [today] = useState<Moment>(moment());
+
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [fields.startDate.path, fields.endDate.path] });
 
@@ -66,7 +68,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 endDate={endDate}
                 aria-label="Start date"
                 showTimeSelect={showTimeSelect}
-                minDate={startDate}
+                minDate={today}
               />
             }
             endDateControl={
@@ -77,7 +79,7 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
                 endDate={endDate}
                 aria-label="End date"
                 showTimeSelect={showTimeSelect}
-                minDate={startDate}
+                minDate={today}
               />
             }
             fullWidth
