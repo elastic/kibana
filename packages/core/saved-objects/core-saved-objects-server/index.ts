@@ -57,6 +57,7 @@ export {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
   INGEST_SAVED_OBJECT_INDEX,
   ALERTING_CASES_SAVED_OBJECT_INDEX,
+  SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   SavedObjectsIndexPatterns,
 } from './src/saved_objects_index_pattern';
 export type {
