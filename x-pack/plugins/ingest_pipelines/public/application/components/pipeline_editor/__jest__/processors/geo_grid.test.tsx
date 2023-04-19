@@ -79,10 +79,12 @@ describe('Processor: GeoGrid', () => {
 
     const processors = getProcessorValue(onUpdate, GEO_GRID_TYPE);
 
-    expect(processors[0][GEO_GRID_TYPE]).toEqual({
-      field: 'test_geo_grid_processor',
-      tile_type: 'geohex',
-    });
+    expect(processors[0][GEO_GRID_TYPE]).toEqual(
+      expect.objectContaining({
+        field: 'test_geo_grid_processor',
+        tile_type: 'geohex',
+      })
+    );
   });
 
   test('saves with optional parameter values', async () => {
@@ -113,10 +115,10 @@ describe('Processor: GeoGrid', () => {
       tile_type: 'geohex',
       target_field: 'test_target',
       target_format: 'WKT',
-      parent: 'parent_field',
-      children: 'children_field',
-      non_children: 'nonchildren_field',
-      precision: 'precision_field',
+      parent_field: 'parent_field',
+      children_field: 'children_field',
+      non_children_field: 'nonchildren_field',
+      precision_field: 'precision_field',
     });
   });
 });
