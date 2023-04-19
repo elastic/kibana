@@ -47,6 +47,7 @@ booleanExpression
     | valueExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
+    | IS_NULL_FUNCTION LP qualifiedName RP
     ;
 
 valueExpression
@@ -126,6 +127,7 @@ mathFunctionExpressionArgument
    | string
    | number
    | operatorExpression
+   | number (DATE_LITERAL)
    ;
 
 qualifiedName

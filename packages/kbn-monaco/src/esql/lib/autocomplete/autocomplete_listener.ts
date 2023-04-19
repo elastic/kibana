@@ -26,7 +26,7 @@ import {
   closeBracketDefinition,
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
-  roundCommandDefinition,
+  mathCommandDefinition,
   assignOperatorDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
@@ -289,7 +289,7 @@ export class AutocompleteListener implements ESQLParserListener {
         }
 
         if (this.parentContext === ESQLParser.EVAL) {
-          this.suggestions = [roundCommandDefinition, ...this.fields];
+          this.suggestions = [...mathCommandDefinition, ...this.fields];
           return;
         }
       }

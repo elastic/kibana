@@ -75,6 +75,15 @@ DECIMAL_LITERAL
 
 BY : 'by';
 
+DATE_LITERAL
+    : 'year'
+    | 'month'
+    | 'day'
+    | 'second'
+    | 'minute'
+    | 'hour'
+    ;
+
 AND : 'and';
 ASSIGN : '=';
 COMMA : ',';
@@ -120,6 +129,12 @@ NULLS_ORDERING_DIRECTION
 
 MATH_FUNCTION
     : 'round'
+    | 'abs'
+    | 'substring'
+    | 'concat'
+    | 'starts_with'
+    | 'date_format'
+    | 'date_trunc'
     ;
 
 UNARY_FUNCTION
@@ -128,6 +143,10 @@ UNARY_FUNCTION
     | 'max'
     | 'sum'
     | 'count'
+    ;
+
+IS_NULL_FUNCTION
+    : 'is_null'
     ;
 
 UNQUOTED_IDENTIFIER
