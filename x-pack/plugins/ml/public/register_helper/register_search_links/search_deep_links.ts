@@ -68,26 +68,27 @@ const AIOPS_DEEP_LINK: AppDeepLink = {
 
 const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
   id: 'mlModelManagementDeepLink',
-  title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-    defaultMessage: 'Trained Models',
+  title: i18n.translate('xpack.ml.deepLink.modelManagement', {
+    defaultMessage: 'Model Management',
   }),
   path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
   deepLinks: [
     {
       id: 'mlNodesOverviewDeepLink',
-      title: i18n.translate('xpack.ml.deepLink.modelManagement', {
-        defaultMessage: 'Model Management',
+      title: i18n.translate('xpack.ml.deepLink.trainedModels', {
+        defaultMessage: 'Trained Models',
       }),
       path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
     },
-    {
-      id: 'mlMemoryUsageDeepLink',
-      title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
-        defaultMessage: 'Memory usage',
-      }),
-      path: `/${ML_PAGES.MEMORY_USAGE}`,
-    },
   ],
+};
+
+const MEMORY_USAGE_DEEP_LINK: AppDeepLink = {
+  id: 'mlMemoryUsageDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
+    defaultMessage: 'Memory Usage',
+  }),
+  path: `/${ML_PAGES.MEMORY_USAGE}`,
 };
 
 const DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
@@ -139,6 +140,14 @@ const SETTINGS_DEEP_LINK: AppDeepLink = {
   ],
 };
 
+const NOTIFICATIONS_DEEP_LINK: AppDeepLink = {
+  id: 'mlNotificationsDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.notifications', {
+    defaultMessage: 'Notifications',
+  }),
+  path: `/${ML_PAGES.NOTIFICATIONS}`,
+};
+
 export function getDeepLinks(isFullLicense: boolean) {
   const deepLinks: AppDeepLink[] = [
     DATA_VISUALIZER_DEEP_LINK,
@@ -152,8 +161,10 @@ export function getDeepLinks(isFullLicense: boolean) {
       ANOMALY_DETECTION_DEEP_LINK,
       DATA_FRAME_ANALYTICS_DEEP_LINK,
       MODEL_MANAGEMENT_DEEP_LINK,
+      MEMORY_USAGE_DEEP_LINK,
       SETTINGS_DEEP_LINK,
-      AIOPS_DEEP_LINK
+      AIOPS_DEEP_LINK,
+      NOTIFICATIONS_DEEP_LINK
     );
   }
 
