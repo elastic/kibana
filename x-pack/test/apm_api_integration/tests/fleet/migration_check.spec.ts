@@ -23,13 +23,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const bettertest = getBettertest(supertest);
   const apmApiClient = getService('apmApiClient');
 
-  // const config = getService('config');
-  // const apmMigrationEnabled = config.get('xpack.apm.agent.migrations.enabled');
-  // console.log('###################');
-  // console.log(config.getAll());
-  // console.log(config.get('kbnTestServer.serverArgs'));
-  // console.log('###################');
-
   registry.when('Fleet migration check - basic', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await setupFleet(bettertest);
