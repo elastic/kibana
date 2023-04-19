@@ -107,7 +107,9 @@ export class Mask {
    */
   getConditionExpression() {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
-    const lookup = this._isFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
+    const lookup = this._isFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
     return [comparisionOperator, [lookup, this._esAggField.getMbFieldName()], this._value];
   }
 
