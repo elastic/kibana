@@ -86,7 +86,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the description correctly', async () => {
         const desc = await find.byCssSelector(
-          '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj="description"] [data-test-subj="user-action-markdown"]'
         );
 
         expect(await desc.getVisibleText()).equal(`Testing upgrade! Let's see how it goes.`);
