@@ -27,7 +27,12 @@ export const isReauthorizeActionDisabled = (
   canStartStopTransform: boolean,
   transformNodes: number
 ) => {
-  return !canStartStopTransform || items.length === 0 || transformNodes === 0;
+  return (
+    !canStartStopTransform ||
+    items.length === 0 ||
+    transformNodes === 0 ||
+    !items.some(needsReauthorization)
+  );
 };
 
 export interface ReauthorizeActionNameProps {
@@ -43,9 +48,7 @@ export const ReauthorizeActionName: FC<ReauthorizeActionNameProps> = ({
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
   // Disable start for batch transforms which have completed.
-  const transformNeedsReauthorization = items.some((i: TransformListRow) =>
-    needsReauthorization(i)
-  );
+  const someNeedsReauthorization = items.some(needsReauthorization);
 
   const actionIsDisabled = isReauthorizeActionDisabled(
     items,
@@ -55,8 +58,16 @@ export const ReauthorizeActionName: FC<ReauthorizeActionNameProps> = ({
 
   let content: string | undefined;
   if (actionIsDisabled && items.length > 0) {
-    if (!canStartStopTransform && transformNeedsReauthorization) {
+    if (!canStartStopTransform && someNeedsReauthorization) {
       content = createCapabilityFailureMessage('canReauthorizeTransform');
+    }
+    if (!someNeedsReauthorization) {
+      content = i18n.translate(
+        'xpack.transform.transformList.reauthorizeBulkActionDisabledToolTipContent',
+        {
+          defaultMessage: 'One or more selected transforms must require reauthorization.',
+        }
+      );
     }
   }
 

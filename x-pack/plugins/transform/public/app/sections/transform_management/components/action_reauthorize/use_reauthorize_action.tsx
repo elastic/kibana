@@ -7,6 +7,7 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
+import { sortTransformsToReauthorize } from './sort_transforms_to_reauthorize';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import { useReauthorizeTransforms } from '../../../../hooks/use_reauthorize_transform';
 import {
@@ -31,7 +32,8 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
 
   const reauthorizeAndCloseModal = () => {
     setModalVisible(false);
-    reauthorizeTransforms(items.map((i) => ({ id: i.id })));
+    const { transformIds } = sortTransformsToReauthorize(items);
+    reauthorizeTransforms(transformIds);
   };
 
   const openModal = (newItems: TransformListRow[]) => {
