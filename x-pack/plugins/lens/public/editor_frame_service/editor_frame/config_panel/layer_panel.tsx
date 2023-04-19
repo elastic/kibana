@@ -321,6 +321,16 @@ export function LayerPanel(
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
 
+  const visualizationLayerSettings = useMemo(
+    () =>
+      activeVisualization.hasLayerSettings?.({
+        layerId,
+        state: visualizationState,
+        frame: props.framePublicAPI,
+      }) || { data: false, appearance: false },
+    [activeVisualization, layerId, props.framePublicAPI, visualizationState]
+  );
+
   const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
@@ -348,11 +358,7 @@ export function LayerPanel(
           isOnlyLayer,
           isTextBasedLanguage,
           hasLayerSettings: Boolean(
-            (activeVisualization.hasLayerSettings?.({
-              layerId,
-              state: visualizationState,
-              frame: props.framePublicAPI,
-            }) &&
+            (Object.values(visualizationLayerSettings).some(Boolean) &&
               activeVisualization.renderLayerSettings) ||
               layerDatasource?.renderLayerSettings
           ),
@@ -371,8 +377,8 @@ export function LayerPanel(
       layerIndex,
       onCloneLayer,
       onRemoveLayer,
-      props.framePublicAPI,
       updateVisualization,
+      visualizationLayerSettings,
       visualizationState,
       isSaveable,
     ]
@@ -696,15 +702,56 @@ export function LayerPanel(
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
+              {layerDatasource?.renderLayerSettings || visualizationLayerSettings.data ? (
+                <EuiText
+                  size="s"
+                  css={css`
+                    margin-bottom: ${euiThemeVars.euiSize};
+                  `}
+                >
+                  <h4>
+                    {i18n.translate('xpack.lens.editorFrame.layerSettings.headingData', {
+                      defaultMessage: 'Data',
+                    })}
+                  </h4>
+                </EuiText>
+              ) : null}
               {layerDatasource?.renderLayerSettings && (
                 <>
                   <NativeRenderer
                     render={layerDatasource.renderLayerSettings}
                     nativeProps={layerDatasourceConfigProps}
                   />
-                  <EuiSpacer size="m" />
                 </>
               )}
+              {layerDatasource?.renderLayerSettings && visualizationLayerSettings.data ? (
+                <EuiSpacer size="m" />
+              ) : null}
+              {activeVisualization?.renderLayerSettings && visualizationLayerSettings.data ? (
+                <NativeRenderer
+                  render={activeVisualization?.renderLayerSettings}
+                  nativeProps={{
+                    ...layerVisualizationConfigProps,
+                    setState: props.updateVisualization,
+                    panelRef: settingsPanelRef,
+                    section: 'data',
+                  }}
+                />
+              ) : null}
+              {visualizationLayerSettings.appearance ? (
+                <EuiText
+                  size="s"
+                  css={css`
+                    margin-bottom: ${euiThemeVars.euiSize};
+                  `}
+                >
+                  <h4>
+                    {i18n.translate('xpack.lens.editorFrame.layerSettings.headingAppearance', {
+                      defaultMessage: 'Appearance',
+                    })}
+                  </h4>
+                </EuiText>
+              ) : null}
               {activeVisualization?.renderLayerSettings && (
                 <NativeRenderer
                   render={activeVisualization?.renderLayerSettings}
@@ -712,6 +759,7 @@ export function LayerPanel(
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
+                    section: 'appearance',
                   }}
                 />
               )}

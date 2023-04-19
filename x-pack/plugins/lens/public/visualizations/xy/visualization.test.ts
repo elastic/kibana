@@ -3651,7 +3651,7 @@ describe('xy_visualization', () => {
       ).toHaveLength(0);
     });
 
-    it('should return one action for an annotation layer', () => {
+    it('should return no action for an annotation layer', () => {
       const baseState = exampleState();
       expect(
         xyVisualization.getSupportedActionsForLayer?.(
@@ -3684,46 +3684,103 @@ describe('xy_visualization', () => {
         }),
       ]);
     });
+  });
 
-    it('should return an action that performs a state update on click', () => {
-      const baseState = exampleState();
-      const setState = jest.fn();
-      const [action] = xyVisualization.getSupportedActionsForLayer?.(
-        'annotation',
-        {
-          ...baseState,
-          layers: [
-            ...baseState.layers,
-            {
-              layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
-              ignoreGlobalFilters: true,
-              indexPatternId: 'myIndexPattern',
-              hide: false,
-              simpleView: false,
-            },
-          ],
-        },
-        setState
-      )!;
-      action.execute(null);
+  it('should return an action that performs a state update on click', () => {
+    const baseState = exampleState();
+    const setState = jest.fn();
+    const [action] = xyVisualization.getSupportedActionsForLayer?.(
+      'annotation',
+      {
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+            indexPatternId: 'myIndexPattern',
+            hide: false,
+            simpleView: false,
+          },
+        ],
+      },
+      setState
+    )!;
+    action.execute(null);
 
-      expect(setState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          layers: expect.arrayContaining<XYByValueAnnotationLayerConfig>([
-            {
-              layerId: 'annotation',
-              layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
-              ignoreGlobalFilters: false,
-              indexPatternId: 'myIndexPattern',
-              hide: false,
-              simpleView: false,
+    expect(setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        layers: expect.arrayContaining<XYByValueAnnotationLayerConfig>([
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: false,
+            indexPatternId: 'myIndexPattern',
+            hide: false,
+            simpleView: false,
+          },
+        ]),
+      })
+    );
+  });
+
+  describe('layer settings', () => {
+    describe('hasLayerSettings', () => {
+      it('should expose no settings for a data or reference lines layer', () => {
+        const baseState = exampleState();
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: baseState,
+            frame: createMockFramePublicAPI(),
+            layerId: 'first',
+          })
+        ).toEqual({ data: false, appearance: false });
+
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: {
+              ...baseState,
+              layers: [
+                ...baseState.layers,
+                {
+                  layerId: 'referenceLine',
+                  layerType: layerTypes.REFERENCELINE,
+                  accessors: [],
+                  yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+                },
+              ],
             },
-          ]),
-        })
-      );
+            frame: createMockFramePublicAPI(),
+            layerId: 'referenceLine',
+          })
+        ).toEqual({ data: false, appearance: false });
+      });
+
+      it('should expose data settings for an annotation layer', () => {
+        const baseState = exampleState();
+        expect(
+          xyVisualization.hasLayerSettings?.({
+            state: {
+              ...baseState,
+              layers: [
+                ...baseState.layers,
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                  ignoreGlobalFilters: true,
+                  indexPatternId: 'myIndexPattern',
+                },
+              ],
+            },
+            frame: createMockFramePublicAPI(),
+            layerId: 'annotation',
+          })
+        ).toEqual({ data: true, appearance: false });
+      });
     });
   });
 

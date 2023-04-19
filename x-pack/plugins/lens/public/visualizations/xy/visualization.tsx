@@ -111,6 +111,7 @@ import { onDropForVisualization } from '../../editor_frame_service/editor_frame/
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 import { IgnoredGlobalFiltersEntries } from './info_badges';
+import { LayerSettings } from './layer_settings';
 
 const XY_ID = 'lnsXY';
 
@@ -297,6 +298,26 @@ export const getXyVisualization = ({
       );
     }
     return actions;
+  },
+
+  hasLayerSettings({ state, layerId: currentLayerId }) {
+    const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
+    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+  },
+
+  renderLayerSettings(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerSettings {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  onLayerAction(layerId, actionId, state) {
+    return state;
   },
 
   onIndexPatternChange(state, indexPatternId, layerId) {

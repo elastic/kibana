@@ -6,12 +6,12 @@
  */
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import type { TableIdLiteral } from '../../../../common/types';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import type { QueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 
 export interface SessionsComponentsProps extends Pick<QueryTabBodyProps, 'endDate' | 'startDate'> {
-  tableId: TableIdLiteral;
+  tableId: TableId;
   pageFilters: Filter[];
   defaultFilters?: Filter[];
   entityType?: EntityType;
