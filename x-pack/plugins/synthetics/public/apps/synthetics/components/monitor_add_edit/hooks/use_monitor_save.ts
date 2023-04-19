@@ -51,6 +51,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
       dispatch(cleanMonitorListState());
       kibanaService.toasts.addSuccess({
         title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
+        text: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT,
         toastLifeTimeMs: 3000,
       });
     }
@@ -66,6 +67,13 @@ const MONITOR_SUCCESS_LABEL = i18n.translate(
   }
 );
 
+const MONITOR_SUCCESS_LABEL_SUBTEXT = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorAddedSuccessMessage.subtext',
+  {
+    defaultMessage: 'Scheduling for first run in progress.',
+  }
+);
+
 const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorEditedSuccessMessage',
   {
@@ -77,5 +85,12 @@ const MONITOR_FAILURE_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorFailureMessage',
   {
     defaultMessage: 'Monitor was unable to be saved. Please try again later.',
+  }
+);
+
+const MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorFailureMessage',
+  {
+    defaultMessage: 'Scheduling for next run in progress.',
   }
 );
