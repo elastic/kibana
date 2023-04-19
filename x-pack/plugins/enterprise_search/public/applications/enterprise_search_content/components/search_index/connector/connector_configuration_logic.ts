@@ -7,7 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
+import {
+  ConnectorConfiguration,
+  ConnectorStatus,
+  Dependency,
+  DependencyLookup,
+  SelectOption,
+} from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {
@@ -48,12 +54,16 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
-interface ConfigEntry {
-  isPasswordField: boolean;
+export interface ConfigEntry {
+  depends_on: Dependency[];
+  display: string;
   key: string;
   label: string;
+  options: SelectOption[];
   order?: number;
-  value: string;
+  required: boolean;
+  sensitive: boolean;
+  value: string | number | boolean | null;
 }
 
 /**
@@ -84,6 +94,32 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+}
+
+export function ensureStringType(value: string | number | boolean | null): string {
+  return String(value);
+}
+
+export function ensureNumberType(value: string | number | boolean | null): number {
+  const numberValue = Number(value);
+  return isNaN(numberValue) ? 0 : numberValue;
+}
+
+export function ensureBooleanType(value: string | number | boolean | null): boolean {
+  return Boolean(value);
+}
+
+export function dependenciesSatisfied(
+  dependencies: Dependency[],
+  dependencyLookup: DependencyLookup
+): boolean {
+  for (const dependency of dependencies) {
+    if (dependency.value !== dependencyLookup[dependency.field]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -191,9 +227,13 @@ export const ConnectorConfigurationLogic = kea<
     localConfigState: [
       {},
       {
-        setLocalConfigEntry: (configState, { key, label, order, value }) => ({
+        setLocalConfigEntry: (
+          configState,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          { key, depends_on, display, label, options, order, required, sensitive, value }
+        ) => ({
           ...configState,
-          [key]: { label, order, value },
+          [key]: { depends_on, display, label, options, order, required, sensitive, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
@@ -209,21 +249,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) =>
-        sortConnectorConfiguration(configState).map((config) => ({
-          ...config,
-          isPasswordField:
-            config.key.includes('password') || config.label.toLowerCase().includes('password'),
-        })),
+      (configState) => sortConnectorConfiguration(configState),
     ],
   }),
 });
