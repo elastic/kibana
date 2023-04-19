@@ -16,15 +16,20 @@ import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 
+import { upgradeAgentPolicySchemaVersion } from '../setup/upgrade_agent_policy_schema_version';
+
 import {
   type MessageSigningServiceInterface,
   MessageSigningService,
 } from './message_signing_service';
 
+jest.mock('../setup/upgrade_agent_policy_schema_version');
+
 describe('MessageSigningService', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let esoClientMock: jest.Mocked<EncryptedSavedObjectsClient>;
   let messageSigningService: MessageSigningServiceInterface;
+  const upgradeAgentPolicySchemaVersionMocked = upgradeAgentPolicySchemaVersion as jest.Mock;
 
   function mockCreatePointInTimeFinderAsInternalUser(savedObjects: unknown[] = []) {
     esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -33,6 +38,23 @@ describe('MessageSigningService', () => {
         yield { saved_objects: savedObjects };
       },
     });
+  }
+
+  function mockCreatePointInTimeFinderAsInternalUserOnce(savedObjects: unknown[] = []) {
+    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: savedObjects };
+        },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [] };
+        },
+      });
   }
 
   function setupMocks(canEncrypt = true) {
@@ -80,6 +102,34 @@ describe('MessageSigningService', () => {
         public_key: expect.any(String),
         passphrase: expect.any(String),
       });
+    });
+
+    it('can correctly remove existing key pair', async () => {
+      mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
+
+      await messageSigningService.removeKeyPair();
+      expect(soClientMock.delete).toBeCalledWith(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keyPairObj.id
+      );
+    });
+
+    it('can correctly rotate existing key pair', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+
+      await messageSigningService.rotateKeyPair();
+
+      expect(soClientMock.delete).toBeCalledWith(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keyPairObj.id
+      );
+      expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+        private_key: expect.any(String),
+        public_key: expect.any(String),
+        passphrase: expect.any(String),
+      });
+
+      expect(upgradeAgentPolicySchemaVersionMocked).toBeCalledTimes(1);
     });
 
     it('does not generate key pair if one exists', async () => {

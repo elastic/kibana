@@ -159,7 +159,9 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   public async removeKeyPair(): Promise<void> {
     const currentKeyPair = await this.getCurrentKeyPair();
-    await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+    if (currentKeyPair) {
+      await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+    }
   }
 
   public async rotateKeyPair(): Promise<void> {
