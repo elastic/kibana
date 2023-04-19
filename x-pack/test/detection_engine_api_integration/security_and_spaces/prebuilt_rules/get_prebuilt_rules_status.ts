@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   deleteAllRules,
+  deleteRule,
   getPrebuiltRulesAndTimelinesStatus,
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
@@ -38,6 +39,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body).toMatchObject({
         rules_custom_installed: 0,
+        rules_installed: 0,
+        rules_not_installed: 0,
+        rules_not_updated: 0,
+      });
+    });
+
+    it('should show that one custom rule is installed when a custom rule is added', async () => {
+      await createRule(supertest, log, getSimpleRule());
+
+      const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      expect(body).toMatchObject({
+        rules_custom_installed: 1,
         rules_installed: 0,
         rules_not_installed: 0,
         rules_not_updated: 0,
@@ -86,6 +99,20 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_custom_installed: 0,
           rules_installed: RULES_COUNT,
           rules_not_installed: 0,
+          rules_not_updated: 0,
+        });
+      });
+
+      it('should notify the user again that a rule is available for install after it is deleted', async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRulesAndTimelines(supertest);
+        await deleteRule(supertest, 'rule-1');
+
+        const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        expect(body).toMatchObject({
+          rules_custom_installed: 0,
+          rules_installed: RULES_COUNT - 1,
+          rules_not_installed: 1,
           rules_not_updated: 0,
         });
       });
@@ -142,6 +169,20 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_custom_installed: 0,
           rules_installed: RULES_COUNT,
           rules_not_installed: 0,
+          rules_not_updated: 0,
+        });
+      });
+
+      it('should notify the user again that a rule is available for install after it is deleted', async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+        await installPrebuiltRulesAndTimelines(supertest);
+        await deleteRule(supertest, 'rule-1');
+
+        const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        expect(body).toMatchObject({
+          rules_custom_installed: 0,
+          rules_installed: RULES_COUNT - 1,
+          rules_not_installed: 1,
           rules_not_updated: 0,
         });
       });
