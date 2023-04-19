@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindOptions, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/server';
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetBulkRuleActionsSavedObject } from './legacy_get_bulk_rule_actions_saved_object';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import { Rule } from '../../../types';
 
-describe('legacy_get_bulk_rule_actions_saved_object', () => {
+import {
+  legacyGetBulkRuleActionsSavedObject,
+  LegacyActionsObj,
+  formatLegacyActions,
+} from './format_legacy_actions';
+import { legacyRuleActionsSavedObjectType } from './types';
+
+describe('legacyGetBulkRuleActionsSavedObject', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  type FuncReturn = Record<string, LegacyRulesActionsSavedObject>;
+  type FuncReturn = Record<string, LegacyActionsObj>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -34,10 +34,9 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
   });
 
-  test('calls "savedObjectsClient.find" with the expected "hasReferences"', () => {
-    legacyGetBulkRuleActionsSavedObject({ alertIds: ['123'], savedObjectsClient, logger });
-    const [[arg1]] = savedObjectsClient.find.mock.calls;
-    expect(arg1).toEqual<SavedObjectsFindOptions>({
+  test('calls "savedObjectsClient.find" with the expected "hasReferences"', async () => {
+    await legacyGetBulkRuleActionsSavedObject({ alertIds: ['123'], savedObjectsClient, logger });
+    expect(savedObjectsClient.find).toHaveBeenCalledWith({
       hasReference: [{ id: '123', type: 'alert' }],
       perPage: 10000,
       type: legacyRuleActionsSavedObjectType,
@@ -45,9 +44,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns nothing transformed through the find if it does not return any matches against the alert id', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [];
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [];
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
       per_page: 0,
@@ -64,9 +61,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns 1 action transformed through the find if 1 was found for 1 single alert id', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -111,12 +106,15 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
-        id: '123',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_1',
+            actionTypeId: 'action_type_1',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_1',
             id: 'action-123',
             params: {},
@@ -127,9 +125,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns 1 action transformed through the find for 2 alerts with 1 action each', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -203,12 +199,16 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
-        id: '123',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_1',
+            actionTypeId: 'action_type_1',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_1',
             id: 'action-123',
             params: {},
@@ -216,12 +216,15 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
         ],
       },
       'alert-456': {
-        id: '456',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_2',
+            actionTypeId: 'action_type_2',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_2',
             id: 'action-456',
             params: {},
@@ -232,9 +235,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns 2 actions transformed through the find if they were found for 1 single alert id', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -290,18 +291,26 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
-        id: '123',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_1',
+            actionTypeId: 'action_type_1',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_1',
             id: 'action-123',
             params: {},
           },
           {
-            action_type_id: 'action_type_2',
+            actionTypeId: 'action_type_2',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_2',
             id: 'action-456',
             params: {},
@@ -312,9 +321,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns only 1 action if for some unusual reason the actions reference is missing an item for 1 single alert id', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -366,12 +373,15 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
-        id: '123',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_1',
+            actionTypeId: 'action_type_1',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_1',
             id: 'action-123',
             params: {},
@@ -382,9 +392,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns only 1 action if for some unusual reason the action is missing from the attributes', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -435,12 +443,15 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
     });
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
-        id: '123',
-        alertThrottle: '1d',
         ruleThrottle: '1d',
-        actions: [
+        legacyRuleActions: [
           {
-            action_type_id: 'action_type_1',
+            actionTypeId: 'action_type_1',
+            frequency: {
+              notifyWhen: 'onThrottleInterval',
+              summary: true,
+              throttle: '1d',
+            },
             group: 'group_1',
             id: 'action-123',
             params: {},
@@ -451,9 +462,7 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
   });
 
   test('returns nothing if the alert id is missing within the references array', async () => {
-    const savedObjects: Array<
-      SavedObjectsFindResult<LegacyIRuleActionsAttributesSavedObjectAttributes>
-    > = [
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
       {
         score: 0,
         id: '123',
@@ -493,5 +502,114 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
       logger,
     });
     expect(returnValue).toEqual<FuncReturn>({});
+  });
+});
+
+describe('formatLegacyActions', () => {
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    savedObjectsClient = savedObjectsClientMock.create();
+  });
+
+  it('should return not modified rule when error is thrown within method', async () => {
+    savedObjectsClient.find.mockRejectedValueOnce(new Error('test failure'));
+    const mockRules = [{ id: 'mock-id0' }, { id: 'mock-id1' }] as Rule[];
+    expect(
+      await formatLegacyActions(mockRules, {
+        logger,
+        savedObjectsClient,
+      })
+    ).toEqual(mockRules);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `formatLegacyActions(): Failed to read legacy actions for SIEM rules mock-id0, mock-id1: test failure`
+    );
+  });
+
+  it('should format rule correctly', async () => {
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
+      {
+        score: 0,
+        id: '123',
+        type: legacyRuleActionsSavedObjectType,
+        references: [
+          {
+            name: 'alert_0',
+            id: 'alert-123',
+            type: 'alert',
+          },
+          {
+            name: 'action_0',
+            id: 'action-123',
+            type: 'action',
+          },
+        ],
+        attributes: {
+          actions: [
+            {
+              group: 'group_1',
+              params: {},
+              action_type_id: 'action_type_1',
+              actionRef: 'action_0',
+            },
+          ],
+          ruleThrottle: '1d',
+          alertThrottle: '1d',
+        },
+      },
+    ];
+    savedObjectsClient.find.mockResolvedValue({
+      total: 0,
+      per_page: 0,
+      page: 1,
+      saved_objects: savedObjects,
+    });
+
+    const mockRules = [
+      {
+        id: 'alert-123',
+        actions: [
+          {
+            actionTypeId: 'action_type_2',
+            group: 'group_1',
+            id: 'action-456',
+            params: {},
+          },
+        ],
+      },
+    ] as Rule[];
+    const migratedRules = await formatLegacyActions(mockRules, {
+      logger,
+      savedObjectsClient,
+    });
+
+    expect(migratedRules).toEqual([
+      {
+        // actions have been merged
+        actions: [
+          {
+            actionTypeId: 'action_type_2',
+            group: 'group_1',
+            id: 'action-456',
+            params: {},
+          },
+          {
+            actionTypeId: 'action_type_1',
+            frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '1d' },
+            group: 'group_1',
+            id: 'action-123',
+            params: {},
+          },
+        ],
+        id: 'alert-123',
+        // muteAll set to false
+        muteAll: false,
+        notifyWhen: 'onThrottleInterval',
+        throttle: '1d',
+      },
+    ]);
   });
 });
