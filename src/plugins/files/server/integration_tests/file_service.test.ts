@@ -157,6 +157,7 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'foo-2' }),
       createDisposableFile({ fileKind, name: 'foo-3' }),
       createDisposableFile({ fileKind, name: 'test-3' }),
+      createDisposableFile({ fileKind: fileKindNonDefault, name: 'foo-1' }),
     ]);
     {
       const { files, total } = await fileService.find({
@@ -166,7 +167,7 @@ describe('FileService', () => {
         page: 1,
       });
       expect(files.length).toBe(2);
-      expect(total).toBe(3);
+      expect(total).toBe(4);
     }
 
     {
@@ -176,7 +177,19 @@ describe('FileService', () => {
         perPage: 2,
         page: 2,
       });
-      expect(files.length).toBe(1);
+      expect(files.length).toBe(2);
+      expect(total).toBe(4);
+    }
+
+    // Filter out fileKind
+    {
+      const { files, total } = await fileService.find({
+        kindToExclude: [fileKindNonDefault],
+        name: ['foo*'],
+        perPage: 10,
+        page: 1,
+      });
+      expect(files.length).toBe(3); // foo-1 from fileKindNonDefault not returned
       expect(total).toBe(3);
     }
   });
