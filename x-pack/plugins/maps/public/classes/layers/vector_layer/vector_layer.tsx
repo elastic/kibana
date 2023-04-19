@@ -703,14 +703,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if ('getMetricFields' in (source as IESAggSource)) {
       const metricFields = (source as IESAggSource).getMetricFields();
       metricFields.forEach((metricField) => {
-        const mask = metricField.getMask();
-        if (mask) {
+        const maskDescriptor = metricField.getMask();
+        if (maskDescriptor) {
           masks.push(
             new Mask({
               esAggField: metricField,
               isGeometrySourceMvt: source.isMvt(),
-              operator: mask.operator,
-              value: mask.value,
+              ...maskDescriptor,
             })
           );
         }
@@ -722,14 +721,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       if ('getMetricFields' in (rightSource as unknown as IESAggSource)) {
         const metricFields = (rightSource as unknown as IESAggSource).getMetricFields();
         metricFields.forEach((metricField) => {
-          const mask = metricField.getMask();
-          if (mask) {
+          const maskDescriptor = metricField.getMask();
+          if (maskDescriptor) {
             masks.push(
               new Mask({
                 esAggField: metricField,
                 isGeometrySourceMvt: source.isMvt(),
-                operator: mask.operator,
-                value: mask.value,
+                ...maskDescriptor,
               })
             );
           }
@@ -752,7 +750,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this.getMasks().forEach((mask) => {
       // case expressions require 2 parts
       // 1) condition expression
-      maskCaseExpressions.push(mask.getConditionExpression());
+      maskCaseExpressions.push(mask.getMatchMaskedExpression());
       // 2) output. 0 opacity styling "hides" feature
       maskCaseExpressions.push(0);
     });

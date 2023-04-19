@@ -109,8 +109,19 @@ export class Mask {
   /*
    * Returns maplibre expression that matches masked features
    */
-  getConditionExpression() {
+  getMatchMaskedExpression() {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
+    const lookup = this._isFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
+    return [comparisionOperator, [lookup, this._esAggField.getMbFieldName()], this._value];
+  }
+
+  /*
+   * Returns maplibre expression that matches unmasked features
+   */
+  getMatchUnmaskedExpression() {
+    const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '>=' : '<=';
     const lookup = this._isFeatureState()
       ? MB_LOOKUP_FUNCTION.FEATURE_STATE
       : MB_LOOKUP_FUNCTION.GET;
