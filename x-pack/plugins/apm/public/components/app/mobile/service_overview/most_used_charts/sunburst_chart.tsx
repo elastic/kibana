@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiText,
   EuiSpacer,
+  EuiProgress,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IconChartDonut } from '@kbn/chart-icons';
@@ -54,6 +55,21 @@ export function SunburstChart({
 }) {
   const colors = euiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const isDataAvailable = data && data.length > 0;
+  const isLoading = fetchStatus === FETCH_STATUS.LOADING;
+
+  // The loader needs to be wrapped inside a div with fixed height to avoid layout shift
+  const ProgressLoader = (
+    <div style={{ height: '5px' }}>
+      {isLoading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          style={{ background: 'transparent' }}
+        />
+      )}
+    </div>
+  );
+
   return (
     <EuiFlexItem
       grow={true}
@@ -66,6 +82,8 @@ export function SunburstChart({
       <EuiTitle size="xs">
         <h2 style={{ fontSize: '0.8571rem' }}>{label}</h2>
       </EuiTitle>
+      {ProgressLoader}
+      <EuiSpacer size="m" />
       <ChartContainer
         hasData={Boolean(isDataAvailable)}
         status={fetchStatus}
