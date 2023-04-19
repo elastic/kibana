@@ -117,7 +117,7 @@ const IndexTimeout = () => (
       <h2>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutTitle"
-          defaultMessage="Findings Delayed"
+          defaultMessage="Waiting for Findings data"
         />
       </h2>
     }
@@ -125,13 +125,13 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
           values={{
             docs: (
               <EuiLink href="https://ela.st/findings" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="docs"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
@@ -268,7 +268,7 @@ export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes })
       .sort((a, b) => a.localeCompare(b));
   const render = () => {
     if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
-    if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
+    if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices

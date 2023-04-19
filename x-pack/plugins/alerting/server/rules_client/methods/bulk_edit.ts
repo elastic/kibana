@@ -69,6 +69,8 @@ import {
   NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
+import { migrateLegacyActions } from '../lib';
+
 export type BulkEditFields = keyof Pick<
   Rule,
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
@@ -449,6 +451,19 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
+    // migrate legacy actions only for SIEM rules
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: rule.id,
+      actions: rule.attributes.actions,
+      references: rule.references,
+      attributes: rule.attributes,
+    });
+
+    if (migratedActions.hasLegacyActions) {
+      rule.attributes.actions = migratedActions.resultedActions;
+      rule.references = migratedActions.resultedReferences;
+    }
+
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
       await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);
 
@@ -625,7 +640,9 @@ async function getUpdatedAttributesFromOperations(
 
         // TODO https://github.com/elastic/kibana/issues/148414
         // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = updatedOperation.value[0]?.frequency;
+        const firstFrequency = updatedOperation.value.find(
+          (action) => action?.frequency
+        )?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
           if (!attributes.notifyWhen) {

@@ -1517,6 +1517,41 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.DashboardListingTable",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardListingTable",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "DashboardListingProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardListingTable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "DashboardListingProps"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.LazyDashboardContainerRenderer",
         "type": "Function",
         "tags": [],

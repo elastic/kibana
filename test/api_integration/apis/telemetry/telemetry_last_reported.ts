@@ -7,21 +7,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
-  const client = getService('es');
+  const client = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('/api/telemetry/v2/last_reported API Telemetry lastReported', () => {
     before(async () => {
-      await client.delete(
-        {
-          index: '.kibana',
-          id: 'telemetry:telemetry',
-        },
-        { ignore: [404] }
-      );
+      await client.savedObjects.delete({ type: 'telemetry', id: 'telemetry' });
     });
 
     it('GET should return undefined when there is no stored telemetry.lastReported value', async () => {
@@ -31,22 +25,25 @@ export default function optInTest({ getService }: FtrProviderContext) {
     it('PUT should update telemetry.lastReported to now', async () => {
       await supertest.put('/api/telemetry/v2/last_reported').set('kbn-xsrf', 'xxx').expect(200);
 
-      const { _source } = await client.get<{ telemetry: { lastReported: number } }>({
-        index: '.kibana',
-        id: 'telemetry:telemetry',
+      const {
+        attributes: { lastReported },
+      } = await client.savedObjects.get<{ lastReported: number }>({
+        type: 'telemetry',
+        id: 'telemetry',
       });
 
-      expect(_source?.telemetry.lastReported).to.be.a('number');
+      expect(lastReported).to.be.a('number');
     });
 
     it('GET should return the previously stored lastReported value', async () => {
-      const { _source } = await client.get<{ telemetry: { lastReported: number } }>({
-        index: '.kibana',
-        id: 'telemetry:telemetry',
+      const {
+        attributes: { lastReported },
+      } = await client.savedObjects.get<{ lastReported: number }>({
+        type: 'telemetry',
+        id: 'telemetry',
       });
 
-      expect(_source?.telemetry.lastReported).to.be.a('number');
-      const lastReported = _source?.telemetry.lastReported;
+      expect(lastReported).to.be.a('number');
 
       await supertest
         .get('/api/telemetry/v2/last_reported')
