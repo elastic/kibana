@@ -259,11 +259,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('tablePaginationPopoverButton');
     },
 
-    getPageSizeOption(pageSize: 5 | 10 | 20) {
+    getPageSizeOption(pageSize: number) {
       return testSubjects.find(`tablePagination-${pageSize}-rows`);
     },
 
-    async changePageSize(pageSize: 5 | 10 | 20) {
+    async changePageSize(pageSize: number) {
       const pageSizeSelector = await this.getPageSizeSelector();
       await pageSizeSelector.click();
       const pageSizeOption = await this.getPageSizeOption(pageSize);
