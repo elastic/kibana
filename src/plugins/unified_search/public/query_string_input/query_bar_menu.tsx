@@ -34,6 +34,10 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
       defaultMessage: 'Saved query menu',
     }),
+  getSavedQueryPopoverSaveChangesButtonText: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
+      defaultMessage: 'Update query',
+    }),
 };
 
 export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProps {
@@ -171,7 +175,10 @@ function QueryBarMenuComponent({
         );
       case 'saveForm':
         return (
-          <EuiContextMenuPanel items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]} />
+          <EuiContextMenuPanel
+            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
+            items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]}
+          />
         );
       case 'saveAsNewForm':
         return (
