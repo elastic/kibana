@@ -69,7 +69,7 @@ describe('useHostTable hook', () => {
       },
     ];
 
-    const items = [
+    const expected = [
       {
         name: 'host-0',
         os: '-',
@@ -79,27 +79,11 @@ describe('useHostTable hook', () => {
           cloudProvider: 'aws',
           name: 'host-0',
         },
-        rx: {
-          name: 'rx',
-          avg: 252456.92916666667,
-        },
-        tx: {
-          name: 'tx',
-          avg: 252758.425,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.94525,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.6353277777777777,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-
-          avg: 34359.738368,
-        },
+        rx: 252456.92916666667,
+        tx: 252758.425,
+        memory: 0.94525,
+        cpu: 0.6353277777777777,
+        memoryTotal: 34359.738368,
       },
       {
         name: 'host-1',
@@ -110,32 +94,17 @@ describe('useHostTable hook', () => {
           cloudProvider: null,
           name: 'host-1',
         },
-        rx: {
-          name: 'rx',
-          avg: 95.86339715321859,
-        },
-        tx: {
-          name: 'tx',
-          avg: 110.38566859563191,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.5400000214576721,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.8647805555555556,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-          avg: 9.194304,
-        },
+        rx: 95.86339715321859,
+        tx: 110.38566859563191,
+        memory: 0.5400000214576721,
+        cpu: 0.8647805555555556,
+        memoryTotal: 9.194304,
       },
     ];
-    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
 
+    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
     const { result } = renderHook(() => useHostsTable({ nodes, tableParams: { time } }));
 
-    expect(result.current.items).toStrictEqual(items);
+    expect(result.current.items).toStrictEqual(expected);
   });
 });

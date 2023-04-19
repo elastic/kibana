@@ -64,7 +64,7 @@ const buildItemsList = (nodes: SnapshotNode[]) => {
       cloudProvider: path.at(-1)?.cloudProvider ?? null,
     },
     ...metrics.reduce((data, metric) => {
-      data[metric.name as HostMetric] = metric.avg;
+      data[metric.name as HostMetric] = metric.avg ?? metric.value;
       return data;
     }, {} as HostMetrics),
   })) as HostNodeRow[];

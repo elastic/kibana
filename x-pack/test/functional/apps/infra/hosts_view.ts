@@ -531,6 +531,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Pagination and Sorting', () => {
         beforeEach(async () => {
+          browser.scrollTop();
           await pageObjects.infraHostsView.changePageSize(5);
         });
 
