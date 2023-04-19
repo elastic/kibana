@@ -42,7 +42,7 @@ describe('Endpoint generated alerts', () => {
               {
                 agentPolicyId: policy.policy_id,
               },
-              { timeout: 120000 }
+              { timeout: 180000 }
             )
             .then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
@@ -74,6 +74,8 @@ describe('Endpoint generated alerts', () => {
     // FIXME:PT remove this (only for dev)
     navigateToEndpointList();
 
+    const executeCommand = `bash -c cat /dev/tcp/foo | grep ${createdHost.agentId}`;
+
     // 1. send `execute` command that triggers malicious behaviour
     request<ResponseActionApiResponse>({
       method: 'POST',
@@ -82,13 +84,21 @@ describe('Endpoint generated alerts', () => {
         endpoint_ids: [createdHost.agentId],
         parameters: {
           // Triggers a Malicious Behaviour alert on Linux system
-          command: 'bash -c cat /dev/tcp/foo',
+          command: executeCommand,
         },
       },
     })
       .then((response) => waitForActionToComplete(response.body.data.id))
-      .then(() => waitForEndpointAlerts(createdHost.agentId));
+      .then(() =>
+        waitForEndpointAlerts(createdHost.agentId, [
+          {
+            term: { 'process.group_leader.args': executeCommand },
+          },
+        ])
+      );
 
     // 4. check that alert show up on alerts list
+
+    cy.log('Reached end of test');
   });
 });
