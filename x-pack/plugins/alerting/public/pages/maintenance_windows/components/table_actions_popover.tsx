@@ -102,6 +102,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       if (status !== MaintenanceWindowStatus.Archived) {
         menuItems.push(
           <EuiContextMenuItem
+            data-test-subj="table-actions-edit"
             key="edit"
             icon="pencil"
             onClick={() => {
@@ -116,6 +117,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       if (status === MaintenanceWindowStatus.Running) {
         menuItems.push(
           <EuiContextMenuItem
+            data-test-subj="table-actions-cancel"
             key="cancel"
             icon="stopSlash"
             onClick={() => {
@@ -128,6 +130,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         );
         menuItems.push(
           <EuiContextMenuItem
+            data-test-subj="table-actions-cancel-and-archive"
             key="cancel-and-archive"
             icon="trash"
             onClick={() => {
@@ -145,6 +148,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       ) {
         menuItems.push(
           <EuiContextMenuItem
+            data-test-subj="table-actions-archive"
             key="archive"
             icon="trash"
             onClick={() => {
@@ -159,6 +163,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
       if (status === MaintenanceWindowStatus.Archived) {
         menuItems.push(
           <EuiContextMenuItem
+            data-test-subj="table-actions-unarchive"
             key="unarchive"
             icon="exit"
             onClick={() => {
@@ -180,7 +185,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             <EuiPopover
               button={
                 <EuiButtonIcon
-                  data-test-subj="upcoming-events-icon-button"
+                  data-test-subj="table-actions-icon-button"
                   iconType="boxesHorizontal"
                   size="s"
                   aria-label="Upcoming events"
