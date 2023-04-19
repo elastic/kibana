@@ -27,6 +27,10 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -62,6 +66,7 @@ export interface InfraClientStartExports {
 export interface InfraClientSetupDeps {
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
@@ -80,6 +85,7 @@ export interface InfraClientStartDeps {
   lens: LensPublicStart;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;

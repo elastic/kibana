@@ -95,7 +95,7 @@ export class Plugin implements InfraClientPluginClass {
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
       { label: 'Hosts', isTechnicalPreview: true, app: 'metrics', path: '/hosts' },
     ];
-    pluginsSetup.observability.navigation.registerSections(
+    pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
         map(
           ([
