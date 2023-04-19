@@ -103,7 +103,7 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     label: 'date_trunc',
     insertText: 'date_trunc',
     kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.dateFormatDoc', {
+    detail: i18n.translate('monaco.esql.autocomplete.dateTruncDoc', {
       defaultMessage: `Rounds down a date to the closest interval.`,
     }),
     documentation: {

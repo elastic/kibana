@@ -85,4 +85,22 @@ export const comparisonCommandsDefinitions: AutocompleteCommandDefinition[] = [
     }),
     sortText: 'D',
   },
+  {
+    label: 'like',
+    insertText: 'like',
+    kind: 11,
+    detail: i18n.translate('monaco.esql.autocomplete.likeDoc', {
+      defaultMessage: 'Filter data based on string patterns',
+    }),
+    sortText: 'D',
+  },
+  {
+    label: 'rlike',
+    insertText: 'rlike',
+    kind: 11,
+    detail: i18n.translate('monaco.esql.autocomplete.rlikeDoc', {
+      defaultMessage: 'Filter data based on string regular expressions',
+    }),
+    sortText: 'D',
+  },
 ];

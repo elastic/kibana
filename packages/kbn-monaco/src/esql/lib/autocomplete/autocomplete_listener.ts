@@ -46,6 +46,7 @@ import {
   UserVariableContext,
   RenameVariableContext,
   BooleanExpressionContext,
+  RegexBooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
   ProjectCommandContext,
@@ -344,6 +345,15 @@ export class AutocompleteListener implements ESQLParserListener {
       return;
     } else {
       const innerBooleanExpressions = booleanExpression.getRuleContexts(BooleanExpressionContext);
+      const regexBooleanExpression = booleanExpression.getRuleContexts(
+        RegexBooleanExpressionContext
+      );
+
+      if (regexBooleanExpression.length) {
+        this.suggestions = [];
+        return;
+      }
+
       if (innerBooleanExpressions.some((be) => be.exception)) {
         this.suggestions = this.fields;
         return;

@@ -18,6 +18,7 @@ import { SourceCommandContext } from "./esql_parser";
 import { ProcessingCommandContext } from "./esql_parser";
 import { WhereCommandContext } from "./esql_parser";
 import { BooleanExpressionContext } from "./esql_parser";
+import { RegexBooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
 import { MathFnContext } from "./esql_parser";
@@ -234,6 +235,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitBooleanExpression?: (ctx: BooleanExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.regexBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterRegexBooleanExpression?: (ctx: RegexBooleanExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.regexBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitRegexBooleanExpression?: (ctx: RegexBooleanExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.valueExpression`.

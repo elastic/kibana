@@ -45,9 +45,15 @@ whereCommand
 booleanExpression
     : NOT booleanExpression
     | valueExpression
+    | regexBooleanExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
     | IS_NULL_FUNCTION LP qualifiedName RP
+    ;
+
+regexBooleanExpression
+    : valueExpression (NOT)? kind=LIKE pattern=string
+    | valueExpression (NOT)? kind=RLIKE pattern=string
     ;
 
 valueExpression

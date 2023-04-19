@@ -92,6 +92,8 @@ LP : '(';
 OPENING_BRACKET : '[' -> pushMode(DEFAULT_MODE);
 CLOSING_BRACKET : ']' -> popMode, popMode; // pop twice, once to clear mode of current cmd and once to exit DEFAULT_MODE
 NOT : 'not';
+LIKE: 'like';
+RLIKE: 'rlike';
 NULL : 'null';
 OR : 'or';
 RP : ')';
