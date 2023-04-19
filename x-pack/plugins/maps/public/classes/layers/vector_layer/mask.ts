@@ -90,6 +90,9 @@ export class Mask {
     this._value = value;
   }
 
+  /*
+   * Returns maplibre expression that matches masked features
+   */
   getConditionExpression() {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
     const lookup = this._isFeatureState ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;

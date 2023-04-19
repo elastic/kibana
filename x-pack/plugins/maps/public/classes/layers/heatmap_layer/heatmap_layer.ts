@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
-import { LAYER_TYPE } from '../../../../common/constants';
+import { LAYER_TYPE, MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import {
@@ -186,6 +186,20 @@ export class HeatmapLayer extends AbstractLayer {
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
+
+    // heatmap can implement mask with filter expression because 
+    // feature-state support is not needed since heatmap layers do not support joins
+    const mask = metricField.getMask();
+    if (mask) {
+      // Create filter that matches unmasked features
+      const maskFilter = [
+        mask.operator === MASK_OPERATOR.BELOW ? '>=' : '<=',
+        [MB_LOOKUP_FUNCTION.GET, metricField.getMbFieldName()],
+        mask.value,
+      ] as FilterSpecification;
+      mbMap.setFilter(heatmapLayerId, maskFilter);
+    }
+
     mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
