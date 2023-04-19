@@ -22,19 +22,8 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
     schemaVersion: {
       type: 'keyword',
     },
-    semanticVersion: {
-      type: 'keyword',
-    },
     artifacts: {
       type: 'nested',
-      properties: {
-        policyId: {
-          type: 'keyword',
-        },
-        artifactId: {
-          type: 'keyword',
-        },
-      },
     },
   },
 };
