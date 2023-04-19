@@ -26,10 +26,14 @@ import {
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { IEditableControlFactory } from '../../types';
+import { ControlInputTransform } from '../../../common/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 
-export function openAddDataControlFlyout(this: ControlGroupContainer) {
+export function openAddDataControlFlyout(
+  this: ControlGroupContainer,
+  controlInputTransform?: ControlInputTransform
+) {
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
@@ -76,6 +80,10 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
             const factory = getControlFactory(type) as IEditableControlFactory;
             if (factory.presaveTransformFunction) {
               controlInput = factory.presaveTransformFunction(controlInput);
+            }
+
+            if (controlInputTransform) {
+              controlInput = controlInputTransform({ ...controlInput }, type);
             }
 
             if (type === OPTIONS_LIST_CONTROL) {

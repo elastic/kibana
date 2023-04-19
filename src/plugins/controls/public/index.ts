@@ -35,6 +35,7 @@ export {
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,

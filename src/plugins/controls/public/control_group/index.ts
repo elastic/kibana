@@ -18,6 +18,7 @@ export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
   type ControlGroupInputBuilder,
+  type AddRangeSliderControlProps,
   controlGroupInputBuilder,
 } from './external_api/control_group_input_builder';
 

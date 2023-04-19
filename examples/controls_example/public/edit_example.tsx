@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
   type ControlGroupInput,
   ControlGroupRenderer,
@@ -28,8 +29,11 @@ import {
   ACTION_EDIT_CONTROL,
   ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
+import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
+
+const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -84,6 +88,7 @@ export const EditExample = () => {
         setToggleIconIdToSelectedMapIcon({
           [ACTION_EDIT_CONTROL]: disabledActions.includes(ACTION_EDIT_CONTROL),
           [ACTION_DELETE_CONTROL]: disabledActions.includes(ACTION_DELETE_CONTROL),
+          [WITH_CUSTOM_PLACEHOLDER]: false,
         });
       } catch (e) {
         // ignore parse errors
@@ -92,6 +97,24 @@ export const EditExample = () => {
     setIsLoading(false);
     return input;
   }
+
+  const controlInputTransform: ControlInputTransform = (newState, type) => {
+    if (type === OPTIONS_LIST_CONTROL && toggleIconIdToSelectedMapIcon[WITH_CUSTOM_PLACEHOLDER]) {
+      return {
+        ...newState,
+        placeholder: 'Custom Placeholder',
+      };
+    }
+
+    if (type === RANGE_SLIDER_CONTROL) {
+      return {
+        ...newState,
+        value: ['0', '4'],
+      };
+    }
+
+    return newState;
+  };
 
   return (
     <>
@@ -110,7 +133,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
-                controlGroupAPI!.openAddDataControlFlyout();
+                controlGroupAPI!.openAddDataControlFlyout(controlInputTransform);
               }}
             >
               Add control
@@ -130,6 +153,11 @@ export const EditExample = () => {
                   id: ACTION_DELETE_CONTROL,
                   label: 'Disable delete action',
                   value: ACTION_DELETE_CONTROL,
+                },
+                {
+                  id: WITH_CUSTOM_PLACEHOLDER,
+                  label: WITH_CUSTOM_PLACEHOLDER,
+                  value: WITH_CUSTOM_PLACEHOLDER,
                 },
               ]}
               idToSelectedMap={toggleIconIdToSelectedMapIcon}

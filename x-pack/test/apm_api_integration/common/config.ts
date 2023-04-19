@@ -56,7 +56,8 @@ type ApmApiClientKey =
   | 'noMlAccessUser'
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
-  | 'monitorClusterAndIndicesUser';
+  | 'monitorClusterAndIndicesUser'
+  | 'manageServiceAccount';
 
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
@@ -145,6 +146,10 @@ export function createTestConfig(
             monitorClusterAndIndicesUser: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmMonitorClusterAndIndices,
+            }),
+            manageServiceAccount: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmManageServiceAccount,
             }),
           };
         },

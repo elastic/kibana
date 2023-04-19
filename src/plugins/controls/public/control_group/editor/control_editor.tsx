@@ -98,6 +98,9 @@ export const ControlEditor = ({
 
   const controlGroup = useControlGroupContainer();
   const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
+  const customFilterPredicate = controlGroup.select(
+    (state) => state.componentState.fieldFilterPredicate
+  );
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');
@@ -196,7 +199,10 @@ export const ControlEditor = ({
           )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
-              filterPredicate={(field: DataViewField) => Boolean(fieldRegistry?.[field.name])}
+              filterPredicate={(field: DataViewField) => {
+                const customPredicate = customFilterPredicate ? customFilterPredicate(field) : true;
+                return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+              }}
               selectedFieldName={selectedField}
               dataView={selectedDataView}
               onSelectField={(field) => {
