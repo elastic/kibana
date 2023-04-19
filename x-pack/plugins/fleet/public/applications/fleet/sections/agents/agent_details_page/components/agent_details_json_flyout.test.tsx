@@ -9,10 +9,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import type { Agent } from '../../../../types';
+import { useStartServices } from '../../../../hooks';
 
-import { AgentDocumentFlyout } from './agent_document_flyout';
+import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
-describe('AgentDocumentFlyout', () => {
+jest.mock('../../../../hooks');
+
+const mockUseStartServices = useStartServices as jest.Mock;
+
+describe('AgentDetailsJsonFlyout', () => {
   const agent: Agent = {
     id: '123',
     packages: [],
@@ -23,13 +28,19 @@ describe('AgentDocumentFlyout', () => {
     local_metadata: {},
   };
 
+  beforeEach(() => {
+    mockUseStartServices.mockReturnValue({
+      docLinks: { links: { fleet: { troubleshooting: 'https://elastic.co' } } },
+    });
+  });
+
   const renderComponent = () => {
-    return render(<AgentDocumentFlyout agent={agent} onClose={jest.fn()} />);
+    return render(<AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />);
   };
 
   it('renders a title with the agent id if host name is not defined', () => {
     const result = renderComponent();
-    expect(result.getByText("'123' agent document")).toBeInTheDocument();
+    expect(result.getByText("'123' agent details")).toBeInTheDocument();
   });
 
   it('renders a title with the agent host name if defined', () => {
@@ -39,12 +50,12 @@ describe('AgentDocumentFlyout', () => {
       },
     };
     const result = renderComponent();
-    expect(result.getByText("'456' agent document")).toBeInTheDocument();
+    expect(result.getByText("'456' agent details")).toBeInTheDocument();
   });
 
   it('does not add a link to the page after clicking Download', () => {
     const result = renderComponent();
-    const downloadButton = result.getByRole('button', { name: 'Download document' });
+    const downloadButton = result.getByRole('button', { name: 'Download JSON' });
     const anchorMocked = {
       href: '',
       click: jest.fn(),
@@ -57,6 +68,7 @@ describe('AgentDocumentFlyout', () => {
 
     downloadButton.click();
     expect(createElementSpyOn).toBeCalledWith('a');
-    expect(result.queryAllByRole('link')).toHaveLength(0);
+    expect(result.queryAllByRole('link')).toHaveLength(1); // The only link is the one from the flyout's description.
+    expect(result.getByRole('link')).toHaveAttribute('href', 'https://elastic.co');
   });
 });

@@ -17,12 +17,16 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { Agent } from '../../../../types';
+import { useStartServices } from '../../../../hooks';
 
-export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
+export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
     const agentToJson = JSON.stringify(agent, null, 2);
     const agentName =
@@ -33,9 +37,11 @@ export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
     const downloadJson = () => {
       const link = document.createElement('a');
       link.href = `data:text/json;charset=utf-8,${encodeURIComponent(agentToJson)}`;
-      link.download = `${agentName}-agent-document.json`;
+      link.download = `${agentName}-agent-details.json`;
       link.click();
     };
+
+    const { docLinks } = useStartServices();
 
     return (
       <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
@@ -43,8 +49,8 @@ export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="xpack.fleet.agentDetails.agentDocumentFlyoutTitle"
-                defaultMessage="'{name}' agent document"
+                id="xpack.fleet.agentDetails.jsonFlyoutTitle"
+                defaultMessage="'{name}' agent details"
                 values={{
                   name: agentName,
                 }}
@@ -53,6 +59,25 @@ export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.agentDetails.jsonFlyoutDescription"
+                defaultMessage="The JSON below is the raw agent data tracked by Fleet. This data can be useful for debugging or troubleshooting Elastic Agent. For more information, see the {doc}."
+                values={{
+                  doc: (
+                    <EuiLink href={docLinks.links.fleet.troubleshooting}>
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.jsonFlyoutDocLink"
+                        defaultMessage="troubleshooting documentation"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
           <EuiCodeBlock language="json">{agentToJson}</EuiCodeBlock>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -60,7 +85,7 @@ export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose} flush="left">
                 <FormattedMessage
-                  id="xpack.fleet.agentDetails.agentDocumentFlyoutCloseButtonLabel"
+                  id="xpack.fleet.agentDetails.agentDetailsJsonFlyoutCloseButtonLabel"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
@@ -68,8 +93,8 @@ export const AgentDocumentFlyout = memo<{ agent: Agent; onClose: () => void }>(
             <EuiFlexItem grow={false}>
               <EuiButton iconType="download" onClick={downloadJson}>
                 <FormattedMessage
-                  id="xpack.fleet.agentDetails.agentDocumentDownloadButtonLabel"
-                  defaultMessage="Download document"
+                  id="xpack.fleet.agentDetails.agentDetailsJsonDownloadButtonLabel"
+                  defaultMessage="Download JSON"
                 />
               </EuiButton>
             </EuiFlexItem>

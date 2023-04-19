@@ -24,7 +24,7 @@ import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { AgentDocumentFlyout } from './agent_document_flyout';
+import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -39,7 +39,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
-  const [isAgentDocumentFlyoutOpen, setIsAgentDocumentFlyoutOpen] = useState<boolean>(false);
+  const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -112,13 +112,13 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       icon="inspect"
       onClick={() => {
         setIsContextMenuOpen(false);
-        setIsAgentDocumentFlyoutOpen(!isAgentDocumentFlyoutOpen);
+        setIsAgentDetailsJsonFlyoutOpen(!isAgentDetailsJsonFlyoutOpen);
       }}
-      key="agentDocument"
+      key="agentDetailsJson"
     >
       <FormattedMessage
-        id="xpack.fleet.agentList.viewAgentDocumentText"
-        defaultMessage="View agent document"
+        id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+        defaultMessage="View agent JSON"
       />
     </EuiContextMenuItem>,
   ];
@@ -185,9 +185,12 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
-      {isAgentDocumentFlyoutOpen && (
+      {isAgentDetailsJsonFlyoutOpen && (
         <EuiPortal>
-          <AgentDocumentFlyout agent={agent} onClose={() => setIsAgentDocumentFlyoutOpen(false)} />
+          <AgentDetailsJsonFlyout
+            agent={agent}
+            onClose={() => setIsAgentDetailsJsonFlyoutOpen(false)}
+          />
         </EuiPortal>
       )}
       <ContextMenuActions
