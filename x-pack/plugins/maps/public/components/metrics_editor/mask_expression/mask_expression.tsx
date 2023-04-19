@@ -78,7 +78,7 @@ export class MaskExpression extends Component<Props, State> {
         id="mask"
         button={
           <EuiExpression
-            color={this.props.metric.mask === undefined ? 'subdued' : 'danger'}
+            color="subdued"
             description={getMaskI18nDescription({
               bucketsName: this.props.bucketsName,
               aggLabel: this._getAggLabel(),
