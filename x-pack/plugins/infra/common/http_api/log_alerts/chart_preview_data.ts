@@ -59,7 +59,7 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 //
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT: any = rt.intersection([
   rt.type({
-    criteria: countCriteriaRT,
+    criteria: rt.union([countCriteriaRT, rt.array(countCriteriaRT)]),
     count: rt.intersection([
       rt.type({
         comparator: ThresholdRT.props.comparator,

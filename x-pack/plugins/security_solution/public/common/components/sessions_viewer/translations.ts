@@ -39,10 +39,10 @@ export const COLUMN_EXECUTABLE = i18n.translate(
   }
 );
 
-export const COLUMN_ENTRY_USER = i18n.translate(
-  'xpack.securitySolution.sessionsView.columnEntryUser',
+export const COLUMN_ENTRY_USER_ID = i18n.translate(
+  'xpack.securitySolution.sessionsView.columnEntryUserID',
   {
-    defaultMessage: 'User',
+    defaultMessage: 'User ID',
   }
 );
 

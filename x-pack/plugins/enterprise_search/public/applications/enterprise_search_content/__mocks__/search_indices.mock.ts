@@ -9,6 +9,7 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 
 import {
   ConnectorStatus,
+  DisplayType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
@@ -32,7 +33,21 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -128,7 +143,21 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
