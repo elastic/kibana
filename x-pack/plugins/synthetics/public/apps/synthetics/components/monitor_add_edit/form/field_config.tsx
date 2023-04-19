@@ -904,7 +904,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         ) {
           return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid', {
             defaultMessage:
-              'Monitor script is invalid. Inline scripts cannot be full journey scripts. It must be only steps definitions.',
+              'Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
           });
         }
         // should contain at least one step
