@@ -19,10 +19,9 @@ import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 
 import {
-  getBaseRequestParams,
+  getBaseSearchTemplate,
   getPaginationRequestParams,
   getPaginationRequestSizeParams,
-  getSearchQueryRequestParams,
   getTotalCountRequestParams,
 } from './analytics_collection_explore_table_formulas';
 import {
@@ -75,14 +74,18 @@ const tablesParams: {
       })),
       totalCount: response.rawResponse.aggregations.totalCount.value,
     }),
-    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
-      params: {
-        aggs: {
+    requestParams: (
+      { timeRange, sorting, pageIndex, pageSize, search },
+      aggregationFieldName = 'search.query'
+    ) =>
+      getBaseSearchTemplate(
+        aggregationFieldName,
+        { search, timeRange },
+        {
           searches: {
             terms: {
-              ...getSearchQueryRequestParams(search),
               ...getPaginationRequestSizeParams(pageIndex, pageSize),
-              field: 'search.query',
+              field: aggregationFieldName,
               order: sorting
                 ? {
                     [sorting.field === ExploreTableColumns.count ? '_count' : '_key']:
@@ -92,11 +95,9 @@ const tablesParams: {
             },
             ...getPaginationRequestParams(pageIndex, pageSize),
           },
-          ...getTotalCountRequestParams('search.query'),
-        },
-        ...getBaseRequestParams(timeRange),
-      },
-    }),
+          ...getTotalCountRequestParams(aggregationFieldName),
+        }
+      ),
   },
   [ExploreTables.WorsePerformers]: {
     parseResponse: (
@@ -115,17 +116,21 @@ const tablesParams: {
       })),
       totalCount: response.rawResponse.aggregations.formula.totalCount.value,
     }),
-    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
-      params: {
-        aggs: {
+    requestParams: (
+      { timeRange, sorting, pageIndex, pageSize, search },
+      aggregationFieldName = 'search.query'
+    ) =>
+      getBaseSearchTemplate(
+        aggregationFieldName,
+        { search, timeRange },
+        {
           formula: {
             aggs: {
-              ...getTotalCountRequestParams('search.query'),
+              ...getTotalCountRequestParams(aggregationFieldName),
               searches: {
                 terms: {
-                  ...getSearchQueryRequestParams(search),
                   ...getPaginationRequestSizeParams(pageIndex, pageSize),
-                  field: 'search.query',
+                  field: aggregationFieldName,
                   order: sorting
                     ? {
                         [sorting?.field === ExploreTableColumns.count ? '_count' : '_key']:
@@ -138,10 +143,8 @@ const tablesParams: {
             },
             filter: { term: { 'search.results.total_results': '0' } },
           },
-        },
-        ...getBaseRequestParams(timeRange),
-      },
-    }),
+        }
+      ),
   },
   [ExploreTables.TopClicked]: {
     parseResponse: (
@@ -160,17 +163,21 @@ const tablesParams: {
       })),
       totalCount: response.rawResponse.aggregations.formula.totalCount.value,
     }),
-    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
-      params: {
-        aggs: {
+    requestParams: (
+      { timeRange, sorting, pageIndex, pageSize, search },
+      aggregationFieldName = 'search.results.items.page.url'
+    ) =>
+      getBaseSearchTemplate(
+        aggregationFieldName,
+        { search, timeRange },
+        {
           formula: {
             aggs: {
-              ...getTotalCountRequestParams('search.results.items.page.url'),
+              ...getTotalCountRequestParams(aggregationFieldName),
               searches: {
                 terms: {
-                  ...getSearchQueryRequestParams(search),
                   ...getPaginationRequestSizeParams(pageIndex, pageSize),
-                  field: 'search.results.items.page.url',
+                  field: aggregationFieldName,
                   order: sorting
                     ? {
                         [sorting.field === ExploreTableColumns.count ? '_count' : '_key']:
@@ -183,10 +190,8 @@ const tablesParams: {
             },
             filter: { term: { 'event.action': 'search_click' } },
           },
-        },
-        ...getBaseRequestParams(timeRange),
-      },
-    }),
+        }
+      ),
   },
   [ExploreTables.TopReferrers]: {
     parseResponse: (
@@ -205,17 +210,21 @@ const tablesParams: {
       })),
       totalCount: response.rawResponse.aggregations.formula.totalCount.value,
     }),
-    requestParams: ({ timeRange, sorting, pageIndex, pageSize, search }) => ({
-      params: {
-        aggs: {
+    requestParams: (
+      { timeRange, sorting, pageIndex, pageSize, search },
+      aggregationFieldName = 'page.referrer'
+    ) =>
+      getBaseSearchTemplate(
+        aggregationFieldName,
+        { search, timeRange },
+        {
           formula: {
             aggs: {
-              ...getTotalCountRequestParams('page.referrer'),
+              ...getTotalCountRequestParams(aggregationFieldName),
               searches: {
                 terms: {
-                  ...getSearchQueryRequestParams(search),
                   ...getPaginationRequestSizeParams(pageIndex, pageSize),
-                  field: 'page.referrer',
+                  field: aggregationFieldName,
                   order: sorting
                     ? {
                         [sorting?.field === ExploreTableColumns.sessions ? '_count' : '_key']:
@@ -228,10 +237,8 @@ const tablesParams: {
             },
             filter: { term: { 'event.action': 'page_view' } },
           },
-        },
-        ...getBaseRequestParams(timeRange),
-      },
-    }),
+        }
+      ),
   },
 };
 
@@ -342,6 +349,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
       {
         onTableChange: (_, { page }) => page?.index || 0,
         reset: () => 0,
+        setSearch: () => 0,
         setSelectedTable: () => 0,
       },
     ],

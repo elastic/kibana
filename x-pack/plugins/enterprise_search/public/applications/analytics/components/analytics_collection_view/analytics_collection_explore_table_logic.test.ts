@@ -139,6 +139,14 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         AnalyticsCollectionExploreTableLogic.actions.reset();
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
       });
+
+      it('should handle setSearch', () => {
+        AnalyticsCollectionExploreTableLogic.actions.onTableChange({
+          page: { index: 2, size: 10 },
+        });
+        AnalyticsCollectionExploreTableLogic.actions.setSearch('');
+        expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
+      });
     });
 
     describe('pageSize', () => {
