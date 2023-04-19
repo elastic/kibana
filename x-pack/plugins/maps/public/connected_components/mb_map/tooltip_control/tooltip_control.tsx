@@ -188,8 +188,8 @@ export class TooltipControl extends Component<Props, {}> {
       // therefore, there is no way to remove masked features with queryRenderedFeatures
       // masked features must be removed via manual filtering
       const masks = layer.getMasks();
-      const mask = masks.find((mask) => mask.isFeatureMasked(mbFeature));
-      if (mask) {
+      const maskHiddingFeature = masks.find((mask) => mask.isFeatureMasked(mbFeature));
+      if (maskHiddingFeature) {
         continue;
       }
 
