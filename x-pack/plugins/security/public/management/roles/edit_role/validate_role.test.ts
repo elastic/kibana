@@ -212,6 +212,29 @@ describe('validateRemoteIndexPrivileges', () => {
     });
   });
 
+  test('it requires indices and privileges when clusters is defined', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        remote_indices: [
+          {
+            clusters: ['cluster'],
+            names: [],
+            privileges: [],
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateRemoteIndexPrivileges(role)).toEqual({
+      isInvalid: true,
+    });
+  });
+
   test('it throws when indices is not an array', () => {
     const role = {
       name: '',

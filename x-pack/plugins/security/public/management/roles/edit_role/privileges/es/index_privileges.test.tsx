@@ -83,6 +83,14 @@ test('it renders an IndexPrivilegeForm for each index privilege on the role', as
                   grant: ['some_field'],
                 },
               },
+              {
+                names: ['bar*'],
+                privileges: ['all'],
+                query: '*',
+                field_security: {
+                  grant: ['another_field'],
+                },
+              },
             ],
             run_as: [],
           },
@@ -98,7 +106,7 @@ test('it renders an IndexPrivilegeForm for each index privilege on the role', as
     </KibanaContextProvider>
   );
   await flushPromises();
-  expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
+  expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(2);
 });
 
 test('it renders an IndexPrivilegeForm for each remote index privilege on the role', async () => {
@@ -131,6 +139,15 @@ test('it renders an IndexPrivilegeForm for each remote index privilege on the ro
                   grant: ['some_field'],
                 },
               },
+              {
+                clusters: ['bar*'],
+                names: ['foo*'],
+                privileges: ['all'],
+                query: '*',
+                field_security: {
+                  grant: ['another_field'],
+                },
+              },
             ],
             run_as: [],
           },
@@ -146,7 +163,7 @@ test('it renders an IndexPrivilegeForm for each remote index privilege on the ro
     </KibanaContextProvider>
   );
   await flushPromises();
-  expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
+  expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(2);
 });
 
 test('it renders fields as disabled when not editable', async () => {
