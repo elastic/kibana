@@ -213,7 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(undefined);
-      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(null);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(undefined);
-      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(null);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -336,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(undefined);
-      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(null);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
