@@ -21,6 +21,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
@@ -58,7 +59,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
-  areLayersLoaded,
+  isMapLoading,
   getGeoFieldNames,
   getEmbeddableSearchContext,
   getLayerList,
@@ -82,7 +83,7 @@ import {
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
-  getChartsPaletteServiceGetColor,
+  getCharts,
   getCoreI18n,
   getExecutionContextService,
   getHttp,
@@ -108,6 +109,24 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
+
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
+  const chartsService = getCharts();
+  const paletteRegistry: PaletteRegistry | null = chartsService
+    ? await chartsService.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -782,13 +801,8 @@ export class MapEmbeddable
       });
     }
 
-    const layers = getLayerList(this._savedMap.getStore().getState());
-    const isLoading =
-      !areLayersLoaded(this._savedMap.getStore().getState()) ||
-      layers.some((layer) => {
-        return layer.isLayerLoading();
-      });
-    const firstLayerWithError = layers.find((layer) => {
+    const isLoading = isMapLoading(this._savedMap.getStore().getState());
+    const firstLayerWithError = getLayerList(this._savedMap.getStore().getState()).find((layer) => {
       return layer.hasErrors();
     });
     const output = this.getOutput();

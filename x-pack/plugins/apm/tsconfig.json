@@ -82,6 +82,8 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/exploratory-view-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

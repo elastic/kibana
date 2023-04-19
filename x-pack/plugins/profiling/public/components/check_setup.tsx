@@ -15,18 +15,24 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
+import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { NoDataPage } from './no_data_page';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { LicensePrompt } from './shared/license_prompt';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
     start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
+  const license = useLicenseContext();
+
+  const { docLinks, notifications } = core;
 
   const [postSetupLoading, setPostSetupLoading] = useState(false);
 
@@ -39,6 +45,14 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const http = useAutoAbortedHttpClient([]);
 
+  if (!license?.hasAtLeast('enterprise')) {
+    return (
+      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+        <LicensePrompt />
+      </ProfilingAppPageTemplate>
+    );
+  }
+
   const displaySetupScreen =
     (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
 
@@ -46,8 +60,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
 
   const displayUi = data?.has_data === true;
-
-  const docsLink = `https://elastic.github.io/universal-profiling-documentation`;
 
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
@@ -89,7 +101,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
       <ProfilingAppPageTemplate
         tabs={[]}
         noDataConfig={{
-          docsLink,
+          docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
           logo: 'logoObservability',
           pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
             defaultMessage: 'Universal Profiling (now in Beta)',
@@ -118,15 +130,23 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                   <EuiText size={'xs'}>
                     <ul>
                       <li>
-                        {i18n.translate('xpack.profiling.noDataConfig.action.dataRetention', {
-                          defaultMessage: `Normal data storage costs apply for profiling data stored in Elasticsearch.
-                      To control data retention. `,
-                        })}
-                        <EuiLink target="_blank" href={docsLink}>
-                          {i18n.translate('xpack.profiling.noDataConfig.readMore.linkLabel', {
-                            defaultMessage: 'Read more',
-                          })}
-                        </EuiLink>
+                        <FormattedMessage
+                          id="xpack.profiling.noDataConfig.action.dataRetention"
+                          defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
+                          values={{
+                            dataRetentionLink: (
+                              <EuiLink
+                                href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
+                                target="_blank"
+                              >
+                                {i18n.translate(
+                                  'xpack.profiling.noDataConfig.action.dataRetention.link',
+                                  { defaultMessage: 'controlling data retention' }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
                       </li>
                       <li>
                         {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
@@ -162,7 +182,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                       .catch((err) => {
                         const message = err?.body?.message ?? err.message ?? String(err);
 
-                        core.notifications.toasts.addError(err, {
+                        notifications.toasts.addError(err, {
                           title: i18n.translate(
                             'xpack.profiling.checkSetup.setupFailureToastTitle',
                             { defaultMessage: 'Failed to complete setup' }
