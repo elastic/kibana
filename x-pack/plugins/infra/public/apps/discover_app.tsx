@@ -6,18 +6,30 @@
  */
 import { interpret } from 'xstate';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import type { LogViewColumnConfiguration, ResolvedLogView } from '../../common/log_views';
-import { createLogViewStateMachine, DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state';
+import {
+  createLogViewStateMachine,
+  DEFAULT_LOG_VIEW,
+  initializeFromUrl,
+} from '../observability_logs/log_view_state';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../common/constants';
 
-export const renderApp = (plugins: InfraClientStartDeps, pluginStart: InfraClientStartExports) => {
+export const renderApp = (
+  core: CoreStart,
+  plugins: InfraClientStartDeps,
+  pluginStart: InfraClientStartExports,
+  params: AppMountParameters
+) => {
   const { discover } = plugins;
   const { logViews } = pluginStart;
 
   const machine = createLogViewStateMachine({
     initialContext: { logViewReference: DEFAULT_LOG_VIEW },
     logViews: logViews.client,
+    initializeFromUrl: createInitializeFromUrl(core, params),
   });
 
   const service = interpret(machine)
@@ -78,4 +90,16 @@ const getColumnValue = (column: LogViewColumnConfiguration) => {
   if ('fieldColumn' in column) return column.fieldColumn.field;
 
   return null;
+};
+
+const createInitializeFromUrl = (core: CoreStart, params: AppMountParameters) => {
+  const toastsService = core.notifications.toasts;
+
+  const urlStateStorage = createKbnUrlStateStorage({
+    history: params.history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  return initializeFromUrl({ toastsService, urlStateStorage });
 };
