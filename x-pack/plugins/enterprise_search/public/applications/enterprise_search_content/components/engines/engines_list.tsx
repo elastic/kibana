@@ -68,16 +68,19 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
             onClick={openEngineCreate}
             to={ENGINE_CREATION_PATH}
           >
-            {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-              defaultMessage: 'Create Search Application',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
+              {
+                defaultMessage: 'Create Search Application',
+              }
+            )}
           </EuiButtonTo>
         </div>
       }
     >
       <EuiPopoverTitle>
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.engines.createEngineDisabledPopover.title"
+          id="xpack.enterpriseSearch.content.searchApplications.createEngineDisabledPopover.title"
           defaultMessage="Platinum only feature"
         />
       </EuiPopoverTitle>
@@ -85,7 +88,7 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engines.createEngineDisabledPopover.body"
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineDisabledPopover.body"
               defaultMessage="Search Applications require a Platinum license or higher and are not available to Standard license self-managed deployments."
             />
           </EuiText>
@@ -160,14 +163,14 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
+          i18n.translate('xpack.enterpriseSearch.content.searchApplications.breadcrumb', {
             defaultMessage: 'Search Applications',
           }),
         ]}
         pageHeader={{
           description: (
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engines.description"
+              id="xpack.enterpriseSearch.content.searchApplications.description"
               defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
               values={{
                 documentationUrl: (
@@ -177,15 +180,18 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
-                    {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
-                      defaultMessage: 'explore our Search Applications documentation',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.searchApplications.documentation',
+                      {
+                        defaultMessage: 'explore our Search Applications documentation',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}
             />
           ),
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.searchApplications.title', {
             defaultMessage: 'Search Applications',
           }),
           rightSideItems: isLoading
@@ -209,15 +215,15 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
               <EuiFieldSearch
                 value={searchQuery}
                 placeholder={i18n.translate(
-                  'xpack.enterpriseSearch.content.engines.searchPlaceholder',
+                  'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.engines.searchBar.ariaLabel',
+                  'xpack.enterpriseSearch.content.searchApplications.searchBar.ariaLabel',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 fullWidth
@@ -229,9 +235,10 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
             <EuiSpacer size="s" />
             <EuiText color="subdued" size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
+                'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or by its included indices.',
+                  defaultMessage:
+                    'Locate an search application via name or by its included indices.',
                 }
               )}
             </EuiText>
@@ -239,7 +246,7 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
             <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engines.enginesList.description"
+                id="xpack.enterpriseSearch.content.searchApplications.enginesList.description"
                 defaultMessage="Showing {from}-{to} of {total}"
                 values={{
                   from: (

@@ -60,7 +60,7 @@ export const EngineIndices: React.FC = () => {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
       {
-        defaultMessage: 'Remove this index from engine',
+        defaultMessage: 'Remove this index from search application',
       }
     ),
     icon: 'minusInCircle',
@@ -213,7 +213,7 @@ export const EngineIndices: React.FC = () => {
                   'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
                   {
                     defaultMessage:
-                      'Some data might be unreachable from this engine. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this engine.',
+                      'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this search application.',
                   }
                 )}
               </p>

@@ -24,9 +24,12 @@ export const EngineError: React.FC<{ error: HttpError | undefined }> = ({ error 
       <>
         <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
         <NotFoundPrompt
-          backToContent={i18n.translate('xpack.enterpriseSearch.engines.engine.notFound.action1', {
-            defaultMessage: 'Back to Engines',
-          })}
+          backToContent={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.engine.notFound.action1',
+            {
+              defaultMessage: 'Back to Search Applications',
+            }
+          )}
           backToLink={ENGINES_PATH}
           productSupportUrl={ENTERPRISE_SEARCH_CONTENT_PLUGIN.SUPPORT_URL}
         />
