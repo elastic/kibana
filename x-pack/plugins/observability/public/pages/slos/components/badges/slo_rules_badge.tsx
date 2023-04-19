@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
-interface Props {
+export interface Props {
   rules: Array<Rule<SloRule>> | undefined;
   onClick: () => void;
 }
@@ -20,13 +20,22 @@ export function SloRulesBadge({ rules, onClick }: Props) {
   return rules === undefined || rules.length > 0 ? null : (
     <EuiToolTip
       position="top"
-      content={i18n.translate('xpack.observability.slo.slo.rulesBadge.label', {
+      content={i18n.translate('xpack.observability.slo.slo.rulesBadge.popover', {
         defaultMessage:
           'There are no rules configured for this SLO yet. You will not receive alerts when SLO is breached.',
       })}
       display="block"
     >
-      <EuiButtonIcon iconType="warning" color="danger" onClick={onClick} />
+      <EuiBadge
+        color=""
+        css={{ cursor: 'pointer' }}
+        onClick={onClick}
+        onClickAriaLabel={i18n.translate('xpack.observability.slo.slo.rulesBadge.label', {
+          defaultMessage: 'Create new rule',
+        })}
+      >
+        <EuiIcon color="danger" type="warning" />
+      </EuiBadge>
     </EuiToolTip>
   );
 }
