@@ -63,9 +63,15 @@ export const ConnectorConfigurationForm = () => {
           key,
           display,
           label,
+          sensitive,
           tooltip,
+          ui_restrictions: uiRestrictions,
         } = configEntry;
-        // toggle label goes next to the element, not in the row
+
+        if (uiRestrictions.length > 0) {
+          return <></>;
+        }
+
         const hasDependencies = dependencies.length > 0;
         const helpText = defaultValue
           ? i18n.translate(
@@ -76,13 +82,14 @@ export const ConnectorConfigurationForm = () => {
               }
             )
           : '';
+        // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel =
-          display !== DisplayType.TOGGLE ? (
+          display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
+            <></>
+          ) : (
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
             </EuiToolTip>
-          ) : (
-            <></>
           );
 
         return hasDependencies ? (

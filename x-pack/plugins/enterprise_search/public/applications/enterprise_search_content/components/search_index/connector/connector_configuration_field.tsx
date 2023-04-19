@@ -34,6 +34,8 @@ import {
   ensureBooleanType,
 } from './connector_configuration_logic';
 
+import './connector_configuration_field.scss';
+
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntry;
 }
@@ -95,7 +97,14 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
       return sensitive ? (
-        <EuiAccordion id={key + '-accordion'} buttonContent={label}>
+        <EuiAccordion
+          id={key + '-accordion'}
+          buttonContent={
+            <EuiToolTip content={tooltip}>
+              <p>{label}</p>
+            </EuiToolTip>
+          }
+        >
           {textarea}
         </EuiAccordion>
       ) : (
