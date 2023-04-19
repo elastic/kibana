@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensChartConfig } from '../../../types';
+import type { LensChartConfig } from '../../../types';
 import { getFilters } from './utils';
 
 export const hostCount: LensChartConfig = {

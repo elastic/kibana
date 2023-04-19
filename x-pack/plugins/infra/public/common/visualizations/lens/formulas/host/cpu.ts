@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensChartConfig, LensLineChartConfig } from '../../../types';
+import type { LensChartConfig, LensLineChartConfig } from '../../../types';
 import { getFilters } from './utils';
 
 export const cpuLineChart: LensLineChartConfig = {

@@ -13,7 +13,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import {
   DEFAULT_LAYER_ID,
   getAdhocDataView,

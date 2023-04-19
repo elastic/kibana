@@ -6,7 +6,7 @@
  */
 
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import { LensChartConfig, LensLineChartConfig } from '../../../types';
+import type { LensChartConfig, LensLineChartConfig } from '../../../types';
 import { getFilters } from './utils';
 
 const REFERENCE_LAYER = 'referenceLayer';

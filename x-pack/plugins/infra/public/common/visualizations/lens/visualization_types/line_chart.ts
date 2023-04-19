@@ -149,8 +149,6 @@ export const getXYVisualizationState = (
   preferredSeriesType: 'line',
   valuesInLegend: false,
   emphasizeFitting: true,
-  yTitle: '',
-  xTitle: '',
   hideEndzones: true,
   ...custom,
 });
