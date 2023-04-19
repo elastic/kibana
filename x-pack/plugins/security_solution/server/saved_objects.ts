@@ -12,9 +12,7 @@ import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_ob
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
 import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
-import {
-  manifestType,
-} from './endpoint/lib/artifacts/saved_object_mappings';
+import { manifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 
 const types = [
   noteType,
