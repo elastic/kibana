@@ -12,17 +12,18 @@ import { tagUsageCollectorSchema } from './schema';
 
 export const createTagUsageCollector = ({
   usageCollection,
-  kibanaIndex,
+  getIndexForType,
 }: {
   usageCollection: UsageCollectionSetup;
-  kibanaIndex: string;
+  getIndexForType: (type: string) => Promise<string>;
 }) => {
   return usageCollection.makeUsageCollector<TaggingUsageData>({
     type: 'saved_objects_tagging',
     isReady: () => true,
     schema: tagUsageCollectorSchema,
-    fetch: ({ esClient }) => {
-      return fetchTagUsageData({ esClient, kibanaIndex });
+    fetch: async ({ esClient }) => {
+      const index = await getIndexForType('tag');
+      return fetchTagUsageData({ esClient, kibanaIndex: index });
     },
   });
 };

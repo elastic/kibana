@@ -29,10 +29,9 @@ export function initializeAlertingTelemetry(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string,
   eventLogIndex: string
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex, eventLogIndex);
+  registerAlertingTelemetryTask(logger, core, taskManager, eventLogIndex);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -45,20 +44,13 @@ function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string,
   eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        core,
-        kibanaIndex,
-        eventLogIndex,
-        taskManager.index
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, eventLogIndex, taskManager.index),
     },
   });
 }
@@ -80,7 +72,6 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  kibanaIndex: string,
   eventLogIndex: string,
   taskManagerIndex: string
 ) {
@@ -94,13 +85,18 @@ export function telemetryTaskRunner(
           },
         ]) => client.asInternalUser
       );
+    const getAlertIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('alert'));
 
     return {
       async run() {
         const esClient = await getEsClient();
+        const alertIndex = await getAlertIndex();
         return Promise.all([
-          getTotalCountAggregations({ esClient, kibanaIndex, logger }),
-          getTotalCountInUse({ esClient, kibanaIndex, logger }),
+          getTotalCountAggregations({ esClient, alertIndex, logger }),
+          getTotalCountInUse({ esClient, alertIndex, logger }),
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
