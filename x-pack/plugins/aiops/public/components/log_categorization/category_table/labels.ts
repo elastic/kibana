@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export function getLabels(isFlyout: boolean) {
   const flyoutFilterIn = (single: boolean) =>
-    i18n.translate('xpack.aiops.logCategorization.filterIn', {
+    i18n.translate('xpack.aiops.logCategorization.flyout.filterIn', {
       defaultMessage:
         'Filter for documents which match {values, plural, one {this category} other {these categories}}',
       values: {
@@ -17,7 +17,7 @@ export function getLabels(isFlyout: boolean) {
       },
     });
   const flyoutFilterOut = (single: boolean) =>
-    i18n.translate('xpack.aiops.logCategorization.filterOut', {
+    i18n.translate('xpack.aiops.logCategorization.flyout.filterOut', {
       defaultMessage:
         'Filter out documents which match {values, plural, one {this category} other {these categories}}',
       values: {
