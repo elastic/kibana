@@ -146,7 +146,7 @@ export const formatLegacyActions = async <T extends Rule>(
   } catch (e) {
     const ruleIds = rules.map((rule) => rule.id).join(', ');
     logger.error(
-      `formatLegacyActions(): Failed to read legacy actions for SIEM rules: ${ruleIds}: ${e.message}`
+      `formatLegacyActions(): Failed to read legacy actions for SIEM rules ${ruleIds}: ${e.message}`
     );
     return rules;
   }

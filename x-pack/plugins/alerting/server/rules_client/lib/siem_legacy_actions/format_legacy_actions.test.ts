@@ -9,10 +9,16 @@ import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/ser
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { legacyGetBulkRuleActionsSavedObject, LegacyActionsObj } from './format_legacy_actions';
+import { Rule } from '../../../types';
+
+import {
+  legacyGetBulkRuleActionsSavedObject,
+  LegacyActionsObj,
+  formatLegacyActions,
+} from './format_legacy_actions';
 import { legacyRuleActionsSavedObjectType } from './types';
 
-describe('legacy_get_bulk_rule_actions_saved_object', () => {
+describe('legacyGetBulkRuleActionsSavedObject', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   type FuncReturn = Record<string, LegacyActionsObj>;
@@ -496,5 +502,114 @@ describe('legacy_get_bulk_rule_actions_saved_object', () => {
       logger,
     });
     expect(returnValue).toEqual<FuncReturn>({});
+  });
+});
+
+describe('formatLegacyActions', () => {
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    savedObjectsClient = savedObjectsClientMock.create();
+  });
+
+  it('should return not modified rule when error is thrown within method', async () => {
+    savedObjectsClient.find.mockRejectedValueOnce(new Error('test failure'));
+    const mockRules = [{ id: 'mock-id0' }, { id: 'mock-id1' }] as Rule[];
+    expect(
+      await formatLegacyActions(mockRules, {
+        logger,
+        savedObjectsClient,
+      })
+    ).toEqual(mockRules);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `formatLegacyActions(): Failed to read legacy actions for SIEM rules mock-id0, mock-id1: test failure`
+    );
+  });
+
+  it('should format rule correctly', async () => {
+    const savedObjects: Array<SavedObjectsFindResult<SavedObjectAttribute>> = [
+      {
+        score: 0,
+        id: '123',
+        type: legacyRuleActionsSavedObjectType,
+        references: [
+          {
+            name: 'alert_0',
+            id: 'alert-123',
+            type: 'alert',
+          },
+          {
+            name: 'action_0',
+            id: 'action-123',
+            type: 'action',
+          },
+        ],
+        attributes: {
+          actions: [
+            {
+              group: 'group_1',
+              params: {},
+              action_type_id: 'action_type_1',
+              actionRef: 'action_0',
+            },
+          ],
+          ruleThrottle: '1d',
+          alertThrottle: '1d',
+        },
+      },
+    ];
+    savedObjectsClient.find.mockResolvedValue({
+      total: 0,
+      per_page: 0,
+      page: 1,
+      saved_objects: savedObjects,
+    });
+
+    const mockRules = [
+      {
+        id: 'alert-123',
+        actions: [
+          {
+            actionTypeId: 'action_type_2',
+            group: 'group_1',
+            id: 'action-456',
+            params: {},
+          },
+        ],
+      },
+    ] as Rule[];
+    const migratedRules = await formatLegacyActions(mockRules, {
+      logger,
+      savedObjectsClient,
+    });
+
+    expect(migratedRules).toEqual([
+      {
+        // actions have been merged
+        actions: [
+          {
+            actionTypeId: 'action_type_2',
+            group: 'group_1',
+            id: 'action-456',
+            params: {},
+          },
+          {
+            actionTypeId: 'action_type_1',
+            frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '1d' },
+            group: 'group_1',
+            id: 'action-123',
+            params: {},
+          },
+        ],
+        id: 'alert-123',
+        // muteAll set to false
+        muteAll: false,
+        notifyWhen: 'onThrottleInterval',
+        throttle: '1d',
+      },
+    ]);
   });
 });
