@@ -43,7 +43,6 @@ import { reportingCsvShareProvider } from './share_context_menu/register_csv_rep
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 import {
-  ExportTypesPlugin,
   ExportTypesPluginSetup,
   ExportTypesPluginStart,
 } from '../server/export_types_registry/plugin';
