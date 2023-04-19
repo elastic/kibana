@@ -8,7 +8,6 @@
 import { createContext, type FC, useContext } from 'react';
 
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -17,6 +16,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
+  ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -30,6 +30,7 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
   data: DataPublicPluginStart;
+  executionContext: ExecutionContextStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
