@@ -128,7 +128,8 @@ export class HttpService
         const router = new Router<DefaultRequestHandlerType>(
           path,
           this.log,
-          prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId)
+          prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
+          { isDev: this.env.mode.dev }
         );
 
         registerCallback(router);
@@ -172,7 +173,9 @@ export class HttpService
         pluginId: PluginOpaqueId = this.coreContext.coreId
       ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router<Context>(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler, {
+          isDev: this.env.mode.dev,
+        });
         registerRouter(router);
         return router;
       },

@@ -16,6 +16,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
+  INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
 } from '../../common/constants';
 
 import {
@@ -37,6 +38,7 @@ import {
   postComment,
   getCaseConnectors,
   getCaseUserActionsStats,
+  deleteFileAttachments,
 } from './api';
 
 import {
@@ -59,6 +61,7 @@ import {
   caseUserActionsWithRegisteredAttachmentsSnake,
   basicPushSnake,
   getCaseUserActionsStatsResponse,
+  basicFileMock,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -817,6 +820,30 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('deleteFileAttachments', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+
+    it('should be called with correct url, method, signal and body', async () => {
+      const resp = await deleteFileAttachments({
+        caseId: basicCaseId,
+        fileIds: [basicFileMock.id],
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId),
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids: [basicFileMock.id] }),
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toBe(undefined);
     });
   });
 

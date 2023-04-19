@@ -149,7 +149,7 @@ describe('Versioned route', () => {
     let validatedOutputBody = false;
 
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    const versionedRouter = CoreVersionedRouter.from({ router, validateResponses: true });
+    const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
     versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
       {
         version: '1',
@@ -194,7 +194,7 @@ describe('Versioned route', () => {
     );
 
     const kibanaResponse = await handler!(
-      {} as any,
+      { core: { env: { mode: { dev: true } } } } as any,
       createRequest({
         version: '1',
         body: { foo: 1 },
