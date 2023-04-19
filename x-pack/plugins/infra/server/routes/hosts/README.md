@@ -7,9 +7,9 @@ parameters:
 
 - metrics: list of metrics to be calculated and returned for each host
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
+- limit: max number of hosts - max 500
 - timeRange: time range object containing start and end attributes - passed in timestamp
 - (optional) query: filter
-- (optional) limit: max number of hosts
 
 The response includes:
 
