@@ -118,7 +118,6 @@ export class UiSettingsService
         overrides: isNamespaceScope ? this.overrides : {},
         log: this.log,
       };
-
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
   }

@@ -28,7 +28,7 @@ interface Options {
   buildNum: number;
   log: Logger;
   handleWriteErrors: boolean;
-  type: 'config' | 'config-global' | 'config-user';
+  type: 'config' | 'config-global';
 }
 
 export async function createOrUpgradeSavedConfig(
