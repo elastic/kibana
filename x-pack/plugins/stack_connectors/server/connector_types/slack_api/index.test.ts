@@ -111,6 +111,25 @@ describe('validate secrets', () => {
       `"error validating action type secrets: [token]: expected value of type [string] but got [number]"`
     );
   });
+
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: () => {
+        throw new Error(`target hostname is not added to allowedHosts`);
+      },
+    };
+
+    expect(() => {
+      validateSecrets(
+        connectorType,
+        { token: 'fake token' },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+    );
+  });
 });
 
 describe('execute', () => {

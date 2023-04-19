@@ -12,13 +12,16 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { i18n } from '@kbn/i18n';
 import type {
   SlackApiExecutorOptions,
   SlackApiConnectorType,
   SlackApiParams,
+  SlackApiSecrets,
 } from '../../../common/slack_api/types';
 import { SlackApiSecretsSchema, SlackApiParamsSchema } from '../../../common/slack_api/schema';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
@@ -38,6 +41,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     validate: {
       secrets: {
         schema: SlackApiSecretsSchema,
+        customValidator: validateSlackUrl,
       },
       params: {
         schema: SlackApiParamsSchema,
@@ -46,6 +50,23 @@ export const getConnectorType = (): SlackApiConnectorType => {
     renderParameterTemplates,
     executor: async (execOptions: SlackApiExecutorOptions) => await slackApiExecutor(execOptions),
   };
+};
+
+const validateSlackUrl = (secretsObject: SlackApiSecrets, validatorServices: ValidatorServices) => {
+  const { configurationUtilities } = validatorServices;
+
+  try {
+    configurationUtilities.ensureUriAllowed(SLACK_URL);
+  } catch (allowedListError) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.slack_api.configurationError', {
+        defaultMessage: 'error configuring slack action: {message}',
+        values: {
+          message: allowedListError.message,
+        },
+      })
+    );
+  }
 };
 
 const renderParameterTemplates = (params: SlackApiParams, variables: Record<string, unknown>) => {
