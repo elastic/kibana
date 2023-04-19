@@ -44,7 +44,7 @@ const fieldsConfig: FieldsConfig = {
     ],
   },
   /* Optional field config */
-  parent: {
+  parent_field: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.parentFieldLabel', {
@@ -57,7 +57,7 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-  children: {
+  children_field: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.childrenFieldLabel', {
@@ -70,7 +70,7 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-  non_children: {
+  non_children_field: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.nonchildrenFieldLabel', {
@@ -83,7 +83,7 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-  precision: {
+  precision_field: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.precisionFieldLabel', {
@@ -216,28 +216,28 @@ export const GeoGrid: FunctionComponent = () => {
         data-test-subj="parentField"
         config={fieldsConfig.parent}
         component={Field}
-        path="fields.parent"
+        path="fields.parent_field"
       />
 
       <UseField
         data-test-subj="childrenField"
         config={fieldsConfig.children}
         component={Field}
-        path="fields.children"
+        path="fields.children_field"
       />
 
       <UseField
         data-test-subj="nonChildrenField"
         config={fieldsConfig.non_children}
         component={Field}
-        path="fields.non_children"
+        path="fields.non_children_field"
       />
 
       <UseField
         data-test-subj="precisionField"
         config={fieldsConfig.precision}
         component={Field}
-        path="fields.precision"
+        path="fields.precision_field"
       />
 
       <IgnoreMissingField />
