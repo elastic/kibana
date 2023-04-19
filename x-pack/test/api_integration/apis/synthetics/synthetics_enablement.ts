@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('/internal/uptime/service/enablement', () => {
+  describe('SyntheticsEnablement', () => {
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
     const security = getService('security');
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('[GET] - /internal/uptime/service/enablement', () => {
-      ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
+      ['manage_security', 'manage_own_api_key', 'manage_api_key'].forEach((privilege) => {
         it(`returns response for an admin with privilege ${privilege}`, async () => {
           const username = 'admin';
           const roleName = `synthetics_admin-${privilege}`;
@@ -59,9 +59,16 @@ export default function ({ getService }: FtrProviderContext) {
               areApiKeysEnabled: true,
               canManageApiKeys: true,
               canEnable: true,
-              isEnabled: false,
-              isValidApiKey: false,
+              isEnabled: true,
+              isValidApiKey: true,
             });
+            if (privilege !== 'manage_own_api_key') {
+              await supertest
+                .delete(API_URLS.SYNTHETICS_ENABLEMENT)
+                .auth(username, password)
+                .set('kbn-xsrf', 'true')
+                .expect(200);
+            }
           } finally {
             await security.user.delete(username);
             await security.role.delete(roleName);
@@ -247,11 +254,12 @@ export default function ({ getService }: FtrProviderContext) {
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
-          await supertest
+          const delResponse = await supertest
             .delete(API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
+          expect(delResponse.body).eql({});
           const apiResponse = await supertest
             .get(API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
@@ -262,8 +270,8 @@ export default function ({ getService }: FtrProviderContext) {
             areApiKeysEnabled: true,
             canManageApiKeys: true,
             canEnable: true,
-            isEnabled: false,
-            isValidApiKey: false,
+            isEnabled: true,
+            isValidApiKey: true,
           });
         } finally {
           await security.user.delete(username);
@@ -354,7 +362,21 @@ export default function ({ getService }: FtrProviderContext) {
             full_name: 'a kibana user',
           });
 
-          // can disable synthetics in default space when enabled in a non default space
+          // can enable synthetics in default space when enabled in a non default space
+          const apiResponseGet = await supertest
+            .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(apiResponseGet.body).eql({
+            areApiKeysEnabled: true,
+            canManageApiKeys: true,
+            canEnable: true,
+            isEnabled: true,
+            isValidApiKey: true,
+          });
+
           await supertest
             .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
             .auth(username, password)
