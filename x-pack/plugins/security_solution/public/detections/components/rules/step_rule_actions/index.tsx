@@ -36,7 +36,6 @@ import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
-import { THROTTLE_FIELD_HELP_TEXT, THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY } from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -139,23 +138,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     };
   }, [getData, setForm]);
 
-  const throttleFieldComponentProps = useMemo(
-    () => ({
-      idAria: 'detectionEngineStepRuleActionsThrottle',
-      isDisabled: isLoading,
-      isLoading: isLoadingCaseAction,
-      dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
-      hasNoInitialSelection: false,
-      helpText: isQueryRule(ruleType)
-        ? THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY
-        : THROTTLE_FIELD_HELP_TEXT,
-      euiFieldProps: {
-        options: [],
-      },
-    }),
-    [isLoading, isLoadingCaseAction, ruleType]
-  );
-
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -195,14 +177,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     ) : (
       <>
         <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
-        <UseField
-          path="throttle"
-          componentProps={throttleFieldComponentProps}
-          component={GhostFormField}
-        />
-        <UseField path="actions" component={GhostFormField} />
-        <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
-        <UseField path="enabled" component={GhostFormField} />
       </>
     );
   }, [
@@ -210,7 +184,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     displayActionsOptions,
     displayResponseActionsOptions,
     responseActionsEnabled,
-    throttleFieldComponentProps,
   ]);
 
   if (isReadOnlyView) {

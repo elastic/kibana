@@ -203,9 +203,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   );
 
   const setActionFrequency = useCallback(
-    // TODO: replace any with a concrete type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (key: string, value: any, index: number) => {
+    (key: string, value: RuleActionParam, index: number) => {
       field.setValue((prevValue: RuleAction[]) => {
         const updatedActions = [...prevValue];
         updatedActions[index] = {
@@ -236,7 +234,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
         defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
-        hideNotifyWhen: false,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,

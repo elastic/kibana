@@ -30,22 +30,13 @@ export const transformToActionFrequency = <T extends ActionWithFrequency>(
   actions: T[],
   throttle: string | null | undefined
 ): T[] => {
-  const frequency = transformToFrequency(throttle);
+  // If each action has frequency attribute set, then ignore the rule level throttle
   if (actions.every((action) => action.frequency)) {
     return actions;
   }
-  if (!actionsWithoutFrequency.length) {
-    return actions;
-  }
 
-  const transformedActions: T[] = [];
-  actions.forEach((action) => {
-    transformedActions.push({
-      ...action,
-      ...{ frequency },
-    });
-  });
-  return transformedActions;
+  const frequency = transformToFrequency(throttle);
+  return actions.map((action) => ({ ...action, frequency }));
 };
 
 /**

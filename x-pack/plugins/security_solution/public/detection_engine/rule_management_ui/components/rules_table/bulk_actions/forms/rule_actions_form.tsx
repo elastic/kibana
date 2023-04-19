@@ -13,7 +13,6 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import type { RuleActionFrequency } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   useForm,
@@ -38,12 +37,10 @@ import { debouncedValidateRuleActionsField } from '../../../../../../detections/
 
 const CommonUseField = getUseField({ component: Field });
 
-export interface RuleActionForBulkActions extends RuleAction {
-  frequency: RuleActionFrequency;
-}
+type BulkActionsRuleAction = RuleAction & Required<Pick<RuleAction, 'frequency'>>;
 
 export interface RuleActionsFormData {
-  actions: RuleActionForBulkActions[];
+  actions: BulkActionsRuleAction[];
   overwrite: boolean;
 }
 
