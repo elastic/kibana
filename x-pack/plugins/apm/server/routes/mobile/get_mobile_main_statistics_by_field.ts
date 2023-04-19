@@ -11,6 +11,7 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { merge } from 'lodash';
 import {
   APP_LAUNCH_TIME,
   SERVICE_NAME,
@@ -41,9 +42,11 @@ export interface MobileMainStatisticsResponse {
     latency: number | null;
     throughput: number;
     crashRate: number;
-    appLaunchTime: number | null;
-  }>;
-  agentName?: string;
+  }> &
+    Array<{
+      name: string | number;
+      appLaunchTime: number | null;
+    }>;
 }
 
 export async function getMobileMainStatisticsByField({
@@ -55,83 +58,137 @@ export async function getMobileMainStatisticsByField({
   end,
   field,
 }: Props) {
-  const response = await apmEventClient.search(
-    `get_mobile_main_statistics_by_field`,
-    {
-      apm: {
-        events: [
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  async function getMobileTransactionEventStatistics() {
+    const response = await apmEventClient.search(
+      `get_mobile_main_statistics_by_field`,
+      {
+        apm: {
+          events: [ProcessorEvent.transaction, ProcessorEvent.error],
         },
-        _source: [AGENT_NAME],
-        aggs: {
-          main_statistics: {
-            terms: {
-              field,
-              size: 1000,
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
             },
-            aggs: {
-              latency: {
-                avg: {
-                  field: TRANSACTION_DURATION,
-                },
+          },
+          _source: [AGENT_NAME],
+          aggs: {
+            main_statistics: {
+              terms: {
+                field,
+                size: 1000,
               },
-              sessions: {
-                cardinality: {
-                  field: SESSION_ID,
+              aggs: {
+                latency: {
+                  avg: {
+                    field: TRANSACTION_DURATION,
+                  },
                 },
-              },
-              crashes: {
-                filter: {
-                  term: {
-                    [ERROR_TYPE]: 'crash',
+                sessions: {
+                  cardinality: {
+                    field: SESSION_ID,
+                  },
+                },
+                crashes: {
+                  filter: {
+                    term: {
+                      [ERROR_TYPE]: 'crash',
+                    },
                   },
                 },
               },
-              app_launch_time: {
-                sum: {
-                  field: APP_LAUNCH_TIME,
+            },
+          },
+        },
+      }
+    );
+
+    return (
+      response.aggregations?.main_statistics.buckets.map((bucket) => {
+        return {
+          name: bucket.key,
+          latency: getLatencyValue({
+            latencyAggregationType: LatencyAggregationType.avg,
+            aggregation: bucket.latency,
+          }),
+          throughput: calculateThroughputWithRange({
+            start,
+            end,
+            value: bucket.doc_count,
+          }),
+          crashRate: bucket.crashes.doc_count / bucket.sessions.value,
+        };
+      }) ?? []
+    );
+  }
+
+  async function getMobileTransactionMetricsStatistics() {
+    const response = await apmEventClient.search(
+      `get_mobile_main_statistics_by_field`,
+      {
+        apm: {
+          events: [ProcessorEvent.metric],
+        },
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+              ],
+            },
+          },
+          _source: [AGENT_NAME],
+          aggs: {
+            main_statistics: {
+              terms: {
+                field,
+                size: 1000,
+              },
+              aggs: {
+                app_launch_time: {
+                  sum: {
+                    field: APP_LAUNCH_TIME,
+                  },
                 },
               },
             },
           },
         },
-      },
-    }
-  );
+      }
+    );
 
-  const mainStatistics =
-    response.aggregations?.main_statistics.buckets.map((bucket) => {
-      return {
-        name: bucket.key,
-        latency: getLatencyValue({
-          latencyAggregationType: LatencyAggregationType.avg,
-          aggregation: bucket.latency,
-        }),
-        throughput: calculateThroughputWithRange({
-          start,
-          end,
-          value: bucket.doc_count,
-        }),
-        crashRate: bucket.crashes.doc_count / bucket.sessions.value,
-        appLaunchTime: bucket.app_launch_time.value,
-      };
-    }) ?? [];
+    return (
+      response.aggregations?.main_statistics.buckets.map((bucket) => {
+        return {
+          name: bucket.key,
+          appLaunchTime: bucket.app_launch_time.value,
+        };
+      }) ?? []
+    );
+  }
+
+  const [transactioEventStatistics, transactionMetricStatistics] =
+    await Promise.all([
+      getMobileTransactionEventStatistics(),
+      getMobileTransactionMetricsStatistics(),
+    ]);
+
+  const mainStatistics = merge(
+    transactioEventStatistics,
+    transactionMetricStatistics
+  );
 
   return { mainStatistics };
 }

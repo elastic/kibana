@@ -12,7 +12,6 @@ import { isTimeComparison } from '../../../../shared/time_comparison/get_compari
 
 const INITIAL_STATE_MAIN_STATISTICS = {
   mainStatistics: [],
-  agentName: '',
   requestId: undefined,
   totalItems: 0,
 };
