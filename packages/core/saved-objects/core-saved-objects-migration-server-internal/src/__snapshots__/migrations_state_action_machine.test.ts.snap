@@ -134,6 +134,11 @@ Object {
                         "type": "upgrade-assistant-telemetry",
                       },
                     },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
+                      },
+                    },
                   ],
                 },
               },
@@ -319,6 +324,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                   ],
@@ -510,6 +520,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                   ],
@@ -705,6 +720,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                   ],
@@ -950,6 +970,11 @@ Object {
                         "type": "upgrade-assistant-telemetry",
                       },
                     },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
+                      },
+                    },
                   ],
                 },
               },
@@ -1146,6 +1171,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "upgrade-assistant-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                   ],

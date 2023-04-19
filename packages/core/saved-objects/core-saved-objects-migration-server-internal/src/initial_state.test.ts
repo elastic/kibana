@@ -168,6 +168,11 @@ describe('createInitialState', () => {
                   "type": "upgrade-assistant-telemetry",
                 },
               },
+              Object {
+                "term": Object {
+                  "type": "endpoint:user-artifact",
+                },
+              },
             ],
           },
         },
