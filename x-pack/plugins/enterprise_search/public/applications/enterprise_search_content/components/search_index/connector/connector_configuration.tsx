@@ -430,7 +430,7 @@ export const ConnectorConfiguration: React.FC = () => {
                     <EuiFlexItem>
                       <EuiLink href={docsUrl} target="_blank">
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
+                          'xpack.enterpriseSearch.content.indices.configurationConnector.support.dockerDeploy.label',
                           {
                             defaultMessage: 'Deploy with Docker',
                           }
@@ -444,7 +444,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       target="_blank"
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.deploy.label',
                         {
                           defaultMessage: 'Deploy without Docker',
                         }
