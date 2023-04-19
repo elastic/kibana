@@ -40,15 +40,15 @@ import {
 import { ConfigService } from './config.service';
 
 export class ApiService implements GuidedOnboardingApi {
-  private isCloudEnabled: boolean | undefined;
+  private _isEnabled: boolean = false;
   private client: HttpSetup | undefined;
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
   public isLoading$ = new BehaviorSubject<boolean>(false);
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private configService = new ConfigService();
 
-  public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
-    this.isCloudEnabled = isCloudEnabled;
+  public setup(httpClient: HttpSetup, isEnabled: boolean) {
+    this._isEnabled = isEnabled;
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
@@ -93,7 +93,7 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchPluginState$(): Observable<PluginState | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return of(undefined);
     }
     if (!this.client) {
@@ -117,7 +117,7 @@ export class ApiService implements GuidedOnboardingApi {
    * where all guides are displayed with their corresponding status.
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -142,7 +142,7 @@ export class ApiService implements GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ): Promise<{ pluginState: PluginState } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -464,7 +464,7 @@ export class ApiService implements GuidedOnboardingApi {
    * @return {Promise} a promise with the guide config or undefined if the config is not found
    */
   public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -474,6 +474,10 @@ export class ApiService implements GuidedOnboardingApi {
     const config = await this.configService.getGuideConfig(guideId);
     this.isLoading$.next(false);
     return config;
+  }
+
+  public get isEnabled() {
+    return this._isEnabled;
   }
 }
 

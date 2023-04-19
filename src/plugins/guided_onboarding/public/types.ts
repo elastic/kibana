@@ -55,4 +55,5 @@ export interface GuidedOnboardingApi {
   isGuidePanelOpen$: Observable<boolean>;
   isLoading$: Observable<boolean>;
   getGuideConfig: (guideId: GuideId) => Promise<GuideConfig | undefined>;
+  readonly isEnabled: boolean;
 }
