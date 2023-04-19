@@ -12,7 +12,7 @@ import { MESSAGE_SIGNING_SERVICE_API_ROUTES } from '../../constants';
 import { rotateKeyPairHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  // Rotate Kibana key pair
+  // Rotate fleet message signing key pair
   router.post(
     {
       path: MESSAGE_SIGNING_SERVICE_API_ROUTES.ROTATE_KEY_PAIR,
