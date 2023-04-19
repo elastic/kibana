@@ -236,6 +236,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const editor = (
       <CustomUrlEditor
         showTimeRangeSelector={isAnomalyDetectionJob(this.props.job)}
+        showCustomTimeRangeSelector={isDataFrameAnalyticsConfigs(this.props.job)}
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}
         savedCustomUrls={customUrls}

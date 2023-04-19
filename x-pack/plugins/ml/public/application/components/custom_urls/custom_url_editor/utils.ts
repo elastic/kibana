@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Moment } from 'moment';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
@@ -57,6 +58,7 @@ export interface CustomUrlSettings {
   // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
   // as for other URLs we have no way of knowing how the field will be used in the URL.
   timeRange: TimeRange;
+  customTimeRange?: { start: Moment; end: Moment };
   kibanaSettings?: {
     dashboardId?: string;
     queryFieldNames?: string[];
@@ -239,12 +241,19 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
   }
 
   const dashboard = getDashboard();
+  let customStart;
+  let customEnd;
+
+  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
+    customStart = settings.customTimeRange.start.toISOString();
+    customEnd = settings.customTimeRange.end.toISOString();
+  }
 
   const location = await dashboard?.locator?.getLocation({
     dashboardId,
     timeRange: {
-      from: '$earliest$',
-      to: '$latest$',
+      from: customStart ?? '$earliest$',
+      to: customEnd ?? '$latest$',
       mode: 'absolute',
     },
     filters,
@@ -286,10 +295,18 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
   // anomaly on which the URL will be run against.
+  let customStart;
+  let customEnd;
+
+  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
+    customStart = settings.customTimeRange.start.toISOString();
+    customEnd = settings.customTimeRange.end.toISOString();
+  }
+
   const _g = rison.encode({
     time: {
-      from: '$earliest$',
-      to: '$latest$',
+      from: customStart ?? '$earliest$',
+      to: customEnd ?? '$latest$',
       mode: 'absolute',
     },
   });
