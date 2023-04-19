@@ -324,6 +324,9 @@ export const getLegacyMetricVisualization = ({
       });
     }
 
+    const hasColoring = state.palette != null;
+    const stops = state.palette?.params?.stops || [];
+
     return {
       layers: [
         {
@@ -332,6 +335,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: hasColoring ? stops.map(({ color }) => color) : undefined,
         },
       ],
     };

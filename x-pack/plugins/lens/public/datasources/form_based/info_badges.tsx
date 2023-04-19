@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiColorPaletteDisplay,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -27,11 +34,13 @@ export function ReducedSamplingSectionEntries({
     <>
       {layers.map(([id, layer], layerIndex) => {
         const dataView = dataViews.indexPatterns[layer.indexPatternId];
+        const layerInfo = visualizationInfo.layers.find(({ layerId, label }) => layerId === id);
         const layerTitle =
-          visualizationInfo.layers.find(({ layerId }) => layerId === id)?.label ||
+          layerInfo?.label ||
           i18n.translate('xpack.lens.indexPattern.samplingPerLayer.fallbackLayerName', {
             defaultMessage: 'Data layer',
           });
+        const layerPalette = layerInfo?.palette;
         return (
           <li
             key={`${layerTitle}-${dataView}-${layerIndex}`}
@@ -40,9 +49,21 @@ export function ReducedSamplingSectionEntries({
               margin: ${euiTheme.size.base} 0 0;
             `}
           >
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent={layerPalette ? 'center' : 'spaceBetween'} gutterSize="s">
+              {layerPalette ? (
+                <EuiFlexItem grow={false}>
+                  {layerPalette.length === 1 ? (
+                    <EuiIcon color={layerPalette[0]} type="stopFilled" />
+                  ) : (
+                    <EuiIcon type="color" />
+                  )}
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={Boolean(layerPalette)}>
                 <EuiText size="s">{layerTitle}</EuiText>
+                {layerPalette && layerPalette.length > 1 ? (
+                  <EuiColorPaletteDisplay size="xs" palette={layerPalette} />
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
