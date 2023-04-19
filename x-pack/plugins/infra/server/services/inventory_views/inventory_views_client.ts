@@ -34,7 +34,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     private readonly infraSources: IInfraSources
   ) {}
 
-  static STATIC_VIEW_ID = 'static';
+  static STATIC_VIEW_ID = '0';
 
   public async find(query: InventoryViewRequestQuery): Promise<InventoryView[]> {
     this.logger.debug('Trying to load inventory views ...');
@@ -59,7 +59,11 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       )
     );
 
-    return [defaultView, ...views];
+    const inventoryViews = [defaultView, ...views];
+
+    const sortedInventoryViews = this.moveDefaultViewOnTop(inventoryViews);
+
+    return sortedInventoryViews;
   }
 
   public async get(
@@ -154,6 +158,17 @@ export class InventoryViewsClient implements IInventoryViewsClient {
         isStatic: false,
       },
     };
+  }
+
+  private moveDefaultViewOnTop(views: InventoryView[]) {
+    const defaultViewPosition = views.findIndex((view) => view.attributes.isDefault);
+
+    if (defaultViewPosition !== -1) {
+      const element = views.splice(defaultViewPosition, 1)[0];
+      views.unshift(element);
+    }
+
+    return views;
   }
 
   /**
