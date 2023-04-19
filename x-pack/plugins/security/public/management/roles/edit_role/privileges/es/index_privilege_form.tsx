@@ -92,7 +92,9 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <Fragment>
         <EuiSpacer size="m" />
         <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
-          <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel color="subdued">{this.getPrivilegeForm()}</EuiPanel>
+          </EuiFlexItem>
           {!this.props.isRoleReadOnly && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -120,7 +122,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
 
   private getPrivilegeForm = () => {
     return (
-      <EuiPanel color="subdued">
+      <>
         <EuiFlexGroup>
           {this.props.indexType === 'remote_indices' ? (
             <EuiFlexItem>
@@ -218,12 +220,9 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer />
-
         {this.getFieldLevelControls()}
-
         {this.getGrantedDocumentsControl()}
-      </EuiPanel>
+      </>
     );
   };
 
@@ -248,17 +247,20 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getFieldLevelControls = () => {
-    const { allowFieldLevelSecurity, allowDocumentLevelSecurity, indexPrivilege, isRoleReadOnly } =
-      this.props;
+    const { allowFieldLevelSecurity, indexPrivilege, isRoleReadOnly } = this.props;
+    const { grant, except } = this.getFieldSecurity(indexPrivilege);
 
     if (!allowFieldLevelSecurity) {
       return null;
     }
 
-    const { grant, except } = this.getFieldSecurity(indexPrivilege);
+    if (isRoleReadOnly && !this.state.fieldSecurityExpanded) {
+      return null;
+    }
 
     return (
       <>
+        <EuiSpacer />
         <EuiFlexGroup direction="column">
           {!isRoleReadOnly && (
             <EuiFlexItem>
@@ -349,7 +351,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        {allowDocumentLevelSecurity && <EuiSpacer />}
       </>
     );
   };
@@ -361,64 +362,71 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       return null;
     }
 
+    if (this.props.isRoleReadOnly && !this.state.queryExpanded) {
+      return null;
+    }
+
     return (
-      <EuiFlexGroup direction="column">
-        {!this.props.isRoleReadOnly && (
-          <EuiFlexItem>
-            <EuiSwitch
-              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
-                  defaultMessage="Grant read privileges to specific documents"
-                />
-              }
-              compressed={true}
-              checked={this.state.queryExpanded}
-              onChange={this.toggleDocumentQuery}
-              disabled={isRoleReadOnly}
-            />
-          </EuiFlexItem>
-        )}
-        {this.state.queryExpanded && (
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
-                  defaultMessage="Granted documents query"
-                />
-              }
-              fullWidth
-              data-test-subj={`queryInput${this.props.formIndex}`}
-            >
-              <CodeEditorField
-                languageId="xjson"
-                width="100%"
-                fullWidth
-                height={this.state.documentQueryEditorHeight}
-                aria-label={i18n.translate(
-                  'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
-                  {
-                    defaultMessage: 'Granted documents query editor',
-                  }
-                )}
-                value={indexPrivilege.query ?? ''}
-                onChange={this.onQueryChange}
-                options={{
-                  readOnly: this.props.isRoleReadOnly,
-                  minimap: {
-                    enabled: false,
-                  },
-                  // Prevent an empty form from showing an error
-                  renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
-                }}
-                editorDidMount={this.editorDidMount}
+      <>
+        <EuiSpacer />
+        <EuiFlexGroup direction="column">
+          {!this.props.isRoleReadOnly && (
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                    defaultMessage="Grant read privileges to specific documents"
+                  />
+                }
+                compressed={true}
+                checked={this.state.queryExpanded}
+                onChange={this.toggleDocumentQuery}
+                disabled={isRoleReadOnly}
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {this.state.queryExpanded && (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
+                    defaultMessage="Granted documents query"
+                  />
+                }
+                fullWidth
+                data-test-subj={`queryInput${this.props.formIndex}`}
+              >
+                <CodeEditorField
+                  languageId="xjson"
+                  width="100%"
+                  fullWidth
+                  height={this.state.documentQueryEditorHeight}
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
+                    {
+                      defaultMessage: 'Granted documents query editor',
+                    }
+                  )}
+                  value={indexPrivilege.query ?? ''}
+                  onChange={this.onQueryChange}
+                  options={{
+                    readOnly: this.props.isRoleReadOnly,
+                    minimap: {
+                      enabled: false,
+                    },
+                    // Prevent an empty form from showing an error
+                    renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
+                  }}
+                  editorDidMount={this.editorDidMount}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </>
     );
   };
 

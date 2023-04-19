@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,7 +52,14 @@ export class IndexPrivileges extends Component<Props, State> {
     const indices = this.props.role.elasticsearch[this.props.indexType] ?? [];
 
     const { indexPatterns = [], license, availableIndexPrivileges, indicesAPIClient } = this.props;
-    const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } = license.getFeatures();
+    const {
+      allowRoleDocumentLevelSecurity,
+      allowRoleFieldLevelSecurity,
+      allowRoleRemoteIndexPrivileges,
+    } = license.getFeatures();
+
+    const remoteIndexPrivilegesDisabled =
+      this.props.indexType === 'remote_indices' && !allowRoleRemoteIndexPrivileges;
 
     const props = {
       indexType: this.props.indexType,
@@ -63,7 +70,8 @@ export class IndexPrivileges extends Component<Props, State> {
       // doesn't permit FLS/DLS).
       allowDocumentLevelSecurity: allowRoleDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowRoleFieldLevelSecurity || !isRoleEnabled(this.props.role),
-      isRoleReadOnly: !this.props.editable || isRoleReadOnly(this.props.role),
+      isRoleReadOnly:
+        !this.props.editable || isRoleReadOnly(this.props.role) || remoteIndexPrivilegesDisabled,
     };
 
     return (
@@ -83,19 +91,40 @@ export class IndexPrivileges extends Component<Props, State> {
         {this.props.editable && (
           <>
             <EuiSpacer size="m" />
-            <EuiButton iconType="plusInCircle" onClick={this.addIndexPrivilege}>
-              {this.props.indexType === 'remote_indices' ? (
-                <FormattedMessage
-                  id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteIndexPrivilegesButtonLabel"
-                  defaultMessage="Add remote index privilege"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-                  defaultMessage="Add index privilege"
-                />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="plusInCircle"
+                  onClick={this.addIndexPrivilege}
+                  disabled={remoteIndexPrivilegesDisabled}
+                >
+                  {this.props.indexType === 'remote_indices' ? (
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteIndexPrivilegesButtonLabel"
+                      defaultMessage="Add remote index privilege"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+                      defaultMessage="Add index privilege"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+              {remoteIndexPrivilegesDisabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesLicenseMissing"
+                        defaultMessage="Your license does not allow configuring remote index privileges"
+                      />
+                    }
+                    position="right"
+                  />
+                </EuiFlexItem>
               )}
-            </EuiButton>
+            </EuiFlexGroup>
           </>
         )}
       </Fragment>
