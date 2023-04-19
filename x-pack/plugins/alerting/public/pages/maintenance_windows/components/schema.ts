@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -72,11 +71,7 @@ export const schema: FormSchema<FormProps> = {
       defaultValue: EndsOptions.NEVER,
       validations: [],
     },
-    until: {
-      label: '',
-      defaultValue: moment().endOf('day').toISOString(),
-      validations: [],
-    },
+    until: {},
     count: {
       label: '',
       type: FIELD_TYPES.TEXT,
