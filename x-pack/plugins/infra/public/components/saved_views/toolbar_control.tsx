@@ -29,7 +29,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     updateView,
     deletedId,
     deleteView,
-    defaultViewId,
     makeDefault,
     sourceIsLoading,
     find,
@@ -233,10 +232,9 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           sourceIsLoading={sourceIsLoading}
           loading={loading}
           views={views}
-          defaultViewId={defaultViewId}
-          makeDefault={makeDefault}
-          deleteView={deleteView}
-          close={closeManageFlyout}
+          onMakeDefaultView={makeDefault}
+          onDeleteView={deleteView}
+          onClose={closeManageFlyout}
           setView={setCurrentView}
         />
       )}
