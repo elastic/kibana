@@ -44,19 +44,19 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   if (
     enabledStream.vars &&
     enabledStream.vars.schedule?.value &&
-    enabledStream.compiled_stream.schedule
+    enabledStream.compiled_stream?.schedule
   ) {
     const schedule = enabledStream.vars.schedule.value.match(/\d+\.?\d*/g)?.[0];
     const updatedSchedule = getNearestSupportedSchedule(schedule);
-    const formattedUpdatedSchedule = `"@every ${updatedSchedule}m"`;
-    enabledStream.vars.schedule.value = `"@every ${updatedSchedule}m"`;
+    const formattedUpdatedSchedule = `@every ${updatedSchedule}m`;
+    enabledStream.vars.schedule.value = `"${formattedUpdatedSchedule}"`;
     enabledStream.compiled_stream.schedule = formattedUpdatedSchedule;
   }
 
   if (
     enabledStream.data_stream.dataset === 'browser' &&
     enabledStream.vars?.['throttling.config'] &&
-    enabledStream.compiled_stream.throttling
+    enabledStream.compiled_stream?.throttling
   ) {
     const throttling = enabledStream.vars['throttling.config'].value;
     if (throttling) {

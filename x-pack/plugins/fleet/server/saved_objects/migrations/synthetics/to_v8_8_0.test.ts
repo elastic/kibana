@@ -68,7 +68,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         `"@every ${validSchedule}m"`
       );
       expect(actual.attributes?.inputs[0]?.streams[0]?.compiled_stream?.schedule).toEqual(
-        `"@every ${validSchedule}m"`
+        `@every ${validSchedule}m`
       );
     });
 
@@ -78,7 +78,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         '"@every 1m"'
       );
       expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream?.schedule).toEqual(
-        `"@every 1m"`
+        `@every 1m`
       );
     });
 
@@ -88,7 +88,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         '"@every 3m"'
       );
       expect(actual.attributes?.inputs[0]?.streams[0]?.compiled_stream?.schedule).toEqual(
-        `"@every 3m"`
+        `@every 3m`
       );
     });
 
@@ -98,7 +98,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         '"@every 10m"'
       );
       expect(actual.attributes?.inputs[1]?.streams[0]?.compiled_stream?.schedule).toEqual(
-        `"@every 10m"`
+        `@every 10m`
       );
     });
 
@@ -108,7 +108,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
         '"@every 15m"'
       );
       expect(actual.attributes?.inputs[2]?.streams[0]?.compiled_stream?.schedule).toEqual(
-        `"@every 15m"`
+        `@every 15m`
       );
     });
   });
