@@ -18,7 +18,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { get } from 'lodash';
-import type { FC } from 'react';
+import type { FC, ReactElement } from 'react';
 import React, { Fragment, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -84,14 +84,17 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
     [indicators, eventId, isDraggable, scopeId]
   );
 
+  const renderModalChildren = useCallback(() => getThreatMatchRows('all'), [getThreatMatchRows]);
+
   return (
     <EuiFlexGroup direction="column" justifyContent="center" alignItems="center" gutterSize="none">
       <EuiFlexItem>{getThreatMatchRows()}</EuiFlexItem>
       {indicators.length > MAX_INDICATOR_VISIBLE && (
         <EuiFlexItem>
-          <ThreatMatchRowModal title={SHOW_ALL_INDICATOR_MATCHES(indicators.length)}>
-            {getThreatMatchRows('all')}
-          </ThreatMatchRowModal>
+          <ThreatMatchRowModal
+            title={SHOW_ALL_INDICATOR_MATCHES(indicators.length)}
+            renderChildren={renderModalChildren}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -100,9 +103,10 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
 
 interface ThreatMatchRowModalProps {
   title: string;
+  renderChildren: () => ReactElement;
 }
 
-const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, children }) => {
+const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildren }) => {
   const [isModalVisible, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   const showModal = () => setShowModal(true);
@@ -114,7 +118,7 @@ const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, children }) 
         <EuiModalHeader data-test-subj="threat-match-row-modal">
           <EuiModalHeaderTitle>{ALL_INDICATOR_MATCHES_MODAL_HEADER}</EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiModalBody>{children}</EuiModalBody>
+        <EuiModalBody>{renderChildren()}</EuiModalBody>
         <EuiModalFooter>
           <EuiButton onClick={closeModal} fill>
             {ALL_INDICATOR_MATCHES_MODAL_CLOSE}
