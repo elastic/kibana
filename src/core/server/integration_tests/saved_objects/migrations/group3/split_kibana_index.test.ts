@@ -219,6 +219,7 @@ describe('split .kibana index into multiple system indices', () => {
             "legacy-url-alias",
             "lens",
             "lens-ui-telemetry",
+            "maintenance-window",
             "map",
             "metrics-explorer-view",
             "ml-job",
