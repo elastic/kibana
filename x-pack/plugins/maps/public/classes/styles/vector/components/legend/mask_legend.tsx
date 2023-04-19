@@ -10,7 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { FIELD_ORIGIN, MASK_OPERATOR } from '../../../../../../common/constants';
 import type { IESAggField } from '../../../../fields/agg';
 import type { IESAggSource } from '../../../../sources/es_agg_source';
-import { getMaskI18nDescription, getMaskI18nValue } from '../../../../layers/vector_layer/mask';
+import { getMaskI18nDescription, getMaskI18nLabel, getMaskI18nValue } from '../../../../layers/vector_layer/mask';
 
 interface Props {
   esAggField: IESAggField;
@@ -55,18 +55,23 @@ export class MaskLegend extends Component<Props, State> {
   }
 
   render() {
-    const maskDescription = getMaskI18nDescription({
+    const isJoin = this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
+    const maskLabel = getMaskI18nLabel({
       bucketsName: this._getBucketsName(),
-      aggLabel: this.state.aggLabel,
-      isJoin: this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN,
+      isJoin,
     });
+    const maskDescription = getMaskI18nDescription({
+      aggLabel: this.state.aggLabel,
+      isJoin,
+    });
+    const maskValue = getMaskI18nValue(
+      this.props.operator,
+      this.props.value
+    );
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          <strong>{`${maskDescription} ${getMaskI18nValue(
-            this.props.operator,
-            this.props.value
-          )}`}</strong>
+          <strong>{`${maskLabel} ${maskDescription} ${maskValue}`}</strong>
         </small>
       </EuiText>
     );

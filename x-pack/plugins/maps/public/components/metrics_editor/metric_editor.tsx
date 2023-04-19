@@ -18,6 +18,7 @@ import { AggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
+import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
 import { MaskExpression } from './mask_expression';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
@@ -234,13 +235,10 @@ export function MetricEditor({
       {labelInput}
 
       <EuiFormRow
-        label={i18n.translate('xpack.maps.metricsEditor.maskLabel', {
-          defaultMessage: 'Mask',
-        })}
+        label={getMaskI18nLabel({ bucketsName, isJoin })}
         display="columnCompressed"
       >
         <MaskExpression
-          bucketsName={bucketsName}
           fields={fields}
           isJoin={isJoin}
           metric={metric}

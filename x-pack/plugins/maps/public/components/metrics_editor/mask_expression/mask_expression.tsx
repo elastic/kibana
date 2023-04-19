@@ -18,7 +18,6 @@ import {
 } from '../../../classes/layers/vector_layer/mask';
 
 interface Props {
-  bucketsName?: string;
   fields: DataViewField[];
   isJoin: boolean;
   metric: AggDescriptor;
@@ -48,7 +47,7 @@ export class MaskExpression extends Component<Props, State> {
 
   _getMaskExpressionValue() {
     return this.props.metric.mask === undefined
-      ? '--'
+      ? '...'
       : getMaskI18nValue(this.props.metric.mask.operator, this.props.metric.mask.value);
   }
 
@@ -80,7 +79,6 @@ export class MaskExpression extends Component<Props, State> {
           <EuiExpression
             color="subdued"
             description={getMaskI18nDescription({
-              bucketsName: this.props.bucketsName,
               aggLabel: this._getAggLabel(),
               isJoin: this.props.isJoin,
             })}

@@ -22,7 +22,11 @@ export const BUCKETS = i18n.translate('xpack.maps.mask.genericBucketsName', {
   defaultMessage: 'buckets',
 });
 
-export const VALUE = i18n.translate('xpack.maps.mask.genericAggLabel', {
+const FEATURES = i18n.translate('xpack.maps.mask.genericFeaturesName', {
+  defaultMessage: 'features',
+});
+
+const VALUE = i18n.translate('xpack.maps.mask.genericAggLabel', {
   defaultMessage: 'value',
 });
 
@@ -42,6 +46,21 @@ export function getMaskI18nValue(operator: MASK_OPERATOR, value: number): string
   return `${getOperatorLabel(operator)} ${value}`;
 }
 
+export function getMaskI18nLabel({
+  bucketsName,
+  isJoin,
+}: {
+  bucketsName?: string;
+  isJoin: boolean;
+}): string {
+  return i18n.translate('xpack.maps.mask.maskLabel', {
+    defaultMessage: 'Hide {hideNoun}',
+    values: {
+      hideNoun: isJoin ? FEATURES : bucketsName ? bucketsName : BUCKETS,
+    },
+  });
+}
+
 export function getMaskI18nDescription({
   aggLabel,
   bucketsName,
@@ -53,13 +72,13 @@ export function getMaskI18nDescription({
 }): string {
   return isJoin
     ? i18n.translate('xpack.maps.mask.maskJoinDescription', {
-        defaultMessage: 'hide features when join metric {aggLabel} is ',
+        defaultMessage: 'when join metric {aggLabel} is ',
         values: {
           aggLabel: aggLabel ? aggLabel : VALUE,
         },
       })
     : i18n.translate('xpack.maps.mask.maskDescription', {
-        defaultMessage: 'hide {bucketsName} when {aggLabel} is ',
+        defaultMessage: 'when {aggLabel} is ',
         values: {
           bucketsName: bucketsName ? bucketsName : BUCKETS,
           aggLabel: aggLabel ? aggLabel : VALUE,
