@@ -124,13 +124,11 @@ export class EditPanelAction implements Action<ActionContext> {
 
     if (app && path) {
       if (this.currentAppId) {
-        const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
-
         const originatingPath = this.getOriginatingPath?.();
 
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
-          valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
+          valueInput: this.getExplicitInput({ embeddable }),
           embeddableId: embeddable.id,
           searchSessionId: embeddable.getInput().searchSessionId,
           originatingPath,
