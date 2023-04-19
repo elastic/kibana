@@ -76,6 +76,7 @@ export function ErrorCountRuleType(props: Props) {
               query: {
                 environment: params.environment,
                 serviceName: params.serviceName,
+                errorGroupingKey: params.errorGroupingKey,
                 interval,
                 start,
                 end,
@@ -90,6 +91,7 @@ export function ErrorCountRuleType(props: Props) {
       params.windowUnit,
       params.environment,
       params.serviceName,
+      params.errorGroupingKey,
     ]
   );
 
