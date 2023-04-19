@@ -164,7 +164,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                       negate: false,
                       alias: null,
                       index: dataView.id!,
-                      key: 'instance',
+                      key: `${item.group.name}_${item.group.value}`,
                       field: item.group.name,
                       params: {
                         query: item.group.value,
