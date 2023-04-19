@@ -5,5 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 export { ExportTypesRegistry } from './export_types_registry';
+export type { ExportTypeRegistryEntry } from './export_types_registry';
+
+export type { ExportTypesPluginSetup, ExportTypesPluginStart } from './export_types/plugin' 

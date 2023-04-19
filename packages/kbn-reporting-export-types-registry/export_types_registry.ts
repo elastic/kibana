@@ -8,37 +8,41 @@
 
 import { Subscription } from 'rxjs';
 import type { Job } from '@kbn/reporting-plugin/public/lib/job';
+import { ExportTypeEntry } from './export_definitions';
 
-// these types go into the registry and need to include the following properties
-export interface ExportType {
+/** 
+ * The entries after being registered should have these properties
+ * @public 
+*/
+export interface ExportTypeRegistryEntry {
   // some sort of locator param
   // this is used in report_listing but might not be needed for the export type registry
+  id: string;
   ilmLocator?: string; // urlService.locators.get(‘ILM_LOCATOR_ID’); // urlService is a prop
   // / prop in report_listing
   licenseSubscription: Subscription;
   // can set the job from the await apiClient.list(await this.apiClient.total())
-  jobs: Job[];
+  job: Job;
+  /** this can be CSVExportType or PNG or PDF export types */
+  exportTypeCategory: ExportTypeEntry;
 }
 
-export interface ExportTypeProvider {
-  readonly id: string;
-  getExportTypeItems: () => ExportType[];
-}
+// export interface ExportTypeProvider {
+//   readonly id: string;
+//   getExportTypeItems: () => ExportTypeEntryRegistry[];
+// }
 
-// this is created by the reporting plugin from the setup and registerExportType()
 export class ExportTypesRegistry {
-  // what data structure should the registry be share_menu_registry is a Map
-  private exportTypeRegistry = new Map<string, ExportTypeProvider>();
+  public exportTypeRegistry = new Map<string, ExportTypeRegistryEntry>();
 
-  public register(et: ExportType) {
-    // validation of export type
+  public register(et: ExportTypeEntry) {
     this.validateExportType(et);
   }
-  public getExportType(et: ExportType) {
+  public getExportType(et: ExportTypeEntry) {
     this.validateExportType(et);
   }
 
-  validateExportType(et: ExportType) {}
+  validateExportType(et: ExportTypeEntry) {}
 
   public getExportTypeRegistry() {
     return this.exportTypeRegistry;

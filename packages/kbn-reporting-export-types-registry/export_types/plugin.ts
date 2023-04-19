@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { ExportType, ExportTypesRegistry } from '../export_types_registry';
+import type { ExportTypesRegistry } from '../export_types_registry';
 import { CSVExportType, ExportTypeEntry } from '../export_definitions';
 
 export interface ExportTypesPluginSetup {
@@ -20,9 +20,9 @@ export interface ExportTypesPluginSetup {
 export interface ExportTypesPluginStart {
   /** Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle */
 }
-
+/** This plugin creates the export types in export type definitions */
 export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportTypesPluginStart> {
-  private exportType?: ExportType;
+  private exportType?: ExportTypeEntry;
   // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
 
   public setup(core: CoreSetup<ExportTypesPluginSetup>, plugins: object) {
@@ -30,9 +30,6 @@ export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportT
       register: (type: ExportTypeEntry) => {
         // does the entry need to be independent or is it just one of the three types
         // is this where we could see if it's serverless and needs to be disabled etc or is that probably in the reporting plugin itself
-        if (this.exportType.has(id)) {
-          throw new Error(``);
-        }
         return {} as CSVExportType;
       },
     };
@@ -42,7 +39,4 @@ export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportT
     return this.exportTypeStart;
   }
 
-  public disablePngType(et: ExportTypeEntry) {}
-
-  public disablePdfType(et: ExportTypeEntry) {}
 }
