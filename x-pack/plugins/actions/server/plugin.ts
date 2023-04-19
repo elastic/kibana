@@ -116,13 +116,16 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
   isPreconfiguredConnector(connectorId: string): boolean;
+
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
@@ -197,7 +200,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private inMemoryMetrics: InMemoryMetrics;
-  private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -214,8 +216,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
-
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -295,17 +295,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core, this.kibanaIndex)
+      this.createRouteHandlerContext(core)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      const kibanaIndex = this.kibanaIndex;
 
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        kibanaIndex,
         this.preconfiguredActions,
         eventLogIndex
       );
@@ -381,7 +379,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndex,
       isESOCanEncrypt,
       preconfiguredActions,
       instantiateAuthorization,
@@ -413,7 +410,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: kibanaIndex!,
+        kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         preconfiguredActions,
         request,
@@ -588,8 +585,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>,
-    defaultKibanaIndex: string
+    core: CoreSetup<ActionsPluginsStart>
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -622,7 +618,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
-            defaultKibanaIndex,
+            kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             preconfiguredActions,
             request,
