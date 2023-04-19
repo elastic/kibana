@@ -6585,7 +6585,7 @@
             "signature": [
               "((props: ",
               "VisualizationConfigProps",
-              "<T>) => boolean) | undefined"
+              "<T>) => Record<\"data\" | \"appearance\", boolean>) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6619,8 +6619,8 @@
             "description": [],
             "signature": [
               "((domElement: Element, props: ",
-              "VisualizationLayerSettingsProps",
-              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+              "VisualizationConfigProps",
+              "<T> & { setState(newState: T | ((currState: T) => T)): void; panelRef: React.MutableRefObject<HTMLDivElement | null>; } & { section: \"data\" | \"appearance\"; }) => void | ((cleanupElement: Element) => void)) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6649,8 +6649,8 @@
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "VisualizationLayerSettingsProps",
-                  "<T>"
+                  "VisualizationConfigProps",
+                  "<T> & { setState(newState: T | ((currState: T) => T)): void; panelRef: React.MutableRefObject<HTMLDivElement | null>; } & { section: \"data\" | \"appearance\"; }"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -7588,6 +7588,40 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.getVisualizationInfo.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getReportingLayout",
+            "type": "Function",
+            "tags": [],
+            "label": "getReportingLayout",
+            "description": [
+              "\nA visualization can return custom dimensions for the reporting tool"
+            ],
+            "signature": [
+              "((state: T) => { height: number; width: number; }) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getReportingLayout.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",

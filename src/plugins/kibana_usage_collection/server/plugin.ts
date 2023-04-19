@@ -143,8 +143,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndicesForTypes(types));
     registerKibanaUsageCollector(usageCollection, getIndexForTypes);
-    const getAllIndices = () =>
-      coreSetup.getStartServices().then(([coreStart]) => coreStart.savedObjects.getAllIndices());
 
     const coreStartPromise = coreSetup.getStartServices().then(([coreStart]) => coreStart);
     const getAllSavedObjectTypes = async () => {
@@ -154,7 +152,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getAllTypes()
         .map(({ name }) => name);
     };
-    registerSavedObjectsCountUsageCollector(usageCollection, getAllIndices, getAllSavedObjectTypes);
+    registerSavedObjectsCountUsageCollector(usageCollection, getAllSavedObjectTypes);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

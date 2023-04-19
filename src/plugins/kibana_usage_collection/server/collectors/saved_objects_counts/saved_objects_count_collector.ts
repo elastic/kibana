@@ -23,7 +23,6 @@ interface SavedObjectsCountUsage {
 
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getAllIndices: () => Promise<string[]>,
   getAllSavedObjectTypes: () => Promise<string[]>
 ) {
   usageCollection.registerCollector(
@@ -68,15 +67,14 @@ export function registerSavedObjectsCountUsageCollector(
           },
         },
       },
-      async fetch({ esClient }) {
-        const allIndices = await getAllIndices();
+      async fetch({ soClient }) {
         const allRegisteredSOTypes = await getAllSavedObjectTypes();
         const {
           total,
           per_type: buckets,
           non_expected_types: nonRegisteredTypes,
           others,
-        } = await getSavedObjectsCounts(esClient, allIndices, allRegisteredSOTypes, false);
+        } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, false);
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => ({ type, count })),

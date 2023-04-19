@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
@@ -27,9 +27,8 @@ describe('kibana_usage', () => {
   });
 
   const kibanaIndex = '.kibana-tests';
-  const getIndexForTypes = (index: string) => (types: string[]) => Promise.resolve([index]);
 
-  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, getIndexForTypes(kibanaIndex)));
+  beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
 
   afterEach(() => getSavedObjectsCountsMock.mockReset());
@@ -53,7 +52,8 @@ describe('kibana_usage', () => {
 });
 
 describe('getKibanaSavedObjectCounts', () => {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const fetchContextMock = createCollectorFetchContextMock();
+  const soClient = fetchContextMock.soClient;
 
   test('Get all the saved objects equal to 0 because no results were found', async () => {
     getSavedObjectsCountsMock.mockResolvedValueOnce({
@@ -62,7 +62,7 @@ describe('getKibanaSavedObjectCounts', () => {
       non_expected_types: [],
       others: 0,
     });
-    const results = await getKibanaSavedObjectCounts(esClient, ['.kibana']);
+    const results = await getKibanaSavedObjectCounts(soClient);
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -84,7 +84,7 @@ describe('getKibanaSavedObjectCounts', () => {
       others: 0,
     });
 
-    const results = await getKibanaSavedObjectCounts(esClient, ['.kibana']);
+    const results = await getKibanaSavedObjectCounts(soClient);
     expect(results).toStrictEqual({
       dashboard: { total: 1 },
       visualization: { total: 0 },
@@ -94,8 +94,7 @@ describe('getKibanaSavedObjectCounts', () => {
     });
 
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
-      esClient,
-      ['.kibana'],
+      soClient,
       ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'],
       true
     );
