@@ -8,7 +8,10 @@
     ]
   },
   "kbn_references": [
-
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-base-server-internal",
+    "@kbn/logging",
   ],
   "include": [
     "**/*.ts",
