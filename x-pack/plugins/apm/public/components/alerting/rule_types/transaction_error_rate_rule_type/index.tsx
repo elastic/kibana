@@ -80,6 +80,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 environment: params.environment,
                 serviceName: params.serviceName,
                 transactionType: params.transactionType,
+                transactionName: params.transactionName,
                 interval,
                 start,
                 end,
@@ -91,6 +92,7 @@ export function TransactionErrorRateRuleType(props: Props) {
     },
     [
       params.transactionType,
+      params.transactionName,
       params.environment,
       params.serviceName,
       params.windowSize,
