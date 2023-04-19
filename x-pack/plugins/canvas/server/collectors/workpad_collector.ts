@@ -378,7 +378,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
 }
 
 const workpadCollector: TelemetryCollector = async function (getIndexForType, esClient) {
-  const index = await getIndexForType('canvas-workpad');
+  const index = await getIndexForType(CANVAS_TYPE);
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
