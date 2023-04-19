@@ -12,7 +12,11 @@ import {
   CreateTextExpansionModelApiLogicActions,
   CreateTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-
+import {
+  FetchTextExpansionModelApiLogic,
+  FetchTextExpansionModelApiLogicActions,
+  FetchTextExpansionModelResponse,
+} from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
 // export enum MlModelDeploymentState {
 //   NotDeployed = '',
@@ -55,33 +59,79 @@ import {
 interface TextExpansionCalloutActions {
   createTextExpansionModel: CreateTextExpansionModelApiLogicActions['makeRequest'];
   createTextExpansionModelSuccess: CreateTextExpansionModelApiLogicActions['apiSuccess'];
+  fetchTextExpansionModel: FetchTextExpansionModelApiLogicActions['makeRequest'];
+  fetchTextExpansionModelSuccess: FetchTextExpansionModelApiLogicActions['apiSuccess'];
+  textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
+  startPollingTextExpansionModel: () => void;
+  stopPollingTextExpansionModel: () => void;
 }
 
 export interface TextExpansionCalloutValues {
   createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
   createTextExpansionModelStatus: Status;
   isCreateButtonDisabled: boolean;
+  isModelDownloadInProgress: boolean;
+  isModelDownloaded: boolean;
+  textExpansionModel: FetchTextExpansionModelResponse | undefined;
 }
 
 export const TextExpansionCalloutLogic = kea<
   MakeLogicType<TextExpansionCalloutValues, TextExpansionCalloutActions>
 >({
-  actions: {},
+  actions: {
+    startPollingTextExpansionModel: true,
+    stopPollingTextExpansionModel: true,
+  },
   connect: {
     actions: [
       CreateTextExpansionModelApiLogic,
       ['makeRequest as createTextExpansionModel', 'apiSuccess as createTextExpansionModelSuccess'],
+      FetchTextExpansionModelApiLogic,
+      ['makeRequest as fetchTextExpansionModel', 'apiSuccess as fetchTextExpansionModelSuccess'],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
       ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
+      FetchTextExpansionModelApiLogic,
+      ['data as textExpansionModel'],
     ],
   },
+  events: ({ actions }) => ({
+    afterMount: () => {
+      actions.fetchTextExpansionModel(undefined);
+    },
+  }),
+  listeners: ({ actions }) => ({
+    fetchTextExpansionModelSuccess: (data) => {
+      console.log('fetchTextExpansionModelSuccess listener', data);
+      if (data?.deploymentState === 'downloading') {
+        console.log('START polling');
+        actions.startPollingTextExpansionModel();
+      } else if (data?.deploymentState === 'downloaded') {
+        console.log('END polling');
+        actions.stopPollingTextExpansionModel();
+      }
+    },
+  }),
   path: ['enterprise_search', 'content', 'text_expansion_callout_logic'],
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
       () => [selectors.createTextExpansionModelStatus],
       (status: Status) => status !== Status.IDLE,
+    ],
+    isModelDownloadInProgress: [
+      () => [selectors.textExpansionModel],
+      (data: FetchTextExpansionModelResponse) => {
+        console.log('isModelDownloadInProgress', data);
+        return data?.deploymentState === 'downloading';
+      }
+    ],
+    isModelDownloaded: [
+      () => [selectors.textExpansionModel],
+      (data: FetchTextExpansionModelResponse) => {
+        console.log('isModelDownloaded', data);
+        return data?.deploymentState === 'downloaded';
+      }
     ],
   }),
 });
