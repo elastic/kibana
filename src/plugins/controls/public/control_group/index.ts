@@ -19,6 +19,7 @@ export { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from './actions';
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   controlGroupInputBuilder,
 } from './control_group_input_builder';
 
