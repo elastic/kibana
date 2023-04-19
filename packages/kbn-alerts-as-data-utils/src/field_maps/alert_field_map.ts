@@ -16,6 +16,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
+  ALERT_CONTEXT,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -79,6 +80,11 @@ export const alertFieldMap = {
   },
   [ALERT_REASON]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_CONTEXT]: {
+    type: 'object',
     array: false,
     required: false,
   },
