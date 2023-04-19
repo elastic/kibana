@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -34,7 +34,7 @@ import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { AuthorizationContext, PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
@@ -79,22 +79,41 @@ export const TransformManagement: FC = () => {
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
-    return unauthorizedCnt > 0 ? (
+
+    if (!unauthorizedCnt) return null;
+
+    return (
       <>
         <EuiCallOut
           color="warning"
-          title={i18n.translate('xpack.transform.transformList.unauthorizedTransformsCallout', {
-            defaultMessage:
-              '{unauthorizedCnt, plural, one {A transform was installed but requires more permissions to run.} other {# transforms were installed but require more permissions to run.}} Contact your administrator to request the required privileges.',
-            values: { unauthorizedCnt },
-          })}
+          title={
+            canStartStopTransform
+              ? i18n.translate(
+                  'xpack.transform.transformList.unauthorizedTransformsCallout.reauthorizeMsg',
+                  {
+                    defaultMessage:
+                      '{unauthorizedCnt, plural, one {A transform was installed but requires more permissions to run.} other {# transforms were installed but require more permissions to run.}} Reauthorize to start transforms.',
+                    values: { unauthorizedCnt },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.transform.transformList.unauthorizedTransformsCallout.contactAdminMsg',
+                  {
+                    defaultMessage:
+                      '{unauthorizedCnt, plural, one {A transform was installed but requires more permissions to run.} other {# transforms were installed but require more permissions to run.}} Contact your administrator to request the required permissions.',
+                    values: { unauthorizedCnt },
+                  }
+                )
+          }
         />
         <EuiSpacer size="s" />
       </>
-    ) : null;
-  }, [transforms]);
+    );
+  }, [transforms, canStartStopTransform]);
 
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);

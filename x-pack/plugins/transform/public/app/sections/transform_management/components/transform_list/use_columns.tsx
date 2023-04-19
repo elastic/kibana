@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,6 +24,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { AuthorizationContext } from '../../../../lib/authorization';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
@@ -45,6 +46,8 @@ export const useColumns = (
   transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
+  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
     transformNodes,
@@ -156,13 +159,23 @@ export const useColumns = (
         const needsReauthTooltipIcon = needsReauth ? (
           <>
             <EuiToolTip
-              content={i18n.translate(
-                'xpack.transform.transformList.needsReauthorizationBadgeTooltip',
-                {
-                  defaultMessage:
-                    'This transform was created with insufficient permissions. Contact your administrator to request the required privileges.',
-                }
-              )}
+              content={
+                canStartStopTransform
+                  ? i18n.translate(
+                      'xpack.transform.transformList.needsReauthorizationBadge.reauthorizeTooltip',
+                      {
+                        defaultMessage:
+                          'This transform was created with insufficient permissions. Reauthorize to start transforms.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.transform.transformList.needsReauthorizationBadge.contactAdminTooltip',
+                      {
+                        defaultMessage:
+                          'This transform was created with insufficient permissions. Contact your administrator to request the required permissions.',
+                      }
+                    )
+              }
             >
               <EuiIcon size="s" color="warning" type={'alert'} />
             </EuiToolTip>
