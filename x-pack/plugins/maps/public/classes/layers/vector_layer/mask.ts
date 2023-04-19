@@ -80,7 +80,6 @@ export function getMaskI18nDescription({
     : i18n.translate('xpack.maps.mask.maskDescription', {
         defaultMessage: 'when {aggLabel} is ',
         values: {
-          bucketsName: bucketsName ? bucketsName : BUCKETS,
           aggLabel: aggLabel ? aggLabel : VALUE,
         },
       });
