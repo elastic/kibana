@@ -20,8 +20,8 @@ import {
   SearchApplicationConnectTabs,
 } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
-import { NotFound } from '../../not_found';
 
+import { EngineError } from '../engine_error';
 import { EngineViewLogic } from '../engine_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
@@ -61,7 +61,22 @@ export const EngineConnect: React.FC = () => {
       })
     );
   };
-  if (!ConnectTabs.includes(connectTabId)) return <NotFound />;
+  if (!ConnectTabs.includes(connectTabId)) {
+    return (
+      <EnterpriseSearchEnginesPageTemplate
+        pageChrome={[engineName, pageTitle]}
+        pageViewTelemetry={EngineViewTabs.CONNECT}
+        isLoading={isLoadingEngine}
+        pageHeader={{
+          pageTitle,
+          rightSideItems: [],
+        }}
+        engineName={engineName}
+      >
+        <EngineError notFound />
+      </EnterpriseSearchEnginesPageTemplate>
+    );
+  }
 
   return (
     <EnterpriseSearchEnginesPageTemplate

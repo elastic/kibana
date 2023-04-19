@@ -24,7 +24,6 @@ import {
 
 import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
-import { NotFound } from '../not_found';
 
 import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineError } from './engine_error';
@@ -83,7 +82,18 @@ export const EngineView: React.FC = () => {
           to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.API}`}
         />
         <Route>
-          <NotFound />
+          <EnterpriseSearchEnginesPageTemplate
+            isEmptyState
+            pageChrome={[engineName]}
+            pageViewTelemetry={tabId}
+            pageHeader={{
+              pageTitle: engineName,
+              rightSideItems: [],
+            }}
+            engineName={engineName}
+          >
+            <EngineError notFound />
+          </EnterpriseSearchEnginesPageTemplate>
         </Route>
       </Switch>
     </>
