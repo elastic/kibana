@@ -9,6 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
 import {
   FieldMapping,
   formatPipelineName,
@@ -82,6 +84,10 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
+};
+
+const isNotTextExpansionModel = (model: MLInferencePipelineOption): boolean => {
+  return model.modelType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -537,7 +543,9 @@ export const MLInferenceLogic = kea<
               sourceField,
             };
           })
-          .filter((p): p is MLInferencePipelineOption => p !== undefined);
+          .filter(
+            (p): p is MLInferencePipelineOption => p !== undefined && isNotTextExpansionModel(p)
+          );
 
         return existingPipelines;
       },

@@ -17,6 +17,7 @@ import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
 } from '@kbn/fleet-plugin/common/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -68,6 +69,7 @@ describe('ingest_integration tests ', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const generator = new EndpointDocGenerator();
+  const cloudService = cloudMock.createSetup();
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -92,13 +94,17 @@ describe('ingest_integration tests ', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const createNewEndpointPolicyInput = (manifest: ManifestSchema, license = 'platinum') => ({
+    const createNewEndpointPolicyInput = (
+      manifest: ManifestSchema,
+      license = 'platinum',
+      cloud = cloudService.isCloudEnabled
+    ) => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory(license)) },
+        policy: { value: disableProtections(policyFactory(license, cloud)) },
         artifact_manifest: { value: manifest },
       },
     });
@@ -111,7 +117,8 @@ describe('ingest_integration tests ', () => {
         requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
-        exceptionListClient
+        exceptionListClient,
+        cloudService
       );
 
       return callback(
