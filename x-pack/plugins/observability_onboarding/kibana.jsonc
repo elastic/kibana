@@ -6,7 +6,7 @@
     "id": "observabilityOnboarding",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability"],
+    "configPath": ["xpack", "observability_onboarding"],
     "requiredPlugins": [
       "data",
       "observability",

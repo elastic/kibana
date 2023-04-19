@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { ObservabilityOnboardingPlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>
@@ -18,3 +22,19 @@ export type {
   ObservabilityOnboardingServerRouteRepository,
 } from './routes';
 export type { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
+
+const configSchema = schema.object({
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+});
+
+// plugin config
+export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: configSchema,
+};
+
+export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;

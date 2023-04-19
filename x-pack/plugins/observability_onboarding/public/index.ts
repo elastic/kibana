@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import {
   ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
@@ -15,7 +15,7 @@ import {
 export const plugin: PluginInitializer<
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart
-> = () => new ObservabilityOnboardingPlugin();
+> = (ctx: PluginInitializerContext) => new ObservabilityOnboardingPlugin(ctx);
 
 export type {
   ObservabilityOnboardingPluginSetup,
