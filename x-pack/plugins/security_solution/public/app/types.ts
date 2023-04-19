@@ -18,6 +18,7 @@ import type {
 import type { RouteProps } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TableState } from '@kbn/securitysolution-data-table';
 import type { ExploreReducer, ExploreState } from '../explore';
 import type { StartServices } from '../types';
 
@@ -34,7 +35,6 @@ export interface RenderAppProps extends AppMountParameters {
 import type { State, SubPluginsInitReducer } from '../common/store';
 import type { Immutable } from '../../common/endpoint/types';
 import type { AppAction } from '../common/store/actions';
-import type { TableState } from '../common/store/data_table/types';
 import type { GroupModel } from '../common/store/grouping';
 
 export { SecurityPageName } from '../../common/constants';
