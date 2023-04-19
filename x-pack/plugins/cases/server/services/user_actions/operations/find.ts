@@ -28,6 +28,7 @@ import {
 import type { ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
+import type { UserActionPersistedAttributes } from '../../../common/types/user_actions/attributes';
 
 interface FindOptions extends UserActionFindRequest {
   caseId: string;
@@ -51,17 +52,15 @@ export class UserActionFinder {
       const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
 
       const userActions =
-        await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
-          {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            page: page ?? DEFAULT_PAGE,
-            perPage: perPage ?? DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            sortOrder: sortOrder ?? 'asc',
-            filter: finalFilter,
-          }
-        );
+        await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          page: page ?? DEFAULT_PAGE,
+          perPage: perPage ?? DEFAULT_PER_PAGE,
+          sortField: 'created_at',
+          sortOrder: sortOrder ?? 'asc',
+          filter: finalFilter,
+        });
 
       return transformFindResponseToExternalModel(
         userActions,

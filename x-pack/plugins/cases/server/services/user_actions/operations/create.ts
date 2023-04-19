@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
+import type { UnsafeUserActionPersistedAttributes } from '../../../common/types/user_actions/common';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import type { CaseSavedObject } from '../../../common/types';
 import { arraysDifference } from '../../../client/utils';
@@ -28,7 +29,6 @@ import type {
 import { Actions, ActionTypes } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
-  Attributes,
   BuilderParameters,
   CommonArguments,
   CreateUserAction,
@@ -335,7 +335,9 @@ export class UserActionPersister {
   private async bulkCreate({
     actions,
     refresh,
-  }: PostCaseUserActionArgs): Promise<SavedObjectsBulkResponse<Attributes> | undefined> {
+  }: PostCaseUserActionArgs): Promise<
+    SavedObjectsBulkResponse<UnsafeUserActionPersistedAttributes> | undefined
+  > {
     if (isEmpty(actions)) {
       return;
     }
@@ -343,7 +345,7 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      return await this.context.unsecuredSavedObjectsClient.bulkCreate(
+      return await this.context.unsecuredSavedObjectsClient.bulkCreate<UnsafeUserActionPersistedAttributes>(
         actions.map((action) => ({
           type: CASE_USER_ACTION_SAVED_OBJECT,
           ...action.parameters,
