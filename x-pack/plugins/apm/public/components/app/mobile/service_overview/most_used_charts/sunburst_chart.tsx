@@ -58,7 +58,10 @@ export function SunburstChart({
     <EuiFlexItem
       grow={true}
       key={chartKey}
-      style={{ height: '200px', width: chartWidth }}
+      style={{
+        height: '200px',
+        width: chartWidth,
+      }}
     >
       <EuiTitle size="xs">
         <h2 style={{ fontSize: '0.8571rem' }}>{label}</h2>
