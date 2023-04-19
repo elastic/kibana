@@ -13,39 +13,6 @@ import { migrations } from './migrations';
 export const exceptionsArtifactSavedObjectType = ArtifactConstants.SAVED_OBJECT_TYPE;
 export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
 
-export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
-  dynamic: false,
-  properties: {
-    identifier: {
-      type: 'keyword',
-    },
-    compressionAlgorithm: {
-      type: 'keyword',
-    },
-    encryptionAlgorithm: {
-      type: 'keyword',
-    },
-    encodedSha256: {
-      type: 'keyword',
-    },
-    encodedSize: {
-      type: 'long',
-    },
-    decodedSha256: {
-      type: 'keyword',
-    },
-    decodedSize: {
-      type: 'long',
-    },
-    created: {
-      type: 'date',
-    },
-    body: {
-      type: 'binary',
-    },
-  },
-};
-
 export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
@@ -70,13 +37,6 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
       },
     },
   },
-};
-
-export const exceptionsArtifactType: SavedObjectsType = {
-  name: exceptionsArtifactSavedObjectType,
-  hidden: false,
-  namespaceType: 'agnostic',
-  mappings: exceptionsArtifactSavedObjectMappings,
 };
 
 export const manifestType: SavedObjectsType = {

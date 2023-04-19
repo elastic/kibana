@@ -13,7 +13,6 @@ import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule
 import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import {
-  exceptionsArtifactType,
   manifestType,
 } from './endpoint/lib/artifacts/saved_object_mappings';
 
@@ -23,7 +22,6 @@ const types = [
   legacyRuleActionsType,
   prebuiltRuleAssetType,
   timelineType,
-  exceptionsArtifactType,
   manifestType,
   signalsMigrationType,
 ];
