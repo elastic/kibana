@@ -2242,6 +2242,7 @@ describe('xy_visualization', () => {
         expect(yConfigs?.accessors[1].columnId).toEqual('b');
         expect(yConfigs?.accessors[1].color).toEqual('green');
 
+        // This call restores the initial state of the paletteGetter
         paletteGetter.mockRestore();
       });
     });

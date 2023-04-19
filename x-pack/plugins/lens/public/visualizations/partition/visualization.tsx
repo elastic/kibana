@@ -675,6 +675,9 @@ export const getPieVisualization = ({
           )
         );
       } else if (!layer.primaryGroups?.length) {
+        // This is a logic integrated in the renderer, here simulated
+        // In the particular case of no color assigned (as no sliceBy dimension defined)
+        // the color is generated on the fly from the default palette
         palette.push(
           ...paletteService
             .get(state.palette?.name || 'default')

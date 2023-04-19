@@ -235,23 +235,7 @@ export const getGaugeVisualization = ({
   getSuggestions,
 
   getConfiguration({ state, frame }) {
-    // const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
-
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
-    // const { metricAccessor } = state ?? {};
-
-    // const accessors = getAccessorsFromState(state);
-
-    // let palette;
-    // if (!(row == null || metricAccessor == null || state?.palette == null || !hasColoring)) {
-    //   const currentMinMax = {
-    //     min: getMinValue(row, accessors),
-    //     max: getMaxValue(row, accessors),
-    //   };
-
-    //   const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
-    //   palette = displayStops.map(({ color }) => color);
-    // }
     const { palette, metricAccessor, accessors } = getConfigurationAccessorsAndPalette(
       state,
       paletteService,
