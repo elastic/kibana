@@ -20,16 +20,11 @@ export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 const throttlingFormatter: Formatter = (fields) => {
   if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
 
-  const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
-    v !== '' && v !== undefined ? `${v}${suffix}` : null;
-
-  return [
-    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
-    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
-    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
-  ]
-    .filter((v) => v !== null)
-    .join('/');
+  return JSON.stringify({
+    download: Number(fields[ConfigKey.DOWNLOAD_SPEED]),
+    upload: Number(fields[ConfigKey.UPLOAD_SPEED]),
+    latency: Number(fields[ConfigKey.LATENCY]),
+  });
 };
 
 export const browserFormatters: BrowserFormatMap = {
