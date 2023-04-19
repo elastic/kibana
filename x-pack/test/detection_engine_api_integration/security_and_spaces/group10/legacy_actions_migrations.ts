@@ -212,8 +212,8 @@ export default ({ getService }: FtrProviderContext) => {
           frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -276,8 +276,8 @@ export default ({ getService }: FtrProviderContext) => {
           frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
         },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -335,8 +335,8 @@ export default ({ getService }: FtrProviderContext) => {
           frequency: { summary: true, throttle: '7d', notifyWhen: 'onThrottleInterval' },
         },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql(undefined);
+      expect(ruleSO?.alert.notifyWhen).to.eql(undefined);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
