@@ -15,6 +15,12 @@ export const ADD_TO_TIMELINE = i18n.translate(
     defaultMessage: 'Add to timeline',
   }
 );
+export const ADD_TO_NEW_TIMELINE = i18n.translate(
+  'xpack.securitySolution.actions.cellValue.addToNewTimeline.displayName',
+  {
+    defaultMessage: 'Investigate in timeline',
+  }
+);
 
 export const SEVERITY = (level: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.severityLevel', {
