@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorStatus, DisplayType } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
@@ -54,7 +54,7 @@ describe('ConnectorConfigurationLogic', () => {
           foo: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'newBar',
             options: [],
             order: 1,
@@ -72,7 +72,7 @@ describe('ConnectorConfigurationLogic', () => {
           foo: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'newBar',
             options: [],
             order: 1,
@@ -86,7 +86,7 @@ describe('ConnectorConfigurationLogic', () => {
           {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             key: 'foo',
             label: 'newBar',
             options: [],
@@ -104,7 +104,7 @@ describe('ConnectorConfigurationLogic', () => {
         foo: {
           default_value: '',
           depends_on: [],
-          display: 'textbox',
+          display: DisplayType.TEXTBOX,
           label: 'thirdBar',
           options: [],
           order: 1,
@@ -120,7 +120,7 @@ describe('ConnectorConfigurationLogic', () => {
           foo: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'thirdBar',
             options: [],
             order: 1,
@@ -134,7 +134,7 @@ describe('ConnectorConfigurationLogic', () => {
           {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             key: 'foo',
             label: 'thirdBar',
             options: [],
@@ -153,7 +153,7 @@ describe('ConnectorConfigurationLogic', () => {
           bar: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'foo',
             options: [],
             order: 1,
@@ -165,7 +165,7 @@ describe('ConnectorConfigurationLogic', () => {
           password: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'thirdBar',
             options: [],
             order: 2,
@@ -179,7 +179,7 @@ describe('ConnectorConfigurationLogic', () => {
           bar: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'foo',
             options: [],
             order: 1,
@@ -191,7 +191,7 @@ describe('ConnectorConfigurationLogic', () => {
           password: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'thirdBar',
             options: [],
             order: 2,
@@ -204,7 +204,7 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
           default_value: '',
           depends_on: [],
-          display: 'textbox',
+          display: DisplayType.TEXTBOX,
           key: 'bar',
           label: 'foo',
           options: [],
@@ -220,7 +220,7 @@ describe('ConnectorConfigurationLogic', () => {
             bar: {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               label: 'foo',
               options: [],
               order: 1,
@@ -232,7 +232,7 @@ describe('ConnectorConfigurationLogic', () => {
             password: {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               label: 'thirdBar',
               options: [],
               order: 2,
@@ -246,7 +246,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'bar',
               label: 'foo',
               options: [],
@@ -259,7 +259,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'password',
               label: 'thirdBar',
               options: [],
@@ -274,7 +274,7 @@ describe('ConnectorConfigurationLogic', () => {
             bar: {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               label: 'foo',
               options: [],
               order: 1,
@@ -286,7 +286,7 @@ describe('ConnectorConfigurationLogic', () => {
             password: {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               label: 'thirdBar',
               options: [],
               order: 2,
@@ -300,7 +300,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'bar',
               label: 'foo',
               options: [],
@@ -313,7 +313,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'password',
               label: 'thirdBar',
               options: [],
@@ -337,7 +337,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'foo',
               label: 'bar',
               options: [],
@@ -373,7 +373,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'foo',
               label: 'bar',
               options: [],
@@ -394,7 +394,7 @@ describe('ConnectorConfigurationLogic', () => {
             {
               default_value: '',
               depends_on: [],
-              display: 'textbox',
+              display: DisplayType.TEXTBOX,
               key: 'foo',
               label: 'bar',
               options: [],
@@ -417,7 +417,7 @@ describe('ConnectorConfigurationLogic', () => {
           foo: {
             default_value: '',
             depends_on: [],
-            display: 'textbox',
+            display: DisplayType.TEXTBOX,
             label: 'bar',
             options: [],
             order: 1,

@@ -13,6 +13,7 @@ import {
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
+  DisplayType,
 } from '../../../../common/types/connectors';
 
 import {
@@ -46,7 +47,7 @@ export const connectorIndex: ConnectorViewIndex = {
       foo: {
         default_value: '',
         depends_on: [],
-        display: 'textbox',
+        display: DisplayType.TEXTBOX,
         key: 'foo',
         label: 'bar',
         options: [],
@@ -160,7 +161,7 @@ export const crawlerIndex: CrawlerViewIndex = {
       foo: {
         default_value: '',
         depends_on: [],
-        display: 'textbox',
+        display: DisplayType.TEXTBOX,
         key: 'foo',
         label: 'bar',
         options: [],
