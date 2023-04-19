@@ -122,6 +122,10 @@ export function ExplainLogRateSpikesDataGeneratorProvider({ getService }: FtrPro
   return new (class DataGenerator {
     public async generateData(dataGenerator: string) {
       switch (dataGenerator) {
+        case 'kibana_sample_data_logs':
+          // will be added via UI
+          break;
+
         case 'farequote_with_spike':
           await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 

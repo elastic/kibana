@@ -40,7 +40,7 @@ export interface TestData {
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
   brushBaselineTargetTimestamp?: number;
-  brushDeviationTargetTimestamp: number;
+  brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
   fieldSelectorSearch: string;
