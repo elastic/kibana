@@ -253,6 +253,8 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.files.allowedMimeTypes
+    xpack.cases.files.maxSize
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
