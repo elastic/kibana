@@ -28,17 +28,17 @@ export type ObservabilityOnboardingPluginSetup = ReturnType<
 export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup>
 {
-  private logger: Logger;
-
+  private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.logger = initContext.logger.get();
   }
 
   public setup(
     core: CoreSetup<ObservabilityOnboardingPluginStartDependencies>,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
+    this.logger = this.initContext.logger.get();
+
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
