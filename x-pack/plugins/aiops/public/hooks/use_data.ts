@@ -45,9 +45,6 @@ export const useData = (
   } = useAiopsAppContext();
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  const [fieldStatsRequest, setFieldStatsRequest] = useState<
-    DocumentStatsSearchStrategyParams | undefined
-  >();
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
@@ -91,11 +88,29 @@ export const useData = (
   ]);
 
   const _timeBuckets = useTimeBuckets();
-
   const timefilter = useTimefilter({
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
+
+  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+    if (timefilterActiveBounds !== undefined) {
+      _timeBuckets.setInterval('auto');
+      _timeBuckets.setBounds(timefilterActiveBounds);
+      _timeBuckets.setBarTarget(barTarget);
+      return {
+        earliest: timefilterActiveBounds.min?.valueOf(),
+        latest: timefilterActiveBounds.max?.valueOf(),
+        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
+        index: selectedDataView.getIndexPattern(),
+        searchQuery,
+        timeFieldName: selectedDataView.timeFieldName,
+        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastRefresh, searchQuery]);
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
@@ -125,25 +140,6 @@ export const useData = (
     lastRefresh
   );
 
-  function updateFieldStatsRequest() {
-    const timefilterActiveBounds = timefilter.getActiveBounds();
-    if (timefilterActiveBounds !== undefined) {
-      _timeBuckets.setInterval('auto');
-      _timeBuckets.setBounds(timefilterActiveBounds);
-      _timeBuckets.setBarTarget(barTarget);
-      setFieldStatsRequest({
-        earliest: timefilterActiveBounds.min?.valueOf(),
-        latest: timefilterActiveBounds.max?.valueOf(),
-        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-        index: selectedDataView.getIndexPattern(),
-        searchQuery,
-        timeFieldName: selectedDataView.timeFieldName,
-        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
-      });
-      setLastRefresh(Date.now());
-    }
-  }
-
   useEffect(() => {
     const timefilterUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
@@ -156,13 +152,13 @@ export const useData = (
           refreshInterval: timefilter.getRefreshInterval(),
         });
       }
-      updateFieldStatsRequest();
+      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.
     const timefilterEnabledSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
       if (fieldStatsRequest === undefined) {
-        updateFieldStatsRequest();
+        setLastRefresh(Date.now());
       }
     });
 
@@ -172,12 +168,6 @@ export const useData = (
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Ensure request is updated when search changes
-  useEffect(() => {
-    updateFieldStatsRequest();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
     documentStats,

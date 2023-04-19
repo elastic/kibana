@@ -25,9 +25,12 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -52,15 +55,19 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 interface SpikeAnalysisTableProps {
   significantTerms: SignificantTerm[];
   groupTableItems: GroupTableItem[];
-  dataViewId?: string;
   loading: boolean;
+  searchQuery: estypes.QueryDslQueryContainer;
+  timeRangeMs: TimeRangeMs;
+  dataView: DataView;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   significantTerms,
   groupTableItems,
-  dataViewId,
   loading,
+  dataView,
+  timeRangeMs,
+  searchQuery,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -76,6 +83,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
+  const dataViewId = dataView.id;
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -102,8 +110,10 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             []
           )}
           loading={loading}
-          dataViewId={dataViewId}
           isExpandedRow
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
         />
       );
     }
