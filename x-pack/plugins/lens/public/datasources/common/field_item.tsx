@@ -8,14 +8,11 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiText, EuiButton, EuiPopoverFooter, EuiIconTip } from '@elastic/eui';
+import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   AddFieldFilterHandler,
   FieldStats,
@@ -23,37 +20,59 @@ import {
   FieldPopoverHeader,
   FieldPopoverVisualize,
   FieldItemButton,
+  type GetCustomFieldType,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DatasourceDataPanelProps } from '../../types';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
+import { getFieldItemActions } from './get_field_item_actions';
 
-export interface FieldItemProps {
-  core: DatasourceDataPanelProps['core'];
-  fieldFormats: FieldFormatsStart;
-  field: IndexPatternField;
-  indexPattern: IndexPattern;
+type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;
+
+function isTextBasedColumnField(field: LensFieldListItem): field is DatatableColumn {
+  return !('type' in field) && Boolean(field?.meta.type);
+}
+
+interface FieldItemBaseProps {
   highlight?: string;
   exists: boolean;
-  query: Query;
-  dateRange: DatasourceDataPanelProps['dateRange'];
-  chartsThemeService: ChartsPluginSetup['theme'];
-  filters: Filter[];
   hideDetails?: boolean;
   itemIndex: number;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
-  editField?: (name: string) => void;
-  removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
-  uiActions: UiActionsStart;
 }
 
-export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
+export interface FieldItemIndexPatternFieldProps extends FieldItemBaseProps {
+  field: IndexPatternField;
+  indexPattern: IndexPattern;
+  query: Query;
+  dateRange: DatasourceDataPanelProps['dateRange'];
+  filters: Filter[];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
+  getCustomFieldType?: never;
+}
+
+export interface FieldItemDatatableColumnProps extends FieldItemBaseProps {
+  field: DatatableColumn;
+  indexPattern?: never;
+  query?: never;
+  dateRange?: never;
+  filters?: never;
+  editField?: never;
+  removeField?: never;
+  getCustomFieldType: GetCustomFieldType<DatatableColumn>;
+}
+
+export type FieldItemProps = FieldItemIndexPatternFieldProps | FieldItemDatatableColumnProps;
+
+export function InnerFieldItem(props: FieldItemProps) {
   const {
     field,
     indexPattern,
@@ -66,9 +85,21 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     hasSuggestionForField,
     editField,
     removeField,
+    getCustomFieldType,
   } = props;
-
-  const dataViewField = useMemo(() => new DataViewField(field), [field]);
+  const dataViewField = useMemo(() => {
+    // DatatableColumn type
+    if (isTextBasedColumnField(field)) {
+      return new DataViewField({
+        name: field.name,
+        type: field.meta?.type ?? 'unknown',
+        searchable: true,
+        aggregatable: true,
+      });
+    }
+    // IndexPatternField type
+    return new DataViewField(field);
+  }, [field]);
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
@@ -83,7 +114,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const addFilterAndClose: AddFieldFilterHandler | undefined = useMemo(
     () =>
-      filterManager
+      filterManager && indexPattern
         ? (clickedField, values, operation) => {
             closePopover();
             const newFilters = generateFilters(
@@ -121,52 +152,45 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     [removeField, closePopover]
   );
 
+  const indexPatternId = indexPattern?.id;
   const value = useMemo(
-    () => ({
-      field,
-      indexPatternId: indexPattern.id,
-      id: field.name,
-      humanData: {
-        label: field.displayName,
-        position: itemIndex + 1,
-      },
-    }),
-    [field, indexPattern.id, itemIndex]
+    () =>
+      isTextBasedColumnField(field)
+        ? {
+            field: field.name,
+            id: field.id,
+            humanData: { label: field.name },
+          }
+        : {
+            field,
+            indexPatternId,
+            id: field.name,
+            humanData: {
+              label: field.displayName,
+              position: itemIndex + 1,
+            },
+          },
+    [field, indexPatternId, itemIndex]
   );
-
-  const dropOntoWorkspaceAndClose = useCallback(() => {
-    closePopover();
-    dropOntoWorkspace(value);
-  }, [dropOntoWorkspace, closePopover, value]);
-
-  const onDragStart = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensInfoIcon = (
-    <EuiIconTip
-      anchorClassName="lnsFieldItem__infoIcon"
-      content={
-        hideDetails
-          ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-              defaultMessage: 'Drag and drop to visualize.',
-            })
-          : exists
-          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-            })
-          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
-              defaultMessage:
-                'This field doesn’t have any data but you can still drag and drop to visualize.',
-            })
-      }
-      type="iInCircle"
-      color="subdued"
-      size="s"
-    />
-  );
+  const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } = getFieldItemActions({
+    value,
+    hasSuggestionForField,
+    dropOntoWorkspace,
+    closeFieldPopover: closePopover,
+  });
+
+  const commonFieldItemButtonProps = {
+    isSelected: false, // multiple selections are allowed
+    isEmpty: !exists,
+    isActive: infoIsOpen,
+    fieldSearchHighlight: highlight,
+    onClick: togglePopover,
+    buttonAddFieldToWorkspaceProps,
+    onAddFieldToWorkspace,
+  };
 
   return (
     <li>
@@ -187,41 +211,26 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-            onDragStart={onDragStart}
+            onDragStart={closePopover}
           >
-            <FieldItemButton<IndexPatternField>
-              isEmpty={!exists}
-              isActive={infoIsOpen}
-              infoIcon={lensInfoIcon}
-              field={field}
-              fieldSearchHighlight={highlight}
-              onClick={togglePopover}
-            />
+            {isTextBasedColumnField(field) ? (
+              <FieldItemButton<DatatableColumn>
+                field={field}
+                getCustomFieldType={getCustomFieldType}
+                {...commonFieldItemButtonProps}
+              />
+            ) : (
+              <FieldItemButton field={field} {...commonFieldItemButtonProps} />
+            )}
           </DragDrop>
         }
         renderHeader={() => {
-          const canAddToWorkspace = hasSuggestionForField(value);
-          const buttonTitle = canAddToWorkspace
-            ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-                defaultMessage: 'Add {field} to workspace',
-                values: {
-                  field: value.field.name,
-                },
-              })
-            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
-                defaultMessage:
-                  'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
-              });
-
           return (
             <FieldPopoverHeader
               field={dataViewField}
               closePopover={closePopover}
-              buttonAddFieldToWorkspaceProps={{
-                isDisabled: !canAddToWorkspace,
-                'aria-label': buttonTitle,
-              }}
-              onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
+              buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              onAddFieldToWorkspace={onAddFieldToWorkspace}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}
               onDeleteField={removeFieldAndClose}
@@ -242,9 +251,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       />
     </li>
   );
-};
+}
 
-export const FieldItem = React.memo(InnerFieldItem);
+export const FieldItem = React.memo(InnerFieldItem) as typeof InnerFieldItem;
 
 function FieldItemPopoverContents(
   props: FieldItemProps & {
@@ -252,10 +261,13 @@ function FieldItemPopoverContents(
     onAddFilter: AddFieldFilterHandler | undefined;
   }
 ) {
-  const { query, filters, indexPattern, dataViewField, dateRange, onAddFilter, uiActions } = props;
+  const { query, filters, indexPattern, dataViewField, dateRange, onAddFilter } = props;
   const services = useKibana<LensAppServices>().services;
 
   const exploreInDiscover = useMemo(() => {
+    if (!indexPattern) {
+      return null;
+    }
     const meta = {
       id: indexPattern.id,
       columns: [dataViewField.name],
@@ -289,6 +301,10 @@ function FieldItemPopoverContents(
       columns: meta.columns,
     });
   }, [dataViewField.name, filters, indexPattern, query, services]);
+
+  if (!indexPattern) {
+    return null;
+  }
 
   return (
     <>
@@ -330,7 +346,7 @@ function FieldItemPopoverContents(
           field={dataViewField}
           dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
           originatingApp={APP_ID}
-          uiActions={uiActions}
+          uiActions={services.uiActions}
           buttonProps={{
             'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
           }}

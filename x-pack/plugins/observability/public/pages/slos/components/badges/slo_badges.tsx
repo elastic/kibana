@@ -31,7 +31,7 @@ export function SloBadges({ activeAlerts, rules, slo, onClickRuleBadge }: Props)
       <SloStatusBadge slo={slo} />
       <SloIndicatorTypeBadge slo={slo} />
       <SloTimeWindowBadge slo={slo} />
-      <SloActiveAlertsBadge activeAlerts={activeAlerts} />
+      <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
       <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
     </EuiFlexGroup>
   );
