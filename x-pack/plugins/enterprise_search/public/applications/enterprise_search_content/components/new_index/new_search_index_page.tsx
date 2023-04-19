@@ -59,7 +59,7 @@ function getDescription(method: string, serviceType: string): string {
   switch (method) {
     case INGESTION_METHOD_IDS.API:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.apiDescription', {
-        defaultMessage: 'A search index is a place to hold your data.',
+        defaultMessage: 'A search index stores your data.',
       });
     case INGESTION_METHOD_IDS.CONNECTOR: {
       const connector =
@@ -69,23 +69,23 @@ function getDescription(method: string, serviceType: string): string {
             'xpack.enterpriseSearch.content.new_index.connectorDescriptionWithServiceType',
             {
               defaultMessage:
-                'A search index is a place to hold the data for your {name} connector.',
+                'A search index stores the data for your {name} connector.',
               values: {
                 name: connector.name,
               },
             }
           )
         : i18n.translate('xpack.enterpriseSearch.content.new_index.connectorDescription', {
-            defaultMessage: 'A search index is a place to hold the data for your connector.',
+            defaultMessage: 'A search index stores the data for your connector.',
           });
     }
     case INGESTION_METHOD_IDS.CRAWLER:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.crawlerDescription', {
-        defaultMessage: 'A search index is a place to hold the data for your web crawler.',
+        defaultMessage: 'A search index stores the data for your web crawler.',
       });
     default:
       return i18n.translate('xpack.enterpriseSearch.content.new_index.defaultDescription', {
-        defaultMessage: 'A search index is a place to hold your data.',
+        defaultMessage: 'A search index stores your data.',
       });
   }
 }

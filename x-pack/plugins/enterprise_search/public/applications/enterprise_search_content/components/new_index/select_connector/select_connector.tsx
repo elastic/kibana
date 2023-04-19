@@ -55,7 +55,7 @@ export const SelectConnector: React.FC = () => {
         description: i18n.translate(
           'xpack.enterpriseSearch.content.indices.selectConnector.description',
           {
-            defaultMessage: 'A search connector will sync data from a third party.',
+            defaultMessage: 'A search connector syncs data from a third party source.',
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
