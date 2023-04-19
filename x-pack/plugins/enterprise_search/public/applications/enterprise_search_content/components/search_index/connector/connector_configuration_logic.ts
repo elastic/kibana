@@ -7,7 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
+import {
+  ConnectorConfiguration,
+  ConnectorStatus,
+  Dependency,
+  DependencyLookup,
+  DisplayType,
+  SelectOption,
+} from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {
@@ -48,19 +55,17 @@ interface ConnectorConfigurationValues {
   shouldStartInEditMode: boolean;
 }
 
-interface SelectOptions {
-  label: string;
-  value: string;
-}
-
 export interface ConfigEntry {
-  display: string;
+  default_value: string | number | boolean | null;
+  depends_on: Dependency[];
+  display: DisplayType;
   key: string;
   label: string;
-  options: SelectOptions[];
+  options: SelectOption[];
   order?: number;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
   value: string | number | boolean | null;
 }
 
@@ -105,6 +110,19 @@ export function ensureNumberType(value: string | number | boolean | null): numbe
 
 export function ensureBooleanType(value: string | number | boolean | null): boolean {
   return Boolean(value);
+}
+
+export function dependenciesSatisfied(
+  dependencies: Dependency[],
+  dependencyLookup: DependencyLookup
+): boolean {
+  for (const dependency of dependencies) {
+    if (dependency.value !== dependencyLookup[dependency.field]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -214,10 +232,35 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          { key, display, label, options, order, required, sensitive, value }
+          {
+            key,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            default_value,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          }
         ) => ({
           ...configState,
-          [key]: { display, label, options, order, required, sensitive, value },
+          [key]: {
+            default_value,
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },

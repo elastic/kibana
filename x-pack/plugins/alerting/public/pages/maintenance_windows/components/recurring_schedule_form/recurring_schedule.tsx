@@ -39,9 +39,10 @@ import { FormProps } from '../schema';
 const UseField = getUseField({ component: Field });
 
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const [{ startDate, timezone, recurringSchedule }] = useFormData<FormProps>({
+  const [{ startDate, endDate, timezone, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
+      'endDate',
       'timezone',
       'recurringSchedule.frequency',
       'recurringSchedule.interval',
@@ -121,6 +122,11 @@ export const RecurringSchedule: React.FC = React.memo(() => {
               <EuiFlexItem grow={3}>
                 <UseField
                   path="recurringSchedule.until"
+                  config={{
+                    label: '',
+                    defaultValue: moment(endDate).endOf('day').toISOString(),
+                    validations: [],
+                  }}
                   component={DatePickerField}
                   componentProps={{
                     'data-test-subj': 'until-field',

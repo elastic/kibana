@@ -193,13 +193,13 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           }),
           items: [
             {
-              id: 'enterpriseSearchEngineOverview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.overviewTitle', {
-                defaultMessage: 'Overview',
+              id: 'enterpriseSearchEnginePreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+                defaultMessage: 'Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.OVERVIEW}`,
+                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
               }),
             },
             {
@@ -220,16 +220,6 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEnginePreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
               }),
             },
             {

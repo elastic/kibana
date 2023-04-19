@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
-import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
@@ -28,7 +28,7 @@ const DashboardRendererComponent = ({
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
-  onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
+  onDashboardContainerLoaded?: (dashboardContainer: DashboardAPI) => void;
   query?: Query;
   savedObjectId: string | undefined;
   timeRange: {
@@ -39,12 +39,12 @@ const DashboardRendererComponent = ({
   };
 }) => {
   const dispatch = useDispatch();
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+  const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
-        overrideInput: { timeRange, viewMode: ViewMode.VIEW, query, filters },
+        initialInput: { timeRange, viewMode: ViewMode.VIEW, query, filters },
       }),
     [filters, query, timeRange]
   );
@@ -73,17 +73,17 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, filters, query, timeRange]);
 
   const handleDashboardLoaded = useCallback(
-    (container: DashboardContainer) => {
+    (container: DashboardAPI) => {
       setDashboardContainer(container);
       onDashboardContainerLoaded?.(container);
     },
     [onDashboardContainerLoaded]
   );
   return savedObjectId && canReadDashboard ? (
-    <LazyDashboardContainerRenderer
+    <DashboardContainerRenderer
+      ref={handleDashboardLoaded}
       savedObjectId={savedObjectId}
       getCreationOptions={getCreationOptions}
-      onDashboardContainerLoaded={handleDashboardLoaded}
     />
   ) : null;
 };

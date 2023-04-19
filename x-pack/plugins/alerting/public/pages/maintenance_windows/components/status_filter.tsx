@@ -28,7 +28,7 @@ export const StatusFilter: React.FC<CustomComponentProps> = React.memo(({ query,
           return acc.addOrFieldValue('status', curr, true, 'eq');
         }, q);
       }
-      onChange!(q);
+      onChange?.(q);
     },
     [query, onChange, selectedOptions]
   );

@@ -8,7 +8,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { migration880 } from './8.8.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { ConfigKey, ScheduleUnit } from '../../../../../../common/runtime_types';
-import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../../common/constants/monitor_defaults';
 import {
   browserUI,
   browserProject,
@@ -18,6 +22,8 @@ import {
   httpUptimeUI,
 } from './test_fixtures/8.7.0';
 import { httpUI as httpUI850 } from './test_fixtures/8.5.0';
+import { LegacyConfigKey } from '../../../../../../common/constants/monitor_management';
+import { omit } from 'lodash';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -151,11 +157,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
           'ssl.verification_mode': 'full',
           tags: [],
-          'throttling.config': '5d/3u/20l',
-          'throttling.download_speed': '5',
-          'throttling.is_enabled': true,
-          'throttling.latency': '20',
-          'throttling.upload_speed': '3',
+          throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
           timeout: null,
           type: 'browser',
           'url.port': null,
@@ -195,9 +197,24 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           name: null,
         },
       };
-      // @ts-ignore specificially testing monitors with invalid values
+      // @ts-ignore specifically testing monitors with invalid values
       const actual = migration880(encryptedSavedObjectsSetup)(invalidTestMonitor, context);
-      expect(actual).toEqual(invalidTestMonitor);
+      expect(actual).toEqual({
+        ...invalidTestMonitor,
+        attributes: omit(
+          {
+            ...invalidTestMonitor.attributes,
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
+          },
+          [
+            LegacyConfigKey.THROTTLING_CONFIG,
+            LegacyConfigKey.IS_THROTTLING_ENABLED,
+            LegacyConfigKey.DOWNLOAD_SPEED,
+            LegacyConfigKey.UPLOAD_SPEED,
+            LegacyConfigKey.LATENCY,
+          ]
+        ),
+      });
     });
   });
 
@@ -411,6 +428,79 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
       ).toBe(true);
       expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    });
+  });
+
+  describe('throttling migration', () => {
+    it('handles migrating with enabled throttling', () => {
+      const actual = migration880(encryptedSavedObjectsSetup)(browserUI, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual(
+        PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT]
+      );
+    });
+
+    it('handles migrating with defined throttling value', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.UPLOAD_SPEED]: '0.75',
+          [LegacyConfigKey.DOWNLOAD_SPEED]: '9',
+          [LegacyConfigKey.LATENCY]: '170',
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: '4g',
+        label: '4G',
+        value: {
+          download: '9',
+          upload: '0.75',
+          latency: '170',
+        },
+      });
+    });
+
+    it('handles migrating with custom throttling value', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.UPLOAD_SPEED]: '5',
+          [LegacyConfigKey.DOWNLOAD_SPEED]: '10',
+          [LegacyConfigKey.LATENCY]: '30',
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: 'custom',
+        label: 'Custom',
+        value: {
+          download: '10',
+          upload: '5',
+          latency: '30',
+        },
+      });
+    });
+
+    it('handles migrating with disabled throttling', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [LegacyConfigKey.IS_THROTTLING_ENABLED]: false,
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+      // @ts-ignore
+      expect(actual.attributes[ConfigKey.THROTTLING_CONFIG]).toEqual({
+        id: 'no-throttling',
+        label: 'No throttling',
+        value: null,
+      });
     });
   });
 });

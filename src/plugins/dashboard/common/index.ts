@@ -17,7 +17,6 @@ export type {
   DashboardPanelMap,
   DashboardPanelState,
   DashboardContainerInput,
-  DashboardContainerByValueInput,
   DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
 
