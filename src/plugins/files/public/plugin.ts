@@ -37,6 +37,7 @@ export interface FilesSetup {
 
 export type FilesStart = Pick<FilesSetup, 'filesClientFactory'> & {
   getFileKindDefinition: (id: string) => FileKindBrowser;
+  getAllFindKindDefinitions: () => FileKindBrowser[];
 };
 
 /**
@@ -81,6 +82,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
       filesClientFactory: this.filesClientFactory!,
       getFileKindDefinition: (id: string): FileKindBrowser => {
         return this.registry.get(id);
+      },
+      getAllFindKindDefinitions: (): FileKindBrowser[] => {
+        return this.registry.getAll();
       },
     };
   }

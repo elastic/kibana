@@ -16,9 +16,12 @@ export const FilesManagementAppContextProvider: FC<AppContext> = ({
   children,
   filesClient,
   getFileKindDefinition,
+  getAllFindKindDefinitions,
 }) => {
   return (
-    <FilesManagementAppContext.Provider value={{ filesClient, getFileKindDefinition }}>
+    <FilesManagementAppContext.Provider
+      value={{ filesClient, getFileKindDefinition, getAllFindKindDefinitions }}
+    >
       {children}
     </FilesManagementAppContext.Provider>
   );

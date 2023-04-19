@@ -30,9 +30,15 @@ function naivelyFuzzify(query: string): string {
 }
 
 export const App: FunctionComponent = () => {
-  const { filesClient, getFileKindDefinition } = useFilesManagementContext();
+  const { filesClient, getFileKindDefinition, getAllFindKindDefinitions } =
+    useFilesManagementContext();
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<undefined | FileJSON>(undefined);
+
+  const kindToExcludeFromSearch = getAllFindKindDefinitions()
+    .filter(({ managementUiActions }) => managementUiActions?.list?.enabled === false)
+    .map(({ id }) => id);
+
   return (
     <div data-test-subj="filesManagementApp">
       <TableListView<FilesUserContentSchema>
@@ -44,7 +50,10 @@ export const App: FunctionComponent = () => {
         entityNamePlural={i18nTexts.entityNamePlural}
         findItems={(searchQuery) =>
           filesClient
-            .find({ name: searchQuery ? naivelyFuzzify(searchQuery) : undefined })
+            .find({
+              name: searchQuery ? naivelyFuzzify(searchQuery) : undefined,
+              kindToExclude: kindToExcludeFromSearch,
+            })
             .then(({ files, total }) => ({
               hits: files.map((file) => ({
                 id: file.id,
