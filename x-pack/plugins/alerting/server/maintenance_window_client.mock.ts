@@ -17,7 +17,7 @@ const createMaintenanceWindowClientMock = () => {
     find: jest.fn(),
     get: jest.fn(),
     archive: jest.fn(),
-    getActiveMaintenanceWindows: jest.fn(),
+    getActiveMaintenanceWindows: jest.fn().mockResolvedValue([]),
     finish: jest.fn(),
     delete: jest.fn(),
   };

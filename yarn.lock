@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@77.0.0":
-  version "77.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-77.0.0.tgz#931bb7f8a109b571dedefe481ccf41a9229a6286"
-  integrity sha512-4RV6GxSFFWGEZtUkLpZWQrwTdEVMq/hmicSZiCpvJUnilLmhfnNEGqCn5Qu8g/OOb5AL3XayfytWMiiaJ9Yw+g==
+"@elastic/eui@77.1.1":
+  version "77.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-77.1.1.tgz#82f4294bf3239d5d825c1d939c49d125bfdbeb72"
+  integrity sha512-guJmHoGDbvKh/738taKDZGSdNk+OXMse513oPaPf4NoXpQUeYvl3gLT50mX5J4nwILS1LFKNGrbU2Es77HM1cQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -4841,6 +4841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
@@ -4906,6 +4910,10 @@
   uid ""
 
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
   version "0.0.0"
   uid ""
 
@@ -14267,7 +14275,7 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.44.0:
+elastic-apm-node@^3.44.1:
   version "3.44.1"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.44.1.tgz#8a6e88fa9f3401455dddb87f9d5559f6d894964d"
   integrity sha512-hSf+S6GtQ+Ff5ueyQ1n2BAgAdiDOZ+XmHKFurzpB5/rvRFz6JbXLq+pcI11HMlK3ImiMVG9LQxHWMN6gqkqzYQ==
@@ -22304,7 +22312,7 @@ p-limit@^1.1.0:
   dependencies:
     p-try "^1.0.0"
 
-p-limit@^2.0.0, p-limit@^2.2.0, p-limit@^2.3.0:
+p-limit@^2.0.0, p-limit@^2.2.0, p-limit@^2.2.2, p-limit@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-2.3.0.tgz#3dd33c647a214fdfffd835933eb086da0dc21db1"
   integrity sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==
@@ -22365,6 +22373,11 @@ p-map@^4.0.0:
   dependencies:
     aggregate-error "^3.0.0"
 
+p-reflect@2.1.0, p-reflect@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/p-reflect/-/p-reflect-2.1.0.tgz#5d67c7b3c577c4e780b9451fc9129675bd99fe67"
+  integrity sha512-paHV8NUz8zDHu5lhr/ngGWQiW067DK/+IbJ+RfZ4k+s8y4EKyYCz8pGYWjxCg35eHztpJAt+NUgvN4L+GCbPlg==
+
 p-retry@^4.2.0, p-retry@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.5.0.tgz#6685336b3672f9ee8174d3769a660cb5e488521d"
@@ -22372,6 +22385,14 @@ p-retry@^4.2.0, p-retry@^4.5.0:
   dependencies:
     "@types/retry" "^0.12.0"
     retry "^0.12.0"
+
+p-settle@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/p-settle/-/p-settle-4.1.1.tgz#37fbceb2b02c9efc28658fc8d36949922266035f"
+  integrity sha512-6THGh13mt3gypcNMm0ADqVNCcYa3BK6DWsuJWFCuEKP1rpY+OKGp7gaZwVmLspmic01+fsg/fN57MfvDzZ/PuQ==
+  dependencies:
+    p-limit "^2.2.2"
+    p-reflect "^2.1.0"
 
 p-timeout@^2.0.1:
   version "2.0.1"
