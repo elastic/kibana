@@ -10,6 +10,7 @@ import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { PackagePolicy } from '../../../common';
 
 import { migratePackagePolicyToV880 as SecSolMigratePackagePolicyToV880 } from './security_solution';
+import { migratePackagePolicyToV880 as SyntheticsMigratePackagePolicyToV880 } from './synthetics';
 
 export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc,
@@ -20,6 +21,14 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   // Endpoint specific migrations
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     updatedPackagePolicyDoc = SecSolMigratePackagePolicyToV880(packagePolicyDoc, migrationContext);
+  }
+
+  // Synthetics specific migrations
+  if (packagePolicyDoc.attributes.package?.name === 'synthetics') {
+    updatedPackagePolicyDoc = SyntheticsMigratePackagePolicyToV880(
+      packagePolicyDoc,
+      migrationContext
+    );
   }
 
   return updatedPackagePolicyDoc;
