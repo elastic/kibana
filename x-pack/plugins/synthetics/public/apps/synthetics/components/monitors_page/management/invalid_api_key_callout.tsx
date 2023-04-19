@@ -68,9 +68,7 @@ const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
 const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.description.invalidKey',
   {
-    defaultMessage:
-      `Monitor Management is currently disabled. To run your monitors in one of Elastic's global managed testing locations,` +
-      'you need to re-enable monitor management.',
+    defaultMessage: `Monitor Management is currently disabled. To run your monitors in one of Elastic's global managed testing locations, you need to re-enable monitor management.`,
   }
 );
 

@@ -105,7 +105,7 @@ export interface BulkUpdateCasesOptions {
   caseIds: string[];
 }
 
-export interface RemoveAlertsFromCaseOptions {
+export interface RemoveCaseIdFromAlertsOptions {
   alerts: MgetAndAuditAlert[];
   caseId: string;
 }
@@ -851,33 +851,33 @@ export class AlertsClient {
     });
   }
 
-  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
     try {
       if (alerts.length === 0) {
         return;
       }
 
-      const mgetRes = await this.ensureAllAlertsAuthorized({
-        alerts,
-        operation: ReadOperations.Get,
-      });
-
       const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
-        for (int i=0; i < ctx._source['${ALERT_CASE_IDS}'].length; i++) {
-            if (ctx._source['${ALERT_CASE_IDS}'][i].equals('${caseId}')) {
-                ctx._source['${ALERT_CASE_IDS}'].remove(i);
-            }
+        if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
+          int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
+          ctx._source['${ALERT_CASE_IDS}'].remove(index);
         }
       }`;
 
       const bulkUpdateRequest = [];
 
-      for (const doc of mgetRes.docs) {
+      for (const alert of alerts) {
         bulkUpdateRequest.push(
           {
             update: {
-              _index: doc._index,
-              _id: doc._id,
+              _index: alert.index,
+              _id: alert.id,
             },
           },
           {
@@ -891,8 +891,58 @@ export class AlertsClient {
         body: bulkUpdateRequest,
       });
     } catch (error) {
-      this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
+      this.logger.error(`Error removing case ${caseId} from alerts: ${error}`);
       throw error;
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (caseIds.length === 0) {
+        return;
+      }
+
+      const index = `${this.ruleDataService.getResourcePrefix()}-*`;
+      const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
+      const esQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+
+      const SCRIPT_PARAMS_ID = 'caseIds';
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
+        List storedCaseIds = ctx._source['${ALERT_CASE_IDS}'];
+        List caseIdsToRemove = params['${SCRIPT_PARAMS_ID}'];
+
+        for (int i=0; i < caseIdsToRemove.length; i++) {
+          if (storedCaseIds.contains(caseIdsToRemove[i])) {
+            int index = storedCaseIds.indexOf(caseIdsToRemove[i]);
+            storedCaseIds.remove(index);
+          }
+        }
+      }`;
+
+      await this.esClient.updateByQuery({
+        index,
+        conflicts: 'proceed',
+        refresh: true,
+        body: {
+          script: {
+            source: painlessScript,
+            lang: 'painless',
+            params: { caseIds },
+          } as InlineScript,
+          query: esQuery,
+        },
+        ignore_unavailable: true,
+      });
+    } catch (err) {
+      this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
+      throw err;
     }
   }
 

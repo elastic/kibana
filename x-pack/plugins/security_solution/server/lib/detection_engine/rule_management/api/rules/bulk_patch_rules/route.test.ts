@@ -23,18 +23,8 @@ import { bulkPatchRulesRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
 jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Bulk patch rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -50,8 +40,6 @@ describe('Bulk patch rules route', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
     bulkPatchRulesRoute(server.router, ml, logger);
   });
 
@@ -66,7 +54,6 @@ describe('Bulk patch rules route', () => {
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getPatchBulkRequest(),
         requestContextMock.convertContext(context)
@@ -86,7 +73,6 @@ describe('Bulk patch rules route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/bulk_update`,
@@ -167,8 +153,6 @@ describe('Bulk patch rules route', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
-
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
