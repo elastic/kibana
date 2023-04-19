@@ -16,10 +16,14 @@ import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONFIGURE_URL,
   CASE_REPORTERS_URL,
+  CASE_SAVED_OBJECT,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureResponse,
@@ -325,7 +329,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
         query: {
           term: {
             type: {
-              value: 'cases-configure',
+              value: CASE_CONFIGURE_SAVED_OBJECT,
             },
           },
         },
@@ -338,7 +342,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
-  const configure: TransportResult<
+  const cases: TransportResult<
     estypes.SearchResponse<{ cases: ESCaseAttributes }>,
     unknown
   > = await es.search(
@@ -348,7 +352,7 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
         query: {
           term: {
             type: {
-              value: 'cases',
+              value: CASE_SAVED_OBJECT,
             },
           },
         },
@@ -357,7 +361,53 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
     { meta: true }
   );
 
-  return configure;
+  return cases;
+};
+
+export const getCaseCommentSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const comments: TransportResult<
+    estypes.SearchResponse<{ ['cases-comments']: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_COMMENT_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return comments;
+};
+
+export const getCaseUserActionsSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const userActions: TransportResult<
+    estypes.SearchResponse<{ ['cases-user-actions']: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_USER_ACTION_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return userActions;
 };
 
 export const updateCase = async ({
