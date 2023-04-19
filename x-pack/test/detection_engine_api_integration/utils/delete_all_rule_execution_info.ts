@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { countDownES } from './count_down_es';
 
@@ -20,7 +21,7 @@ export const deleteAllRuleExecutionInfo = async (es: Client, log: ToolingLog): P
     async () => {
       return es.deleteByQuery(
         {
-          index: '.kibana',
+          index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
           q: 'type:siem-detection-engine-rule-execution-info',
           wait_for_completion: true,
           refresh: true,

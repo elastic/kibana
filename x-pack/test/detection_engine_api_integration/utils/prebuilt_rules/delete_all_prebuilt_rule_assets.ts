@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 /**
  * Remove all prebuilt rule assets from the .kibana index
@@ -13,7 +14,7 @@ import type { Client } from '@elastic/elasticsearch';
  */
 export const deleteAllPrebuiltRuleAssets = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     q: 'type:security-rule',
     wait_for_completion: true,
     refresh: true,
