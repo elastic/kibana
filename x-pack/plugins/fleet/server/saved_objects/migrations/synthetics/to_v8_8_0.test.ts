@@ -7,7 +7,7 @@
 
 import type { SavedObjectMigrationContext } from '@kbn/core/server';
 
-import { browserPolicy, httpPolicy, icmpPolicy, tcpPolicy } from './fixtures/8.7.0';
+import { getBrowserPolicy, httpPolicy, icmpPolicy, tcpPolicy } from './fixtures/8.7.0';
 
 import { migratePackagePolicyToV880 as migration } from './to_v8_8_0';
 
@@ -37,62 +37,121 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
     ];
 
     it.each(testSchedules)('handles a variety of schedules', (invalidSchedule, validSchedule) => {
-      expect(
-        migration(
-          {
-            ...httpPolicy,
-            attributes: {
-              ...httpPolicy.attributes,
-              inputs: [
-                {
-                  ...httpPolicy.attributes.inputs[0],
-                  streams: [
-                    {
-                      ...httpPolicy.attributes.inputs[0].streams[0],
-                      vars: {
-                        ...httpPolicy.attributes.inputs[0].streams[0].vars,
-                        schedule: {
-                          value: `@every ${invalidSchedule}m`,
-                          type: 'text',
-                        },
+      const actual = migration(
+        {
+          ...httpPolicy,
+          attributes: {
+            ...httpPolicy.attributes,
+            inputs: [
+              {
+                ...httpPolicy.attributes.inputs[0],
+                streams: [
+                  {
+                    ...httpPolicy.attributes.inputs[0].streams[0],
+                    vars: {
+                      ...httpPolicy.attributes.inputs[0].streams[0].vars,
+                      schedule: {
+                        value: `"@every ${invalidSchedule}m"`,
+                        type: 'text',
                       },
                     },
-                  ],
-                },
-              ],
-            },
+                  },
+                ],
+              },
+            ],
           },
-          {} as SavedObjectMigrationContext
-        ).attributes?.inputs[0]?.streams[0]?.vars?.schedule?.value
-      ).toEqual(`@every ${validSchedule}m`);
+        },
+        {} as SavedObjectMigrationContext
+      );
+      expect(actual.attributes?.inputs[0]?.streams[0]?.vars?.schedule?.value).toEqual(
+        `"@every ${validSchedule}m"`
+      );
+      expect(actual.attributes?.inputs[0]?.streams[0]?.compiled_stream?.schedule).toEqual(
+        `"@every ${validSchedule}m"`
+      );
     });
 
     it('handles browserPolicy with 2 minute', () => {
-      expect(
-        migration(browserPolicy, {} as SavedObjectMigrationContext).attributes?.inputs[3]
-          ?.streams[0]?.vars?.schedule?.value
-      ).toEqual('@every 1m');
+      const actual = migration(getBrowserPolicy(), {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.schedule?.value).toEqual(
+        '"@every 1m"'
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream?.schedule).toEqual(
+        `"@every 1m"`
+      );
     });
 
     it('handles httpPolicy with 4 minute schedule', () => {
-      expect(
-        migration(httpPolicy, {} as SavedObjectMigrationContext).attributes?.inputs[0]?.streams[0]
-          ?.vars?.schedule?.value
-      ).toEqual('@every 3m');
+      const actual = migration(httpPolicy, {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[0]?.streams[0]?.vars?.schedule?.value).toEqual(
+        '"@every 3m"'
+      );
+      expect(actual.attributes?.inputs[0]?.streams[0]?.compiled_stream?.schedule).toEqual(
+        `"@every 3m"`
+      );
     });
 
     it('handles tcp with 8 minute schedule', () => {
-      expect(
-        migration(tcpPolicy, {} as SavedObjectMigrationContext).attributes?.inputs[1]?.streams[0]
-          ?.vars?.schedule?.value
-      ).toEqual('@every 10m');
+      const actual = migration(tcpPolicy, {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[1]?.streams[0]?.vars?.schedule?.value).toEqual(
+        '"@every 10m"'
+      );
+      expect(actual.attributes?.inputs[1]?.streams[0]?.compiled_stream?.schedule).toEqual(
+        `"@every 10m"`
+      );
     });
 
     it('handles icmpPolicy with 16 minute schedule', () => {
-      expect(
-        migration(icmpPolicy, {} as SavedObjectMigrationContext).attributes?.inputs[2]?.streams[0]
-          ?.vars?.schedule?.value
-      ).toEqual('@every 15m');
+      const actual = migration(icmpPolicy, {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[2]?.streams[0]?.vars?.schedule?.value).toEqual(
+        '"@every 15m"'
+      );
+      expect(actual.attributes?.inputs[2]?.streams[0]?.compiled_stream?.schedule).toEqual(
+        `"@every 15m"`
+      );
+    });
+  });
+
+  describe('throttling migration', () => {
+    it('handles throtling config for throttling: false', () => {
+      const actual = migration(getBrowserPolicy('false'), {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
+        'false'
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream?.throttling).toEqual(false);
+    });
+
+    it('handles throttling config for default  throttling', () => {
+      const actual = migration(getBrowserPolicy(), {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
+        JSON.stringify({ download: 5, upload: 3, latency: 20 })
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
+        JSON.stringify({ download: 5, upload: 3, latency: 20 })
+      );
+    });
+
+    it('handles throttling config for custom throttling', () => {
+      const actual = migration(getBrowserPolicy('20d/10u/30l'), {} as SavedObjectMigrationContext);
+      expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
+        JSON.stringify({ download: 20, upload: 10, latency: 30 })
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
+        JSON.stringify({ download: 20, upload: 10, latency: 30 })
+      );
+    });
+
+    it('handles edge cases', () => {
+      const actual = migration(
+        getBrowserPolicy('not a valid value'),
+        {} as SavedObjectMigrationContext
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
+        JSON.stringify({ download: 5, upload: 3, latency: 20 })
+      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
+        JSON.stringify({ download: 5, upload: 3, latency: 20 })
+      );
     });
   });
 });

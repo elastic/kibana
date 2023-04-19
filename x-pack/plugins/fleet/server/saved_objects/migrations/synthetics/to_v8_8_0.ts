@@ -48,12 +48,42 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   ) {
     const schedule = enabledStream.vars.schedule.value.match(/\d+/g)?.[0];
     const updatedSchedule = getNearestSupportedSchedule(schedule);
-    const formattedUpdatedSchedule = `@every ${updatedSchedule}m`;
-    enabledStream.vars.schedule.value = `@every ${updatedSchedule}m`;
+    const formattedUpdatedSchedule = `"@every ${updatedSchedule}m"`;
+    enabledStream.vars.schedule.value = `"@every ${updatedSchedule}m"`;
     enabledStream.compiled_stream.schedule = formattedUpdatedSchedule;
   }
 
+  if (
+    enabledStream.data_stream.dataset === 'browser' &&
+    enabledStream.vars?.['throttling.config'] &&
+    enabledStream.compiled_stream.throttling
+  ) {
+    const throttling = enabledStream.vars['throttling.config'].value;
+    if (throttling) {
+      const formattedThrottling = handleThrottling(throttling);
+      enabledStream.vars['throttling.config'].value = formattedThrottling;
+      enabledStream.compiled_stream.throttling = formattedThrottling;
+    }
+  }
+
   return updatedPackagePolicyDoc;
+};
+
+const handleThrottling = (throttling: string): string => {
+  try {
+    const [download = 5, upload = 3, latency = 20] = throttling.match(/\d+/g) || [];
+    return JSON.stringify({
+      download: Number(download),
+      upload: Number(upload),
+      latency: Number(latency),
+    });
+  } catch {
+    return JSON.stringify({
+      download: 5,
+      upload: 3,
+      latency: 20,
+    });
+  }
 };
 
 const getNearestSupportedSchedule = (currentSchedule: string): string => {
