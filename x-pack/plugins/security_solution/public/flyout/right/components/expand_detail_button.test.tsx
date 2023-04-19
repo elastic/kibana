@@ -22,7 +22,6 @@ describe('<ExpandDetailButton />', () => {
     const panelContextValue = {
       eventId: 'eventId',
       indexName: 'indexName',
-      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
@@ -41,7 +40,6 @@ describe('<ExpandDetailButton />', () => {
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
-        scopeId: panelContextValue.scopeId,
       },
     });
   });
