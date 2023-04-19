@@ -230,5 +230,51 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
       await testSubjects.click('querySubmitButton');
     },
+
+    // Pagination
+    getPageNumberButton(pageNumber: number) {
+      return testSubjects.find(`pagination-button-${pageNumber - 1}`);
+    },
+
+    getPageSizeSelector() {
+      return testSubjects.find('tablePaginationPopoverButton');
+    },
+
+    getPageSizeOption(pageSize: 5 | 10 | 20) {
+      return testSubjects.find(`tablePagination-${pageSize}-rows`);
+    },
+
+    async changePageSize(pageSize: 5 | 10 | 20) {
+      const pageSizeSelector = await this.getPageSizeSelector();
+      await pageSizeSelector.click();
+      const pageSizeOption = await this.getPageSizeOption(pageSize);
+      await pageSizeOption.click();
+    },
+
+    async paginateTo(pageNumber: number) {
+      const paginationButton = await this.getPageNumberButton(pageNumber);
+      await paginationButton.click();
+    },
+
+    // Sorting
+    getDiskLatencyHeader() {
+      return testSubjects.find('tableHeaderCell_diskLatency.avg_4');
+    },
+
+    getTitleHeader() {
+      return testSubjects.find('tableHeaderCell_title_1');
+    },
+
+    async sortByDiskLatency() {
+      const diskLatency = await this.getDiskLatencyHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      return button.click();
+    },
+
+    async sortByTitle() {
+      const diskLatency = await this.getTitleHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      return button.click();
+    },
   };
 }

@@ -134,7 +134,7 @@ describe('useHostTable hook', () => {
     ];
     const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
 
-    const { result } = renderHook(() => useHostsTable(nodes, { time }));
+    const { result } = renderHook(() => useHostsTable({ nodes, tableParams: { time } }));
 
     expect(result.current.items).toStrictEqual(items);
   });

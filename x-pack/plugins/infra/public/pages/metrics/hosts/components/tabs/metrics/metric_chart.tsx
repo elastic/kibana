@@ -4,22 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useMemo, useState } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiProgress } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiI18n } from '@elastic/eui';
-import { InfraClientSetupDeps } from '../../../../../../types';
+import { EuiLoadingChart } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import useCustomCompareEffect from 'react-use/lib/useCustomCompareEffect';
+import { isEqual } from 'lodash';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { createHostsFilter } from '../../../utils';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 
 export interface MetricChartProps {
   title: string;
@@ -30,14 +37,34 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+  const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest } = useHostsViewContext();
+  const { baseRequest, loading } = useHostsViewContext();
+  const { currentPage } = useHostsTableContext();
   const {
     services: { lens },
-  } = useKibana<InfraClientSetupDeps>();
-
+  } = useKibanaContextForPlugin();
   const EmbeddableComponent = lens.EmbeddableComponent;
+
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const [internalLastReloadRequestTime, setInternalLastReloadRequestTime] = useState(
+    baseRequest.requestTs
+  );
+  const [internalSearchCriteria, setInternalSearchCriteria] = useState(searchCriteria);
+
+  useCustomCompareEffect(
+    () => {
+      // prevents updates on requestTs and serchCriteria states from relaoding the chart
+      // we want it to reload only once the table has finished loading
+      if (!loading) {
+        setInternalLastReloadRequestTime(baseRequest.requestTs);
+        setInternalSearchCriteria(searchCriteria);
+      }
+    },
+    [loading],
+    (prevDeps, nextDeps) => isEqual(prevDeps, nextDeps)
+  );
 
   const { injectData, getExtraActions, error } = useLensAttributes({
     type,
@@ -47,8 +74,15 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     },
   });
 
+  const hostsFilterQuery = useMemo(() => {
+    return createHostsFilter(
+      currentPage.map((p) => p.name),
+      dataView
+    );
+  }, [currentPage, dataView]);
+
   const injectedLensAttributes = injectData({
-    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
+    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters, ...[hostsFilterQuery]],
     query: searchCriteria.query,
     title,
   });
@@ -73,12 +107,12 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasShadow={false}
       hasBorder
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
+      style={{ minHeight: MIN_HEIGHT, position: 'relative' }}
       data-test-subj={`hostsView-metricChart-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ minHeight: '100%', alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -97,24 +131,51 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        injectedLensAttributes && (
-          <EmbeddableComponent
-            id={`hostsViewsmetricsChart-${type}`}
-            style={{ height: MIN_HEIGHT }}
-            attributes={injectedLensAttributes}
-            viewMode={ViewMode.VIEW}
-            timeRange={searchCriteria.dateRange}
-            query={searchCriteria.query}
-            filters={searchCriteria.filters}
-            extraActions={extraAction}
-            lastReloadRequestTime={baseRequest.requestTs}
-            executionContext={{
-              type: 'infrastructure_observability_hosts_view',
-              name: `Hosts View ${type} Chart`,
-            }}
-            onBrushEnd={handleBrushEnd}
-          />
-        )
+        <>
+          {loading && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              style={{ zIndex: 1 }}
+              css={css`
+                top: ${loadedOnce ? euiTheme.size.l : 0};
+              `}
+            />
+          )}
+
+          {loading && !loadedOnce ? (
+            <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingChart mono size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            injectedLensAttributes && (
+              <EmbeddableComponent
+                id={`hostsViewsmetricsChart-${type}`}
+                style={{ height: '100%' }}
+                attributes={injectedLensAttributes}
+                viewMode={ViewMode.VIEW}
+                timeRange={internalSearchCriteria.dateRange}
+                query={internalSearchCriteria.query}
+                filters={internalSearchCriteria.filters}
+                extraActions={extraAction}
+                lastReloadRequestTime={internalLastReloadRequestTime}
+                executionContext={{
+                  type: 'infrastructure_observability_hosts_view',
+                  name: `Hosts View ${type} Chart`,
+                }}
+                onBrushEnd={handleBrushEnd}
+                onLoad={() => {
+                  if (!loadedOnce) {
+                    setLoadedOnce(true);
+                  }
+                }}
+              />
+            )
+          )}
+        </>
       )}
     </EuiPanel>
   );
