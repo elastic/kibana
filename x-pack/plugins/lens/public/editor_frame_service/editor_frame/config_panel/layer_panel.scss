@@ -176,5 +176,6 @@
   &:focus {
     @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
     background-color: transparent;
+    text-decoration-thickness: $euiBorderWidthThin !important;
   }
 }

@@ -94,7 +94,7 @@
   }
 }
 
-$reorderItemMargin: 8px;
+$reorderItemMargin: $euiSizeS;
 .domDragDrop__reorderableDrop {
   position: absolute;
   width: 100%;
