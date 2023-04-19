@@ -43,10 +43,10 @@ export class ContentManagementPlugin
   public start(core: CoreStart, deps: StartDependencies) {
     const rpcClient = new RpcClient(core.http);
 
-    const contentClient = new ContentClient(
-      (contentType) => this.contentTypeRegistry.get(contentType)?.crud ?? rpcClient,
-      this.contentTypeRegistry
-    );
+    const contentClient = new ContentClient((contentType) => {
+      if (!contentType) return rpcClient;
+      return this.contentTypeRegistry.get(contentType)?.crud ?? rpcClient;
+    }, this.contentTypeRegistry);
     return {
       client: contentClient,
       registry: {

@@ -37,7 +37,6 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
-  DatasourceLayerSettingsProps,
   DataSourceInfo,
   UserMessage,
   FrameDatasourceAPI,
@@ -69,6 +68,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  getNotifiableFeatures,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -428,10 +428,7 @@ export function getFormBasedDatasource({
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
       toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
-    renderLayerSettings(
-      domElement: Element,
-      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
-    ) {
+    renderLayerSettings(domElement, props) {
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
@@ -585,6 +582,7 @@ export function getFormBasedDatasource({
                 unifiedSearch={unifiedSearch}
                 dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
                 {...props}
               />
             </KibanaContextProvider>
@@ -818,7 +816,7 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
@@ -872,7 +870,9 @@ export function getFormBasedDatasource({
         ),
       ];
 
-      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
+      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+
+      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {

@@ -14,11 +14,6 @@ import type { LeftPanelProps } from './left';
 import { LeftPanel, LeftPanelKey } from './left';
 import { LeftPanelProvider } from './left/context';
 
-// TODO these should be replaced by a more dynamic solution
-//  see https://github.com/elastic/security-team/issues/6247
-export const RIGHT_SECTION_WIDTH = 500;
-export const LEFT_SECTION_WIDTH = 1000;
-
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -26,7 +21,6 @@ export const LEFT_SECTION_WIDTH = 1000;
 export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
   {
     key: RightPanelKey,
-    width: RIGHT_SECTION_WIDTH,
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
@@ -35,7 +29,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   },
   {
     key: LeftPanelKey,
-    width: LEFT_SECTION_WIDTH,
     component: (props) => (
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />

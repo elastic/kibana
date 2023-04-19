@@ -38,6 +38,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import rison from '@kbn/rison';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   Rule,
@@ -107,26 +108,26 @@ const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
   filteredRuleTypes?: string[];
-  showActionFilter?: boolean;
-  showRuleParamFilter?: boolean;
-  ruleDetailsRoute?: string;
-  showCreateRuleButtonInPrompt?: boolean;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
-  statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => void;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => void;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
-  ruleParamFilter?: Record<string, string | number>;
-  onRuleParamFilterChange?: (ruleParams: Record<string, string | number>) => void;
-  typeFilter?: string[];
-  onTypeFilterChange?: (type: string[]) => void;
-  searchFilter?: string;
-  onSearchFilterChange?: (search: string) => void;
   refresh?: Date;
+  ruleDetailsRoute?: string;
+  ruleParamFilter?: Record<string, string | number>;
   rulesListKey?: string;
+  searchFilter?: string;
+  showActionFilter?: boolean;
+  showCreateRuleButtonInPrompt?: boolean;
+  showRuleParamFilter?: boolean;
+  statusFilter?: RuleStatus[];
+  typeFilter?: string[];
   visibleColumns?: string[];
+  onLastResponseFilterChange?: (lastResponse: string[]) => void;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
+  onRuleParamFilterChange?: (ruleParams: Record<string, string | number>) => void;
+  onSearchFilterChange?: (search: string) => void;
+  onStatusFilterChange?: (status: RuleStatus[]) => void;
+  onTypeFilterChange?: (type: string[]) => void;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
 }
 
 export const percentileFields = {
@@ -145,50 +146,53 @@ const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
-  showActionFilter = true,
-  showRuleParamFilter = true,
-  ruleDetailsRoute,
-  showCreateRuleButtonInPrompt = false,
-  statusFilter,
-  onStatusFilterChange,
   lastResponseFilter,
-  onLastResponseFilterChange,
   lastRunOutcomeFilter,
-  onLastRunOutcomeFilterChange,
+  refresh,
+  ruleDetailsRoute,
   ruleParamFilter,
-  onRuleParamFilterChange,
+  rulesListKey,
   searchFilter = '',
-  onSearchFilterChange,
+  showActionFilter = true,
+  showCreateRuleButtonInPrompt = false,
+  showRuleParamFilter = true,
+  statusFilter,
   typeFilter,
+  visibleColumns,
+  onLastResponseFilterChange,
+  onLastRunOutcomeFilterChange,
+  onRuleParamFilterChange,
+  onSearchFilterChange,
+  onStatusFilterChange,
   onTypeFilterChange,
   setHeaderActions,
-  refresh,
-  rulesListKey,
-  visibleColumns,
 }: RulesListProps) => {
   const history = useHistory();
   const {
-    http,
-    notifications: { toasts },
-    application: { capabilities },
-    ruleTypeRegistry,
     actionTypeRegistry,
+    application: { capabilities },
+    http,
     kibanaFeatures,
+    notifications: { toasts },
+    ruleTypeRegistry,
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
+  const [ruleParamText, setRuleParamText] = useState<string>(
+    ruleParamFilter && Object.keys(ruleParamFilter).length ? rison.encode(ruleParamFilter) : ''
+  );
 
   const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: searchFilter || '',
-    types: typeFilter || [],
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
-    ruleStatuses: statusFilter || [],
     ruleParams: ruleParamFilter || {},
+    ruleStatuses: statusFilter || [],
+    searchText: searchFilter || '',
     tags: [],
+    types: typeFilter || [],
   }));
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -366,6 +370,7 @@ export const RulesList = ({
           break;
         case 'ruleParams':
           onRuleParamFilterChange?.(value as Record<string, string | number>);
+          break;
         case 'searchText':
           onSearchFilterChange?.(value as string);
           break;
@@ -801,20 +806,22 @@ export const RulesList = ({
         {showRulesList && (
           <>
             <RulesListFiltersBar
-              inputText={inputText}
-              filters={filters}
-              showActionFilter={showActionFilter}
-              rulesStatusesTotal={rulesStatusesTotal}
-              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
-              tags={tags}
-              filterOptions={filterOptions}
               actionTypes={actionTypes}
-              lastUpdate={lastUpdate}
-              showErrors={showErrors}
+              filterOptions={filterOptions}
+              filters={filters}
+              inputText={inputText}
               items={tableItems}
-              showRuleParamFilter={showRuleParamFilter}
-              updateFilters={updateFilters}
+              lastUpdate={lastUpdate}
+              ruleParamText={ruleParamText}
+              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
+              rulesStatusesTotal={rulesStatusesTotal}
               setInputText={setInputText}
+              setRuleParamText={setRuleParamText}
+              showActionFilter={showActionFilter}
+              showErrors={showErrors}
+              showRuleParamFilter={showRuleParamFilter}
+              tags={tags}
+              updateFilters={updateFilters}
               onClearSelection={onClearSelection}
               onRefreshRules={refreshRules}
               onToggleRuleErrors={toggleRuleErrors}

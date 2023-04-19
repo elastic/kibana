@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -13,6 +14,7 @@ import Chance from 'chance';
 import { TestProvider } from '../../../test/test_provider';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
+import { EMPTY_STATE_TEST_SUBJ } from '../../../components/test_subjects';
 
 const chance = new Chance();
 
@@ -55,6 +57,7 @@ describe('<FindingsByResourceTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      onResetFilters: jest.fn(),
     };
 
     render(
@@ -63,9 +66,7 @@ describe('<FindingsByResourceTable />', () => {
       </TestProvider>
     );
 
-    expect(
-      screen.getByTestId(TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(EMPTY_STATE_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {
@@ -80,6 +81,7 @@ describe('<FindingsByResourceTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      onResetFilters: jest.fn(),
     };
 
     render(

@@ -82,28 +82,28 @@ export function RulesPage() {
 
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { lastResponse, search, status: newStatus, type });
+    urlStateStorage.set('_a', { lastResponse, params, search, status: newStatus, type });
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { lastResponse: newLastResponse, search, status, type });
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, params, search, status, type });
   };
 
   const handleTypeFilterChange = (newType: string[]) => {
     setType(newType);
-    urlStateStorage.set('_a', { lastResponse, search, status, type: newType });
+    urlStateStorage.set('_a', { lastResponse, params, search, status, type: newType });
   };
 
   const handleSearchFilterChange = (newSearch: string) => {
     setSearch(newSearch);
-    urlStateStorage.set('_a', { lastResponse, search: newSearch, status, type });
+    urlStateStorage.set('_a', { lastResponse, params, search: newSearch, status, type });
   };
 
   const handleRuleParamFilterChange = (newParams: Record<string, string | number>) => {
     setParams(newParams);
-    urlStateStorage.set('_a', { lastResponse, params: newParams, status });
+    urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
   };
 
   return (

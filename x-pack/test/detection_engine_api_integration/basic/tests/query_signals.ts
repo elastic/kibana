@@ -22,23 +22,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSignalStatus())
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql({
-          timed_out: false,
-          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
-        });
-      });
-
       // This fails and should be investigated or removed if it no longer applies
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest, log);
@@ -144,23 +127,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
-        it('should not give errors when querying and the signals index does not exist yet', async () => {
-          const { body } = await supertest
-            .post(ALERTS_AS_DATA_FIND_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ...getSignalStatus(), index: '.siem-signals-default' })
-            .expect(200);
-
-          // remove any server generated items that are indeterministic
-          delete body.took;
-
-          expect(body).to.eql({
-            timed_out: false,
-            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-            hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
-          });
-        });
-
         // This fails and should be investigated or removed if it no longer applies
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest, log);

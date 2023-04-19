@@ -56,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe('Non ECS fields in alert document source', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
+  describe.skip('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'

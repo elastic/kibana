@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import rison from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -26,49 +27,51 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
-import { RuleParamsFilter } from './rule_params_filter';
 import { RulesListSearchFilter } from './rules_list_search_filter';
 
 interface RulesListFiltersBarProps {
-  inputText: string;
-  filters: RulesListFilters;
-  showActionFilter: boolean;
-  showRuleParamFilter: boolean;
-  rulesStatusesTotal: Record<string, number>;
-  rulesLastRunOutcomesTotal: Record<string, number>;
-  tags: string[];
-  filterOptions: TypeFilterProps['options'];
   actionTypes: ActionType[];
-  lastUpdate: string;
-  showErrors: boolean;
+  filterOptions: TypeFilterProps['options'];
+  filters: RulesListFilters;
+  inputText: string;
   items: RuleTableItem[];
-  updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
-  setInputText: (text: string) => void;
+  lastUpdate: string;
+  ruleParamText: string;
+  rulesLastRunOutcomesTotal: Record<string, number>;
+  rulesStatusesTotal: Record<string, number>;
+  showActionFilter: boolean;
+  showErrors: boolean;
+  showRuleParamFilter: boolean;
+  tags: string[];
   onClearSelection: () => void;
   onRefreshRules: () => void;
   onToggleRuleErrors: () => void;
+  setInputText: (text: string) => void;
+  setRuleParamText: (text: string) => void;
+  updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
 }
 
 const ENTER_KEY = 13;
 export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) => {
   const {
-    filters,
-    inputText,
-    showActionFilter = true,
-    showRuleParamFilter = true,
-    rulesStatusesTotal,
-    rulesLastRunOutcomesTotal,
-    tags,
     actionTypes,
     filterOptions,
+    filters,
+    inputText,
     lastUpdate,
-    showErrors,
-    updateFilters,
-    setInputText,
-    items,
     onClearSelection,
     onRefreshRules,
     onToggleRuleErrors,
+    ruleParamText,
+    rulesLastRunOutcomesTotal,
+    rulesStatusesTotal,
+    setInputText,
+    setRuleParamText,
+    showActionFilter = true,
+    showErrors,
+    showRuleParamFilter = true,
+    tags,
+    updateFilters,
   } = props;
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
@@ -137,14 +140,6 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     ),
     ...getRuleOutcomeOrStatusFilter(),
     ...getRuleTagFilter(),
-    showRuleParamFilter && (
-      <RuleParamsFilter
-        key="param-filter"
-        filters={filters.ruleParams}
-        ruleItems={items}
-        onChange={(value) => updateFilters({ filter: 'ruleParams', value })}
-      />
-    ),
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,11 +152,26 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
   const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === ENTER_KEY) {
       updateFilters({ filter: 'searchText', value: inputText });
+
+      updateFilters({
+        filter: 'ruleParams',
+        value:
+          (rison.decode(`(${ruleParamText.replaceAll(' ', '')})`) as Record<
+            string,
+            string | number
+          >) || {},
+      });
     }
   };
 
-  const handlePoop = (value: Record<string, string>) =>
-    updateFilters({ filter: 'ruleParams', value });
+  const handleChangeRuleParams = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setRuleParamText(value);
+
+    if (e.target.value === '') {
+      updateFilters({ filter: 'ruleParams', value: {} });
+    }
+  };
 
   return (
     <>
@@ -178,11 +188,10 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         <EuiFlexItem>
           <RulesListSearchFilter
             inputText={inputText}
-            filters={filters}
-            items={items}
+            ruleParamText={ruleParamText}
             showRuleParamFilter={showRuleParamFilter}
             onChange={handleChange}
-            onChangeRuleParams={handlePoop}
+            onChangeRuleParams={handleChangeRuleParams}
             onKeyUp={handleKeyup}
           />
         </EuiFlexItem>

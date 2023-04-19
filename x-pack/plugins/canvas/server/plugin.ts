@@ -45,6 +45,7 @@ interface PluginsStart {
 
 export class CanvasPlugin implements Plugin {
   private readonly logger: Logger;
+
   constructor(public readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }

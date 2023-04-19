@@ -314,7 +314,7 @@
             "description": [],
             "signature": [
               "({ caseId, alerts }: ",
-              "RemoveAlertsFromCaseOptions",
+              "RemoveCaseIdFromAlertsOptions",
               ") => Promise<void>"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
@@ -329,12 +329,56 @@
                 "label": "{ caseId, alerts }",
                 "description": [],
                 "signature": [
-                  "RemoveAlertsFromCaseOptions"
+                  "RemoveCaseIdFromAlertsOptions"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.removeCaseIdsFromAllAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "removeCaseIdsFromAllAlerts",
+            "description": [],
+            "signature": [
+              "({ caseIds }: { caseIds: string[]; }) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.removeCaseIdsFromAllAlerts.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ caseIds }",
+                "description": [],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.removeCaseIdsFromAllAlerts.$1.caseIds",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "caseIds",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -1676,9 +1720,21 @@
             "text": "RuleExecutorOptions"
           },
           "<Params, ",
-          "WrappedLifecycleRuleState",
+          {
+            "pluginId": "@kbn/alerting-state-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingStateTypesPluginApi",
+            "section": "def-common.WrappedLifecycleRuleState",
+            "text": "WrappedLifecycleRuleState"
+          },
           "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: ",
-          "WrappedLifecycleRuleState",
+          {
+            "pluginId": "@kbn/alerting-state-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingStateTypesPluginApi",
+            "section": "def-common.WrappedLifecycleRuleState",
+            "text": "WrappedLifecycleRuleState"
+          },
           "<State>; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
