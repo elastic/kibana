@@ -8,7 +8,13 @@
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import {
+  METRIC_TYPE,
+  ML_JOB_TELEMETRY_STATUS,
+  TELEMETRY_EVENT,
+  track,
+} from '../../../lib/telemetry';
+
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
 import type { SecurityJob } from '../types';
 import * as i18n from './translations';
@@ -38,7 +44,7 @@ export const useEnableDataFeed = () => {
             jobId: job.id,
             isElasticJob: job.isElasticJob,
             moduleId: job.moduleId,
-            status: 'module_installed',
+            status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
           });
         } catch (error) {
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
@@ -47,7 +53,7 @@ export const useEnableDataFeed = () => {
             jobId: job.id,
             isElasticJob: job.isElasticJob,
             moduleId: job.moduleId,
-            status: 'installation_error',
+            status: ML_JOB_TELEMETRY_STATUS.installationError,
             errorMessage: `${i18n.CREATE_JOB_FAILURE} - ${error.message}`,
           });
           return;
@@ -66,7 +72,7 @@ export const useEnableDataFeed = () => {
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
-            status: 'started',
+            status: ML_JOB_TELEMETRY_STATUS.started,
           });
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
@@ -74,7 +80,7 @@ export const useEnableDataFeed = () => {
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
-            status: 'start_error',
+            status: ML_JOB_TELEMETRY_STATUS.startError,
             errorMessage: `${i18n.START_JOB_FAILURE} - ${error.message}`,
           });
         }
@@ -84,7 +90,7 @@ export const useEnableDataFeed = () => {
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
-            status: 'stopped',
+            status: ML_JOB_TELEMETRY_STATUS.stopped,
           });
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
@@ -92,7 +98,7 @@ export const useEnableDataFeed = () => {
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
-            status: 'stop_error',
+            status: ML_JOB_TELEMETRY_STATUS.stopError,
             errorMessage: `${i18n.STOP_JOB_FAILURE} - ${error.message}`,
           });
         }

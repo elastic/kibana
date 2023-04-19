@@ -52,17 +52,19 @@ export interface ReportEntityRiskFilteredParams extends EntityParam {
   selectedSeverity: RiskSeverity;
 }
 
+export enum ML_JOB_TELEMETRY_STATUS {
+  started = 'started',
+  startError = 'start_error',
+  stopped = 'stopped',
+  stopError = 'stop_error',
+  moduleInstalled = 'module_installed',
+  installationError = 'installationError',
+}
 
 export interface ReportMLJobUpdateParams {
   jobId: string;
   isElasticJob: boolean;
-  status:
-    | 'module_installed'
-    | 'installation_error'
-    | 'started'
-    | 'start_error'
-    | 'stopped'
-    | 'stop_error';
+  status: ML_JOB_TELEMETRY_STATUS;
   moduleId?: string;
   errorMessage?: string;
 }

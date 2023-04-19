@@ -19,6 +19,7 @@ import type { State } from '../../../store';
 
 import type { SecurityJob } from '../types';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
+import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
@@ -171,14 +172,14 @@ describe('useSecurityJobsHelpers', () => {
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'module_installed',
+        status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
         isElasticJob: true,
         jobId,
         moduleId,
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'started',
+        status: ML_JOB_TELEMETRY_STATUS.started,
         isElasticJob: true,
         jobId,
       });
@@ -193,7 +194,7 @@ describe('useSecurityJobsHelpers', () => {
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'stopped',
+        status: ML_JOB_TELEMETRY_STATUS.stopped,
         isElasticJob: true,
         jobId,
       });
@@ -209,7 +210,7 @@ describe('useSecurityJobsHelpers', () => {
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'stop_error',
+        status: ML_JOB_TELEMETRY_STATUS.stopError,
         errorMessage: 'Stop job failure - test_error',
         isElasticJob: true,
         jobId,
@@ -226,7 +227,7 @@ describe('useSecurityJobsHelpers', () => {
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'start_error',
+        status: ML_JOB_TELEMETRY_STATUS.startError,
         errorMessage: 'Start job failure - test_error',
         isElasticJob: true,
         jobId,
@@ -243,7 +244,7 @@ describe('useSecurityJobsHelpers', () => {
       });
 
       expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: 'installation_error',
+        status: ML_JOB_TELEMETRY_STATUS.installationError,
         errorMessage: 'Create job failure - test_error',
         isElasticJob: true,
         jobId,
