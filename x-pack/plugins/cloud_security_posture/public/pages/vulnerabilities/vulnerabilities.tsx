@@ -9,7 +9,7 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiLoadingSpinner,
+  EuiProgress,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
@@ -31,6 +32,9 @@ import { EmptyState } from '../../components/empty_state';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useLimitProperties } from '../../common/utils/get_limit_properties';
+import { LimitedResultsBar } from '../configurations/layout/findings_layout';
+import { CspLoadingState } from '../../components/csp_loading_state';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -38,6 +42,15 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   sort: [{ id: vulnerabilitiesColumns.cvss, direction: 'desc' }],
   pageIndex: 0,
 });
+
+const Loader = () => (
+  <CspLoadingState>
+    <FormattedMessage
+      id="xpack.csp.vulnerabilities.loadingDescription"
+      defaultMessage="Loading..."
+    />
+  </CspLoadingState>
+);
 
 export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
@@ -49,7 +62,7 @@ export const Vulnerabilities = () => {
     return <ErrorCallout error={error as Error} />;
   }
   if (isLoading || !data) {
-    return <EuiLoadingSpinner />;
+    return <Loader />;
   }
 
   return <VulnerabilitiesContent dataView={data} />;
@@ -74,7 +87,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
   const { euiTheme } = useEuiTheme();
 
-  const { data, isLoading } = useLatestVulnerabilities({
+  const { data, isLoading, isFetching } = useLatestVulnerabilities({
     query,
     sort,
     enabled: !queryError,
@@ -95,6 +108,12 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     setVulnerability(undefined);
   };
 
+  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
+    total: data?.total,
+    pageIndex,
+    pageSize,
+  });
+
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
       const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
@@ -114,7 +133,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       }
       if (columnId === vulnerabilitiesColumns.vulnerability) {
-        return vulnerabilityRow.vulnerability.id || null;
+        return vulnerabilityRow.vulnerability.id || '';
       }
       if (columnId === vulnerabilitiesColumns.cvss) {
         if (!vulnerabilityRow.vulnerability.score?.base) {
@@ -131,15 +150,12 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         return vulnerabilityRow.resource?.name || null;
       }
       if (columnId === vulnerabilitiesColumns.severity) {
-        if (
-          !vulnerabilityRow.vulnerability.score?.base ||
-          !vulnerabilityRow.vulnerability.severity
-        ) {
+        if (!vulnerabilityRow.vulnerability.severity) {
           return null;
         }
         return (
           <SeverityStatusBadge
-            score={vulnerabilityRow.vulnerability.score.base}
+            score={vulnerabilityRow.vulnerability.score?.base}
             status={vulnerabilityRow.vulnerability.severity}
           />
         );
@@ -169,7 +185,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     return <ErrorCallout error={error as Error} />;
   }
   if (isLoading || !data?.page) {
-    return <EuiLoadingSpinner />;
+    return <Loader />;
   }
 
   const columns = getVulnerabilitiesColumnsGrid();
@@ -188,6 +204,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>
+          {isFetching && <EuiProgress size="xs" color="accent" />}
           <EuiDataGrid
             css={css`
               & .euiDataGridHeaderCell__icon {
@@ -209,7 +226,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               visibleColumns: columns.map(({ id }) => id),
               setVisibleColumns: () => {},
             }}
-            rowCount={data?.total}
+            rowCount={limitedTotalItemCount}
             toolbarVisibility={{
               showColumnSelector: false,
               showDisplaySelector: false,
@@ -236,7 +253,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               header: 'underline',
             }}
             renderCellValue={renderCellValue}
-            inMemory={{ level: 'sorting' }}
+            inMemory={{ level: 'pagination' }}
             sorting={{ columns: sort, onSort }}
             pagination={{
               pageIndex,
@@ -246,6 +263,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               onChangePage,
             }}
           />
+          {isLastLimitedPage && <LimitedResultsBar />}
           {/* Todo: Add Pagination */}
           {isVulnerabilityDetailFlyoutVisible && !!vulnerability && (
             <VulnerabilityFindingFlyout
