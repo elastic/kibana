@@ -11,10 +11,16 @@ import { DataView } from '@kbn/data-views-plugin/common';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
+import { findOrCreateDataView } from '../../utils/find_or_create_data_view';
 
 import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
+
+jest.mock('../../utils/find_or_create_data_view', () => {
+  return {
+    findOrCreateDataView: jest.fn(),
+  };
+});
 
 describe('AnalyticsCollectionDataViewLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionDataViewLogic);
@@ -44,7 +50,7 @@ describe('AnalyticsCollectionDataViewLogic', () => {
   describe('listeners', () => {
     it('should find and set dataView when analytics collection fetched', async () => {
       const dataView = { id: 'test' } as DataView;
-      jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValue([dataView]);
+      (findOrCreateDataView as jest.Mock).mockResolvedValue(dataView);
 
       await FetchAnalyticsCollectionLogic.actions.apiSuccess({
         events_datastream: 'events1',
@@ -56,7 +62,7 @@ describe('AnalyticsCollectionDataViewLogic', () => {
 
     it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
       const dataView = { id: 'test' } as DataView;
-      jest.spyOn(KibanaLogic.values.data.dataViews, 'createAndSave').mockResolvedValue(dataView);
+      (findOrCreateDataView as jest.Mock).mockResolvedValue(dataView);
 
       await FetchAnalyticsCollectionLogic.actions.apiSuccess({
         events_datastream: 'events1',

@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
@@ -24,7 +24,7 @@ describe('AnalyticsCollectionExplorer', () => {
     refreshInterval: { pause: false, value: 1000 },
     timeRange: { from: 'now-15m', to: 'now' },
   };
-  const mockActions = { findDataViewId: jest.fn(), reset: jest.fn(), setSelectedTable: jest.fn() };
+  const mockActions = { reset: jest.fn() };
 
   beforeAll(() => {
     jest.clearAllMocks();
@@ -59,11 +59,5 @@ describe('AnalyticsCollectionExplorer', () => {
       pageTitle: 'Explorer',
       rightSideItems: [<AnalyticsCollectionToolbar />],
     });
-  });
-
-  it('calls reset on unmount', () => {
-    const wrapper = mount(<AnalyticsCollectionExplorer />);
-    wrapper.unmount();
-    expect(mockActions.reset).toHaveBeenCalled();
   });
 });

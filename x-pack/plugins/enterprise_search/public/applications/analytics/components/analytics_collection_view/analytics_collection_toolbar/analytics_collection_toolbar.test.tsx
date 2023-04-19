@@ -93,7 +93,9 @@ describe('AnalyticsCollectionToolbar', () => {
 
     expect(exploreInDiscoverItem).toHaveLength(1);
 
-    expect(exploreInDiscoverItem.prop('href')).toBe("/app/discover#/?_a=(index:'data-view-test')");
+    expect(exploreInDiscoverItem.prop('href')).toBe(
+      "/app/discover#/?_a=(index:'data-view-test')&_g=(filters:!(),refreshInterval:(pause:!f,value:10000),time:(from:now-90d,to:now))"
+    );
   });
 
   it('should correct link to the manage datastream link', () => {
