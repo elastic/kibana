@@ -87,4 +87,13 @@ export const apmActionVariables = {
     name: 'viewInAppUrl' as const,
     usesPublicBaseUrl: true,
   },
+  errorGroupingKey: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.errorGroupingKey',
+      {
+        defaultMessage: 'The error grouping key the alert is created for',
+      }
+    ),
+    name: 'viewInAppUrl' as const,
+  },
 };

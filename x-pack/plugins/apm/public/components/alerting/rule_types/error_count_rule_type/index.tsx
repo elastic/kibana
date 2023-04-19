@@ -21,6 +21,7 @@ import { createCallApmApi } from '../../../../services/rest/create_call_apm_api'
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
+  ErrorGroupingKeyField,
   IsAboveField,
   ServiceField,
 } from '../../utils/fields';
@@ -33,6 +34,7 @@ export interface RuleParams {
   threshold?: number;
   serviceName?: string;
   environment?: string;
+  errorGroupingKey?: string;
 }
 
 interface Props {
@@ -106,6 +108,12 @@ export function ErrorCountRuleType(props: Props) {
       onChange={(value) => setRuleParams('environment', value)}
       serviceName={params.serviceName}
     />,
+    <ErrorGroupingKeyField
+      currentValue={params.errorGroupingKey}
+      onChange={(value) => setRuleParams('errorGroupingKey', value)}
+      serviceName={params.serviceName}
+    />,
+
     <IsAboveField
       value={params.threshold}
       unit={i18n.translate('xpack.apm.errorCountRuleType.errors', {
