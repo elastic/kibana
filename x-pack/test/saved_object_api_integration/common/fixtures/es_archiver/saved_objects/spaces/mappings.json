@@ -108,6 +108,7 @@
             "cases-telemetry",
             "cases-user-actions",
             "connector_token",
+            "maintenance-window",
             "rules-settings"
           ],
           ".kibana_task_manager": [
