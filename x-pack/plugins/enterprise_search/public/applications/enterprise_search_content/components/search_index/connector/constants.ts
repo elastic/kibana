@@ -50,6 +50,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'azure_blob_storage',
   },
   {
+    docsUrl: docLinks.connectorsGoogleCloudStorage,
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
     externalDocsUrl: 'https://cloud.google.com/storage/docs',
     icon: CONNECTOR_ICONS.google_cloud_storage,
@@ -61,6 +62,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'google_cloud_storage',
   },
   {
+    docsUrl: docLinks.connectorsMicrosoftSQL,
     externalAuthDocsUrl:
       'https://learn.microsoft.com/sql/relational-databases/security/authentication-access/getting-started-with-database-engine-permissions',
     externalDocsUrl: 'https://learn.microsoft.com/sql/',
@@ -73,6 +75,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'mssql',
   },
   {
+    docsUrl: docLinks.connectorsNetworkDrive,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.network_drive,
@@ -84,6 +87,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'network_drive',
   },
   {
+    docsUrl: docLinks.connectorsOracle,
     externalAuthDocsUrl:
       'https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/index.html',
     externalDocsUrl: 'https://docs.oracle.com/database/oracle/oracle-database/',
@@ -96,6 +100,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'oracle',
   },
   {
+    docsUrl: docLinks.connectorsPostgreSQL,
     externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
     externalDocsUrl: 'https://www.postgresql.org/docs/',
     icon: CONNECTOR_ICONS.postgresql,
@@ -107,6 +112,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 'postgresql',
   },
   {
+    docsUrl: docLinks.connectorsS3,
     externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
@@ -118,6 +124,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     serviceType: 's3',
   },
   {
+    docsUrl: docLinks.connectors,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.custom,
