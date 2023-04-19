@@ -34,10 +34,9 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { COLLECTION_INTEGRATE_PATH } from '../../../routes';
-import { getDiscoverLink } from '../../../utils/get_discover_link';
-import { AnalyticsCollectionDataViewLogic } from '../analytics_collection_data_view_logic';
 import { DeleteAnalyticsCollectionLogic } from '../delete_analytics_collection_logic';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
+import { useDiscoverLink } from '../use_discover_link';
 
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar_logic';
 
@@ -80,9 +79,9 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 ];
 
 export const AnalyticsCollectionToolbar: React.FC = () => {
+  const discoverLink = useDiscoverLink();
   const [isPopoverOpen, setPopover] = useState(false);
   const { application, navigateToUrl } = useValues(KibanaLogic);
-  const { dataView } = useValues(AnalyticsCollectionDataViewLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
   const { setTimeRange, setRefreshInterval, onTimeRefresh } = useActions(
     AnalyticsCollectionToolbarLogic
@@ -171,10 +170,10 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
                 />
               </EuiContextMenuItem>
 
-              {dataView && (
+              {discoverLink && (
                 <EuiContextMenuItem
                   icon="visArea"
-                  href={getDiscoverLink(application, dataView)}
+                  href={discoverLink}
                   size="s"
                   data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
                 >
