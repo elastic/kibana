@@ -49,6 +49,7 @@ export const renderApp = ({
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
+    observabilityShared: pluginsStart.observabilityShared,
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
