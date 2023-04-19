@@ -239,9 +239,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await logoutAndDeleteReadOnlyUser();
       });
 
-      it('should render metadata tab', async () => {
+      it('should render metadata tab, add and remove filter', async () => {
         const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
         expect(metadataTab).to.contain('Metadata');
+
+        await pageObjects.infraHostsView.clickAddMetadataFilter();
+        await pageObjects.infraHome.waitForLoading();
+
+        // Add Filter
+        const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
+        expect(addedFilter).to.contain('host.architecture: arm64');
+        const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
+        expect(removeFilterExists).to.be(true);
+
+        // Remove filter
+        await pageObjects.infraHostsView.clickRemoveMetadataFilter();
+        await pageObjects.infraHome.waitForLoading();
+        const removeFilterShouldNotExist = await pageObjects.infraHostsView.getRemoveFilterExist();
+        expect(removeFilterShouldNotExist).to.be(false);
       });
 
       it('should navigate to Uptime after click', async () => {
