@@ -42,8 +42,8 @@ describe('autocomplete_listener', () => {
   });
 
   describe('where', () => {
-    testSuggestions('from a | where ', ['FieldIdentifier']);
-    testSuggestions('from a | where "field" ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | where ', ['is_null', 'cidr_match', 'FieldIdentifier']);
+    testSuggestions('from a | where "field" ', ['==', '!=', '<', '>', '<=', '>=', 'like', 'rlike']);
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
@@ -54,9 +54,29 @@ describe('autocomplete_listener', () => {
       '>',
       '<=',
       '>=',
+      'like',
+      'rlike',
     ]);
-    testSuggestions('from a | stats a=avg("field") | where a ', ['==', '!=', '<', '>', '<=', '>=']);
-    testSuggestions('from a | stats a=avg("b") | where "c" ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | stats a=avg("field") | where a ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+    ]);
+    testSuggestions('from a | stats a=avg("b") | where "c" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      'like',
+      'rlike',
+    ]);
     testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
 
@@ -93,7 +113,16 @@ describe('autocomplete_listener', () => {
   describe('eval', () => {
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);
-    testSuggestions('from a | eval a=', ['round', 'FieldIdentifier']);
+    testSuggestions('from a | eval a=', [
+      'round',
+      'abs',
+      'concat',
+      'substring',
+      'starts_with',
+      'date_format',
+      'date_trunc',
+      'FieldIdentifier',
+    ]);
     testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=round', ['(']);

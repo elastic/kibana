@@ -339,7 +339,7 @@ export class AutocompleteListener implements ESQLParserListener {
   }
 
   exitWhereCommand(ctx: WhereCommandContext) {
-    const booleanExpression = ctx.booleanExpression();
+    const booleanExpression = ctx.whereBooleanExpression();
 
     if (booleanExpression.exception) {
       if (!booleanExpression.text) {

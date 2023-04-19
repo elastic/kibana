@@ -17,6 +17,7 @@ import { QueryContext } from "./esql_parser";
 import { SourceCommandContext } from "./esql_parser";
 import { ProcessingCommandContext } from "./esql_parser";
 import { WhereCommandContext } from "./esql_parser";
+import { WhereBooleanExpressionContext } from "./esql_parser";
 import { BooleanExpressionContext } from "./esql_parser";
 import { RegexBooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionContext } from "./esql_parser";
@@ -224,6 +225,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitWhereCommand?: (ctx: WhereCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.whereBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterWhereBooleanExpression?: (ctx: WhereBooleanExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.whereBooleanExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitWhereBooleanExpression?: (ctx: WhereBooleanExpressionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.booleanExpression`.

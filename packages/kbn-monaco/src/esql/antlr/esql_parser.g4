@@ -39,16 +39,23 @@ processingCommand
     ;
 
 whereCommand
-    : WHERE booleanExpression
+    : WHERE whereBooleanExpression
     ;
 
-booleanExpression
+whereBooleanExpression
     : NOT booleanExpression
     | valueExpression
     | regexBooleanExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
     | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
+    ;
+
+booleanExpression
+    : NOT booleanExpression
+    | valueExpression
+    | left=booleanExpression operator=AND right=booleanExpression
+    | left=booleanExpression operator=OR right=booleanExpression
     ;
 
 regexBooleanExpression
