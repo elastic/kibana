@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { MlGetTrainedModelsStatsRequest, MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  MlGetTrainedModelsStatsRequest,
+  MlGetTrainedModelsRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
