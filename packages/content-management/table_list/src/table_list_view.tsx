@@ -108,7 +108,7 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
   contentEditor?: ContentEditorConfig;
 }
 
-export type TableListProps<T extends UserContentCommonSchema> = Pick<
+export type TableListProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewProps<T>,
   | 'entityName'
   | 'entityNamePlural'
@@ -129,7 +129,7 @@ export type TableListProps<T extends UserContentCommonSchema> = Pick<
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-> & { onFetchSuccess: () => void; tableCaption: string };
+> & { onFetchSuccess: () => void; tableCaption: string; refreshListBouncer?: boolean };
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
@@ -249,7 +249,7 @@ const urlStateSerializer = (updated: {
   return updatedQueryParams;
 };
 
-function TableListComp<T extends UserContentCommonSchema>({
+const TableListComp = function TableListComp<T extends UserContentCommonSchema>({
   tableCaption,
   entityName,
   entityNamePlural,
@@ -271,6 +271,7 @@ function TableListComp<T extends UserContentCommonSchema>({
   titleColumnName,
   withoutPageTemplateWrapper,
   onFetchSuccess: onInitialFetchReturned,
+  refreshListBouncer,
 }: TableListProps<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -409,6 +410,10 @@ function TableListComp<T extends UserContentCommonSchema>({
       });
     }
   }, [searchQueryParser, searchQuery.text, findItems, onInitialFetchReturned]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems, refreshListBouncer]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -949,7 +954,7 @@ function TableListComp<T extends UserContentCommonSchema>({
       </div>
     </>
   );
-}
+};
 
 export const TableList = React.memo(TableListComp) as typeof TableListComp;
 

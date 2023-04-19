@@ -17,7 +17,12 @@ import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import TableListView, { UserContentCommonSchema, type TableListViewProps } from './table_list_view';
+import TableListView, {
+  TableList,
+  TableListProps,
+  UserContentCommonSchema,
+  type TableListViewProps,
+} from './table_list_view';
 
 const mockUseEffect = useEffect;
 
@@ -45,24 +50,24 @@ interface Router {
   };
 }
 
-const requiredProps: TableListViewProps = {
-  entityName: 'test',
-  entityNamePlural: 'tests',
-  listingLimit: 500,
-  initialFilter: '',
-  initialPageSize: 20,
-  title: 'test title',
-  findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
-  getDetailViewLink: () => 'http://elastic.co',
-  urlStateEnabled: false,
-};
-
 const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
 const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
 describe('TableListView', () => {
+  const requiredProps: TableListViewProps = {
+    entityName: 'test',
+    entityNamePlural: 'tests',
+    listingLimit: 500,
+    initialFilter: '',
+    initialPageSize: 20,
+    title: 'test title',
+    findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
+    getDetailViewLink: () => 'http://elastic.co',
+    urlStateEnabled: false,
+  };
+
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
@@ -1032,5 +1037,69 @@ describe('TableListView', () => {
       ]);
       expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
     });
+  });
+});
+
+describe('TableList', () => {
+  const requiredProps: TableListProps = {
+    entityName: 'test',
+    entityNamePlural: 'tests',
+    initialPageSize: 20,
+    listingLimit: 500,
+    findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
+    onFetchSuccess: jest.fn(),
+    tableCaption: 'test title',
+    getDetailViewLink: () => '',
+  };
+
+  const setup = registerTestBed<string, TableListProps>(WithServices<TableListProps>(TableList), {
+    defaultProps: { ...requiredProps, refreshListBouncer: false },
+    memoryRouter: { wrapComponent: true },
+  });
+
+  it('refreshes the list when the bouncer changes', async () => {
+    let testBed: TestBed;
+
+    const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+
+    act(() => {
+      testBed = setup({ findItems });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const { component, table } = testBed!;
+    component.update();
+
+    findItems.mockClear();
+    expect(findItems).not.toHaveBeenCalled();
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: `item`,
+        type: 'dashboard',
+        updatedAt: 'some date',
+        attributes: {
+          title: `Updated title`,
+        },
+        references: [],
+      },
+    ];
+    findItems.mockResolvedValue({ total: hits.length, hits });
+
+    act(() => {
+      component.setProps({
+        refreshListBouncer: true,
+      });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    component.update();
+
+    expect(findItems).toHaveBeenCalledTimes(1);
+
+    const metadata = table.getMetaData('itemsInMemTable');
+
+    expect(metadata.tableCellsValues[0][0]).toBe('Updated title');
   });
 });

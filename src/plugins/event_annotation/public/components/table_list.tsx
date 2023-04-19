@@ -49,6 +49,12 @@ export const EventAnnotationGroupTableList = ({
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+
+  const refreshList = useCallback(() => {
+    setRefreshListBouncer(!refreshListBouncer);
+  }, [refreshListBouncer]);
+
   const fetchItems = useCallback(
     (
       searchTerm: string,
@@ -115,6 +121,7 @@ export const EventAnnotationGroupTableList = ({
                   : eventAnnotationService.createAnnotationGroup(groupToEditInfo.group)
                 ).then(() => {
                   setGroupToEditInfo(undefined);
+                  refreshList();
                 })
               }
             >
@@ -132,6 +139,7 @@ export const EventAnnotationGroupTableList = ({
   return (
     <>
       <TableList<EventAnnotationGroupContent>
+        refreshListBouncer={refreshListBouncer}
         // createItem={createNewGroup}
         tableCaption={i18n.translate('eventAnnotation.tableList.listTitle', {
           defaultMessage: 'Annotation Library',
