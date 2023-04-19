@@ -1,0 +1,7 @@
+{
+  "prefix": "observability_onboarding",
+  "paths": {
+    "profiling": "."
+  },
+  "translations": []
+}

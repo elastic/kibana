@@ -10,7 +10,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -20,19 +19,18 @@ import {
   CoreStart,
   APP_WRAPPER_CLASS,
 } from '@kbn/core/public';
-
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-
 import {
   DatePickerContextProvider,
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-plugin/public';
+import { Theme, ThemeProvider } from '@emotion/react';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { Home } from '../components/app/home';
 
@@ -81,7 +79,7 @@ function ObservabilityOnboardingApp() {
 
   return (
     <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
+      theme={(outerTheme?: Theme) => ({
         ...outerTheme,
         eui: darkMode ? euiDarkVars : euiLightVars,
         darkMode,

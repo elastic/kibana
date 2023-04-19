@@ -968,6 +968,27 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Invalid value for select type']);
     });
 
+    it('should return an error message if the value is an empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
     it('should accept a select with a valid value', () => {
       const res = validatePackagePolicyConfig(
         {
