@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type {
+  ContentManagementCrudTypes,
+  CreateOptions,
+  UpdateOptions,
+} from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
 export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
@@ -31,13 +35,13 @@ export type MapGetOut = MapCrudTypes['GetOut'];
 
 export type MapCreateIn = MapCrudTypes['CreateIn'];
 export type MapCreateOut = MapCrudTypes['CreateOut'];
-export type MapCreateOptions = MapCrudTypes['CreateOptions'];
+export type MapCreateOptions = CreateOptions;
 
 // ----------- UPDATE --------------
 
 export type MapUpdateIn = MapCrudTypes['UpdateIn'];
 export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-export type MapUpdateOptions = MapCrudTypes['UpdateOptions'];
+export type MapUpdateOptions = UpdateOptions;
 
 // ----------- DELETE --------------
 
@@ -48,4 +52,7 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
-export type MapSearchOptions = MapCrudTypes['SearchOptions'];
+export interface MapSearchOptions {
+  /** Flag to indicate to only search the text on the "title" field */
+  onlyTitle?: boolean;
+}

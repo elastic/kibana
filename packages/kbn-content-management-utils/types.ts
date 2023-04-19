@@ -25,23 +25,25 @@ export interface Reference {
   name: string;
 }
 
+/** Saved Object create options - Pick and Omit to customize */
 export interface CreateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-export interface SearchOptions {
-  /** Flag to indicate to only search the text on the "title" field */
-  onlyTitle?: boolean;
-}
+/** Saved Object search options - Pick and Omit to customize */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchOptions {}
 
+/** Saved Object update options  - Pick and Omit to customize */
 export interface UpdateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
 
-export type GetResultSO<Item extends object> = GetResult<
-  Item,
+/** Return value for Saved Object get, T is item returned */
+export type GetResultSO<T extends object> = GetResult<
+  T,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     aliasTargetId?: string;
@@ -109,10 +111,6 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
    * Create item result
    */
   CreateOut: CreateResult<SOWithMetadata<Attributes>>;
-  /**
-   * Create options
-   */
-  CreateOptions: CreateOptions;
 
   /**
    * Search item params
@@ -122,10 +120,6 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
    * Search item result
    */
   SearchOut: SearchResult<SOWithMetadata<Attributes>>;
-  /**
-   * Search options
-   */
-  SearchOptions: SearchOptions;
 
   /**
    * Update item params
@@ -135,10 +129,6 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
    * Update item result
    */
   UpdateOut: UpdateResult<PartialItem<Attributes>>;
-  /**
-   * Update options
-   */
-  UpdateOptions: UpdateOptions;
 
   /**
    * Delete item params
