@@ -34,28 +34,36 @@ const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
   path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
 };
 
-const EXPLAIN_LOG_RATE_SPIKES_DEEP_LINK: AppDeepLink = {
-  id: 'explainLogRateSpikesDeepLink',
-  title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
-    defaultMessage: 'Explain Log Rate Spikes',
+const AIOPS_DEEP_LINK: AppDeepLink = {
+  id: 'aiOpsDeepLink',
+  title: i18n.translate('xpack.ml.deepLink.aiOps', {
+    defaultMessage: 'AIOps',
   }),
+  // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
   path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
-};
-
-const LOG_PATTERN_ANALYSIS_DEEP_LINK: AppDeepLink = {
-  id: 'logPatternAnalysisDeepLink',
-  title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
-    defaultMessage: 'Log Pattern Analysis',
-  }),
-  path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
-};
-
-const CHANGE_POINT_DETECTION_DEEP_LINK: AppDeepLink = {
-  id: 'changePointDetectionsDeepLink',
-  title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
-    defaultMessage: 'Change Point Detection',
-  }),
-  path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+  deepLinks: [
+    {
+      id: 'explainLogRateSpikesDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.explainLogRateSpikes', {
+        defaultMessage: 'Explain Log Rate Spikes',
+      }),
+      path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
+    },
+    {
+      id: 'logPatternAnalysisDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
+        defaultMessage: 'Log Pattern Analysis',
+      }),
+      path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
+    },
+    {
+      id: 'changePointDetectionsDeepLink',
+      title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
+        defaultMessage: 'Change Point Detection',
+      }),
+      path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+    },
+  ],
 };
 
 const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
@@ -145,9 +153,7 @@ export function getDeepLinks(isFullLicense: boolean) {
       DATA_FRAME_ANALYTICS_DEEP_LINK,
       MODEL_MANAGEMENT_DEEP_LINK,
       SETTINGS_DEEP_LINK,
-      EXPLAIN_LOG_RATE_SPIKES_DEEP_LINK,
-      LOG_PATTERN_ANALYSIS_DEEP_LINK,
-      CHANGE_POINT_DETECTION_DEEP_LINK
+      AIOPS_DEEP_LINK
     );
   }
 
