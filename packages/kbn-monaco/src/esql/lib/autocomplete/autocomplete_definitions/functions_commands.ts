@@ -218,4 +218,18 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     },
     sortText: 'C',
   },
+  {
+    label: 'count_distinct',
+    insertText: 'count_distinct',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.countDistinctDoc', {
+      defaultMessage: 'Returns the count of distinct values in a field.',
+    }),
+    documentation: {
+      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
+        'from index | stats count = count_distinct(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
 ];

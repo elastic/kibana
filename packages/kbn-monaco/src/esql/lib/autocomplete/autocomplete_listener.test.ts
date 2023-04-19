@@ -95,7 +95,15 @@ describe('autocomplete_listener', () => {
   describe('stats', () => {
     testSuggestions('from a | stats ', ['var0']);
     testSuggestions('from a | stats a ', ['=']);
-    testSuggestions('from a | stats a=', ['avg', 'max', 'min', 'sum', 'count', 'FieldIdentifier']);
+    testSuggestions('from a | stats a=', [
+      'avg',
+      'max',
+      'min',
+      'sum',
+      'count',
+      'count_distinct',
+      'FieldIdentifier',
+    ]);
     testSuggestions('from a | stats a=b', ['|', 'by']);
     testSuggestions('from a | stats a=b by ', ['FieldIdentifier']);
     testSuggestions('from a | stats a=c by d', ['|']);

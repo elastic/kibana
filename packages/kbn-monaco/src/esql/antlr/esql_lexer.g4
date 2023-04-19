@@ -145,6 +145,7 @@ UNARY_FUNCTION
     | 'max'
     | 'sum'
     | 'count'
+    | 'count_distinct'
     ;
 
 WHERE_FUNCTIONS
