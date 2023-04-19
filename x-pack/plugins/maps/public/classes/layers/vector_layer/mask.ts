@@ -86,11 +86,20 @@ export class Mask {
     this._value = value;
   }
 
-  /*
-   * join mask field values are retrieved from feature state
-   */
   private _isFeatureState() {
-    return this._esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
+    if (this._esAggField.getOrigin() === FIELD_ORIGIN.SOURCE) {
+      // source fields are stored in properties
+      return false;
+    }
+
+    if (!this._esAggField.getSource().isMvt()) {
+      // For geojson sources, join fields are stored in properties
+      return false;
+    }
+
+    // For vector tile sources, it is not possible to add join fields to properties
+    // so join fields are stored in feature state
+    return true;
   }
 
   /*
