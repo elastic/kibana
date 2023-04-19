@@ -77,7 +77,7 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryActionMock.create).toHaveBeenCalledWith({
       ...defaultQueryResultParams,
       query: simpleQuery,
     });
@@ -102,7 +102,7 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions });
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryActionMock.create).toHaveBeenCalledWith({
       ...defaultPackResultParams,
       queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
     });
