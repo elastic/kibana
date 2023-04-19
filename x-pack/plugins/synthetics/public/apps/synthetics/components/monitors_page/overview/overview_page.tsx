@@ -114,7 +114,7 @@ export const OverviewPage: React.FC = () => {
       {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
             <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
