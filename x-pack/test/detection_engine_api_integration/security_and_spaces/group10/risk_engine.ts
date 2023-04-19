@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('Risk engine', () => {
-    describe('tests with auditbeat data', () => {
+    context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
@@ -131,8 +131,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      describe('rule risk score 21', () => {
-        it('risk scores calculated for 1 alert', async () => {
+      context('with a rule generating alerts with risk_score of 21', () => {
+        it('calculates risk from a single alert', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
 
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 2 alert with different host names', async () => {
+        it('calculates risk from two alerts, each representing a unique host', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([
             buildDocument({ host: { name: 'host-1' } }, documentId),
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 2 alert with different host names', async () => {
+        it('calculates risk from two alerts, both for the same host', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([
             buildDocument({ host: { name: 'host-1' } }, documentId),
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 30 alert with different host names', async () => {
+        it('calculates risk from 30 alerts, all for the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(30).fill(doc));
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 30 alert with same host names and 1 different', async () => {
+        it('calculates risk from 31 alerts, 30 from the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments([
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 100 alert with the same host names', async () => {
+        it('calculates risk from 100 alerts, all for the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
@@ -271,8 +271,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('rule risk score 100', () => {
-        it('risk scores calculated for 100 alert', async () => {
+      context('with a rule generating alerts with risk_score of 100', () => {
+        it('calculates risk from 100 alerts, all for the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('risk scores calculated for 10.000 alert', async () => {
+        it('calculates risk from 10,000 alerts, all for the same host', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(
