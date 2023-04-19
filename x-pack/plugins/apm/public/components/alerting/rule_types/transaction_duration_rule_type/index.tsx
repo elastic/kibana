@@ -153,7 +153,8 @@ export function TransactionDurationRuleType(props: Props) {
       onChange={(value) => {
         if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
-          setRuleParams('transactionType', '');
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
           setRuleParams('environment', ENVIRONMENT_ALL.value);
         }
       }}
