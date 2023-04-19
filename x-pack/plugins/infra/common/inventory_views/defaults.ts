@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
 import type { InventoryViewAttributes } from './types';
 
-export const staticInventoryViewId = 'static';
+export const staticInventoryViewId = '0';
 
 export const staticInventoryViewAttributes: InventoryViewAttributes = {
   name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
