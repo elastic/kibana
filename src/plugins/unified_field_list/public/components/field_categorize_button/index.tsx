@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { type FieldCategorizeButtonProps, FieldCategorizeButton } from './field_categorize_button';
+export {
+  type FieldCategorizeButtonProps,
+  FieldCategorizeButton,
+  getFieldCategorizeButton,
+} from './field_categorize_button';
 
 export { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';

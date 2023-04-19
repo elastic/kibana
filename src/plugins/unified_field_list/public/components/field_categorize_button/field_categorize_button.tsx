@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiButtonProps } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -27,16 +27,6 @@ export interface FieldCategorizeButtonProps {
 
 export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(
   ({ field, dataView, trackUiMetric, originatingApp, uiActions, buttonProps, closePopover }) => {
-    const [canCategorizeField, setCanCategorizeField] = useState<boolean>(false);
-
-    useEffect(() => {
-      canCategorize(uiActions, field, dataView).then(setCanCategorizeField);
-    }, [field, dataView, uiActions]);
-
-    if (canCategorizeField === false) {
-      return null;
-    }
-
     const handleVisualizeLinkClick = async (
       event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
@@ -61,3 +51,8 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
     );
   }
 );
+
+export async function getFieldCategorizeButton(props: FieldCategorizeButtonProps) {
+  const showButton = await canCategorize(props.uiActions, props.field, props.dataView);
+  return showButton ? <FieldCategorizeButton {...props} /> : null;
+}

@@ -6,21 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
-import { FieldVisualizeButton, type FieldVisualizeButtonProps } from '../field_visualize_button';
-import { FieldCategorizeButton, FieldCategorizeButtonProps } from '../field_categorize_button';
+import { type FieldVisualizeButtonProps, getFieldVisualizeButton } from '../field_visualize_button';
+import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
 
 export type FieldPopoverVisualizeProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 
 export const FieldPopoverVisualize: React.FC<FieldPopoverVisualizeProps> = (props) => {
-  return (
+  const [visualizeButton, setVisualizeButton] = useState<JSX.Element | null>(null);
+  const [categorizeButton, setCategorizeButton] = useState<JSX.Element | null>(null);
+
+  useEffect(() => {
+    getFieldVisualizeButton(props).then(setVisualizeButton);
+    getFieldCategorizeButton(props).then(setCategorizeButton);
+  }, [props]);
+
+  return visualizeButton || categorizeButton ? (
     <EuiPopoverFooter>
-      <FieldVisualizeButton {...props} />
-
-      <EuiSpacer size="s" />
-
-      <FieldCategorizeButton {...props} />
+      {visualizeButton}
+      {visualizeButton && categorizeButton ? <EuiSpacer size="s" /> : null} {categorizeButton}
     </EuiPopoverFooter>
-  );
+  ) : null;
 };

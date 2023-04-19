@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
@@ -14,7 +13,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { FieldCategorizeButton } from './field_categorize_button';
+import { getFieldCategorizeButton } from './field_categorize_button';
 import { ACTION_CATEGORIZE_FIELD, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { CATEGORIZE_FIELD_TRIGGER, TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 
@@ -46,15 +45,14 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
     const field = dataView.fields.find((f) => f.name === fieldName)!;
     let wrapper: ReactWrapper;
 
+    const button = await getFieldCategorizeButton({
+      field,
+      dataView,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
+    });
     await act(async () => {
-      wrapper = await mountWithIntl(
-        <FieldCategorizeButton
-          field={field}
-          dataView={dataView}
-          originatingApp={ORIGINATING_APP}
-          uiActions={uiActions}
-        />
-      );
+      wrapper = await mountWithIntl(button!);
     });
 
     await wrapper!.update();
@@ -79,25 +77,14 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
   it('should not render for non text field', async () => {
     const fieldName = 'phpmemory';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    let wrapper: ReactWrapper;
 
-    await act(async () => {
-      wrapper = await mountWithIntl(
-        <FieldCategorizeButton
-          field={field}
-          dataView={dataView}
-          originatingApp={ORIGINATING_APP}
-          uiActions={uiActions}
-        />
-      );
+    const button = await getFieldCategorizeButton({
+      field,
+      dataView,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
     });
 
-    await wrapper!.update();
-
-    expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(1);
-    wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).exists();
-    expect(wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).exists()).toBe(
-      false
-    );
+    expect(button).toBe(null);
   });
 });
