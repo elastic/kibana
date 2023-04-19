@@ -6,11 +6,9 @@
  */
 
 import {
-  EuiButton,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -141,10 +139,9 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             isDisabled={!editable}
           />
         </EuiDescribedFormGroup>
-
         <EuiSpacer />
 
-        <EuiTitle size={'xs'}>
+        <EuiTitle size="xs">
           <h3>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
@@ -152,8 +149,8 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size={'s'} />
-        <EuiText size={'s'} color={'subdued'}>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
@@ -162,29 +159,48 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             {this.learnMore(docLinks.links.security.indicesPrivileges)}
           </p>
         </EuiText>
-
         <IndexPrivileges
+          indexType="indices"
+          indexPatterns={indexPatterns}
           role={role}
           indicesAPIClient={indicesAPIClient}
           validator={validator}
-          indexPatterns={indexPatterns}
           license={license}
           onChange={onChange}
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
         />
+        <EuiSpacer />
+        <EuiSpacer />
 
-        {editable && (
-          <>
-            <EuiHorizontalRule />
-            <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-                defaultMessage="Add index privilege"
-              />
-            </EuiButton>
-          </>
-        )}
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesTitle"
+              defaultMessage="Remote index privileges"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
+              defaultMessage="Control access to the data in remote clusters. "
+            />
+            {this.learnMore(docLinks.links.security.indicesPrivileges)}
+          </p>
+        </EuiText>
+        <IndexPrivileges
+          indexType="remote_indices"
+          role={role}
+          indicesAPIClient={indicesAPIClient}
+          validator={validator}
+          license={license}
+          onChange={onChange}
+          availableIndexPrivileges={builtinESPrivileges.index}
+          editable={editable}
+        />
       </Fragment>
     );
   };
