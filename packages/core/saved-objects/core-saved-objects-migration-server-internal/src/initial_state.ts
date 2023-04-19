@@ -28,6 +28,7 @@ export interface CreateInitialStateParams {
   indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
+  coreMigrationVersionPerType: SavedObjectsMigrationVersion;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
@@ -46,6 +47,7 @@ export const createInitialState = ({
   indexTypesMap,
   targetMappings,
   preMigrationScript,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
@@ -53,32 +55,53 @@ export const createInitialState = ({
   docLinks,
   logger,
 }: CreateInitialStateParams): InitState => {
+  const types = [
+    ...new Set([
+      ...Object.keys(coreMigrationVersionPerType),
+      ...Object.keys(migrationVersionPerType),
+    ]).values(),
+  ];
   const outdatedDocumentsQuery: QueryDslQueryContainer = {
     bool: {
-      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
+      should: types.map((type) => ({
         bool: {
           must: [
             { term: { type } },
             {
               bool: {
                 should: [
-                  {
-                    bool: {
-                      must_not: [
-                        { exists: { field: 'typeMigrationVersion' } },
-                        { exists: { field: `migrationVersion.${type}` } },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      must: { exists: { field: 'migrationVersion' } },
-                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-                    },
-                  },
-                  {
-                    range: { typeMigrationVersion: { lt: latestVersion } },
-                  },
+                  ...(coreMigrationVersionPerType[type]
+                    ? [
+                        {
+                          range: {
+                            coreMigrationVersion: { lt: coreMigrationVersionPerType[type] },
+                          },
+                        },
+                      ]
+                    : []),
+                  ...(migrationVersionPerType[type]
+                    ? [
+                        {
+                          bool: {
+                            must_not: [
+                              { exists: { field: 'typeMigrationVersion' } },
+                              { exists: { field: `migrationVersion.${type}` } },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            must: { exists: { field: 'migrationVersion' } },
+                            must_not: {
+                              term: { [`migrationVersion.${type}`]: migrationVersionPerType[type] },
+                            },
+                          },
+                        },
+                        {
+                          range: { typeMigrationVersion: { lt: migrationVersionPerType[type] } },
+                        },
+                      ]
+                    : []),
                 ],
               },
             },

@@ -34,6 +34,12 @@ interface MigrationVersionParams {
    * @default true
    */
   includeDeferred?: boolean;
+
+  /**
+   * Migration type to use in the migrationVersion.
+   * @default 'type'
+   */
+  migrationType?: 'core' | 'type';
 }
 
 /**
@@ -80,9 +86,11 @@ export class DocumentMigrator implements VersionedTransformer {
 
   /**
    * Gets the latest pending version of each type.
+   * Some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types).
    */
   public getMigrationVersion({
     includeDeferred = true,
+    migrationType = 'type',
   }: MigrationVersionParams = {}): SavedObjectsMigrationVersion {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -91,12 +99,10 @@ export class DocumentMigrator implements VersionedTransformer {
     return Object.entries(this.migrations).reduce(
       (acc, [type, { latestVersion, immediateVersion }]) => {
         const version = includeDeferred ? latestVersion : immediateVersion;
-        // some migration objects won't have a latest migration version (they only contain reference transforms that are applied from other types)
-        const latestMigrationVersion = maxVersion(version.migrate, version.convert);
-        if (latestMigrationVersion) {
-          return { ...acc, [type]: latestMigrationVersion };
-        }
-        return acc;
+        const latestMigrationVersion =
+          migrationType === 'core' ? version.core : maxVersion(version.migrate, version.convert);
+
+        return latestMigrationVersion ? { ...acc, [type]: latestMigrationVersion } : acc;
       },
       {}
     );

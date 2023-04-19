@@ -665,6 +665,24 @@ describe('DocumentMigrator', () => {
       );
     });
 
+    test('extracts the latest core migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ migrationType: 'core' })).toHaveProperty(
+        'aaa',
+        '8.8.0'
+      );
+    });
+
     describe('conversion to multi-namespace type', () => {
       it('assumes documents w/ undefined typeMigrationVersion and correct coreMigrationVersion are up to date', () => {
         const migrator = new DocumentMigrator({

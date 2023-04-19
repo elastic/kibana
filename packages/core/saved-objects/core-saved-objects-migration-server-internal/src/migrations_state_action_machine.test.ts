@@ -44,6 +44,7 @@ describe('migrationsStateActionMachine', () => {
       '.kibana_cases': ['typeD', 'typeE'],
     },
     targetMappings: { properties: {} },
+    coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
     migrationsConfig: {

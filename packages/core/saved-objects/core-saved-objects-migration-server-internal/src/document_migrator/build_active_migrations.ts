@@ -36,7 +36,6 @@ export function buildActiveMigrations({
   convertVersion?: string;
   log: Logger;
 }): ActiveMigrations {
-  const coreTransforms = getCoreTransforms();
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
@@ -46,7 +45,6 @@ export function buildActiveMigrations({
       type,
       log,
       kibanaVersion,
-      coreTransforms,
       referenceTransforms,
     });
 
@@ -64,13 +62,11 @@ export function buildActiveMigrations({
 const buildTypeTransforms = ({
   type,
   log,
-  coreTransforms,
   referenceTransforms,
 }: {
   type: SavedObjectsType;
   kibanaVersion: string;
   log: Logger;
-  coreTransforms: Transform[];
   referenceTransforms: Transform[];
 }): TypeTransforms => {
   const migrationsMap =
@@ -85,6 +81,7 @@ const buildTypeTransforms = ({
     })
   );
 
+  const coreTransforms = getCoreTransforms({ log, type });
   const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
 
   const conversionTransforms = getConversionTransforms(type);

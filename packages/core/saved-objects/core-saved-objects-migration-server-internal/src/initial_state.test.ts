@@ -40,6 +40,7 @@ const createInitialStateCommonParams = {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
   } as IndexMapping,
+  coreMigrationVersionPerType: {},
   migrationVersionPerType: {},
   indexPrefix: '.kibana_task_manager',
   migrationsConfig,
@@ -351,6 +352,7 @@ describe('createInitialState', () => {
       createInitialState({
         ...createInitialStateParams,
         preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
+        coreMigrationVersionPerType: {},
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
@@ -456,6 +458,124 @@ describe('createInitialState', () => {
                           "range": Object {
                             "typeMigrationVersion": Object {
                               "lt": "8.0.0",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('selects documents with outdated core migration version', () => {
+    expect(
+      createInitialState({
+        ...createInitialStateParams,
+        coreMigrationVersionPerType: { dashboard: '8.8.0' },
+      }).outdatedDocumentsQuery
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "dashboard",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "coreMigrationVersion": Object {
+                              "lt": "8.8.0",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('combines query with outdated core and type migrations versions', () => {
+    expect(
+      createInitialState({
+        ...createInitialStateParams,
+        coreMigrationVersionPerType: { dashboard: '8.8.0' },
+        migrationVersionPerType: { dashboard: '7.7.0' },
+      }).outdatedDocumentsQuery
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "dashboard",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "coreMigrationVersion": Object {
+                              "lt": "8.8.0",
+                            },
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.dashboard",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must": Object {
+                              "exists": Object {
+                                "field": "migrationVersion",
+                              },
+                            },
+                            "must_not": Object {
+                              "term": Object {
+                                "migrationVersion.dashboard": "7.7.0",
+                              },
+                            },
+                          },
+                        },
+                        Object {
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "7.7.0",
                             },
                           },
                         },

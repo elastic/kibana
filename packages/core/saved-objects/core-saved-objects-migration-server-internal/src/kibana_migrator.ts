@@ -243,6 +243,10 @@ export class KibanaMigrator implements IKibanaMigrator {
                 migrateDoc: this.documentMigrator.migrateAndConvert,
                 rawDocs,
               }),
+            coreMigrationVersionPerType: this.documentMigrator.getMigrationVersion({
+              includeDeferred: false,
+              migrationType: 'core',
+            }),
             migrationVersionPerType: this.documentMigrator.getMigrationVersion({
               includeDeferred: false,
             }),
