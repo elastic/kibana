@@ -135,13 +135,6 @@ export interface SavedObjectsServiceSetup {
 
   /**
    * Returns the default index used for saved objects.
-   *
-   * @deprecated use {@link SavedObjectsServiceSetup.getDefaultIndex} instead.
-   */
-  getKibanaIndex: () => string;
-
-  /**
-   * Returns the default index used for saved objects.
    */
   getDefaultIndex: () => string;
 

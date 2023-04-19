@@ -197,7 +197,6 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => MAIN_SAVED_OBJECT_INDEX,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
       getAllIndices: () => [...SavedObjectsIndexPatterns],
     };

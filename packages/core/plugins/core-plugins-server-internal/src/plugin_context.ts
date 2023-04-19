@@ -245,7 +245,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
-      getKibanaIndex: deps.savedObjects.getKibanaIndex,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
       getAllIndices: deps.savedObjects.getAllIndices,
     },
