@@ -10,14 +10,16 @@ import type { FunctionComponent } from 'react';
 
 import { EuiSpacer, EuiCallOut, EuiTitle } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { useAuthz } from '../../../../../../../hooks';
 
 import type { EsAssetReference } from '../../../../../../../../common';
 
 import type { PackageInfo } from '../../../../../types';
 import { ElasticsearchAssetType } from '../../../../../types';
+
+import { getDeferredInstallationMsg } from './deferred_assets_warning';
 
 import { DeferredTransformAccordion } from './deferred_transforms_accordion';
 
@@ -30,6 +32,8 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
   deferredInstallations,
   packageInfo,
 }) => {
+  const authz = useAuthz();
+
   const deferredTransforms = deferredInstallations.filter(
     (asset) => asset.type === ElasticsearchAssetType.transform
   );
@@ -48,14 +52,7 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
         size="m"
         color="warning"
         iconType="alert"
-        title={i18n.translate(
-          'xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout',
-          {
-            defaultMessage:
-              'This package has {numOfDeferredInstallations, plural, one {one deferred installation which requires} other {# deferred installations which require}} additional permissions to install and operate correctly.',
-            values: { numOfDeferredInstallations: deferredInstallations.length },
-          }
-        )}
+        title={getDeferredInstallationMsg(deferredInstallations.length, { authz })}
       />
       <EuiSpacer size="l" />
 

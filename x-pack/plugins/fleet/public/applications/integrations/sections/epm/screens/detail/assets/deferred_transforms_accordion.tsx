@@ -44,11 +44,25 @@ interface Props {
   deferredInstallations: EsAssetReference[];
 }
 
-export const getDeferredAssetDescription = (assetType: string, assetCount: number) => {
+export const getDeferredAssetDescription = (
+  assetType: string,
+  assetCount: number,
+  permissions: { canReauthorizeTransforms: boolean }
+) => {
   switch (assetType) {
     case ElasticsearchAssetType.transform:
+      if (permissions.canReauthorizeTransforms) {
+        return i18n.translate(
+          'xpack.fleet.epm.packageDetails.assets.deferredTransformReauthorizeDescription',
+          {
+            defaultMessage:
+              '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Reauthorize the {assetCount, plural, one {transform} other {transforms}} to start operations.',
+            values: { assetCount: assetCount ?? 1 },
+          }
+        );
+      }
       return i18n.translate(
-        'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsDescription',
+        'xpack.fleet.epm.packageDetails.assets.deferredTransformRequestPermissionDescription',
         {
           defaultMessage:
             '{assetCount, plural, one {Transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Contact your administrator to request the required privileges.',
@@ -186,7 +200,11 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
       <>
         <EuiSpacer size="m" />
 
-        <EuiText>{getDeferredAssetDescription(type, deferredInstallations.length)} </EuiText>
+        <EuiText>
+          {getDeferredAssetDescription(type, deferredInstallations.length, {
+            canReauthorizeTransforms,
+          })}{' '}
+        </EuiText>
         <EuiSpacer size="m" />
 
         <EuiButton
@@ -198,7 +216,9 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
             e.preventDefault();
             authorizeTransforms(deferredTransforms.map((t) => ({ transformId: t.id })));
           }}
-          aria-label={getDeferredAssetDescription(type, deferredInstallations.length)}
+          aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
+            canReauthorizeTransforms,
+          })}
         >
           {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
             defaultMessage: 'Reauthorize all',
@@ -223,7 +243,7 @@ export const DeferredTransformAccordion: FunctionComponent<Props> = ({
                         content={
                           canReauthorizeTransforms
                             ? undefined
-                            : getDeferredAssetDescription(type, 1)
+                            : getDeferredAssetDescription(type, 1, { canReauthorizeTransforms })
                         }
                         data-test-subject={`fleetAssetsReauthorizeTooltip-${transformId}-${isLoading}`}
                       >
