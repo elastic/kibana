@@ -54,8 +54,8 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }, index) => ({
-    id: `${name}-${index}`,
+  return nodes.map(({ metrics, path, name }) => ({
+    id: `${name}-${path.at(-1)?.os ?? '-'}`,
     name,
     os: path.at(-1)?.os ?? '-',
     ip: path.at(-1)?.ip ?? '',

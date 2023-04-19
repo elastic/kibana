@@ -25,7 +25,7 @@ export interface ServiceData {
     hosts: string[];
     api_key: string;
   };
-  runOnce?: boolean;
+  endpoint?: 'monitors' | 'runOnce' | 'sync';
   isEdit?: boolean;
   licenseLevel: string;
 }
@@ -81,7 +81,7 @@ export class ServiceAPIClient {
   }
 
   async post(data: ServiceData) {
-    return this.callAPI('PUT', data);
+    return this.callAPI('POST', data);
   }
 
   async put(data: ServiceData) {
@@ -93,7 +93,11 @@ export class ServiceAPIClient {
   }
 
   async runOnce(data: ServiceData) {
-    return this.callAPI('POST', { ...data, runOnce: true });
+    return this.callAPI('POST', { ...data, endpoint: 'runOnce' });
+  }
+
+  async syncMonitors(data: ServiceData) {
+    return this.callAPI('PUT', { ...data, endpoint: 'sync' });
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
@@ -112,7 +116,7 @@ export class ServiceAPIClient {
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
       /* url is required for service locations, but omitted for private locations.
-  /* this.locations is only service locations */
+      /* this.locations is only service locations */
       const httpsAgent = this.getHttpsAgent(url);
 
       if (httpsAgent) {
@@ -138,7 +142,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce, isEdit, licenseLevel }: ServiceData
+    { monitors: allMonitors, output, endpoint, isEdit, licenseLevel }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -154,25 +158,24 @@ export class ServiceAPIClient {
         locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
+        const promise = this.callServiceEndpoint(
+          { monitors: locMonitors, isEdit, endpoint, output, licenseLevel },
+          method,
+          url
+        );
         promises.push(
-          rxjsFrom(
-            this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, runOnce, output, licenseLevel },
-              method,
-              url
-            )
-          ).pipe(
+          rxjsFrom(promise).pipe(
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
-                `Successfully called service location ${url} with method ${method} with ${locMonitors.length} monitors `
+                `Successfully called service location ${url}${result.request?.path} with method ${method} with ${locMonitors.length} monitors`
               );
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
               pushErrors.push({ locationId: id, error: err.response?.data! });
               const reason = err.response?.data?.reason ?? '';
 
-              err.message = `Failed to call service location ${url} with method ${method} with ${locMonitors.length} monitors:  ${err.message}, ${reason}`;
+              err.message = `Failed to call service location ${url}${err.request?.path} with method ${method} with ${locMonitors.length} monitors:  ${err.message}, ${reason}`;
               this.logger.error(err);
               sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
                 reason: err.response?.data?.reason,
@@ -197,19 +200,34 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, runOnce, isEdit, licenseLevel }: ServiceData,
+    { monitors, output, endpoint = 'monitors', isEdit, licenseLevel }: ServiceData,
     method: 'POST' | 'PUT' | 'DELETE',
-    url: string
+    baseUrl: string
   ) {
     // don't need to pass locations to heartbeat
     const monitorsStreams = monitors.map(({ locations, ...rest }) =>
       convertToDataStreamFormat(rest)
     );
 
+    let url = baseUrl;
+    switch (endpoint) {
+      case 'monitors':
+        url += '/monitors';
+        break;
+      case 'runOnce':
+        url += '/run';
+        break;
+      case 'sync':
+        url += '/monitors/sync';
+        break;
+    }
+
+    const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
+
     return axios(
       this.addVersionHeader({
         method,
-        url: url + (runOnce ? '/run' : '/monitors'),
+        url,
         data: {
           monitors: monitorsStreams,
           output,
@@ -217,12 +235,8 @@ export class ServiceAPIClient {
           is_edit: isEdit,
           license_level: licenseLevel,
         },
-        headers: this.authorization
-          ? {
-              Authorization: this.authorization,
-            }
-          : undefined,
-        httpsAgent: this.getHttpsAgent(url),
+        headers: authHeader,
+        httpsAgent: this.getHttpsAgent(baseUrl),
       })
     );
   }

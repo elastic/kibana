@@ -12,7 +12,7 @@ import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
-import { KPICharts } from './kpi_charts/kpi_charts';
+import { KPIGrid } from './kpis/kpi_grid';
 import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 import { PageProviders } from './page_providers';
@@ -40,7 +40,7 @@ export const HostContainer = () => {
       <PageProviders>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <KPICharts />
+            <KPIGrid />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HostsTable />

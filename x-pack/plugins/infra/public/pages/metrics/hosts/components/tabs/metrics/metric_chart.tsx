@@ -6,7 +6,6 @@
  */
 import React, { useMemo, useState } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { EuiIcon, EuiPanel, EuiProgress } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -18,20 +17,20 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import useCustomCompareEffect from 'react-use/lib/useCustomCompareEffect';
 import { isEqual } from 'lodash';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
-
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
+import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { createHostsFilter } from '../../../utils';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
+import { LensWrapper } from '../../chart/lens_wrapper';
 
 export interface MetricChartProps {
   title: string;
-  type: HostLensAttributesTypes;
+  type: HostsLensLineChartFormulas;
   breakdownSize: number;
+  render?: boolean;
 }
 
 const MIN_HEIGHT = 300;
@@ -42,11 +41,6 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   const { dataView } = useMetricsDataViewContext();
   const { baseRequest, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
-  const {
-    services: { lens },
-  } = useKibanaContextForPlugin();
-  const EmbeddableComponent = lens.EmbeddableComponent;
-
   const [loadedOnce, setLoadedOnce] = useState(false);
   const [internalLastReloadRequestTime, setInternalLastReloadRequestTime] = useState(
     baseRequest.requestTs
@@ -66,12 +60,14 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     (prevDeps, nextDeps) => isEqual(prevDeps, nextDeps)
   );
 
-  const { injectData, getExtraActions, error } = useLensAttributes({
+  const { attributes, getExtraActions, error } = useLensAttributes({
     type,
     dataView,
     options: {
+      title,
       breakdownSize,
     },
+    visualizationType: 'lineChart',
   });
 
   const hostsFilterQuery = useMemo(() => {
@@ -81,14 +77,18 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     );
   }, [currentPage, dataView]);
 
-  const injectedLensAttributes = injectData({
-    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters, ...[hostsFilterQuery]],
-    query: searchCriteria.query,
-    title,
+  const filters = [
+    ...internalSearchCriteria.filters,
+    ...internalSearchCriteria.panelFilters,
+    ...[hostsFilterQuery],
+  ];
+  const extraActionOptions = getExtraActions({
+    timeRange: internalSearchCriteria.dateRange,
+    filters,
+    query: internalSearchCriteria.query,
   });
 
-  const extraActionOptions = getExtraActions(injectedLensAttributes, searchCriteria.dateRange);
-  const extraAction: Action[] = [extraActionOptions.openInLens];
+  const extraActions: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
     const [min, max] = range;
@@ -151,29 +151,22 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
-            injectedLensAttributes && (
-              <EmbeddableComponent
-                id={`hostsViewsmetricsChart-${type}`}
-                style={{ height: '100%' }}
-                attributes={injectedLensAttributes}
-                viewMode={ViewMode.VIEW}
-                timeRange={internalSearchCriteria.dateRange}
-                query={internalSearchCriteria.query}
-                filters={internalSearchCriteria.filters}
-                extraActions={extraAction}
-                lastReloadRequestTime={internalLastReloadRequestTime}
-                executionContext={{
-                  type: 'infrastructure_observability_hosts_view',
-                  name: `Hosts View ${type} Chart`,
-                }}
-                onBrushEnd={handleBrushEnd}
-                onLoad={() => {
-                  if (!loadedOnce) {
-                    setLoadedOnce(true);
-                  }
-                }}
-              />
-            )
+            <LensWrapper
+              id={`hostsViewsmetricsChart-${type}`}
+              attributes={attributes}
+              style={{ height: MIN_HEIGHT }}
+              extraActions={extraActions}
+              lastReloadRequestTime={internalLastReloadRequestTime}
+              dateRange={internalSearchCriteria.dateRange}
+              filters={filters}
+              query={internalSearchCriteria.query}
+              onBrushEnd={handleBrushEnd}
+              onLoad={() => {
+                if (loadedOnce) {
+                  setLoadedOnce(true);
+                }
+              }}
+            />
           )}
         </>
       )}

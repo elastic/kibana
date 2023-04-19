@@ -148,7 +148,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.router.validateResponses && validation?.response?.[response.status]) {
+    if (this.router.isDev && validation?.response?.[response.status]) {
       const responseValidation = validation.response[response.status];
       try {
         validate(
