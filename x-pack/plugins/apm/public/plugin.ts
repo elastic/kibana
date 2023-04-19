@@ -38,6 +38,10 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
@@ -80,6 +84,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
 }
@@ -96,6 +101,7 @@ export interface ApmPluginStartDeps {
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   fleet?: FleetStart;
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
@@ -162,7 +168,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
+    plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
