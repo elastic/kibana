@@ -92,7 +92,6 @@ export type ScreenshotResult = PdfScreenshotResult | PngScreenshotResult;
 const DEFAULT_SETUP_RESULT = {
   elementsPositionAndAttributes: null,
   timeRange: null,
-  info: [],
 };
 
 export class Screenshots {
