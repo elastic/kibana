@@ -190,4 +190,9 @@ type TestSubject =
   | 'droppableList.input-2'
   | 'prefixField.input'
   | 'suffixField.input'
+  | 'indexedCharsField.input'
+  | 'indexedCharsFieldField.input'
+  | 'removeBinaryField.input'
+  | 'resourceNameField.input'
+  | 'propertiesField'
   | 'patternDefinitionsField';

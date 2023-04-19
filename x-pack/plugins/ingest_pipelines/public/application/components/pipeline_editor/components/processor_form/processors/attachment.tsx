@@ -26,7 +26,6 @@ import { FieldsConfig, to, from } from './shared';
 const propertyValues: string[] = [
   'content',
   'title',
-  'name',
   'author',
   'keywords',
   'date',
@@ -58,7 +57,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.attachment.indexedCharsFieldLabel',
+      'xpack.ingestPipelines.pipelineEditor.attachment.indexedCharsFieldFieldLabel',
       {
         defaultMessage: 'Indexed chars field (optional)',
       }
@@ -176,6 +175,7 @@ export const Attachment: FunctionComponent = () => {
         component={ComboBoxField}
         config={fieldsConfig.properties}
         euiFieldProps={{
+          'data-test-subj': 'propertiesField',
           noSuggestions: false,
           options: propertyValues.map((label) => ({ label })),
         }}
@@ -183,14 +183,14 @@ export const Attachment: FunctionComponent = () => {
       />
 
       <UseField
-        data-test-subj="removeBinaryFieldField"
+        data-test-subj="removeBinaryField"
         component={ToggleField}
         config={fieldsConfig.remove_binary}
         path="fields.remove_binary"
       />
 
       <UseField
-        data-test-subj="resourceNameFieldField"
+        data-test-subj="resourceNameField"
         config={fieldsConfig.resource_name}
         component={Field}
         path="fields.resource_name"
