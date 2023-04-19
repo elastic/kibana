@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { request } from './common';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
+import type { ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
@@ -58,4 +62,36 @@ export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
     force: true,
   });
   cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
+};
+
+/**
+ * Continuously checks an Response Action until it completes (or timeout is reached)
+ * @param actionId
+ * @param timeout
+ */
+export const waitForActionToComplete = (actionId: string, timeout = 60000) => {
+  let timeLeft = timeout;
+
+  const checkAction = () => {
+    request<ActionDetailsApiResponse>({
+      method: 'GET',
+      url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+    }).then((response) => {
+      if (response.body.data.isCompleted) {
+        return;
+      }
+
+      timeLeft -= 1000;
+
+      if (timeLeft <= 0) {
+        throw new Error(`Timed out waiting for action [${actionId}] to complete`);
+      }
+
+      cy.wait(1000);
+
+      checkAction();
+    });
+  };
+
+  checkAction();
 };
