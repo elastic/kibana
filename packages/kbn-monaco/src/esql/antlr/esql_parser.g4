@@ -48,7 +48,7 @@ booleanExpression
     | regexBooleanExpression
     | left=booleanExpression operator=AND right=booleanExpression
     | left=booleanExpression operator=OR right=booleanExpression
-    | IS_NULL_FUNCTION LP qualifiedName RP
+    | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 
 regexBooleanExpression

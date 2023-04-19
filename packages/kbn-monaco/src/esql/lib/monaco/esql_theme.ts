@@ -70,6 +70,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'expr_ws',
         'row',
         'limit',
+        'cidr_match',
         'nulls_ordering_direction',
         'nulls_ordering',
         'null',
@@ -82,7 +83,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     // aggregation functions
     ...buildRuleGroup(['unary_function'], euiThemeVars.euiColorPrimaryText),
     // is null functions
-    ...buildRuleGroup(['is_null_function'], euiThemeVars.euiColorPrimaryText),
+    ...buildRuleGroup(['where_functions'], euiThemeVars.euiColorPrimaryText),
     // math functions
     ...buildRuleGroup(['math_function'], euiThemeVars.euiColorPrimaryText),
 

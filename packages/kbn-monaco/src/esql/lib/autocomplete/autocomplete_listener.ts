@@ -27,6 +27,7 @@ import {
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
   mathCommandDefinition,
+  whereCommandDefinition,
   assignOperatorDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
@@ -341,6 +342,10 @@ export class AutocompleteListener implements ESQLParserListener {
     const booleanExpression = ctx.booleanExpression();
 
     if (booleanExpression.exception) {
+      if (!booleanExpression.text) {
+        this.suggestions = [...whereCommandDefinition, ...this.fields];
+        return;
+      }
       this.suggestions = this.fields;
       return;
     } else {
@@ -348,6 +353,13 @@ export class AutocompleteListener implements ESQLParserListener {
       const regexBooleanExpression = booleanExpression.getRuleContexts(
         RegexBooleanExpressionContext
       );
+
+      if (booleanExpression.WHERE_FUNCTIONS()) {
+        if (booleanExpression.COMMA().length) {
+          this.suggestions = [];
+          return;
+        }
+      }
 
       if (regexBooleanExpression.length) {
         this.suggestions = [];
@@ -359,7 +371,7 @@ export class AutocompleteListener implements ESQLParserListener {
         return;
       }
     }
-    if (!this.hasSuggestions) {
+    if (!this.hasSuggestions && !booleanExpression.WHERE_FUNCTIONS()) {
       this.suggestions = comparisonCommandsDefinitions;
     }
   }

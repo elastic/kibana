@@ -11,6 +11,38 @@ import { buildDocumentation } from './utils';
 
 import type { AutocompleteCommandDefinition } from '../types';
 
+export const whereCommandDefinition: AutocompleteCommandDefinition[] = [
+  {
+    label: 'is_null',
+    insertText: 'is_null',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.isNullDoc', {
+      defaultMessage: `Returns a boolean than indicates whether its input is null.`,
+    }),
+    documentation: {
+      value: buildDocumentation('is_null(grouped[T]): aggregated[T]', [
+        'from index where is_null(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'cidr_match',
+    insertText: 'cidr_match',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.cidrMatchDoc', {
+      defaultMessage:
+        'The function takes a first parameter of type IP, followed by one or more parameters evaluated to a CIDR specificatione.',
+    }),
+    documentation: {
+      value: buildDocumentation('cidr_match(grouped[T]): aggregated[T]', [
+        'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
+      ]),
+    },
+    sortText: 'C',
+  },
+];
+
 export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
   {
     label: 'round',

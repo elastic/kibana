@@ -147,8 +147,9 @@ UNARY_FUNCTION
     | 'count'
     ;
 
-IS_NULL_FUNCTION
+WHERE_FUNCTIONS
     : 'is_null'
+    | 'cidr_match'
     ;
 
 UNQUOTED_IDENTIFIER
