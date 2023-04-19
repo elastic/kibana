@@ -30,10 +30,9 @@ export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
 export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
 export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
 export enum EngineViewTabs {
-  OVERVIEW = 'overview',
+  PREVIEW = 'preview',
   INDICES = 'indices',
   SCHEMA = 'schema',
-  PREVIEW = 'preview',
   API = 'api',
 }
 
