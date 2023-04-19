@@ -6,7 +6,7 @@
  */
 
 import type { Headers } from '@kbn/core/server';
-import { defer, forkJoin, from, Observable, throwError } from 'rxjs';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors } from '../../common';
 import {
@@ -79,11 +79,6 @@ export interface ScreenshotObservableResult {
   renderErrors?: string[];
 
   /**
-   * Include browser version, build ID and DevTools API version.
-   */
-  info: string[];
-
-  /**
    * @internal
    */
   elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
@@ -92,7 +87,6 @@ export interface ScreenshotObservableResult {
 interface PageSetupResults {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
-  info: string[];
   error?: Error;
   renderErrors?: string[];
 }
@@ -203,7 +197,7 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  private completeRender(): Observable<PageSetupResults> {
+  private completeRender() {
     const driver = this.driver;
     const layout = this.layout;
     const eventLogger = this.eventLogger;
@@ -238,14 +232,13 @@ export class ScreenshotObservableHandler {
             layout
           ),
           renderErrors: getRenderErrors(driver, eventLogger, layout),
-          info: from(Promise.all([driver.getVersion()])),
         })
       ),
       this.waitUntil(this.timeouts.renderComplete)
     );
   }
 
-  public setupPage(index: number, url: UrlOrUrlWithContext): Observable<PageSetupResults> {
+  public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender())
@@ -292,11 +285,10 @@ export class ScreenshotObservableHandler {
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
-          const { timeRange, info, error: setupError, renderErrors } = data;
+          const { timeRange, error: setupError, renderErrors } = data;
 
           return {
             timeRange,
-            info,
             screenshots,
             error: setupError,
             renderErrors,

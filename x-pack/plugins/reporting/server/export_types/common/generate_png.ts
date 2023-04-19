@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Protocol } from 'devtools-protocol';
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
@@ -18,7 +19,7 @@ interface PngResult {
   buffer: Buffer;
   metrics?: PngMetrics;
   warnings: string[];
-  info: string[];
+  versionInfo: Protocol.Browser.GetVersionResponse;
 }
 
 export function generatePngObservable(
@@ -52,7 +53,7 @@ export function generatePngObservable(
       map(({ metrics, results }) => ({
         metrics,
         buffer: results[0].screenshots[0].data,
-        info: results[0].info,
+        versionInfo: results[0].screenshots[0].versionInfo,
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);

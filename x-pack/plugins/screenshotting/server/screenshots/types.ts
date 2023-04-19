@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Protocol } from 'devtools-protocol';
+
 export interface PhaseInstance {
   timeoutValue: number;
   configValue: string;
@@ -32,4 +34,9 @@ export interface Screenshot {
    * Screenshot description.
    */
   description: string | null;
+
+  /**
+   * Chromium browser version info
+   */
+  versionInfo: Protocol.Browser.GetVersionResponse;
 }

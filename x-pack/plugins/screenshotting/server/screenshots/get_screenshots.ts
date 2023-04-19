@@ -59,6 +59,10 @@ export const getScreenshots = async (
   const { elements, layout } = options;
   kbnLogger.info(`taking screenshots`);
 
+  // Log version info for debugging / maintenance
+  const versionInfo = await browser.getVersion();
+  kbnLogger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+
   const screenshots: Screenshot[] = [];
 
   try {
@@ -89,6 +93,7 @@ export const getScreenshots = async (
         data,
         title: attributes.title,
         description: attributes.description,
+        versionInfo,
       });
 
       endScreenshot({ byte_length: data.byteLength });
