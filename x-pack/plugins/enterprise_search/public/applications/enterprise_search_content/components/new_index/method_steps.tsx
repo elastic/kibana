@@ -68,7 +68,7 @@ export const BUILD_SEARCH_EXPERIENCE_STEP: EuiContainedStepProps = {
             searchApplicationLink: (
               <EuiLink onClick={() => KibanaLogic.values.navigateToUrl(ENGINES_PATH)}>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.appSearchLink',
+                  'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.searchApplicationLink',
                   { defaultMessage: 'Search Application' }
                 )}
               </EuiLink>

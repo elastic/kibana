@@ -8,7 +8,6 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
 

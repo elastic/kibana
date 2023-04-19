@@ -7,8 +7,6 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
-
 import { UpdateEngineApiLogic } from '../../api/engines/update_engine_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicActions } from './engine_indices_logic';
