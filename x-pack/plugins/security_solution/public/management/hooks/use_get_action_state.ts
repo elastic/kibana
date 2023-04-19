@@ -11,19 +11,21 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { ACTION_STATE_ROUTE } from '../../../common/endpoint/constants';
 import { useHttp } from '../../common/lib/kibana';
 
-interface GetActionsStateResponse {
-  canEncrypt?: boolean;
+interface GetActionStateResponse {
+  data: {
+    canEncrypt?: boolean;
+  };
 }
 /**
- * Get info for actions state
+ * Get info for action state
  */
-export const useGetActionsState = (): UseQueryResult<GetActionsStateResponse, IHttpFetchError> => {
+export const useGetActionState = (): UseQueryResult<GetActionStateResponse, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<GetActionsStateResponse, IHttpFetchError>({
-    queryKey: ['get-actions-state'],
+  return useQuery<GetActionStateResponse, IHttpFetchError>({
+    queryKey: ['get-action-state'],
     queryFn: () => {
-      return http.get<GetActionsStateResponse>(ACTION_STATE_ROUTE);
+      return http.get<GetActionStateResponse>(ACTION_STATE_ROUTE);
     },
   });
 };

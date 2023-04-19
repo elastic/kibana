@@ -30,11 +30,11 @@ describe('Missing encryption key callout', () => {
         if (path === ACTION_STATE_ROUTE) {
           asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
           return Promise.resolve({
-            canEncrypt,
+            data: { canEncrypt },
           });
         }
 
-        // Get package data
+        // Get action state
         // Used in tests that route back to the list
         if (policyListApiHandlers[path]) {
           asyncActions = asyncActions.then(async () => sleep());

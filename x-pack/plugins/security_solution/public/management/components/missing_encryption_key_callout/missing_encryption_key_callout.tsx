@@ -9,10 +9,10 @@ import React, { memo, useState, useCallback } from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useGetActionsState } from '../../hooks';
+import { useGetActionState } from '../../hooks';
 
 export const MissingEncryptionKeyCallout = memo(() => {
-  const { data: encryptionKeyState } = useGetActionsState();
+  const { data: encryptionKeyState } = useGetActionState();
   const [calloutDismiss, setCalloutDismiss] = useState(false);
 
   const onClickDismissButton = useCallback(() => setCalloutDismiss(true), []);
@@ -21,7 +21,7 @@ export const MissingEncryptionKeyCallout = memo(() => {
     return null;
   }
 
-  if (calloutDismiss || encryptionKeyState.canEncrypt === true) {
+  if (calloutDismiss || encryptionKeyState.data.canEncrypt === true) {
     return null;
   }
 
@@ -38,12 +38,12 @@ export const MissingEncryptionKeyCallout = memo(() => {
           }
         )}
       >
-        <p>
+        <div>
           <FormattedMessage
             id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
             defaultMessage="Encryption key will make your environment more secure"
           />
-        </p>
+        </div>
 
         <EuiButtonEmpty
           onClick={onClickDismissButton}

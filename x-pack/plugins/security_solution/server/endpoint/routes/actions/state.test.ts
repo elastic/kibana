@@ -30,7 +30,7 @@ interface CallRouteInterface {
   authz?: Partial<EndpointAuthz>;
 }
 
-describe('when calling the Actions state route handler', () => {
+describe('when calling the Action state route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
@@ -73,50 +73,34 @@ describe('when calling the Actions state route handler', () => {
     };
   });
   describe('with having right privileges', () => {
-    it('when can encrypt is set to true', async () => {
-      const routerMock: RouterMock = httpServiceMock.createRouter();
-      const endpointAppContextService = new EndpointAppContextService();
-      registerActionStateRoutes(
-        routerMock,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: endpointAppContextService,
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        true
-      );
+    it.each([[true], [false]])(
+      'when can encrypt is set to %s it returns proper value',
+      async (canEncrypt) => {
+        const routerMock: RouterMock = httpServiceMock.createRouter();
+        const endpointAppContextService = new EndpointAppContextService();
+        registerActionStateRoutes(
+          routerMock,
+          {
+            logFactory: loggingSystemMock.create(),
+            service: endpointAppContextService,
+            config: () => Promise.resolve(createMockConfig()),
+            experimentalFeatures: parseExperimentalConfigValue(
+              createMockConfig().enableExperimental
+            ),
+          },
+          canEncrypt
+        );
 
-      await callRoute(routerMock, ACTION_STATE_ROUTE, {
-        authz: { canIsolateHost: true },
-      });
+        await callRoute(routerMock, ACTION_STATE_ROUTE, {
+          authz: { canIsolateHost: true },
+        });
 
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { data: { canEncrypt: true } } });
-    });
-
-    it('when can encrypt is set to false', async () => {
-      const routerMock: RouterMock = httpServiceMock.createRouter();
-      const endpointAppContextService = new EndpointAppContextService();
-      registerActionStateRoutes(
-        routerMock,
-        {
-          logFactory: loggingSystemMock.create(),
-          service: endpointAppContextService,
-          config: () => Promise.resolve(createMockConfig()),
-          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        },
-        false
-      );
-
-      await callRoute(routerMock, ACTION_STATE_ROUTE, {
-        authz: { canIsolateHost: true },
-      });
-
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { data: { canEncrypt: false } } });
-    });
+        expect(mockResponse.ok).toHaveBeenCalledWith({ body: { data: { canEncrypt } } });
+      }
+    );
   });
   describe('without having right privileges', () => {
-    it('when can encrypt is set to true', async () => {
+    it('it returns unauthorized error', async () => {
       const routerMock: RouterMock = httpServiceMock.createRouter();
       const endpointAppContextService = new EndpointAppContextService();
       registerActionStateRoutes(

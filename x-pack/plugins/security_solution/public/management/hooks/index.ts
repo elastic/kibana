@@ -8,4 +8,4 @@
 export { useGetEndpointDetails } from './endpoint/use_get_endpoint_details';
 export { useWithShowEndpointResponder } from './use_with_show_endpoint_responder';
 export { useGetEndpointActionList } from './response_actions/use_get_endpoint_action_list';
-export { useGetActionsState } from './use_get_actions_state';
+export { useGetActionState } from './use_get_action_state';
