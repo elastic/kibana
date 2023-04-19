@@ -36,6 +36,22 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
+    async clickFlyoutUptimeLink() {
+      return testSubjects.click('hostsView-flyout-uptime-link');
+    },
+
+    async clickFlyoutApmServicesLink() {
+      return testSubjects.click('hostsView-flyout-apm-services-link');
+    },
+
+    async clickAddMetadataFilter() {
+      return testSubjects.click('hostsView-flyout-metadata-add-filter');
+    },
+
+    async clickRemoveMetadataFilter() {
+      return testSubjects.click('hostsView-flyout-metadata-remove-filter');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -132,6 +148,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
       return tabTitle.getVisibleText();
+    },
+
+    async getAppliedFilter() {
+      const filter = await testSubjects.find(
+        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
+      );
+      return filter.getVisibleText();
+    },
+
+    async getRemoveFilterExist() {
+      return testSubjects.exists('hostsView-flyout-metadata-remove-filter');
     },
 
     async getProcessesTabContentTitle(index: number) {

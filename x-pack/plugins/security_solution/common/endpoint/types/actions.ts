@@ -132,6 +132,10 @@ export interface LogsEndpointAction {
   user: {
     id: string;
   };
+  rule?: {
+    id: string;
+    name: string;
+  };
 }
 
 /**
@@ -188,6 +192,7 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  alert_id?: string[];
 }
 
 export interface FleetActionResponseData {
@@ -302,8 +307,9 @@ export interface ResponseActionApiResponse<TOutput extends object = object> {
 
 export interface EndpointPendingActions {
   agent_id: string;
-  pending_actions: {
-    /** Number of actions pending for each type. The `key` could be one of the `RESPONSE_ACTION_COMMANDS` values. */
+  /** Number of actions pending for each type */
+  pending_actions: Partial<Record<ResponseActionsApiCommandNames, number>> & {
+    // Defined any other key just in case we get back some other actions
     [key: string]: number;
   };
 }
@@ -375,6 +381,9 @@ export interface ActionDetails<
   comment?: string;
   /** parameters submitted with action */
   parameters?: TParameters;
+  alertIds?: string[];
+  ruleId?: string;
+  ruleName?: string;
 }
 
 export interface ActionDetailsApiResponse<

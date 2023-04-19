@@ -15,8 +15,8 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
-  MAX_DOCS_PER_PAGE,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
+  INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
 } from '../../common/constants';
 
 import {
@@ -38,6 +38,7 @@ import {
   postComment,
   getCaseConnectors,
   getCaseUserActionsStats,
+  deleteFileAttachments,
 } from './api';
 
 import {
@@ -60,6 +61,7 @@ import {
   caseUserActionsWithRegisteredAttachmentsSnake,
   basicPushSnake,
   getCaseUserActionsStatsResponse,
+  basicFileMock,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -469,8 +471,8 @@ describe('Cases API', () => {
   describe('findCaseUserActions', () => {
     const findCaseUserActionsSnake = {
       page: 1,
-      perPage: 1000,
-      total: 20,
+      perPage: 10,
+      total: 30,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
     const filterActionType: CaseUserActionTypeWithAll = 'all';
@@ -478,6 +480,8 @@ describe('Cases API', () => {
     const params = {
       type: filterActionType,
       sortOrder,
+      page: 1,
+      perPage: 10,
     };
 
     beforeEach(() => {
@@ -493,7 +497,8 @@ describe('Cases API', () => {
         query: {
           types: [],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -501,7 +506,7 @@ describe('Cases API', () => {
     it('should be called with action type user action and desc sort order', async () => {
       await findCaseUserActions(
         basicCase.id,
-        { type: 'action', sortOrder: 'desc' },
+        { type: 'action', sortOrder: 'desc', page: 2, perPage: 15 },
         abortCtrl.signal
       );
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
@@ -510,7 +515,8 @@ describe('Cases API', () => {
         query: {
           types: ['action'],
           sortOrder: 'desc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 2,
+          perPage: 15,
         },
       });
     });
@@ -523,7 +529,8 @@ describe('Cases API', () => {
         query: {
           types: ['user'],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -813,6 +820,30 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('deleteFileAttachments', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+
+    it('should be called with correct url, method, signal and body', async () => {
+      const resp = await deleteFileAttachments({
+        caseId: basicCaseId,
+        fileIds: [basicFileMock.id],
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId),
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids: [basicFileMock.id] }),
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toBe(undefined);
     });
   });
 

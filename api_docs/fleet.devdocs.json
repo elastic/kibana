@@ -19104,9 +19104,9 @@
             "label": "experimental_data_stream_features",
             "description": [],
             "signature": [
-              "{ data_stream: string; features: Record<",
+              "{ data_stream: string; features: Partial<Record<",
               "ExperimentalIndexingFeature",
-              ", boolean>; }[] | undefined"
+              ", boolean>>; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -20188,7 +20188,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
+              "{ dataset: string; type: string; elasticsearch?: { dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -21507,6 +21507,34 @@
             "description": [],
             "signature": [
               "\"time_series\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.dynamic_dataset",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic_dataset",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.dynamic_namespace",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic_namespace",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -25190,6 +25218,21 @@
             "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DASHBOARD_LOCATORS_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DASHBOARD_LOCATORS_IDS",
+        "description": [],
+        "signature": [
+          "{ readonly ELASTIC_AGENT_OVERVIEW: \"elastic_agent-a148dc70-6b3c-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_INFO: \"elastic_agent-0600ffa0-6b5e-11ed-98de-67bdecd21824\"; readonly ELASTIC_AGENT_AGENT_METRICS: \"elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395\"; readonly ELASTIC_AGENT_INTEGRATIONS: \"elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824\"; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/locators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

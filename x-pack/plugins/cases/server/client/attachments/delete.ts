@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { CommentAttributes } from '../../../common/api';
+import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
@@ -25,7 +25,7 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    services: { caseService, attachmentService, userActionService },
+    services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
@@ -61,6 +61,10 @@ export async function deleteAll(
       })),
       user,
     });
+
+    const attachments = comments.saved_objects.map((comment) => comment.attributes);
+
+    await handleAlerts({ alertsService, attachments, caseId: caseID });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -121,7 +125,7 @@ export async function deleteComment(
       owner: attachment.attributes.owner,
     });
 
-    await handleAlerts({ alertsService, attachment: attachment.attributes, caseId: id });
+    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
@@ -133,16 +137,19 @@ export async function deleteComment(
 
 interface HandleAlertsArgs {
   alertsService: CasesClientArgs['services']['alertsService'];
-  attachment: CommentAttributes;
+  attachments: CommentRequest[];
   caseId: string;
 }
 
-const handleAlerts = async ({ alertsService, attachment, caseId }: HandleAlertsArgs) => {
-  if (!isCommentRequestTypeAlert(attachment)) {
+const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
+  const alertAttachments = attachments.filter((attachment): attachment is CommentRequestAlertType =>
+    isCommentRequestTypeAlert(attachment)
+  );
+
+  if (alertAttachments.length === 0) {
     return;
   }
 
-  const alerts = getAlertInfoFromComments([attachment]);
-  await alertsService.ensureAlertsAuthorized({ alerts });
+  const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };
