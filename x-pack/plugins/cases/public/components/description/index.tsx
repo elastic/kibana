@@ -128,7 +128,7 @@ export const Description = React.memo(
       ) : null,
       timelineAvatar: null,
       className: classNames({
-        isEditable,
+        isEdit: isEditable,
         draftFooter:
           !isEditable &&
           !isLoadingDescription &&
