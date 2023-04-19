@@ -18,7 +18,7 @@ export interface PackageInfo {
   location: 'custom' | 'common';
 }
 
-const REVISION = 1036745;
+const REVISION = 1045629;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
