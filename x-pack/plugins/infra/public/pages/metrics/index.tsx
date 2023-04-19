@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -51,7 +51,14 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { keepPreviousData: true },
+        },
+      })
+  );
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
