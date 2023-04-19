@@ -33,6 +33,7 @@ import {
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,6 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   const postBulkAction = () =>
     supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
@@ -72,11 +74,13 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await deleteAllRules(supertest, log);
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {
@@ -329,6 +333,8 @@ export default ({ getService }: FtrProviderContext): void => {
           uuid: ruleBody.actions[0].uuid,
         },
       ]);
+      // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
+      await waitForRuleSuccess({ id: rule1.id, supertest, log });
     });
 
     it('should disable rules', async () => {
@@ -428,7 +434,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).to.eql(2);
     });
 
-    it('should duplicate rule with a legacy action and migrate new rules action', async () => {
+    it('should duplicate rule with a legacy action', async () => {
       const ruleId = 'ruleId';
       const [connector, ruleToDuplicate] = await Promise.all([
         supertest
@@ -465,10 +471,6 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
 
-      // legacy sidecar action should be gone
-      const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
-
       // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
@@ -478,6 +480,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).to.eql(2);
 
       rulesResponse.data.forEach((rule: RuleResponse) => {
+        const uuid = rule.actions[0].uuid;
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -487,7 +490,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: rule.actions[0].uuid,
+            ...(uuid ? { uuid } : {}),
           },
         ]);
       });
@@ -1091,7 +1094,6 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-
         expect(setTagsBody.attributes.summary).to.eql({
           failed: 0,
           skipped: 0,
@@ -1514,6 +1516,76 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
             expect(readRule.actions).to.eql([]);
+          });
+
+          it('should migrate legacy actions on edit when actions edited', async () => {
+            const ruleId = 'ruleId';
+            const [connector, createdRule] = await Promise.all([
+              supertest
+                .post(`/api/actions/connector`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  name: 'My action',
+                  connector_type_id: '.slack',
+                  secrets: {
+                    webhookUrl: 'http://localhost:1234',
+                  },
+                }),
+              createRule(supertest, log, getSimpleRule(ruleId, true)),
+            ]);
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
+
+            await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+
+            // check for legacy sidecar action
+            const sidecarActionsResults = await getLegacyActionSO(es);
+            expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+            expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+              createdRule.id
+            );
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: webHookConnector.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
+              {
+                ...webHookActionMock,
+                id: webHookConnector.id,
+                action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+              },
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
+
+            // Sidecar should be removed
+            const sidecarActionsPostResults = await getLegacyActionSO(es);
+            expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
           });
         });
 

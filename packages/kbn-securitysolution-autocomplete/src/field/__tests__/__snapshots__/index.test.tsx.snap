@@ -16,7 +16,7 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -33,6 +33,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -89,7 +90,7 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+            class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
@@ -106,6 +107,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -219,7 +221,7 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -236,6 +238,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -283,7 +286,7 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+            class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
@@ -300,6 +303,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
@@ -404,7 +408,7 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -421,6 +425,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -466,7 +471,7 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+            class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
@@ -483,6 +488,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -585,7 +591,7 @@ Object {
             class="euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -602,6 +608,7 @@ Object {
                   aria-autocomplete="list"
                   aria-controls=""
                   aria-expanded="false"
+                  aria-invalid="false"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -654,7 +661,7 @@ Object {
           class="euiFormControlLayout__childrenWrapper"
         >
           <div
-            class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading"
+            class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
@@ -671,6 +678,7 @@ Object {
                 aria-autocomplete="list"
                 aria-controls=""
                 aria-expanded="false"
+                aria-invalid="false"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
