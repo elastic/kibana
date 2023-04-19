@@ -24,6 +24,7 @@ import {
 import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
+  ANALYTICS_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
@@ -118,7 +119,11 @@ describe('migration v2', () => {
 
       const esClient: ElasticsearchClient = esServer.es.getClient();
       const docs = await esClient.search({
-        index: [MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX],
+        index: [
+          MAIN_SAVED_OBJECT_INDEX,
+          TASK_MANAGER_SAVED_OBJECT_INDEX,
+          ANALYTICS_SAVED_OBJECT_INDEX,
+        ],
         _source: false,
         fields: ['_id'],
         size: 50,
