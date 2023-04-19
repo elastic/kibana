@@ -24,7 +24,7 @@ import { FieldsConfig, from } from './shared';
 import { TargetField } from './common_fields/target_field';
 
 const fieldsConfig: FieldsConfig = {
-  tileType: {
+  tile_type: {
     type: FIELD_TYPES.TEXT,
     defaultValue: '',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoGrid.tileTypeFieldLabel', {
@@ -176,7 +176,7 @@ export const GeoGrid: FunctionComponent = () => {
                 ],
               },
             }}
-            config={fieldsConfig.tileType}
+            config={fieldsConfig.tile_type}
             component={SelectField}
             path="fields.tile_type"
           />
@@ -214,28 +214,28 @@ export const GeoGrid: FunctionComponent = () => {
 
       <UseField
         data-test-subj="parentField"
-        config={fieldsConfig.parent}
+        config={fieldsConfig.parent_field}
         component={Field}
         path="fields.parent_field"
       />
 
       <UseField
         data-test-subj="childrenField"
-        config={fieldsConfig.children}
+        config={fieldsConfig.children_field}
         component={Field}
         path="fields.children_field"
       />
 
       <UseField
         data-test-subj="nonChildrenField"
-        config={fieldsConfig.non_children}
+        config={fieldsConfig.non_children_field}
         component={Field}
         path="fields.non_children_field"
       />
 
       <UseField
         data-test-subj="precisionField"
-        config={fieldsConfig.precision}
+        config={fieldsConfig.precision_field}
         component={Field}
         path="fields.precision_field"
       />
