@@ -21,7 +21,10 @@ import {
   TestElasticsearchUtils,
   createTestServers as createkbnServerTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
@@ -115,7 +118,7 @@ describe('migration v2', () => {
 
       const esClient: ElasticsearchClient = esServer.es.getClient();
       const docs = await esClient.search({
-        index: SavedObjectsIndexPatterns,
+        index: [MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX],
         _source: false,
         fields: ['_id'],
         size: 50,
