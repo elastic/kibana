@@ -1,6 +1,7 @@
 {
   "name": "@kbn/reporting-export-types",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "private": true,
   "scripts": {
     "build": "yarn plugin-helpers build",
