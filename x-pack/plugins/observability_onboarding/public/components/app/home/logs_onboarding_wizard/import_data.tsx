@@ -42,8 +42,9 @@ export function ImportData() {
         <EuiText color="subdued">
           <p>
             It might take a few minutes for the data to get to Elasticsearch. If
-            you're not seeing any, try generating some to verify. If you're
-            having trouble connecting, check out the troubleshooting guide.
+            you&apos;re not seeing any, try generating some to verify. If
+            you&apos;re having trouble connecting, check out the troubleshooting
+            guide.
           </p>
         </EuiText>
         <EuiSpacer size="m" />

@@ -23,7 +23,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import { ObservabilityOnboardingConfig } from '../server';
+import type { ObservabilityOnboardingConfig } from '../server';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;

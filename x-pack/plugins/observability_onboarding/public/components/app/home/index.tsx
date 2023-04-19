@@ -49,8 +49,6 @@ function AnimatedTransitionsWizard() {
     return callApmApi('GET /internal/observability/onboarding/hello_world');
   }, []);
 
-  console.log(data);
-
   function onChangeStep({
     direction,
     StepComponent,
@@ -84,13 +82,13 @@ function AnimatedTransitionsWizard() {
             transition={transition}
           >
             <FilmstripFrame position="left">
-              {transition === 'back' ? <TransitionComponent.current /> : null}
+              {transition === 'back' ? TransitionComponent.current : null}
             </FilmstripFrame>
             <FilmstripFrame position="center">
               <WizardStep />
             </FilmstripFrame>
             <FilmstripFrame position="right">
-              {transition === 'next' ? <TransitionComponent.current /> : null}
+              {transition === 'next' ? TransitionComponent.current : null}
             </FilmstripFrame>
           </FilmstripTransition>
         </EuiFlexItem>
