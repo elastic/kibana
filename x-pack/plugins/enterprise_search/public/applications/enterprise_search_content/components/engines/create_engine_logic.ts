@@ -72,7 +72,6 @@ export const CreateEngineLogic = kea<
     },
     engineCreated: () => {
       actions.fetchEngines();
-      console.log("engineCreated")
       actions.closeEngineCreate();
     },
   }),

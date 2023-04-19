@@ -257,7 +257,7 @@ export const EngineIndices: React.FC = () => {
             }}
             title={i18n.translate(
               'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-              { defaultMessage: 'Remove this index from the engine' }
+              { defaultMessage: 'Remove this index from the Search Application' }
             )}
             buttonColor="danger"
             cancelButtonText={CANCEL_BUTTON_LABEL}
@@ -276,7 +276,7 @@ export const EngineIndices: React.FC = () => {
                   'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
                   {
                     defaultMessage:
-                      "This won't delete the index. You may add it back to this engine at a later time.",
+                      "This won't delete the index. You may add it back to this search application at a later time.",
                   }
                 )}
               </p>

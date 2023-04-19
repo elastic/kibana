@@ -20,15 +20,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  APP_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-} from '../../../../../../../common/constants';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
+
+import { ENGINES_PATH } from '../../../../routes';
 
 import { CreateEngineMenuItem } from './create_engine_menu_item';
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
-import { ENGINES_PATH } from '../../../../routes';
 
 export interface SearchEnginesPopoverProps {
   indexName?: string;

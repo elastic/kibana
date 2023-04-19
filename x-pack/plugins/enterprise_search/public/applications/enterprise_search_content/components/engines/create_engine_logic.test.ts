@@ -27,7 +27,7 @@ const DEFAULT_VALUES: CreateEngineLogicValues = {
 
 const VALID_ENGINE_NAME = 'unit-test-001';
 const INVALID_ENGINE_NAME = 'TEST';
-const VALID_INDICES_DATA = [{ name: 'search-index-01' }] as ElasticsearchIndexWithIngestion[];
+const VALID_INDICES_DATA = ['search-index-01'];
 
 describe('CreateEngineLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(CreateEngineApiLogic);
@@ -114,7 +114,7 @@ describe('CreateEngineLogic', () => {
       it('returns true while create request in progress', () => {
         CreateEngineApiLogic.actions.makeRequest({
           engineName: VALID_ENGINE_NAME,
-          indices: [VALID_INDICES_DATA[0].name],
+          indices: [VALID_INDICES_DATA[0]],
         });
 
         expect(CreateEngineLogic.values.formDisabled).toEqual(true);
