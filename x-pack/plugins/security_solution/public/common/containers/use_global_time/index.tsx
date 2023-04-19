@@ -22,11 +22,11 @@ export const useGlobalTime = () => {
   );
   const [isInitializing, setIsInitializing] = useState(true);
 
-  const queryId = useRef<string>('');
+  const queryId = useRef<string[]>([]);
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) => {
-      queryId.current = id;
+      queryId.current = [...queryId.current, id];
       dispatch(
         inputsActions.setQuery({
           inputId: InputsModelId.global,
@@ -55,12 +55,12 @@ export const useGlobalTime = () => {
   useEffect(() => {
     return () => {
       if (queryId.current.length > 0) {
-        deleteQuery({ id: queryId.current });
+        queryId.current.forEach((id) => deleteQuery({ id }));
       }
     };
   }, [deleteQuery]);
 
-  const memoizedReturn = useMemo(
+  return useMemo(
     () => ({
       isInitializing,
       from,
@@ -70,8 +70,6 @@ export const useGlobalTime = () => {
     }),
     [deleteQuery, from, isInitializing, setQuery, to]
   );
-
-  return memoizedReturn;
 };
 
 export type GlobalTimeArgs = Omit<ReturnType<typeof useGlobalTime>, 'deleteQuery'> &
