@@ -355,5 +355,3 @@ export const useXtermPlayer = ({
     search,
   };
 };
-
-const useFrame = (
