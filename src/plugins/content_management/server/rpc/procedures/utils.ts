@@ -8,8 +8,10 @@
 
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
+import type { StorageContext } from '../../core';
+import type { Context as RpcContext } from '../types';
 
-export const validateRequestVersion = (
+const validateRequestVersion = (
   requestVersion: Version | undefined,
   latestVersion: Version
 ): Version => {
@@ -29,4 +31,28 @@ export const validateRequestVersion = (
   }
 
   return requestVersionNumber;
+};
+
+export const getStorageContext = ({
+  contentTypeId,
+  version: _version,
+  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory },
+}: {
+  contentTypeId: string;
+  version?: number;
+  ctx: RpcContext;
+}): StorageContext => {
+  const contentDefinition = contentRegistry.getDefinition(contentTypeId);
+  const version = validateRequestVersion(_version, contentDefinition.version.latest);
+  const storageContext: StorageContext = {
+    requestHandlerContext,
+    version: {
+      request: version,
+      latest: contentDefinition.version.latest,
+    },
+    utils: {
+      getTransforms: getTransformsFactory(contentTypeId, version),
+    },
+  };
+  return storageContext;
 };
