@@ -70,7 +70,7 @@ export const getMaxValue = (
   if (isRespectRanges && paletteParams?.rangeMax) {
     const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
     return !metricValue || metricValue < paletteParams?.rangeMax
-      ? paletteParams?.rangeMax
+      ? paletteParams.rangeMax
       : metricValue;
   }
 
@@ -93,16 +93,16 @@ export const getMinValue = (
   accessors?: Accessors,
   paletteParams?: CustomPaletteParams,
   isRespectRanges?: boolean
-) => {
+): number => {
   const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : undefined;
-  if (currentValue !== undefined && currentValue !== null) {
+  if (currentValue != null) {
     return currentValue;
   }
 
   if (isRespectRanges && paletteParams?.rangeMin) {
     const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
     return !metricValue || metricValue > paletteParams?.rangeMin
-      ? paletteParams?.rangeMin
+      ? paletteParams.rangeMin
       : metricValue;
   }
 
@@ -121,7 +121,7 @@ export const getMinValue = (
 
 export const getGoalValue = (row?: DatatableRow, accessors?: Accessors) => {
   const currentValue = accessors?.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-  if (currentValue !== undefined && currentValue !== null) {
+  if (currentValue != null) {
     return currentValue;
   }
 
