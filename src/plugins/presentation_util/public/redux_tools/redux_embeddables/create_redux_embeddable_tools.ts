@@ -6,34 +6,19 @@
  * Side Public License, v 1.
  */
 
-import {
-  AnyAction,
-  configureStore,
-  createSlice,
-  Draft,
-  Middleware,
-  PayloadAction,
-  SliceCaseReducers,
-} from '@reduxjs/toolkit';
-import React, { ReactNode, PropsWithChildren } from 'react';
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { Draft, AnyAction, Middleware, PayloadAction } from '@reduxjs/toolkit';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import {
-  EmbeddableReducers,
-  ReduxEmbeddableTools,
-  ReduxEmbeddableContext,
-  ReduxEmbeddableState,
-  ReduxEmbeddableSyncSettings,
-} from './types';
+import { ReduxToolsReducers } from '../types';
+import { createReduxTools } from '../create_redux_tools';
 import { syncReduxEmbeddable } from './sync_redux_embeddable';
-import { EmbeddableReduxContext } from './use_redux_embeddable_context';
 import { cleanStateForRedux } from './clean_redux_embeddable_state';
+import { ReduxEmbeddableTools, ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
 
 export const createReduxEmbeddableTools = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+  ReducerType extends ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>
 >({
   reducers,
   embeddable,
@@ -50,7 +35,9 @@ export const createReduxEmbeddableTools = <
   syncSettings?: ReduxEmbeddableSyncSettings;
   reducers: ReducerType;
 }): ReduxEmbeddableTools<ReduxEmbeddableStateType, ReducerType> => {
-  // Additional generic reducers to aid in embeddable syncing
+  /**
+   * Build additional generic reducers to aid in embeddable syncing.
+   */
   const genericReducers = {
     replaceEmbeddableReduxInput: (
       state: Draft<ReduxEmbeddableStateType>,
@@ -65,8 +52,11 @@ export const createReduxEmbeddableTools = <
       state.output = action.payload;
     },
   };
+  const allReducers = { ...reducers, ...genericReducers };
 
-  // create initial state from Embeddable
+  /**
+   * Create initial state from Embeddable.
+   */
   let initialState: ReduxEmbeddableStateType = {
     output: embeddable.getOutput(),
     componentState: initialComponentState ?? {},
@@ -75,51 +65,33 @@ export const createReduxEmbeddableTools = <
 
   initialState = cleanStateForRedux<ReduxEmbeddableStateType>(initialState);
 
-  // create slice out of reducers and embeddable initial state.
-  const slice = createSlice<ReduxEmbeddableStateType, SliceCaseReducers<ReduxEmbeddableStateType>>({
+  const { dispatch, store, select, getState, onStateChange } = createReduxTools<
+    ReduxEmbeddableStateType,
+    typeof allReducers
+  >({
+    reducers: allReducers,
+    additionalMiddleware,
     initialState,
-    name: `${embeddable.type}_${embeddable.id}`,
-    reducers: { ...reducers, ...genericReducers },
   });
 
-  const store = configureStore({
-    reducer: slice.reducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(...(additionalMiddleware ?? [])),
-  });
-
-  // create the context which will wrap this embeddable's react components to allow access to update and read from the store.
-  const context = {
-    embeddableInstance: embeddable,
-
-    actions: slice.actions as ReduxEmbeddableContext<
-      ReduxEmbeddableStateType,
-      typeof reducers
-    >['actions'],
-    useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
-    useEmbeddableSelector: useSelector as TypedUseSelectorHook<ReduxEmbeddableStateType>,
-  };
-
-  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }: { children?: ReactNode }) => (
-    <Provider store={store}>
-      <EmbeddableReduxContext.Provider value={context}>{children}</EmbeddableReduxContext.Provider>
-    </Provider>
-  );
-
+  /**
+   * Sync redux state with embeddable input and output observables. Eventually we can replace the input and output observables
+   * with redux and remove this sync.
+   */
   const stopReduxEmbeddableSync = syncReduxEmbeddable<ReduxEmbeddableStateType>({
-    actions: context.actions,
+    replaceEmbeddableReduxInput: dispatch.replaceEmbeddableReduxInput,
+    replaceEmbeddableReduxOutput: dispatch.replaceEmbeddableReduxOutput,
     settings: syncSettings,
     embeddable,
     store,
   });
 
-  // return redux tools for the embeddable class to use.
   return {
-    Wrapper,
-    actions: context.actions,
-    dispatch: store.dispatch,
-    getState: store.getState,
-    onStateChange: store.subscribe,
+    store,
+    select,
+    dispatch,
+    getState,
+    onStateChange,
     cleanup: () => stopReduxEmbeddableSync?.(),
   };
 };

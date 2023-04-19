@@ -7,11 +7,12 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { EnhancedStore } from '@reduxjs/toolkit';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { EnhancedStore } from '@reduxjs/toolkit';
-import { ReduxEmbeddableContext, ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
+
 import { cleanInputForRedux } from './clean_redux_embeddable_state';
+import { ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -19,17 +20,19 @@ export const syncReduxEmbeddable = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
 >({
   store,
-  actions,
   settings,
   embeddable,
+  replaceEmbeddableReduxInput,
+  replaceEmbeddableReduxOutput,
 }: {
   settings?: ReduxEmbeddableSyncSettings;
   store: EnhancedStore<ReduxEmbeddableStateType>;
+  replaceEmbeddableReduxInput: (input: ReduxEmbeddableStateType['explicitInput']) => void;
+  replaceEmbeddableReduxOutput: (output: ReduxEmbeddableStateType['output']) => void;
   embeddable: IEmbeddable<
     ReduxEmbeddableStateType['explicitInput'],
     ReduxEmbeddableStateType['output']
   >;
-  actions: ReduxEmbeddableContext<ReduxEmbeddableStateType>['actions'];
 }) => {
   if (settings?.disableSync) {
     return;
@@ -80,9 +83,7 @@ export const syncReduxEmbeddable = <
     >;
 
     if (!inputEqual(reduxExplicitInput, embeddableExplictInput)) {
-      store.dispatch(
-        actions.replaceEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
-      );
+      replaceEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput));
     }
     embeddableToReduxInProgress = false;
   });
@@ -93,7 +94,7 @@ export const syncReduxEmbeddable = <
     embeddableToReduxInProgress = true;
     const reduxState = store.getState();
     if (!outputEqual(reduxState.output, embeddableOutput)) {
-      store.dispatch(actions.replaceEmbeddableReduxOutput(embeddableOutput));
+      replaceEmbeddableReduxOutput(embeddableOutput);
     }
     embeddableToReduxInProgress = false;
   });

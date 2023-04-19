@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 import { omit } from 'lodash';
-import { AnyAction, Middleware } from '@reduxjs/toolkit';
+import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
 
-import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../../common';
-import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
+import { DashboardContainerInput } from '../../../../common';
 import type { DashboardDiffFunctions } from './dashboard_diffing_functions';
 import {
   isKeyEqual,
   shouldRefreshDiffingFunctions,
   unsavedChangesDiffingFunctions,
 } from './dashboard_diffing_functions';
-import { dashboardContainerReducers } from '../../../state/dashboard_container_reducers';
+import { pluginServices } from '../../../services/plugin_services';
+import { DashboardContainer, DashboardCreationOptions } from '../..';
+import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
+import { dashboardContainerReducers } from '../dashboard_container_reducers';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
  * and the last saved input, so we can safely ignore any output reducers, and most componentState reducers.
  * This is only for performance reasons, because the diffing function itself can be quite heavy.
  */
-const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
+export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
   'setTimeslice',
   'setFullScreenMode',
   'setSearchSessionId',
@@ -37,11 +37,12 @@ const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
  */
-const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> = [
+const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'searchSessionId',
   'timeslice',
+  'id',
 
   'timeRange', // Current behaviour expects time range not to be backed up. Revisit this?
   'refreshInterval',
@@ -51,18 +52,19 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> 
  * Some keys will often have deviated from their last saved state, but should be
  * ignored when calculating whether or not this dashboard has unsaved changes.
  */
-export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByValueInput> = [
+export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'searchSessionId',
   'timeslice',
   'viewMode',
+  'id',
 ];
 
 /**
  * input keys that will cause a new session to be created.
  */
-const refetchKeys: Array<keyof DashboardContainerByValueInput> = [
+const refetchKeys: Array<keyof DashboardContainerInput> = [
   'query',
   'filters',
   'timeRange',
@@ -82,17 +84,34 @@ const refetchKeys: Array<keyof DashboardContainerByValueInput> = [
  */
 export function startDiffingDashboardState(
   this: DashboardContainer,
-  {
-    useSessionBackup,
-    setCleanupFunction,
-  }: {
-    useSessionBackup?: boolean;
-    setCleanupFunction: (cleanupFunction: () => void) => void;
-  }
+  creationOptions?: DashboardCreationOptions
 ) {
   const checkForUnsavedChangesSubject$ = new Subject<null>();
+  this.subscriptions.add(
+    checkForUnsavedChangesSubject$
+      .pipe(
+        debounceTime(CHANGE_CHECK_DEBOUNCE),
+        switchMap(() => {
+          return new Observable((observer) => {
+            const {
+              explicitInput: currentInput,
+              componentState: { lastSavedInput },
+            } = this.getState();
+            getUnsavedChanges
+              .bind(this)(lastSavedInput, currentInput)
+              .then((unsavedChanges) => {
+                if (observer.closed) return;
 
-  // middleware starts the check for unsaved changes function if the action dispatched could cause them.
+                updateUnsavedChangesState.bind(this)(unsavedChanges);
+                if (creationOptions?.useSessionStorageIntegration) {
+                  backupUnsavedChanges.bind(this)(unsavedChanges);
+                }
+              });
+          });
+        })
+      )
+      .subscribe()
+  );
   const diffingMiddleware: Middleware<AnyAction> = (store) => (next) => (action) => {
     const dispatchedActionName = action.type.split('/')?.[1];
     if (
@@ -104,60 +123,7 @@ export function startDiffingDashboardState(
     }
     next(action);
   };
-
-  const getHasUnsavedChangesSubscription = checkForUnsavedChangesSubject$
-    .pipe(
-      debounceTime(CHANGE_CHECK_DEBOUNCE),
-      switchMap(() => {
-        return new Observable((observer) => {
-          const {
-            explicitInput: currentInput,
-            componentState: { lastSavedInput },
-          } = this.getReduxEmbeddableTools().getState();
-          getUnsavedChanges
-            .bind(this)(lastSavedInput, currentInput)
-            .then((unsavedChanges) => {
-              if (observer.closed) return;
-
-              updateUnsavedChangesState.bind(this)(unsavedChanges);
-              if (useSessionBackup) backupUnsavedChanges.bind(this)(unsavedChanges);
-            });
-        });
-      })
-    )
-    .subscribe();
-
-  setCleanupFunction(() => getHasUnsavedChangesSubscription.unsubscribe());
-
   return diffingMiddleware;
-}
-
-function updateUnsavedChangesState(
-  this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerByValueInput>
-) {
-  const {
-    getState,
-    dispatch,
-    actions: { setHasUnsavedChanges },
-  } = this.getReduxEmbeddableTools();
-
-  // dispatch has unsaved changes state
-  const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
-  if (getState().componentState.hasUnsavedChanges !== hasChanges) {
-    dispatch(setHasUnsavedChanges(hasChanges));
-  }
-}
-
-function backupUnsavedChanges(
-  this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerByValueInput>
-) {
-  const { dashboardSessionStorage } = pluginServices.getServices();
-  dashboardSessionStorage.setState(
-    this.getDashboardSavedObjectId(),
-    omit(unsavedChanges, keysToOmitFromSessionStorage)
-  );
 }
 
 /**
@@ -166,19 +132,19 @@ function backupUnsavedChanges(
  */
 export async function getUnsavedChanges(
   this: DashboardContainer,
-  lastInput: DashboardContainerByValueInput,
-  input: DashboardContainerByValueInput
-): Promise<Partial<DashboardContainerByValueInput>> {
+  lastInput: DashboardContainerInput,
+  input: DashboardContainerInput
+): Promise<Partial<DashboardContainerInput>> {
   const allKeys = [...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
-    keyof DashboardContainerByValueInput
+    keyof DashboardContainerInput
   >;
   return await getInputChanges(this, lastInput, input, allKeys, unsavedChangesDiffingFunctions);
 }
 
 export async function getShouldRefresh(
   this: DashboardContainer,
-  lastInput: DashboardContainerByValueInput,
-  input: DashboardContainerByValueInput
+  lastInput: DashboardContainerInput,
+  input: DashboardContainerInput
 ): Promise<boolean> {
   const inputChanges = await getInputChanges(
     this,
@@ -192,15 +158,14 @@ export async function getShouldRefresh(
 
 async function getInputChanges(
   container: DashboardContainer,
-  lastInput: DashboardContainerByValueInput,
-  input: DashboardContainerByValueInput,
-  keys: Array<keyof DashboardContainerByValueInput>,
+  lastInput: DashboardContainerInput,
+  input: DashboardContainerInput,
+  keys: Array<keyof DashboardContainerInput>,
   diffingFunctions: DashboardDiffFunctions
-): Promise<Partial<DashboardContainerByValueInput>> {
-  await container.untilInitialized();
+): Promise<Partial<DashboardContainerInput>> {
   const keyComparePromises = keys.map(
     (key) =>
-      new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) => {
+      new Promise<{ key: keyof DashboardContainerInput; isEqual: boolean }>((resolve) => {
         if (input[key] === undefined && lastInput[key] === undefined) {
           resolve({ key, isEqual: true });
         }
@@ -226,6 +191,28 @@ async function getInputChanges(
       if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
     }
     return changes;
-  }, {} as Partial<DashboardContainerByValueInput>);
+  }, {} as Partial<DashboardContainerInput>);
   return inputChanges;
+}
+
+function updateUnsavedChangesState(
+  this: DashboardContainer,
+  unsavedChanges: Partial<DashboardContainerInput>
+) {
+  // dispatch has unsaved changes state
+  const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
+  if (this.getState().componentState.hasUnsavedChanges !== hasChanges) {
+    this.dispatch.setHasUnsavedChanges(hasChanges);
+  }
+}
+
+function backupUnsavedChanges(
+  this: DashboardContainer,
+  unsavedChanges: Partial<DashboardContainerInput>
+) {
+  const { dashboardSessionStorage } = pluginServices.getServices();
+  dashboardSessionStorage.setState(
+    this.getDashboardSavedObjectId(),
+    omit(unsavedChanges, keysToOmitFromSessionStorage)
+  );
 }

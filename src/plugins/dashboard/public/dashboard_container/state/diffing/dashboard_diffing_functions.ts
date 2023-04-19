@@ -17,27 +17,28 @@ import {
 } from '@kbn/es-query';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainer } from '../../dashboard_container';
-import { DashboardContainerByValueInput } from '../../../../../common';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
+import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
 
-export interface DiffFunctionProps<Key extends keyof DashboardContainerByValueInput> {
-  currentValue: DashboardContainerByValueInput[Key];
-  lastValue: DashboardContainerByValueInput[Key];
+export interface DiffFunctionProps<Key extends keyof DashboardContainerInput> {
+  currentValue: DashboardContainerInput[Key];
+  lastValue: DashboardContainerInput[Key];
 
-  currentInput: DashboardContainerByValueInput;
-  lastInput: DashboardContainerByValueInput;
+  currentInput: DashboardContainerInputWithoutId;
+  lastInput: DashboardContainerInputWithoutId;
   container: DashboardContainer;
 }
 
 export type DashboardDiffFunctions = {
-  [key in keyof Partial<DashboardContainerByValueInput>]: (
+  [key in keyof Partial<DashboardContainerInput>]: (
     props: DiffFunctionProps<key>
   ) => boolean | Promise<boolean>;
 };
 
 export const isKeyEqual = async (
-  key: keyof DashboardContainerByValueInput,
+  key: keyof DashboardContainerInput,
   diffFunctionProps: DiffFunctionProps<typeof key>,
   diffingFunctions: DashboardDiffFunctions
 ) => {

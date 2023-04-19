@@ -6,24 +6,21 @@
  * Side Public License, v 1.
  */
 
-import _, { identity, pickBy } from 'lodash';
-import { Observable, Subscription } from 'rxjs';
+import { isEqual } from 'lodash';
+import { Observable } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
-  CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
-import { pluginServices } from '../../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../../common';
+import { DashboardContainerInput } from '../../../../../common';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -35,61 +32,16 @@ const distinctUntilDiffCheck = <T extends {}>(a: T, b: T, diffChecks: DiffChecks
     .includes(false);
 
 type DashboardControlGroupCommonKeys = keyof Pick<
-  DashboardContainerByValueInput | ControlGroupInput,
+  DashboardContainerInput | ControlGroupInput,
   'filters' | 'lastReloadRequestTime' | 'timeRange' | 'query'
 >;
 
-export async function startControlGroupIntegration(
-  this: DashboardContainer,
-  initialInput: DashboardContainerByValueInput
-): Promise<ControlGroupContainer | undefined> {
-  const {
-    embeddable: { getEmbeddableFactory },
-  } = pluginServices.getServices();
-  const controlsGroupFactory = getEmbeddableFactory<
-    ControlGroupInput,
-    ControlGroupOutput,
-    ControlGroupContainer
-  >(CONTROL_GROUP_TYPE);
-  const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-  const controlGroup = await controlsGroupFactory?.create({
-    id: `control_group_${id ?? 'new_dashboard'}`,
-    ...getDefaultControlGroupInput(),
-    ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-    timeRange,
-    viewMode,
-    filters,
-    query,
-  });
-  if (!controlGroup || isErrorEmbeddable(controlGroup)) {
-    return;
-  }
-
-  this.untilInitialized().then(() => {
-    const stopSyncingControlGroup =
-      startSyncingDashboardControlGroup.bind(this)()?.stopSyncingWithControlGroup;
-    this.onDestroyControlGroup = () => {
-      stopSyncingControlGroup?.();
-      this.controlGroup?.destroy();
-    };
-  });
-  await controlGroup.untilInitialized();
-  return controlGroup;
-}
-
-function startSyncingDashboardControlGroup(this: DashboardContainer) {
+export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
-  const subscriptions = new Subscription();
-
-  const {
-    actions: { setControlGroupState },
-    dispatch,
-  } = this.getReduxEmbeddableTools();
-
   const isControlGroupInputEqual = () =>
     persistableControlGroupInputIsEqual(
       this.controlGroup!.getInput(),
-      this.getInputAsValueType().controlGroupInput
+      this.getInput().controlGroupInput
     );
 
   // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
@@ -99,7 +51,7 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
     chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getInput$()
       .pipe(
@@ -111,9 +63,12 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
         const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
           this.controlGroup!.getInput();
         if (!isControlGroupInputEqual()) {
-          dispatch(
-            setControlGroupState({ panels, controlStyle, chainingSystem, ignoreParentSettings })
-          );
+          this.dispatch.setControlGroupState({
+            panels,
+            controlStyle,
+            chainingSystem,
+            ignoreParentSettings,
+          });
         }
       })
   );
@@ -129,23 +84,20 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
   };
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
-  subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerByValueInput>>)
+  this.subscriptions.add(
+    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(
         distinctUntilChanged((a, b) =>
-          distinctUntilDiffCheck<DashboardContainerByValueInput>(a, b, dashboardRefetchDiff)
+          distinctUntilDiffCheck<DashboardContainerInput>(a, b, dashboardRefetchDiff)
         )
       )
       .subscribe(() => {
         const newInput: { [key: string]: unknown } = {};
         (Object.keys(dashboardRefetchDiff) as DashboardControlGroupCommonKeys[]).forEach((key) => {
           if (
-            !dashboardRefetchDiff[key]?.(
-              this.getInputAsValueType()[key],
-              this.controlGroup!.getInput()[key]
-            )
+            !dashboardRefetchDiff[key]?.(this.getInput()[key], this.controlGroup!.getInput()[key])
           ) {
-            newInput[key] = this.getInputAsValueType()[key];
+            newInput[key] = this.getInput()[key];
           }
         });
         if (Object.keys(newInput).length > 0) {
@@ -155,24 +107,24 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
   );
 
   // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
-  subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerByValueInput>>)
+  this.subscriptions.add(
+    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
-          if (!this.getInputAsValueType().controlGroupInput) {
+          if (!this.getInput().controlGroupInput) {
             this.controlGroup!.updateInput(getDefaultControlGroupInput());
             return;
           }
           this.controlGroup!.updateInput({
-            ...this.getInputAsValueType().controlGroupInput,
+            ...this.getInput().controlGroupInput,
           });
         }
       })
   );
 
   // when control group outputs filters, force a refresh!
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -184,23 +136,23 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
       .subscribe(() => this.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
   );
 
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
         distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
-          _.isEqual(timesliceA, timesliceB)
+          isEqual(timesliceA, timesliceB)
         )
       )
       .subscribe(({ timeslice }) => {
-        if (!_.isEqual(timeslice, this.getInputAsValueType().timeslice)) {
-          this.updateInput({ timeslice });
+        if (!isEqual(timeslice, this.getInput().timeslice)) {
+          this.dispatch.setTimeslice(timeslice);
         }
       })
   );
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
-  subscriptions.add(
+  this.subscriptions.add(
     this.getAnyChildOutputChange$().subscribe(() => {
       if (!this.controlGroup) {
         return;
@@ -216,12 +168,6 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
       this.controlGroup.anyControlOutputConsumerLoading$.next(false);
     })
   );
-
-  return {
-    stopSyncingWithControlGroup: () => {
-      subscriptions.unsubscribe();
-    },
-  };
 }
 
 export const combineDashboardFiltersWithControlGroupFilters = (
