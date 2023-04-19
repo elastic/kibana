@@ -42,6 +42,7 @@ import {
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
+  transformAlertToRuleAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
 import {
@@ -51,8 +52,6 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -75,7 +74,6 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import {
-  transformActions,
   transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
@@ -646,8 +644,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  legacyRuleActions?: LegacyRuleActions | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
@@ -675,8 +672,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    throttle: transformFromAlertThrottle(rule),
+    actions: rule.actions.map(transformAlertToRuleAction),
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
