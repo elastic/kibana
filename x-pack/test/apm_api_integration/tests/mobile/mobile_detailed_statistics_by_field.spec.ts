@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             offset,
             kuery,
             field,
-            fieldNames: JSON.stringify(SERVICE_VERSIONS),
+            fieldValues: JSON.stringify(SERVICE_VERSIONS),
           },
         },
       })

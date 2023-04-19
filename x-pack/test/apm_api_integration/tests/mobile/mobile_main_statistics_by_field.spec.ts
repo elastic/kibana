@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
         expect(throughputValues).to.be.eql([
-          1.800002000002222, 1.0000011111123457, 1.0000011111123457,
+          0.6000006666674074, 0.40000044444493826, 0.40000044444493826,
         ]);
       });
       it('returns the correct data for Os version', async () => {
