@@ -14,9 +14,11 @@ import {
   MonitorFields,
   ScheduleUnit,
   SyntheticsMonitorWithSecrets,
+  ThrottlingConfig,
 } from '../../../../../../common/runtime_types';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
+  CUSTOM_LABEL,
   PROFILE_VALUES,
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
@@ -136,6 +138,7 @@ const updateThrottlingFields = (
         [LegacyConfigKey.DOWNLOAD_SPEED]: string;
         [LegacyConfigKey.UPLOAD_SPEED]: string;
         [LegacyConfigKey.LATENCY]: string;
+        [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfig;
       }>
   >,
   logger: SavedObjectMigrationContext
@@ -153,18 +156,19 @@ const updateThrottlingFields = (
 
     const isThrottlingEnabled = attributes[LegacyConfigKey.IS_THROTTLING_ENABLED];
     if (isThrottlingEnabled) {
-      const download = String(attributes[LegacyConfigKey.DOWNLOAD_SPEED])!;
-      const upload = String(attributes[LegacyConfigKey.UPLOAD_SPEED])!;
-      const latency = String(attributes[LegacyConfigKey.LATENCY])!;
+      const defaultProfileValue = PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT].value!;
 
-      // @ts-ignore
+      const download =
+        String(attributes[LegacyConfigKey.DOWNLOAD_SPEED]) || defaultProfileValue.download;
+      const upload = String(attributes[LegacyConfigKey.UPLOAD_SPEED]) || defaultProfileValue.upload;
+      const latency = String(attributes[LegacyConfigKey.LATENCY]) || defaultProfileValue.latency;
+
       migrated.attributes[ConfigKey.THROTTLING_CONFIG] = getMatchingThrottlingConfig(
         download,
         upload,
         latency
       );
     } else {
-      // @ts-ignore
       migrated.attributes[ConfigKey.THROTTLING_CONFIG] =
         PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
     }
@@ -186,7 +190,6 @@ const updateThrottlingFields = (
     );
     const { attributes } = doc;
 
-    // @ts-ignore
     attributes[ConfigKey.THROTTLING_CONFIG] = PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT];
 
     return {
@@ -202,7 +205,7 @@ const updateThrottlingFields = (
   }
 };
 
-const getMatchingThrottlingConfig = (download?: string, upload?: string, latency?: string) => {
+const getMatchingThrottlingConfig = (download: string, upload: string, latency: string) => {
   const matchedProfile = PROFILE_VALUES.find(({ value }) => {
     return (
       Number(value?.download) === Number(download) &&
@@ -216,7 +219,7 @@ const getMatchingThrottlingConfig = (download?: string, upload?: string, latency
   } else {
     return {
       id: PROFILE_VALUES_ENUM.CUSTOM,
-      label: 'Custom',
+      label: CUSTOM_LABEL,
       value: {
         download: String(download),
         upload: String(upload),

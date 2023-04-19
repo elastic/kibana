@@ -44,6 +44,10 @@ export enum PROFILE_VALUES_ENUM {
   CUSTOM = 'custom',
 }
 
+export const CUSTOM_LABEL = i18n.translate('xpack.synthetics.connectionProfile.custom', {
+  defaultMessage: 'Custom',
+});
+
 export const PROFILE_VALUES: ThrottlingConfig[] = [
   {
     value: { download: '5', upload: '3', latency: '20' },

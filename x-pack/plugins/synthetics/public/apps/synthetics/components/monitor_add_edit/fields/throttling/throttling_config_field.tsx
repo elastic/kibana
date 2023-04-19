@@ -10,7 +10,7 @@ import { useConnectionProfiles } from './use_connection_profiles';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 import { ThrottlingFields } from './throttling_fields';
-import { PROFILE_VALUES_ENUM, PROFILE_VALUES, PROFILES_MAP } from '../../constants';
+import { PROFILE_VALUES_ENUM, PROFILE_VALUES, PROFILES_MAP, CUSTOM_LABEL } from '../../constants';
 import { ConnectionProfile } from './connection_profile';
 
 export interface ThrottlingConfigFieldProps {
@@ -46,7 +46,7 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
             props.onChange({
               ...PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
               id: PROFILE_VALUES_ENUM.CUSTOM,
-              label: 'Custom',
+              label: CUSTOM_LABEL,
             });
           } else {
             props.onChange({

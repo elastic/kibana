@@ -18,6 +18,7 @@ import {
   DEFAULT_FIELDS,
   PROFILES_MAP,
   PROFILE_VALUES,
+  CUSTOM_LABEL,
 } from '../../../../common/constants/monitor_defaults';
 import {
   NormalizedProjectProps,
@@ -103,7 +104,7 @@ export const normalizeThrottling = (
     } else {
       return {
         id: PROFILE_VALUES_ENUM.CUSTOM,
-        label: 'Custom',
+        label: CUSTOM_LABEL,
         value: {
           download: String(download),
           upload: String(upload),

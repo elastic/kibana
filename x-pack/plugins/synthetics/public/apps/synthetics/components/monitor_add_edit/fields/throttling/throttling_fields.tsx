@@ -19,7 +19,7 @@ import { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingDownloadField } from './throttling_download_field';
 import { ThrottlingLatencyField } from './throttling_latency_field';
-import { PROFILE_VALUES_ENUM } from '../../constants';
+import { CUSTOM_LABEL, PROFILE_VALUES_ENUM } from '../../constants';
 
 interface Props {
   validate?: Validation;
@@ -40,8 +40,8 @@ export const ThrottlingFields = memo<Props>(
         setValue({
           ...throttling,
           value: { ...throttling.value!, [configKey]: value },
-          label: 'Custom',
-          id: 'custom',
+          label: CUSTOM_LABEL,
+          id: PROFILE_VALUES_ENUM.CUSTOM,
         });
       },
       [setValue, throttling]
