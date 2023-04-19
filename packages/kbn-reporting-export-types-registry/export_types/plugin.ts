@@ -38,5 +38,4 @@ export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportT
     // return this.getContract()
     return this.exportTypeStart;
   }
-
 }

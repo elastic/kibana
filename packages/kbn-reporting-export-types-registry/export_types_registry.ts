@@ -10,10 +10,10 @@ import { Subscription } from 'rxjs';
 import type { Job } from '@kbn/reporting-plugin/public/lib/job';
 import { ExportTypeEntry } from './export_definitions';
 
-/** 
+/**
  * The entries after being registered should have these properties
- * @public 
-*/
+ * @public
+ */
 export interface ExportTypeRegistryEntry {
   // some sort of locator param
   // this is used in report_listing but might not be needed for the export type registry

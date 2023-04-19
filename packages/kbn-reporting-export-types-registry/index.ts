@@ -8,4 +8,4 @@
 export { ExportTypesRegistry } from './export_types_registry';
 export type { ExportTypeRegistryEntry } from './export_types_registry';
 
-export type { ExportTypesPluginSetup, ExportTypesPluginStart } from './export_types/plugin' 
+export type { ExportTypesPluginSetup, ExportTypesPluginStart } from './export_types/plugin';
