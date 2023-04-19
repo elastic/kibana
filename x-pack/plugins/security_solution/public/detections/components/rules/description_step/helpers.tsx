@@ -606,8 +606,8 @@ export const buildAlertSuppressionMissingFieldsDescription = (
 
   const description =
     value === SuppressionMissingFieldsOptions.OneAlertPerDocument
-      ? 'One alert per each document'
-      : 'Single alert for all documents';
+      ? 'Suppress on missing field value'
+      : 'Do not suppress';
 
   const title = (
     <>
