@@ -52,7 +52,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX, SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -197,7 +197,8 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getAllIndices: () => [...SavedObjectsIndexPatterns],
     };
   }
 
@@ -340,6 +341,21 @@ export class SavedObjectsService
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getIndexForType: (type: string) => {
+        const definition = this.typeRegistry.getType(type);
+        return definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+      },
+      getIndicesForTypes: (types: string[]) => {
+        const indices = new Set<string>();
+        types.forEach((type) => {
+          const definition = this.typeRegistry.getType(type);
+          const index = definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+          indices.add(index);
+        });
+        return [...indices];
+      },
+      getAllIndices: () => [...SavedObjectsIndexPatterns],
     };
   }
 
