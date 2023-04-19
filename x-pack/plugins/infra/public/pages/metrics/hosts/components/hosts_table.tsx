@@ -59,7 +59,7 @@ export const HostsTable = () => {
         noItemsMessage={
           loading ? (
             i18n.translate('xpack.infra.waffle.loadingDataText', {
-              defaultMessage: 'Loading data...',
+              defaultMessage: 'Loading data',
             })
           ) : (
             <NoData

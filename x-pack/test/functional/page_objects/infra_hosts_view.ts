@@ -258,7 +258,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Sorting
     getDiskLatencyHeader() {
-      return testSubjects.find('tableHeaderCell_diskLatency.avg_4');
+      return testSubjects.find('tableHeaderCell_diskLatency_4');
     },
 
     getTitleHeader() {
@@ -272,8 +272,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async sortByTitle() {
-      const diskLatency = await this.getTitleHeader();
-      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      const titleHeader = await this.getTitleHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', titleHeader);
       return button.click();
     },
   };

@@ -515,7 +515,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Pagination and Sorting', () => {
-        before(async () => {
+        beforeEach(async () => {
           await pageObjects.infraHostsView.changePageSize(5);
         });
 
@@ -550,36 +550,50 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should sort by Disk Latency asc', async () => {
           await pageObjects.infraHostsView.sortByDiskLatency();
-          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          expect(hostRows[0]).to.eql(tableEntries[1]);
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
           await pageObjects.infraHostsView.paginateTo(2);
-          expect(hostRows[0]).to.eql(tableEntries[0]);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[1]);
         });
 
         it('should sort by Disk Latency desc', async () => {
           await pageObjects.infraHostsView.sortByDiskLatency();
-          await pageObjects.infraHostsView.sortByDiskLatency();
-          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          expect(hostRows[0]).to.eql(tableEntries[0]);
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[1]);
+
           await pageObjects.infraHostsView.paginateTo(2);
-          expect(hostRows[0]).to.eql(tableEntries[1]);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
 
         it('should sort by Title asc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
-          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          expect(hostRows[0]).to.eql(tableEntries[0]);
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
           await pageObjects.infraHostsView.paginateTo(2);
-          expect(hostRows[0]).to.eql(tableEntries[5]);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[5]);
         });
 
         it('should sort by Title desc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
-          await pageObjects.infraHostsView.sortByTitle();
-          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          expect(hostRows[0]).to.eql(tableEntries[5]);
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[5]);
+
           await pageObjects.infraHostsView.paginateTo(2);
-          expect(hostRows[0]).to.eql(tableEntries[0]);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
       });
     });
