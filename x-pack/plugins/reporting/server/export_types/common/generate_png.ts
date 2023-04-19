@@ -18,6 +18,7 @@ interface PngResult {
   buffer: Buffer;
   metrics?: PngMetrics;
   warnings: string[];
+  info: string[];
 }
 
 export function generatePngObservable(
@@ -51,6 +52,7 @@ export function generatePngObservable(
       map(({ metrics, results }) => ({
         metrics,
         buffer: results[0].screenshots[0].data,
+        info: results[0].info,
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);

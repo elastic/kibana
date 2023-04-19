@@ -449,6 +449,11 @@ export class HeadlessChromiumDriver {
     this.listenersAttached = true;
   }
 
+  public async getVersion() {
+    const client = this.page._client();
+    return JSON.stringify(await client.send('Browser.getVersion'));
+  }
+
   private async launchDebugger() {
     // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
     // and more specifically, for the page being used. _client is per-page.
