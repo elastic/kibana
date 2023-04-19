@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
@@ -112,6 +112,20 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
+    const tableCss = useMemo(() => {
+      return css`
+        .euiTableRow {
+          &.running {
+            background-color: ${warningBackgroundColor};
+          }
+
+          &.archived {
+            background-color: ${subduedBackgroundColor};
+          }
+        }
+      `;
+    }, [warningBackgroundColor, subduedBackgroundColor]);
+
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
         name: '',
@@ -128,19 +142,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         ],
       },
     ];
+
     return (
       <EuiInMemoryTable
-        css={css`
-          .euiTableRow {
-            &.running {
-              background-color: ${warningBackgroundColor};
-            }
-
-            &.archived {
-              background-color: ${subduedBackgroundColor};
-            }
-          }
-        `}
+        css={tableCss}
         itemId="id"
         loading={loading}
         tableCaption="Maintenance Windows List"
