@@ -30,6 +30,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
@@ -152,6 +153,11 @@ export const alertFieldMap = {
   [ALERT_TIME_RANGE]: {
     type: 'date_range',
     format: 'epoch_millis||strict_date_optional_time',
+    array: false,
+    required: false,
+  },
+  [ALERT_URL]: {
+    type: 'text',
     array: false,
     required: false,
   },
