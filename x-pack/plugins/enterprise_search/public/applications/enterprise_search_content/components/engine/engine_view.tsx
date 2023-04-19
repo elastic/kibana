@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Switch } from 'react-router-dom';
+import { useParams, Redirect, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
@@ -15,7 +15,12 @@ import { Route } from '@kbn/shared-ux-router';
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { ENGINE_PATH, EngineViewTabs } from '../../routes';
+import {
+  ENGINE_PATH,
+  SEARCH_APPLICATION_CONNECT_PATH,
+  EngineViewTabs,
+  SearchApplicationConnectTabs,
+} from '../../routes';
 
 import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
@@ -72,7 +77,11 @@ export const EngineView: React.FC = () => {
         />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
         <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.SCHEMA}`} component={EngineSchema} />
-        <Route path={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`} component={EngineConnect} />
+        <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
+        <Redirect
+          from={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`}
+          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.API}`}
+        />
         <Route>
           <NotFound />
         </Route>

@@ -35,6 +35,7 @@ export enum EngineViewTabs {
 export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
 export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
 export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
+export const SEARCH_APPLICATION_CONNECT_PATH = `${ENGINE_PATH}/${EngineViewTabs.CONNECT}/:connectTabId`;
 export enum SearchApplicationConnectTabs {
   API = 'api',
 }

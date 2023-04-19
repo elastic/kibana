@@ -189,6 +189,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: enginePath,
           }),
           items: [
@@ -232,6 +233,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
+                shouldShowActiveForSubroutes: true,
                 to: `${enginePath}/${EngineViewTabs.CONNECT}`,
               }),
             },

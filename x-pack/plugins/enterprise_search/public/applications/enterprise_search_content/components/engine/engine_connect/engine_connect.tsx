@@ -6,13 +6,21 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { EngineViewTabs, SearchApplicationConnectTabs } from '../../../routes';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
+import {
+  SEARCH_APPLICATION_CONNECT_PATH,
+  EngineViewTabs,
+  SearchApplicationConnectTabs,
+} from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
+import { NotFound } from '../../not_found';
 
 import { EngineViewLogic } from '../engine_view_logic';
 
@@ -24,16 +32,40 @@ const pageTitle = i18n.translate(
     defaultMessage: 'Connect',
   }
 );
+const API_TAB_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.content.searchApplications.connect.apiTabTitle',
+  {
+    defaultMessage: 'API',
+  }
+);
+const ConnectTabs: string[] = Object.values(SearchApplicationConnectTabs);
+const getTabBreadCrumb = (tabId: string) => {
+  switch (tabId) {
+    case SearchApplicationConnectTabs.API:
+      return API_TAB_TITLE;
+    default:
+      return tabId;
+  }
+};
 
 export const EngineConnect: React.FC = () => {
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const [connectTabId, setTab] = React.useState<SearchApplicationConnectTabs>(
-    SearchApplicationConnectTabs.API
-  );
+  const { connectTabId = SearchApplicationConnectTabs.API } = useParams<{
+    connectTabId?: string;
+  }>();
+  const onTabClick = (tab: SearchApplicationConnectTabs) => () => {
+    KibanaLogic.values.navigateToUrl(
+      generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
+        engineName,
+        connectTabId: tab,
+      })
+    );
+  };
+  if (!ConnectTabs.includes(connectTabId)) return <NotFound />;
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName, pageTitle]}
+      pageChrome={[engineName, pageTitle, getTabBreadCrumb(connectTabId)]}
       pageViewTelemetry={EngineViewTabs.CONNECT}
       isLoading={isLoadingEngine}
       pageHeader={{
@@ -41,14 +73,9 @@ export const EngineConnect: React.FC = () => {
         rightSideItems: [],
         tabs: [
           {
-            onClick: () => setTab(SearchApplicationConnectTabs.API),
             isSelected: connectTabId === SearchApplicationConnectTabs.API,
-            label: i18n.translate(
-              'xpack.enterpriseSearch.content.searchApplications.connect.apiTabTitle',
-              {
-                defaultMessage: 'API',
-              }
-            ),
+            label: API_TAB_TITLE,
+            onClick: onTabClick(SearchApplicationConnectTabs.API),
           },
         ],
       }}
