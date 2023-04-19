@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { METRICS_APP_DATA_TEST_SUBJ } from '../../../../apps/metrics_app';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -71,12 +72,21 @@ export const UnifiedSearchBar = () => {
 const StickyContainer = (props: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
 
+  const top = useMemo(() => {
+    const wrapper = document.querySelector(`[data-test-subj="${METRICS_APP_DATA_TEST_SUBJ}"]`);
+    if (!wrapper) {
+      return `calc(${euiTheme.size.xxxl} * 2)`;
+    }
+
+    return `${wrapper.getBoundingClientRect().top}px`;
+  }, [euiTheme]);
+
   return (
     <EuiFlexGrid
       gutterSize="none"
       css={css`
         position: sticky;
-        top: calc(${euiTheme.size.xxxl} * 2);
+        top: ${top};
         z-index: ${euiTheme.levels.header};
         background: ${euiTheme.colors.emptyShade};
         padding-top: ${euiTheme.size.m};

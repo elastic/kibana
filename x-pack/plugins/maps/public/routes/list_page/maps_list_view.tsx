@@ -13,7 +13,7 @@ import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import type { MapItem } from '../../../common/content_management';
-import { APP_ID, getEditPath, MAP_PATH } from '../../../common/constants';
+import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
@@ -22,7 +22,6 @@ import {
   getUiSettings,
   getUsageCollection,
 } from '../../kibana_services';
-import { getAppTitle } from '../../../common/i18n_getters';
 import { mapsClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
@@ -73,8 +72,8 @@ function MapsListViewComp({ history }: Props) {
   const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  getCoreChrome().docTitle.change(getAppTitle());
-  getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
+  getCoreChrome().docTitle.change(APP_NAME);
+  getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
 
   const findMaps = useCallback(
     async (
@@ -128,7 +127,7 @@ function MapsListViewComp({ history }: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableListTitle={getAppTitle()}
+      tableListTitle={APP_NAME}
       onClickTitle={({ id }) => history.push(getEditPath(id))}
     />
   );

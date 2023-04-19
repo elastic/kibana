@@ -468,6 +468,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
+        plugins.cloud,
         logger
       );
       this.policyWatcher.start(licenseService);
@@ -498,6 +499,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       manifestManager,
       registerIngestCallback,
       licenseService,
+      cloud: plugins.cloud,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
