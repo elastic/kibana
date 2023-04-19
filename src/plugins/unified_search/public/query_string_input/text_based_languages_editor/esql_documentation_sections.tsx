@@ -142,7 +142,7 @@ export const processingCommands = {
       description: (
         <Markdown
           markdown={i18n.translate(
-            'unifiedSearch.query.textBasedLanguagesEditor.documentation.from.markdown',
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.dissect.markdown',
             {
               defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.

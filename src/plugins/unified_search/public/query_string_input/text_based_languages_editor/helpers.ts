@@ -106,7 +106,7 @@ export const getDocumentationSections = async (language: string) => {
       './esql_documentation_sections'
     );
     groups.push({
-      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
+      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ESQL',
       }),
       items: [],
