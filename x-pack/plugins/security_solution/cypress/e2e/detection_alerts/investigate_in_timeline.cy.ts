@@ -64,26 +64,26 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
     });
 
     it('should open a new timeline from a prevalence field', () => {
-      cy.get(SUMMARY_VIEW_PREVALENCE_CELL)
-        .last()
-        .invoke('text')
-        .then((alertCount) => {
-          // Click on the last button that lets us investigate in timeline.
-          // We expect this to be the `process.args` row.
-          cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).last().click();
+      // Only one alert matches the exact process args in this case
+      const alertCount = 1;
 
-          // Make sure a new timeline is created and opened
-          cy.get(TIMELINE_TITLE).should('contain.text', 'Untitled timeline');
+      // Click on the last button that lets us investigate in timeline.
+      // We expect this to be the `process.args` row.
+      const investigateButton = cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).last();
+      investigateButton.should('have.text', alertCount);
+      investigateButton.click();
 
-          // The alert count in this timeline should match the count shown on the alert flyout
-          cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
+      // Make sure a new timeline is created and opened
+      cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
 
-          // The correct filter is applied to the timeline query
-          cy.get(FILTER_BADGE).should(
-            'contain.text',
-            ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
-          );
-        });
+      // The alert count in this timeline should match the count shown on the alert flyout
+      cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
+
+      // The correct filter is applied to the timeline query
+      cy.get(FILTER_BADGE).should(
+        'have.text',
+        ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
+      );
     });
 
     it('should open a new timeline from an insights module', () => {
