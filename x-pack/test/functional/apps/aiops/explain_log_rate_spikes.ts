@@ -208,6 +208,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         }
       }
+
+      if (testData.action !== undefined) {
+        await ml.testExecution.logTestStep('check all table row actions are present');
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.assertRowActions(
+          testData.action.tableRowId
+        );
+
+        await ml.testExecution.logTestStep('click log pattern analysis action');
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.clickRowAction(
+          testData.action.tableRowId,
+          testData.action.type
+        );
+
+        await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
+        await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
+        await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
+          testData.action.expected.totalDocCount
+        );
+        await aiops.logPatternAnalysisPageProvider.assertQueryInput(
+          testData.action.expected.queryBar
+        );
+      }
     });
   }
 
@@ -242,7 +264,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
-          await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
+          if (testData.dataGenerator !== 'kibana_sample_data_logs') {
+            await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
+          }
           await aiops.explainLogRateSpikesDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

@@ -195,6 +195,10 @@ export function ExplainLogRateSpikesDataGeneratorProvider({ getService }: FtrPro
 
     public async removeGeneratedData(dataGenerator: string) {
       switch (dataGenerator) {
+        case 'kibana_sample_data_logs':
+          // do not remove
+          break;
+
         case 'farequote_with_spike':
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           break;

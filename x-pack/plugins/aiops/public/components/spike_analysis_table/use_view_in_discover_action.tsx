@@ -94,6 +94,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
 
       return (
         <TableActionButton
+          dataTestSubjPostfix="Discover"
           iconType="discoverApp"
           isDisabled={discoverUrlError !== undefined}
           label={viewInDiscoverMessage}

@@ -7,6 +7,15 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+interface TestDataTableActionLogPatternAnalysis {
+  type: 'LogPatternAnalysis';
+  tableRowId: string;
+  expected: {
+    queryBar: string;
+    totalDocCount: string;
+  };
+}
+
 interface TestDataExpectedWithSampleProbability {
   totalDocCountFormatted: string;
   sampleProbabilityFormatted: string;
@@ -46,5 +55,6 @@ export interface TestData {
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;
+  action?: TestDataTableActionLogPatternAnalysis;
   expected: TestDataExpectedWithSampleProbability | TestDataExpectedWithoutSampleProbability;
 }

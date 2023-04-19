@@ -11,6 +11,7 @@ import { EuiLink, EuiIcon, EuiText, EuiToolTip, type IconType } from '@elastic/e
 
 interface TableActionButtonProps {
   iconType: IconType;
+  dataTestSubjPostfix: string;
   isDisabled: boolean;
   label: string;
   message?: string;
@@ -19,6 +20,7 @@ interface TableActionButtonProps {
 
 export const TableActionButton: FC<TableActionButtonProps> = ({
   iconType,
+  dataTestSubjPostfix,
   isDisabled,
   label,
   message,
@@ -33,7 +35,7 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
 
   const unwrappedButton = !isDisabled ? (
     <EuiLink
-      data-test-subj="aiopsTableActionButtonEnabled"
+      data-test-subj={`aiopsTableActionButton${dataTestSubjPostfix} enabled`}
       onClick={onClick}
       color={'text'}
       aria-label={message}
@@ -42,7 +44,7 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
     </EuiLink>
   ) : (
     <EuiText
-      data-test-subj="aiopsTableActionButtonDisabled"
+      data-test-subj={`aiopsTableActionButton${dataTestSubjPostfix} disabled`}
       size="s"
       color={'subdued'}
       aria-label={message}

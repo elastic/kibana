@@ -47,6 +47,7 @@ export const useCopyToClipboardAction = (): TableItemAction => ({
         <EuiCopy textToCopy={getTableItemAsKQL(tableItem)}>
           {(copy) => (
             <TableActionButton
+              dataTestSubjPostfix="CopyToClipboard"
               iconType="copyClipboard"
               isDisabled={false}
               label={copyToClipboardButtonLabel}
