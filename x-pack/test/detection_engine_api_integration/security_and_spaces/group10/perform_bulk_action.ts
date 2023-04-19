@@ -1579,6 +1579,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
