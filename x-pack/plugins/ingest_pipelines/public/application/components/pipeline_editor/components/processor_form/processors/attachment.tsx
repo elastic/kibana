@@ -64,7 +64,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.attachment.indexedCharsFieldHelperText"
+        id="xpack.ingestPipelines.pipelineEditor.attachment.indexedCharsFieldFieldHelperText"
         defaultMessage="Field name from which you can overwrite the number of chars being used for extraction. Defaults to {field}."
         values={{ field: <EuiCode>{'null'}</EuiCode> }}
       />
