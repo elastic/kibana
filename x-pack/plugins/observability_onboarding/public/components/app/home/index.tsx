@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { ComponentType, useRef, useState } from 'react';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import {
   FilmstripFrame,
   FilmstripTransition,
@@ -44,10 +43,6 @@ const TRANSITION_DURATION = 180;
 function AnimatedTransitionsWizard() {
   const [transition, setTransition] = useState<TransitionState>('ready');
   const TransitionComponent = useRef<ComponentType>(() => null);
-
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/observability/onboarding/hello_world');
-  }, []);
 
   function onChangeStep({
     direction,

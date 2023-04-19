@@ -7,16 +7,16 @@
 
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 
-const helloWorldRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability/onboarding/hello_world',
+const statusRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/get_status',
   options: {
     tags: [],
   },
-  async handler(resources): Promise<{ message: string }> {
-    return { message: 'Hello world!' };
+  async handler(resources): Promise<{ status: 'incomplete' | 'complete' }> {
+    return { status: 'complete' };
   },
 });
 
-export const helloWorldRouteRepository = {
-  ...helloWorldRoute,
+export const statusRouteRepository = {
+  ...statusRoute,
 };

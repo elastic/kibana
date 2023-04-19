@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiText,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiSteps,
   EuiHorizontalRule,
-  EuiButtonEmpty,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
+import React from 'react';
+import { useWizard } from '.';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { useWizard } from '.';
 
 export function ImportData() {
   const { goToStep, goBack } = useWizard();
+
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/observability_onboarding/get_status');
+  }, []);
 
   function onContinue() {
     goToStep('inspect');
@@ -64,7 +69,7 @@ export function ImportData() {
         <EuiSteps
           titleSize="xs"
           steps={[
-            { title: 'Ping received', status: 'complete', children: null },
+            { title: 'Ping received', status: data?.status, children: null },
             { title: 'File found', status: 'complete', children: null },
             {
               title: 'Downloading Elastic Agent',

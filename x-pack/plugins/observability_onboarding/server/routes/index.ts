@@ -10,11 +10,11 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
-import { helloWorldRouteRepository } from './hello_world/route';
+import { statusRouteRepository } from './status/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
-    ...helloWorldRouteRepository,
+    ...statusRouteRepository,
   };
 
   return repository;
