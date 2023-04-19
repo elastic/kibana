@@ -15,7 +15,6 @@ import { shallow } from 'enzyme';
 import { DEFAULT_PIPELINE_NAME } from '../../../../../../../common/constants';
 
 import { CustomPipelineItem } from './custom_pipeline_item';
-import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines_card';
 
@@ -47,7 +46,6 @@ describe('IngestPipelinesCard', () => {
   it('renders with default ingest pipeline', () => {
     const wrapper = shallow(<IngestPipelinesCard />);
     expect(wrapper.find(DefaultPipelineItem)).toHaveLength(1);
-    expect(wrapper.find(CustomizeIngestPipelineItem)).toHaveLength(1);
     expect(wrapper.find(CustomPipelineItem)).toHaveLength(0);
   });
 });

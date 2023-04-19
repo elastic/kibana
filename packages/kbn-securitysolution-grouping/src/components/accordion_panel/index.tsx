@@ -13,18 +13,6 @@ import { firstNonNullValue } from '../../helpers';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
-export interface BadgeMetric {
-  title: string;
-  value: number;
-  color?: string;
-  width?: number;
-}
-
-export interface CustomMetric {
-  title: string;
-  customStatRenderer: JSX.Element;
-}
-
 interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;
   customAccordionClassName?: string;
@@ -35,7 +23,7 @@ interface GroupPanelProps<T> {
   isLoading: boolean;
   level?: number;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
 }
 

@@ -115,7 +115,7 @@ export const createUserAttachmentUserActionBuilder = ({
             isLoading={isLoading}
             commentContent={comment.comment}
             onEdit={() => handleManageMarkdownEditId(comment.id)}
-            onDelete={() => handleDeleteComment(comment.id)}
+            onDelete={() => handleDeleteComment(comment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
             onQuote={() => handleManageQuote(comment.comment)}
           />
         </UserActionContentToolbar>

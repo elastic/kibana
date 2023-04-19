@@ -185,8 +185,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           vars: {
             __ui: {
-              value:
-                '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false}',
+              value: '{"script_source":{"is_generated_script":false,"file_name":""}}',
               type: 'yaml',
             },
             enabled: { value: true, type: 'bool' },
@@ -196,10 +195,10 @@ export const getTestProjectSyntheticsPolicy = (
             'service.name': { value: '', type: 'text' },
             timeout: { value: null, type: 'text' },
             tags: { value: null, type: 'yaml' },
-            'source.zip_url.url': { value: '', type: 'text' },
-            'source.zip_url.username': { value: '', type: 'text' },
-            'source.zip_url.folder': { value: '', type: 'text' },
-            'source.zip_url.password': { value: '', type: 'password' },
+            'source.zip_url.url': { type: 'text' },
+            'source.zip_url.username': { type: 'text' },
+            'source.zip_url.folder': { type: 'text' },
+            'source.zip_url.password': { type: 'password' },
             'source.inline.script': { value: null, type: 'yaml' },
             'source.project.content': {
               value:
@@ -217,13 +216,13 @@ export const getTestProjectSyntheticsPolicy = (
             'throttling.config': { value: '5d/3u/20l', type: 'text' },
             'filter_journeys.tags': { value: null, type: 'yaml' },
             'filter_journeys.match': { value: '"check if title is present"', type: 'text' },
-            'source.zip_url.ssl.certificate_authorities': { value: null, type: 'yaml' },
-            'source.zip_url.ssl.certificate': { value: null, type: 'yaml' },
-            'source.zip_url.ssl.key': { value: null, type: 'yaml' },
-            'source.zip_url.ssl.key_passphrase': { value: null, type: 'text' },
-            'source.zip_url.ssl.verification_mode': { value: null, type: 'text' },
-            'source.zip_url.ssl.supported_protocols': { value: null, type: 'yaml' },
-            'source.zip_url.proxy_url': { value: '', type: 'text' },
+            'source.zip_url.ssl.certificate_authorities': { type: 'yaml' },
+            'source.zip_url.ssl.certificate': { type: 'yaml' },
+            'source.zip_url.ssl.key': { type: 'yaml' },
+            'source.zip_url.ssl.key_passphrase': { type: 'text' },
+            'source.zip_url.ssl.verification_mode': { type: 'text' },
+            'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
+            'source.zip_url.proxy_url': { type: 'text' },
             location_name: { value: 'Test private location 0', type: 'text' },
             id: { value: id, type: 'text' },
             config_id: { value: configId, type: 'text' },
@@ -237,7 +236,6 @@ export const getTestProjectSyntheticsPolicy = (
           compiled_stream: {
             __ui: {
               script_source: { is_generated_script: false, file_name: '' },
-              is_zip_url_tls_enabled: false,
             },
             type: 'browser',
             name: 'check if title is present',

@@ -6,7 +6,8 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
@@ -16,6 +17,7 @@ import { getRulesStats } from './rules_stats_collector';
 
 export function registerCspmUsageCollector(
   logger: Logger,
+  coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   usageCollection?: UsageCollectionSetup
 ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered
@@ -26,10 +28,18 @@ export function registerCspmUsageCollector(
   // Create usage collector
   const cspmUsageCollector = usageCollection.makeUsageCollector<CspmUsage>({
     type: 'cloud_security_posture',
-    isReady: () => true,
+    isReady: async () => {
+      await coreServices;
+      return true;
+    },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       const [indicesStats, accountsStats, resourcesStats, rulesStats] = await Promise.all([
-        getIndicesStats(collectorFetchContext.esClient, logger),
+        getIndicesStats(
+          collectorFetchContext.esClient,
+          collectorFetchContext.soClient,
+          coreServices,
+          logger
+        ),
         getAccountsStats(collectorFetchContext.esClient, logger),
         getResourcesStats(collectorFetchContext.esClient, logger),
         getRulesStats(collectorFetchContext.esClient, logger),

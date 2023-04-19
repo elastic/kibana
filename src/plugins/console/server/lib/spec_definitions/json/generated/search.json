@@ -13,6 +13,7 @@
       "stored_fields": [],
       "docvalue_fields": [],
       "from": "0",
+      "force_synthetic_source": "__flag__",
       "ignore_unavailable": "__flag__",
       "ignore_throttled": "__flag__",
       "allow_no_indices": "__flag__",

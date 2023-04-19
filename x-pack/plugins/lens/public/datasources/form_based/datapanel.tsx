@@ -27,6 +27,7 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { ChildDragDropProvider, DragContextState } from '@kbn/dom-drag-drop';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -34,7 +35,6 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from './field_item';

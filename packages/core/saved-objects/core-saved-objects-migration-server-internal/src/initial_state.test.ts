@@ -369,41 +369,107 @@ describe('createInitialState', () => {
         logger: mockLogger.get(),
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "should": Array [
-              Object {
-                "bool": Object {
-                  "must": Object {
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
                     "term": Object {
                       "type": "my_dashboard",
                     },
                   },
-                  "must_not": Object {
-                    "term": Object {
-                      "migrationVersion.my_dashboard": "7.10.1",
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "must": Object {
+                              "exists": Object {
+                                "field": "migrationVersion",
+                              },
+                            },
+                            "must_not": Object {
+                              "term": Object {
+                                "migrationVersion.my_dashboard": "7.10.1",
+                              },
+                            },
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion",
+                                },
+                              },
+                              Object {
+                                "term": Object {
+                                  "typeMigrationVersion": "7.10.1",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
-                },
+                ],
               },
-              Object {
-                "bool": Object {
-                  "must": Object {
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
                     "term": Object {
                       "type": "my_viz",
                     },
                   },
-                  "must_not": Object {
-                    "term": Object {
-                      "migrationVersion.my_viz": "8.0.0",
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "must": Object {
+                              "exists": Object {
+                                "field": "migrationVersion",
+                              },
+                            },
+                            "must_not": Object {
+                              "term": Object {
+                                "migrationVersion.my_viz": "8.0.0",
+                              },
+                            },
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion",
+                                },
+                              },
+                              Object {
+                                "term": Object {
+                                  "typeMigrationVersion": "8.0.0",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
-                },
+                ],
               },
-            ],
-          },
-        }
-      `);
+            },
+          ],
+        },
+      }
+    `);
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {

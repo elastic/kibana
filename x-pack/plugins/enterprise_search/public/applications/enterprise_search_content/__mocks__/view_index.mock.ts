@@ -13,6 +13,7 @@ import {
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
+  DisplayType,
 } from '../../../../common/types/connectors';
 
 import {
@@ -42,7 +43,21 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
-    configuration: { foo: { label: 'bar', value: 'barbar' } },
+    configuration: {
+      foo: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        key: 'foo',
+        label: 'bar',
+        options: [],
+        order: 1,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        value: 'barbar',
+      },
+    },
     custom_scheduling: {
       foo: {
         configuration_overrides: {},
@@ -112,6 +127,7 @@ export const connectorIndex: ConnectorViewIndex = {
     language: 'en',
     last_seen: null,
     last_sync_error: null,
+    last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
@@ -141,7 +157,21 @@ export const connectorIndex: ConnectorViewIndex = {
 export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
-    configuration: { foo: { label: 'bar', value: 'barbar' } },
+    configuration: {
+      foo: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        key: 'foo',
+        label: 'bar',
+        options: [],
+        order: 1,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        value: 'barbar',
+      },
+    },
     custom_scheduling: {
       foo: {
         configuration_overrides: {},
@@ -211,6 +241,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     language: 'en',
     last_seen: null,
     last_sync_error: null,
+    last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',

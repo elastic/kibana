@@ -147,3 +147,10 @@ export const SHOW_MORE = (count: number) =>
     defaultMessage: '+{count} more',
     values: { count },
   });
+
+export const NO_ATTACHMENTS_ADDED = i18n.translate(
+  'xpack.cases.modal.attachments.noAttachmentsTitle',
+  {
+    defaultMessage: 'No attachments added to the case',
+  }
+);

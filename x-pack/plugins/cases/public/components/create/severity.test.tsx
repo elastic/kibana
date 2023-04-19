@@ -54,8 +54,9 @@ describe('Severity form field', () => {
       </MockHookWrapperComponent>
     );
     expect(result.getByTestId('caseSeverity')).toBeTruthy();
-    // two items. one for the popover one for the selected field
-    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(2);
+    // ID removed for options dropdown here:
+    // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(1);
   });
 
   it('selects the correct value when changed', async () => {

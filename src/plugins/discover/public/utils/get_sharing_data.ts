@@ -16,7 +16,7 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
-  AppState,
+  DiscoverAppState,
   isEqualFilters,
 } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
@@ -31,7 +31,7 @@ import {
  */
 export async function getSharingData(
   currentSearchSource: ISearchSource,
-  state: AppState | SavedSearch,
+  state: DiscoverAppState | SavedSearch,
   services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
 ) {
   const { uiSettings: config, data } = services;

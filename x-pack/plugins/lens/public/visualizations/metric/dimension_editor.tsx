@@ -38,6 +38,7 @@ import {
   applyPaletteParams,
   PalettePanelContainer,
   useDebouncedValue,
+  IconSelect,
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -49,6 +50,7 @@ import {
 } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { DebouncedInput } from '../../shared_components/debounced_input';
+import { iconsSet } from './icon_set';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -381,6 +383,24 @@ function PrimaryMetricEditor(props: SubProps) {
           </EuiFlexGroup>
         </EuiFormRow>
       )}
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.icon', {
+          defaultMessage: 'Icon decoration',
+        })}
+      >
+        <IconSelect
+          customIconSet={iconsSet}
+          value={state?.icon}
+          onChange={(newIcon) => {
+            setState({
+              ...state,
+              icon: newIcon,
+            });
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 }

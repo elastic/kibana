@@ -101,12 +101,15 @@ export class ContentStream extends Duplex {
       },
     });
 
-    const docIndex = chunkDocMeta.hits.hits[0]._index;
+    const docIndex = chunkDocMeta.hits.hits?.[0]?._index;
 
     if (!docIndex) {
-      throw new Error(
+      const err = new Error(
         `Unable to determine index for file chunk id [${id}] in index (alias) [${this.index}]`
       );
+
+      this.logger.error(err);
+      throw err;
     }
 
     return docIndex;

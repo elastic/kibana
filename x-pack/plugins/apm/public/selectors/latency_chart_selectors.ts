@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import {
@@ -28,7 +29,7 @@ export function getLatencyChartSelector({
   previousPeriodLabel,
 }: {
   latencyChart?: LatencyChartsResponse;
-  latencyAggregationType?: string;
+  latencyAggregationType: LatencyAggregationType;
   previousPeriodLabel: string;
 }): Partial<LatencyChartData> {
   if (

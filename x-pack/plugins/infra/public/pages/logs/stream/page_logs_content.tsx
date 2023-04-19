@@ -52,7 +52,7 @@ export const StreamPageLogsContent = React.memo<{
       query: { queryString },
     },
   } = useKibanaContextForPlugin().services;
-  const { resolvedLogView, logView, logViewId } = useLogViewContext();
+  const { resolvedLogView, logView, logViewReference } = useLogViewContext();
   const { textScale, textWrap } = useLogViewConfigurationContext();
   const {
     surroundingLogsId,
@@ -228,10 +228,16 @@ export const StreamPageLogsContent = React.memo<{
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={setFilter}
-          sourceId={logViewId}
+          logViewReference={logViewReference}
         />
       ) : null}
-      <PageContent key={`${logViewId}-${logView?.version}`}>
+      <PageContent
+        key={`${
+          logViewReference.type === 'log-view-reference'
+            ? logViewReference.logViewId
+            : logViewReference.id
+        }-${logView?.version}`}
+      >
         <ScrollableLogTextStreamView
           columnConfigurations={(resolvedLogView && resolvedLogView.columns) || []}
           hasMoreAfterEnd={hasMoreAfterEnd}

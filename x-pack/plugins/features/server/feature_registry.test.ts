@@ -22,6 +22,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
 
@@ -137,6 +138,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
 
@@ -278,6 +280,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -313,6 +316,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -350,6 +354,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
@@ -383,6 +388,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -1645,6 +1651,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
       expect(result[0].reserved?.privileges).toHaveLength(2);
@@ -1802,7 +1809,7 @@ describe('FeatureRegistry', () => {
       `);
     });
 
-    it('cannot register feature after getAll has been called', () => {
+    it('cannot register kibana feature after lockRegistration has been called', () => {
       const feature1: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -1820,6 +1827,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature1);
+      featureRegistry.lockRegistration();
       featureRegistry.getAllKibanaFeatures();
       expect(() => {
         featureRegistry.registerKibanaFeature(feature2);
@@ -1827,6 +1835,7 @@ describe('FeatureRegistry', () => {
         `"Features are locked, can't register new features. Attempt to register test-feature-2 failed."`
       );
     });
+
     describe('#getAllKibanaFeatures', () => {
       const features: KibanaFeatureConfig[] = [
         {
@@ -1879,6 +1888,7 @@ describe('FeatureRegistry', () => {
 
       const registry = new FeatureRegistry();
       features.forEach((f) => registry.registerKibanaFeature(f));
+      registry.lockRegistration();
 
       it('returns all features and sub-feature privileges by default', () => {
         const result = registry.getAllKibanaFeatures();
@@ -1926,6 +1936,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerElasticsearchFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllElasticsearchFeatures();
       expect(result).toHaveLength(1);
 
@@ -1962,6 +1973,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerElasticsearchFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllElasticsearchFeatures();
       expect(result).toHaveLength(1);
 
@@ -2014,6 +2026,27 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+    });
+
+    it('cannot register elasticsearch feature after lockRegistration has been called', () => {
+      const feature: ElasticsearchFeatureConfig = {
+        id: 'test-feature',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['all'],
+            ui: [],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.lockRegistration();
+
+      expect(() =>
+        featureRegistry.registerElasticsearchFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Features are locked, can't register new features. Attempt to register test-feature failed."`
+      );
     });
   });
 

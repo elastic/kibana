@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
+  const dashboardExpect = getService('dashboardExpect');
 
   describe('Session and searches integration', () => {
     before(async function () {
@@ -195,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessionItem.view();
         expect(await toasts.getToastCount()).to.be(0); // there should be no warnings
         await searchSessions.expectState('restored', 20000);
-        await testSubjects.missingOrFail('embeddableError');
+        await dashboardExpect.noErrorEmbeddablesPresent();
 
         const data = await elasticChart.getChartDebugData();
         expect(data!.bars![0].bars.length).to.eql(4);

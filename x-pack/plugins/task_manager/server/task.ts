@@ -91,6 +91,7 @@ export type CancelFunction = () => Promise<RunResult | undefined | void>;
 export interface CancellableTask {
   run: RunFunction;
   cancel?: CancelFunction;
+  cleanup?: () => Promise<void>;
 }
 
 export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;

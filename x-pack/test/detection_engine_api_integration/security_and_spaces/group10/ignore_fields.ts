@@ -15,7 +15,7 @@ import {
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();

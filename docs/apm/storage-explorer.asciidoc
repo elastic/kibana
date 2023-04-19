@@ -74,7 +74,7 @@ tune the APM agent or agents that are collecting the data.
 You can disable the collection of specific metrics with the **disable metrics** configuration.
 Or, you can set the **metrics interval** to zero seconds to deactivate metrics entirely.
 Most APM agents support both options.
-See the relevant {apm-agents-ref}[agent configuration options] for more details.
+See the relevant {apm-agents-ref}[APM agent configuration options] for more details.
 
 [float]
 ===== Reduce the number of errors

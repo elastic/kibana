@@ -315,3 +315,21 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   </EuiScreenReaderLive>
 </ScreenReaderRouteAnnouncements>
 `;
+
+exports[`SkipToMainContent renders 1`] = `
+<button
+  class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+  tabindex="0"
+  type="button"
+>
+  <span
+    class="emotion-euiButtonDisplayContent"
+  >
+    <span
+      class="eui-textTruncate"
+    >
+      Skip to main content
+    </span>
+  </span>
+</button>
+`;

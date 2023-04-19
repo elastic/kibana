@@ -33,7 +33,6 @@ import {
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
-import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
@@ -49,6 +48,7 @@ import {
   getRangeSliderPanelState,
   getTimeSliderPanelState,
 } from '../control_group_input_builder';
+import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -124,15 +124,7 @@ export class ControlGroupContainer extends Container<
 
   public openAddDataControlFlyout = openAddDataControlFlyout;
 
-  public getEditControlGroupButton = (closePopover: () => void) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
-
-    return (
-      <ControlsServicesProvider>
-        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
-      </ControlsServicesProvider>
-    );
-  };
+  public openEditControlGroupFlyout = openEditControlGroupFlyout;
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,

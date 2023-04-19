@@ -64,7 +64,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
-import { DateRange, LayerType } from '../../../../../common';
+import { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
 import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
@@ -228,6 +228,8 @@ export interface HelpProps<C> {
 }
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
+
+export type LayerSettingsFeatures = Record<'sampling', boolean>;
 
 export interface AdvancedOption {
   dataTestSubj: string;
@@ -434,6 +436,10 @@ interface BaseOperationDefinitionProps<
    * Boolean flag whether the data section extra element passed in from the visualization is handled by the param editor of the operation or whether the datasource general logic should be used.
    */
   handleDataSectionExtra?: boolean;
+  /**
+   * When present returns a dictionary of unsupported layer settings
+   */
+  getUnsupportedSettings?: () => LayerSettingsFeatures;
 }
 
 interface BaseBuildColumnArgs {

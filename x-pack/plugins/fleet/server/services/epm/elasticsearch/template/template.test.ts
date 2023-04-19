@@ -802,7 +802,7 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
-  it('tests processing dimension field', () => {
+  it('tests processing dimension field on a keyword', () => {
     const literalYml = `
 - name: example.id
   type: keyword
@@ -822,7 +822,60 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on an long', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              time_series_dimension: true,
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on an long without timeserie enabled', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: false,
+    });
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -979,6 +1032,28 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
+  });
+
+  it('tests processing field of aggregate_metric_double type', () => {
+    const fieldLiteralYaml = `
+    - name: aggregate_metric
+      type: aggregate_metric_double
+      metrics: ["min", "max", "sum", "value_count"]
+      default_metric: "max"
+    `;
+    const fieldMapping = {
+      properties: {
+        aggregate_metric: {
+          metrics: ['min', 'max', 'sum', 'value_count'],
+          default_metric: 'max',
+          type: 'aggregate_metric_double',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(fieldLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
   });
 
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {

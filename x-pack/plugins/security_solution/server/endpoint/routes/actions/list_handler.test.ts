@@ -96,21 +96,22 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
+    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: 'index_not_found_exception',
       });
     });
 
     it('should return `ok` when actions index exists', async () => {
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
-      await actionListHandler({ pageSize: 10, page: 1, statuses: ['failed', 'pending'] });
+      await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({ statuses: ['failed', 'pending'] })
       );
@@ -123,6 +124,7 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
+        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
@@ -137,8 +139,7 @@ describe('Action List Handler', () => {
 
     it('should call `getActionList` when statuses filter values are not provided', async () => {
       await actionListHandler({
-        pageSize: 10,
-        page: 1,
+        ...defaultParams,
         commands: ['isolate', 'kill-process'],
         userIds: ['userX', 'userY'],
       });
@@ -152,8 +153,7 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionList`', async () => {
       await actionListHandler({
-        page: 1,
-        pageSize: 10,
+        ...defaultParams,
         agentIds: 'agentX',
         commands: 'isolate',
         userIds: 'userX',

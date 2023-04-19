@@ -45,6 +45,7 @@ interface DoneOpts {
 interface AlertOpts {
   action: string;
   id: string;
+  uuid: string;
   message: string;
   group?: string;
   state?: AlertInstanceState;
@@ -239,6 +240,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
+    alertUuid: alert.uuid,
     action: alert.action,
     state: alert.state,
     instanceId: alert.id,
