@@ -16,9 +16,9 @@ export const initialSection = (
       {
         defaultMessage: `## ESQL
 
-An ESQL query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
+An ESQL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
-A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command, by adding, removing, and changing rows and columns.
+A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
 
 \`\`\`
 source-command
