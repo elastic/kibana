@@ -7,6 +7,7 @@
 
 export interface SessionViewConfig {
   sessionEntityId: string;
+  sessionStartTime?: string;
   jumpToEntityId?: string;
   jumpToCursor?: string;
   investigatedAlertId?: string;

@@ -6,7 +6,12 @@
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEventsAndScopedAlerts } from './process_events_route';
-import { mockEvents, mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+  mockEvents,
+  mockAlerts,
+} from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
 import { EventAction, EventKind, ProcessEvent } from '../../common/types/process_tree';
 
@@ -42,7 +47,14 @@ describe('process_events_route.ts', () => {
       const client = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(client);
 
-      const body = await fetchEventsAndScopedAlerts(client, alertsClient, 'asdf', undefined);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        TEST_PROCESS_INDEX,
+        'asdf',
+        '',
+        undefined
+      );
 
       expect(body.events.length).toBe(0);
       expect(body.total).toBe(0);
@@ -52,7 +64,14 @@ describe('process_events_route.ts', () => {
       const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
       const alertsClient = getAlertsClientMockInstance();
 
-      const body = await fetchEventsAndScopedAlerts(client, alertsClient, 'mockId', undefined);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        TEST_PROCESS_INDEX,
+        'mockId',
+        TEST_SESSION_START_TIME,
+        undefined
+      );
 
       expect(body.events.length).toBe(mockEvents.length + mockAlerts.length);
 
@@ -74,7 +93,9 @@ describe('process_events_route.ts', () => {
       const body = await fetchEventsAndScopedAlerts(
         client,
         alertsClient,
+        TEST_PROCESS_INDEX,
         'mockId',
+        TEST_SESSION_START_TIME,
         undefined,
         false
       );

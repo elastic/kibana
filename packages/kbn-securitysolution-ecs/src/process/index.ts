@@ -33,6 +33,7 @@ export interface ProcessSessionData {
   entity_id?: string[];
   pid?: string[];
   name?: string[];
+  start?: string[];
 }
 
 export interface ProcessHashData {

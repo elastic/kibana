@@ -454,17 +454,6 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
             ),
           },
           {
-            title: <DetailPanelListItem>user.id</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy
-                textToCopy={`${PROCESS_FIELD_PREFIX}.user.id: "${userId}"`}
-                tooltipContent={userId}
-              >
-                {userId}
-              </DetailPanelCopy>
-            ),
-          },
-          {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy

@@ -6,7 +6,9 @@
  */
 
 export interface SessionViewConfig {
+  processIndex: string;
   sessionEntityId: string;
+  sessionStartTime: string;
   jumpToEntityId?: string;
   jumpToCursor?: string;
   investigatedAlertId?: string;

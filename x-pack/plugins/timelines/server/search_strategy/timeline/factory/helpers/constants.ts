@@ -230,6 +230,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'process.entry_leader.entity_id',
   'process.entry_leader.name',
   'process.entry_leader.pid',
+  'process.entry_leader.start',
   'process.session_leader.entity_id',
   'process.session_leader.name',
   'process.session_leader.pid',
