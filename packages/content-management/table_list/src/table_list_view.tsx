@@ -878,7 +878,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   }
 
   const PageTemplate = withoutPageTemplateWrapper
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    ? ((({
+        children: _children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        children: React.ReactNode;
+        ['data-test-subj']?: string;
+      }) => (
+        <div data-test-subj={dataTestSubj}>{_children}</div>
+      )) as unknown as typeof KibanaPageTemplate)
     : KibanaPageTemplate;
 
   if (!showFetchError && hasNoItems) {
