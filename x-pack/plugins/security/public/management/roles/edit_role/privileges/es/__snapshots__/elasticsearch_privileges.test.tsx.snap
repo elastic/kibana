@@ -176,20 +176,7 @@ exports[`it renders without crashing 1`] = `
         "features$": Observable {
           "_subscribe": [Function],
         },
-        "getFeatures": [MockFunction] {
-          "calls": Array [
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Object {
-                "allowRoleDocumentLevelSecurity": true,
-                "allowRoleFieldLevelSecurity": true,
-              },
-            },
-          ],
-        },
+        "getFeatures": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
@@ -273,20 +260,7 @@ exports[`it renders without crashing 1`] = `
         "features$": Observable {
           "_subscribe": [Function],
         },
-        "getFeatures": [MockFunction] {
-          "calls": Array [
-            Array [],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Object {
-                "allowRoleDocumentLevelSecurity": true,
-                "allowRoleFieldLevelSecurity": true,
-              },
-            },
-          ],
-        },
+        "getFeatures": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
