@@ -1,2 +1,2 @@
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
-xpack.fleet.internal.ILMPoliciesDisabled: true
+xpack.fleet.internal.disableILMPolicies: true

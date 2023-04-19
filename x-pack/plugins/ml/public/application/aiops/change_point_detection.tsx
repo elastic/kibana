@@ -49,6 +49,7 @@ export const ChangePointDetectionPage: FC = () => {
           appDependencies={pick(services, [
             'application',
             'data',
+            'executionContext',
             'charts',
             'fieldFormats',
             'http',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
@@ -102,12 +102,25 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items, refreshData }) => {
     const warningBackgroundColor = useEuiBackgroundColor('warning');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
-
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
-
     const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
     const { mutate: finishAndArchiveMaintenanceWindow } = useFinishAndArchiveMaintenanceWindow();
+
+    const tableCss = useMemo(() => {
+      return css`
+        .euiTableRow {
+          &.running {
+            background-color: ${warningBackgroundColor};
+          }
+
+          &.archived {
+            background-color: ${subduedBackgroundColor};
+          }
+        }
+      `;
+    }, [warningBackgroundColor, subduedBackgroundColor]);
+
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
         name: '',
@@ -131,19 +144,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         },
       },
     ];
+
     return (
       <EuiInMemoryTable
-        css={css`
-          .euiTableRow {
-            &.running {
-              background-color: ${warningBackgroundColor};
-            }
-
-            &.archived {
-              background-color: ${subduedBackgroundColor};
-            }
-          }
-        `}
+        css={tableCss}
         itemId="id"
         loading={loading}
         tableCaption="Maintenance Windows List"

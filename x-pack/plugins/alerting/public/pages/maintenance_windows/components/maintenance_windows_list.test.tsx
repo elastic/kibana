@@ -14,6 +14,7 @@ import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('MaintenanceWindowsList', () => {
   const date = moment('2023-04-05').toISOString();
+  const endDate = moment('2023-04-05').add(1, 'month').toISOString();
   const items: MaintenanceWindowFindResponse[] = [
     {
       id: '1',
@@ -26,7 +27,7 @@ describe('MaintenanceWindowsList', () => {
       rRule: { dtstart: date, tzid: 'UTC' },
       status: MaintenanceWindowStatus.Running,
       eventStartTime: date,
-      eventEndTime: date,
+      eventEndTime: endDate,
       createdBy: 'elastic',
       updatedBy: 'elastic',
       createdAt: date,
@@ -43,7 +44,7 @@ describe('MaintenanceWindowsList', () => {
       rRule: { dtstart: date, tzid: 'UTC' },
       status: MaintenanceWindowStatus.Upcoming,
       eventStartTime: date,
-      eventEndTime: date,
+      eventEndTime: endDate,
       createdBy: 'elastic',
       updatedBy: 'elastic',
       createdAt: date,
@@ -60,7 +61,7 @@ describe('MaintenanceWindowsList', () => {
       rRule: { dtstart: date, tzid: 'UTC' },
       status: MaintenanceWindowStatus.Finished,
       eventStartTime: date,
-      eventEndTime: date,
+      eventEndTime: endDate,
       createdBy: 'elastic',
       updatedBy: 'elastic',
       createdAt: date,
@@ -77,7 +78,7 @@ describe('MaintenanceWindowsList', () => {
       rRule: { dtstart: date, tzid: 'UTC' },
       status: MaintenanceWindowStatus.Archived,
       eventStartTime: date,
-      eventEndTime: date,
+      eventEndTime: endDate,
       createdBy: 'elastic',
       updatedBy: 'elastic',
       createdAt: date,
@@ -97,5 +98,22 @@ describe('MaintenanceWindowsList', () => {
     );
 
     expect(result.getAllByTestId('list-item')).toHaveLength(items.length);
+
+    // check the title
+    expect(result.getAllByText('Host maintenance')).toHaveLength(1);
+    expect(result.getAllByText('Server outage west coast')).toHaveLength(1);
+    expect(result.getAllByText('Monthly maintenance window')).toHaveLength(2);
+
+    // check the status
+    expect(result.getAllByText('Running')).toHaveLength(1);
+    expect(result.getAllByText('Upcoming')).toHaveLength(1);
+    expect(result.getAllByText('Finished')).toHaveLength(1);
+    expect(result.getAllByText('Archived')).toHaveLength(1);
+
+    // check the startDate formatting
+    expect(result.getAllByText('04/05/23 00:00 AM')).toHaveLength(4);
+
+    // check the endDate formatting
+    expect(result.getAllByText('05/05/23 00:00 AM')).toHaveLength(4);
   });
 });
