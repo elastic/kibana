@@ -39,6 +39,7 @@ import {
 } from '../../../../../common/detection_engine/rule_schema';
 
 import {
+  transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
@@ -51,8 +52,6 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -74,11 +73,7 @@ import type {
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
-import {
-  transformActions,
-  transformFromAlertThrottle,
-  transformToActionFrequency,
-} from './rule_actions';
+import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 
@@ -402,7 +397,7 @@ export const convertPatchAPIToInternalSchema = (
   const existingParams = existingRule.params;
 
   const alertActions = nextParams.actions?.map(transformRuleToAlertAction) ?? existingRule.actions;
-  const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule, null);
+  const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
   const actions = transformToActionFrequency(alertActions, throttle);
 
   return {
@@ -644,16 +639,15 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  legacyRuleActions?: LegacyRuleActions | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
 
-  const alertActions = transformActions(rule.actions, legacyRuleActions);
-  const throttle = transformFromAlertThrottle(rule, legacyRuleActions);
+  const alertActions = rule.actions.map(transformAlertToRuleAction);
+  const throttle = transformFromAlertThrottle(rule);
   const actions = transformToActionFrequency(alertActions, throttle);
 
   return {

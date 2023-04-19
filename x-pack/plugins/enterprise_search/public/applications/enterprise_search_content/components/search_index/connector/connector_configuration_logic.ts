@@ -12,6 +12,7 @@ import {
   ConnectorStatus,
   Dependency,
   DependencyLookup,
+  DisplayType,
   SelectOption,
 } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
@@ -55,14 +56,16 @@ interface ConnectorConfigurationValues {
 }
 
 export interface ConfigEntry {
+  default_value: string | number | boolean | null;
   depends_on: Dependency[];
-  display: string;
+  display: DisplayType;
   key: string;
   label: string;
   options: SelectOption[];
   order?: number;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
   value: string | number | boolean | null;
 }
 
@@ -229,11 +232,35 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          { key, depends_on, display, label, options, order, required, sensitive, value }
+          {
+            key,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            default_value,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          }
         ) => ({
           ...configState,
-          [key]: { depends_on, display, label, options, order, required, sensitive, value },
+          [key]: {
+            default_value,
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            value,
+          },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
