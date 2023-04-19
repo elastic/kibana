@@ -69,6 +69,8 @@ import {
   NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
+import { migrateLegacyActions } from '../lib';
+
 export type BulkEditFields = keyof Pick<
   Rule,
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
@@ -448,6 +450,19 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
+
+    // migrate legacy actions only for SIEM rules
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: rule.id,
+      actions: rule.attributes.actions,
+      references: rule.references,
+      attributes: rule.attributes,
+    });
+
+    if (migratedActions.hasLegacyActions) {
+      rule.attributes.actions = migratedActions.resultedActions;
+      rule.references = migratedActions.resultedReferences;
+    }
 
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
       await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);

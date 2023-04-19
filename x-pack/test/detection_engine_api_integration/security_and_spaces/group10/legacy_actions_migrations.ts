@@ -124,13 +124,29 @@ export default ({ getService }: FtrProviderContext) => {
           uuid: ruleSO?.alert.actions[0].uuid,
           frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
         },
+        {
+          actionRef: 'action_1',
+          actionTypeId: '.email',
+          group: 'default',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            subject: 'Test Actions',
+            to: ['test@test.com'],
+          },
+          uuid: ruleSO?.alert.actions[1].uuid,
+        },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql('rule');
       expect(ruleSO?.alert.notifyWhen).to.eql(null);
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
           name: 'action_0',
+          type: 'action',
+        },
+        {
+          id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
+          name: 'action_1',
           type: 'action',
         },
       ]);
