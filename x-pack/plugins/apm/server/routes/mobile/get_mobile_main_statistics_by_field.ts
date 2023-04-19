@@ -60,7 +60,7 @@ export async function getMobileMainStatisticsByField({
 }: Props) {
   async function getMobileTransactionEventStatistics() {
     const response = await apmEventClient.search(
-      `get_mobile_main_statistics_by_field`,
+      `get_mobile_transaction_events_main_statistics_by_field`,
       {
         apm: {
           events: [ProcessorEvent.transaction, ProcessorEvent.error],
@@ -131,7 +131,7 @@ export async function getMobileMainStatisticsByField({
 
   async function getMobileTransactionMetricsStatistics() {
     const response = await apmEventClient.search(
-      `get_mobile_main_statistics_by_field`,
+      `get_mobile_transaction_metrics_main_statistics_by_field`,
       {
         apm: {
           events: [ProcessorEvent.metric],
