@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LensAttributes } from '../../../types';
-import type { ILensVisualization } from './types';
+import type { LensAttributes, TVisualization, VisualizationAttributes } from '../types';
 
-export const buildLensAttributes = (visualization: ILensVisualization): LensAttributes => {
+export const buildLensAttributes = <T extends VisualizationAttributes<TVisualization>>(
+  visualization: T
+): LensAttributes => {
   return {
     title: visualization.getTitle(),
     visualizationType: visualization.getVisualizationType(),
@@ -18,7 +19,8 @@ export const buildLensAttributes = (visualization: ILensVisualization): LensAttr
           layers: visualization.getLayers(),
         },
       },
-      filters: [],
+      internalReferences: visualization.getReferences(),
+      filters: visualization.getFilters(),
       query: { language: 'kuery', query: '' },
       visualization: visualization.getVisualizationState(),
       adHocDataViews: visualization.getAdhocDataView(),

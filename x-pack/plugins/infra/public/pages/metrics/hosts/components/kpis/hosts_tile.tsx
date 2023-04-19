@@ -7,14 +7,14 @@
 import React from 'react';
 
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { type ChartBaseProps, KPIChart } from './kpi_chart';
+import { type ChartBaseProps, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 
 export const HostsTile = ({ type, ...props }: ChartBaseProps) => {
   const { hostNodes, loading } = useHostsViewContext();
 
   return (
-    <KPIChart
-      id={`$metric-${type}`}
+    <MetricChartWrapper
+      id={`metric-${type}`}
       type={type}
       nodes={[]}
       loading={loading}
