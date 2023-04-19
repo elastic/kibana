@@ -24,7 +24,6 @@ import {
   INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
   INSIGHTS_RELATED_ALERTS_BY_SESSION,
   SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
-  SUMMARY_VIEW_PREVALENCE_CELL,
 } from '../../screens/alerts_details';
 import { verifyInsightCount } from '../../tasks/alerts_details';
 
@@ -69,7 +68,10 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
-      const investigateButton = cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).last();
+      const investigateButton = cy
+        .get(ALERT_FLYOUT)
+        .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
+        .last();
       investigateButton.should('have.text', alertCount);
       investigateButton.click();
 
