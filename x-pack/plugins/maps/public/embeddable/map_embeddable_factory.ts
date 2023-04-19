@@ -8,12 +8,10 @@
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
+import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
-import { lazyLoadMapModules } from '../lazy_load_bundle';
-import { getApplication, getUsageCollection } from '../kibana_services';
+import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -26,7 +24,6 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async isEditable() {
-    const { getMapsCapabilities } = await lazyLoadMapModules();
     return getMapsCapabilities().save as boolean;
   }
 
@@ -36,7 +33,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    return getMapEmbeddableDisplayName();
+    return MAP_EMBEDDABLE_NAME;
   }
 
   createFromSavedObject = async (
@@ -51,7 +48,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
-    const { MapEmbeddable } = await lazyLoadMapModules();
+    const { MapEmbeddable } = await import('./map_embeddable');
     const usageCollection = getUsageCollection();
     if (usageCollection) {
       // currentAppId$ is a BehaviorSubject exposed as an observable so subscription gets last value upon subscribe
