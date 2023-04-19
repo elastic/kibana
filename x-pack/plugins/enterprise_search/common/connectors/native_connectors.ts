@@ -13,6 +13,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mongodb: {
     configuration: {
       host: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.hostLabel',
@@ -27,6 +28,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       user: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.usernameLabel',
@@ -41,6 +43,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       password: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.passwordLabel',
@@ -55,6 +58,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       database: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.databaseLabel',
@@ -69,6 +73,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       collection: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.collectionLabel',
@@ -83,6 +88,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       direct_connection: {
+        depends_on: [],
         display: 'toggle',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.directConnectionLabel',
@@ -113,6 +119,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mysql: {
     configuration: {
       host: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.hostLabel',
@@ -127,6 +134,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       port: {
+        depends_on: [],
         display: 'numeric',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.portLabel',
@@ -141,6 +149,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       user: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel',
@@ -155,6 +164,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       password: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel',
@@ -169,6 +179,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       database: {
+        depends_on: [],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databaseLabel',
@@ -183,6 +194,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       tables: {
+        depends_on: [],
         display: 'textarea',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
@@ -197,6 +209,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
       ssl_enabled: {
+        depends_on: [],
         display: 'toggle',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslEnabledLabel',
@@ -211,6 +224,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: false,
       },
       ssl_ca: {
+        depends_on: [{ field: 'ssl_enabled', value: true }],
         display: 'textbox',
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',

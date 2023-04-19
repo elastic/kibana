@@ -512,7 +512,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -528,7 +528,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
@@ -547,7 +547,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -563,7 +563,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
