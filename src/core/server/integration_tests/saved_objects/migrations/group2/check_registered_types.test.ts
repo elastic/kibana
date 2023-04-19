@@ -81,7 +81,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "core-usage-stats": "b3c04da317c957741ebcdedfea4524049fdc79ff",
         "csp-rule-template": "099c229bf97578d9ca72b3a672d397559b84ee0b",
         "dashboard": "71e3f8dfcffeb5fbd410dec81ce46f5691763c43",
-        "endpoint:user-artifact-manifest": "17d17827606db55e7499b1dab259263ffee3bb09",
+        "endpoint:user-artifact-manifest": "8ad9bd235dcfdc18b567aef0dc36ac686193dc89",
         "enterprise_search_telemetry": "4b41830e3b28a16eb92dee0736b44ae6276ced9b",
         "epm-packages": "83235af7c95fd9bfb1d70996a5511e05b3fcc9ef",
         "epm-packages-assets": "00c8b5e5bf059627ffc9fbde920e1ac75926c5f6",
