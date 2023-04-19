@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,6 +20,7 @@ import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_templat
 
 import { AnalyticsCollectionExploreTable } from '../analytics_collection_explore_table/analytics_collection_explore_table';
 
+import { AnalyticsCollectionNoEventsCallout } from '../analytics_collection_no_events_callout/analytics_collection_no_events_callout';
 import { AnalyticsCollectionToolbar } from '../analytics_collection_toolbar/analytics_collection_toolbar';
 import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
@@ -90,6 +91,9 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
         rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >
+      <AnalyticsCollectionNoEventsCallout analyticsCollection={analyticsCollection} />
+      <EuiSpacer />
+
       <EuiFlexGroup direction="column">
         <EuiFlexGroup gutterSize="m">
           {filters.map(({ name, id }) => (

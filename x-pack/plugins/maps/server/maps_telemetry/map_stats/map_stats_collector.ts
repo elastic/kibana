@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import type { MapAttributes } from '../../../common/content_management';
 import {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,
@@ -38,7 +38,7 @@ export class MapStatsCollector {
   private _customIconsCountStats: ClusterCountStats | undefined;
   private _sourceCountStats: ClusterCountStats | undefined;
 
-  push(attributes: MapSavedObjectAttributes) {
+  push(attributes: MapAttributes) {
     if (!attributes || !attributes.mapStateJSON || !attributes.layerListJSON) {
       return;
     }
