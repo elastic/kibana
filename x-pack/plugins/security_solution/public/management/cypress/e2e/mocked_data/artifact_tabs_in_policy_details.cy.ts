@@ -69,7 +69,7 @@ const visitPolicyDetailsPage = () => {
   cy.get('#settings').should('exist'); // waiting for Policy Settings tab
 };
 
-describe.skip('Artifact tabs in Policy Details page', () => {
+describe('Artifact tabs in Policy Details page', () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();

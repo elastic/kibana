@@ -251,6 +251,49 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
         },
       ],
     },
+    {
+      key: 'symbols',
+      title: i18n.translate('xpack.profiling.tabs.symbols.title', {
+        defaultMessage: 'Upload Symbols',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
+            defaultMessage: 'Download the symbtool binary from the URL below:',
+          }),
+          content: (
+            <EuiLink target="_blank" href={`https://ela.st/symbtool-linux-amd64`}>
+              https://ela.st/symbtool-linux-amd64
+            </EuiLink>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
+            defaultMessage: 'Generate an Elasticsearch token:',
+          }),
+          content: (
+            <EuiLink
+              target="_blank"
+              href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+            >
+              {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
+                defaultMessage: 'Instructions here',
+              })}
+            </EuiLink>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
+            defaultMessage: 'Run:',
+          }),
+          content: (
+            <EuiCodeBlock paddingSize="s" isCopyable>
+              {`./symbtool push-symbols executable --url <symb service IP> --api-key {} --help`}
+            </EuiCodeBlock>
+          ),
+        },
+      ],
+    },
   ];
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].key);

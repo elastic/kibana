@@ -20,7 +20,7 @@ import React, {
   RefObject,
   ReactElement,
 } from 'react';
-import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
@@ -61,6 +61,7 @@ export interface ProcessDeps {
   onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
+  handleCollapseProcessTree?: () => void;
 }
 
 /**
@@ -83,6 +84,7 @@ export function ProcessTreeNode({
   onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
+  handleCollapseProcessTree,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
@@ -133,7 +135,15 @@ export function ProcessTreeNode({
 
   const alertTypeCounts = useMemo(() => {
     const alertCounts: AlertTypeCount[] = chain(alerts)
-      .groupBy((alert) => alert.event?.category?.[0])
+      .groupBy((alert) => {
+        const category = alert.event?.category;
+
+        if (Array.isArray(category)) {
+          return category?.[0];
+        }
+
+        return category;
+      })
       .map((processAlerts, alertCategory) => ({
         category: alertCategory as ProcessEventAlertCategory,
         count: processAlerts.length,
@@ -176,8 +186,12 @@ export function ProcessTreeNode({
       }
 
       onProcessSelected?.(process);
+
+      if (isSessionLeader && scrollerRef.current) {
+        scrollerRef.current.scrollTop = 0;
+      }
     },
-    [onProcessSelected, process]
+    [isSessionLeader, onProcessSelected, process, scrollerRef]
   );
 
   const processDetails = process.getDetails();
@@ -219,6 +233,19 @@ export function ProcessTreeNode({
 
   const children = process.getChildren(verboseMode);
 
+  const user = processDetails?.process?.user;
+  const userName = useMemo(() => {
+    if (user?.name) {
+      return user.name;
+    } else if (user?.id === '0') {
+      return 'root';
+    } else if (user?.id) {
+      return `uid: ${user?.id}`;
+    }
+
+    return '-';
+  }, [user?.id, user?.name]);
+
   if (!processDetails?.process) {
     return null;
   }
@@ -231,7 +258,6 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     start,
-    user,
   } = processDetails.process;
 
   const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
@@ -275,7 +301,14 @@ export function ProcessTreeNode({
               <Nbsp />
               <EuiIcon type="user" />
               <Nbsp />
-              <b css={styles.darkText}>{user?.name || 'ID: ' + user?.id}</b>
+              <b css={styles.darkText}>{userName}</b>
+              <Nbsp />
+              <EuiButtonIcon
+                size="xs"
+                iconType="fold"
+                onClick={handleCollapseProcessTree}
+                css={styles.jumpToTop}
+              />
             </span>
           ) : (
             <>
