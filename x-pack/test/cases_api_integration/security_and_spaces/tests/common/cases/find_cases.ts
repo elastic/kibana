@@ -9,7 +9,7 @@ import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   CaseResponse,
   CaseSeverity,
