@@ -34,6 +34,7 @@ import { installTransforms, isTransform } from './elasticsearch/transform/instal
 import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import { ensureInstalledPackage, getInstallation, getPackages } from './packages';
+import { generatePackageInfoFromArchiveBuffer } from './archive';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -55,6 +56,10 @@ export interface PackageClient {
     packageName: string,
     options?: FetchFindLatestPackageOptions
   ): Promise<RegistryPackage | BundledPackage>;
+
+  readBundledPackage(
+    bundledPackage: BundledPackage
+  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
   getPackage(
     packageName: string,
@@ -149,6 +154,11 @@ class PackageClientImpl implements PackageClient {
   ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
     return fetchFindLatestPackageOrThrow(packageName, options);
+  }
+
+  public async readBundledPackage(bundledPackage: BundledPackage) {
+    await this.#runPreflight();
+    return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
   }
 
   public async getPackage(

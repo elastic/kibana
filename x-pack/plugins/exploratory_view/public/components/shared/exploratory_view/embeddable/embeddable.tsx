@@ -15,7 +15,7 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import { observabilityFeatureId } from '@kbn/observability-plugin/public';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
