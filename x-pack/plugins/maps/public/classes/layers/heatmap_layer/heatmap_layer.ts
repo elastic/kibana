@@ -187,7 +187,7 @@ export class HeatmapLayer extends AbstractLayer {
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
 
-    // heatmap can implement mask with filter expression because 
+    // heatmap can implement mask with filter expression because
     // feature-state support is not needed since heatmap layers do not support joins
     const mask = metricField.getMask();
     if (mask) {

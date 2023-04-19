@@ -78,11 +78,13 @@ export class HeatmapLegend extends Component<Props, State> {
       }
     }
 
-    return maskLegend
-      ? <>
-          {maskLegend}
-          {metricLegend}
-        </>
-      : metricLegend;
+    return maskLegend ? (
+      <>
+        {maskLegend}
+        {metricLegend}
+      </>
+    ) : (
+      metricLegend
+    );
   }
 }
