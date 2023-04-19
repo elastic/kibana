@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { CopyTextIconButton } from './copy_text_icon_button';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { TextBlock } from '../../../../detection_engine/rule_monitoring/components/basic/text/text_block';
 
 import * as i18n from './translations';
 
@@ -54,9 +55,10 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           overflow-y: auto;
         `}
       >
-        {message.split('\n').map((line, index) => (
+        {/* {message.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
-        ))}
+        ))} */}
+        <TextBlock text={message} />
       </div>
     </EuiCallOut>
   );

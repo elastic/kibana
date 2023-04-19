@@ -48,6 +48,28 @@ export const searchAfterAndBulkCreate = async ({
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
 
+    /*
+    throw new Error(`[2023-04-18T10:26:22.346+02:00][DEBUG][plugins.securitySolution.ruleExecution] totalHits: 0 [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][DEBUG][plugins.securitySolution.ruleExecution] searchResult.hit.hits.length: 0 [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][DEBUG][plugins.securitySolution.ruleExecution] totalHits was 0, exiting early [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][DEBUG][plugins.securitySolution.ruleExecution] [+] completed bulk index of 0 [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][DEBUG][plugins.securitySolution.ruleExecution] [+] Signal Rule execution completed. [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][DEBUG][plugins.securitySolution.ruleExecution] [+] Finished indexing 0 signals into .alerts-security.alerts-default [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.347+02:00][INFO ][plugins.securitySolution.ruleExecution] Changing rule status to "succeeded". Rule execution completed successfully [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    [2023-04-18T10:26:22.348+02:00][DEBUG][plugins.securitySolution.ruleExecution] [+] Finished indexing 0 signals searched between date ranges [
+      {
+        "to": "2023-04-18T08:26:22.206Z",
+        "from": "2023-04-18T07:21:22.206Z",
+        "maxSignals": 100
+      }
+    ] [siem.queryRule][test2][rule id dba013b0-dd1b-11ed-8928-6155599ac787][rule uuid 649f8c4e-dc85-4394-8cc2-fb8a522188f9][exec id 44e0c8ea-29a7-49be-8b71-5359cfe3baa2][space default]
+    {"log.level":"error","@timestamp":"2023-04-18T08:26:30.843Z","log":{"logger":"elastic-apm-node"},"ecs":{"version":"1.6.0"},"message":"APM Server responded with \"404 Not Found\". This might be because you're running an incompatible version of the APM Server. This agent only supports APM Server v6.5 and above. If you're using an older version of the APM Server, please downgrade this agent to version 1.x or upgrade the APM Server\n{\"ok\":false,\"message\":\"Unknown resource.\"}\n"}
+    [2023-04-18T10:26:34.305+02:00][DEBUG][plugins.securitySolution.endpoint:user-artifact-packager:1.0.0] Last computed manifest not available yet
+    [2023-04-18T10:26:37.241+02:00][DEBUG][plugins.securitySolution.telemetry_events] [task security:telemetry-filterlist-artifact:1.0.0]: attempting to run
+    [2023-04-18T10:26:37.241+02:00][DEBUG][plugins.securitySolution.telemetry_events] [task security:telemetry-filterlist-artifact:1.0.0]: telemetry is not opted-in
+    {"log.level":"error","@timestamp":"2023-04-18T08:26:50.230Z","log":{"logger":"elastic-apm-node"},"ecs":{"version":"1.6.0"},"message":"APM Server responded with \"404 Not Found\". This might be because you're running an incompatible version of the APM Server. This agent only supports APM Server v6.5 and above. If you're using an older version of the APM Server, please downgrade this agent to version 1.x or upgrade the APM Server\n{\"ok\":false,\"message\":\"Unknown resource.\"}\n"}`);
+    */
+
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
