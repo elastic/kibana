@@ -7,11 +7,12 @@
  */
 import React, { useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { DiscoverGrid, DiscoverGridProps, DiscoverGridFlyout } from '@kbn/doc-table-browser';
 import { DataTableRecord } from '../types';
-import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
+// import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import './saved_search_grid.scss';
-import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
+// import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;

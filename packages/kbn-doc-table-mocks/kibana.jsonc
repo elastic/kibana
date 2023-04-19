@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/doc-table-mocks",
+  "owner": "@elastic/TEAM_NAME"
+}
