@@ -114,6 +114,7 @@ export const LogCategorizationPage: FC = () => {
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
+    'log_categorization',
     undefined,
     undefined,
     BAR_TARGET
