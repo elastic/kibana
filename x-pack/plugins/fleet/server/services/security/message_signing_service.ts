@@ -14,6 +14,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
+import { upgradeAgentPolicySchemaVersion } from '../setup/upgrade_agent_policy_schema_version';
 
 interface MessageSigningKeys {
   private_key: string;
@@ -27,6 +28,8 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  removeKeyPair(): Promise<void>;
+  rotateKeyPair(): Promise<void>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -152,6 +155,17 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
 
     return publicKey;
+  }
+
+  public async removeKeyPair(): Promise<void> {
+    const currentKeyPair = await this.getCurrentKeyPair();
+    await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+  }
+
+  public async rotateKeyPair(): Promise<void> {
+    await this.removeKeyPair();
+    await this.generateKeyPair();
+    await upgradeAgentPolicySchemaVersion(this.soClient);
   }
 
   private get soClient() {
