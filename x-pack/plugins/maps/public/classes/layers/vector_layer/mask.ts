@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { IESAggField } from '../../fields/agg';
-import { MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
+import { FIELD_ORIGIN, MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
 
 export const BELOW = i18n.translate('xpack.maps.mask.belowLabel', {
   defaultMessage: 'below',
@@ -68,26 +68,29 @@ export function getMaskI18nDescription({
 }
 
 export class Mask {
-  private readonly _isFeatureState: boolean;
   private readonly _esAggField: IESAggField;
   private readonly _operator: MASK_OPERATOR;
   private readonly _value: number;
 
   constructor({
     esAggField,
-    isFeatureState,
     operator,
     value,
   }: {
     esAggField: IESAggField;
-    isFeatureState: boolean;
     operator: MASK_OPERATOR;
     value: number;
   }) {
     this._esAggField = esAggField;
-    this._isFeatureState = isFeatureState;
     this._operator = operator;
     this._value = value;
+  }
+
+  /*
+   * join mask field values are retrieved from feature state
+   */
+  private _isFeatureState() {
+    return this._esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
   }
 
   /*
@@ -95,7 +98,7 @@ export class Mask {
    */
   getConditionExpression() {
     const comparisionOperator = this._operator === MASK_OPERATOR.BELOW ? '<' : '>';
-    const lookup = this._isFeatureState ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
+    const lookup = this._isFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
     return [comparisionOperator, [lookup, this._esAggField.getMbFieldName()], this._value];
   }
 
@@ -112,7 +115,7 @@ export class Mask {
   }
 
   isFeatureMasked(feature: MapGeoJSONFeature) {
-    const featureValue = this._isFeatureState
+    const featureValue = this._isFeatureState()
       ? feature?.state[this._esAggField.getMbFieldName()]
       : feature?.properties[this._esAggField.getMbFieldName()];
     if (typeof featureValue !== 'number') {
