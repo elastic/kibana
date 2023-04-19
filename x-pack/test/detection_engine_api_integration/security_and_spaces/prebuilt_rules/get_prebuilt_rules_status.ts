@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should return available rule updates when previous historical versions available)', async () => {
+      it('should return available rule updates when previous historical versions available', async () => {
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
         await installPrebuiltRulesAndTimelines(supertest);
 
