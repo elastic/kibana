@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subscription } from 'rxjs';
-import type { Job } from '@kbn/reporting-plugin/public/lib/job';
-import { ExportTypeEntry } from './export_definitions';
-
+import type { ExportTypeEntry } from '@kbn/reporting-export-types';
+import type { Job } from './job';
 /**
  * The entries after being registered should have these properties
  * @public

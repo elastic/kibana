@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { ExportTypesRegistry } from './export_types_registry';
-export type { ExportTypeRegistryEntry } from './export_definitions';
+export { ExportTypesRegistry } from '@kbn/reporting-plugin/public/lib/export_types_registry';
+export type { ExportTypeRegistryEntry } from '@kbn/reporting-plugin/public/lib/export_types_registry';
 
 export type { ExportTypesPluginSetup, ExportTypesPluginStart } from './plugin';
+export type { ExportTypeEntry } from './export_definitions';

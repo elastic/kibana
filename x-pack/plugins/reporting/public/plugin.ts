@@ -24,10 +24,7 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import {
-  ExportTypesPluginSetup,
-  ExportTypesPluginStart,
-} from '@kbn/reporting-export-types-registry';
+import { ExportTypesPluginSetup, ExportTypesPluginStart } from '@kbn/reporting-export-types';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from '.';

@@ -1,5 +1,5 @@
 {
-  "name": "reportingExportTypes",
+  "name": "@kbn/reporting-export-types",
   "version": "0.0.0",
   "private": true,
   "scripts": {

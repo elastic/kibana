@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/reporting-export-types",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "reportingExportTypes",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack"],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+  },
+}
