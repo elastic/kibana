@@ -17,7 +17,6 @@ import {
   IEmbeddable,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
-  SavedObjectEmbeddableInput,
   EmbeddableInput,
   Container,
 } from '../..';
