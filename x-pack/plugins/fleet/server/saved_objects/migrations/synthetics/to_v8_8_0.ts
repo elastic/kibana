@@ -46,7 +46,7 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
     enabledStream.vars.schedule?.value &&
     enabledStream.compiled_stream.schedule
   ) {
-    const schedule = enabledStream.vars.schedule.value.match(/\d+/g)?.[0];
+    const schedule = enabledStream.vars.schedule.value.match(/\d+\.?\d*/g)?.[0];
     const updatedSchedule = getNearestSupportedSchedule(schedule);
     const formattedUpdatedSchedule = `"@every ${updatedSchedule}m"`;
     enabledStream.vars.schedule.value = `"@every ${updatedSchedule}m"`;
@@ -61,7 +61,7 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
     const throttling = enabledStream.vars['throttling.config'].value;
     if (throttling) {
       const formattedThrottling = handleThrottling(throttling);
-      enabledStream.vars['throttling.config'].value = formattedThrottling;
+      enabledStream.vars['throttling.config'].value = JSON.stringify(formattedThrottling);
       enabledStream.compiled_stream.throttling = formattedThrottling;
     }
   }
@@ -69,20 +69,22 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   return updatedPackagePolicyDoc;
 };
 
-const handleThrottling = (throttling: string): string => {
+const handleThrottling = (
+  throttling: string
+): { download: number; upload: number; latency: number } => {
   try {
-    const [download = 5, upload = 3, latency = 20] = throttling.match(/\d+/g) || [];
-    return JSON.stringify({
+    const [download = 5, upload = 3, latency = 20] = throttling.match(/\d+\.?\d*/g) || [];
+    return {
       download: Number(download),
       upload: Number(upload),
       latency: Number(latency),
-    });
+    };
   } catch {
-    return JSON.stringify({
+    return {
       download: 5,
       upload: 3,
       latency: 20,
-    });
+    };
   }
 };
 

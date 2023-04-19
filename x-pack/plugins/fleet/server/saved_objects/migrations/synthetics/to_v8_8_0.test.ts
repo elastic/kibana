@@ -15,6 +15,7 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
   describe('schedule migration', () => {
     const testSchedules = [
       ['4', '3'],
+      ['4.5', '5'],
       ['7', '5'],
       ['8', '10'],
       ['9.5', '10'],
@@ -126,19 +127,26 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
       expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
         JSON.stringify({ download: 5, upload: 3, latency: 20 })
       );
-      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
-        JSON.stringify({ download: 5, upload: 3, latency: 20 })
-      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual({
+        download: 5,
+        upload: 3,
+        latency: 20,
+      });
     });
 
     it('handles throttling config for custom throttling', () => {
-      const actual = migration(getBrowserPolicy('20d/10u/30l'), {} as SavedObjectMigrationContext);
+      const actual = migration(
+        getBrowserPolicy('1.6d/0.75u/150l'),
+        {} as SavedObjectMigrationContext
+      );
       expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
-        JSON.stringify({ download: 20, upload: 10, latency: 30 })
+        JSON.stringify({ download: 1.6, upload: 0.75, latency: 150 })
       );
-      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
-        JSON.stringify({ download: 20, upload: 10, latency: 30 })
-      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual({
+        download: 1.6,
+        upload: 0.75,
+        latency: 150,
+      });
     });
 
     it('handles edge cases', () => {
@@ -149,9 +157,11 @@ describe('8.8.0 Synthetics Package Policy migration', () => {
       expect(actual.attributes?.inputs[3]?.streams[0]?.vars?.['throttling.config']?.value).toEqual(
         JSON.stringify({ download: 5, upload: 3, latency: 20 })
       );
-      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual(
-        JSON.stringify({ download: 5, upload: 3, latency: 20 })
-      );
+      expect(actual.attributes?.inputs[3]?.streams[0]?.compiled_stream.throttling).toEqual({
+        download: 5,
+        upload: 3,
+        latency: 20,
+      });
     });
   });
 });
