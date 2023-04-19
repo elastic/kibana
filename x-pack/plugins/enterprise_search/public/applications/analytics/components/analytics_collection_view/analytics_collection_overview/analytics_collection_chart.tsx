@@ -42,7 +42,7 @@ const DEFAULT_STROKE_WIDTH = 1;
 const HOVER_STROKE_WIDTH = 3;
 const CHART_HEIGHT = 490;
 
-interface AnalyticsCollectionChartProps extends WithLensDataInputProps {
+interface AnalyticsCollectionChartProps extends Pick<WithLensDataInputProps, 'timeRange'> {
   selectedChart: FilterBy | null;
   setSelectedChart(chart: FilterBy): void;
 }
