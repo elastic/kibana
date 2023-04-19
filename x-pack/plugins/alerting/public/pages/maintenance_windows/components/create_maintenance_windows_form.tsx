@@ -42,7 +42,8 @@ export const useTimeZone = (): string => {
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>(
   ({ onCancel, onSuccess, initialValue, maintenanceWindowId }) => {
-    const [defaultDateValue] = useState<string>(moment().toISOString());
+    const [defaultStartDateValue] = useState<string>(moment().toISOString());
+    const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
     const timezone = useTimeZone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
@@ -116,7 +117,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'startDate',
                           config: {
                             label: i18n.CREATE_FORM_SCHEDULE,
-                            defaultValue: defaultDateValue,
+                            defaultValue: defaultStartDateValue,
                             validations: [],
                           },
                         },
@@ -124,7 +125,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'endDate',
                           config: {
                             label: '',
-                            defaultValue: defaultDateValue,
+                            defaultValue: defaultEndDateValue,
                             validations: [],
                           },
                         },

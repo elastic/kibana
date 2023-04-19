@@ -20,6 +20,8 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/i18n-react",
     "@kbn/shared-ux-page-kibana-template-mocks",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": ["target/**/*"]
 }
