@@ -6,29 +6,22 @@
  */
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { STATUS } from '../../../../../../common/constants';
 import { getHealthMessage } from './monitor_status_column';
 import { UptimeThemeContext } from '../../../../contexts';
 import { PingError } from '../../../../../../common/runtime_types';
-import { getInlineErrorLabel } from '../../../monitor_management/monitor_list/inline_error';
-import { StdErrorPopover } from '../../../monitor_management/monitor_list/stderr_logs_popover';
 
 export const StatusBadge = ({
   status,
-  checkGroup,
   summaryError,
-  monitorType,
 }: {
   status: string;
-  monitorType: string;
-  checkGroup?: string;
   summaryError?: PingError;
 }) => {
   const {
     colors: { dangerBehindText },
   } = useContext(UptimeThemeContext);
-  const [isOpen, setIsOpen] = useState(false);
 
   if (status === STATUS.UP) {
     return (
@@ -38,33 +31,13 @@ export const StatusBadge = ({
     );
   }
 
-  const errorMessage =
-    monitorType !== 'browser' ? summaryError?.message : getInlineErrorLabel(summaryError?.message);
+  const errorMessage = summaryError?.message;
 
-  const button = (
+  return (
     <EuiToolTip content={errorMessage}>
-      <EuiBadge
-        className="eui-textCenter"
-        color={dangerBehindText}
-        onClick={() => setIsOpen(true)}
-        onClickAriaLabel={errorMessage}
-      >
+      <EuiBadge className="eui-textCenter" color={dangerBehindText}>
         {getHealthMessage(status)}
       </EuiBadge>
     </EuiToolTip>
-  );
-
-  if (monitorType !== 'browser') {
-    return button;
-  }
-
-  return (
-    <StdErrorPopover
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      checkGroup={checkGroup!}
-      button={button}
-      summaryMessage={summaryError?.message}
-    />
   );
 };

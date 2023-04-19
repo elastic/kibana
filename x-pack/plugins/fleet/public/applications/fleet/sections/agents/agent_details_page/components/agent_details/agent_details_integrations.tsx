@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
+import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
+
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 import type { FleetServerAgentComponentUnit } from '../../../../../../../../common/types/models/agent';
 import { useLink, useUIExtension } from '../../../../../hooks';
@@ -69,11 +71,20 @@ const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};
 `;
 
-const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
-  id,
-  title,
-  children,
-}) => {
+const CollapsablePanel: React.FC<{
+  id: string;
+  title: React.ReactNode;
+  'data-test-subj'?: string;
+}> = ({ id, title, children, 'data-test-subj': dataTestSubj }) => {
+  const arrowProps = useMemo<EuiAccordionProps['arrowProps']>(() => {
+    if (dataTestSubj) {
+      return {
+        'data-test-subj': `${dataTestSubj}-openCloseToggle`,
+      };
+    }
+    return undefined;
+  }, [dataTestSubj]);
+
   return (
     <EuiPanel paddingSize="none">
       <StyledEuiAccordion
@@ -81,6 +92,8 @@ const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
         arrowDisplay="left"
         buttonClassName="ingest-integration-title-button"
         buttonContent={title}
+        arrowProps={arrowProps}
+        data-test-subj={dataTestSubj}
       >
         {children}
       </StyledEuiAccordion>
@@ -92,7 +105,8 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   agent: Agent;
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
-}> = memo(({ agent, agentPolicy, packagePolicy }) => {
+  'data-test-subj'?: string;
+}> = memo(({ agent, agentPolicy, packagePolicy, 'data-test-subj': dataTestSubj }) => {
   const { getHref } = useLink();
   const theme = useEuiTheme();
 
@@ -204,6 +218,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   return (
     <CollapsablePanel
       id={packagePolicy.id}
+      data-test-subj={dataTestSubj}
       title={
         <EuiTitle size="xs">
           <h3>
@@ -234,7 +249,12 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               </EuiFlexItem>
               {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="warning" iconSide="left">
+                  <EuiBadge
+                    color={theme.euiTheme.colors.danger}
+                    iconType="warning"
+                    iconSide="left"
+                    data-test-subj={dataTestSubj ? `${dataTestSubj}-needsAttention` : undefined}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
                       defaultMessage="Needs attention"
@@ -270,13 +290,16 @@ export const AgentDetailsIntegrationsSection: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {(agentPolicy.package_policies as PackagePolicy[]).map((packagePolicy) => {
+      {(agentPolicy.package_policies as PackagePolicy[]).map((packagePolicy, index) => {
+        const testSubj = (packagePolicy.package?.name ?? 'packagePolicy') + '-' + index;
+
         return (
-          <EuiFlexItem grow={false} key={packagePolicy.id}>
+          <EuiFlexItem grow={false} key={packagePolicy.id} data-test-subj={testSubj}>
             <AgentDetailsIntegration
               agent={agent}
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
+              data-test-subj={`${testSubj}-accordion`}
             />
           </EuiFlexItem>
         );

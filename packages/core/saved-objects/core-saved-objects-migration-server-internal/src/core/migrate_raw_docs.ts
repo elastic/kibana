@@ -17,8 +17,10 @@ import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { MigrateAndConvertFn } from '../document_migrator/document_migrator';
+import type { VersionedTransformer } from '../document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
+
+type MigrateAndConvertFn = VersionedTransformer['migrateAndConvert'];
 
 export interface DocumentsTransformFailed {
   readonly type: string;

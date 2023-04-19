@@ -788,20 +788,6 @@
       },
       {
         "parentPluginId": "visTypeXy",
-        "id": "def-public.ChartType",
-        "type": "Enum",
-        "tags": [],
-        "label": "ChartType",
-        "description": [
-          "\nType of charts able to render"
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
         "id": "def-public.ScaleType",
         "type": "Enum",
         "tags": [],

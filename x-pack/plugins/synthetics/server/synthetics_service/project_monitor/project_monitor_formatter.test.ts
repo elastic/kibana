@@ -122,7 +122,7 @@ describe('ProjectMonitorFormatter', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -445,7 +445,6 @@ const payloadData = [
   {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,
@@ -478,12 +477,6 @@ const payloadData = [
     'source.inline.script': '',
     'source.project.content':
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
-    'source.zip_url.folder': '',
-    'source.zip_url.password': '',
-    'source.zip_url.proxy_url': '',
-    'source.zip_url.url': '',
-    'source.zip_url.ssl.certificate': undefined,
-    'source.zip_url.username': '',
     'ssl.certificate': '',
     'ssl.certificate_authorities': '',
     'ssl.key': '',
@@ -492,11 +485,6 @@ const payloadData = [
     'ssl.verification_mode': 'full',
     synthetics_args: [],
     tags: [],
-    'throttling.config': '5d/3u/20l',
-    'throttling.download_speed': '5',
-    'throttling.is_enabled': true,
-    'throttling.latency': '20',
-    'throttling.upload_speed': '3',
     timeout: null,
     type: 'browser',
     'url.port': null,
@@ -507,7 +495,6 @@ const payloadData = [
   {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,
@@ -540,11 +527,6 @@ const payloadData = [
     'source.inline.script': '',
     'source.project.content':
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
-    'source.zip_url.folder': '',
-    'source.zip_url.password': '',
-    'source.zip_url.proxy_url': '',
-    'source.zip_url.url': '',
-    'source.zip_url.username': '',
     'ssl.certificate': '',
     'ssl.certificate_authorities': '',
     'ssl.key': '',
@@ -553,11 +535,6 @@ const payloadData = [
     'ssl.verification_mode': 'full',
     synthetics_args: [],
     tags: [],
-    'throttling.config': '5d/3u/20l',
-    'throttling.download_speed': '5',
-    'throttling.is_enabled': true,
-    'throttling.latency': '20',
-    'throttling.upload_speed': '3',
     timeout: null,
     type: 'browser',
     'url.port': null,

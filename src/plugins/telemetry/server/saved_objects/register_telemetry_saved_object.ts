@@ -17,32 +17,8 @@ export function registerTelemetrySavedObject(
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {
-      properties: {
-        enabled: {
-          type: 'boolean',
-        },
-        sendUsageFrom: {
-          type: 'keyword',
-        },
-        lastReported: {
-          type: 'date',
-        },
-        lastVersionChecked: {
-          type: 'keyword',
-        },
-        userHasSeenNotice: {
-          type: 'boolean',
-        },
-        reportFailureCount: {
-          type: 'integer',
-        },
-        reportFailureVersion: {
-          type: 'keyword',
-        },
-        allowChangingOptInStatus: {
-          type: 'boolean',
-        },
-      },
+      dynamic: false,
+      properties: {},
     },
   });
 }

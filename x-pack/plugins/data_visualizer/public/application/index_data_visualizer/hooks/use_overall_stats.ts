@@ -137,11 +137,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         latest,
         runtimeFieldMap,
         samplingOption,
+        sessionId,
+        embeddableExecutionContext,
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
         abortSignal: abortCtrl.current.signal,
-        sessionId: searchStrategyParams?.sessionId,
+        sessionId,
+        ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
 
       const documentCountStats = await getDocumentCountStats(

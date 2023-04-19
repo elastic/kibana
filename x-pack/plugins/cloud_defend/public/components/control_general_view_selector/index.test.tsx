@@ -50,6 +50,7 @@ describe('<ControlGeneralViewSelector />', () => {
           onChange={onChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
+          usedByResponse={false}
         />
       </TestProvider>
     );
@@ -66,6 +67,12 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(getByTestId('cloud-defend-selectorcondition-name')).toBeTruthy();
     expect(getByTestId('cloud-defend-selectorcondition-operation')).toBeTruthy();
+  });
+
+  it('renders a badge to show that the selector is unused', () => {
+    const { getByText } = render(<WrappedComponent />);
+
+    expect(getByText(i18n.unusedSelector)).toBeTruthy();
   });
 
   it('allows the user to add a limited set of operations', () => {
@@ -109,7 +116,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const conditions = getSelectorConditions('file');
     expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => userEvent.click(options[0])); // add first option "containerImageName"
+    await waitFor(() => userEvent.click(options[1])); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
     const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
@@ -189,7 +196,7 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+    expect(getByText('"containerImageName" values cannot exceed 511 bytes')).toBeTruthy();
   });
 
   it('prevents targetFilePath conditions from having values that exceed MAX_FILE_PATH_VALUE_LENGTH_BYTES', async () => {
@@ -212,7 +219,7 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
+    expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
   });
 
   it('shows an error if condition values fail their pattern regex', async () => {

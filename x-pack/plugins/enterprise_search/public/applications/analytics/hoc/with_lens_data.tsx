@@ -10,16 +10,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexItem } from '@elastic/eui';
+import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { TimeRange } from '@kbn/es-query';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
+import { AnalyticsCollection } from '../../../../common/types/analytics';
+
 import { KibanaLogic } from '../../shared/kibana';
+import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 
 export interface WithLensDataInputProps {
+  collection: AnalyticsCollection;
   id: string;
+  searchSessionId?: string;
+  setTimeRange?(timeRange: TimeRange): void;
   timeRange: TimeRange;
 }
 
@@ -33,7 +40,6 @@ interface WithLensDataParams<Props, OutputState> {
     formulaApi: FormulaPublicApi,
     props: Props
   ) => TypedLensByValueInput['attributes'];
-  getDataViewQuery: (props: Props) => string;
   initialValues: OutputState;
 }
 
@@ -42,14 +48,12 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
   {
     dataLoadTransform,
     getAttributes,
-    getDataViewQuery,
     initialValues,
   }: WithLensDataParams<Omit<T, keyof OutputState>, OutputState>
 ) => {
   const ComponentWithLensData: React.FC<T & WithLensDataInputProps> = (props) => {
     const {
       lens: { EmbeddableComponent, stateHelperApi },
-      data: { dataViews },
     } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);
@@ -58,14 +62,19 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
       () => dataView && formula && getAttributes(dataView, formula, props),
       [dataView, formula, props]
     );
+    const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
+      const [min, max] = range;
+
+      props.setTimeRange?.({
+        from: new Date(min).toISOString(),
+        mode: 'absolute',
+        to: new Date(max).toISOString(),
+      });
+    };
 
     useEffect(() => {
       (async () => {
-        const [target] = await dataViews.find(getDataViewQuery(props), 1);
-
-        if (target) {
-          setDataView(target);
-        }
+        setDataView(await findOrCreateDataView(props.collection));
       })();
     }, [props]);
     useEffect(() => {
@@ -85,6 +94,8 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
               id={props.id}
               timeRange={props.timeRange}
               attributes={attributes}
+              searchSessionId={props?.searchSessionId}
+              onBrushEnd={handleBrushEnd}
               onLoad={(...args) => {
                 if (dataLoadTransform) {
                   setData(dataLoadTransform(...args));
