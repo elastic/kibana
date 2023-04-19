@@ -42,7 +42,7 @@ export function DimensionButton({
   return (
     <div {...otherProps}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiToolTip
             content={message?.shortMessage || message?.longMessage || undefined}
             position="left"

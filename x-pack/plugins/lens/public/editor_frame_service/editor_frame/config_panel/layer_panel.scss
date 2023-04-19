@@ -118,14 +118,24 @@
   font-weight: $euiFontWeightRegular;
 }
 
-.domDragDrop-isReplacing {
-  .lnsLayerPanel__triggerText {
-    text-decoration: line-through;
+.lnsLayerPanel__dimensionLink {
+  &:hover {
+    text-decoration: none;
   }
 }
 
 .lnsLayerPanel__triggerTextLabel {
   transition: background-color $euiAnimSpeedFast ease-in-out;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.domDragDrop-isReplacing {
+  .lnsLayerPanel__triggerText {
+    text-decoration: line-through;
+  }
 }
 
 .lnsLayerPanel__triggerTextContent {
