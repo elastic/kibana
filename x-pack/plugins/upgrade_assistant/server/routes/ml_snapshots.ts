@@ -155,7 +155,7 @@ export function registerMlSnapshotRoutes({
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
+          savedObjects: { getClient },
           elasticsearch: { client: esClient },
         } = await core;
         const { snapshotId, jobId } = request.body;
@@ -173,7 +173,10 @@ export function registerMlSnapshotRoutes({
 
         // Store snapshot in saved object if upgrade not complete
         if (body.completed !== true) {
-          await createMlOperation(savedObjectsClient, snapshotInfo);
+          await createMlOperation(
+            getClient({ includedHiddenTypes: [ML_UPGRADE_OP_TYPE] }),
+            snapshotInfo
+          );
         }
 
         return response.ok({
@@ -202,9 +205,10 @@ export function registerMlSnapshotRoutes({
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
+          savedObjects: { getClient },
           elasticsearch: { client: esClient },
         } = await core;
+        const savedObjectsClient = getClient({ includedHiddenTypes: [ML_UPGRADE_OP_TYPE] });
         const { snapshotId, jobId } = request.params;
 
         // Verify snapshot exists

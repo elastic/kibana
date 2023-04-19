@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
@@ -26,6 +25,7 @@ import {
   scheduleTask,
   updateMeta,
   createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 
@@ -143,6 +143,13 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
+            const migratedActions = await migrateLegacyActions(context, {
+              ruleId: rule.id,
+              actions: rule.attributes.actions,
+              references: rule.references,
+              attributes: rule.attributes,
+            });
+
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
@@ -152,6 +159,13 @@ const bulkEnableRulesWithOCC = async (
                   username,
                   shouldUpdateApiKey: true,
                 }))),
+              ...(migratedActions.hasLegacyActions
+                ? {
+                    actions: migratedActions.resultedActions,
+                    throttle: undefined,
+                    notifyWhen: undefined,
+                  }
+                : {}),
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -187,6 +201,9 @@ const bulkEnableRulesWithOCC = async (
                 ...updatedAttributes,
                 ...(scheduledTaskId ? { scheduledTaskId } : undefined),
               },
+              ...(migratedActions.hasLegacyActions
+                ? { references: migratedActions.resultedReferences }
+                : {}),
             });
 
             context.auditLogger?.log(
