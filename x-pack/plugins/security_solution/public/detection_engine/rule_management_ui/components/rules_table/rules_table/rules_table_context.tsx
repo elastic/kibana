@@ -336,11 +336,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   );
 
   const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap = rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-      map[snoozeSettings.id] = snoozeSettings;
+    const rulesSnoozeSettingsMap =
+      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
+        map[snoozeSettings.id] = snoozeSettings;
 
-      return map;
-    }, {} as Record<string, RuleSnoozeSettings>);
+        return map;
+      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
 
     return {
       state: {
