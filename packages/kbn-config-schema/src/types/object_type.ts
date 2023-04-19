@@ -181,6 +181,39 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     return new ObjectType(extendedProps, extendedOptions);
   }
 
+  public extendsDeep<NP extends NullableProps>(
+    newProps: NP,
+    newOptions?: ExtendedObjectTypeOptions<P, NP>
+  ): ExtendedObjectType<P, NP> {
+    // console.log('PROPS', Object.keys(this.props));
+    const extendedProps = Object.entries({
+      ...this.props,
+      ...newProps,
+    }).reduce((memo, [key, value]) => {
+      if (value !== null && value !== undefined) {
+        let val = value;
+        if (val instanceof ObjectType) {
+          val = (value as ObjectType).extendsDeep<NP>(
+            {} as NP,
+            newOptions as ExtendedObjectTypeOptions<any, NP>
+          );
+        }
+        return {
+          ...memo,
+          [key]: val,
+        };
+      }
+      return memo;
+    }, {} as ExtendedProps<P, NP>);
+
+    const extendedOptions = {
+      ...this.options,
+      ...newOptions,
+    } as ExtendedObjectTypeOptions<P, NP>;
+
+    return new ObjectType(extendedProps, extendedOptions);
+  }
+
   protected handleError(type: string, { reason, value }: Record<string, any>) {
     switch (type) {
       case 'any.required':
