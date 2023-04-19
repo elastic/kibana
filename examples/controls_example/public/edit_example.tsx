@@ -38,8 +38,6 @@ const INPUT_KEY = 'kbnControls:saveExample:input';
 
 const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 
-const EXCLUDE_NUMBER_FIELD = 'Exclude Number fields';
-
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
