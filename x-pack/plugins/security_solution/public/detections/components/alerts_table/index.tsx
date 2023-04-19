@@ -102,7 +102,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
-  const { from, to, setQuery } = useGlobalTime(false);
+  const { from, to, setQuery } = useGlobalTime();
 
   const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
 

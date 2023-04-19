@@ -61,7 +61,7 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
 export const getBulkActionHook =
   (tableId: TableId): AlertsTableConfigurationRegistry['useBulkActions'] =>
   (query) => {
-    const { from, to } = useGlobalTime(false);
+    const { from, to } = useGlobalTime();
     const filters = getFiltersForDSLQuery(query);
     const getGlobalQueries = inputsSelectors.globalQuery();
 

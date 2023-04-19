@@ -183,7 +183,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
 
-  const { deleteQuery, setQuery } = useGlobalTime(false);
+  const { deleteQuery, setQuery } = useGlobalTime();
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuidv4()}`, []);
 
