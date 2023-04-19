@@ -7,7 +7,7 @@
  */
 
 import { EditPanelAction } from './edit_panel_action';
-import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddables';
+import { Embeddable, EmbeddableInput } from '../embeddables';
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
 import { embeddablePluginMock } from '../../mocks';
