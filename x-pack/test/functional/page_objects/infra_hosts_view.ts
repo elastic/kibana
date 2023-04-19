@@ -241,6 +241,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async typeInQueryBar(query: string) {
       const queryBar = await this.getQueryBar();
 
+      await queryBar.clearValueWithKeyboard();
       return queryBar.type(query);
     },
 
