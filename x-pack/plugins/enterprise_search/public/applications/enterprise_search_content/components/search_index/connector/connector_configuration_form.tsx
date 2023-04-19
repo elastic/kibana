@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
-import { DependencyLookup } from '../../../../../../common/types/connectors';
+import { DependencyLookup, DisplayType } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
@@ -68,11 +68,16 @@ export const ConnectorConfigurationForm = () => {
         // toggle label goes next to the element, not in the row
         const hasDependencies = dependencies.length > 0;
         const helpText = defaultValue
-          ? `If left empty, the default value ${defaultValue} will be used.`
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.config.defaultValue',
+              {
+                defaultMessage: 'If left empty, the default value {defaultValue} will be used.',
+                values: { defaultValue },
+              }
+            )
           : '';
-
         const rowLabel =
-          display !== 'toggle' ? (
+          display !== DisplayType.TOGGLE ? (
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
             </EuiToolTip>

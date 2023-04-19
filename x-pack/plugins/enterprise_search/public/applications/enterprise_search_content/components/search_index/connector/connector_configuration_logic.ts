@@ -12,6 +12,7 @@ import {
   ConnectorStatus,
   Dependency,
   DependencyLookup,
+  DisplayType,
   SelectOption,
 } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
@@ -57,7 +58,7 @@ interface ConnectorConfigurationValues {
 export interface ConfigEntry {
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
-  display: string;
+  display: DisplayType;
   key: string;
   label: string;
   options: SelectOption[];

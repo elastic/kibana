@@ -17,10 +17,19 @@ export interface Dependency {
 
 export type DependencyLookup = Record<string, string | number | boolean | null>;
 
+export enum DisplayType {
+  TEXTBOX = 'textbox',
+  TEXTAREA = 'textarea',
+  NUMERIC = 'numeric',
+  TOGGLE = 'toggle',
+  DROPDOWN = 'dropdown',
+  CHECKBOX = 'checkbox',
+}
+
 export interface ConnectorConfigProperties {
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
-  display: string;
+  display: DisplayType;
   label: string;
   options: SelectOption[];
   order?: number | null;
