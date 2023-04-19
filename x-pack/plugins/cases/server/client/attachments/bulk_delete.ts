@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { PromiseResult } from 'p-settle';
+import type { PromiseResult, PromiseRejectedResult } from 'p-settle';
 import pSettle from 'p-settle';
 import { partition } from 'lodash';
 import type { Logger } from '@kbn/core/server';
@@ -171,7 +171,14 @@ export const retrieveFilesIgnoringNotFound = (
     if (result.isFulfilled) {
       files.push(result.value);
     } else if (result.reason instanceof FileNotFoundError) {
-      logger.warn(`Failed to find file id: ${fileIds[index]}: ${result.reason}`);
+      const warningMessage = getFileNotFoundErrorMessage({
+        resultsLength: results.length,
+        fileIds,
+        index,
+        result,
+      });
+
+      logger.warn(warningMessage);
     } else if (result.reason instanceof Error) {
       throw result.reason;
     } else {
@@ -180,4 +187,22 @@ export const retrieveFilesIgnoringNotFound = (
   });
 
   return files;
+};
+
+const getFileNotFoundErrorMessage = ({
+  resultsLength,
+  fileIds,
+  index,
+  result,
+}: {
+  resultsLength: number;
+  fileIds: BulkDeleteFileArgs['fileIds'];
+  index: number;
+  result: PromiseRejectedResult;
+}) => {
+  if (resultsLength === fileIds.length) {
+    return `Failed to find file id: ${fileIds[index]}: ${result.reason}`;
+  }
+
+  return `Failed to find file: ${result.reason}`;
 };

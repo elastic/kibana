@@ -41,6 +41,18 @@ describe('bulk_delete', () => {
       `);
     });
 
+    it('logs a warning without the fileId when the results length is different from the file ids', async () => {
+      const fileNotFound = await pReflect(Promise.reject(new FileNotFoundError('not found')));
+
+      expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc', '123'], mockLogger)).toEqual([]);
+      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Failed to find file: Error: not found",
+        ]
+      `);
+    });
+
     it('throws when encountering an error that is not a file not found', async () => {
       const otherError = new Error('other error');
       const otherErrorResult = await pReflect(Promise.reject(new Error('other error')));
@@ -55,7 +67,7 @@ describe('bulk_delete', () => {
 
     it('throws when encountering an error that is not a file not found after a valid file', async () => {
       const otherError = new Error('other error');
-      const otherErrorResult = await pReflect(Promise.reject(new Error('other error')));
+      const otherErrorResult = await pReflect(Promise.reject(otherError));
       const fileResult = await createFakeFile();
 
       expect.assertions(2);
