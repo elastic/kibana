@@ -49,7 +49,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             title={iconTitle}
             size="s"
             css={css`
-              color: ${euiTheme.colors.emptyShade};
+              color: transparent;
               font-size: ${xsFontSize};
               height: ${euiTheme.size.l} !important;
               .euiButtonEmpty__content {
