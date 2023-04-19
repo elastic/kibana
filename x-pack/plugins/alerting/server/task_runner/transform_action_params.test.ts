@@ -632,7 +632,7 @@ describe('transformSummaryActionParams', () => {
       id: '1',
       name: 'test-rule',
       tags: ['test-tag'],
-      params: { foo: 'bar' },
+      params: { foo: 'bar', fooBar: true },
     } as SanitizedRule,
     ruleTypeId: 'rule-type-id',
     actionId: 'action-id',
@@ -666,7 +666,7 @@ describe('transformSummaryActionParams', () => {
     const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
-          "message": "Value \\"{\\"@timestamp\\":\\"2022-12-07T15:38:43.472Z\\",\\"event\\":{\\"kind\\":\\"signal\\",\\"action\\":\\"active\\"},\\"kibana\\":{\\"version\\":\\"8.7.0\\",\\"space_ids\\":[\\"default\\"],\\"alert\\":{\\"instance\\":{\\"id\\":\\"*\\"},\\"uuid\\":\\"2d3e8fe5-3e8b-4361-916e-9eaab0bf2084\\",\\"status\\":\\"active\\",\\"workflow_status\\":\\"open\\",\\"reason\\":\\"system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.\\",\\"time_range\\":{\\"gte\\":\\"2022-01-01T12:00:00.000Z\\"},\\"start\\":\\"2022-12-07T15:23:13.488Z\\",\\"duration\\":{\\"us\\":100000},\\"flapping\\":false,\\"rule\\":{\\"category\\":\\"Metric threshold\\",\\"consumer\\":\\"alerts\\",\\"execution\\":{\\"uuid\\":\\"c35db7cc-5bf7-46ea-b43f-b251613a5b72\\"},\\"name\\":\\"test-rule\\",\\"producer\\":\\"infrastructure\\",\\"rule_type_id\\":\\"metrics.alert.threshold\\",\\"uuid\\":\\"0de91960-7643-11ed-b719-bb9db8582cb6\\",\\"tags\\":[]}}}}\\", \\"http://ruleurl\\" and \\"{\\"foo\\":\\"bar\\"}\\" exist",
+          "message": "Value \\"{\\"@timestamp\\":\\"2022-12-07T15:38:43.472Z\\",\\"event\\":{\\"kind\\":\\"signal\\",\\"action\\":\\"active\\"},\\"kibana\\":{\\"version\\":\\"8.7.0\\",\\"space_ids\\":[\\"default\\"],\\"alert\\":{\\"instance\\":{\\"id\\":\\"*\\"},\\"uuid\\":\\"2d3e8fe5-3e8b-4361-916e-9eaab0bf2084\\",\\"status\\":\\"active\\",\\"workflow_status\\":\\"open\\",\\"reason\\":\\"system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.\\",\\"time_range\\":{\\"gte\\":\\"2022-01-01T12:00:00.000Z\\"},\\"start\\":\\"2022-12-07T15:23:13.488Z\\",\\"duration\\":{\\"us\\":100000},\\"flapping\\":false,\\"rule\\":{\\"category\\":\\"Metric threshold\\",\\"consumer\\":\\"alerts\\",\\"execution\\":{\\"uuid\\":\\"c35db7cc-5bf7-46ea-b43f-b251613a5b72\\"},\\"name\\":\\"test-rule\\",\\"producer\\":\\"infrastructure\\",\\"rule_type_id\\":\\"metrics.alert.threshold\\",\\"uuid\\":\\"0de91960-7643-11ed-b719-bb9db8582cb6\\",\\"tags\\":[]}}}}\\", \\"http://ruleurl\\" and \\"{\\"foo\\":\\"bar\\",\\"foo_bar\\":true,\\"name\\":\\"test-rule\\",\\"id\\":\\"1\\"}\\" exist",
         }
     `);
   });
