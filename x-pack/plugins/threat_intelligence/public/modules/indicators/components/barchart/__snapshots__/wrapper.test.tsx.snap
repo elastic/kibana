@@ -67,7 +67,7 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
                 </div>
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <button
                   aria-label="Open list of options"
