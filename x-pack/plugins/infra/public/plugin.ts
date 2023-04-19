@@ -51,7 +51,8 @@ export class Plugin implements InfraClientPluginClass {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
-    this.config = context.config.get();this.inventoryViews = new InventoryViewsService()
+    this.config = context.config.get();
+    this.inventoryViews = new InventoryViewsService();
     this.logViews = new LogViewsService({
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
@@ -288,7 +289,7 @@ export class Plugin implements InfraClientPluginClass {
     const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
 
     const inventoryViews = this.inventoryViews.start({
-      http: core.http
+      http: core.http,
     });
 
     const logViews = this.logViews.start({
