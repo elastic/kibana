@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { Filter, PhraseFilter, PhrasesFilter, ScriptedPhraseFilter } from '@kbn/es-query';
 import { buildMetadataFilter } from './build_metadata_filter';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -31,9 +30,7 @@ const filterAddedToastTitle = i18n.translate(
 export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) => {
   const { dataView } = useMetricsDataViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
-  const [existingFilter, setExistingFilter] = useState<
-    PhrasesFilter | PhraseFilter | ScriptedPhraseFilter | Filter | undefined
-  >(() => undefined);
+
   const {
     services: {
       data: {
@@ -43,12 +40,26 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     },
   } = useKibanaContextForPlugin();
 
-  useMemo(() => {
-    const addedFilter = searchCriteria.filters.find((filter) => filter.meta.key === item.name);
-    if (addedFilter) {
-      setExistingFilter(addedFilter);
+  const existingFilter = useMemo(
+    () => searchCriteria.filters.find((filter) => filter.meta.key === item.name),
+    [item.name, searchCriteria.filters]
+  );
+
+  const handleAddFilter = () => {
+    const newFilter = buildMetadataFilter({
+      field: item.name,
+      value: item.value ?? '',
+      dataView,
+      negate: false,
+    });
+    if (newFilter) {
+      filterManagerService.addFilters(newFilter);
+      toastsService.addSuccess({
+        title: filterAddedToastTitle,
+        toastLifeTimeMs: 10000,
+      });
     }
-  }, [item.name, searchCriteria.filters]);
+  };
 
   if (existingFilter) {
     return (
@@ -101,21 +112,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
               defaultMessage: 'Add Filter',
             }
           )}
-          onClick={() => {
-            const newFilter = buildMetadataFilter({
-              field: item.name,
-              value: item.value ?? '',
-              dataView,
-              negate: false,
-            });
-            if (newFilter) {
-              filterManagerService.addFilters(newFilter);
-              toastsService.addSuccess({
-                title: filterAddedToastTitle,
-                toastLifeTimeMs: 10000,
-              });
-            }
-          }}
+          onClick={handleAddFilter}
         />
       </EuiToolTip>
     </span>
