@@ -53,6 +53,20 @@ declare global {
         ...args: Parameters<Cypress.Chainable<E>['find']>
       ): Chainable<JQuery<E>>;
 
+      /**
+       * Continuously call provided callback function until it either return `true`
+       * or fail if `timeout` is reached.
+       * @param fn
+       * @param options
+       */
+      waitUntil(
+        fn: (subject?: any) => boolean | Promise<boolean> | Chainable<boolean>,
+        options?: Partial<{
+          interval: number;
+          timeout: number;
+        }>
+      ): Chainable<Subject>;
+
       task(
         name: 'indexFleetEndpointPolicy',
         arg: {
