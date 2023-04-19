@@ -9,26 +9,27 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { buildForecastedSlo } from '../../../../data/slo/slo';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloBadges as Component, Props } from './slo_badges';
+import { SloRulesBadge as Component, Props } from './slo_rules_badge';
 
 export default {
   component: Component,
-  title: 'app/SLO/Badges/SloBadges',
+  title: 'app/SLO/Badges/SloRulesBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = (props: Props) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup gutterSize="s">
     <Component {...props} />
   </EuiFlexGroup>
 );
 
-const defaultProps = {
-  slo: buildForecastedSlo(),
-  rules: [],
-};
+export const WithNoRule = Template.bind({});
+WithNoRule.args = { rules: [] };
 
-export const SloBadges = Template.bind({});
-SloBadges.args = defaultProps;
+export const WithLoadingRule = Template.bind({});
+WithLoadingRule.args = { rules: undefined };
+export const WithRule = Template.bind({});
+WithRule.args = { rules: [{ name: 'rulename' }] as Array<Rule<SloRule>> };
