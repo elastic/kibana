@@ -708,6 +708,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
           masks.push(
             new Mask({
               esAggField: metricField,
+              isGeometrySourceMvt: source.isMvt(),
               operator: mask.operator,
               value: mask.value,
             })
@@ -726,6 +727,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
             masks.push(
               new Mask({
                 esAggField: metricField,
+                isGeometrySourceMvt: source.isMvt(),
                 operator: mask.operator,
                 value: mask.value,
               })

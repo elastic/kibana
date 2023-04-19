@@ -69,19 +69,23 @@ export function getMaskI18nDescription({
 
 export class Mask {
   private readonly _esAggField: IESAggField;
+  private readonly _isGeometrySourceMvt: boolean;
   private readonly _operator: MASK_OPERATOR;
   private readonly _value: number;
 
   constructor({
     esAggField,
+    isGeometrySourceMvt,
     operator,
     value,
   }: {
     esAggField: IESAggField;
+    isGeometrySourceMvt: boolean;
     operator: MASK_OPERATOR;
     value: number;
   }) {
     this._esAggField = esAggField;
+    this._isGeometrySourceMvt = isGeometrySourceMvt;
     this._operator = operator;
     this._value = value;
   }
@@ -92,7 +96,7 @@ export class Mask {
       return false;
     }
 
-    if (!this._esAggField.getSource().isMvt()) {
+    if (!this._isGeometrySourceMvt) {
       // For geojson sources, join fields are stored in properties
       return false;
     }
