@@ -573,6 +573,8 @@ function buildSuggestion({
       existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
+  const isIncomplete = yValues.length === 0;
+
   return {
     title,
     score: getScore(yValues, splitBy, changeType),
@@ -583,10 +585,11 @@ function buildSuggestion({
         // Don't advertise removing dimensions
         (currentState && changeType === 'reduced') ||
         // Don't advertise charts without y axis
-        yValues.length === 0 ||
+        isIncomplete ||
         // Don't advertise charts without at least one split
         (!xValue && !splitBy)),
     state,
+    incomplete: isIncomplete,
     previewIcon: getIconForSeries(seriesType),
   };
 }

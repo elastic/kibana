@@ -15,7 +15,7 @@ import {
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
-import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   fetchAgentPolicyEnrollmentKey,

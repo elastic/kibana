@@ -17,14 +17,14 @@ import type {
   GroupingFieldTotalAggregation,
   GroupingAggregation,
 } from '@kbn/securitysolution-grouping';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { useGrouping, isNoneGroup } from '@kbn/securitysolution-grouping';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
-import type { TableIdLiteral } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../../common/lib/kibana';

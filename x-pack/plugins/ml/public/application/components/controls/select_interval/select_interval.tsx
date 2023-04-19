@@ -88,12 +88,12 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
   return (
     <EuiSelect
       data-test-subj="mlAnomalyIntervalControls"
-      prepend={i18n.translate('xpack.ml.explorer.intervalLabel', {
+      prepend={i18n.translate('xpack.ml.controls.selectInterval.intervalLabel', {
         defaultMessage: 'Interval',
       })}
       append={
         <EuiToolTip
-          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
+          content={i18n.translate('xpack.ml.controls.selectInterval.intervalTooltip', {
             defaultMessage:
               'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
           })}
@@ -105,6 +105,9 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
       options={OPTIONS}
       value={interval.val}
       onChange={handleOnChange}
+      aria-label={i18n.translate('xpack.ml.controls.selectInterval.ariaLabel', {
+        defaultMessage: 'Select interval',
+      })}
     />
   );
 };

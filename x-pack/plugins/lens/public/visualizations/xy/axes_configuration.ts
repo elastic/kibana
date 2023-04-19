@@ -8,7 +8,7 @@
 import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import {
   getDataBounds,
   validateAxisDomain,

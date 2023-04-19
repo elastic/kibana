@@ -25,6 +25,8 @@ import {
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -54,10 +56,19 @@ function ThroughputChart({
   timeZone: string;
 }) {
   /* Throughput Chart */
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery: '',
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
     useFetcher(
       (callApmApi) => {
-        if (serviceName && transactionType && start && end) {
+        if (serviceName && transactionType && start && end && preferred) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/throughput',
             {
@@ -72,13 +83,16 @@ function ThroughputChart({
                   end,
                   transactionType,
                   transactionName: undefined,
+                  documentType: preferred.source.documentType,
+                  rollupInterval: preferred.source.rollupInterval,
+                  bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 },
               },
             }
           );
         }
       },
-      [environment, serviceName, start, end, transactionType]
+      [environment, serviceName, start, end, transactionType, preferred]
     );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.THROUGHPUT

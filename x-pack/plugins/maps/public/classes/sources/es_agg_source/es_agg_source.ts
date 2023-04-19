@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties } from 'geojson';
 import { DataView } from '@kbn/data-plugin/common';
-import { IESSource } from '../es_source';
+import type { IESAggSource } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
@@ -18,14 +18,6 @@ import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
-
-export interface IESAggSource extends IESSource {
-  getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
-  getMetricFields(): IESAggField[];
-  getMetricFieldForName(fieldName: string): IESAggField | null;
-  getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };
-}
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
@@ -138,5 +130,13 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
 
     return await Promise.all(promises);
+  }
+
+  isGeoGridPrecisionAware(): boolean {
+    return false;
+  }
+
+  getGeoGridPrecision(zoom: number): number {
+    return 0;
   }
 }

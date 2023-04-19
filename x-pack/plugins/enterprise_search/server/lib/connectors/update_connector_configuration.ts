@@ -23,7 +23,7 @@ import { fetchConnectorById } from './fetch_connectors';
 export const updateConnectorConfiguration = async (
   client: IScopedClusterClient,
   connectorId: string,
-  configuration: Record<string, string>
+  configuration: Record<string, string | number | boolean>
 ) => {
   const connectorResult = await fetchConnectorById(client, connectorId);
   const connector = connectorResult?.value;

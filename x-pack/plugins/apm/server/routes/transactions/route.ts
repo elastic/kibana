@@ -334,16 +334,22 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({ transactionType: t.string }),
+      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
+      t.intersection([
+        environmentRt,
+        kueryRt,
+        rangeRt,
+        offsetRt,
+        serviceTransactionDataSourceRt,
+      ]),
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<FailedTransactionRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const {
       environment,
@@ -353,15 +359,10 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       start,
       end,
       offset,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     } = params.query;
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config,
-      apmEventClient,
-      kuery,
-      start,
-      end,
-    });
 
     return getFailedTransactionRatePeriods({
       environment,
@@ -370,10 +371,12 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       transactionType,
       transactionName,
       apmEventClient,
-      searchAggregatedTransactions,
       start,
       end,
       offset,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     });
   },
 });

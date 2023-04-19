@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingChart } from '@elastic/eui';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
@@ -19,30 +18,25 @@ import { getAllFields } from './utils';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
 
-const NODE_TYPE = 'host' as InventoryItemType;
-
 export interface TabProps {
   currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
+  nodeType: InventoryItemType;
 }
 
-export const Metadata = ({ node, currentTimeRange }: TabProps) => {
+export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   const nodeId = node.name;
-  const inventoryModel = findInventoryModel(NODE_TYPE);
+  const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
-    error,
+    error: fetchMetadataError,
     metadata,
-  } = useMetadata(nodeId, NODE_TYPE, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
-  if (metadataLoading) {
-    return <LoadingPlaceholder />;
-  }
-
-  if (error) {
+  if (fetchMetadataError) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
@@ -72,42 +66,5 @@ export const Metadata = ({ node, currentTimeRange }: TabProps) => {
     );
   }
 
-  return fields.length > 0 ? (
-    <Table rows={fields} />
-  ) : (
-    <EuiCallOut
-      data-test-subj="infraMetadataNoData"
-      title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-        defaultMessage: 'Sorry, there is no metadata related to this host.',
-      })}
-      size="m"
-      iconType="iInCircle"
-    />
-  );
-};
-
-const LoadingPlaceholder = () => {
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '200px',
-        padding: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
-    </div>
-  );
-};
-
-export const MetadataTab = {
-  id: 'metadata',
-  name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
-    defaultMessage: 'Metadata',
-  }),
-  content: Metadata,
-  'data-test-subj': 'hostsView-flyout-tabs-metadata',
+  return <Table rows={fields} loading={metadataLoading} />;
 };

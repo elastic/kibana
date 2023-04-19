@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardSettings = getService('dashboardSettings');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
@@ -65,18 +66,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('open options menu', async () => {
-      await PageObjects.dashboard.openOptions();
+    it('open settings flyout', async () => {
+      await PageObjects.dashboard.openSettingsFlyout();
       await a11y.testAppSnapshot();
     });
 
     it('Should be able to hide panel titles', async () => {
-      await testSubjects.click('dashboardPanelTitlesCheckbox');
+      await dashboardSettings.toggleShowPanelTitles(false);
       await a11y.testAppSnapshot();
     });
 
     it('Should be able display panels without margins', async () => {
-      await testSubjects.click('dashboardMarginsCheckbox');
+      await dashboardSettings.toggleUseMarginsBetweenPanels(true);
+      await a11y.testAppSnapshot();
+    });
+
+    it('close settings flyout', async () => {
+      await dashboardSettings.clickCancelButton();
       await a11y.testAppSnapshot();
     });
 
@@ -109,12 +115,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Test full screen', async () => {
+    // https://github.com/elastic/kibana/issues/153597
+    it.skip('Test full screen', async () => {
       await PageObjects.dashboard.clickFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
-    it('Exit out of full screen mode', async () => {
+    // https://github.com/elastic/kibana/issues/153597
+    it.skip('Exit out of full screen mode', async () => {
       await PageObjects.dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });
