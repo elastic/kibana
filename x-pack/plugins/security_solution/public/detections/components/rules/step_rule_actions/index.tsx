@@ -35,7 +35,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { useManageCaseAction } from './use_manage_case_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
@@ -79,7 +78,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
   ruleType,
 }) => {
-  const [isLoadingCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
