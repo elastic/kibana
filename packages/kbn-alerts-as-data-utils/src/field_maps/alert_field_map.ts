@@ -159,7 +159,9 @@ export const alertFieldMap = {
   [ALERT_URL]: {
     type: 'text',
     array: false,
+    index: false,
     required: false,
+    ignore_above: 2048,
   },
   [ALERT_UUID]: {
     type: 'keyword',
