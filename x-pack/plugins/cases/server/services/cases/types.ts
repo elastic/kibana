@@ -7,6 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import type { Case } from '../../../common';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type { CaseSavedObjectAttributes, CaseSavedObject } from '../../common/types/case';
@@ -61,7 +62,7 @@ export interface PatchCasesArgs extends IndexRefresh {
 }
 
 export interface CasesMapWithPageInfo {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   page: number;
   perPage: number;
   total: number;

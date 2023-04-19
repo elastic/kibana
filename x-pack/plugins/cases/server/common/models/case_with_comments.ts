@@ -13,20 +13,14 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type {
-  CaseResponse,
+  Case,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
   CommentRequestUserType,
   CommentRequestAlertType,
 } from '../../../common/api';
-import {
-  CaseResponseRt,
-  CaseStatuses,
-  CommentType,
-  ActionTypes,
-  Actions,
-} from '../../../common/api';
+import { CaseRt, CaseStatuses, CommentType, ActionTypes, Actions } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
@@ -434,7 +428,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<CaseResponse> {
+  public async encodeWithComments(): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -453,7 +447,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return CaseResponseRt.encode(caseResponse);
+      return CaseRt.encode(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,

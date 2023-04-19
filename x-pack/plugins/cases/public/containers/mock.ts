@@ -22,9 +22,9 @@ import type {
 } from '../../common/ui/types';
 import type {
   CaseConnector,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CasesResponse,
+  Cases,
   CasesStatusResponse,
   CaseUserActionResponse,
   CaseUserActionsResponse,
@@ -515,7 +515,7 @@ export const persistableStateAttachmentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCaseSnake: CaseResponse = {
+export const basicCaseSnake: Case = {
   ...basicCase,
   status: CaseStatuses.open,
   closed_at: null,
@@ -529,7 +529,7 @@ export const basicCaseSnake: CaseResponse = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
-} as CaseResponse;
+} as Case;
 
 export const caseWithAlertsSnake = {
   ...basicCaseSnake,
@@ -583,7 +583,7 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const casesSnake: CasesResponse = [
+export const casesSnake: Cases = [
   basicCaseSnake,
   {
     ...pushedCaseSnake,

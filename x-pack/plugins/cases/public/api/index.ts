@@ -14,7 +14,7 @@ import {
   INTERNAL_BULK_GET_CASES_URL,
 } from '../../common/constants';
 import type {
-  CaseResponse,
+  Case,
   CasesBulkGetRequestCertainFields,
   CasesBulkGetResponseCertainFields,
   CasesFindRequest,
@@ -68,7 +68,7 @@ export const getCasesMetrics = async ({
   return convertToCamelCase(decodeCasesMetricsResponse(res));
 };
 
-export const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseResponse>({
+export const bulkGetCases = async <Field extends keyof Case = keyof Case>({
   http,
   signal,
   params,

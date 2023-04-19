@@ -13,8 +13,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { ToastInputFields } from '@kbn/core/public';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
-  CaseResponse,
-  CasesResponse,
+  Case,
+  Cases,
   CasesConfigurationsResponse,
   CasesConfigureResponse,
   CaseUserActionsResponse,
@@ -25,8 +25,8 @@ import type {
   CaseUserActionStatsResponse,
 } from '../../common/api';
 import {
-  CaseResponseRt,
-  CasesResponseRt,
+  CaseRt,
+  CasesRt,
   throwErrors,
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -49,8 +49,8 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-export const decodeCaseResponse = (respCase?: CaseResponse) =>
-  pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCaseResponse = (respCase?: Case) =>
+  pipe(CaseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
   pipe(
@@ -64,8 +64,8 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesResponse = (respCase?: CasesResponse) =>
-  pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesResponse = (respCase?: Cases) =>
+  pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
   return pipe(

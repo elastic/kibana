@@ -20,7 +20,7 @@ import type {
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   CommentResponse,
-  CaseResponse,
+  Case,
   UserActionFindResponse,
   FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
@@ -92,7 +92,7 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
   userActions: CaseUserActions[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
+export type Case = Omit<SnakeToCamelCase<Case>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;

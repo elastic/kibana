@@ -11,7 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
-  CaseResponse,
+  Case,
   CaseResolveResponse,
   User,
   AllTagsFindRequest,
@@ -22,7 +22,7 @@ import type {
   AttachmentTotals,
 } from '../../../common/api';
 import {
-  CaseResponseRt,
+  CaseRt,
   CaseResolveResponseRt,
   AllTagsFindRequestRt,
   excess,
@@ -173,7 +173,7 @@ export interface GetParams {
 export const get = async (
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+): Promise<Case> => {
   const {
     services: { caseService },
     logger,
@@ -191,7 +191,7 @@ export const get = async (
     });
 
     if (!includeComments) {
-      return CaseResponseRt.encode(
+      return CaseRt.encode(
         flattenCaseSavedObject({
           savedObject: theCase,
         })
@@ -206,7 +206,7 @@ export const get = async (
       },
     });
 
-    return CaseResponseRt.encode(
+    return CaseRt.encode(
       flattenCaseSavedObject({
         savedObject: theCase,
         comments: theComments.saved_objects,

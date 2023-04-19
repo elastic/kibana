@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
-import { getTypeProps, CaseResponseRt } from '../../../common/api';
+import type { Case } from '../../../common/api';
+import { getTypeProps, CaseRt } from '../../../common/api';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';
@@ -39,8 +39,8 @@ describe('bulkGet', () => {
       unauthorized: [],
     });
 
-    const typeProps = getTypeProps(CaseResponseRt) ?? {};
-    const validFields = Object.keys(typeProps) as Array<keyof CaseResponse>;
+    const typeProps = getTypeProps(CaseRt) ?? {};
+    const validFields = Object.keys(typeProps) as Array<keyof Case>;
 
     beforeEach(() => {
       jest.clearAllMocks();

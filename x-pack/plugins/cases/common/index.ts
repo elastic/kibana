@@ -38,7 +38,7 @@ export {
 } from './api';
 
 export type {
-  CaseResponse,
+  Case,
   CasesBulkGetRequestCertainFields,
   CasesBulkGetResponseCertainFields,
 } from './api';

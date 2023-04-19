@@ -25,15 +25,15 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CasePatchRequest,
-  CaseResponse,
+  Case,
   CasesPatchRequest,
-  CasesResponse,
+  Cases,
   CommentAttributes,
   User,
 } from '../../../common/api';
 import {
   CasesPatchRequestRt,
-  CasesResponseRt,
+  CasesRt,
   CaseStatuses,
   CommentType,
   excess,
@@ -303,7 +303,7 @@ interface UpdateRequestWithOriginalCase {
 export const update = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs
-): Promise<CasesResponse> => {
+): Promise<Cases> => {
   const {
     services: {
       caseService,
@@ -442,7 +442,7 @@ export const update = async (
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
         }),
       ];
-    }, [] as CaseResponse[]);
+    }, [] as Case[]);
 
     await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
@@ -458,7 +458,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesResponseRt.encode(returnUpdatedCase);
+    return CasesRt.encode(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

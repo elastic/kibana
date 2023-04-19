@@ -13,12 +13,12 @@ import {
 } from '../../common/utils/attachments';
 import type {
   CasesFindResponse,
-  CaseResponse,
+  Case,
   CaseUserActionsResponse,
   CommentRequest,
   CommentResponse,
   CaseResolveResponse,
-  CasesResponse,
+  Cases,
 } from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type { Cases, Case, Comment, ResolvedCase } from '../containers/types';
@@ -46,16 +46,15 @@ export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
     return acc;
   }, {} as U);
 
-export const convertCaseToCamelCase = (theCase: CaseResponse): Case => {
+export const convertCaseToCamelCase = (theCase: Case): Case => {
   const { comments, ...restCase } = theCase;
   return {
-    ...convertToCamelCase<CaseResponse, Case>(restCase),
+    ...convertToCamelCase<Case, Case>(restCase),
     ...(comments != null ? { comments: convertAttachmentsToCamelCase(comments) } : {}),
   };
 };
 
-export const convertCasesToCamelCase = (cases: CasesResponse): Case[] =>
-  cases.map(convertCaseToCamelCase);
+export const convertCasesToCamelCase = (cases: Cases): Case[] => cases.map(convertCaseToCamelCase);
 
 export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): ResolvedCase => {
   const { case: theCase, ...rest } = res;

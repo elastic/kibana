@@ -28,7 +28,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type {
-  CaseResponse,
+  Case,
   CommentAttributes,
   User,
   CaseAttributes,
@@ -53,6 +53,22 @@ import type { AggregationBuilder, AggregationResponse } from '../../client/metri
 import { createCaseError } from '../../common/error';
 import type { CaseSavedObject, CaseSavedObjectAttributes } from '../../common/types/case';
 import { CaseStatusSavedObject } from '../../common/types/case';
+import type {
+  GetCaseIdsByAlertIdArgs,
+  GetCaseIdsByAlertIdAggs,
+  FindCaseOptions,
+  CasesMapWithPageInfo,
+  DeleteCaseArgs,
+  GetCaseArgs,
+  GetCasesArgs,
+  FindCommentsArgs,
+  FindCaseCommentsArgs,
+  GetReportersArgs,
+  GetTagsArgs,
+  PostCaseArgs,
+  PatchCaseArgs,
+  PatchCasesArgs,
+} from './types';
 
 export class CasesService {
   private readonly log: Logger;
@@ -151,7 +167,7 @@ export class CasesService {
       caseIds: Array.from(casesMap.keys()),
     });
 
-    const casesWithComments = new Map<string, CaseResponse>();
+    const casesWithComments = new Map<string, Case>();
     for (const [id, caseInfo] of casesMap.entries()) {
       const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
 

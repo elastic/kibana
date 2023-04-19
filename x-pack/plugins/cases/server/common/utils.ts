@@ -29,7 +29,7 @@ import type { AlertInfo, FileAttachmentRequest } from './types';
 import type {
   CaseAttributes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
   CommentAttributes,
   CommentRequest,
@@ -98,7 +98,7 @@ export const transformCases = ({
   perPage,
   total,
 }: {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -125,7 +125,7 @@ export const flattenCaseSavedObject = ({
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-}): CaseResponse => ({
+}): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),

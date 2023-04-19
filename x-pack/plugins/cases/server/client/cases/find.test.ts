@@ -6,7 +6,7 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
@@ -16,7 +16,7 @@ import { find } from './find';
 describe('find', () => {
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
-    const casesMap = new Map<string, CaseResponse>(
+    const casesMap = new Map<string, Case>(
       mockCases.map((obj) => {
         return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
       })
