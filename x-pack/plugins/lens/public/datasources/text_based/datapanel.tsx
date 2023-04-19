@@ -125,6 +125,7 @@ export function TextBasedDataPanel({
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
           highlight={fieldSearchHighlight}
+          getCustomFieldType={getCustomFieldType}
         />
       );
     },

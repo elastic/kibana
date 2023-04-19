@@ -20,6 +20,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverVisualize,
   FieldItemButton,
+  type GetCustomFieldType,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -55,6 +56,7 @@ export interface FieldItemIndexPatternFieldProps extends FieldItemBaseProps {
   filters: Filter[];
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
+  getCustomFieldType?: never;
 }
 
 export interface FieldItemDatatableColumnProps extends FieldItemBaseProps {
@@ -65,6 +67,7 @@ export interface FieldItemDatatableColumnProps extends FieldItemBaseProps {
   filters?: never;
   editField?: never;
   removeField?: never;
+  getCustomFieldType: GetCustomFieldType<DatatableColumn>;
 }
 
 export type FieldItemProps = FieldItemIndexPatternFieldProps | FieldItemDatatableColumnProps;
@@ -82,6 +85,7 @@ export function InnerFieldItem(props: FieldItemProps) {
     hasSuggestionForField,
     editField,
     removeField,
+    getCustomFieldType,
   } = props;
   const dataViewField = useMemo(() => {
     // DatatableColumn type
@@ -178,6 +182,16 @@ export function InnerFieldItem(props: FieldItemProps) {
     closeFieldPopover: closePopover,
   });
 
+  const commonFieldItemButtonProps = {
+    isSelected: false, // multiple selections are allowed
+    isEmpty: !exists,
+    isActive: infoIsOpen,
+    fieldSearchHighlight: highlight,
+    onClick: togglePopover,
+    buttonAddFieldToWorkspaceProps,
+    onAddFieldToWorkspace,
+  };
+
   return (
     <li>
       <FieldPopover
@@ -199,16 +213,15 @@ export function InnerFieldItem(props: FieldItemProps) {
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
             onDragStart={closePopover}
           >
-            <FieldItemButton
-              isSelected={false} // multiple selections are allowed
-              isEmpty={!exists}
-              isActive={infoIsOpen}
-              field={field}
-              fieldSearchHighlight={highlight}
-              onClick={togglePopover}
-              buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
-              onAddFieldToWorkspace={onAddFieldToWorkspace}
-            />
+            {isTextBasedColumnField(field) ? (
+              <FieldItemButton<DatatableColumn>
+                field={field}
+                getCustomFieldType={getCustomFieldType}
+                {...commonFieldItemButtonProps}
+              />
+            ) : (
+              <FieldItemButton field={field} {...commonFieldItemButtonProps} />
+            )}
           </DragDrop>
         }
         renderHeader={() => {
