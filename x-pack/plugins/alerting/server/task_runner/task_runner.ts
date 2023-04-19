@@ -458,6 +458,7 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
+      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
