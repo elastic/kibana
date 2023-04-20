@@ -45,6 +45,7 @@ export const getConnectorType = (): ConnectorTypeModel<
       }),
     },
   ],
+  hideInUi: true,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
   actionTypeTitle: ACTION_TYPE_TITLE,

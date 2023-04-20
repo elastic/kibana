@@ -77,11 +77,12 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(
       ([id, details]) =>
-        actionTypeRegistry.has(id) && details.enabledInConfig === true && id !== '.slack_api'
+        actionTypeRegistry.has(id) &&
+        details.enabledInConfig === true &&
+        !actionTypeRegistry.get(id).hideInUi
     )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
