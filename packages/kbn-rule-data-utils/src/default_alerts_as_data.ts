@@ -52,6 +52,9 @@ const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
+// kibana.alert.url - url which will take the user directly to a view of the alert
+const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
+
 // kibana.alert.start - timestamp when the alert is first active
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
 

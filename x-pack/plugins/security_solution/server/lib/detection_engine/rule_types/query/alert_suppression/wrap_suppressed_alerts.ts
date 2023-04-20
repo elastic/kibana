@@ -14,8 +14,11 @@ import {
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
   ALERT_INSTANCE_ID,
+  ALERT_URL,
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import { getAlertDetailsUrl } from '../../../../../../common/utils/build_alert_detail_path';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -56,6 +59,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage,
   alertTimestampOverride,
   ruleExecutionLogger,
+  publicBaseUrl,
 }: {
   suppressionBuckets: SuppressionBuckets[];
   spaceId: string;
@@ -65,6 +69,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -93,6 +98,15 @@ export const wrapSuppressedAlerts = ({
       alertTimestampOverride,
       ruleExecutionLogger
     );
+
+    const alertUrl = getAlertDetailsUrl({
+      alertId: id,
+      index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+      timestamp: baseAlert['@timestamp'],
+      basePath: publicBaseUrl,
+      spaceId,
+    });
+
     return {
       _id: id,
       _index: '',
@@ -103,6 +117,7 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
         [ALERT_UUID]: id,
+        [ALERT_URL]: alertUrl,
         [ALERT_INSTANCE_ID]: instanceId,
       },
     };

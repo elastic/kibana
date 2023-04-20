@@ -7,7 +7,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
+import { getAlertDetailsUrl } from '../../../../../common/utils/build_alert_detail_path';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type {
   BaseFieldsLatest,
   NewTermsFieldsLatest,
@@ -34,6 +36,7 @@ export const wrapNewTermsAlerts = ({
   indicesToQuery,
   alertTimestampOverride,
   ruleExecutionLogger,
+  publicBaseUrl,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -42,6 +45,7 @@ export const wrapNewTermsAlerts = ({
   indicesToQuery: string[];
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl?: string;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -63,6 +67,13 @@ export const wrapNewTermsAlerts = ({
       alertTimestampOverride,
       ruleExecutionLogger
     );
+    const alertUrl = getAlertDetailsUrl({
+      alertId: id,
+      index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+      timestamp: baseAlert['@timestamp'],
+      basePath: publicBaseUrl,
+      spaceId,
+    });
     return {
       _id: id,
       _index: '',
@@ -70,6 +81,7 @@ export const wrapNewTermsAlerts = ({
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
         [ALERT_UUID]: id,
+        [ALERT_URL]: alertUrl,
       },
     };
   });

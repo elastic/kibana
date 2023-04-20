@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 
+import { getAlertDetailsUrl } from '../../../../../common/utils/build_alert_detail_path';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type { ConfigType } from '../../../../config';
 import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
 import { buildAlert, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
@@ -43,7 +45,8 @@ export const buildAlertGroupFromSequence = (
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined
+  alertTimestampOverride: Date | undefined,
+  publicBaseUrl?: string
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
@@ -96,7 +99,8 @@ export const buildAlertGroupFromSequence = (
     spaceId,
     buildReasonMessage,
     indicesToQuery,
-    alertTimestampOverride
+    alertTimestampOverride,
+    publicBaseUrl
   );
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
@@ -106,15 +110,26 @@ export const buildAlertGroupFromSequence = (
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
   const wrappedBuildingBlocks = wrappedBaseFields.map(
-    (block, i): WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> => ({
-      ...block,
-      _source: {
-        ...block._source,
-        [ALERT_BUILDING_BLOCK_TYPE]: 'default',
-        [ALERT_GROUP_ID]: shellAlert[ALERT_GROUP_ID],
-        [ALERT_GROUP_INDEX]: i,
-      },
-    })
+    (block, i): WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> => {
+      const alertUrl = getAlertDetailsUrl({
+        alertId: block._id,
+        index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+        timestamp: block._source['@timestamp'],
+        basePath: publicBaseUrl,
+        spaceId,
+      });
+
+      return {
+        ...block,
+        _source: {
+          ...block._source,
+          [ALERT_BUILDING_BLOCK_TYPE]: 'default',
+          [ALERT_GROUP_ID]: shellAlert[ALERT_GROUP_ID],
+          [ALERT_GROUP_INDEX]: i,
+          [ALERT_URL]: alertUrl,
+        },
+      };
+    }
   );
 
   return [...wrappedBuildingBlocks, sequenceAlert];
@@ -126,7 +141,8 @@ export const buildAlertRoot = (
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined
+  alertTimestampOverride: Date | undefined,
+  publicBaseUrl?: string
 ): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
@@ -143,11 +159,20 @@ export const buildAlertRoot = (
     alertTimestampOverride
   );
   const alertId = generateAlertId(doc);
+  const alertUrl = getAlertDetailsUrl({
+    alertId,
+    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+    timestamp: doc['@timestamp'],
+    basePath: publicBaseUrl,
+    spaceId,
+  });
+
   return {
     ...mergedAlerts,
     ...doc,
     [ALERT_UUID]: alertId,
     [ALERT_GROUP_ID]: alertId,
+    [ALERT_URL]: alertUrl,
   };
 };
 

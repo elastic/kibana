@@ -128,7 +128,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
           </EuiFlexItem>
         )}
-        {isAlert && (
+        {isAlert && alertDetailsLink && (
           <EuiCopy textToCopy={alertDetailsLink}>
             {(copy) => (
               <EuiButtonEmpty
