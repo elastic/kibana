@@ -138,11 +138,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerOpsStatsCollector(usageCollection, metric$);
 
-    const getIndexForTypes = (types: string[]) =>
+    const getIndicesForTypes = (types: string[]) =>
       coreSetup
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getIndicesForTypes(types));
-    registerKibanaUsageCollector(usageCollection, getIndexForTypes);
+    registerKibanaUsageCollector(usageCollection, getIndicesForTypes);
 
     const coreStartPromise = coreSetup.getStartServices().then(([coreStart]) => coreStart);
     const getAllSavedObjectTypes = async () => {

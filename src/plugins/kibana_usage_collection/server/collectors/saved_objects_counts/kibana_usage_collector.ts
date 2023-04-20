@@ -43,7 +43,7 @@ export async function getKibanaSavedObjectCounts(
 
 export function registerKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getIndexForTypes: (types: string[]) => Promise<string[]>
+  getIndicesForTypes: (types: string[]) => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<KibanaUsage>({
@@ -80,7 +80,7 @@ export function registerKibanaUsageCollector(
         },
       },
       async fetch({ soClient }) {
-        const indices = await getIndexForTypes(['dashboard', 'visualization', 'search']);
+        const indices = await getIndicesForTypes(['dashboard', 'visualization', 'search']);
         return {
           index: indices[0],
           ...(await getKibanaSavedObjectCounts(soClient)),
