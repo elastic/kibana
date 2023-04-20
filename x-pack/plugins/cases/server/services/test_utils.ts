@@ -7,7 +7,6 @@
 
 import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import type {
   CaseAttributes,
@@ -20,6 +19,7 @@ import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constan
 import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
 import { ESCaseSeverity, ESCaseStatus } from './cases/types';
 import { getNoneCaseConnector } from '../common/utils';
+import type { ConnectorFieldsPersistedAttributes } from '../common/types/connectors';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -29,7 +29,7 @@ export interface ESCaseConnectorWithId {
   id: string;
   name: string;
   type: ConnectorTypes;
-  fields: ESConnectorFields | null;
+  fields: ConnectorFieldsPersistedAttributes | null;
 }
 
 /**

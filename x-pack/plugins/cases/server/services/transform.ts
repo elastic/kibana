@@ -9,7 +9,10 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { CaseConnector, ConnectorTypeFields } from '../../common/api';
 import { getNoneCaseConnector } from '../common/utils';
-import type { ESCaseConnector, ESConnectorFields } from '.';
+import type {
+  ConnectorFieldsPersistedAttributes,
+  ConnectorPersistedAttributes,
+} from '../common/types/connectors';
 
 export function findConnectorIdReference(
   name: string,
@@ -23,7 +26,7 @@ export function transformESConnectorToExternalModel({
   references,
   referenceName,
 }: {
-  connector?: ESCaseConnector;
+  connector?: ConnectorPersistedAttributes;
   references?: SavedObjectReference[];
   referenceName: string;
 }): CaseConnector | undefined {
@@ -32,7 +35,7 @@ export function transformESConnectorToExternalModel({
 }
 
 function transformConnectorFieldsToExternalModel(
-  connector?: ESCaseConnector,
+  connector?: ConnectorPersistedAttributes,
   connectorId?: string
 ): CaseConnector | undefined {
   if (!connector) {
@@ -72,7 +75,7 @@ export function transformESConnectorOrUseDefault({
   references,
   referenceName,
 }: {
-  connector?: ESCaseConnector;
+  connector?: ConnectorPersistedAttributes;
   references?: SavedObjectReference[];
   referenceName: string;
 }): CaseConnector {
@@ -82,12 +85,14 @@ export function transformESConnectorOrUseDefault({
   );
 }
 
-export function transformFieldsToESModel(connector: CaseConnector): ESConnectorFields {
+export function transformFieldsToESModel(
+  connector: CaseConnector
+): ConnectorFieldsPersistedAttributes {
   if (!connector.fields) {
     return [];
   }
 
-  return Object.entries(connector.fields).reduce<ESConnectorFields>(
+  return Object.entries(connector.fields).reduce<ConnectorFieldsPersistedAttributes>(
     (acc, [key, value]) => [
       ...acc,
       {
