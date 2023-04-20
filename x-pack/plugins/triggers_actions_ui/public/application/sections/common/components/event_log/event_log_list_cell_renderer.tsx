@@ -137,7 +137,7 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
   }
 
   if (columnId === 'maintenance_window_ids') {
-    return <>{Array.isArray(value) ? JSON.stringify(value) : ''}</>;
+    return <>{Array.isArray(value) ? value.join(', ') : ''}</>;
   }
 
   return <>{value}</>;

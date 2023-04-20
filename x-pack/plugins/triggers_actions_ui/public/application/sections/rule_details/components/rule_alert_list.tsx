@@ -95,7 +95,7 @@ const alertsTableColumns = (
     field: 'maintenanceWindowIds',
     width: '250px',
     render: (value: string[]) => {
-      return Array.isArray(value) ? JSON.stringify(value) : '';
+      return Array.isArray(value) ? value.join(', ') : '';
     },
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.maintenanceWindowIds',

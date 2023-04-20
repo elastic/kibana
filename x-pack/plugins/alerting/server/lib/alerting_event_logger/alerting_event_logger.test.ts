@@ -300,7 +300,16 @@ describe('AlertingEventLogger', () => {
       alertingEventLogger.setMaintenanceWindowIds([]);
 
       const event = initializeExecuteRecord(contextWithScheduleDelay);
-      expect(alertingEventLogger.getEvent()).toEqual(event);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: [],
+          },
+        },
+      });
 
       alertingEventLogger.setMaintenanceWindowIds(['test-id-1', 'test-id-2']);
       expect(alertingEventLogger.getEvent()).toEqual({
