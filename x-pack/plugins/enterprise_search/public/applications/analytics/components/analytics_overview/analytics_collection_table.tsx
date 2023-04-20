@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSuperDatePicker,
   EuiSuperDatePickerCommonRange,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiSpacer,
   EuiButtonGroup,
@@ -23,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
@@ -31,6 +31,7 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
+import { AnalyticsCollectionNotFound } from './analytics_collection_not_found';
 import { AnalyticsCollectionTableStyles } from './analytics_collection_table.styles';
 
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
@@ -73,11 +74,13 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 
 interface AnalyticsCollectionTableProps {
   collections: AnalyticsCollection[];
+  isSearching: boolean;
   onSearch: (query: string) => void;
 }
 
 export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
   collections,
+  isSearching,
   onSearch,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -139,8 +142,10 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
               onChange={(e) => {
                 setQuery(e.target.value);
               }}
+              isLoading={isSearching}
               onSearch={onSearch}
               incremental
+              fullWidth
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -170,18 +175,22 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiFlexGrid columns={3}>
-        {collections.map((collection) => (
-          <AnalyticsCollectionCardWithLens
-            key={collection.name}
-            id={`collection-card-${collection.name}`}
-            collection={collection}
-            subtitle={selectedFilterLabel}
-            filterBy={filterId}
-            timeRange={timeRange}
-          />
-        ))}
-      </EuiFlexGrid>
+      {collections.length ? (
+        <EuiFlexGrid columns={3}>
+          {collections.map((collection) => (
+            <AnalyticsCollectionCardWithLens
+              key={collection.name}
+              id={`collection-card-${collection.name}`}
+              collection={collection}
+              subtitle={selectedFilterLabel}
+              filterBy={filterId}
+              timeRange={timeRange}
+            />
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <AnalyticsCollectionNotFound query={query} />
+      )}
       <AddAnalyticsCollection
         render={(onClick) => (
           <EuiButton
