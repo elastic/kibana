@@ -397,8 +397,8 @@ export default function ({ getService }: FtrProviderContext) {
             areApiKeysEnabled: true,
             canManageApiKeys: true,
             canEnable: true,
-            isEnabled: false,
-            isValidApiKey: false,
+            isEnabled: true,
+            isValidApiKey: true,
           });
 
           // can disable synthetics in non default space when enabled in default space
@@ -422,8 +422,8 @@ export default function ({ getService }: FtrProviderContext) {
             areApiKeysEnabled: true,
             canManageApiKeys: true,
             canEnable: true,
-            isEnabled: false,
-            isValidApiKey: false,
+            isEnabled: true,
+            isValidApiKey: true,
           });
         } finally {
           await security.user.delete(username);
