@@ -14,7 +14,7 @@ interface Props extends FrameInformationWindowProps {
 
 export function FrameInformationTooltip({ onClose, ...props }: Props) {
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutBody>
         <FrameInformationWindow {...props} />
       </EuiFlyoutBody>

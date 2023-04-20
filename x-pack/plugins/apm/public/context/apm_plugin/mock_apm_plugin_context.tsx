@@ -66,6 +66,7 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  latestAgentVersionsUrl: '',
 };
 
 const urlService = new UrlService({
@@ -93,6 +94,7 @@ const mockCorePlugins = {
   inspector: {},
   maps: {},
   observability: {},
+  observabilityShared: {},
   data: {},
 };
 

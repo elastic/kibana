@@ -9,6 +9,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_BODY,
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
@@ -31,9 +33,27 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
+  KIBANA_NAVBAR_ALERTS_PAGE,
+  KIBANA_NAVBAR_CASES_PAGE,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
 import { getClassSelector } from '../helpers/common';
+
+/**
+ * Navigates to the alerts page by clicking on the Kibana sidenav entry
+ */
+export const navigateToAlertsPage = () => {
+  cy.get(KIBANA_NAVBAR_ALERTS_PAGE).should('be.visible').click();
+};
+
+/**
+ * Navigates to the cases page by clicking on the Kibana sidenav entry
+ */
+export const navigateToCasesPage = () => {
+  cy.get(KIBANA_NAVBAR_CASES_PAGE).should('be.visible').click();
+};
 
 /**
  * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
@@ -60,6 +80,34 @@ export const collapseDocumentDetailsExpandableFlyoutLeftSection = () =>
  */
 export const scrollWithinDocumentDetailsExpandableFlyoutRightSection = (x: number, y: number) =>
   cy.get(getClassSelector('euiFlyout')).last().scrollTo(x, y);
+
+/**
+ * Scroll down to the flyout footer's take action button, open its dropdown and click on the desired option
+ */
+export const openTakeActionButtonAndSelectItem = (option: string) => {
+  openTakeActionButton();
+  selectTakeActionItem(option);
+};
+
+/**
+ * Scroll down to the flyout footer's take action button and open its dropdown
+ */
+export const openTakeActionButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER)
+    .scrollIntoView()
+    .within(() => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible').click();
+    });
+};
+
+/**
+ * Click on the item within the flyout's footer take action button dropdown
+ */
+export const selectTakeActionItem = (option: string) => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN)
+    .should('be.visible')
+    .within(() => cy.get(option).should('be.visible').click());
+};
 
 /**
  * Open the Overview tab in the document details expandable flyout right section
@@ -98,16 +146,26 @@ export const toggleOverviewTabInsightsSection = () =>
     .click();
 
 /**
+ * Toggle the Overview tab visualizations section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabVisualizationsSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+
+/**
  * Open the Table tab in the document details expandable flyout right section
  */
 export const openTableTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).scrollIntoView().should('be.visible').click();
 
 /**
  * Open the Json tab in the document details expandable flyout right section
  */
 export const openJsonTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView().should('be.visible').click();
 
 /**
  * Open the Visualize tab in the document details expandable flyout left section

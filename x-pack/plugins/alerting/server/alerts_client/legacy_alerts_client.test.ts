@@ -236,6 +236,7 @@ describe('Legacy Alerts Client', () => {
       shouldLogAndScheduleActionsForAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       notifyWhen: RuleNotifyWhen.CHANGE,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -284,6 +285,7 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../_index.scss';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
@@ -35,7 +36,7 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
-  areLayersLoaded: boolean;
+  isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
@@ -86,7 +87,7 @@ export class MapContainer extends Component<Props, State> {
     this._loadShowTimesliderButton();
     if (
       this.props.isSharable &&
-      this.props.areLayersLoaded &&
+      !this.props.isMapLoading &&
       !this._isInitalLoadRenderTimerStarted
     ) {
       this._isInitalLoadRenderTimerStarted = true;

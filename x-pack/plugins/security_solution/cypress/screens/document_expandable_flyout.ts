@@ -71,8 +71,22 @@ import {
   ENTITY_PANEL_HEADER_TEST_ID,
   ENTITY_PANEL_CONTENT_TEST_ID,
   ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
+  VISUALIZATIONS_SECTION_HEADER_TEST_ID,
+  ANALYZER_TREE_TEST_ID,
 } from '../../public/flyout/right/components/test_ids';
-import { getClassSelector, getDataTestSubjectSelector } from '../helpers/common';
+import {
+  getClassSelector,
+  getDataTestSubjectSelector,
+  getDataTestSubjectSelectorStartWith,
+} from '../helpers/common';
+
+/* Kibana */
+
+export const KIBANA_NAVBAR_ALERTS_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavItemLink-alerts'
+);
+export const KIBANA_NAVBAR_CASES_PAGE = getDataTestSubjectSelector('solutionSideNavItemLink-cases');
+export const KIBANA_TOAST = getDataTestSubjectSelector('globalToastList');
 
 /* Right section */
 
@@ -152,6 +166,74 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT = getData
   CORRELATIONS_DETAILS_TEST_ID
 );
 
+/* Footer */
+
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER = getDataTestSubjectSelector(
+  'side-panel-flyout-footer'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(
+  'take-action-dropdown-btn'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN =
+  getDataTestSubjectSelector('takeActionPanelMenu');
+
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE = getDataTestSubjectSelector(
+  'add-to-existing-case-action'
+);
+export const CREATE_CASE_BUTTON = `[data-test-subj="createNewCaseBtn"]`;
+export const NEW_CASE_NAME_INPUT = `[data-test-subj="input"][aria-describedby="caseTitle"]`;
+
+export const NEW_CASE_DESCRIPTION_INPUT = getDataTestSubjectSelector('euiMarkdownEditorTextArea');
+
+export const NEW_CASE_CREATE_BUTTON = getDataTestSubjectSelector('create-case-submit');
+export const EXISTING_CASE_SELECT_BUTTON =
+  getDataTestSubjectSelectorStartWith('cases-table-row-select-');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE =
+  getDataTestSubjectSelector('add-to-new-case-action');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT = NEW_CASE_NAME_INPUT;
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT =
+  NEW_CASE_DESCRIPTION_INPUT;
+
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON = NEW_CASE_CREATE_BUTTON;
+
+export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
+export const CASE_ACTION_WRAPPER = getDataTestSubjectSelector('case-action-bar-wrapper');
+
+export const CASE_ELLIPSE_BUTTON = getDataTestSubjectSelector('property-actions-case-ellipses');
+
+export const CASE_ELLIPSE_DELETE_CASE_OPTION = getDataTestSubjectSelector(
+  'property-actions-case-trash'
+);
+
+export const CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON = getDataTestSubjectSelector(
+  'confirmModalConfirmButton'
+);
+
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED = getDataTestSubjectSelector(
+  'acknowledged-alert-status'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED =
+  getDataTestSubjectSelector('close-alert-status');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION = getDataTestSubjectSelector(
+  'add-endpoint-exception-menu-item'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION =
+  getDataTestSubjectSelector('add-exception-menu-item');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER =
+  getDataTestSubjectSelector('exceptionFlyoutTitle');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON =
+  getDataTestSubjectSelector('cancelExceptionAddButton');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND = getDataTestSubjectSelector(
+  'endpointResponseActions-action-item'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE = getDataTestSubjectSelector(
+  'investigate-in-timeline-action-item'
+);
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION =
+  getDataTestSubjectSelector('timelineHeader');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY =
+  getDataTestSubjectSelector('providerContainer');
+
 /* Overview tab */
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER =
@@ -219,6 +301,11 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER =
   getDataTestSubjectSelector(ENTITY_PANEL_HEADER_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT =
   getDataTestSubjectSelector(ENTITY_PANEL_CONTENT_TEST_ID);
+
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER =
+  getDataTestSubjectSelector(VISUALIZATIONS_SECTION_HEADER_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE =
+  getDataTestSubjectSelector(ANALYZER_TREE_TEST_ID);
 
 /* Table tab */
 

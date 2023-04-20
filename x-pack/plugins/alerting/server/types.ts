@@ -27,6 +27,7 @@ import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
   Rule,
@@ -64,6 +65,7 @@ export type { RuleTypeParams };
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
   getRulesSettingsClient: () => RulesSettingsClient;
+  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -116,6 +118,7 @@ export interface RuleExecutorOptions<
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
+  maintenanceWindowIds?: string[];
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -166,6 +169,9 @@ export interface CombinedSummarizedAlerts extends SummarizedAlerts {
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+  // Optional time bounds
+  start?: number;
+  end?: number;
 }
 export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>
@@ -357,6 +363,7 @@ export interface RawRule extends SavedObjectAttributes {
   updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
   throttle?: string | null;
   notifyWhen?: RuleNotifyWhenType | null;
   muteAll: boolean;
@@ -401,6 +408,8 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+
+export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
