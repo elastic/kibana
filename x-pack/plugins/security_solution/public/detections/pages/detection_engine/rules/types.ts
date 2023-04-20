@@ -150,7 +150,7 @@ export enum GroupByOptions {
 
 export enum SuppressionMissingFieldsOptions {
   DoNotSuppress = 'doNotSuppress',
-  Supress = 'supress',
+  Suppress = 'suppress',
 }
 
 /**

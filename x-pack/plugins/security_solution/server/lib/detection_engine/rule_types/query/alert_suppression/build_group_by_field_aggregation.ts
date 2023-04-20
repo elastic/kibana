@@ -21,14 +21,14 @@ interface GetGroupByFieldAggregationArgs {
   groupByFields: string[];
   maxSignals: number;
   aggregatableTimestampField: string;
-  topHitsSize?: number;
+  missingBucket: boolean;
 }
 
 export const buildGroupByFieldAggregation = ({
   groupByFields,
   maxSignals,
   aggregatableTimestampField,
-  topHitsSize = 1,
+  missingBucket,
 }: GetGroupByFieldAggregationArgs) => ({
   eventGroups: {
     composite: {
@@ -36,8 +36,9 @@ export const buildGroupByFieldAggregation = ({
         [field]: {
           terms: {
             field,
-            missing_bucket: true,
-            missing_order: 'last' as const,
+            ...(missingBucket
+              ? { missing_bucket: missingBucket, missing_order: 'last' as const }
+              : {}),
           },
         },
       })),
@@ -46,7 +47,7 @@ export const buildGroupByFieldAggregation = ({
     aggs: {
       topHits: {
         top_hits: {
-          size: topHitsSize,
+          size: 1,
           sort: [
             {
               [aggregatableTimestampField]: {

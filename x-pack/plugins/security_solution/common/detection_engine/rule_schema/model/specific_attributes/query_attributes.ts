@@ -14,7 +14,7 @@ import {
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
 export const AlertSuppressionMissingFields = t.union([
   t.literal('doNotSuppress'),
-  t.literal('supress'),
+  t.literal('suppress'),
 ]);
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({

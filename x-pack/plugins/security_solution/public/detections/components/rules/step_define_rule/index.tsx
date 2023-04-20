@@ -574,11 +574,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: SuppressionMissingFieldsOptions.DoNotSuppress,
+            id: SuppressionMissingFieldsOptions.Suppress,
             label: 'Suppress on missing field value',
           },
           {
-            id: SuppressionMissingFieldsOptions.Supress,
+            id: SuppressionMissingFieldsOptions.DoNotSuppress,
             label: 'Do not suppress',
           },
         ]}

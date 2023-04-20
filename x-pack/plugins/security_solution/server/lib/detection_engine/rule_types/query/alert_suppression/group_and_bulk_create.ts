@@ -21,7 +21,9 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
-import { prepareBucketsToSuppression } from './prepare_buckets_to_supppresion';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../../common/detection_engine/constants';
+import { getUnsuppressedAlerts } from './get_unsuppressed_alerts';
+
 export interface BucketHistory {
   key: Record<string, string | number | null>;
   endDate: string;
@@ -154,10 +156,17 @@ export const groupAndBulkCreate = async ({
         from: tuple.from,
       });
 
+      // TODO DEFAULT
+      // if we don not suppress alerts ofr docs with missing values, we will create aggregation for null missing buckets
+      const suppressOnMissingFields =
+        runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ===
+        AlertSuppressionMissingFieldsStrategy.Suppress;
+
       const groupingAggregation = buildGroupByFieldAggregation({
         groupByFields,
         maxSignals: tuple.maxSignals,
         aggregatableTimestampField: runOpts.aggregatableTimestampField,
+        missingBucket: suppressOnMissingFields,
       });
 
       const eventsSearchParams = {
@@ -173,9 +182,7 @@ export const groupAndBulkCreate = async ({
         primaryTimestamp: runOpts.primaryTimestamp,
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
-        // TODO: https://github.com/elastic/kibana/issues/155242
         additionalFilters: bucketHistoryFilter,
-        // additionalFilters: [],
       };
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
         eventsSearchParams
@@ -196,16 +203,17 @@ export const groupAndBulkCreate = async ({
         return toReturn;
       }
 
-      const bucketsToSuppress = (await prepareBucketsToSuppression({
+      const unsuppressedAlerts = await getUnsuppressedAlerts({
         groupByFields,
-        buckets,
-        strategy: runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy,
-        searchParams: eventsSearchParams,
-        maxSignals: tuple.maxSignals,
-        aggregatableTimestampField: runOpts.aggregatableTimestampField,
-      })) as typeof eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+        size: tuple.maxSignals - buckets.length,
+        searchParams: { ...eventsSearchParams, aggregations: undefined },
+        runOpts,
+        toReturn,
+        buildReasonMessage,
+        suppressOnMissingFields,
+      });
 
-      const suppressionBuckets: SuppressionBucket[] = bucketsToSuppress.map((bucket) => ({
+      const suppressionBuckets: SuppressionBucket[] = buckets.map((bucket) => ({
         event: bucket.topHits.hits.hits[0],
         count: bucket.doc_count,
         start: bucket.min_timestamp.value_as_string
@@ -241,8 +249,13 @@ export const groupAndBulkCreate = async ({
           alertTimestampOverride: runOpts.alertTimestampOverride,
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        // TODO: handle this branch
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       } else {
-        const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
+        const bulkCreateResult = await runOpts.bulkCreate([
+          ...wrappedAlerts,
+          ...unsuppressedAlerts,
+        ]);
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }

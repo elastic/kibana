@@ -35,8 +35,8 @@ export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
 export enum AlertSuppressionMissingFieldsStrategy {
   DoNotSuppress = 'doNotSuppress',
-  Supress = 'supress',
+  Suppress = 'suppress',
 }
 
 export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
-  AlertSuppressionMissingFieldsStrategy.DoNotSuppress;
+  AlertSuppressionMissingFieldsStrategy.Suppress;
