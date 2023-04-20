@@ -135,6 +135,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         .set('kbn-xsrf', 'foo')
         .send({});
 
+      expect(response.body.data[0].id).to.eql(createdMaintenanceWindow.id);
       expect(response.body.data[0].r_rule).to.eql(updatedRRule);
     });
   });
