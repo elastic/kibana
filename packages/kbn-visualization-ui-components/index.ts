@@ -12,6 +12,7 @@ export {
   NameInput,
   DebouncedInput,
   useDebouncedValue,
+  TooltipWrapper,
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption } from './components';

@@ -26,7 +26,6 @@ export {
   getDataBounds,
   axisExtentConfigToExpression,
 } from './axis/extent';
-export { TooltipWrapper } from './tooltip_wrapper';
 export * from './coloring';
 export * from './helpers';
 export { LegendActionPopover } from './legend/action/legend_action_popover';

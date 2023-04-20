@@ -16,7 +16,7 @@ import {
   EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
-import { TooltipWrapper } from '../../../shared_components';
+import { TooltipWrapper } from '@kbn/visualization-ui-components';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -42,7 +42,7 @@ function isValidPonyfill(colorString: string) {
   }
 }
 
-export function isValidColor(colorString?: string) {
+function isValidColor(colorString?: string) {
   // chroma can handle also hex values with alpha channel/transparency
   // chroma accepts also hex without #, so test for it
   return (

@@ -15,7 +15,7 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import { TooltipWrapper } from '..';
+import { TooltipWrapper } from '@kbn/visualization-ui-components';
 import type { BucketContainerProps } from './types';
 
 export const FieldsBucketContainer = ({
