@@ -9,7 +9,7 @@ import React, { type FC } from 'react';
 import { css } from '@emotion/react';
 
 import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
-import { euiTextTruncate, EuiDataGridColumn } from '@elastic/eui';
+import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
