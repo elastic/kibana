@@ -43,7 +43,9 @@ export const useSearchBar = (
 
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
-  const [errorMessage, setErrorMessage] = useState<QueryErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
@@ -61,7 +63,7 @@ export const useSearchBar = (
           return;
       }
     } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
@@ -71,14 +73,14 @@ export const useSearchBar = (
     actions: {
       searchChangeHandler,
       searchSubmitHandler,
-      setErrorMessage,
+      setQueryErrorMessage,
       setSearchInput,
       setSearchLanguage,
       setSearchQuery,
       setSearchString,
     },
     state: {
-      errorMessage,
+      queryErrorMessage,
       transformConfigQuery,
       searchInput,
       searchLanguage,

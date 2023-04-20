@@ -52,7 +52,9 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
-  const [errorMessage, setErrorMessage] = useState<QueryErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   const { services } = useMlKibana();
   const {
@@ -116,7 +118,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
           convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
-          setErrorMessage({
+          setQueryErrorMessage({
             query: query.query as string,
             message: i18n.translate('xpack.ml.queryBar.queryLanguageNotSupported', {
               defaultMessage: 'Query language is not supported',
@@ -130,7 +132,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         language: query.language,
       });
     } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
@@ -184,7 +186,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   return (
     <EuiInputPopover
       style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      closePopover={() => setQueryErrorMessage(undefined)}
       input={
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -246,14 +248,14 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
           )}
         </EuiFlexGroup>
       }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+      isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}
     >
       <EuiCode>
         {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
           defaultMessage: 'Invalid Query',
         })}
         {': '}
-        {errorMessage?.message.split('\n')[0]}
+        {queryErrorMessage?.message.split('\n')[0]}
       </EuiCode>
     </EuiInputPopover>
   );
