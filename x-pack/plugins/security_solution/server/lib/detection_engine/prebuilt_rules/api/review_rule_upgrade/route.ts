@@ -121,7 +121,7 @@ const getRuleDiffCalculationArgs = (
 
     result.push({
       currentVersion: installedRule,
-        baseVersion: baseRule,
+      baseVersion: baseRule,
       targetVersion: latestRule,
     });
   });
