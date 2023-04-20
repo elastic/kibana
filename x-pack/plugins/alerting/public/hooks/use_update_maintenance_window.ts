@@ -39,10 +39,13 @@ export function useUpdateMaintenanceWindow() {
         })
       );
     },
-    onError: () => {
+    onError: (error, variables) => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsUpdateFailure', {
-          defaultMessage: 'Failed to update maintenance window.',
+          defaultMessage: "Failed to update maintenance window '{id}'",
+          values: {
+            id: variables.maintenanceWindowId,
+          },
         })
       );
     },
