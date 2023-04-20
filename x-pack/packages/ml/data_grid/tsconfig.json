@@ -10,10 +10,23 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/field-types",
+    "@kbn/ml-nested-property",
+    "@kbn/ml-agg-utils",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-data-frame-analytics",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-date-picker",
+  ]
 }
