@@ -155,16 +155,15 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_EXCEPTIONS_TEXT: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with"
-      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} exceptions - include expired rule exception items"
+      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} exceptions"
       values={{ rulesCount }}
     />
   ),
 
-  DUPLICATE_EXCEPTIONS_EXCLUDE_EXPIRED_EXCEPTIONS_TEXT: (rulesCount: number) => (
+  DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL: () => (
     <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.excludeExpiredExceptionsConfirmation.with"
-      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} exceptions - exclude expired rule exception items"
-      values={{ rulesCount }}
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.includeExpiredExceptionsCheckboxLabel"
+      defaultMessage="Include expired rule exception items"
     />
   ),
 
