@@ -42,11 +42,6 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
-      "kibana.alert.context": Object {
-        "array": false,
-        "required": false,
-        "type": "object",
-      },
       "kibana.alert.duration.us": Object {
         "array": false,
         "required": false,

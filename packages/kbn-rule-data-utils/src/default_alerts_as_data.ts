@@ -49,9 +49,6 @@ const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
-// kibana.alert.context - alert context
-const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
-
 // kibana.alert.start - timestamp when the alert is first active
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
 
@@ -113,7 +110,6 @@ const fields = {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
-  ALERT_CONTEXT,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -150,7 +146,6 @@ export {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
-  ALERT_CONTEXT,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
