@@ -42,11 +42,8 @@ export interface MobileMainStatisticsResponse {
     latency: number | null;
     throughput: number;
     crashRate: number;
-  }> &
-    Array<{
-      name: string | number;
-      appLaunchTime: number | null;
-    }>;
+    appLaunchTime?: number;
+  }>;
 }
 
 export async function getMobileMainStatisticsByField({
@@ -173,7 +170,7 @@ export async function getMobileMainStatisticsByField({
       response.aggregations?.main_statistics.buckets.map((bucket) => {
         return {
           name: bucket.key,
-          appLaunchTime: bucket.app_launch_time.value,
+          appLaunchTime: bucket.app_launch_time.value ?? 0,
         };
       }) ?? []
     );
