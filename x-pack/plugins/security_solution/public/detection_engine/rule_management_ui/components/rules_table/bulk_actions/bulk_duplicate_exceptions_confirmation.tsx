@@ -66,10 +66,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
       defaultFocusedButton="confirm"
       onCancel={onCancel}
     >
-      <EuiText>
-        {i18n.MODAL_TEXT(rulesCount)}{' '}
-        <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
-      </EuiText>
+      <EuiText>{i18n.MODAL_TEXT(rulesCount)} </EuiText>
 
       <EuiSpacer />
       <EuiRadioGroup
@@ -78,14 +75,18 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
             id: DuplicateOptions.withExceptions,
             label: (
               <>
-                <EuiText size="s">{i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount)}</EuiText>
+                <EuiText size="s">
+                  {i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount)}{' '}
+                  <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+                </EuiText>
                 <EuiSpacer size="s" />
                 {selectedDuplicateOption === DuplicateOptions.withExceptions && (
                   <EuiCheckbox
                     id={'duplicateOptionsWithExpiredExceptions'}
-                    label={i18n.DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL()}
+                    label={i18n.DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL(rulesCount)}
                     checked={isIncludeExpiredExceptionItemsChecked}
                     onChange={handleCheckboxChange}
+                    data-test-subj="withExceptionsExcludeExpiredExceptions"
                   />
                 )}
               </>

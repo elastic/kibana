@@ -55,9 +55,6 @@ export const EXCEPTIONS_TABLE_LINK_RULES_BTN =
 export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
 
-export const exceptionsTableListManagementListContainerByListId = (listId: string) =>
-  `[data-test-subj="exceptionsManagementListCard-${listId}"]`;
-
 export const EXCEPTIONS_TABLE_DUPLICATE_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemDuplicate"]';
 

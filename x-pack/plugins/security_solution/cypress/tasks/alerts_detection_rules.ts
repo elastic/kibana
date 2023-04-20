@@ -64,7 +64,7 @@ import {
   RULE_LAST_RUN,
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
-  DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
+  INCLUDE_EXPIRED_EXCEPTIONS_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -168,7 +168,7 @@ export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
   cy.log('Duplicate selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
-  cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
+  cy.get(INCLUDE_EXPIRED_EXCEPTIONS_CHECKBOX).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
