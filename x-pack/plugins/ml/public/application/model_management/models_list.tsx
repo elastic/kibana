@@ -55,6 +55,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats;
   pipelines?: ModelPipelines['pipelines'] | null;
+  deployment_ids: string[];
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -226,6 +227,13 @@ export const ModelsList: FC<Props> = ({
               ...(model.stats ?? {}),
               ...stats,
             };
+
+            if (stats.deployment_stats) {
+              if (!Array.isArray(model.deployment_ids)) {
+                model.deployment_ids = [];
+              }
+              model.deployment_ids.push(stats.deployment_stats.deployment_id);
+            }
           }
         }
       }

@@ -101,12 +101,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
           hasChildLabel={false}
         >
           <EuiFieldText
-            placeholder="Placeholder text"
             value={config.deploymentId ?? ''}
             onChange={(e) => {
               onConfigChange({ ...config, deploymentId: e.target.value });
             }}
-            aria-label="Use aria labels when no actual label is in use"
             data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
           />
         </EuiFormRow>

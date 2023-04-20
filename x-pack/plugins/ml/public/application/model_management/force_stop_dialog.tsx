@@ -19,7 +19,7 @@ interface ForceStopModelConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> = ({
+export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogProps> = ({
   model,
   onConfirm,
   onCancel,
@@ -64,7 +64,7 @@ export const getUserConfirmationProvider =
         const modalSession = overlays.openModal(
           toMountPoint(
             wrapWithTheme(
-              <ForceStopModelConfirmDialog
+              <StopModelDeploymentsConfirmDialog
                 model={forceStopModel}
                 onCancel={() => {
                   modalSession.close();

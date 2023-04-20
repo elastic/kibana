@@ -273,13 +273,9 @@ export function useModelActions({
           item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
+          const hasMultipleDeployments = item.deployment_ids.length > 1;
 
-          if (requireForceStop) {
-            const hasUserApproved = await getUserConfirmation(item);
-            if (!hasUserApproved) return;
-          }
-
-          if (requireForceStop) {
+          if (requireForceStop || hasMultipleDeployments) {
             const hasUserApproved = await getUserConfirmation(item);
             if (!hasUserApproved) return;
           }
