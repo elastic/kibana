@@ -5,33 +5,63 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import React, { type FC, useState } from 'react';
+import { EuiCheckboxGroup, EuiCheckboxGroupOption, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ModelItem } from './models_list';
 
 interface ForceStopModelConfirmDialogProps {
   model: ModelItem;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (deploymentIds: string[]) => void;
 }
 
+/**
+ * Confirmation is required when there are multiple model deployments
+ * or associated pipelines.
+ */
 export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogProps> = ({
   model,
   onConfirm,
   onCancel,
 }) => {
+  const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  const options: EuiCheckboxGroupOption[] = model.deployment_ids.map((deploymentId) => {
+    return {
+      id: deploymentId,
+      label: deploymentId,
+    };
+  });
+
+  const onChange = (id: string) => {
+    setCheckboxIdToSelectedMap((prev) => {
+      return {
+        ...prev,
+        [id]: !prev[id],
+      };
+    });
+  };
+
+  const selectedDeploymentIds = Object.keys(checkboxIdToSelectedMap).filter(
+    (id) => checkboxIdToSelectedMap[id]
+  );
+
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {
-        defaultMessage: 'Stop model {modelId}?',
-        values: { modelId: model.model_id },
+        defaultMessage:
+          'Stop {deploymentCount, plural, one {deployment} other {deployments}} of model {modelId}?',
+        values: { modelId: model.model_id, deploymentCount: model.deployment_ids.length },
       })}
       onCancel={onCancel}
-      onConfirm={onConfirm}
+      onConfirm={onConfirm.bind(null, selectedDeploymentIds)}
       cancelButtonText={i18n.translate(
         'xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText',
         { defaultMessage: 'Cancel' }
@@ -41,24 +71,47 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
         { defaultMessage: 'Stop' }
       )}
       buttonColor="danger"
+      confirmButtonDisabled={model.deployment_ids.length > 1 && selectedDeploymentIds.length === 0}
     >
-      <FormattedMessage
-        id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
-        defaultMessage="You can't use these ingest pipelines until you restart the model:"
-      />
-      <ul>
-        {Object.keys(model.pipelines!)
-          .sort()
-          .map((pipelineName) => {
-            return <li key={pipelineName}>{pipelineName}</li>;
-          })}
-      </ul>
+      {model.deployment_ids.length > 1 ? (
+        <EuiCheckboxGroup
+          legend={{
+            display: 'visible',
+            children: (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.forceStopDialog.selectDeploymentsLegend"
+                defaultMessage="Select deployments to stop"
+              />
+            ),
+          }}
+          options={options}
+          idToSelectedMap={checkboxIdToSelectedMap}
+          onChange={onChange}
+        />
+      ) : null}
+
+      {isPopulatedObject(model.pipelines) ? (
+        <>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
+            defaultMessage="You can't use these ingest pipelines until you restart the model:"
+          />
+          <ul>
+            {Object.keys(model.pipelines!)
+              .sort()
+              .map((pipelineName) => {
+                return <li key={pipelineName}>{pipelineName}</li>;
+              })}
+          </ul>
+        </>
+      ) : null}
     </EuiConfirmModal>
   );
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart, theme: ThemeServiceStart) => async (forceStopModel: ModelItem) => {
+  (overlays: OverlayStart, theme: ThemeServiceStart) =>
+  async (forceStopModel: ModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {
         const modalSession = overlays.openModal(
@@ -68,11 +121,11 @@ export const getUserConfirmationProvider =
                 model={forceStopModel}
                 onCancel={() => {
                   modalSession.close();
-                  resolve(false);
+                  reject();
                 }}
-                onConfirm={() => {
+                onConfirm={(deploymentIds: string[]) => {
                   modalSession.close();
-                  resolve(true);
+                  resolve(deploymentIds);
                 }}
               />,
               theme.theme$
@@ -80,7 +133,7 @@ export const getUserConfirmationProvider =
           )
         );
       } catch (e) {
-        resolve(false);
+        reject();
       }
     });
   };

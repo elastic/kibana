@@ -275,14 +275,18 @@ export function useModelActions({
           const requireForceStop = isPopulatedObject(item.pipelines);
           const hasMultipleDeployments = item.deployment_ids.length > 1;
 
+          let deploymentIds: string[] = [item.model_id];
           if (requireForceStop || hasMultipleDeployments) {
-            const hasUserApproved = await getUserConfirmation(item);
-            if (!hasUserApproved) return;
+            try {
+              deploymentIds = await getUserConfirmation(item);
+            } catch (error) {
+              return;
+            }
           }
 
           try {
             onLoading(true);
-            await trainedModelsApiService.stopModelAllocation(item.model_id, {
+            await trainedModelsApiService.stopModelAllocation(deploymentIds, {
               force: requireForceStop,
             });
             displaySuccessToast(
