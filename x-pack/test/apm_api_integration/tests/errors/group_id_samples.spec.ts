@@ -167,9 +167,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
 
         errorGroupSamplesResponse = (
-          await callErrorGroupSamplesApi({
-            path: { groupId: '0000000000000000000000000Error 1' },
-          })
+          await callErrorGroupSamplesApi({ groupId: '0000000000000000000000000Error 1' })
         ).body;
       });
 
