@@ -379,7 +379,7 @@ export const ActionForm = ({
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
                   if (newConnector && newConnector.actionTypeId) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                    if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                    if (actionTypeRegistered.convertParamsBetweenGroups) {
                       const updatedActions = actions.map((_item: RuleAction, i: number) => {
                         if (i === index) {
                           return {
@@ -387,8 +387,8 @@ export const ActionForm = ({
                             actionTypeId: newConnector.actionTypeId,
                             id: connectorId,
                             params:
-                              actionTypeRegistered.resetParamsOnConnectorChange != null
-                                ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                              actionTypeRegistered.convertParamsBetweenGroups != null
+                                ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
                                 : {},
                           };
                         }
@@ -432,7 +432,7 @@ export const ActionForm = ({
                   newConnector.actionTypeId !== actionConnector.actionTypeId
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                  if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                  if (actionTypeRegistered.convertParamsBetweenGroups) {
                     const updatedActions = actions.map((_item: RuleAction, i: number) => {
                       if (i === index) {
                         return {
@@ -440,8 +440,8 @@ export const ActionForm = ({
                           actionTypeId: newConnector.actionTypeId,
                           id,
                           params:
-                            actionTypeRegistered.resetParamsOnConnectorChange != null
-                              ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                            actionTypeRegistered.convertParamsBetweenGroups != null
+                              ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
                               : {},
                         };
                       }

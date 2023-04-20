@@ -254,7 +254,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
-  resetParamsOnConnectorChange?: (params: ActionParams) => ActionParams | {};
+  convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
 }
 
 export interface GenericValidationResult<T> {

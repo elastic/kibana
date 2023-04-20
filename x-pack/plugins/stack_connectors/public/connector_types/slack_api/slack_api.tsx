@@ -68,7 +68,7 @@ export const getConnectorType = (): ConnectorTypeModel<
   },
   actionConnectorFields: lazy(() => import('./slack_connectors')),
   actionParamsFields: lazy(() => import('./slack_params')),
-  resetParamsOnConnectorChange: (
+  convertParamsBetweenGroups: (
     params: SlackActionParams | PostMessageParams
   ): SlackActionParams | PostMessageParams | {} => {
     if ('message' in params) {
