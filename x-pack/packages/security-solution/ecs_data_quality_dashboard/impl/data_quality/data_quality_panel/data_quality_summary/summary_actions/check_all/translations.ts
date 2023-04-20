@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const AN_ERROR_OCCURRED_CHECKING_INDEX = (indexName: string) =>
-  i18n.translate('ecsDataQualityDashboard.checkAllErrorCheckingIndexMessage', {
-    values: { indexName },
-    defaultMessage: 'An error occurred checking index {indexName}',
-  });
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.checkAllErrorCheckingIndexMessage',
+    {
+      values: { indexName },
+      defaultMessage: 'An error occurred checking index {indexName}',
+    }
+  );

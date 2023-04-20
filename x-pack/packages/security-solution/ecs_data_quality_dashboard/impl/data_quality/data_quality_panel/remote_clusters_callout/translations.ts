@@ -7,12 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TITLE = i18n.translate('ecsDataQualityDashboard.remoteClustersCallout.title', {
-  defaultMessage: "Remote clusters won't be checked",
-});
+export const TITLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.remoteClustersCallout.title',
+  {
+    defaultMessage: "Remote clusters won't be checked",
+  }
+);
 
 export const TO_CHECK_INDICES_ON_REMOTE_CLUSTERS = i18n.translate(
-  'ecsDataQualityDashboard.remoteClustersCallout.toCheckIndicesOnRemoteClustersLabel',
+  'securitySolutionPackages.ecsDataQualityDashboard.remoteClustersCallout.toCheckIndicesOnRemoteClustersLabel',
   {
     defaultMessage:
       "To check indices on remote clusters supporting cross-cluster search, log in to the remote cluster's Kibana",

@@ -7,19 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_TO_CASE_SUCCESS = i18n.translate('ecsDataQualityDashboard.addToCaseSuccessToast', {
-  defaultMessage: 'Successfully added data quality results to the case',
-});
+export const ADD_TO_CASE_SUCCESS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.addToCaseSuccessToast',
+  {
+    defaultMessage: 'Successfully added data quality results to the case',
+  }
+);
 
 export const CREATE_A_DATA_QUALITY_CASE = i18n.translate(
-  'ecsDataQualityDashboard.createADataQualityCaseHeaderText',
+  'securitySolutionPackages.ecsDataQualityDashboard.createADataQualityCaseHeaderText',
   {
     defaultMessage: 'Create a data quality case',
   }
 );
 
 export const CREATE_A_DATA_QUALITY_CASE_FOR_INDEX = (indexName: string) =>
-  i18n.translate('ecsDataQualityDashboard.createADataQualityCaseForIndexHeaderText', {
-    values: { indexName },
-    defaultMessage: 'Create a data quality case for index {indexName}',
-  });
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.createADataQualityCaseForIndexHeaderText',
+    {
+      values: { indexName },
+      defaultMessage: 'Create a data quality case for index {indexName}',
+    }
+  );

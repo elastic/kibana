@@ -7,23 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DOCS = i18n.translate('ecsDataQualityDashboard.patternSummary.docsLabel', {
-  defaultMessage: 'Docs',
-});
+export const DOCS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.patternSummary.docsLabel',
+  {
+    defaultMessage: 'Docs',
+  }
+);
 
-export const INDICES = i18n.translate('ecsDataQualityDashboard.patternSummary.indicesLabel', {
-  defaultMessage: 'Indices',
-});
+export const INDICES = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.patternSummary.indicesLabel',
+  {
+    defaultMessage: 'Indices',
+  }
+);
 
 export const PATTERN_OR_INDEX_TOOLTIP = i18n.translate(
-  'ecsDataQualityDashboard.patternSummary.patternOrIndexTooltip',
+  'securitySolutionPackages.ecsDataQualityDashboard.patternSummary.patternOrIndexTooltip',
   {
     defaultMessage: 'A pattern or specific index',
   }
 );
 
 export const PATTERN_DOCS_COUNT_TOOLTIP = (pattern: string) =>
-  i18n.translate('ecsDataQualityDashboard.patternDocsCountTooltip', {
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.patternDocsCountTooltip', {
     values: { pattern },
     defaultMessage: 'The total count from all indices matching: {pattern}',
   });

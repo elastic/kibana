@@ -8,12 +8,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const CHART_TITLE = i18n.translate(
-  'ecsDataQualityDashboard.ecsSummaryDonutChart.chartTitle',
+  'securitySolutionPackages.ecsDataQualityDashboard.ecsSummaryDonutChart.chartTitle',
   {
     defaultMessage: 'Field mappings',
   }
 );
 
-export const FIELDS = i18n.translate('ecsDataQualityDashboard.ecsSummaryDonutChart.fieldsLabel', {
-  defaultMessage: 'Fields',
-});
+export const FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ecsSummaryDonutChart.fieldsLabel',
+  {
+    defaultMessage: 'Fields',
+  }
+);

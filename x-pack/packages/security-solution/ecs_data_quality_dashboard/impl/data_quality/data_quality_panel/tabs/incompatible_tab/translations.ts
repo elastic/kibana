@@ -8,13 +8,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE = (indexName: string) =>
-  i18n.translate('ecsDataQualityDashboard.incompatibleTab.incompatibleFieldMappingsTableTitle', {
-    values: { indexName },
-    defaultMessage: 'Incompatible field mappings - {indexName}',
-  });
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.incompatibleTab.incompatibleFieldMappingsTableTitle',
+    {
+      values: { indexName },
+      defaultMessage: 'Incompatible field mappings - {indexName}',
+    }
+  );
 
 export const INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE = (indexName: string) =>
-  i18n.translate('ecsDataQualityDashboard.incompatibleTab.incompatibleFieldValuesTableTitle', {
-    values: { indexName },
-    defaultMessage: 'Incompatible field values - {indexName}',
-  });
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.incompatibleTab.incompatibleFieldValuesTableTitle',
+    {
+      values: { indexName },
+      defaultMessage: 'Incompatible field values - {indexName}',
+    }
+  );

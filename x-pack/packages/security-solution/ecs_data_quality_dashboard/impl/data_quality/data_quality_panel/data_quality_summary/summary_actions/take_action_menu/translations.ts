@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TAKE_ACTION = i18n.translate(
-  'ecsDataQualityDashboard.takeActionMenu.takeActionButton',
+  'securitySolutionPackages.ecsDataQualityDashboard.takeActionMenu.takeActionButton',
   {
     defaultMessage: 'Take action',
   }
