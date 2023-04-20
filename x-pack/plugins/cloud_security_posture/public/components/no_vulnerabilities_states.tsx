@@ -44,7 +44,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <h2>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingButtonTitle"
-          defaultMessage="Scanning your cloud environment"
+          defaultMessage="Scanning your environment"
         />
       </h2>
     }
