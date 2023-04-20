@@ -207,7 +207,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
               <h2 id="flyoutTitle">

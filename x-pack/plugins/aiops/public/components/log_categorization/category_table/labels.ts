@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export function getLabels(isFlyout: boolean) {
   const flyoutFilterIn = (single: boolean) =>
     i18n.translate('xpack.aiops.logCategorization.flyout.filterIn', {
-      defaultMessage: 'Filter for {values, plural, one {category} other {categories}}',
+      defaultMessage: 'Filter for {values, plural, one {pattern} other {patterns}}',
       values: {
         values: single ? 1 : 2,
       },
     });
   const flyoutFilterOut = (single: boolean) =>
     i18n.translate('xpack.aiops.logCategorization.flyout.filterOut', {
-      defaultMessage: 'Filter out {values, plural, one {category} other {categories}}',
+      defaultMessage: 'Filter out {values, plural, one {pattern} other {patterns}}',
       values: {
         values: single ? 1 : 2,
       },
@@ -25,14 +25,14 @@ export function getLabels(isFlyout: boolean) {
 
   const aiopsFilterIn = (single: boolean) =>
     i18n.translate('xpack.aiops.logCategorization.filterIn', {
-      defaultMessage: 'Filter for {values, plural, one {category} other {categories}} in Discover',
+      defaultMessage: 'Filter for {values, plural, one {pattern} other {patterns}} in Discover',
       values: {
         values: single ? 1 : 2,
       },
     });
   const aiopsFilterOut = (single: boolean) =>
     i18n.translate('xpack.aiops.logCategorization.filterOut', {
-      defaultMessage: 'Filter out {values, plural, one {category} other {categories}} in Discover',
+      defaultMessage: 'Filter out {values, plural, one {pattern} other {patterns}} in Discover',
       values: {
         values: single ? 1 : 2,
       },

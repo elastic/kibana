@@ -10,32 +10,25 @@ import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   useEuiBackgroundColor,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiCode,
   EuiText,
   EuiTableSelectionType,
+  EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { useDiscoverLinks, createFilter } from '../use_discover_links';
+import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
 import { useTableState } from './use_table_state';
 import { getLabels } from './labels';
-
-const QUERY_MODE = {
-  INCLUDE: 'should',
-  EXCLUDE: 'must_not',
-} as const;
-export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
+import { TableHeader } from './table_header';
 
 interface Props {
   categories: Category[];
@@ -220,33 +213,15 @@ export const CategoryTable: FC<Props> = ({
 
   return (
     <>
-      {selectedCategories.length > 0 ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
-                iconType="plusInCircle"
-                iconSide="left"
-              >
-                {labels.multiSelect.in}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
-                iconType="minusInCircle"
-                iconSide="left"
-              >
-                {labels.multiSelect.out}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      ) : null}
+      <TableHeader
+        categoriesCount={categories.length}
+        selectedCategoriesCount={selectedCategories.length}
+        labels={labels}
+        openInDiscover={(queryMode: QueryMode) => openInDiscover(queryMode)}
+      />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="none" />
+
       <EuiInMemoryTable<Category>
         compressed
         items={categories}

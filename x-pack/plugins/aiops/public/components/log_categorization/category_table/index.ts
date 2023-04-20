@@ -6,4 +6,3 @@
  */
 
 export { CategoryTable } from './category_table';
-export type { QueryMode } from './category_table';

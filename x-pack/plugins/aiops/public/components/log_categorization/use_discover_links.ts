@@ -13,8 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { Category } from './use_categorize_request';
-import type { QueryMode } from './category_table';
 import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+
+export const QUERY_MODE = {
+  INCLUDE: 'should',
+  EXCLUDE: 'must_not',
+} as const;
+export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
 
 export function useDiscoverLinks() {
   const {

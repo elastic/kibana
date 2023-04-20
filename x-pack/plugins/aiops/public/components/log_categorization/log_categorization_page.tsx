@@ -265,7 +265,7 @@ export const LogCategorizationPage: FC = () => {
             >
               <FormattedMessage
                 id="xpack.aiops.logCategorization.runButton"
-                defaultMessage="Run categorization"
+                defaultMessage="Run pattern analysis"
               />
             </EuiButton>
           ) : (
