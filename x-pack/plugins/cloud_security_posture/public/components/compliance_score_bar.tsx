@@ -22,27 +22,22 @@ export const ComplianceScoreBar = ({
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   return (
-    <EuiToolTip
-      anchorClassName="cspComplianceScoreBarTooltip"
-      content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
-        defaultMessage: '{failed} failed and {passed} passed findings',
-        values: {
-          passed: totalPassed,
-          failed: totalFailed,
-        },
-      })}
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      justifyContent="flexEnd"
+      style={{ gap: euiTheme.size.s }}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="flexEnd"
-        style={{
-          height: '32px',
-          cursor: 'pointer',
-          gap: `${euiTheme.size.s}`,
-        }}
-      >
-        <EuiFlexItem>
+      <EuiFlexItem>
+        <EuiToolTip
+          content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
+            defaultMessage: '{failed} failed and {passed} passed findings',
+            values: {
+              passed: totalPassed,
+              failed: totalFailed,
+            },
+          })}
+        >
           <EuiFlexGroup
             gutterSize="none"
             style={{
@@ -69,14 +64,14 @@ export const ComplianceScoreBar = ({
               />
             )}
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            style={{ fontWeight: euiTheme.font.weight.bold }}
-          >{`${complianceScore.toFixed(0)}%`}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="xs"
+          style={{ fontWeight: euiTheme.font.weight.bold }}
+        >{`${complianceScore.toFixed(0)}%`}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
