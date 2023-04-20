@@ -24,23 +24,46 @@ import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeInput } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
+  const [embeddableInput, setEmbeddableInput] = useState<VisualizeInput>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
   const isChromeVisible = useChromeVisibility(services.chrome);
+  useEffect(() => {
+    const { stateTransferService, data } = services;
+    const {
+      originatingApp: value,
+      searchSessionId,
+      embeddableId,
+      originatingPath: pathValue,
+      valueInput: valueInputValue,
+    } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+
+    if (searchSessionId) {
+      data.search.session.continue(searchSessionId);
+    } else {
+      data.search.session.start();
+    }
+    setEmbeddableInput(valueInputValue);
+    setEmbeddableId(embeddableId);
+    setOriginatingApp(value);
+    setOriginatingPath(pathValue);
+  }, [services]);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,
     eventEmitter,
     isChromeVisible,
     originatingApp,
-    visualizationIdFromUrl
+    visualizationIdFromUrl,
+    embeddableInput
   );
 
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
@@ -65,26 +88,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
-
-  useEffect(() => {
-    const { stateTransferService, data } = services;
-    const {
-      originatingApp: value,
-      searchSessionId,
-      embeddableId,
-      originatingPath: pathValue,
-    } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
-
-    if (searchSessionId) {
-      data.search.session.continue(searchSessionId);
-    } else {
-      data.search.session.start();
-    }
-
-    setEmbeddableId(embeddableId);
-    setOriginatingApp(value);
-    setOriginatingPath(pathValue);
-  }, [services]);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
