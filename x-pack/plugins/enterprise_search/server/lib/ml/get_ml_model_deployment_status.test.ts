@@ -48,7 +48,7 @@ describe('getMlModelDeploymentStatus', () => {
 
   it('should return downloading if the model is downloading', async () => {
     const mockGetReturn = {
-      count: 0,
+      count: 1,
       trained_model_configs: [
         {
           fully_defined: false,
@@ -72,7 +72,7 @@ describe('getMlModelDeploymentStatus', () => {
 
   it('should return downloaded if the model is downloaded but not deployed', async () => {
     const mockGetReturn = {
-      count: 0,
+      count: 1,
       trained_model_configs: [
         {
           fully_defined: true,
@@ -104,7 +104,7 @@ describe('getMlModelDeploymentStatus', () => {
 
   it('should return starting if the model is starting deployment', async () => {
     const mockGetReturn = {
-      count: 0,
+      count: 1,
       trained_model_configs: [
         {
           fully_defined: true,
@@ -114,7 +114,7 @@ describe('getMlModelDeploymentStatus', () => {
     };
 
     const mockStatsReturn = {
-      count: 0,
+      count: 1,
       trained_model_stats: [
         {
           deployment_stats: {
@@ -151,7 +151,7 @@ describe('getMlModelDeploymentStatus', () => {
 
   it('should return started if the model has been started', async () => {
     const mockGetReturn = {
-      count: 0,
+      count: 1,
       trained_model_configs: [
         {
           fully_defined: true,
@@ -161,7 +161,7 @@ describe('getMlModelDeploymentStatus', () => {
     };
 
     const mockStatsReturn = {
-      count: 0,
+      count: 1,
       trained_model_stats: [
         {
           deployment_stats: {
@@ -198,7 +198,7 @@ describe('getMlModelDeploymentStatus', () => {
 
   it('should return fully allocated if the model is fully allocated', async () => {
     const mockGetReturn = {
-      count: 0,
+      count: 1,
       trained_model_configs: [
         {
           fully_defined: true,
@@ -208,7 +208,7 @@ describe('getMlModelDeploymentStatus', () => {
     };
 
     const mockStatsReturn = {
-      count: 0,
+      count: 1,
       trained_model_stats: [
         {
           deployment_stats: {

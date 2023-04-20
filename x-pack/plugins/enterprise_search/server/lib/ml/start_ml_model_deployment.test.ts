@@ -10,7 +10,7 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client/types';
 import { MLSavedObjectService } from '@kbn/ml-plugin/server/saved_objects';
 
-import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import * as mockGetStatus from './get_ml_model_deployment_status';
 import { startMlModelDeployment } from './start_ml_model_deployment';
@@ -62,14 +62,12 @@ describe('startMlModelDeployment', () => {
 
   it('should return the deployment state if already deployed or downloading', async () => {
     jest.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
-      new Promise<MlModelDeploymentStatus>((resolve) => {
-        resolve({
-          deploymentState: MlModelDeploymentState.Starting,
-          modelId: knownModelName,
-          nodeAllocationCount: 0,
-          startTime: 123456,
-          targetAllocationCount: 3,
-        });
+      Promise.resolve({
+        deploymentState: MlModelDeploymentState.Starting,
+        modelId: knownModelName,
+        nodeAllocationCount: 0,
+        startTime: 123456,
+        targetAllocationCount: 3,
       })
     );
 
@@ -88,25 +86,21 @@ describe('startMlModelDeployment', () => {
     jest
       .spyOn(mockGetStatus, 'getMlModelDeploymentStatus')
       .mockReturnValueOnce(
-        new Promise<MlModelDeploymentStatus>((resolve) => {
-          resolve({
-            deploymentState: MlModelDeploymentState.Downloaded,
-            modelId: knownModelName,
-            nodeAllocationCount: 0,
-            startTime: 123456,
-            targetAllocationCount: 3,
-          });
+        Promise.resolve({
+          deploymentState: MlModelDeploymentState.Downloaded,
+          modelId: knownModelName,
+          nodeAllocationCount: 0,
+          startTime: 123456,
+          targetAllocationCount: 3,
         })
       )
       .mockReturnValueOnce(
-        new Promise<MlModelDeploymentStatus>((resolve) => {
-          resolve({
-            deploymentState: MlModelDeploymentState.Starting,
-            modelId: knownModelName,
-            nodeAllocationCount: 0,
-            startTime: 123456,
-            targetAllocationCount: 3,
-          });
+        Promise.resolve({
+          deploymentState: MlModelDeploymentState.Starting,
+          modelId: knownModelName,
+          nodeAllocationCount: 0,
+          startTime: 123456,
+          targetAllocationCount: 3,
         })
       );
     mockMlClient.startTrainedModelDeployment.mockImplementation(async () => {});
