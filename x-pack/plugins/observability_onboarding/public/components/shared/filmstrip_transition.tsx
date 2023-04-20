@@ -24,15 +24,14 @@ export function FilmstripTransition({
         position: 'relative',
         zIndex: 0,
         transitionTimingFunction: 'ease-out',
-        ...(transition === 'ready'
-          ? { transform: 'translateX(0)' }
-          : {
-              transition: `transform ${duration}ms`,
-              transform:
-                transition === 'back'
-                  ? 'translateX(200%)'
-                  : 'translateX(-200%)',
-            }),
+        transition:
+          transition !== 'ready' ? `transform ${duration}ms` : undefined,
+        transform:
+          transition === 'ready'
+            ? 'translateX(0)'
+            : transition === 'back'
+            ? 'translateX(200%)'
+            : 'translateX(-200%)',
       }}
     >
       {children}

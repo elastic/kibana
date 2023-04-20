@@ -77,13 +77,19 @@ function AnimatedTransitionsWizard() {
             transition={transition}
           >
             <FilmstripFrame position="left">
-              {transition === 'back' ? TransitionComponent.current : null}
+              {
+                // eslint-disable-next-line react/jsx-pascal-case
+                transition === 'back' ? <TransitionComponent.current /> : null
+              }
             </FilmstripFrame>
             <FilmstripFrame position="center">
               <WizardStep />
             </FilmstripFrame>
             <FilmstripFrame position="right">
-              {transition === 'next' ? TransitionComponent.current : null}
+              {
+                // eslint-disable-next-line react/jsx-pascal-case
+                transition === 'next' ? <TransitionComponent.current /> : null
+              }
             </FilmstripFrame>
           </FilmstripTransition>
         </EuiFlexItem>

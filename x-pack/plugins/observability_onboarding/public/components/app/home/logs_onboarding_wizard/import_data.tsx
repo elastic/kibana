@@ -29,8 +29,8 @@ import {
 export function ImportData() {
   const { goToStep, goBack } = useWizard();
 
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/observability_onboarding/get_status');
+  const { data } = useFetcher((callApi) => {
+    return callApi('GET /internal/observability_onboarding/get_status');
   }, []);
 
   function onContinue() {

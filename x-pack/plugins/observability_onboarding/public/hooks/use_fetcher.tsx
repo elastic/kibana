@@ -52,7 +52,7 @@ function getDetailsFromErrorResponse(
   );
 }
 
-const createAutoAbortedAPMClient = (
+const createAutoAbortedClient = (
   signal: AbortSignal,
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedObservabilityClient => {
@@ -87,7 +87,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: AutoAbortedObservabilityClient) => TReturn,
+  fn: (callApi: AutoAbortedObservabilityClient) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -115,9 +115,7 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(
-        createAutoAbortedAPMClient(signal, addInspectorRequest)
-      );
+      const promise = fn(createAutoAbortedClient(signal, addInspectorRequest));
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
