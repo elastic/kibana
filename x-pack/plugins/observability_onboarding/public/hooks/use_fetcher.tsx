@@ -153,16 +153,22 @@ export function useFetcher<TReturn>(
 
           if (showToastOnError) {
             notifications.toasts.danger({
-              title: i18n.translate('xpack.observability_onboarding.fetcher.error.title', {
-                defaultMessage: `Error while fetching resource`,
-              }),
+              title: i18n.translate(
+                'xpack.observability_onboarding.fetcher.error.title',
+                {
+                  defaultMessage: `Error while fetching resource`,
+                }
+              ),
 
               body: (
                 <div>
                   <h5>
-                    {i18n.translate('xpack.observability_onboarding.fetcher.error.status', {
-                      defaultMessage: `Error`,
-                    })}
+                    {i18n.translate(
+                      'xpack.observability_onboarding.fetcher.error.status',
+                      {
+                        defaultMessage: `Error`,
+                      }
+                    )}
                   </h5>
 
                   {errorDetails}
