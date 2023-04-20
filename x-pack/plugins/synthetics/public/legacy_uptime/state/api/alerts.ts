@@ -199,6 +199,7 @@ export const fetchAnomalyAlertRecords = async ({
       ruleTypeId: monitorRule.rule_type_id,
     };
   }
+  return monitorRule as Rule<NewAlertParams>;
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {
