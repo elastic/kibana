@@ -22,8 +22,8 @@ describe('startMlModelDeployment', () => {
   const knownModelName = '.elser_model_1_SNAPSHOT';
   const mockIScopedClusterClient = {};
   const mockMlClient = {
-    startTrainedModelDeployment: jest.fn(),
     putTrainedModel: jest.fn(),
+    startTrainedModelDeployment: jest.fn(),
   };
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
@@ -119,7 +119,6 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should start a download and sync if not downloaded yet', async () => {
-    jest.useFakeTimers();
     jest
       .spyOn(mockGetStatus, 'getMlModelDeploymentStatus')
       .mockReturnValueOnce(
@@ -142,7 +141,7 @@ describe('startMlModelDeployment', () => {
       );
 
     jest.spyOn(mockMLSavedObjectService, 'syncSavedObjectsFactory').mockReturnValue({
-      syncSavedObjects: async (_simulate: boolean = false) => {
+      syncSavedObjects: async (_: boolean = false) => {
         const results: SyncSavedObjectResponse = {
           datafeedsAdded: {},
           datafeedsRemoved: {},

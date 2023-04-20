@@ -1013,7 +1013,6 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      // TODO : double check params for spaces and authorization
       const savedObjectService = mlSavedObjectServiceFactory(
         savedObjectsClient,
         savedObjectsClient,
