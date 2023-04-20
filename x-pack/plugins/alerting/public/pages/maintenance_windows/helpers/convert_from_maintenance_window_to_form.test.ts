@@ -188,7 +188,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         tzid: 'UTC',
         freq: RRuleFrequency.YEARLY,
         interval: 1,
-        bymonth: [2],
+        bymonth: [3],
         bymonthday: [22],
       },
     });
@@ -297,7 +297,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         tzid: 'UTC',
         freq: RRuleFrequency.YEARLY,
         interval: 3,
-        bymonth: [2],
+        bymonth: [3],
         bymonthday: [22],
       },
     });
