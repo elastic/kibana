@@ -16,10 +16,10 @@ import { ConnectorStatus } from '../../../../../../../common/types/connectors';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
-import { NativeConnector } from '../types';
+import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
-  nativeConnector: NativeConnector;
+  nativeConnector: ConnectorDefinition;
   status: ConnectorStatus;
 }
 
