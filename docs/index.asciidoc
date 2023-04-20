@@ -7,8 +7,6 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
 include::{docs-root}/shared/attributes.asciidoc[]
 
-:blob: {kib-repo}blob/{branch}/
-
 include::user/index.asciidoc[]
 
 include::accessibility.asciidoc[]
