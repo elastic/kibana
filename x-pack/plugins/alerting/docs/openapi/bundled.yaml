@@ -370,44 +370,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  alerting_framework_heath:
-                    type: object
-                    description: This property has a typo. Use `alerting_framework_health` instead.
-                    deprecated: true
-                    properties:
-                      _deprecated:
-                        type: string
-                        example: This state property has a typo, use "alerting_framework_health" instead.
-                      decryption_health:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: ok
-                          timestamp:
-                            type: string
-                            format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
-                      execution_health:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: ok
-                          timestamp:
-                            type: string
-                            format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
-                      read_health:
-                        type: object
-                        properties:
-                          status:
-                            type: string
-                            example: ok
-                          timestamp:
-                            type: string
-                            format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
                   alerting_framework_health:
                     type: object
                     description: |
@@ -719,7 +681,7 @@ paths:
       summary: Mutes an alert.
       operationId: muteAlert
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. 
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
       tags:
         - alerting
       parameters:
@@ -745,7 +707,7 @@ paths:
       summary: Unmutes an alert.
       operationId: unmuteAlert
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. 
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
       tags:
         - alerting
       parameters:
@@ -2303,17 +2265,6 @@ components:
         is_sufficiently_secure: true
         has_permanent_encryption_key: true
         alerting_framework_health:
-          decryption_health:
-            status: ok
-            timestamp: '2023-01-13T01:28:00.280Z'
-          execution_health:
-            status: ok
-            timestamp: '2023-01-13T01:28:00.280Z'
-          read_health:
-            status: ok
-            timestamp: '2023-01-13T01:28:00.280Z'
-        alerting_framework_heath:
-          _deprecated: This state property has a typo, use "alerting_framework_health" instead.
           decryption_health:
             status: ok
             timestamp: '2023-01-13T01:28:00.280Z'
