@@ -75,6 +75,7 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  force,
   verificationResult,
   authorizationHeader,
 }: {
@@ -90,6 +91,7 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  force?: boolean;
   verificationResult?: PackageVerificationResult;
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<AssetReference[]> {
@@ -249,15 +251,16 @@ export async function _installPackage({
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransforms(
-        packageInfo,
+      installTransforms({
+        installablePackage: packageInfo,
         paths,
         esClient,
         savedObjectsClient,
         logger,
         esReferences,
-        authorizationHeader
-      )
+        force,
+        authorizationHeader,
+      })
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines
