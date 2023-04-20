@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import { createEsClient } from './stack_services';
 import { createSecuritySuperuser } from './security_user_services';
+
+export interface DeleteAllEndpointDataResponse {
+  count: number;
+  query: string;
+  response: estypes.DeleteByQueryResponse;
+}
 
 /**
  * Attempts to delete all data associated with the provided endpoint agent IDs.
@@ -17,7 +23,10 @@ import { createSecuritySuperuser } from './security_user_services';
  * @param esClient
  * @param endpointAgentIds
  */
-const deleteAllEndpointData = async (esClient: Client, endpointAgentIds: string[]) => {
+export const deleteAllEndpointData = async (
+  esClient: Client,
+  endpointAgentIds: string[]
+): Promise<DeleteAllEndpointDataResponse> => {
   const unrestrictedUser = await createSecuritySuperuser(esClient, 'super_superuser');
   const esUrl = getEsUrlFromClient(esClient);
   const esClientUnrestricted = createEsClient({
@@ -26,7 +35,26 @@ const deleteAllEndpointData = async (esClient: Client, endpointAgentIds: string[
     password: unrestrictedUser.password,
   });
 
-  // FIXME:PT Implement deleteAllEndpointData
+  const queryString = endpointAgentIds.map((id) => `(${id})`).join(' OR ');
+
+  const deleteResponse = await esClientUnrestricted.deleteByQuery({
+    index: '*,.*',
+    body: {
+      query: {
+        query_string: {
+          query: queryString,
+        },
+      },
+    },
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+  });
+
+  return {
+    count: deleteResponse.deleted ?? 0,
+    query: queryString,
+    response: deleteResponse,
+  };
 };
 
 const getEsUrlFromClient = (esClient: Client) => {
