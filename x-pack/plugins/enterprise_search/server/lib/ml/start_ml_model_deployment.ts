@@ -91,50 +91,16 @@ export const startMlModelDeployment = async (
   });
 
   // and sync our objects
-  const { syncSavedObjects } = syncSavedObjectsFactory(clusterClient, savedObjectService);
-  await syncSavedObjects(false);
+  await syncSavedObjectsFactory(clusterClient, savedObjectService).syncSavedObjects(false);
 
-  // get our retur status
-  const returnStatus = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
-
-  // create task to watch for completed download if we need to
-  if (returnStatus.deploymentState === MlModelDeploymentState.Downloading) {
-    // if we're downloading - start up our background task so we can auto-deploy the model
-    setTimeout(() => {
-      watchDownloadToDeployModel(modelName, mlClient, trainedModelsProvider);
-    }, 1000);
-  } else if (returnStatus.deploymentState === MlModelDeploymentState.Downloaded) {
-    // if we're downloaded, deploy it
-    await deployModel(modelName, mlClient);
-  }
-
-  return returnStatus;
+  // and return our status
+  return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
 };
-
-async function watchDownloadToDeployModel(
-  modelName: string,
-  mlClient: MlClient,
-  trainedModelsProvider: MlTrainedModels
-) {
-  const returnStatus = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
-  if (returnStatus.deploymentState === MlModelDeploymentState.Downloading) {
-    // we're still downloading - reset out timeout
-    setTimeout(() => {
-      watchDownloadToDeployModel(modelName, mlClient, trainedModelsProvider);
-    }, 1000);
-  } else if (returnStatus.deploymentState === MlModelDeploymentState.Downloaded) {
-    // if we're downloaded, deploy it
-    await deployModel(modelName, mlClient);
-  }
-
-  // if we're here - we've either got an error, or we are already deployed
-  // in either case, just exit and don't reset the timeout
-}
 
 async function deployModel(modelName: string, mlClient: MlClient) {
   const startRequest: MlStartTrainedModelDeploymentRequest = {
     model_id: modelName,
-    wait_for: 'starting',
+    wait_for: 'started',
   };
 
   await mlClient.startTrainedModelDeployment(startRequest);
