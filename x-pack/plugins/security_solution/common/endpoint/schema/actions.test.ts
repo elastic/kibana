@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
@@ -185,25 +186,20 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it.each([
-      'isolate',
-      'unisolate',
-      'kill-process',
-      'suspend-process',
-      'running-processes',
-      'get-file',
-      'execute',
-    ])('should work with commands query params with %s action', (command) => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          page: 10,
-          pageSize: 100,
-          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          endDate: new Date().toISOString(), // today
-          commands: command,
-        });
-      }).not.toThrow();
-    });
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'should work with commands query params with %s action',
+      (command) => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            page: 10,
+            pageSize: 100,
+            startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+            endDate: new Date().toISOString(), // today
+            commands: command,
+          });
+        }).not.toThrow();
+      }
+    );
 
     it('should work with commands query params with a single action type in a list', () => {
       expect(() => {
