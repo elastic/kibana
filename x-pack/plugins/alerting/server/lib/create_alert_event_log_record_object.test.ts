@@ -10,6 +10,8 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 import { schema } from '@kbn/config-schema';
 
+const MAINTENANCE_WINDOW_IDS = ['test-1', 'test-2'];
+
 describe('createAlertEventLogRecordObject', () => {
   const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     id: 'test',
@@ -48,6 +50,7 @@ describe('createAlertEventLogRecordObject', () => {
           },
         ],
         spaceId: 'default',
+        maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -65,6 +68,7 @@ describe('createAlertEventLogRecordObject', () => {
             },
             rule_type_id: 'test',
           },
+          maintenance_window_ids: MAINTENANCE_WINDOW_IDS,
         },
         saved_objects: [
           {
@@ -117,6 +121,7 @@ describe('createAlertEventLogRecordObject', () => {
           },
         ],
         spaceId: 'default',
+        maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
       })
     ).toStrictEqual({
       event: {
@@ -136,6 +141,7 @@ describe('createAlertEventLogRecordObject', () => {
             },
             rule_type_id: 'test',
           },
+          maintenance_window_ids: MAINTENANCE_WINDOW_IDS,
         },
         alerting: {
           action_group_id: 'group 1',
@@ -200,6 +206,7 @@ describe('createAlertEventLogRecordObject', () => {
           ongoing: 3,
           recovered: 1,
         },
+        maintenanceWindowIds: MAINTENANCE_WINDOW_IDS,
       })
     ).toStrictEqual({
       event: {
@@ -219,6 +226,7 @@ describe('createAlertEventLogRecordObject', () => {
             },
             rule_type_id: 'test',
           },
+          maintenance_window_ids: MAINTENANCE_WINDOW_IDS,
         },
         alerting: {
           action_group_id: 'group 1',

@@ -21,6 +21,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  GetViewInAppRelativeUrlFnOpts,
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -84,6 +85,7 @@ const rule = {
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  schedule: { interval: '1m' },
   notifyWhen: 'onActiveAlert',
   actions: [
     {
@@ -120,6 +122,7 @@ const defaultExecutionParams = {
   ruleLabel: 'rule-label',
   request: {} as KibanaRequest,
   alertingEventLogger,
+  previousStartedAt: null,
   taskInstance: {
     params: { spaceId: 'test1', alertId: '1' },
   } as unknown as ConcreteTaskInstance,
@@ -1451,6 +1454,25 @@ describe('Execution Handler', () => {
       ],
     } as unknown as SanitizedRule<RuleTypeParams>;
 
+    const summaryRuleWithUrl = {
+      ...rule,
+      actions: [
+        {
+          id: '1',
+          group: null,
+          actionTypeId: 'test',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
+          params: {
+            val: 'rule url: {{rule.url}}',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule<RuleTypeParams>;
+
     it('populates the rule.url in the action params when the base url and rule id are specified', async () => {
       const execParams = {
         ...defaultExecutionParams,
@@ -1469,6 +1491,55 @@ describe('Execution Handler', () => {
           Object {
             "actionParams": Object {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('populates the rule.url with start and stop time when available', async () => {
+      clock.reset();
+      clock.tick(90000);
+      getSummarizedAlertsMock.mockResolvedValue({
+        new: {
+          count: 2,
+          data: [
+            mockAAD,
+            {
+              ...mockAAD,
+              '@timestamp': '2022-12-07T15:45:41.4672Z',
+              alert: { instance: { id: 'all' } },
+            },
+          ],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+      const execParams = {
+        ...defaultExecutionParams,
+        ruleType: {
+          ...ruleType,
+          getViewInAppRelativeUrl: (opts: GetViewInAppRelativeUrlFnOpts<RuleTypeParams>) =>
+            `/app/test/rule/${opts.rule.id}?start=${opts.start ?? 0}&end=${opts.end ?? 0}`,
+        },
+        rule: summaryRuleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
             "ruleId": "1",
