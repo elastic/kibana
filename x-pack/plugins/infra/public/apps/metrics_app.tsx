@@ -22,6 +22,8 @@ import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider } from '../containers/metrics_source';
 
+export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
+
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
@@ -30,7 +32,7 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element, 'infraMetricsPage');
+  prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
 
   ReactDOM.render(
     <MetricsApp

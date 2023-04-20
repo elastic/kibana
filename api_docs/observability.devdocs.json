@@ -4244,6 +4244,24 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.observabilityShared",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityShared",
+            "description": [],
+            "signature": [
+              "{ navigation: { registerSections: (sections$: ",
+              "Observable",
+              "<",
+              "NavigationSection",
+              "[]>) => void; }; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsSetup.share",
             "type": "CompoundType",
             "tags": [],
@@ -4528,6 +4546,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.exploratoryView",
+            "type": "Object",
+            "tags": [],
+            "label": "exploratoryView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "exploratoryView",
+                "scope": "public",
+                "docId": "kibExploratoryViewPluginApi",
+                "section": "def-public.ExploratoryViewPublicPluginsStart",
+                "text": "ExploratoryViewPublicPluginsStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
             "type": "Object",
             "tags": [],
@@ -4581,6 +4619,40 @@
                 "section": "def-public.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.observabilityShared",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityShared",
+            "description": [],
+            "signature": [
+              "{ navigation: { PageTemplate: (pageTemplateProps: ",
+              "WrappedPageTemplateProps",
+              ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLink",
+                "text": "AppDeepLink"
+              },
+              "[]; updater$: ",
+              "Subject",
+              "<",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppUpdater",
+                "text": "AppUpdater"
+              },
+              ">; }) => void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -6845,17 +6917,7 @@
           "section": "def-public.ObservabilityRuleTypeFormatter",
           "text": "ObservabilityRuleTypeFormatter"
         },
-        " | undefined; list: () => string[]; }; navigation: { registerSections: (sections$: ",
-        "Observable",
-        "<",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.NavigationSection",
-          "text": "NavigationSection"
-        },
-        "[]>) => void; }; useRulesLink: (options?: ",
+        " | undefined; list: () => string[]; }; useRulesLink: (options?: ",
         "Options",
         ") => ",
         "LinkProps",
@@ -6891,37 +6953,7 @@
           "section": "def-public.ObservabilityRuleTypeFormatter",
           "text": "ObservabilityRuleTypeFormatter"
         },
-        " | undefined; list: () => string[]; }; navigation: { PageTemplate: (pageTemplateProps: ",
-        "WrappedPageTemplateProps",
-        ") => JSX.Element; }; createExploratoryViewUrl: ({ reportType, allSeries }: { reportType: ",
-        "ReportViewType",
-        "; allSeries: ",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.AllSeries",
-          "text": "AllSeries"
-        },
-        "; }, baseHref?: string, appId?: string) => string; getAppDataView: (appId: ",
-        "AppDataType",
-        ", indexPattern?: string | undefined) => Promise<",
-        {
-          "pluginId": "dataViews",
-          "scope": "common",
-          "docId": "kibDataViewsPluginApi",
-          "section": "def-common.DataView",
-          "text": "DataView"
-        },
-        " | null | undefined>; ExploratoryViewEmbeddable: (props: ",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.ExploratoryEmbeddableProps",
-          "text": "ExploratoryEmbeddableProps"
-        },
-        ") => JSX.Element | null; useRulesLink: (options?: ",
+        " | undefined; list: () => string[]; }; useRulesLink: (options?: ",
         "Options",
         ") => ",
         "LinkProps",

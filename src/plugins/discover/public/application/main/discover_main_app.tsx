@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect } from 'react';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useHistory } from 'react-router-dom';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { useSearchSession } from './hooks/use_search_session';
@@ -95,10 +96,12 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverLayoutMemoized
-      navigateTo={navigateTo}
-      stateContainer={stateContainer}
-      persistDataView={persistDataView}
-    />
+    <RootDragDropProvider>
+      <DiscoverLayoutMemoized
+        navigateTo={navigateTo}
+        stateContainer={stateContainer}
+        persistDataView={persistDataView}
+      />
+    </RootDragDropProvider>
   );
 }

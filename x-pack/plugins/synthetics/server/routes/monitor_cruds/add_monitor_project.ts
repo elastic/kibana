@@ -78,7 +78,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       };
     } catch (error) {
       server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
-      if (error.output.statusCode === 404) {
+      if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
