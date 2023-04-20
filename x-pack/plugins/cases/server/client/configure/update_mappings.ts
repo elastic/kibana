@@ -41,7 +41,7 @@ export const updateMappings = async (
       refresh,
     });
 
-    return theMapping.attributes.mappings ?? [];
+    return (theMapping.attributes.mappings as ConnectorMappingsAttributes[]) ?? [];
   } catch (error) {
     throw createCaseError({
       message: `Failed to create mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,
