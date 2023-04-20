@@ -156,6 +156,9 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const mockRunNowResponse = {

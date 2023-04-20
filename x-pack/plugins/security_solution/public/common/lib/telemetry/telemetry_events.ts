@@ -141,6 +141,47 @@ const entityRiskFilteredEvent: TelemetryEvent = {
   },
 };
 
+const mlJobUpdateEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.MLJobUpdate,
+  schema: {
+    jobId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Job id',
+        optional: false,
+      },
+    },
+    isElasticJob: {
+      type: 'boolean',
+      _meta: {
+        description: 'If true the job is one of the pre-configure security solution modules',
+        optional: false,
+      },
+    },
+    moduleId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Module id',
+        optional: true,
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'It describes what has changed in the job.',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'Error message',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
@@ -148,4 +189,5 @@ export const telemetryEvents = [
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
+  mlJobUpdateEvent,
 ];
