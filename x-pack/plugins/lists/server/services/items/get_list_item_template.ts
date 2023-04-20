@@ -10,9 +10,6 @@ import listsItemsMappings from './list_item_mappings.json';
 export const getListItemTemplate = (index: string): Record<string, unknown> => {
   const template = {
     index_patterns: [`${index}-*`],
-    // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-    // then newly created indices will use the matching template with the *longest* namespace
-    priority: namespace.length,
     template: {
       mappings: listsItemsMappings,
       settings: {
