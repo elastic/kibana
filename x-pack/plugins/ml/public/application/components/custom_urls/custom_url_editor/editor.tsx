@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FC } from 'react';
+import React, { ChangeEvent, useState, useRef, useEffect, FC } from 'react';
 import { type Moment } from 'moment';
 
 import {
@@ -26,12 +26,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
+import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { CustomTimeRangePicker } from './custom_time_range_picker';
+import { useMlKibana } from '../../../contexts/kibana';
+import { getDropDownOptions } from './get_dropdown_options';
 
 function getLinkToOptions() {
   return [
@@ -62,9 +67,9 @@ interface CustomUrlEditorProps {
   savedCustomUrls: UrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
-  queryEntityFieldNames: string[];
-  showTimeRangeSelector: boolean;
+  showTimeRangeSelector?: boolean;
   showCustomTimeRangeSelector: boolean;
+  job: Job | DataFrameAnalyticsConfig;
 }
 
 /*
@@ -76,10 +81,43 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   savedCustomUrls,
   dashboards,
   dataViewListItems,
-  queryEntityFieldNames,
   showTimeRangeSelector,
   showCustomTimeRangeSelector,
+  job,
 }) => {
+  const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
+
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
+
+  const isFirst = useRef(true);
+
+  useEffect(() => {
+    async function getQueryEntityDropdownOptions() {
+      let dataViewToUse: DataView | undefined;
+      const dataViewId = customUrl?.kibanaSettings?.discoverIndexPatternId;
+
+      try {
+        dataViewToUse = await dataViews.get(dataViewId ?? '');
+      } catch (e) {
+        dataViewToUse = undefined;
+      }
+      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
+      setQueryEntityFieldNames(dropDownOptions);
+
+      if (isFirst.current) {
+        isFirst.current = false;
+      }
+    }
+
+    if (job !== undefined) {
+      getQueryEntityDropdownOptions();
+    }
+  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
+
   if (customUrl === undefined) {
     return null;
   }
@@ -123,6 +161,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       kibanaSettings: {
         ...kibanaSettings,
         discoverIndexPatternId: e.target.value,
+        queryFieldNames: [],
       },
     });
   };

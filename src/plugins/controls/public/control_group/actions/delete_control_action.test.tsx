@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import {
-  lazyLoadReduxEmbeddablePackage,
-  ReduxEmbeddablePackage,
-} from '@kbn/presentation-util-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ControlOutput } from '../../types';
@@ -17,17 +13,15 @@ import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { DeleteControlAction } from './delete_control_action';
 import { OptionsListEmbeddableInput } from '../../options_list';
-import { controlGroupInputBuilder } from '../control_group_input_builder';
+import { controlGroupInputBuilder } from '../external_api/control_group_input_builder';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
 let container: ControlGroupContainer;
 let embeddable: OptionsListEmbeddable;
-let reduxEmbeddablePackage: ReduxEmbeddablePackage;
 
 beforeAll(async () => {
-  reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
-
   const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
   controlGroupInputBuilder.addOptionsListControl(controlGroupInput, {
     dataViewId: 'test-data-view',
@@ -36,7 +30,7 @@ beforeAll(async () => {
     width: 'medium',
     grow: false,
   });
-  container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+  container = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await container.untilInitialized();
 
   embeddable = container.getChild(container.getChildIds()[0]);
@@ -53,7 +47,7 @@ test('Action is incompatible with Error Embeddables', async () => {
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
   const deleteControlAction = new DeleteControlAction();
   const optionsListEmbeddable = new OptionsListEmbeddable(
-    reduxEmbeddablePackage,
+    mockedReduxEmbeddablePackage,
     {} as OptionsListEmbeddableInput,
     {} as ControlOutput
   );
