@@ -7,11 +7,11 @@
 
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 import {
-  GetHostsRequestBodyPayload,
-  GetHostsResponsePayload,
-  HostMetadata,
-  HostMetrics,
-} from '../../../../common/http_api/hosts';
+  GetMetricsRequestBodyPayload,
+  GetMetricsResponsePayload,
+  Metadata,
+  Metrics,
+} from '../../../../common/http_api/metrics';
 
 import {
   FilteredMetricsTypeRT,
@@ -22,12 +22,13 @@ import {
 import { METADATA_AGGREGATION_NAME } from './constants';
 
 export const mapToApiResponse = (
-  params: GetHostsRequestBodyPayload,
+  params: GetMetricsRequestBodyPayload,
   buckets?: HostsMetricsSearchBucket[] | undefined
-): GetHostsResponsePayload => {
+): GetMetricsResponsePayload => {
   if (!buckets) {
     return {
-      hosts: [],
+      type: params.type,
+      nodes: [],
     };
   }
 
@@ -39,7 +40,8 @@ export const mapToApiResponse = (
   });
 
   return {
-    hosts,
+    type: params.type,
+    nodes: hosts,
   };
 };
 
@@ -51,7 +53,7 @@ const normalizeValue = (value: string | number | null) => {
   return value;
 };
 
-const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
+const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): Metadata[] => {
   const metadataAggregation = bucket[METADATA_AGGREGATION_NAME];
   return TopMetricsTypeRT.is(metadataAggregation)
     ? metadataAggregation.top
@@ -61,21 +63,21 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[]
             ({
               name: key,
               value: normalizeValue(value),
-            } as HostMetadata)
+            } as Metadata)
         )
     : [];
 };
 
 const convertMetricBucket = (
-  params: GetHostsRequestBodyPayload,
+  params: GetMetricsRequestBodyPayload,
   bucket: HostsMetricsSearchBucket
-): HostMetrics[] => {
+): Metrics[] => {
   return params.metrics.map((returnedMetric) => {
     const metricBucket = bucket[returnedMetric.type];
     return {
       name: returnedMetric.type,
       value: HostsMetricsSearchValueRT.is(metricBucket) ? getMetricValue(metricBucket) ?? 0 : null,
-    } as HostMetrics;
+    } as Metrics;
   });
 };
 

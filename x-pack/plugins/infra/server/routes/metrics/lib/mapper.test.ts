@@ -6,9 +6,10 @@
  */
 
 import { mapToApiResponse } from './mapper';
-import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
+import { GetMetricsRequestBodyPayload } from '../../../../common/http_api/metrics';
 
-const metricsApiRequest: GetHostsRequestBodyPayload = {
+const metricsApiRequest: GetMetricsRequestBodyPayload = {
+  type: 'host',
   limit: 20,
   metrics: [
     {
@@ -30,9 +31,9 @@ const metricsApiRequest: GetHostsRequestBodyPayload = {
       type: 'tx',
     },
   ],
-  timeRange: {
-    from: 1679991289420,
-    to: 1679991290420,
+  range: {
+    from: '2023-04-18T11:15:31.407Z',
+    to: '2023-04-18T11:15:31.407Z',
   },
   query: { bool: [{ must_not: [], filter: [], should: [], must: [] }] },
   sourceId: 'id',

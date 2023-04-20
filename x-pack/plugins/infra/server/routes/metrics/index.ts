@@ -9,29 +9,29 @@ import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
 import {
-  GetHostsRequestBodyPayloadRT,
-  GetHostsRequestBodyPayload,
-  GetHostsResponsePayloadRT,
-} from '../../../common/http_api/hosts';
+  GetMetricsRequestBodyPayloadRT,
+  GetMetricsRequestBodyPayload,
+  GetMetricsResponsePayloadRT,
+} from '../../../common/http_api/metrics';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getHosts } from './lib/get_hosts';
+import { getHosts } from './lib/host/get_hosts';
 
-export const initHostsRoute = (libs: InfraBackendLibs) => {
-  const validateBody = createRouteValidationFunction(GetHostsRequestBodyPayloadRT);
+export const initMetricsRoute = (libs: InfraBackendLibs) => {
+  const validateBody = createRouteValidationFunction(GetMetricsRequestBodyPayloadRT);
 
   const { framework } = libs;
 
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/metrics/hosts',
+      path: '/api/metrics',
       validate: {
         body: validateBody,
       },
     },
     async (_, request, response) => {
       const [{ savedObjects }, { data }] = await libs.getStartServices();
-      const params: GetHostsRequestBodyPayload = request.body;
+      const params: GetMetricsRequestBodyPayload = request.body;
 
       try {
         const searchClient = data.search.asScoped(request);
@@ -40,7 +40,7 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
 
         const hosts = await getHosts({ searchClient, sourceConfig: source.configuration, params });
         return response.ok({
-          body: GetHostsResponsePayloadRT.encode(hosts),
+          body: GetMetricsResponsePayloadRT.encode(hosts),
         });
       } catch (err) {
         if (Boom.isBoom(err)) {

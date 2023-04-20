@@ -8,16 +8,16 @@
 import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ESSearchRequest } from '@kbn/es-types';
-import { InfraStaticSourceConfiguration } from '../../../lib/sources';
-import { decodeOrThrow } from '../../../../common/runtime_types';
-import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
-import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION } from './constants';
+import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { GetMetricsRequestBodyPayload } from '../../../../../common/http_api/metrics';
+import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION } from '../constants';
 import {
   GetHostsArgs,
   HostsMetricsSearchAggregationResponse,
   HostsMetricsSearchAggregationResponseRT,
-} from './types';
-import { createFilters, getInventoryModelAggregations, runQuery } from './helpers/query';
+} from '../types';
+import { createFilters, getInventoryModelAggregations, runQuery } from '../helpers/query';
 
 export const getAllHosts = async (
   { searchClient, sourceConfig, params }: GetHostsArgs,
@@ -30,7 +30,7 @@ export const getAllHosts = async (
 };
 
 const createQuery = (
-  params: GetHostsRequestBodyPayload,
+  params: GetMetricsRequestBodyPayload,
   sourceConfig: InfraStaticSourceConfiguration,
   hostNamesShortList: string[]
 ): ESSearchRequest => {
@@ -56,11 +56,11 @@ const createQuery = (
 };
 
 const createAggregations = (
-  { limit }: GetHostsRequestBodyPayload,
+  { limit }: GetMetricsRequestBodyPayload,
   metricAggregations: Record<string, estypes.AggregationsAggregationContainer>
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   return {
-    hosts: {
+    nodes: {
       terms: {
         field: BUCKET_KEY,
         size: limit ?? MAX_SIZE,

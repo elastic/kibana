@@ -22,6 +22,7 @@ export { nonEmptyStringRt } from './src/non_empty_string_rt';
 export { createLiteralValueFromUndefinedRT } from './src/literal_value_from_undefined_rt';
 export { createRouteValidationFunction } from './src/route_validation';
 export { inRangeRt, type InRangeBrand, type InRange } from './src/in_range_rt';
+export { dateRt } from './src/date_rt';
 export {
   isGreaterOrEqualRt,
   type IsGreaterOrEqualBrand,

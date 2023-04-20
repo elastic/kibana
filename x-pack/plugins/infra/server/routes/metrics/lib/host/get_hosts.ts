@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import { GetHostsResponsePayload } from '../../../../common/http_api/hosts';
+import { GetMetricsResponsePayload } from '../../../../../common/http_api/metrics';
 import { getFilteredHosts } from './get_filtered_hosts';
-import { mapToApiResponse } from './mapper';
-import { hasFilters } from './utils';
-import { GetHostsArgs } from './types';
+import { mapToApiResponse } from '../mapper';
+import { hasFilters } from '../utils';
+import { GetHostsArgs } from '../types';
 import { getAllHosts } from './get_all_hosts';
 
-export const getHosts = async (args: GetHostsArgs): Promise<GetHostsResponsePayload> => {
+export const getHosts = async (args: GetHostsArgs): Promise<GetMetricsResponsePayload> => {
   const runFilterQuery = hasFilters(args.params.query);
   // filter first to prevent filter clauses from impacting the metrics aggregations.
   const hostNamesShortList = runFilterQuery ? await getFilteredHostNames(args) : [];
   if (runFilterQuery && hostNamesShortList.length === 0) {
     return {
-      hosts: [],
+      type: 'host',
+      nodes: [],
     };
   }
 
   const result = await getAllHosts(args, hostNamesShortList);
-  return mapToApiResponse(args.params, result?.hosts.buckets);
+  return mapToApiResponse(args.params, result?.nodes.buckets);
 };
 
 const getFilteredHostNames = async (args: GetHostsArgs) => {
   const filteredHosts = await getFilteredHosts(args);
 
-  const { hosts } = filteredHosts ?? {};
-  return hosts?.buckets.map((p) => p.key) ?? [];
+  const { nodes } = filteredHosts ?? {};
+  return nodes?.buckets.map((p) => p.key) ?? [];
 };

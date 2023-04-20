@@ -10,7 +10,7 @@ import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
 import { InfraStaticSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 
-import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
+import { GetMetricsRequestBodyPayload } from '../../../../common/http_api/metrics';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 
 export const FilteredMetricsTypeRT = rt.type({
@@ -42,7 +42,7 @@ export const HostsNameBucketRT = rt.type({
 
 export const HostsMetricsSearchAggregationResponseRT = rt.union([
   rt.type({
-    hosts: rt.intersection([
+    nodes: rt.intersection([
       rt.partial({
         sum_other_doc_count: rt.number,
         doc_count_error_upper_bound: rt.number,
@@ -55,7 +55,7 @@ export const HostsMetricsSearchAggregationResponseRT = rt.union([
 
 export const FilteredHostsSearchAggregationResponseRT = rt.union([
   rt.type({
-    hosts: rt.intersection([
+    nodes: rt.intersection([
       rt.partial({
         sum_other_doc_count: rt.number,
         doc_count_error_upper_bound: rt.number,
@@ -77,7 +77,7 @@ export interface HostsMetricsAggregationQueryConfig {
 export interface GetHostsArgs {
   searchClient: ISearchClient;
   sourceConfig: InfraStaticSourceConfiguration;
-  params: GetHostsRequestBodyPayload;
+  params: GetMetricsRequestBodyPayload;
 }
 
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;

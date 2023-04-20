@@ -10,7 +10,7 @@ import { ES_SEARCH_STRATEGY, ISearchClient } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import { GetHostsRequestBodyPayload, HostMetricType } from '../../../../../common/http_api/hosts';
+import { GetMetricsRequestBodyPayload, MetricType } from '../../../../../common/http_api/metrics';
 import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
 
 export const createFilters = ({
@@ -18,7 +18,7 @@ export const createFilters = ({
   extraFilter,
   hostNamesShortList = [],
 }: {
-  params: GetHostsRequestBodyPayload;
+  params: GetMetricsRequestBodyPayload;
   hostNamesShortList?: string[];
   extraFilter?: estypes.QueryDslQueryContainer;
 }) => {
@@ -46,8 +46,8 @@ export const createFilters = ({
     {
       range: {
         '@timestamp': {
-          gte: params.timeRange.from,
-          lte: params.timeRange.to,
+          gte: new Date(params.range.from).getTime(),
+          lte: new Date(params.range.to).getTime(),
           format: 'epoch_millis',
         },
       },
@@ -91,7 +91,7 @@ export const runQuery = <T>(
 };
 
 export const getInventoryModelAggregations = (
-  metrics: HostMetricType[]
+  metrics: MetricType[]
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
   return metrics.reduce(

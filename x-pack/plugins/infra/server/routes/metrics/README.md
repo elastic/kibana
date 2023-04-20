@@ -2,9 +2,10 @@
 
 This API returns a list of hosts and their metrics.
 
-**POST /api/metrics/hosts**
+**POST /api/metrics**
 parameters:
 
+- type: asset type. 'host' is the only one supported now
 - metrics: list of metrics to be calculated and returned for each host
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
 - limit: max number of hosts - max 500
@@ -26,40 +27,41 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/hosts' 
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{
-    "limit": 100,
-    "metrics": [
-        {
-            "type": "rx"
-        },
-        {
-            "type": "tx"
-        },
-        {
-            "type": "memory"
-        },
-        {
-            "type": "cpu"
-        },
-        {
-            "type": "diskLatency"
-        },
-        {
-            "type": "memoryTotal"
-        }
-    ],
-    "query": {
-        "bool": {
-            "must": [],
-            "filter": [],
-            "should": [],
-            "must_not": []
-        }
-    },
-    "timeRange": {
-        "from": 1680040800000,
-        "to":   1680645600000
-    },
-    "sourceId": "default"
+   "type": 'host',
+   "limit": 100,
+   "metrics": [
+      {
+         "type": "rx"
+      },
+      {
+         "type": "tx"
+      },
+      {
+         "type": "memory"
+      },
+      {
+         "type": "cpu"
+      },
+      {
+         "type": "diskLatency"
+      },
+      {
+         "type": "memoryTotal"
+      }
+   ],
+   "query": {
+      "bool": {
+         "must": [],
+         "filter": [],
+         "should": [],
+         "must_not": []
+      }
+   },
+   "timeRange": {
+      "from": "2023-04-18T11:15:31.407Z",
+      "to":   "2023-04-18T11:30:31.407Z"
+   },
+   "sourceId": "default"
 }'
 ```
 
@@ -67,7 +69,8 @@ Response
 
 ```json
 {
-   "hosts":[
+   "type": "host",
+   "nodes":[
       {
          "metadata":[
             {
