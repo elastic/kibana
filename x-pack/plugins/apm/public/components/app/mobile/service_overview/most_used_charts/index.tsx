@@ -16,31 +16,32 @@ import { SunburstChart } from './sunburst_chart';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { MobilePropertyType } from '../../../../../../common/mobile_types';
 
 type MostUsedCharts =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/most_used_charts'>['mostUsedCharts'][0];
 
 const MOST_USED_CHARTS: Array<{ key: MostUsedCharts['key']; label: string }> = [
   {
-    key: 'device',
+    key: MobilePropertyType.Device,
     label: i18n.translate('xpack.apm.mobile.charts.device', {
       defaultMessage: 'Devices',
     }),
   },
   {
-    key: 'netConnectionType',
+    key: MobilePropertyType.NetworkConnectionType,
     label: i18n.translate('xpack.apm.mobile.charts.nct', {
       defaultMessage: 'Network Connection Type',
     }),
   },
   {
-    key: 'osVersion',
+    key: MobilePropertyType.OsVersion,
     label: i18n.translate('xpack.apm.mobile.charts.osVersion', {
       defaultMessage: 'OS version',
     }),
   },
   {
-    key: 'appVersion',
+    key: MobilePropertyType.AppVersion,
     label: i18n.translate('xpack.apm.mobile.charts.appVersion', {
       defaultMessage: 'App version',
     }),

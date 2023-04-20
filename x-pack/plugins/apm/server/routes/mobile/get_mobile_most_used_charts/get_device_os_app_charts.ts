@@ -21,11 +21,13 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { mergeCountWithOther } from './merge_other_count';
-
-type MobileMostUsedChartTypes = 'device' | 'appVersion' | 'osVersion';
+import {
+  MobilePropertyType,
+  MobilePropertyDeviceOsAppVersionType,
+} from '../../../../common/mobile_types';
 
 export type MobileMostUsedChartResponse = Array<{
-  key: MobileMostUsedChartTypes;
+  key: MobilePropertyDeviceOsAppVersionType;
   options: Array<{
     key: string | number;
     docCount: number;
@@ -92,7 +94,7 @@ export async function getMobileMostUsedCharts({
 
   return [
     {
-      key: 'device',
+      key: MobilePropertyType.Device,
       options:
         mergeCountWithOther(
           response.aggregations?.devices?.buckets,
@@ -100,7 +102,7 @@ export async function getMobileMostUsedCharts({
         ) || [],
     },
     {
-      key: 'osVersion',
+      key: MobilePropertyType.OsVersion,
       options:
         mergeCountWithOther(
           response.aggregations?.osVersions?.buckets,
@@ -108,7 +110,7 @@ export async function getMobileMostUsedCharts({
         ) || [],
     },
     {
-      key: 'appVersion',
+      key: MobilePropertyType.AppVersion,
       options:
         mergeCountWithOther(
           response.aggregations?.appVersions?.buckets,

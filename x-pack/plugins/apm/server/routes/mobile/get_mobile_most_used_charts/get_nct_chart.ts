@@ -18,9 +18,13 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { mergeCountWithOther } from './merge_other_count';
+import {
+  MobilePropertyType,
+  MobilePropertyNctType,
+} from '../../../../common/mobile_types';
 
 export interface MobileMostUsedNCTChartResponse {
-  key: 'netConnectionType';
+  key: MobilePropertyNctType;
   options: Array<{
     key: string | number;
     docCount: number;
@@ -76,7 +80,7 @@ export async function getMobileMostUsedNCTCharts({
   );
 
   return {
-    key: 'netConnectionType',
+    key: MobilePropertyType.NetworkConnectionType,
     options:
       mergeCountWithOther(
         response.aggregations?.netConnectionTypes?.buckets,
