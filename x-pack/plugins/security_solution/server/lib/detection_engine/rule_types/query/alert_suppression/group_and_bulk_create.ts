@@ -65,22 +65,21 @@ export const buildBucketHistoryFilter = ({
       bool: {
         must_not: bucketHistory.map((bucket) => ({
           bool: {
+            must_not: Object.entries(bucket.key)
+              .filter(([_, value]) => value == null)
+              .map(([field, _]) => ({
+                exists: {
+                  field,
+                },
+              })),
             filter: [
-              ...Object.entries(bucket.key).map(([field, value]) =>
-                value != null
-                  ? {
-                      term: {
-                        [field]: value,
-                      },
-                    }
-                  : {
-                      must_not: {
-                        exists: {
-                          field,
-                        },
-                      },
-                    }
-              ),
+              ...Object.entries(bucket.key)
+                .filter(([_, value]) => value != null)
+                .map(([field, value]) => ({
+                  term: {
+                    [field]: value,
+                  },
+                })),
               buildTimeRangeFilter({
                 to: bucket.endDate,
                 from: from.toISOString(),
@@ -175,8 +174,8 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         // TODO: https://github.com/elastic/kibana/issues/155242
-        // additionalFilters: bucketHistoryFilter,
-        additionalFilters: [],
+        additionalFilters: bucketHistoryFilter,
+        // additionalFilters: [],
       };
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
         eventsSearchParams
