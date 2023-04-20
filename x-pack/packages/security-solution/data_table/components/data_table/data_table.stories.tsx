@@ -15,7 +15,6 @@ import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-
 import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { euiDarkVars } from '@kbn/ui-theme';
-import { Store } from 'redux';
 import { createStore as createReduxStore } from 'redux';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -26,15 +25,14 @@ import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { DataTableComponent } from '.';
 
 export default {
-  component: DataTableComponent,
-  title: 'DataTableComponent',
+  title: 'DataTable',
+  description: 'Table component for displaying events data in a grid view',
 };
 
-const createStore = (state: any) => createReduxStore(() => state, state);
+const createStore = (state: unknown) => createReduxStore(() => state, state);
 
 interface Props {
   children?: React.ReactNode;
-  store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
   cellActions?: Action[];
 }
@@ -76,12 +74,12 @@ const MockFieldBrowser = () => {
       size="xs"
       onClick={() => window.alert('Not implemented')}
     >
-      Field Browser
+      {'Field Browser'}
     </EuiButtonEmpty>
   );
 };
 
-export function Example() {
+export const DataTable = () => {
   return (
     <StoryProviders>
       <DataTableComponent
@@ -104,4 +102,4 @@ export function Example() {
       />
     </StoryProviders>
   );
-}
+};
