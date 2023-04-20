@@ -234,13 +234,11 @@ is considered `false`.  Typically, `port: 465` uses `secure: true`, and
 [float]
 [[elasticcloud]]
 ==== Sending email from Elastic Cloud
-
-IMPORTANT: To receive notifications, the email addresses must be added to an
-    link:{cloud}/ec-watcher.html#ec-watcher-allowlist[allowlist] in the 
-    Elasticsearch Service Console.
     
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from 
 Elastic Cloud.
+
+NOTE: For more information on the preconfigured email connector, see link:{cloud}/ec-watcher.html#ec-cloud-email-service-limits[Elastic Cloud email service limits].
 
 [float]
 [[gmail]]

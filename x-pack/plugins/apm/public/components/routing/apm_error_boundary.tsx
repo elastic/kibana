@@ -45,9 +45,9 @@ const pageHeader = {
 
 function ErrorWithTemplate({ error }: { error: Error }) {
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { observability } = services;
+  const { observabilityShared } = services;
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   if (error instanceof NotFoundRouteException) {
     return (
