@@ -21,6 +21,10 @@ export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 export const throttlingFormatter: Formatter = (fields) => {
   const throttling = fields[ConfigKey.THROTTLING_CONFIG];
 
+  if (!throttling || throttling?.id === 'no-throttling' || !throttling?.value) {
+    return 'false';
+  }
+
   return JSON.stringify({
     download: Number(throttling?.value?.download || DEFAULT_THROTTLING_VALUE.download),
     upload: Number(throttling?.value?.upload || DEFAULT_THROTTLING_VALUE.upload),
