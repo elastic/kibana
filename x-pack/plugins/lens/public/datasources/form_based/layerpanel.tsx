@@ -8,12 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { RandomSamplingIcon } from '@kbn/random-sampling';
 import type { DatasourceLayerPanelProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getSamplingValue } from './utils';
-import type { LensAppServices } from '../../app_plugin/types';
 
 export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
   state: FormBasedPrivateState;
@@ -28,8 +27,6 @@ export function LayerPanel({
 }: FormBasedLayerPanelProps) {
   const layer = state.layers[layerId];
   const { euiTheme } = useEuiTheme();
-  const { randomSampling } = useKibana<LensAppServices>().services;
-  const RandomSamplingIcon = randomSampling.ui.SamplingIcon;
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {

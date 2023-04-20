@@ -45,7 +45,6 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -169,7 +168,6 @@ export interface LensAppServices {
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;
-  randomSampling: RandomSamplingPublicPluginStart;
 }
 
 interface TopNavAction {

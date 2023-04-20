@@ -23,7 +23,6 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
@@ -157,7 +156,6 @@ export function getFormBasedDatasource({
   charts,
   dataViewFieldEditor,
   uiActions,
-  randomSampling,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -169,7 +167,6 @@ export function getFormBasedDatasource({
   charts: ChartsPluginSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
-  randomSampling: RandomSamplingPublicPluginStart;
 }) {
   const uiSettings = core.uiSettings;
 
@@ -444,7 +441,6 @@ export function getFormBasedDatasource({
                 charts,
                 unifiedSearch,
                 share,
-                randomSampling,
               }}
             >
               <LayerSettingsPanel {...props} />
@@ -613,7 +609,6 @@ export function getFormBasedDatasource({
                 charts,
                 unifiedSearch,
                 share,
-                randomSampling,
               }}
             >
               <LayerPanel

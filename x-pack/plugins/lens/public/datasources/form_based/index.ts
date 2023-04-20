@@ -16,7 +16,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import type { EditorFrameSetup } from '../../types';
 
 export type { PersistedIndexPatternLayer, FormulaPublicApi } from './types';
@@ -37,7 +36,6 @@ export interface FormBasedDatasourceStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
-  randomSampling: RandomSamplingPublicPluginStart;
 }
 
 export class FormBasedDatasource {
@@ -66,16 +64,7 @@ export class FormBasedDatasource {
 
       const [
         coreStart,
-        {
-          dataViewFieldEditor,
-          uiActions,
-          data,
-          fieldFormats,
-          dataViews,
-          unifiedSearch,
-          share,
-          randomSampling,
-        },
+        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, share },
       ] = await core.getStartServices();
 
       return getFormBasedDatasource({
@@ -89,7 +78,6 @@ export class FormBasedDatasource {
         charts,
         dataViewFieldEditor,
         uiActions,
-        randomSampling,
       });
     });
   }

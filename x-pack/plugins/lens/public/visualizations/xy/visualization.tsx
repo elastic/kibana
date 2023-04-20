@@ -21,7 +21,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { RandomSamplingPublicPluginStart } from '@kbn/random-sampling-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -117,7 +116,6 @@ export const getXyVisualization = ({
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
-  randomSampling,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -128,7 +126,6 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  randomSampling: RandomSamplingPublicPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -573,7 +570,6 @@ export const getXyVisualization = ({
               docLinks: core.docLinks,
               http: core.http,
               unifiedSearch,
-              randomSampling,
             }}
           >
             <LayerHeaderContent
@@ -642,7 +638,6 @@ export const getXyVisualization = ({
               docLinks: core.docLinks,
               http: core.http,
               unifiedSearch,
-              randomSampling,
             }}
           >
             {dimensionEditor}

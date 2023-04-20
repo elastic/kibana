@@ -13,7 +13,6 @@ import type { Query } from '@kbn/es-query';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 import {
   dataViewPluginMocks,
   Start as DataViewPublicStart,
@@ -176,7 +175,6 @@ describe('TextBased Query Languages Data Panel', () => {
     defaultProps = {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
-      randomSampling: randomSamplingPluginMock.createStartContract(),
       dataViews: {
         ...dataViewsMock,
         getIdsWithTitle: jest.fn().mockReturnValue(

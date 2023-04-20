@@ -15,8 +15,6 @@ import { DataViewsList } from '@kbn/unified-search-plugin/public/dataview_picker
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { TriggerButton } from '../../shared_components/dataview_picker/trigger';
 
@@ -29,16 +27,6 @@ jest.mock('@kbn/unified-search-plugin/public', () => {
     ).DataViewsList,
   };
 });
-
-const mockedServices = {
-  randomSampling: randomSamplingPluginMock.createStartContract(),
-};
-
-const LayerPanelWrapper = (props: FormBasedLayerPanelProps) => (
-  <KibanaContextProvider services={mockedServices}>
-    <LayerPanel {...props} />
-  </KibanaContextProvider>
-);
 
 interface IndexPatternPickerOption {
   label: string;
@@ -267,7 +255,7 @@ describe('Layer Data Panel', () => {
   }
 
   it('should list all index patterns', () => {
-    const instance = mount(<LayerPanelWrapper {...defaultProps} />);
+    const instance = mount(<LayerPanel {...defaultProps} />);
 
     act(() => {
       instance.find(TriggerButton).prop('togglePopover')();
@@ -282,7 +270,7 @@ describe('Layer Data Panel', () => {
   });
 
   it('should switch data panel to target index pattern', () => {
-    const instance = mount(<LayerPanelWrapper {...defaultProps} />);
+    const instance = mount(<LayerPanel {...defaultProps} />);
 
     act(() => {
       instance.find(TriggerButton).prop('togglePopover')();

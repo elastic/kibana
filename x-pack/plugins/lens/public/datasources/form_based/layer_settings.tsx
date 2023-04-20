@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { RandomSamplingSlider } from '@kbn/random-sampling';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
-import { LensAppServices } from '../../app_plugin/types';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 
@@ -23,8 +22,6 @@ export function LayerSettingsPanel({
   setState,
   layerId,
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
-  const { randomSampling } = useKibana<LensAppServices>().services;
-  const SamplingSlider = randomSampling.ui.ControlSlider;
   const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
   const currentValue = isSamplingValueDisabled
     ? samplingValues[samplingValues.length - 1]
@@ -84,7 +81,7 @@ export function LayerSettingsPanel({
         </>
       }
     >
-      <SamplingSlider
+      <RandomSamplingSlider
         disabled={isSamplingValueDisabled}
         disabledReason={i18n.translate('xpack.lens.indexPattern.randomSampling.disabledMessage', {
           defaultMessage:

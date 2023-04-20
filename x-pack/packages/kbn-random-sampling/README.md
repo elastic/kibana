@@ -1,4 +1,4 @@
-# randomSampling
+# @kbn/random-sampling
 
 Contains all the components of Kibana's random sampling experience. Specifically:
  - UI components for rendering the random sampling configuration;

@@ -14,7 +14,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, Datasource, FrameDatasourceAPI } from '../../types';
-import { randomSamplingPluginMock } from '@kbn/random-sampling-plugin/public/mocks';
 
 jest.mock('../../id_generator');
 
@@ -93,7 +92,6 @@ describe('Textbased Data Source', () => {
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
-      randomSampling: randomSamplingPluginMock.createStartContract(),
     });
 
     baseState = {
