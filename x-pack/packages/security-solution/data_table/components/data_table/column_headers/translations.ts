@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const REMOVE_COLUMN = i18n.translate(
-  'securitySolutionDataTable.columnHeaders.flyout.pane.removeColumnButtonLabel',
+  'securitySolutionPackages.dataTable.columnHeaders.flyout.pane.removeColumnButtonLabel',
   {
     defaultMessage: 'Remove column',
   }

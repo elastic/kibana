@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOADING_EVENTS = i18n.translate(
-  'securitySolutionDataTable.dataTable.loadingEventsDataLabel',
+  'securitySolutionPackages.dataTable.loadingEventsDataLabel',
   {
     defaultMessage: 'Loading Events',
   }
 );
 
 export const UNIT = (totalCount: number) =>
-  i18n.translate('securitySolutionDataTable.dataTable.unit', {
+  i18n.translate('securitySolutionPackages.dataTable.unit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
   });
