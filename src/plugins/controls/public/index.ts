@@ -39,8 +39,11 @@ export {
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  controlGroupInputBuilder,
+  type ControlGroupInputBuilder,
+  type ControlGroupAPI,
+  type AwaitingControlGroupAPI,
   type ControlGroupOutput,
+  controlGroupInputBuilder,
 } from './control_group';
 
 export {
@@ -56,11 +59,10 @@ export {
 } from './range_slider';
 
 export {
-  LazyControlGroupRenderer,
-  useControlGroupContainerContext,
-  type ControlGroupRendererProps,
-  ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
+  ACTION_DELETE_CONTROL,
+  ControlGroupRenderer,
+  type ControlGroupRendererProps,
 } from './control_group';
 
 export function plugin() {
