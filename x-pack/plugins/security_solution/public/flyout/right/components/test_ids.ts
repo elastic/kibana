@@ -52,6 +52,9 @@ export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
 export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+
+/* Insights section*/
+
 export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
 export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
 export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
@@ -80,3 +83,12 @@ export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewIP';
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';
+
+/* Visualizations section*/
+export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
+export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
+  'securitySolutionDocumentDetailsVisualizationsTitleHeader';
+export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
+export const ANALYZER_TREE_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTree';
+export const ANALYZER_TREE_LOADING_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeLoading';
+export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeError';

@@ -13,6 +13,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
@@ -40,7 +41,7 @@ export function ServiceField({
     >
       <SuggestionsSelect
         customOptions={
-          allowAll ? [{ label: allOptionText, value: '' }] : undefined
+          allowAll ? [{ label: allOptionText, value: undefined }] : undefined
         }
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
@@ -99,6 +100,46 @@ export function EnvironmentField({
   );
 }
 
+export function TransactionNameField({
+  currentValue,
+  onChange,
+  serviceName,
+}: {
+  currentValue?: string;
+  onChange: (value?: string) => void;
+  serviceName?: string;
+}) {
+  const label = i18n.translate('xpack.apm.alerting.fields.transaction.name', {
+    defaultMessage: 'Name',
+  });
+
+  return (
+    <PopoverExpression value={currentValue || allOptionText} title={label}>
+      <SuggestionsSelect
+        customOptions={[{ label: allOptionText, value: undefined }]}
+        customOptionText={i18n.translate(
+          'xpack.apm.alerting.transaction.name.custom.text',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
+          }
+        )}
+        defaultValue={currentValue}
+        fieldName={TRANSACTION_NAME}
+        onChange={onChange}
+        placeholder={i18n.translate(
+          'xpack.apm.transactionNamesSelectPlaceholder',
+          {
+            defaultMessage: 'Select transaction name',
+          }
+        )}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
+        serviceName={serviceName}
+      />
+    </PopoverExpression>
+  );
+}
+
 export function TransactionTypeField({
   currentValue,
   onChange,
@@ -114,7 +155,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        customOptions={[{ label: allOptionText, value: '' }]}
+        customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {
