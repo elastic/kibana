@@ -61,7 +61,7 @@ export const EnablementEmptyState = () => {
         <h2>
           {canEnable
             ? labels.MONITOR_MANAGEMENT_ENABLEMENT_LABEL
-            : labels.MONITOR_MANAGEMENT_DISABLED_LABEL}
+            : labels.SYNTHETICS_APP_DISABLED_LABEL}
         </h2>
       }
       body={

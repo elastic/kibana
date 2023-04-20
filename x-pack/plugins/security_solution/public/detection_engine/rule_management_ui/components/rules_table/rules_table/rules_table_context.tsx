@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -24,6 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
+  RuleSnoozeSettings,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -40,6 +42,12 @@ import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../../../rule_manage
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+
+interface RulesSnoozeSettings {
+  data: Record<string, RuleSnoozeSettings>; // The key is a rule SO's id (not ruleId)
+  isLoading: boolean;
+  isError: boolean;
+}
 
 export interface RulesTableState {
   /**
@@ -112,6 +120,10 @@ export interface RulesTableState {
    * Whether the state has its default value
    */
   isDefault: boolean;
+  /**
+   * Rules snooze settings for the current rules
+   */
+  rulesSnoozeSettings: RulesSnoozeSettings;
 }
 
 export type LoadingRuleAction =
@@ -282,9 +294,27 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const rulesToUpgrade = useFetchPrebuiltRulesUpgradeReviewQuery().data?.attributes.rules || [];
   const rulesToInstall = useFetchPrebuiltRulesInstallReviewQuery().data?.attributes.rules || [];
 
+  // Fetch rules snooze settings
+  const {
+    data: rulesSnoozeSettings,
+    isLoading: isSnoozeSettingsLoading,
+    isError: isSnoozeSettingsFetchError,
+    refetch: refetchSnoozeSettings,
+  } = useFetchRulesSnoozeSettings(
+    rules.map((x) => x.id),
+    { enabled: rules.length > 0 }
+  );
+
+  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+    const response = await refetch();
+    await refetchSnoozeSettings();
+
+    return response;
+  }, [refetch, refetchSnoozeSettings]);
+
   const actions = useMemo(
     () => ({
-      reFetchRules: refetch,
+      reFetchRules: refetchRulesAndSnoozeSettings,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -298,7 +328,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetch,
+      refetchRulesAndSnoozeSettings,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -313,12 +343,24 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(
-    () => ({
+  const providerValue = useMemo(() => {
+    const rulesSnoozeSettingsMap =
+      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
+        map[snoozeSettings.id] = snoozeSettings;
+
+        return map;
+      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
+
+    return {
       state: {
         rules,
         rulesToUpgrade,
         rulesToInstall,
+        rulesSnoozeSettings: {
+          data: rulesSnoozeSettingsMap,
+          isLoading: isSnoozeSettingsLoading,
+          isError: isSnoozeSettingsFetchError,
+        },
         pagination: {
           page,
           perPage,
@@ -345,29 +387,33 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    }),
-    [
-      rules,
-      page,
-      perPage,
-      total,
-      filterOptions,
-      isPreflightInProgress,
-      isActionInProgress,
-      isAllSelected,
-      isFetched,
-      isFetching,
-      isLoading,
-      isRefetching,
-      isRefreshOn,
-      dataUpdatedAt,
-      loadingRules.ids,
-      loadingRules.action,
-      selectedRuleIds,
-      sortingOptions,
-      actions,
-    ]
-  );
+    };
+  }, [
+    rules,
+    rulesToUpgrade,
+    rulesToInstall,
+    rulesSnoozeSettings,
+    isSnoozeSettingsLoading,
+    isSnoozeSettingsFetchError,
+    page,
+    perPage,
+    total,
+    filterOptions,
+    isPreflightInProgress,
+    isActionInProgress,
+    isAllSelected,
+    isFetched,
+    isFetching,
+    isLoading,
+    isRefetching,
+    isRefreshOn,
+    dataUpdatedAt,
+    loadingRules.ids,
+    loadingRules.action,
+    selectedRuleIds,
+    sortingOptions,
+    actions,
+  ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };

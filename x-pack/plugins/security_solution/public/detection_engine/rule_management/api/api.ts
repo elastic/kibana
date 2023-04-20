@@ -9,7 +9,7 @@ import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -53,6 +53,7 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchRuleProps,
+  FetchRuleSnoozingProps,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -62,6 +63,7 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
+  RulesSnoozeSettingsResponse,
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
@@ -193,6 +195,31 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     query: { id },
     signal,
   });
+
+/**
+ * Fetch rule snooze settings for each provided ruleId
+ *
+ * @param ids Rule IDs (not rule_id)
+ * @param signal to cancel request
+ *
+ * @returns An error if response is not OK
+ */
+export const fetchRulesSnoozeSettings = async ({
+  ids,
+  signal,
+}: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsResponse> =>
+  KibanaServices.get().http.fetch<RulesSnoozeSettingsResponse>(
+    INTERNAL_ALERTING_API_FIND_RULES_PATH,
+    {
+      method: 'GET',
+      query: {
+        filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
+        fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
+        per_page: ids.length,
+      },
+      signal,
+    }
+  );
 
 export interface BulkActionSummary {
   failed: number;
