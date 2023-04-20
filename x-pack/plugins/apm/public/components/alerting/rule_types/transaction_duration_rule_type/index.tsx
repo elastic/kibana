@@ -40,6 +40,7 @@ import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 
@@ -51,7 +52,7 @@ export interface RuleParams {
   transactionType: string;
   windowSize: number;
   windowUnit: string;
-  groupBy?: string | string[] | undefined;
+  groupBy?: string[] | undefined;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
@@ -244,6 +245,7 @@ export function TransactionDurationRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
           preSelectedOptions={[
             SERVICE_NAME,
             SERVICE_ENVIRONMENT,

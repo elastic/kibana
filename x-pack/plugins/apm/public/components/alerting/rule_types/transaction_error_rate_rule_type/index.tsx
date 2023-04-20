@@ -34,6 +34,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
 interface RuleParams {
@@ -43,7 +44,7 @@ interface RuleParams {
   serviceName?: string;
   transactionType?: string;
   environment?: string;
-  groupBy?: string | string[] | undefined;
+  groupBy?: string[] | undefined;
 }
 
 interface Props {
@@ -186,6 +187,7 @@ export function TransactionErrorRateRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
           preSelectedOptions={[
             SERVICE_NAME,
             SERVICE_ENVIRONMENT,

@@ -8,7 +8,7 @@
 import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
 
-export const getGroupByTerms = (groupBy: string[] | string | undefined) => {
+export const getGroupByTerms = (groupBy: string[] | undefined) => {
   return (groupBy ? [groupBy] : []).flat().map((group) => {
     return {
       field: group,

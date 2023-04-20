@@ -32,6 +32,7 @@ import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
@@ -40,7 +41,7 @@ export interface RuleParams {
   threshold?: number;
   serviceName?: string;
   environment?: string;
-  groupBy?: string | string[] | undefined;
+  groupBy?: string[] | undefined;
 }
 
 interface Props {
@@ -153,6 +154,8 @@ export function ErrorCountRuleType(props: Props) {
     />
   );
 
+  // const fields: string[] = [TRANSACTION_NAME];
+
   const groupAlertsBy = (
     <>
       <EuiFormRow
@@ -175,6 +178,7 @@ export function ErrorCountRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
         />
       </EuiFormRow>

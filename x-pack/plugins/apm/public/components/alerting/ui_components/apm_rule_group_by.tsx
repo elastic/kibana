@@ -8,19 +8,18 @@
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 
 interface Props {
-  options: { groupBy: string[] | string | undefined };
+  options: { groupBy: string[] | undefined };
+  fields: string[];
   preSelectedOptions: string[];
-  onChange: (groupBy: string | null | string[]) => void;
+  onChange: (groupBy: string[] | null) => void;
   errorOptions?: string[];
 }
 
-const fields: string[] = [TRANSACTION_NAME];
-
 export function APMRuleGroupBy({
   options,
+  fields,
   preSelectedOptions,
   onChange,
   errorOptions,
@@ -41,7 +40,7 @@ export function APMRuleGroupBy({
     }));
   };
 
-  const getUserSelectedOptions = (groupBy: string[] | string | undefined) => {
+  const getUserSelectedOptions = (groupBy: string[] | undefined) => {
     return Array.isArray(groupBy)
       ? groupBy
           .filter((group) => !preSelectedOptions.includes(group))
