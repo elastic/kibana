@@ -28,48 +28,47 @@ export const convertFromMaintenanceWindowToForm = (
   };
   if (!recurring) return form;
 
-  if (recurring) {
-    const rRule = maintenanceWindow.rRule;
-    const isCustomFrequency = isCustom(rRule);
-    const frequency = rRule.freq?.toString() as Frequency;
-    const ends = rRule.until
-      ? EndsOptions.ON_DATE
-      : rRule.count
-      ? EndsOptions.AFTER_X
-      : EndsOptions.NEVER;
+  const rRule = maintenanceWindow.rRule;
+  const isCustomFrequency = isCustom(rRule);
+  const frequency = rRule.freq?.toString() as Frequency;
+  const ends = rRule.until
+    ? EndsOptions.ON_DATE
+    : rRule.count
+    ? EndsOptions.AFTER_X
+    : EndsOptions.NEVER;
 
-    const recurringSchedule: RecurringScheduleFormProps = {
-      frequency: isCustomFrequency ? 'CUSTOM' : frequency,
-      interval: rRule.interval,
-      ends,
-    };
+  const recurringSchedule: RecurringScheduleFormProps = {
+    frequency: isCustomFrequency ? 'CUSTOM' : frequency,
+    interval: rRule.interval,
+    ends,
+  };
 
-    if (isCustomFrequency) {
-      recurringSchedule.customFrequency = frequency;
-    }
-
-    if (rRule.until) {
-      recurringSchedule.until = rRule.until;
-    }
-    if (rRule.count) {
-      recurringSchedule.count = rRule.count;
-    }
-    if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
-      recurringSchedule.byweekday = getInitialByWeekday(
-        rRule.byweekday as string[],
-        moment(startDate)
-      );
-    }
-    if (frequency === Frequency.MONTHLY) {
-      if (rRule.byweekday) {
-        recurringSchedule.bymonth = 'weekday';
-      } else if (rRule.bymonthday) {
-        recurringSchedule.bymonth = 'day';
-      }
-    }
-
-    form.recurringSchedule = recurringSchedule;
+  if (isCustomFrequency) {
+    recurringSchedule.customFrequency = frequency;
   }
+
+  if (rRule.until) {
+    recurringSchedule.until = rRule.until;
+  }
+  if (rRule.count) {
+    recurringSchedule.count = rRule.count;
+  }
+  if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
+    recurringSchedule.byweekday = getInitialByWeekday(
+      rRule.byweekday as string[],
+      moment(startDate)
+    );
+  }
+  if (frequency === Frequency.MONTHLY) {
+    if (rRule.byweekday) {
+      recurringSchedule.bymonth = 'weekday';
+    } else if (rRule.bymonthday) {
+      recurringSchedule.bymonth = 'day';
+    }
+  }
+
+  form.recurringSchedule = recurringSchedule;
+
   return form;
 };
 
