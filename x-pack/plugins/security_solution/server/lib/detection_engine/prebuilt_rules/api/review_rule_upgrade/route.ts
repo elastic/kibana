@@ -30,6 +30,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { invariant } from '../../../../../../common/utils/invariant';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -103,7 +104,7 @@ const getRuleDiffCalculationArgs = (
   latestRules: PrebuiltRuleAsset[]
 ): CalculateRuleDiffArgs[] => {
   const installedRulesMap = new Map(installedRules.map((r) => [r.rule_id, r]));
-  // const baseRulesMap = new Map(baseRules.map((r) => [r.rule_id, r]));
+  const baseRulesMap = new Map(baseRules.map((r) => [r.rule_id, r]));
   const latestRulesMap = new Map(latestRules.map((r) => [r.rule_id, r]));
 
   const result: CalculateRuleDiffArgs[] = [];
@@ -111,32 +112,30 @@ const getRuleDiffCalculationArgs = (
   installedVersionsToUpgrade.forEach((versionToUpgrade) => {
     const ruleId = versionToUpgrade.rule_id;
     const installedRule = installedRulesMap.get(ruleId);
-    // const baseRule = baseRulesMap.get(ruleId);
+    const baseRule = baseRulesMap.get(ruleId);
     const latestRule = latestRulesMap.get(ruleId);
 
-    // TODO: https://github.com/elastic/kibana/issues/148189
-    // Make base versions optional for diff calculation. We need to support this in order to be able
-    // to still show diffs for rule assets coming from packages without historical versions.
-    // if (installedRule != null && baseRule != null && latestRule != null) {
-    if (installedRule != null && latestRule != null) {
-      result.push({
-        currentVersion: installedRule,
-        baseVersion: latestRule, // baseRule
-        targetVersion: latestRule,
-      });
-    }
+    // baseRule can be undefined if the rule has no historical versions, but other versions should always be present
+    invariant(installedRule != null, `installedRule is not found for rule_id: ${ruleId}`);
+    invariant(latestRule != null, `latestRule is not found for rule_id: ${ruleId}`);
+
+    result.push({
+      currentVersion: installedRule,
+        baseVersion: baseRule,
+      targetVersion: latestRule,
+    });
   });
 
   return result;
 };
 
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
+  const allTags = new Set<string>(
+    results.flatMap((result) => result.ruleVersions.input.current.tags)
+  );
   return {
     num_rules_to_upgrade_total: results.length,
-    num_rules_to_upgrade_not_customized: results.length,
-    num_rules_to_upgrade_customized: 0,
-    tags: [],
-    fields: [],
+    tags: [...allTags].sort((a, b) => a.localeCompare(b)),
   };
 };
 

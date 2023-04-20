@@ -304,10 +304,6 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -338,6 +334,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "aiops",
@@ -380,22 +380,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -410,6 +394,22 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -6593,7 +6593,7 @@
               "\nField formats"
             ],
             "signature": [
-              "{ has: (id: string) => boolean; register: (fieldFormats: ",
+              "{ register: (fieldFormats: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -6601,7 +6601,7 @@
                 "section": "def-common.FieldFormatInstanceType",
                 "text": "FieldFormatInstanceType"
               },
-              "[]) => void; }"
+              "[]) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/plugins/data_views/public/types.ts",
             "deprecated": false,
@@ -6641,7 +6641,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -8561,10 +8561,6 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -8595,6 +8591,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "aiops",
@@ -8637,22 +8637,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -8667,6 +8651,22 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -15875,10 +15875,6 @@
                 "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
@@ -15909,6 +15905,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "aiops",
@@ -15951,22 +15951,6 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -15981,6 +15965,22 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21364,7 +21364,7 @@
               "\nField formats service"
             ],
             "signature": [
-              "{ has: (id: string) => boolean; deserialize: ",
+              "{ deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -21604,7 +21604,7 @@
                 "section": "def-common.FieldFormatConfig",
                 "text": "FieldFormatConfig"
               },
-              ">) => void; }"
+              ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,

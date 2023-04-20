@@ -16,6 +16,7 @@ import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { ALERT_ACTION, getRuleExecutor } from './executor';
+import { sloRuleFieldMap } from './field_map';
 
 const durationSchema = schema.object({
   value: schema.number(),
@@ -63,7 +64,7 @@ export function sloBurnRateRuleType(
     },
     alerts: {
       context: SLO_RULE_REGISTRATION_CONTEXT,
-      mappings: { fieldMap: legacyExperimentalFieldMap },
+      mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
       useEcs: true,
       useLegacyAlerts: true,
     },

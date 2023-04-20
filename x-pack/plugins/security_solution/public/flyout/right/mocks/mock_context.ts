@@ -6,6 +6,7 @@
  */
 
 import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { RightPanelContext } from '../context';
 
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -57,6 +58,27 @@ export const mockDataFormattedForFieldBrowser = [
     field: 'kibana.alert.rule.description',
     values: ['rule-description'],
     originalValue: ['rule-description'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.ancestors.id',
+    values: ['ancestors-id'],
+    originalValue: ['ancestors-id'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.rule.parameters.index',
+    values: ['rule-parameters-index'],
+    originalValue: ['rule-parameters-index'],
+    isObjectArray: false,
+  },
+  {
+    category: 'process',
+    field: 'process.entity_id',
+    values: ['process-entity_id'],
+    originalValue: ['process-entity_id'],
     isObjectArray: false,
   },
 ];
@@ -114,4 +136,19 @@ export const mockSearchHit = {
       },
     ],
   },
+};
+
+/**
+ * Mock contextValue for right panel context
+ */
+export const mockContextValue: RightPanelContext = {
+  eventId: 'eventId',
+  indexName: 'index',
+  scopeId: 'scopeId',
+  getFieldsData: mockGetFieldsData,
+  dataFormattedForFieldBrowser: null,
+  browserFields: null,
+  dataAsNestedObject: null,
+  searchHit: undefined,
+  refetchFlyoutData: jest.fn(),
 };
