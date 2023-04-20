@@ -12,7 +12,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { EuiFormRow, EuiSelectable, EuiSelectableOption, EuiSpacer } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+} from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
