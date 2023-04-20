@@ -57,7 +57,7 @@ import { LastEventIndexKey } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../containers/users/details';
+import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -134,7 +134,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     dispatch(setUsersDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const [loading, { inspect, userDetails, refetch }] = useUserDetails({
+  const [loading, { inspect, userDetails, refetch }] = useObservedUserDetails({
     id: QUERY_ID,
     endDate: to,
     startDate: from,

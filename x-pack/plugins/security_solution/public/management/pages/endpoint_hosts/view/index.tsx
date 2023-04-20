@@ -29,6 +29,7 @@ import type {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -60,7 +61,6 @@ import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
-import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
@@ -69,6 +69,7 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEndpointPendingActionsCallback } from '../store/selectors';
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -127,6 +128,7 @@ export const EndpointList = () => {
     patternsError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
+  const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
     canReadEndpointList,
     canAccessFleet,
@@ -370,7 +372,11 @@ export const EndpointList = () => {
         }),
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
+            <EndpointAgentStatus
+              endpointHostInfo={endpointInfo}
+              pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
+              data-test-subj="rowHostStatus"
+            />
           );
         },
       },
@@ -536,7 +542,15 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
+  }, [
+    queryParams,
+    search,
+    getAppUrl,
+    getHostPendingActions,
+    canReadPolicyManagement,
+    backToEndpointList,
+    PAD_LEFT,
+  ]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {
