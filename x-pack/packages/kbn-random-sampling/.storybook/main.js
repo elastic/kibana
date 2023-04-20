@@ -9,6 +9,7 @@ const baseConfig = require('@kbn/storybook').defaultConfig;
 
 module.exports = {
   ...baseConfig,
+  stories: ['../**/*.stories.mdx', ...baseConfig.stories],
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },
