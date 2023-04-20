@@ -16,7 +16,7 @@ export default defineCypressConfig({
   retries: {
     runMode: 2,
   },
-  screenshotOnRunFailure: true,
+  screenshotOnRunFailure: false,
   screenshotsFolder: '../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
@@ -33,9 +33,5 @@ export default defineCypressConfig({
   // eslint-disable-next-line sort-keys
   e2e: {
     baseUrl: 'http://localhost:5601',
-    setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
-      return require('./cypress/plugins')(on, config);
-    },
   },
 });
