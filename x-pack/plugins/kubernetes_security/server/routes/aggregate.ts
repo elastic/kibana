@@ -8,7 +8,6 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithB
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
-import { PROCESS_EVENTS_INDEX } from '@kbn/session-view-plugin/common/constants';
 import {
   AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
@@ -26,12 +25,12 @@ export const registerAggregateRoute = (router: IRouter) => {
       path: AGGREGATE_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           query: schema.string(),
           countBy: schema.maybe(schema.string()),
           groupBy: schema.string(),
           page: schema.number(),
           perPage: schema.maybe(schema.number()),
-          index: schema.maybe(schema.string()),
           sortByCount: schema.maybe(schema.string()),
         }),
       },
@@ -43,11 +42,11 @@ export const registerAggregateRoute = (router: IRouter) => {
       try {
         const body = await doSearch(
           client,
+          index,
           query,
           groupBy,
           page,
           perPage,
-          index,
           countBy,
           sortByCount
         );
@@ -62,11 +61,11 @@ export const registerAggregateRoute = (router: IRouter) => {
 
 export const doSearch = async (
   client: ElasticsearchClient,
+  index: string,
   query: string,
   groupBy: string,
   page: number, // zero based
   perPage = AGGREGATE_PAGE_SIZE,
-  index?: string,
   countBy?: string,
   sortByCount?: string
 ): Promise<AggregateBucketPaginationResult> => {
@@ -88,7 +87,7 @@ export const doSearch = async (
   }
 
   const search = await client.search({
-    index: [index || PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: queryDSL,
       size: 0,

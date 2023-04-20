@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { PROCESS_EVENTS_INDEX } from '@kbn/session-view-plugin/common/constants';
 import { AGENT_ID_ROUTE } from '../../common/constants';
 
 export const registerAgentIdRoute = (router: IRouter) => {
@@ -34,10 +33,10 @@ export const registerAgentIdRoute = (router: IRouter) => {
   );
 };
 
-export const getAgentId = async (client: ElasticsearchClient, query: string, index?: string) => {
+export const getAgentId = async (client: ElasticsearchClient, query: string, index: string) => {
   const queryDSL = JSON.parse(query);
   const search = await client.search({
-    index: [index || PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: queryDSL,
       size: 1,
