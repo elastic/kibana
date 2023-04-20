@@ -9,7 +9,8 @@
     "browser": true,
     "optionalPlugins": [
       "cloud",
-      "security"
+      "security",
+      "guided_onboarding"
     ]
   }
 }
