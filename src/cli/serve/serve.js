@@ -279,21 +279,21 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    
+
     const defaultConfig = getConfigPath();
     const cliConfigs = opts.config || [];
     const envConfigs = getEnvConfigs();
 
-    // CLI override || ENV override || config/kibana.yml 
+    // CLI override || ENV override || config/kibana.yml
     const configs = [];
     if (cliConfigs.length) {
-      configs.push(...cliConfigs)
+      configs.push(...cliConfigs);
     }
     if (!configs.length && envConfigs.length) {
-      configs.push(...envConfigs)
+      configs.push(...envConfigs);
     }
     if (!configs.length) {
-      configs.push(defaultConfig)
+      configs.push(defaultConfig);
     }
 
     const serverlessMode = getServerlessProjectMode(opts);
