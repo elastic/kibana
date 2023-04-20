@@ -11,7 +11,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsErrorBody } from '@kbn/ml-error-utils';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE } from './constants';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;

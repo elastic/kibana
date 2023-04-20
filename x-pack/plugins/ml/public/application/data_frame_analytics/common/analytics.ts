@@ -10,6 +10,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import {
@@ -32,7 +33,6 @@ import {
   getDependentVar,
   getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 
 export { getAnalysisType } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
@@ -158,16 +158,6 @@ export const getTrainingPercent = (
     trainingPercent = analysis.classification.training_percent;
   }
   return trainingPercent;
-};
-
-export const getNumTopClasses = (
-  analysis: AnalysisConfig
-): ClassificationAnalysis['classification']['num_top_classes'] => {
-  let numTopClasses;
-  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
-    numTopClasses = analysis.classification.num_top_classes;
-  }
-  return numTopClasses;
 };
 
 export const getNumTopFeatureImportanceValues = (
