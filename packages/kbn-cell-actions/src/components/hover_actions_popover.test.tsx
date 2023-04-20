@@ -166,6 +166,44 @@ describe('HoverActionsPopover', () => {
     expect(queryByLabelText('test-action-2')).toBeInTheDocument();
     expect(queryByLabelText('test-action-3')).toBeInTheDocument();
   });
+  it('does not add css positioning when anchorPosition = downCenter', async () => {
+    const getActionsPromise = Promise.resolve([makeAction('test-action')]);
+    const getActions = () => getActionsPromise;
+
+    const { getByLabelText, getByTestId } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <HoverActionsPopover {...defaultProps} anchorPosition="downCenter">
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsProvider>
+    );
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    expect(Object.values(getByLabelText('Actions').style).includes('margin-top')).toEqual(false);
+  });
+  it('adds css positioning when anchorPosition = rightCenter', async () => {
+    const getActionsPromise = Promise.resolve([makeAction('test-action')]);
+    const getActions = () => getActionsPromise;
+
+    const { getByLabelText, getByTestId } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <HoverActionsPopover {...defaultProps} anchorPosition="rightCenter">
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsProvider>
+    );
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    expect(Object.values(getByLabelText('Actions').style).includes('margin-top')).toEqual(true);
+  });
 });
 
 const hoverElement = async (element: Element, waitForChange: () => Promise<unknown>) => {
