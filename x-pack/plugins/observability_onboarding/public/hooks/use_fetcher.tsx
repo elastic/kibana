@@ -43,7 +43,7 @@ function getDetailsFromErrorResponse(
     <>
       {message} ({error.response?.status})
       <h5>
-        {i18n.translate('xpack.apm.fetcher.error.url', {
+        {i18n.translate('xpack.observability_onboarding.fetcher.error.url', {
           defaultMessage: `URL`,
         })}
       </h5>
@@ -153,14 +153,14 @@ export function useFetcher<TReturn>(
 
           if (showToastOnError) {
             notifications.toasts.danger({
-              title: i18n.translate('xpack.apm.fetcher.error.title', {
+              title: i18n.translate('xpack.observability_onboarding.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
               body: (
                 <div>
                   <h5>
-                    {i18n.translate('xpack.apm.fetcher.error.status', {
+                    {i18n.translate('xpack.observability_onboarding.fetcher.error.status', {
                       defaultMessage: `Error`,
                     })}
                   </h5>
