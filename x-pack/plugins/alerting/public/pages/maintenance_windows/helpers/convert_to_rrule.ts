@@ -6,20 +6,21 @@
  */
 
 import { Moment } from 'moment';
-import { RRule, RRuleFrequency, RRuleFrequencyMap } from '../types';
+import { RRuleFrequency, RRuleFrequencyMap } from '../types';
 import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
+import { RRuleParams } from '../../../../common';
 
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
   recurringForm?: RecurringScheduleFormProps
-): RRule => {
+): RRuleParams => {
   const presets = getPresets(startDate);
 
-  const rRule: RRule = {
+  const rRule: RRuleParams = {
     dtstart: startDate.toISOString(),
     tzid: timezone,
   };
