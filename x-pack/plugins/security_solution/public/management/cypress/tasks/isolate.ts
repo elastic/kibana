@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 export const interceptActionRequests = (
@@ -64,5 +65,75 @@ export const waitForReleaseOption = (alertId: string) => {
       });
       cy.contains('Release host').click();
     }
+  });
+};
+
+export const visitRuleAlerts = (ruleName: string) => {
+  cy.visit('/app/security/rules');
+  cy.contains(ruleName).click();
+};
+export const checkFlyoutEndpointIsolation = () => {
+  cy.getByTestSubj('event-field-agent.status').then(($status) => {
+    if ($status.find('[title="Isolated"]').length > 0) {
+      cy.contains('Release host').click();
+    } else {
+      cy.getByTestSubj('euiFlyoutCloseButton').click();
+      cy.wait(5000);
+      openAlertDetails();
+      cy.getByTestSubj('event-field-agent.status').within(() => {
+        cy.contains('Isolated');
+      });
+      cy.contains('Release host').click();
+    }
+  });
+};
+
+export const toggleRuleOffAndOn = (ruleName: string) => {
+  cy.visit('/app/security/rules');
+  cy.wait(2000);
+  cy.contains(ruleName)
+    .parents('tr')
+    .within(() => {
+      cy.getByTestSubj('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      cy.getByTestSubj('ruleSwitch').click();
+      cy.getByTestSubj('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+      cy.getByTestSubj('ruleSwitch').click();
+      cy.getByTestSubj('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+    });
+};
+
+export const filterOutEndpoints = (endpointHostname: string) => {
+  cy.getByTestSubj('filters-global-container').within(() => {
+    cy.getByTestSubj('queryInput').click().type(`host.hostname : "${endpointHostname}"`);
+    cy.getByTestSubj('querySubmitButton').click();
+  });
+};
+
+export const createAgentPolicyTask = (
+  version: string,
+  cb: (response: IndexedFleetEndpointPolicyResponse) => void
+) => {
+  const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
+
+  cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
+    policyName,
+    endpointPackageVersion: version,
+    agentPolicyName: policyName,
+  }).then(cb);
+};
+
+export const filterOutIsolatedHosts = () => {
+  cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
+  cy.getByTestSubj('querySubmitButton').click();
+};
+
+export const checkEndpointListForIsolatedHosts = (expectIsolated = true) => {
+  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
+  cy.getByTestSubj('endpointListTable').within(() => {
+    cy.get('tbody tr').each(($tr) => {
+      cy.wrap($tr).within(() => {
+        cy.get('td').eq(1).should(chainer, 'Isolated');
+      });
+    });
   });
 };
