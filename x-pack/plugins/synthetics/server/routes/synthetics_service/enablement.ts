@@ -19,12 +19,24 @@ export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ response, server }): Promise<any> => {
+  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     try {
-      return response.ok({
-        body: await libs.requests.getSyntheticsEnablement({
+      const result = await libs.requests.getSyntheticsEnablement({
+        server,
+      });
+      const { canEnable, isEnabled } = result;
+      if (canEnable && !isEnabled && server.config.service?.manifestUrl) {
+        await generateAndSaveServiceAPIKey({
+          request,
+          authSavedObjectsClient: savedObjectsClient,
           server,
-        }),
+        });
+      } else {
+        return result;
+      }
+
+      return libs.requests.getSyntheticsEnablement({
+        server,
       });
     } catch (e) {
       server.logger.error(e);
@@ -69,12 +81,12 @@ export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'POST',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ request, response, server }): Promise<any> => {
-    const { authSavedObjectsClient, logger } = server;
+  handler: async ({ request, response, server, savedObjectsClient }): Promise<any> => {
+    const { logger } = server;
     try {
       await generateAndSaveServiceAPIKey({
         request,
-        authSavedObjectsClient,
+        authSavedObjectsClient: savedObjectsClient,
         server,
       });
       return response.ok({

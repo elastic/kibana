@@ -8,38 +8,40 @@
 import React from 'react';
 
 import {
+  EuiBadge,
   EuiCheckableCard,
   EuiCheckableCardProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
-
-import './connector_checkable.scss';
+import { BETA_LABEL } from '../../../../shared/constants';
 
 export type ConnectorCheckableProps = Omit<
   EuiCheckableCardProps,
   'id' | 'label' | 'name' | 'value'
 > & {
-  documentationUrl: string;
+  documentationUrl: string | undefined;
+  icon: string;
+  isBeta: boolean;
   name: string;
   serviceType: string;
 };
 
 export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   documentationUrl,
+  icon,
+  isBeta,
   name,
   serviceType,
   ...props
 }) => {
-  const icon = NATIVE_CONNECTOR_ICONS[serviceType];
   return (
     <EuiCheckableCard
       {...props}
@@ -55,7 +57,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           )}
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <span>{name}</span>
+              <h2>{name}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -63,17 +65,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       name={name}
       value={serviceType}
     >
-      <div className="connectorCheckableContent">
-        <EuiText size="s" color="subdued">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.description',
-            {
-              defaultMessage: 'Search over your {name} content with Enterprise Search.',
-              values: { name },
-            }
-          )}
-        </EuiText>
-        <EuiSpacer size="s" />
+      {documentationUrl && (
         <EuiLink target="_blank" href={documentationUrl}>
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
@@ -82,7 +74,12 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             }
           )}
         </EuiLink>
-      </div>
+      )}
+      {isBeta && (
+        <EuiBadge color="hollow" iconType="beaker">
+          <EuiText size="xs">{BETA_LABEL}</EuiText>
+        </EuiBadge>
+      )}
     </EuiCheckableCard>
   );
 };
