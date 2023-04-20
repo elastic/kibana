@@ -16,10 +16,10 @@ export {
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
   getProcessedFields,
-} from './common';
-export { getFieldType } from './use_column_chart';
-export { useDataGrid } from './use_data_grid';
-export { DataGrid } from './data_grid';
+} from './src/common';
+export { getFieldType } from './src/use_column_chart';
+export { useDataGrid } from './src/use_data_grid';
+export { DataGrid } from './src/data_grid';
 export type {
   DataGridItem,
   EsSorting,
@@ -27,4 +27,4 @@ export type {
   RowCountRelation,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-} from './types';
+} from './src/types';

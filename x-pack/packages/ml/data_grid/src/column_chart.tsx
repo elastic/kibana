@@ -13,7 +13,7 @@ import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { isUnsupportedChartData, ChartData } from '../../../../common/types/field_histograms';
+import { isUnsupportedChartData, ChartData } from './field_histograms';
 
 import { useColumnChart } from './use_column_chart';
 

@@ -4583,6 +4583,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-data-grid@link:x-pack/packages/ml/data_grid":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
   uid ""
