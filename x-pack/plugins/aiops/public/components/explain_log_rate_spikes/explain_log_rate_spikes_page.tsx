@@ -112,9 +112,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
     searchQuery,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
+    'explain_log_rage_spikes',
     aiopsListState,
     setGlobalState,
-    'explain_log_rage_spikes',
     currentSelectedSignificantTerm,
     currentSelectedGroup
   );

@@ -34,9 +34,9 @@ export const useData = (
     selectedDataView,
     selectedSavedSearch,
   }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
-  aiopsListState: AiOpsIndexBasedAppState,
-  onUpdate: (params: Dictionary<unknown>) => void,
   contextId: string,
+  aiopsListState: AiOpsIndexBasedAppState,
+  onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantTerm?: SignificantTerm,
   selectedGroup?: GroupTableItem | null,
   barTarget: number = DEFAULT_BAR_TARGET,
@@ -163,8 +163,8 @@ export const useData = (
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
+        setLastRefresh(Date.now());
       }
-      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.

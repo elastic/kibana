@@ -112,9 +112,9 @@ export const LogCategorizationPage: FC = () => {
     intervalMs,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
+    'log_categorization',
     aiopsListState,
     setGlobalState,
-    'log_categorization',
     undefined,
     undefined,
     BAR_TARGET

@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useUrlState } from '@kbn/ml-url-state';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import { useData } from '../../hooks/use_data';
@@ -60,7 +59,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
-  const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
@@ -94,9 +92,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     forceRefresh,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
-    aiopsListState,
-    setGlobalState,
     'log_categorization',
+    aiopsListState,
+    undefined,
     undefined,
     undefined,
     BAR_TARGET,
@@ -104,13 +102,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   );
 
   useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-    }
-
     const { filters, query } = getState();
 
     setAiopsListState({
@@ -118,7 +109,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(globalState?.time), timefilter]);
+  }, []);
 
   const loadCategories = useCallback(async () => {
     const { title: index, timeFieldName: timeField } = dataView;
