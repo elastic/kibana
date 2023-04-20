@@ -45,6 +45,8 @@ const PackagePolicyStreamsSchema = {
             indices: schema.maybe(schema.arrayOf(schema.string())),
           })
         ),
+        dynamic_dataset: schema.maybe(schema.boolean()),
+        dynamic_namespace: schema.maybe(schema.boolean()),
       })
     ),
   }),

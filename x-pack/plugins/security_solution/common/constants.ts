@@ -97,7 +97,7 @@ export enum SecurityPageName {
    * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
    */
   cloudDefendPolicies = 'cloud_defend-policies',
-  dashboardsLanding = 'dashboards',
+  dashboards = 'dashboards',
   dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
@@ -492,6 +492,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
     hideActionBar: true,
+    persist: true,
   },
   {
     title: 'Severity',
