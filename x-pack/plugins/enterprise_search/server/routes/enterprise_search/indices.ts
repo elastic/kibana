@@ -359,7 +359,7 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, (context, request, response) => {
       return response.ok({
-        body: { 
+        body: {
           deploymentState: 'downloading',
           modelId: 'elser-v1',
         },
@@ -376,14 +376,14 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, (context, request, response) => {
       return response.ok({
-        body: { 
+        body: {
           deploymentState: 'downloading',
           modelId: 'elser-v1',
         },
         headers: { 'content-type': 'application/json' },
       });
     })
-  );  
+  );
 
   router.get(
     {
