@@ -97,7 +97,7 @@ const MONITOR_FAILURE_LABEL = i18n.translate(
 );
 
 const MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT = i18n.translate(
-  'xpack.synthetics.monitorManagement.monitorFailureMessage',
+  'xpack.synthetics.monitorManagement.monitorFailureMessage.subtext',
   {
     defaultMessage: 'It will next run according to its defined schedule.',
   }
