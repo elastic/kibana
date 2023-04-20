@@ -7,11 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
+import type { MlRecordForInfluencer } from '@kbn/ml-common';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { EntityField } from '../util/anomaly_utils';
 import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
-import type { RecordForInfluencer } from './anomalies';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
@@ -115,7 +115,7 @@ export interface InfoTooltip {
   entityFields: EntityField[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 

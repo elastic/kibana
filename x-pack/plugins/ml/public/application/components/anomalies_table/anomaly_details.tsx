@@ -28,10 +28,10 @@ import {
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { MlAnomaliesTableRecordExtended } from '@kbn/ml-common';
 import { getSeverity } from '../../../../common/util/anomaly_utils';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';
-import { AnomaliesTableRecordExtended } from '../../../../common/types/anomalies';
 import { EntityCellFilter } from '../entity_cell';
 import { ExplorerJob } from '../../explorer/explorer_utils';
 
@@ -42,7 +42,7 @@ import {
 } from './anomaly_details_utils';
 
 interface Props {
-  anomaly: AnomaliesTableRecordExtended;
+  anomaly: MlAnomaliesTableRecordExtended;
   examples: string[];
   definition: CategoryDefinition;
   isAggregatedData: boolean;
@@ -118,7 +118,7 @@ export const AnomalyDetails: FC<Props> = ({
 };
 
 const Contents: FC<{
-  anomaly: AnomaliesTableRecordExtended;
+  anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   influencersLimit: number;
@@ -166,7 +166,7 @@ const Contents: FC<{
   );
 };
 
-const Description: FC<{ anomaly: AnomaliesTableRecordExtended }> = ({ anomaly }) => {
+const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly }) => {
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
@@ -235,7 +235,7 @@ const Description: FC<{ anomaly: AnomaliesTableRecordExtended }> = ({ anomaly })
 };
 
 const Details: FC<{
-  anomaly: AnomaliesTableRecordExtended;
+  anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   job: ExplorerJob;
@@ -280,7 +280,7 @@ const Details: FC<{
 };
 
 const Influencers: FC<{
-  anomaly: AnomaliesTableRecordExtended;
+  anomaly: MlAnomaliesTableRecordExtended;
   influencersLimit: number;
   influencerFilter: EntityCellFilter;
 }> = ({ anomaly, influencersLimit, influencerFilter }) => {

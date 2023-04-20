@@ -10,15 +10,16 @@ import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
+import {
+  type MlAnomaliesTableRecord,
+  type MlAnomalyCategorizerStatsDoc,
+  type MlAnomalyRecordDoc,
+  ML_JOB_ID,
+  ML_PARTITION_FIELD_VALUE,
+} from '@kbn/ml-common';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import {
-  AnomaliesTableRecord,
-  AnomalyCategorizerStatsDoc,
-  AnomalyRecordDoc,
-} from '../../../common/types/anomalies';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -51,7 +52,7 @@ interface Influencer {
  * Extracts typical and actual values from the anomaly record.
  * @param source
  */
-export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
+export function getTypicalAndActualValues(source: MlAnomalyRecordDoc) {
   const result: { actual?: number[]; typical?: number[] } = {};
 
   const functionDescription = source.function_description || '';
@@ -219,7 +220,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     );
 
     const tableData: {
-      anomalies: AnomaliesTableRecord[];
+      anomalies: MlAnomaliesTableRecord[];
       interval: string;
       examplesByJobId?: { [key: string]: any };
     } = {
@@ -228,7 +229,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
-      let records: AnomalyRecordDoc[] = [];
+      let records: MlAnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
         records.push(hit._source);
       });
@@ -510,7 +511,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
-    const body = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
+    const body = await mlClient.anomalySearch<MlAnomalyCategorizerStatsDoc>(
       {
         body: {
           query: {
@@ -534,7 +535,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
   async function getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket: typeof JOB_ID | typeof PARTITION_FIELD_VALUE = PARTITION_FIELD_VALUE
+    fieldToBucket: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE = ML_PARTITION_FIELD_VALUE
   ): Promise<GetStoppedPartitionResult> {
     let finalResults: GetStoppedPartitionResult = {
       jobs: {},
@@ -557,12 +558,12 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       .map((j) => j.job_id);
 
     let aggs: any;
-    if (fieldToBucket === JOB_ID) {
+    if (fieldToBucket === ML_JOB_ID) {
       // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
       aggs = {
         unique_terms: {
           terms: {
-            field: JOB_ID,
+            field: ML_JOB_ID,
           },
         },
       };
@@ -571,12 +572,12 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       aggs = {
         jobs: {
           terms: {
-            field: JOB_ID,
+            field: ML_JOB_ID,
           },
           aggs: {
             unique_stopped_partitions: {
               terms: {
-                field: PARTITION_FIELD_VALUE,
+                field: ML_PARTITION_FIELD_VALUE,
               },
             },
           },
@@ -620,14 +621,14 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
         jobIds
       );
-      if (fieldToBucket === JOB_ID) {
+      if (fieldToBucket === ML_JOB_ID) {
         finalResults = {
           // @ts-expect-error incorrect search response type
           jobs: results.aggregations?.unique_terms?.buckets.map(
             (b: { key: string; doc_count: number }) => b.key
           ),
         };
-      } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
+      } else if (fieldToBucket === ML_PARTITION_FIELD_VALUE) {
         const jobs: Record<string, string[]> = jobIdsWithStopOnWarnSet.reduce(
           (obj: Record<string, string[]>, jobId: string) => {
             obj[jobId] = [];

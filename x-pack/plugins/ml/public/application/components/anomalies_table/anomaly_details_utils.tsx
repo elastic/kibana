@@ -18,13 +18,13 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
+import { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-common';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import {
   showActualForFunction,
   showTypicalForFunction,
 } from '../../../../common/util/anomaly_utils';
-import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import { formatValue } from '../../formatters/format_value';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import {
@@ -68,7 +68,7 @@ export function getInfluencersItems(
 }
 
 export const DetailsItems: FC<{
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   filter: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
@@ -328,7 +328,7 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> = ({ anomaly }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -619,7 +619,7 @@ const RecordScore: FC<{ score: number }> = ({ score }) => {
   );
 };
 
-function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) {
+function getAnomalyType(explanation: MlAnomalyRecordDoc['anomaly_score_explanation']) {
   if (
     explanation === undefined ||
     explanation.anomaly_length === undefined ||

@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { MlAnomalyRecordDoc, MlRecordForInfluencer } from '@kbn/ml-common';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -41,7 +42,7 @@ import {
   isMultiBucketAnomaly,
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
+import { CombinedJob, Datafeed } from '../../shared';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
@@ -453,7 +454,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   function processRecordsForDisplay(
     combinedJobRecords: Record<string, MlJob>,
-    anomalyRecords: RecordForInfluencer[]
+    anomalyRecords: MlRecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
     if (anomalyRecords.length === 0) {
@@ -1131,7 +1132,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     function getChartDataForPointSearch(
       chartData: ChartPoint[],
-      record: AnomalyRecordDoc,
+      record: MlAnomalyRecordDoc,
       chartType: ChartType
     ) {
       if (
@@ -1818,7 +1819,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     latestMs: number,
     maxResults: number,
     influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<RecordForInfluencer[]> {
+  ): Promise<MlRecordForInfluencer[]> {
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, record score, plus any specified job IDs.
     const boolCriteria: estypes.QueryDslBoolQuery['must'] = [
@@ -1894,7 +1895,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const response = await mlClient.anomalySearch<estypes.SearchResponse<RecordForInfluencer>>(
+    const response = await mlClient.anomalySearch<estypes.SearchResponse<MlRecordForInfluencer>>(
       {
         body: {
           size: maxResults !== undefined ? maxResults : 100,

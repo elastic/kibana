@@ -8,12 +8,12 @@
 // Service for obtaining data for the ML Results dashboards.
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { type MlAnomalyRecordDoc, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-common';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
 import type { CriteriaField } from '../results_service';
 import { basePath } from '.';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -21,7 +21,6 @@ import type {
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
@@ -130,7 +129,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   anomalySearch(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http<ESSearchResponse<MLAnomalyDoc>>({
+    return httpService.http<ESSearchResponse<MlAnomalyRecordDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,
@@ -139,7 +138,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   anomalySearch$(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http$<ESSearchResponse<MLAnomalyDoc>>({
+    return httpService.http$<ESSearchResponse<MlAnomalyRecordDoc>>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
       body,
@@ -148,7 +147,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+    fieldToBucket?: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -221,7 +220,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       interval,
       functionDescription,
     });
-    return httpService.http$<{ success: boolean; records: AnomalyRecordDoc[] }>({
+    return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
       path: `${basePath()}/results/anomaly_records`,
       method: 'POST',
       body,

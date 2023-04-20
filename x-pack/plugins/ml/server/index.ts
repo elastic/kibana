@@ -9,9 +9,6 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
-  AnomalyRecordDoc as MlAnomalyRecordDoc,
-  AnomaliesTableRecord as MlAnomaliesTableRecord,
-  AnomalyResultType as MlAnomalyResultType,
   DatafeedStats as MlDatafeedStats,
   Job as MlJob,
   MlSummaryJob,
@@ -23,8 +20,6 @@ export type {
   Modules as MlModules,
   ResultsService as MlResultsService,
   TrainedModels as MlTrainedModels,
-} from './shared';
-export {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,

@@ -6,32 +6,34 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { MlAnomalyRecordDoc } from './anomalies';
+import type { MlAnomalyRecordDoc } from './anomalies';
 
 /**
  * Base Interface for basic custom URL.
  */
-export interface BaseUrlConfig {
+export interface MlBaseUrlConfig {
   url_name: string;
   url_value: string;
 }
 
-export interface KibanaUrlConfig extends BaseUrlConfig {
+export interface MlKibanaUrlConfig extends MlBaseUrlConfig {
   time_range?: string;
 }
 
-export interface KibanaUrlConfigWithTimeRange extends BaseUrlConfig {
+export interface MlKibanaUrlConfigWithTimeRange extends MlBaseUrlConfig {
   time_range: string;
 }
 
-export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
+export type MlUrlConfig = MlBaseUrlConfig | MlKibanaUrlConfig;
 
-export interface CustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
+export interface MlCustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
   earliest: string;
   latest: string;
 }
 
-export function isKibanaUrlConfigWithTimeRange(arg: unknown): arg is KibanaUrlConfigWithTimeRange {
+export function isMlKibanaUrlConfigWithTimeRange(
+  arg: unknown
+): arg is MlKibanaUrlConfigWithTimeRange {
   return (
     isPopulatedObject(arg, ['url_name', 'url_value', 'time_range']) &&
     typeof arg.time_range === 'string'

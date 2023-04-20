@@ -11,12 +11,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
+  ML_ANOMALY_SEVERITY,
+  ML_ANOMALY_THRESHOLD,
+  ML_SEVERITY_COLORS,
+} from '@kbn/ml-common';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import type { AnomaliesTableRecord, AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
-  id: ANOMALY_SEVERITY;
+  id: ML_ANOMALY_SEVERITY;
   label: string;
 }
 
@@ -80,37 +85,37 @@ function getSeverityTypes() {
 
   return (severityTypes = {
     critical: {
-      id: ANOMALY_SEVERITY.CRITICAL,
+      id: ML_ANOMALY_SEVERITY.CRITICAL,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
         defaultMessage: 'critical',
       }),
     },
     major: {
-      id: ANOMALY_SEVERITY.MAJOR,
+      id: ML_ANOMALY_SEVERITY.MAJOR,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
         defaultMessage: 'major',
       }),
     },
     minor: {
-      id: ANOMALY_SEVERITY.MINOR,
+      id: ML_ANOMALY_SEVERITY.MINOR,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
         defaultMessage: 'minor',
       }),
     },
     warning: {
-      id: ANOMALY_SEVERITY.WARNING,
+      id: ML_ANOMALY_SEVERITY.WARNING,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
         defaultMessage: 'warning',
       }),
     },
     unknown: {
-      id: ANOMALY_SEVERITY.UNKNOWN,
+      id: ML_ANOMALY_SEVERITY.UNKNOWN,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
         defaultMessage: 'unknown',
       }),
     },
     low: {
-      id: ANOMALY_SEVERITY.LOW,
+      id: ML_ANOMALY_SEVERITY.LOW,
       label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
         defaultMessage: 'low',
       }),
@@ -122,7 +127,7 @@ function getSeverityTypes() {
  * Returns whether the anomaly is in a categorization analysis.
  * @param anomaly Anomaly table record
  */
-export function isCategorizationAnomaly(anomaly: AnomaliesTableRecord): boolean {
+export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolean {
   return anomaly.entityName === 'mlcategory';
 }
 
@@ -142,13 +147,13 @@ export function getFormattedSeverityScore(score: number): string {
 export function getSeverity(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;
@@ -160,19 +165,19 @@ export function getSeverity(normalizedScore: number): SeverityType {
  * for the supplied normalized anomaly score (a value between 0 and 100).
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
-export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
+export function getSeverityType(normalizedScore: number): ML_ANOMALY_SEVERITY {
   if (normalizedScore >= 75) {
-    return ANOMALY_SEVERITY.CRITICAL;
+    return ML_ANOMALY_SEVERITY.CRITICAL;
   } else if (normalizedScore >= 50) {
-    return ANOMALY_SEVERITY.MAJOR;
+    return ML_ANOMALY_SEVERITY.MAJOR;
   } else if (normalizedScore >= 25) {
-    return ANOMALY_SEVERITY.MINOR;
+    return ML_ANOMALY_SEVERITY.MINOR;
   } else if (normalizedScore >= 3) {
-    return ANOMALY_SEVERITY.WARNING;
+    return ML_ANOMALY_SEVERITY.WARNING;
   } else if (normalizedScore >= 0) {
-    return ANOMALY_SEVERITY.LOW;
+    return ML_ANOMALY_SEVERITY.LOW;
   } else {
-    return ANOMALY_SEVERITY.UNKNOWN;
+    return ML_ANOMALY_SEVERITY.UNKNOWN;
   }
 }
 
@@ -185,15 +190,15 @@ export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
 export function getSeverityWithLow(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
     return severityTypesList.warning;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.low;
   } else {
     return severityTypesList.unknown;
@@ -206,18 +211,18 @@ export function getSeverityWithLow(normalizedScore: number): SeverityType {
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
 export function getSeverityColor(normalizedScore: number): string {
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
-    return SEVERITY_COLORS.CRITICAL;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
-    return SEVERITY_COLORS.MAJOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
-    return SEVERITY_COLORS.MINOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
-    return SEVERITY_COLORS.WARNING;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
-    return SEVERITY_COLORS.LOW;
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
+    return ML_SEVERITY_COLORS.CRITICAL;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
+    return ML_SEVERITY_COLORS.MAJOR;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
+    return ML_SEVERITY_COLORS.MINOR;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
+    return ML_SEVERITY_COLORS.WARNING;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
+    return ML_SEVERITY_COLORS.LOW;
   } else {
-    return SEVERITY_COLORS.BLANK;
+    return ML_SEVERITY_COLORS.BLANK;
   }
 }
 
@@ -226,7 +231,7 @@ export function getSeverityColor(normalizedScore: number): string {
  * for example in anomaly charts with a cross-shaped marker.
  * @param anomaly Anomaly table record
  */
-export function isMultiBucketAnomaly(anomaly: AnomalyRecordDoc): boolean {
+export function isMultiBucketAnomaly(anomaly: MlAnomalyRecordDoc): boolean {
   if (anomaly.anomaly_score_explanation === undefined) {
     return false;
   }
@@ -278,7 +283,7 @@ export function getAnomalyScoreExplanationImpactValue(score: number): number {
  * then partition_field, returning undefined if none of these fields are present.
  * @param record - anomaly record result for which to obtain the entity field name.
  */
-export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined {
+export function getEntityFieldName(record: MlAnomalyRecordDoc): string | undefined {
   // Analyses with by and over fields, will have a top-level by_field_name, but
   // the by_field_value(s) will be in the nested causes array.
   if (record.by_field_name !== undefined && record.by_field_value !== undefined) {
@@ -300,7 +305,7 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
  * then partition_field, returning undefined if none of these fields are present.
  * @param record - anomaly record result for which to obtain the entity field value.
  */
-export function getEntityFieldValue(record: AnomalyRecordDoc): string | number | undefined {
+export function getEntityFieldValue(record: MlAnomalyRecordDoc): string | number | undefined {
   if (record.by_field_value !== undefined) {
     return record.by_field_value;
   }
@@ -319,7 +324,7 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
  * of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
  * @param record - anomaly record result for which to obtain the entity field list.
  */
-export function getEntityFieldList(record: AnomalyRecordDoc): EntityField[] {
+export function getEntityFieldList(record: MlAnomalyRecordDoc): EntityField[] {
   const entityFields: EntityField[] = [];
   if (record.partition_field_name !== undefined) {
     entityFields.push({
@@ -375,7 +380,7 @@ export function showTypicalForFunction(functionDescription: string): boolean {
  * Returns whether a rule can be configured against the specified anomaly.
  * @param record - anomaly record result
  */
-export function isRuleSupported(record: AnomalyRecordDoc): boolean {
+export function isRuleSupported(record: MlAnomalyRecordDoc): boolean {
   // A rule can be configured with a numeric condition if the function supports it,
   // and/or with scope if there is a partitioning fields.
   return (

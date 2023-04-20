@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+import type { MlUrlConfig } from '@kbn/ml-common';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
-import { UrlConfig } from '../../../../common/types/custom_urls';
-import { type DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+import type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {
   job: Job | DataFrameAnalyticsConfig;
-  jobCustomUrls: UrlConfig[];
-  setCustomUrls: (customUrls: UrlConfig[]) => void;
+  jobCustomUrls: MlUrlConfig[];
+  setCustomUrls: (customUrls: MlUrlConfig[]) => void;
   editMode?: 'inline' | 'modal';
 }
 

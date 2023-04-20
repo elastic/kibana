@@ -27,15 +27,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
-import { isValidLabel } from '../../../util/custom_url_utils';
+import type { MlUrlConfig } from '@kbn/ml-common';
+
 import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
 
-import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
-import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { CustomTimeRangePicker } from './custom_time_range_picker';
+import { isValidLabel } from '../../../util/custom_url_utils';
 import { useMlKibana } from '../../../contexts/kibana';
+
+import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
+import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
+import { CustomTimeRangePicker } from './custom_time_range_picker';
 import { getDropDownOptions } from './get_dropdown_options';
 
 function getLinkToOptions() {
@@ -64,7 +66,7 @@ function getLinkToOptions() {
 interface CustomUrlEditorProps {
   customUrl: CustomUrlSettings | undefined;
   setEditCustomUrl: (url: CustomUrlSettings) => void;
-  savedCustomUrls: UrlConfig[];
+  savedCustomUrls: MlUrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   showTimeRangeSelector?: boolean;

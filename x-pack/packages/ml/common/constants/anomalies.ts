@@ -9,7 +9,7 @@
  * Labels displayed in the ML UI to indicate the severity of the anomaly according
  * to the normalized anomaly score.
  */
-export enum ANOMALY_SEVERITY {
+export enum ML_ANOMALY_SEVERITY {
   /**
    * Anomalies are displayed as critical severity when the score is greater than or equal to 75.
    */
@@ -45,7 +45,7 @@ export enum ANOMALY_SEVERITY {
 /**
  * Anomaly score numeric thresholds to indicate the severity of the anomaly.
  */
-export enum ANOMALY_THRESHOLD {
+export enum ML_ANOMALY_THRESHOLD {
   /**
    * Threshold at which anomalies are labelled in the UI as critical.
    */
@@ -75,7 +75,7 @@ export enum ANOMALY_THRESHOLD {
 /**
  * RGB hex codes used to indicate the severity of an anomaly according to its anomaly score.
  */
-export const SEVERITY_COLORS = {
+export const ML_SEVERITY_COLORS = {
   /**
    * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.
    */
@@ -108,31 +108,31 @@ export const SEVERITY_COLORS = {
   BLANK: '#ffffff',
 };
 
-export const SEVERITY_COLOR_RAMP = [
+export const ML_SEVERITY_COLOR_RAMP = [
   {
-    stop: ANOMALY_THRESHOLD.LOW,
-    color: SEVERITY_COLORS.WARNING,
+    stop: ML_ANOMALY_THRESHOLD.LOW,
+    color: ML_SEVERITY_COLORS.WARNING,
   },
   {
-    stop: ANOMALY_THRESHOLD.MINOR,
-    color: SEVERITY_COLORS.MINOR,
+    stop: ML_ANOMALY_THRESHOLD.MINOR,
+    color: ML_SEVERITY_COLORS.MINOR,
   },
   {
-    stop: ANOMALY_THRESHOLD.MAJOR,
-    color: SEVERITY_COLORS.MAJOR,
+    stop: ML_ANOMALY_THRESHOLD.MAJOR,
+    color: ML_SEVERITY_COLORS.MAJOR,
   },
   {
-    stop: ANOMALY_THRESHOLD.CRITICAL,
-    color: SEVERITY_COLORS.CRITICAL,
+    stop: ML_ANOMALY_THRESHOLD.CRITICAL,
+    color: ML_SEVERITY_COLORS.CRITICAL,
   },
 ];
 
-export const ANOMALY_RESULT_TYPE = {
+export const ML_ANOMALY_RESULT_TYPE = {
   BUCKET: 'bucket',
   RECORD: 'record',
   INFLUENCER: 'influencer',
 } as const;
 
-export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
-export const JOB_ID = 'job_id';
-export const PARTITION_FIELD_VALUE = 'partition_field_value';
+export const ML_PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
+export const ML_JOB_ID = 'job_id';
+export const ML_PARTITION_FIELD_VALUE = 'partition_field_value';

@@ -27,9 +27,7 @@ export const plugin: PluginInitializer<
 
 export type { MlPluginSetup, MlPluginStart };
 export type {
-  AnomaliesTableRecord,
   DataRecognizerConfigResponse,
-  Influencer,
   JobExistResult,
   JobStat,
   MlCapabilitiesResponse,
@@ -53,7 +51,6 @@ export {
 } from '../common/util/anomaly_utils';
 export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 
-export { ANOMALY_SEVERITY } from '../common';
 export type { MlLocator } from './locator';
 export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 
