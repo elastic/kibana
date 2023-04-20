@@ -49,7 +49,7 @@ const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
-// kibana.alert.context - human readable reason that this alert is active
+// kibana.alert.context - alert context
 const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
 
 // kibana.alert.start - timestamp when the alert is first active
