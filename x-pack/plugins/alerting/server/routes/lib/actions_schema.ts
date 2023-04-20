@@ -29,7 +29,7 @@ export const actionsSchema = schema.arrayOf(
     uuid: schema.maybe(schema.string()),
     alerts_filter: schema.maybe(
       schema.object({
-        query: schema.nullable(
+        query: schema.maybe(
           schema.object({
             kql: schema.string(),
             filters: schema.arrayOf(
@@ -42,7 +42,7 @@ export const actionsSchema = schema.arrayOf(
             dsl: schema.maybe(schema.string()),
           })
         ),
-        timeframe: schema.nullable(
+        timeframe: schema.maybe(
           schema.object({
             days: schema.arrayOf(
               schema.oneOf([

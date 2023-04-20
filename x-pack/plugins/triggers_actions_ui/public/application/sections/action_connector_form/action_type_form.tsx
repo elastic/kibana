@@ -399,12 +399,12 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
             <ActionAlertsFilterQuery
-              state={actionItem.alertsFilter?.query ?? null}
+              state={actionItem.alertsFilter?.query}
               onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
             />
             <EuiSpacer size="s" />
             <ActionAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe ?? null}
+              state={actionItem.alertsFilter?.timeframe}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>

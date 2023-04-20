@@ -88,12 +88,12 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
 }
 
 export interface AlertsFilter extends SavedObjectAttributes {
-  query: null | {
+  query?: {
     kql: string;
     filters: Filter[];
     dsl?: string; // This fields is generated in the code by using "kql", therefore it's not optional but defined as optional to avoid modifying a lot of files in different plugins
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
@@ -190,11 +190,11 @@ export interface Rule<Params extends RuleTypeParams = never> {
 }
 
 export interface SanitizedAlertsFilter extends AlertsFilter {
-  query: null | {
+  query?: {
     kql: string;
     filters: Filter[];
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
 
 export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {

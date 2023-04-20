@@ -14,8 +14,8 @@ import deepEqual from 'fast-deep-equal';
 import { AlertsSearchBar } from '../alerts_search_bar';
 
 interface ActionAlertsFilterQueryProps {
-  state: AlertsFilter['query'] | null;
-  onChange: (update: AlertsFilter['query'] | null) => void;
+  state?: AlertsFilter['query'];
+  onChange: (update?: AlertsFilter['query']) => void;
 }
 
 export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = ({
@@ -27,11 +27,14 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
   const queryEnabled = useMemo(() => Boolean(state), [state]);
 
   useEffect(() => {
-    const nextState = queryEnabled ? query : null;
+    const nextState = queryEnabled ? query : undefined;
     if (!deepEqual(state, nextState)) onChange(nextState);
   }, [queryEnabled, query, state, onChange]);
 
-  const toggleQuery = useCallback(() => onChange(state ? null : query), [state, query, onChange]);
+  const toggleQuery = useCallback(
+    () => onChange(state ? undefined : query),
+    [state, query, onChange]
+  );
   const updateQuery = useCallback(
     (update: Partial<AlertsFilter['query']>) => {
       setQuery({

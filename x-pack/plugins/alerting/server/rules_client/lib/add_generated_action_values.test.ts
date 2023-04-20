@@ -58,7 +58,7 @@ describe('addGeneratedActionValues()', () => {
       addGeneratedActionValues([
         {
           ...mockAction,
-          alertsFilter: { query: { kql: 'foo:bar:1', filters: [] }, timeframe: null },
+          alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
         },
       ])
     ).toThrowErrorMatchingInlineSnapshot('"Error creating DSL query: invalid KQL"');

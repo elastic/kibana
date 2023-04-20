@@ -17,6 +17,7 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
   ALERT_INSTANCE_ID,
+  ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import {
   QueryDslQueryContainer,
@@ -573,10 +574,11 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
         script: {
           script: {
             source:
-              "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+              'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
             params: {
               days: alertsFilter.timeframe.days,
               timezone: alertsFilter.timeframe.timezone,
+              datetimeField: ALERT_LAST_DETECTED,
             },
           },
         },
@@ -585,7 +587,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
         script: {
           script: {
             source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
@@ -610,6 +612,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
               start: alertsFilter.timeframe.hours.start,
               end: alertsFilter.timeframe.hours.end,
               timezone: alertsFilter.timeframe.timezone,
+              datetimeField: ALERT_LAST_DETECTED,
             },
           },
         },

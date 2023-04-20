@@ -31,14 +31,12 @@ export function addGeneratedActionValues(
         ? {
             alertsFilter: {
               ...alertsFilter,
-              timeframe: alertsFilter.timeframe || null,
-              query: !alertsFilter.query
-                ? null
-                : {
-                    kql: alertsFilter.query.kql,
-                    filters: alertsFilter.query.filters,
+              query: alertsFilter.query
+                ? {
+                    ...alertsFilter.query,
                     dsl: generateDSL(alertsFilter.query.kql, alertsFilter.query.filters),
-                  },
+                  }
+                : undefined,
             },
           }
         : {}),
