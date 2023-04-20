@@ -52,16 +52,39 @@ export function IgnoredGlobalFiltersEntries({
               {layerPalette ? (
                 <EuiFlexItem grow={false}>
                   {layerPalette.length === 1 ? (
-                    <EuiIcon color={layerPalette[0]} type="stopFilled" />
+                    <EuiIcon
+                      color={layerPalette[0]}
+                      type="stopFilled"
+                      css={css`
+                        margin-top: 2px;
+                      `}
+                    />
                   ) : (
-                    <EuiIcon type="color" />
+                    <EuiIcon
+                      type="color"
+                      css={css`
+                        margin-top: 2px;
+                      `}
+                    />
                   )}
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={Boolean(layerPalette)}>
+              <EuiFlexItem
+                grow={Boolean(layerPalette)}
+                css={css`
+                  width: 150px;
+                `}
+              >
                 <EuiText size="s">{layerTitle}</EuiText>
                 {layerPalette && layerPalette.length > 1 ? (
-                  <EuiColorPaletteDisplay size="xs" palette={layerPalette} />
+                  <EuiColorPaletteDisplay
+                    size="xs"
+                    palette={layerPalette}
+                    css={css`
+                      margin-top: 4px;
+                      width: 150px;
+                    `}
+                  />
                 ) : null}
               </EuiFlexItem>
             </EuiFlexGroup>
