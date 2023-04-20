@@ -21,7 +21,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionContext();
 
-    const { renderOption } = fieldStats!.useFieldStatsTrigger();
+    const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
 
     const options = useMemo<EuiComboBoxOptionOption[]>(() => {
       return metricFieldOptions.map((v) => {
@@ -41,8 +41,9 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
         if (typeof option !== 'undefined') {
           onChange(option.value as string);
         }
+        closeFlyout();
       },
-      [onChange]
+      [onChange, closeFlyout]
     );
 
     return (
@@ -59,7 +60,6 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
             onChange={onChangeCallback}
             isClearable={false}
             data-test-subj="aiopsChangePointMetricField"
-            onClick={(e) => e.stopPropagation()}
             // @ts-ignore
             renderOption={renderOption}
           />

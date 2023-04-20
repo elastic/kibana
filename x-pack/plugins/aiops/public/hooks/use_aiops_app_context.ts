@@ -43,7 +43,10 @@ export interface AiopsAppDependencies {
   lens: LensPublicStart;
   // deps for unified field stats
   fieldStats?: {
-    useFieldStatsTrigger: () => { renderOption: EuiComboBoxProps<string>['renderOption'] };
+    useFieldStatsTrigger: () => {
+      renderOption: EuiComboBoxProps<string>['renderOption'];
+      closeFlyout: () => void;
+    };
     FieldStatsFlyoutProvider: FC<{
       dataView: DataView;
       fieldStatsServices: FieldStatsServices;

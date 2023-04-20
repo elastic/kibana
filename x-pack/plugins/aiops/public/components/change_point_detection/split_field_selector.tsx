@@ -18,7 +18,7 @@ interface SplitFieldSelectorProps {
 
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ value, onChange }) => {
   const { fieldStats } = useAiopsAppContext();
-  const { renderOption } = fieldStats!.useFieldStatsTrigger();
+  const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
 
   const { splitFieldsOptions } = useChangePointDetectionContext();
 
@@ -45,8 +45,9 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
       const option = selectedOptions[0];
       const newValue = option?.value as string;
       onChange(newValue);
+      closeFlyout();
     },
-    [onChange]
+    [onChange, closeFlyout]
   );
 
   return (
@@ -62,7 +63,6 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
         onChange={onChangeCallback}
         isClearable
         data-test-subj="aiopsChangePointSplitField"
-        onClick={(e) => e.stopPropagation()}
         // @ts-ignore
         renderOption={renderOption}
       />
