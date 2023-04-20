@@ -29,7 +29,7 @@ const connector = new EnginesAPIConnector({
 });`;
 
 const cURLSnippet = (elasticsearchUrl: string, engineName: string, apiKey: string) => `
-curl --location --request GET '${elasticsearchUrl}/_application/search_application/${engineName}/_search' \\
+curl --location --request GET '${elasticsearchUrl}/${engineName}/_search' \\
 --header 'Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}' \\
 --header 'Content-Type: application/json' \\
 --data-raw '{
