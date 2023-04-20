@@ -129,13 +129,13 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
           values={{
             docs: (
               <EuiLink href="https://ela.st/findings" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="docs"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
@@ -206,10 +206,10 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'not-deployed' || status === 'indexing' || status === 'waiting_for_results')
+    if (status === 'indexing' || status === 'waiting_for_results')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'not-installed')
+    if (status === 'not-deployed' || status === 'not-installed')
       return (
         <VulnerabilitiesFindingsInstalledEmptyPrompt
           vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}

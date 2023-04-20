@@ -20,6 +20,7 @@ export const errorCountParamsSchema = schema.object({
 export const transactionDurationParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   transactionType: schema.maybe(schema.string()),
+  transactionName: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),

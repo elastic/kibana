@@ -8,5 +8,4 @@
 export * from './isolate_success';
 export * from './isolate_form';
 export * from './unisolate_form';
-export * from './endpoint_host_isolation_status';
 export * from './action_completion_return_button';
