@@ -57,6 +57,7 @@ import {
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setTheme } from './services';
 import { CustomTimeRangeBadge } from './lib/panel/panel_header/panel_actions/customize_panel/custom_time_range_badge';
+import { setKibanaServices } from './kibana_services';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -143,10 +144,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(
-    core: CoreStart,
-    { uiActions, inspector, savedObjectsManagement }: EmbeddableStartDependencies
-  ): EmbeddableStart {
+  public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
         def.type,
@@ -156,6 +154,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
+    const { uiActions, inspector, savedObjectsManagement } = deps;
     const { overlays, theme, uiSettings } = core;
 
     const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
@@ -232,7 +231,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         getMigrateFunction(commonContract)
       );
 
-    return {
+    const embeddableStart: EmbeddableStart = {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>
@@ -255,6 +254,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
       },
     };
+
+    setKibanaServices(core, embeddableStart, deps);
+    return embeddableStart;
   }
 
   public stop() {

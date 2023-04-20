@@ -93,6 +93,8 @@ export {
   panelHoverTrigger,
 } from './lib';
 
+export { EmbeddablePanelAsync, EmbeddablePanelNew } from './embeddable_panel';
+
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
 export type { EnhancementRegistryDefinition } from './types';
