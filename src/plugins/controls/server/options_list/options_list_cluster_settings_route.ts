@@ -18,6 +18,10 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
     },
     async (context, _, response) => {
       try {
+        /**
+         *  using internal user here because in many cases the logged in user will not have the monitor permission required
+         * to check cluster settings. This endpoint does not take a query, params, or a body, so there is no chance of leaking info.
+         */
         const esClient = (await context.core).elasticsearch.client.asInternalUser;
         const settings = await esClient.cluster.getSettings({
           include_defaults: true,
