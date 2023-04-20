@@ -1190,11 +1190,11 @@ export interface Visualization<T = unknown, P = T> {
   /**
    * Allows the visualization to announce whether or not it has any settings to show
    */
-  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appearance', boolean>;
 
   renderLayerSettings?: (
     domElement: Element,
-    props: VisualizationLayerSettingsProps<T>
+    props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appearance' }
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
@@ -1293,6 +1293,10 @@ export interface Visualization<T = unknown, P = T> {
   ) => Suggestion<T> | undefined;
 
   getVisualizationInfo?: (state: T) => VisualizationInfo;
+  /**
+   * A visualization can return custom dimensions for the reporting tool
+   */
+  getReportingLayout?: (state: T) => { height: number; width: number };
 }
 
 // Use same technique as TriggerContext
