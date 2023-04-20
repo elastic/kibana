@@ -38,7 +38,6 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import rison from '@kbn/rison';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   Rule,
@@ -76,6 +75,7 @@ import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -399,6 +399,8 @@ export const RulesList = ({
     },
     [setFilters, handleUpdateFiltersEffect]
   );
+
+  const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
 
   useEffect(() => {
     if (statusFilter) {
@@ -823,6 +825,10 @@ export const RulesList = ({
                 />
                 <EuiSpacer size="s" />
               </>
+            ) : null}
+
+            {showSearchBar && !isEmpty(filters.ruleParams) ? (
+              <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
             ) : null}
 
             <RulesListTable
