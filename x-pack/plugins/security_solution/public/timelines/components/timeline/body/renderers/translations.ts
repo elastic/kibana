@@ -41,19 +41,6 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
   }
 );
 
-export const EMPTY_STATUS = i18n.translate(
-  'xpack.securitySolution.hostIsolation.agentStatuses.empty',
-  {
-    defaultMessage: '-',
-  }
-);
-
-export const REASON_RENDERER_TITLE = (eventRendererName: string) =>
-  i18n.translate('xpack.securitySolution.event.reason.reasonRendererTitle', {
-    values: { eventRendererName },
-    defaultMessage: 'Event renderer: {eventRendererName} ',
-  });
-
 export const SHOW_ALL_INDICATOR_MATCHES = (count: number) =>
   i18n.translate('xpack.securitySolution.event.summary.threat_indicator.showMatches', {
     values: { count },

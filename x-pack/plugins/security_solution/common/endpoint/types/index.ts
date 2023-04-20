@@ -473,8 +473,10 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export type HostInfo = Immutable<{
-  metadata: HostMetadata;
+// Host Information as returned by the Host Details API.
+// NOTE:  `HostInfo` type is the original and defined as Immutable.
+export interface HostInfoInterface {
+  metadata: HostMetadataInterface;
   host_status: HostStatus;
   policy_info?: {
     agent: {
@@ -492,7 +494,9 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-}>;
+}
+
+export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
 // NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
