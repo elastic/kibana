@@ -40,3 +40,23 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
     defaultMessage: 'Open in Endpoint Security',
   }
 );
+
+export const SHOW_ALL_INDICATOR_MATCHES = (count: number) =>
+  i18n.translate('xpack.securitySolution.event.summary.threat_indicator.showMatches', {
+    values: { count },
+    defaultMessage: 'Show all {count} indicator match alerts',
+  });
+
+export const ALL_INDICATOR_MATCHES_MODAL_HEADER = i18n.translate(
+  'xpack.securitySolution.event.summary.threat_indicator.modal.allMatches',
+  {
+    defaultMessage: 'All Indicator Matches',
+  }
+);
+
+export const ALL_INDICATOR_MATCHES_MODAL_CLOSE = i18n.translate(
+  'xpack.securitySolution.event.summary.threat_indicator.modal.close',
+  {
+    defaultMessage: 'Close',
+  }
+);
