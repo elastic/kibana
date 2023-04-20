@@ -161,7 +161,7 @@ describe('FileService', () => {
     ]);
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 1,
@@ -172,7 +172,7 @@ describe('FileService', () => {
 
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 2,
