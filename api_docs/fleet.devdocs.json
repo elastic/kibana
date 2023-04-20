@@ -6005,6 +6005,60 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.readBundledPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "readBundledPackage",
+            "description": [],
+            "signature": [
+              "(bundledPackage: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.BundledPackage",
+                "text": "BundledPackage"
+              },
+              ") => Promise<{ packageInfo: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              "; paths: string[]; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.readBundledPackage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "bundledPackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.BundledPackage",
+                    "text": "BundledPackage"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.PackageClient.getPackage",
             "type": "Function",
             "tags": [],
