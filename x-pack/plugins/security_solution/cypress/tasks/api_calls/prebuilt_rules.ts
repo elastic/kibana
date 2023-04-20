@@ -34,3 +34,26 @@ export const waitTillPrebuiltRulesReadyToInstall = () => {
     { interval: 2000, timeout: 60000 }
   );
 };
+
+export const createNewRuleAsset = (index: string, initialNumberOfDocuments: number) => {
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'PUT',
+          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
+          failOnStatusCode: false,
+          body: {},
+        })
+        .then((response) => {
+          if (response.status !== 200) {
+            return false;
+          } else {
+            return response.body.hits.hits.length > initialNumberOfDocuments;
+          }
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
