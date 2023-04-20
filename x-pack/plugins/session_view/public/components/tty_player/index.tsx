@@ -95,7 +95,7 @@ export const TTYPlayer = ({
   useEffect(() => {
     if (show) {
       // refetch the most recent page when tty player is loaded
-      refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+      refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     }
   }, [refetch, show]);
 
