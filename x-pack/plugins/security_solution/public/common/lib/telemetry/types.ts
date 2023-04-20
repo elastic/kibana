@@ -20,6 +20,7 @@ export enum TelemetryEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
+  MLJobUpdate = 'ML Job Update',
 }
 
 export interface ReportAlertsGroupingChangedParams {
@@ -51,13 +52,31 @@ export interface ReportEntityRiskFilteredParams extends EntityParam {
   selectedSeverity: RiskSeverity;
 }
 
+export enum ML_JOB_TELEMETRY_STATUS {
+  started = 'started',
+  startError = 'start_error',
+  stopped = 'stopped',
+  stopError = 'stop_error',
+  moduleInstalled = 'module_installed',
+  installationError = 'installationError',
+}
+
+export interface ReportMLJobUpdateParams {
+  jobId: string;
+  isElasticJob: boolean;
+  status: ML_JOB_TELEMETRY_STATUS;
+  moduleId?: string;
+  errorMessage?: string;
+}
+
 export type TelemetryEventParams =
   | ReportAlertsGroupingChangedParams
   | ReportAlertsGroupingToggledParams
   | ReportAlertsTakeActionParams
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
-  | ReportEntityRiskFilteredParams;
+  | ReportEntityRiskFilteredParams
+  | ReportMLJobUpdateParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -67,6 +86,7 @@ export interface TelemetryClientStart {
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
   reportEntityRiskFiltered(params: ReportEntityRiskFilteredParams): void;
+  reportMLJobUpdate(params: ReportMLJobUpdateParams): void;
 }
 
 export type TelemetryEvent =
@@ -93,4 +113,8 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.EntityRiskFiltered;
       schema: RootSchema<ReportEntityRiskFilteredParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.MLJobUpdate;
+      schema: RootSchema<ReportMLJobUpdateParams>;
     };
