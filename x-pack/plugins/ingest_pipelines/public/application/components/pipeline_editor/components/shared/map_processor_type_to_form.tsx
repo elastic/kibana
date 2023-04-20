@@ -29,6 +29,7 @@ import {
   Fail,
   Fingerprint,
   Foreach,
+  GeoGrid,
   GeoIP,
   Grok,
   Gsub,
@@ -387,6 +388,24 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
         defaultMessage: 'Runs a processor for each object in "{field}"',
+        values: {
+          field,
+        },
+      }),
+  },
+  geo_grid: {
+    FieldsComponent: GeoGrid,
+    docLinkPath: '/ingest-geo-grid-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.geogrid', {
+      defaultMessage: 'GeoGrid',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.geogrid', {
+      defaultMessage:
+        'Converts geo-grid definitions of grid tiles or cells to regular bounding boxes or polygons which describe their shape.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geogrid', {
+        defaultMessage: 'Adds geo-grid data to documents based on the value of "{field}"',
         values: {
           field,
         },

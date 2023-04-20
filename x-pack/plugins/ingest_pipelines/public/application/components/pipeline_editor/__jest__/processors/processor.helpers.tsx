@@ -195,4 +195,10 @@ type TestSubject =
   | 'removeBinaryField.input'
   | 'resourceNameField.input'
   | 'propertiesField'
+  | 'tileTypeField'
+  | 'targetFormatField'
+  | 'parentField.input'
+  | 'childrenField.input'
+  | 'nonChildrenField.input'
+  | 'precisionField.input'
   | 'patternDefinitionsField';
