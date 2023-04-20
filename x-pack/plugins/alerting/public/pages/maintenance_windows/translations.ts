@@ -509,7 +509,7 @@ export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.a
 export const ARCHIVE_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.archive.subtitle',
   {
-    defaultMessage: 'Upcoming maintenance window events are canceled.',
+    defaultMessage: 'Upcoming maintenance window events are canceled and the window is queued for deletion.',
   }
 );
 
