@@ -14,6 +14,7 @@ import {
   fetchAgentPolicyEnrollmentKey,
   fetchFleetServerUrl,
   getAgentDownloadUrl,
+  unEnrollFleetAgent,
   waitForHostToEnroll,
 } from './fleet_services';
 
@@ -86,7 +87,20 @@ export const createAndEnrollEndpointHost = async ({
   };
 };
 
-// FIXME:PT create function to remove endpoint host
+/**
+ * Destroys the Endpoint Host VM and un-enrolls the Fleet agent
+ * @param kbnClient
+ * @param createdHost
+ */
+export const destroyEndpointHost = async (
+  kbnClient: KbnClient,
+  createdHost: CreateAndEnrollEndpointHostResponse
+): Promise<void> => {
+  await Promise.all([
+    deleteMultipassVm(createdHost.hostname),
+    unEnrollFleetAgent(kbnClient, createdHost.agentId, true),
+  ]);
+};
 
 interface CreateMultipassVmOptions {
   vmName: string;
@@ -118,6 +132,10 @@ const createMultipassVm = async ({
   return {
     vmName,
   };
+};
+
+const deleteMultipassVm = async (vmName: string): Promise<void> => {
+  await execa.command(`multipass delete -p ${vmName}`);
 };
 
 interface EnrollHostWithFleetOptions {

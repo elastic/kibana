@@ -14,7 +14,12 @@ import type {
   GetAgentPoliciesResponse,
   GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
-import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_API_ROUTES,
+  agentPolicyRouteService,
+  agentRouteService,
+  AGENTS_INDEX,
+} from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
@@ -26,6 +31,7 @@ import type {
   EnrollmentAPIKey,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
+  PostAgentUnenrollResponse,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
@@ -348,4 +354,25 @@ export const getLatestAgentDownloadVersion = async (
   }
 
   return stackVersionToArtifactVersion[matchedVersion];
+};
+
+/**
+ * Un-enrolls a Fleet agent
+ *
+ * @param kbnClient
+ * @param agentId
+ * @param force
+ */
+export const unEnrollFleetAgent = async (
+  kbnClient: KbnClient,
+  agentId: string,
+  force = false
+): Promise<PostAgentUnenrollResponse> => {
+  const { data } = await kbnClient.request<PostAgentUnenrollResponse>({
+    method: 'POST',
+    path: agentRouteService.getUnenrollPath(agentId),
+    body: { revoke: force },
+  });
+
+  return data;
 };
