@@ -259,7 +259,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle create action request appropriately with a predefined id', async () => {
-          const predefinedId = 'aSuperRAdId';
+          const predefinedId = `aSuperRAdId_${scenario.id.replace(/\s/g, '_')}`;
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector/${predefinedId}`)
             .auth(user.username, user.password)
