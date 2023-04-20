@@ -224,11 +224,15 @@ export const RulesList = ({
   const { config } = useLoadConfigQuery();
   // Fetch rule types
   const {
-    ruleTypesState,
+    ruleTypesState: {
+      isLoading: isLoadingRuleTypes,
+      isSuccess: isLoadRuleTypesSuccess,
+      initialLoad: isInitialLoadingRuleTypes,
+      filteredRuleTypeIndex,
+    },
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
     authorizedToCreateAnyRules,
-    isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
@@ -276,10 +280,10 @@ export const RulesList = ({
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
-    isLoadingRuleTypes: ruleTypesState.isLoading,
+    isLoadingRuleTypes,
     isLoadingRules: rulesState.isLoading,
     hasData,
-    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRuleTypes,
     isInitialLoadingRules: rulesState.initialLoad,
   });
 
@@ -296,7 +300,7 @@ export const RulesList = ({
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
   const refreshRules = useCallback(async () => {
-    if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
+    if (!filteredRuleTypeIndex || !hasAnyAuthorizedRuleType) {
       return;
     }
     await loadRules();
@@ -310,20 +314,20 @@ export const RulesList = ({
     loadRuleAggregations,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
-    ruleTypesState,
+    filteredRuleTypeIndex,
   ]);
 
   const tableItems = useMemo(() => {
-    if (ruleTypesState.initialLoad) {
+    if (isInitialLoadingRuleTypes) {
       return [];
     }
     return convertRulesToTableItems({
       rules: rulesState.data,
-      ruleTypeIndex: ruleTypesState.data,
+      ruleTypeIndex: filteredRuleTypeIndex,
       canExecuteActions,
       config,
     });
-  }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
+  }, [rulesState.data, canExecuteActions, config]);
 
   const {
     isAllSelected,
@@ -564,10 +568,10 @@ export const RulesList = ({
 
     return selectedIds.length
       ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
-          hasAllPrivilege(selectedRule.consumer, ruleTypesState.data.get(selectedRule.ruleTypeId))
+          hasAllPrivilege(selectedRule.consumer, filteredRuleTypeIndex.get(selectedRule.ruleTypeId))
         )
       : false;
-  }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
+  }, [selectedIds, rulesState.data, filteredRuleTypeIndex, isAllSelected]);
 
   const updateRulesToBulkEdit = useCallback(
     ({ action, rules, filter }: UpdateRulesToBulkEditProps) => {
@@ -597,7 +601,7 @@ export const RulesList = ({
   const isRulesTableLoading =
     isLoading ||
     rulesState.isLoading ||
-    ruleTypesState.isLoading ||
+    isLoadingRuleTypes ||
     isBulkEditing ||
     isPerformingAction ||
     isEnablingRules ||
@@ -807,7 +811,8 @@ export const RulesList = ({
               items={tableItems}
               isLoading={isRulesTableLoading}
               rulesState={rulesState}
-              ruleTypesState={ruleTypesState}
+              ruleTypeIndex={filteredRuleTypeIndex}
+              ruleTypeInitialLoad={isInitialLoadingRuleTypes}
               ruleTypeRegistry={ruleTypeRegistry}
               isPageSelected={isPageSelected}
               isAllSelected={isAllSelected}
@@ -836,7 +841,7 @@ export const RulesList = ({
               }
               onManageLicenseClick={(rule) =>
                 setManageLicenseModalOpts({
-                  licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
+                  licenseType: filteredRuleTypeIndex.get(rule.ruleTypeId)?.minimumLicenseRequired!,
                   ruleTypeId: rule.ruleTypeId,
                 })
               }
@@ -895,7 +900,7 @@ export const RulesList = ({
                     <RuleQuickEditButtons
                       selectedItems={convertRulesToTableItems({
                         rules: filterRulesById(rulesState.data, selectedIds),
-                        ruleTypeIndex: ruleTypesState.data,
+                        ruleTypeIndex: filteredRuleTypeIndex,
                         canExecuteActions,
                         config,
                       })}
@@ -946,7 +951,7 @@ export const RulesList = ({
               }}
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
-              ruleTypeIndex={ruleTypesState.data}
+              ruleTypeIndex={filteredRuleTypeIndex}
               onSave={refreshRules}
             />
           </Suspense>
@@ -961,7 +966,7 @@ export const RulesList = ({
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
               ruleType={
-                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
+                filteredRuleTypeIndex.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
               }
               onSave={refreshRules}
             />

@@ -61,6 +61,7 @@ import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
+  RuleTypeIndex,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -74,7 +75,6 @@ import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
-import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
@@ -91,6 +91,11 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   dispatch: React.Dispatch<RuleReducerAction>;
   errors: IErrorObject;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  ruleTypeIndex: RuleTypeIndex;
+  ruleTypes: Array<RuleType<string, string>>;
+  ruleTypesLoadError: boolean;
+
+  ruleTypesIsLoading: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
@@ -116,6 +121,10 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  ruleTypeIndex,
+  ruleTypes,
+  ruleTypesLoadError,
+  ruleTypesIsLoading,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
@@ -161,12 +170,6 @@ export const RuleForm = ({
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
-  const {
-    ruleTypes,
-    error: loadRuleTypesError,
-    ruleTypeIndex,
-    ruleTypesIsLoading,
-  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
   useEffect(() => {
@@ -182,7 +185,7 @@ export const RuleForm = ({
             arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
             ruleTypeRegistryItem: RuleTypeModel
           ) => {
-            const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
+            const ruleType = ruleTypesResult?.find((item) => ruleTypeRegistryItem.id === item.id);
             if (ruleType) {
               arr.push({
                 ruleType,
@@ -221,10 +224,10 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
+  }, [rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry, ruleTypeIndex, ruleTypes]);
 
   useEffect(() => {
-    if (loadRuleTypesError) {
+    if (ruleTypesLoadError) {
       toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleForm.unableToLoadRuleTypesMessage',
@@ -232,7 +235,7 @@ export const RuleForm = ({
         ),
       });
     }
-  }, [loadRuleTypesError, toasts]);
+  }, [ruleTypesLoadError, toasts]);
 
   useEffect(() => {
     setRuleTypeModel(rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null);

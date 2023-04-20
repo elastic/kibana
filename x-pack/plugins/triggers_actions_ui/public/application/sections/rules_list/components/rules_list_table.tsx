@@ -65,12 +65,6 @@ import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
-interface RuleTypeState {
-  isLoading: boolean;
-  initialLoad: boolean;
-  data: RuleTypeIndex;
-}
-
 export interface RuleState {
   isLoading: boolean;
   data: Rule[];
@@ -104,7 +98,8 @@ export interface RulesListTableProps {
   rulesListKey?: string;
   rulesState: RuleState;
   items: RuleTableItem[];
-  ruleTypesState: RuleTypeState;
+  ruleTypeIndex: RuleTypeIndex;
+  ruleTypeInitialLoad: boolean;
   ruleTypeRegistry: RuleTypeRegistryContract;
   isLoading?: boolean;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
@@ -174,8 +169,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
     rulesListKey,
     rulesState,
     items = [],
-    ruleTypesState,
+    ruleTypeIndex,
     ruleTypeRegistry,
+    ruleTypeInitialLoad,
     isLoading = false,
     sort,
     isPageSelected = false,
@@ -345,7 +341,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
-          const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
+          const ruleType = ruleTypeIndex.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
           const link = (
             <>
@@ -590,7 +586,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         'data-test-subj': 'rulesTableCell-duration',
         render: (value: number, rule: RuleTableItem) => {
           const showDurationWarning = shouldShowDurationWarning(
-            ruleTypesState.data.get(rule.ruleTypeId),
+            ruleTypeIndex.get(rule.ruleTypeId),
             value
           );
 
@@ -768,26 +764,26 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
     ];
   }, [
-    config.minimumScheduleInterval,
-    currentlyOpenNotify,
-    isLoadingMap,
-    isRuleTypeEditableInContext,
-    onRuleChanged,
+    selectedPercentile,
+    renderPercentileColumnName,
+    renderPercentileCellValue,
+    ruleOutcomeColumnField,
+    renderRuleError,
+    ruleTypeIndex,
     onRuleClick,
-    onRuleDeleteClick,
-    onRuleEditClick,
+    tagPopoverOpenIndex,
+    isLoadingMap,
+    currentlyOpenNotify,
+    onRuleChanged,
     onSnoozeRule,
     onUnsnoozeRule,
+    config.minimumScheduleInterval,
+    onRuleEditClick,
     onManageLicenseClick,
-    renderCollapsedItemActions,
-    renderPercentileCellValue,
-    renderPercentileColumnName,
-    renderRuleError,
     renderRuleStatusDropdown,
-    ruleTypesState.data,
-    selectedPercentile,
-    tagPopoverOpenIndex,
-    ruleOutcomeColumnField,
+    isRuleTypeEditableInContext,
+    renderCollapsedItemActions,
+    onRuleDeleteClick,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
@@ -814,17 +810,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
       const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
       return {
         'data-test-subj': 'rule-row',
-        className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
+        className: !ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense
           ? `actRulesList__tableRowDisabled ${selectedClass}`
           : selectedClass,
       };
     },
-    [ruleTypesState, isRowSelected]
+    [isRowSelected, ruleTypeIndex]
   );
 
   const authorizedToModifyAllRules = useMemo(() => {
     let authorized = true;
-    ruleTypesState.data.forEach((ruleType) => {
+    ruleTypeIndex.forEach((ruleType) => {
       if (!authorized) {
         return;
       }
@@ -836,7 +832,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       }
     });
     return authorized;
-  }, [ruleTypesState]);
+  }, [ruleTypeIndex]);
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
@@ -880,7 +876,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           rowProps={rowProps}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
-            className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
+            className: !ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense
               ? 'actRulesList__tableCellDisabled'
               : '',
           })}
@@ -889,7 +885,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypeInitialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

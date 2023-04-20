@@ -17,14 +17,12 @@ import {
   RuleFlyoutCloseReason,
   IErrorObject,
   RuleAddProps,
-  RuleTypeIndex,
   TriggersActionsUiConfig,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
-import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmRuleSave } from './confirm_rule_save';
 import { ConfirmRuleClose } from './confirm_rule_close';
@@ -37,6 +35,7 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { useLoadRuleTypesQuery } from '../../hooks';
 
 const RuleAdd = ({
   consumer,
@@ -79,9 +78,7 @@ const RuleAdd = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
-  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
-    props.ruleTypeIndex
-  );
+
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
@@ -112,18 +109,14 @@ const RuleAdd = ({
     }
   }, [ruleTypeId]);
 
-  useEffect(() => {
-    if (!props.ruleTypeIndex) {
-      (async () => {
-        const ruleTypes = await loadRuleTypes({ http });
-        const index: RuleTypeIndex = new Map();
-        for (const ruleType of ruleTypes) {
-          index.set(ruleType.id, ruleType);
-        }
-        setRuleTypeIndex(index);
-      })();
-    }
-  }, [props.ruleTypeIndex, http]);
+  const {
+    ruleTypesState: {
+      unfilteredRuleTypeIndex: ruleTypeIndex,
+      isLoading: ruleTypesIsLoading,
+      isError: ruleTypesLoadError,
+      ruleTypes,
+    },
+  } = useLoadRuleTypesQuery({ filteredRuleTypes: filteredRuleTypes || [], enabled: true });
 
   useEffect(() => {
     if (isEmpty(rule.params) && !isEmpty(initialRuleParams)) {
@@ -247,7 +240,7 @@ const RuleAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck inFlyout={true} waitForCheck={true}>
+          <HealthCheck inFlyout waitForCheck>
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}
@@ -264,8 +257,11 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
-                filteredRuleTypes={filteredRuleTypes}
                 hideInterval={hideInterval}
+                ruleTypes={ruleTypes}
+                ruleTypeIndex={ruleTypeIndex}
+                ruleTypesLoadError={ruleTypesLoadError}
+                ruleTypesIsLoading={ruleTypesIsLoading}
                 onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>

@@ -13,26 +13,34 @@ import { RuleType, RuleTypeIndex } from '../../types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];
+  enabled?: boolean;
 }
 
-const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTypes: string[]) => {
-  const index: RuleTypeIndex = new Map();
+const getFilteredIndex = (
+  data: Array<RuleType<string, string>> = [],
+  filteredRuleTypes: string[]
+) => {
+  const unfilteredRuleTypeIndex: RuleTypeIndex = new Map();
+
   for (const ruleType of data) {
-    index.set(ruleType.id, ruleType);
+    unfilteredRuleTypeIndex.set(ruleType.id, ruleType);
   }
-  let filteredIndex = index;
-  if (filteredRuleTypes?.length) {
-    filteredIndex = new Map(
-      [...index].filter(([k, v]) => {
-        return filteredRuleTypes.includes(v.id);
-      })
-    );
-  }
-  return filteredIndex;
+
+  const filteredRuleTypeIndex = filteredRuleTypes?.length
+    ? new Map(
+        [...unfilteredRuleTypeIndex].filter(([k, v]) => {
+          return filteredRuleTypes.includes(v.id);
+        })
+      )
+    : unfilteredRuleTypeIndex;
+
+  return { unfilteredRuleTypeIndex, filteredRuleTypeIndex };
 };
 
-export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
-  const { filteredRuleTypes } = props;
+export const useLoadRuleTypesQuery = ({
+  filteredRuleTypes,
+  enabled = true,
+}: UseLoadRuleTypesQueryProps) => {
   const {
     http,
     notifications: { toasts },
@@ -50,17 +58,24 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     );
   };
 
-  const { data, isSuccess, isFetching, isInitialLoading, isLoading } = useQuery({
+  const { data, isSuccess, isFetching, isInitialLoading, isLoading, isError } = useQuery({
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    staleTime: 9000000,
+    cacheTime: 9000000,
+    enabled,
   });
+  const ruleTypes = data ? data.filter((item) => filteredRuleTypes.includes(item.id)) : [];
 
-  const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();
+  const { filteredRuleTypeIndex, unfilteredRuleTypeIndex } = getFilteredIndex(
+    data,
+    filteredRuleTypes
+  );
 
-  const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
-  const authorizedRuleTypes = [...filteredIndex.values()];
+  const hasAnyAuthorizedRuleType = filteredRuleTypeIndex.size > 0;
+  const authorizedRuleTypes = [...filteredRuleTypeIndex.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
@@ -69,11 +84,14 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     ruleTypesState: {
       initialLoad: isLoading || isInitialLoading,
       isLoading: isLoading || isFetching,
-      data: filteredIndex,
+      isError,
+      isSuccess,
+      filteredRuleTypeIndex,
+      unfilteredRuleTypeIndex,
+      ruleTypes,
     },
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
     authorizedToCreateAnyRules,
-    isSuccess,
   };
 };

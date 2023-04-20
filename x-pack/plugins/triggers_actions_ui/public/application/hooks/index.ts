@@ -7,3 +7,4 @@
 
 export { useSubAction } from './use_sub_action';
 export { useLoadRuleTypes } from './use_load_rule_types';
+export { useLoadRuleTypesQuery } from './use_load_rule_types_query';

@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleStatus, useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
@@ -18,6 +18,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function RulesPage() {
   const {
@@ -47,7 +48,9 @@ export function RulesPage() {
   ]);
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-  const { ruleTypes } = useLoadRuleTypes({
+  const {
+    ruleTypesState: { ruleTypes },
+  } = useLoadRuleTypesQuery({
     filteredRuleTypes,
   });
 

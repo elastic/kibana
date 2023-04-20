@@ -45,7 +45,14 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      cacheTime: 900000,
+      staleTime: 900000,
+    },
+  },
+});
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;

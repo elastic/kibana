@@ -122,7 +122,7 @@ export {
   deprecatedMessage,
 } from './common';
 
-export { useLoadRuleTypes, useSubAction } from './application/hooks';
+export { useLoadRuleTypes, useLoadRuleTypesQuery, useSubAction } from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,
