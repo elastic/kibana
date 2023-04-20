@@ -612,7 +612,7 @@ export const getMockBulkCreateResponse = (
             references,
             ...mockTimestampFieldsWithCreated,
             typeMigrationVersion: typeMigrationVersion || migrationVersion?.[type] || '1.1.1',
-            managed: managed || docManaged || false,
+            managed: managed ?? docManaged ?? false,
           },
           ...mockVersionProps,
         },

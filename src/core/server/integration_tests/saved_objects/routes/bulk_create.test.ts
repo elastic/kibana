@@ -27,7 +27,6 @@ type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const testTypes = [
   { name: 'index-pattern', hide: false },
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
-  { name: 'something-managed', hide: false, managed: true },
 ];
 
 describe('POST /api/saved_objects/_bulk_create', () => {
