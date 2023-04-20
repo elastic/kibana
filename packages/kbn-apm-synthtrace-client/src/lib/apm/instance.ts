@@ -68,7 +68,7 @@ export class Instance extends Entity<ApmFields> {
     return new ApmError({
       ...this.fields,
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': sha256(message),
+      'error.grouping_name': getErrorGroupingKey(message),
     });
   }
 
@@ -91,6 +91,6 @@ export class Instance extends Entity<ApmFields> {
   }
 }
 
-function sha256(content: string) {
+export function getErrorGroupingKey(content: string) {
   return createHash('sha256').update(content).digest('hex');
 }
