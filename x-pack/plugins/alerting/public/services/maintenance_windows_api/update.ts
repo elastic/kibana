@@ -20,15 +20,19 @@ const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({ r_rule: rRule, 
   rRule,
 });
 
-export async function createMaintenanceWindow({
+export async function updateMaintenanceWindow({
   http,
+  maintenanceWindowId,
   maintenanceWindow,
 }: {
   http: HttpSetup;
+  maintenanceWindowId: string;
   maintenanceWindow: MaintenanceWindow;
 }): Promise<MaintenanceWindow> {
   const res = await http.post<AsApiContract<MaintenanceWindow>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/${encodeURIComponent(
+      maintenanceWindowId
+    )}`,
     { body: JSON.stringify(rewriteBodyRequest(maintenanceWindow)) }
   );
 
