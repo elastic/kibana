@@ -52,6 +52,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
+      transactionName: 'GET /orders',
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -59,6 +60,7 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
+      transactionName: 'GET /orders',
       environment: 'Not defined',
       interval: `5 mins`,
       reason:

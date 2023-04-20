@@ -16,7 +16,7 @@ import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/p
 import { DashboardSpacesService } from '../spaces/types';
 import type { DashboardStartDependencies } from '../../plugin';
 import type { DashboardSessionStorageServiceType } from './types';
-import type { DashboardContainerByValueInput } from '../../../common';
+import type { DashboardContainerInput } from '../../../common';
 import { DashboardNotificationsService } from '../notifications/types';
 import { panelStorageErrorStrings } from '../../dashboard_container/_dashboard_container_strings';
 
@@ -68,9 +68,7 @@ class DashboardSessionStorageService implements DashboardSessionStorageServiceTy
     }
   }
 
-  public getState(
-    id = DASHBOARD_PANELS_UNSAVED_ID
-  ): Partial<DashboardContainerByValueInput> | undefined {
+  public getState(id = DASHBOARD_PANELS_UNSAVED_ID): Partial<DashboardContainerInput> | undefined {
     try {
       return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
     } catch (e) {
@@ -81,10 +79,7 @@ class DashboardSessionStorageService implements DashboardSessionStorageServiceTy
     }
   }
 
-  public setState(
-    id = DASHBOARD_PANELS_UNSAVED_ID,
-    newState: Partial<DashboardContainerByValueInput>
-  ) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardContainerInput>) {
     try {
       const sessionStateStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
       set(sessionStateStorage, [this.activeSpaceId, id], newState);

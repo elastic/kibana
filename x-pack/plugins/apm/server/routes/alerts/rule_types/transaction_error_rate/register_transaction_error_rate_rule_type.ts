@@ -154,12 +154,8 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },

@@ -32,6 +32,7 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
@@ -47,9 +48,10 @@ import {
 export interface RuleParams {
   aggregationType: AggregationType;
   environment: string;
-  serviceName: string;
   threshold: number;
-  transactionType: string;
+  transactionType?: string;
+  transactionName?: string;
+  serviceName?: string;
   windowSize: number;
   windowUnit: string;
   groupBy?: string[] | undefined;
@@ -115,6 +117,7 @@ export function TransactionDurationRuleType(props: Props) {
                 environment: params.environment,
                 serviceName: params.serviceName,
                 transactionType: params.transactionType,
+                transactionName: params.transactionName,
                 interval,
                 start,
                 end,
@@ -129,6 +132,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.environment,
       params.serviceName,
       params.transactionType,
+      params.transactionName,
       params.windowSize,
       params.windowUnit,
     ]
@@ -166,7 +170,8 @@ export function TransactionDurationRuleType(props: Props) {
       onChange={(value) => {
         if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
-          setRuleParams('transactionType', '');
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
           setRuleParams('environment', ENVIRONMENT_ALL.value);
         }
       }}
@@ -179,6 +184,11 @@ export function TransactionDurationRuleType(props: Props) {
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
+      serviceName={params.serviceName}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
     <PopoverExpression
