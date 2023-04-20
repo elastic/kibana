@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.uptime.service.password=test',
         '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
         '--xpack.uptime.service.devUrl=mockDevUrl',
-        '--xpack.uptime.service.manifestUrl=https://example.com/manifest.json',
+        '--xpack.uptime.service.manifestUrl=mockDevUrl',
       ],
     },
     testFiles: [require.resolve('.')],
