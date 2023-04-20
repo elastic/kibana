@@ -26,8 +26,9 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { CreateTextExpansionModelResponse } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export interface TextExpansionCallOutState {
   createTextExpansionModel: (args: undefined) => CreateTextExpansionModelResponse | undefined;
@@ -76,7 +77,7 @@ export const useTextExpansionCallOutData = ({
     createTextExpansionModel,
     dismiss,
     isCreateButtonDisabled,
-    isDismissable: isDismissable,
+    isDismissable,
     show,
   };
 };
@@ -233,7 +234,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
   //   fetchTextExpansionModel(undefined);
   // }, [isModelDownloadInProgress]);
 
-  console.log('show callout', show)
+  console.log('show callout', show);
   if (!show) return null;
 
   console.log(
@@ -242,7 +243,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
     'isModelDownloaded',
     isModelDownloaded
   );
-  
+
   if (!!isModelDownloadInProgress) {
     return <ModelDownloadInProgress dismiss={dismiss} isDismissable={isDismissable} />;
   } else if (!!isModelDownloaded) {

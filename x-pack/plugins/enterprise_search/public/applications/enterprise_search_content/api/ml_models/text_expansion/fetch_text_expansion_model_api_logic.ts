@@ -16,12 +16,17 @@ export interface FetchTextExpansionModelResponse {
 
 export const fetchTextExpansionModelStatus = async () => {
   console.log('fetchTextExpansionModel');
-  return await HttpLogic.values.http.get<FetchTextExpansionModelResponse>('/internal/enterprise_search/elser');
+  return await HttpLogic.values.http.get<FetchTextExpansionModelResponse>(
+    '/internal/enterprise_search/elser'
+  );
 };
 
 export const FetchTextExpansionModelApiLogic = createApiLogic(
   ['fetch_text_expansion_model_api_logic'],
-  fetchTextExpansionModelStatus,
+  fetchTextExpansionModelStatus
 );
 
-export type FetchTextExpansionModelApiLogicActions = Actions<FetchTextExpansionModelArgs, FetchTextExpansionModelResponse>;
+export type FetchTextExpansionModelApiLogicActions = Actions<
+  FetchTextExpansionModelArgs,
+  FetchTextExpansionModelResponse
+>;

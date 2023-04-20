@@ -26,7 +26,10 @@ export const createTextExpansionModel = async (): Promise<CreateTextExpansionMod
 
 export const CreateTextExpansionModelApiLogic = createApiLogic(
   ['create_text_expansion_model_api_logic'],
-  createTextExpansionModel,
+  createTextExpansionModel
 );
 
-export type CreateTextExpansionModelApiLogicActions = Actions<CreateTextExpansionModelArgs, CreateTextExpansionModelResponse>;
+export type CreateTextExpansionModelApiLogicActions = Actions<
+  CreateTextExpansionModelArgs,
+  CreateTextExpansionModelResponse
+>;
