@@ -35,13 +35,13 @@ export type MapGetOut = MapCrudTypes['GetOut'];
 
 export type MapCreateIn = MapCrudTypes['CreateIn'];
 export type MapCreateOut = MapCrudTypes['CreateOut'];
-export type MapCreateOptions = CreateOptions;
+export type MapCreateOptions = Pick<CreateOptions, 'references'>;
 
 // ----------- UPDATE --------------
 
 export type MapUpdateIn = MapCrudTypes['UpdateIn'];
 export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-export type MapUpdateOptions = UpdateOptions;
+export type MapUpdateOptions = Pick<UpdateOptions, 'references'>;
 
 // ----------- DELETE --------------
 
