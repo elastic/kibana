@@ -440,7 +440,7 @@ describe('ingest_integration tests ', () => {
     it('updates successfully when meta fields differ from services', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.meta.cloud = true; // cloud mock will return true
-      mockPolicy.meta.license = 'platinum'; // license is set to emit platinum 
+      mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(
         logger,
