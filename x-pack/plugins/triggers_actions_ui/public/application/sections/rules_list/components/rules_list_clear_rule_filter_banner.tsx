@@ -18,9 +18,9 @@ export const RulesListClearRuleFilterBanner = ({
 }: RulesListClearRuleFilterProps) => {
   return (
     <>
-      <EuiCallOut color="danger" size="s" data-test-subj="rulesListClearRuleFilterBanner">
+      <EuiCallOut color="primary" size="s" data-test-subj="rulesListClearRuleFilterBanner">
         <p>
-          <EuiIcon color="danger" type="warning" />{' '}
+          <EuiIcon color="primary" type="iInCircle" />{' '}
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.ruleParamBannerTitle"
             defaultMessage="Rule list filtered by url parameters."

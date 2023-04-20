@@ -67,7 +67,7 @@ export const mapFiltersToKueryNode = ({
 
   if (ruleParamsFilter && Object.keys(ruleParamsFilter).length) {
     filterKueryNode.push(
-      nodeBuilder.or(
+      nodeBuilder.and(
         Object.keys(ruleParamsFilter).map((ruleParam) =>
           nodeBuilder.is(
             `alert.attributes.params.${ruleParam}`,

@@ -64,14 +64,14 @@ export function RulesPage() {
 
   const { lastResponse, params, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
-    params: Record<string, string | number>;
+    params: Record<string, string | number | object>;
     search: string;
     status: RuleStatus[];
     type: string[];
   }>('_a') || { lastResponse: [], params: {}, search: '', status: [], type: [] };
 
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
-  const [stateParams, setParams] = useState<Record<string, string | number>>(params);
+  const [stateParams, setParams] = useState<Record<string, string | number | object>>(params);
   const [stateSearch, setSearch] = useState<string>(search);
   const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateType, setType] = useState<string[]>(type);

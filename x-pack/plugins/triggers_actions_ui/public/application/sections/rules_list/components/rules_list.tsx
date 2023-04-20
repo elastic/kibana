@@ -112,7 +112,7 @@ export interface RulesListProps {
   lastRunOutcomeFilter?: string[];
   refresh?: Date;
   ruleDetailsRoute?: string;
-  ruleParamFilter?: Record<string, string | number>;
+  ruleParamFilter?: Record<string, string | number | object>;
   rulesListKey?: string;
   searchFilter?: string;
   showActionFilter?: boolean;
@@ -123,7 +123,7 @@ export interface RulesListProps {
   visibleColumns?: string[];
   onLastResponseFilterChange?: (lastResponse: string[]) => void;
   onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
-  onRuleParamFilterChange?: (ruleParams: Record<string, string | number>) => void;
+  onRuleParamFilterChange?: (ruleParams: Record<string, string | number | object>) => void;
   onSearchFilterChange?: (search: string) => void;
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
@@ -366,7 +366,7 @@ export const RulesList = ({
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
         case 'ruleParams':
-          onRuleParamFilterChange?.(value as Record<string, string | number>);
+          onRuleParamFilterChange?.(value as Record<string, string | number | object>);
           break;
         case 'searchText':
           onSearchFilterChange?.(value as string);
