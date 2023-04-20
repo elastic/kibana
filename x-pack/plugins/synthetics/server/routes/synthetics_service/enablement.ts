@@ -16,12 +16,24 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
   method: 'GET',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ response, server }): Promise<any> => {
+  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     try {
-      return response.ok({
-        body: await libs.requests.getSyntheticsEnablement({
+      const result = await libs.requests.getSyntheticsEnablement({
+        server,
+      });
+      const { canEnable, isEnabled } = result;
+      if (canEnable && !isEnabled && server.config.service?.manifestUrl) {
+        await generateAndSaveServiceAPIKey({
+          request,
+          authSavedObjectsClient: savedObjectsClient,
           server,
-        }),
+        });
+      } else {
+        return result;
+      }
+
+      return libs.requests.getSyntheticsEnablement({
+        server,
       });
     } catch (e) {
       server.logger.error(e);
@@ -73,7 +85,7 @@ export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
     syntheticsMonitorClient,
     savedObjectsClient,
   }): Promise<any> => {
-    const { authSavedObjectsClient, logger } = server;
+    const { logger } = server;
     try {
       const { security } = server;
       const { syntheticsService } = syntheticsMonitorClient;
@@ -92,7 +104,7 @@ export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
       }
       await generateAndSaveServiceAPIKey({
         request,
-        authSavedObjectsClient,
+        authSavedObjectsClient: savedObjectsClient,
         server,
       });
       return response.ok({

@@ -159,7 +159,17 @@ export const generateAndSaveServiceAPIKey = async ({
 };
 
 export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
-  const { security } = server;
+  const { security, config } = server;
+
+  if (!config.service?.manifestUrl) {
+    return {
+      canEnable: true,
+      canManageApiKeys: true,
+      isEnabled: true,
+      isValidApiKey: true,
+      areApiKeysEnabled: true,
+    };
+  }
 
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
     getAPIKeyForSyntheticsService({ server }),

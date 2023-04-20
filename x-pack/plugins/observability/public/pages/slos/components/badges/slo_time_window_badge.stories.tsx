@@ -15,7 +15,7 @@ import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloTimeWindowBadge',
+  title: 'app/SLO/Badges/SloTimeWindowBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
