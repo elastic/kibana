@@ -414,7 +414,7 @@ const installTransformsAssets = async (
     // By default, for internal Elastic packages that touch system indices, we want to run as internal user
     // so we set runAsKibanaSystem: true by default (e.g. when run_as_kibana_system set to true/not defined in yml file).
     // If package should be installed as the logged in user, set run_as_kibana_system: false,
-    // and pass es-secondary-authorization in header when creating the transforms.
+    // generate api key, and pass es-secondary-authorization in header when creating the transforms.
     const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
       ? await generateTransformSecondaryAuthHeaders({
           authorizationHeader,
@@ -423,7 +423,8 @@ const installTransformsAssets = async (
           pkgVersion: installablePackage.version,
           username,
         })
-      : undefined;
+      : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
+        undefined;
 
     // delete all previous transform
     await Promise.all([
