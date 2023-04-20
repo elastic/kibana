@@ -17,6 +17,7 @@ import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
+import { FlagsReader } from '@kbn/dev-cli-runner';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -34,6 +35,7 @@ export async function runDockerGenerator(
     image: boolean;
     ironbank?: boolean;
     cloud?: boolean;
+    serverless?: boolean;
     dockerBuildDate?: string;
   }
 ) {
@@ -104,6 +106,7 @@ export async function runDockerGenerator(
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
+    serverless: flags.serverless
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
