@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, isEmpty, sortBy } from 'lodash';
+import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, {
@@ -118,7 +118,6 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
   showSearchBar?: boolean;
-  showRuleParamFilter?: boolean;
   statusFilter?: RuleStatus[];
   typeFilter?: string[];
   visibleColumns?: string[];
@@ -156,7 +155,6 @@ export const RulesList = ({
   searchFilter = '',
   showActionFilter = true,
   showCreateRuleButtonInPrompt = false,
-  showRuleParamFilter = false,
   showSearchBar = true,
   statusFilter,
   typeFilter,
@@ -182,11 +180,8 @@ export const RulesList = ({
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
-  const [ruleParamText, setRuleParamText] = useState<string>(
-    ruleParamFilter && Object.keys(ruleParamFilter).length ? rison.encode(ruleParamFilter) : ''
-  );
 
-  const [filters, setFilters] = useState<RulesListFilters>(() => ({
+  const [filters, setFilters] = useState<RulesListFilters>({
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
@@ -195,7 +190,7 @@ export const RulesList = ({
     searchText: searchFilter || '',
     tags: [],
     types: typeFilter || [],
-  }));
+  });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -424,7 +419,7 @@ export const RulesList = ({
   }, [lastRunOutcomeFilter]);
 
   useEffect(() => {
-    if (ruleParamFilter) {
+    if (ruleParamFilter && !isEqual(ruleParamFilter, filters.ruleParams)) {
       updateFilters({ filter: 'ruleParams', value: ruleParamFilter });
     }
   }, [ruleParamFilter]);
@@ -814,16 +809,12 @@ export const RulesList = ({
                   filterOptions={filterOptions}
                   filters={filters}
                   inputText={inputText}
-                  items={tableItems}
                   lastUpdate={lastUpdate}
-                  ruleParamText={ruleParamText}
                   rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
                   rulesStatusesTotal={rulesStatusesTotal}
                   setInputText={setInputText}
-                  setRuleParamText={setRuleParamText}
                   showActionFilter={showActionFilter}
                   showErrors={showErrors}
-                  showRuleParamFilter={showRuleParamFilter}
                   tags={tags}
                   updateFilters={updateFilters}
                   onClearSelection={onClearSelection}

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import rison from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +15,9 @@ import {
   EuiFilterGroup,
   EuiSpacer,
   EuiLink,
+  EuiFieldSearch,
 } from '@elastic/eui';
-import { ActionType, RulesListFilters, RuleTableItem, UpdateFiltersProps } from '../../../../types';
+import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListStatuses } from './rules_list_statuses';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
@@ -27,27 +28,22 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
-import { RulesListSearchFilter } from './rules_list_search_filter';
 
 interface RulesListFiltersBarProps {
   actionTypes: ActionType[];
   filterOptions: TypeFilterProps['options'];
   filters: RulesListFilters;
   inputText: string;
-  items: RuleTableItem[];
   lastUpdate: string;
-  ruleParamText: string;
   rulesLastRunOutcomesTotal: Record<string, number>;
   rulesStatusesTotal: Record<string, number>;
   showActionFilter: boolean;
   showErrors: boolean;
-  showRuleParamFilter: boolean;
   tags: string[];
   onClearSelection: () => void;
   onRefreshRules: () => void;
   onToggleRuleErrors: () => void;
   setInputText: (text: string) => void;
-  setRuleParamText: (text: string) => void;
   updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
 }
 
@@ -62,14 +58,11 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     onClearSelection,
     onRefreshRules,
     onToggleRuleErrors,
-    ruleParamText,
     rulesLastRunOutcomesTotal,
     rulesStatusesTotal,
     setInputText,
-    setRuleParamText,
     showActionFilter = true,
     showErrors,
-    showRuleParamFilter = true,
     tags,
     updateFilters,
   } = props;
@@ -152,24 +145,6 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
   const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === ENTER_KEY) {
       updateFilters({ filter: 'searchText', value: inputText });
-
-      updateFilters({
-        filter: 'ruleParams',
-        value:
-          (rison.decode(`(${ruleParamText.replaceAll(' ', '')})`) as Record<
-            string,
-            string | number
-          >) || {},
-      });
-    }
-  };
-
-  const handleChangeRuleParams = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setRuleParamText(value);
-
-    if (e.target.value === '') {
-      updateFilters({ filter: 'ruleParams', value: {} });
     }
   };
 
@@ -186,12 +161,16 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <RulesListSearchFilter
-            inputText={inputText}
-            ruleParamText={ruleParamText}
-            showRuleParamFilter={showRuleParamFilter}
+          <EuiFieldSearch
+            data-test-subj="ruleSearchField"
+            fullWidth
+            isClearable
+            placeholder={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.searchPlaceholderTitle',
+              { defaultMessage: 'Search' }
+            )}
+            value={inputText}
             onChange={handleChange}
-            onChangeRuleParams={handleChangeRuleParams}
             onKeyUp={handleKeyup}
           />
         </EuiFlexItem>

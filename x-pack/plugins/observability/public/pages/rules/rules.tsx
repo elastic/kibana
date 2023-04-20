@@ -147,12 +147,11 @@ export function RulesPage() {
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
             lastRunOutcomeFilter={stateLastResponse}
-            ruleParamFilter={stateParams}
             refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
             rulesListKey="observability_rulesListColumns"
+            ruleParamFilter={stateParams}
             showActionFilter={false}
-            showRuleParamFilter
             statusFilter={stateStatus}
             searchFilter={stateSearch}
             typeFilter={stateType}
