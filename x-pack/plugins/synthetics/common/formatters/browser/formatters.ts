@@ -12,6 +12,7 @@ import {
   objectToJsonFormatter,
   stringToJsonFormatter,
 } from '../formatting_utils';
+import { DEFAULT_THROTTLING_VALUE } from '../../constants/monitor_defaults';
 
 import { tlsFormatters } from '../tls/formatters';
 
@@ -21,9 +22,9 @@ export const throttlingFormatter: Formatter = (fields) => {
   const throttling = fields[ConfigKey.THROTTLING_CONFIG];
 
   return JSON.stringify({
-    download: Number(throttling.value.download),
-    upload: Number(throttling.value.upload),
-    latency: Number(throttling.value.latency),
+    download: Number(throttling?.value?.download || DEFAULT_THROTTLING_VALUE.download),
+    upload: Number(throttling?.value?.upload || DEFAULT_THROTTLING_VALUE.upload),
+    latency: Number(throttling?.value?.latency || DEFAULT_THROTTLING_VALUE),
   });
 };
 
