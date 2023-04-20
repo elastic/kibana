@@ -21,9 +21,8 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import type { ExpandedEventFieldsObject, RawEventData } from './types';
-import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
+import type { RawEventData } from './types';
+import { useResponseActionsTab } from './response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -67,14 +66,14 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.endpointView;
+  | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
-  endpointView = 'endpoint-results-view',
+  responseActionsView = 'response-actions-results-view',
 }
 
 interface Props {
@@ -426,27 +425,16 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
-  const expandedEventFieldsObject = expandDottedObject(
-    (rawEventData as RawEventData).fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
-
-  const endpointResponseActionsTab = useEndpointResponseActionsTab({
-    responseActions,
-    ruleName,
-    alertIds: [(rawEventData as { _id?: string })?._id ?? ''],
+  const responseActionsTab = useResponseActionsTab({
+    rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, endpointResponseActionsTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTab].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, endpointResponseActionsTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

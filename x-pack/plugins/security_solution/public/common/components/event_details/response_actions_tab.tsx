@@ -11,6 +11,7 @@ import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { map } from 'lodash';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { useKibana } from '../../lib/kibana';
@@ -22,42 +23,43 @@ import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import type { ExpandedEventFieldsObject, RawEventData } from './types';
 
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
 
-export const useEndpointResponseActionsTab = ({
-  responseActions,
-  ruleName,
+export const useResponseActionsTab = ({
+  rawEventData,
   ecsData,
-  alertIds,
 }: {
   ecsData?: Ecs;
-  responseActions?: Array<{
-    action_type_id: RESPONSE_ACTION_TYPES;
-    params: Record<string, unknown>;
-  }>;
-  ruleName?: string[];
-  alertIds: string[];
+  rawEventData: RawEventData;
 }) => {
   const {
     services: { osquery },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
+  const alertId = rawEventData?._id ?? '';
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
-      alertIds,
+      alertIds: [alertId],
     },
     { skip: shouldEarlyReturn }
   );
 
   const { OsqueryResult } = osquery;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
   const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
 
@@ -90,18 +92,18 @@ export const useEndpointResponseActionsTab = ({
   };
 
   return {
-    id: EventsViewType.endpointView,
-    'data-test-subj': 'endpointViewTab',
+    id: EventsViewType.responseActionsView,
+    'data-test-subj': 'responseActionsViewTab',
     name: i18n.ENDPOINT_VIEW,
     append: (
-      <EuiNotificationBadge data-test-subj="endpoint-actions-notification">
+      <EuiNotificationBadge data-test-subj="response-actions-notification">
         {totalItemCount}
       </EuiNotificationBadge>
     ),
     content: (
       <>
         <EuiSpacer size="s" />
-        <TabContentWrapper data-test-subj="endpointViewWrapper">
+        <TabContentWrapper data-test-subj="responseActonsViewWrapper">
           {isFetched && totalItemCount ? renderItems() : null}
         </TabContentWrapper>
       </>
