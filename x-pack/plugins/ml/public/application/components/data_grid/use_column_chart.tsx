@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
+import { euiPaletteColorBlind, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
