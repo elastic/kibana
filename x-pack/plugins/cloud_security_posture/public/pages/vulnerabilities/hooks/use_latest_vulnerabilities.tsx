@@ -24,7 +24,7 @@ export const getFindingsQuery = ({ query, sort }: any) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
   query,
   size: MAX_FINDINGS_TO_LOAD,
-  sort: sort.map(({ id, direction }: { id: string; direction: string }) => ({ [id]: direction })),
+  sort,
 });
 
 export const useLatestVulnerabilities = (options: any) => {

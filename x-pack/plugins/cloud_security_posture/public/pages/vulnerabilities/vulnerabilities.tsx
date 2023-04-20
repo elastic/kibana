@@ -17,12 +17,10 @@ import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
 import { VulnerabilityRecord } from './types';
-import { getVulnerabilitiesColumnsGrid, vulnerabilitiesColumns } from './utils';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
@@ -34,7 +32,11 @@ import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_sta
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useLimitProperties } from '../../common/utils/get_limit_properties';
 import { LimitedResultsBar } from '../configurations/layout/findings_layout';
-import { CspLoadingState } from '../../components/csp_loading_state';
+import {
+  getVulnerabilitiesColumnsGrid,
+  vulnerabilitiesColumns,
+} from './vulnerabilities_table_columns';
+import { defaultLoadingRenderer, defaultNoDataRenderer } from '../../components/cloud_posture_page';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -42,15 +44,6 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   sort: [{ id: vulnerabilitiesColumns.cvss, direction: 'desc' }],
   pageIndex: 0,
 });
-
-const Loader = () => (
-  <CspLoadingState>
-    <FormattedMessage
-      id="xpack.csp.vulnerabilities.loadingDescription"
-      defaultMessage="Loading..."
-    />
-  </CspLoadingState>
-);
 
 export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
@@ -61,8 +54,12 @@ export const Vulnerabilities = () => {
   if (error) {
     return <ErrorCallout error={error as Error} />;
   }
-  if (isLoading || !data) {
-    return <Loader />;
+  if (isLoading) {
+    return defaultLoadingRenderer();
+  }
+
+  if (!data) {
+    return defaultNoDataRenderer();
   }
 
   return <VulnerabilitiesContent dataView={data} />;
@@ -87,9 +84,15 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
   const { euiTheme } = useEuiTheme();
 
+  const multiFieldsSort = useMemo(() => {
+    return sort.map(({ id, direction }: { id: string; direction: string }) => ({
+      [id]: direction,
+    }));
+  }, [sort]);
+
   const { data, isLoading, isFetching } = useLatestVulnerabilities({
     query,
-    sort,
+    sort: multiFieldsSort,
     enabled: !queryError,
   });
 
@@ -113,6 +116,10 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     pageIndex,
     pageSize,
   });
+
+  const columns = useMemo(() => {
+    return getVulnerabilitiesColumnsGrid();
+  }, []);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
@@ -184,11 +191,13 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   if (error) {
     return <ErrorCallout error={error as Error} />;
   }
-  if (isLoading || !data?.page) {
-    return <Loader />;
+  if (isLoading) {
+    return defaultLoadingRenderer();
   }
 
-  const columns = getVulnerabilitiesColumnsGrid();
+  if (!data?.page) {
+    return defaultNoDataRenderer();
+  }
 
   return (
     <>
@@ -204,7 +213,15 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
         <>
-          {isFetching && <EuiProgress size="xs" color="accent" />}
+          {isFetching ? (
+            <EuiProgress size="xs" color="accent" />
+          ) : (
+            <EuiSpacer
+              css={css`
+                height: 2px;
+              `}
+            />
+          )}
           <EuiDataGrid
             css={css`
               & .euiDataGridHeaderCell__icon {
