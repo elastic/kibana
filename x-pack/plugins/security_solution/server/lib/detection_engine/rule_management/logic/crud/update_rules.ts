@@ -14,7 +14,6 @@ import { transformRuleToAlertAction } from '../../../../../../common/detection_e
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
-import { maybeMute } from '../rule_actions/muting';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -79,13 +78,6 @@ export const updateRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
-  });
-
-  await maybeMute({
-    rulesClient,
-    muteAll: existingRule.muteAll,
-    throttle: ruleUpdate.throttle,
-    id: update.id,
   });
 
   if (existingRule.enabled && enabled === false) {

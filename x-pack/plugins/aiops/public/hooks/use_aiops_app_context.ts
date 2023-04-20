@@ -8,7 +8,6 @@
 import { createContext, useContext } from 'react';
 
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -17,6 +16,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   CoreStart,
   CoreSetup,
+  ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -26,6 +26,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
   data: DataPublicPluginStart;
+  executionContext: ExecutionContextStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
