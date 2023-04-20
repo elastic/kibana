@@ -36,7 +36,7 @@ import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
 export const elasticsearchUrl = (): string => {
-  const defaultUrl = 'http://localhost:9200';
+  const defaultUrl = 'https://localhost:9200';
   const cloudContext = useCloudDetails();
   const url =
     (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || defaultUrl;
