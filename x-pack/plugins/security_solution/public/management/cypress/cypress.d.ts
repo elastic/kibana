@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import type { HostPolicyResponse } from '../../../common/endpoint/types';
 import type { IndexEndpointHostsCyTaskOptions } from './types';
@@ -129,6 +130,12 @@ declare global {
         arg: IndexedEndpointPolicyResponse,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<null>;
+
+      task(
+        name: 'deleteAllEndpointData',
+        arg: { endpointAgentIds: string[] },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<DeleteAllEndpointDataResponse>;
     }
   }
 }

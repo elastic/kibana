@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../../screens/alerts';
 import { waitForEndpointAlerts } from '../../tasks/alerts';
 import { request } from '../../tasks/common';
@@ -61,12 +62,9 @@ describe('Endpoint generated alerts', () => {
       cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
     }
 
-    // FIXME:PT implement additional data deletion
-    // ?. Clean up:
-    //      created action
-    //      created action response
-    //      alerts/events
-    //      files created by potential endpoint actions
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
   });
 
   beforeEach(() => {
@@ -74,8 +72,10 @@ describe('Endpoint generated alerts', () => {
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {
-    // Triggers a Malicious Behaviour alert on Linux system
-    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${createdHost.agentId}`;
+    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
+      .toString(16)
+      .substring(2)}`;
 
     // Send `execute` command that triggers malicious behaviour using the `execute` response action
     request<ResponseActionApiResponse>({

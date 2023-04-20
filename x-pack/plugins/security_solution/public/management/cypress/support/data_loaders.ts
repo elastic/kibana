@@ -8,6 +8,8 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
 import type {
   CreateAndEnrollEndpointHostOptions,
@@ -148,6 +150,15 @@ export const dataLoaders = (
     ): Promise<null> => {
       const { esClient } = await stackServicesPromise;
       return deleteIndexedEndpointPolicyResponse(esClient, indexedData).then(() => null);
+    },
+
+    deleteAllEndpointData: async ({
+      endpointAgentIds,
+    }: {
+      endpointAgentIds: string[];
+    }): Promise<DeleteAllEndpointDataResponse> => {
+      const { esClient } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, endpointAgentIds);
     },
   });
 };

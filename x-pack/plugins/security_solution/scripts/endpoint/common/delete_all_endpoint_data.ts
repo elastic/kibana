@@ -6,6 +6,7 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
+import assert from 'assert';
 import { createEsClient } from './stack_services';
 import { createSecuritySuperuser } from './security_user_services';
 
@@ -27,6 +28,8 @@ export const deleteAllEndpointData = async (
   esClient: Client,
   endpointAgentIds: string[]
 ): Promise<DeleteAllEndpointDataResponse> => {
+  assert(endpointAgentIds.length > 0, 'At least one endpoint agent id must be defined');
+
   const unrestrictedUser = await createSecuritySuperuser(esClient, 'super_superuser');
   const esUrl = getEsUrlFromClient(esClient);
   const esClientUnrestricted = createEsClient({
