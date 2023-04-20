@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { Status } from '../../../../../../../common/types/api';
 import {
   CreateTextExpansionModelApiLogic,
@@ -125,14 +126,14 @@ export const TextExpansionCalloutLogic = kea<
       (data: FetchTextExpansionModelResponse) => {
         console.log('isModelDownloadInProgress', data);
         return data?.deploymentState === 'downloading';
-      }
+      },
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
       (data: FetchTextExpansionModelResponse) => {
         console.log('isModelDownloaded', data);
         return data?.deploymentState === 'downloaded';
-      }
+      },
     ],
   }),
 });
