@@ -137,11 +137,9 @@ export class LayerWizardSelect extends Component<Props, State> {
   render() {
     if (!this.state.hasLoadedWizards) {
       return (
-        <div>
-          <EuiPanel>
-            <EuiLoadingContent lines={2} />
-          </EuiPanel>
-        </div>
+        <EuiPanel>
+          <EuiLoadingContent lines={2} />
+        </EuiPanel>
       );
     }
 
