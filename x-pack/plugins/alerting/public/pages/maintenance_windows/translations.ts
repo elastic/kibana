@@ -20,6 +20,13 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const CREATE_NEW_BUTTON = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createNewButton',
+  {
+    defaultMessage: 'Create new',
+  }
+);
+
 export const EMPTY_PROMPT_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.emptyPrompt.button',
   {
@@ -70,12 +77,9 @@ export const MAINTENANCE_WINDOWS_RETURN_LINK = i18n.translate(
   }
 );
 
-export const CREATE_FORM_NAME = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.name',
-  {
-    defaultMessage: 'Name',
-  }
-);
+export const NAME = i18n.translate('xpack.alerting.maintenanceWindows.name', {
+  defaultMessage: 'Name',
+});
 
 export const CREATE_FORM_NAME_REQUIRED = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.nameFieldRequiredError',
@@ -369,3 +373,76 @@ export const CREATE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
 export const CANCEL = i18n.translate('xpack.alerting.maintenanceWindows.createForm.cancel', {
   defaultMessage: 'Cancel',
 });
+
+export const TABLE_ALERTS = i18n.translate('xpack.alerting.maintenanceWindows.table.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+// Add this tooltip to the Alerts column heading on the MW table
+export const TABLE_ALERTS_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.alertsTooltip',
+  {
+    defaultMessage: 'The total number of alerts created in the maintenance window.',
+  }
+);
+
+export const TABLE_STATUS = i18n.translate('xpack.alerting.maintenanceWindows.table.status', {
+  defaultMessage: 'Status',
+});
+
+export const TABLE_STATUS_RUNNING = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusRunning',
+  {
+    defaultMessage: 'Running',
+  }
+);
+
+export const TABLE_STATUS_UPCOMING = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusUpcoming',
+  {
+    defaultMessage: 'Upcoming',
+  }
+);
+
+export const TABLE_STATUS_FINISHED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusFinished',
+  {
+    defaultMessage: 'Finished',
+  }
+);
+
+export const TABLE_STATUS_ARCHIVED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusArchived',
+  {
+    defaultMessage: 'Archived',
+  }
+);
+
+export const TABLE_START_TIME = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.startTime',
+  {
+    defaultMessage: 'Start time',
+  }
+);
+
+export const TABLE_END_TIME = i18n.translate('xpack.alerting.maintenanceWindows.table.endTime', {
+  defaultMessage: 'End time',
+});
+
+export const TABLE_ACTION_EDIT = i18n.translate('xpack.alerting.maintenanceWindows.table.edit', {
+  defaultMessage: 'Edit',
+});
+
+export const EDIT_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alerting.maintenanceWindows.edit.maintenanceWindow',
+  {
+    defaultMessage: 'Edit maintenance window',
+  }
+);
+
+export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alerting.maintenanceWindows.save.maintenanceWindow',
+  {
+    defaultMessage: 'Save maintenance window',
+  }
+);

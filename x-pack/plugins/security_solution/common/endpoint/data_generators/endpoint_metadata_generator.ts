@@ -12,8 +12,8 @@ import { merge, set } from 'lodash';
 import { gte } from 'semver';
 import type { EndpointCapabilities } from '../service/response_actions/constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface, OSFields } from '../types';
-import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
+import type { HostMetadataInterface, OSFields, HostInfoInterface } from '../types';
+import { EndpointStatus, HostPolicyResponseActionStatus, HostStatus } from '../types';
 
 export interface GetCustomEndpointMetadataGeneratorOptions {
   /** Version for agent/endpoint. Defaults to the stack version */
@@ -182,6 +182,31 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     };
 
     return merge(hostMetadataDoc, overrides);
+  }
+
+  /** Generates the complete `HostInfo` as returned by a call to the Endpoint host details api */
+  generateHostInfo(overrides: DeepPartial<HostInfoInterface> = {}): HostInfoInterface {
+    const hostInfo: HostInfoInterface = {
+      metadata: this.generate(),
+      host_status: HostStatus.HEALTHY,
+      policy_info: {
+        endpoint: {
+          id: 'policy-123',
+          revision: 4,
+        },
+        agent: {
+          applied: {
+            id: 'policy-123',
+            revision: 4,
+          },
+          configured: {
+            id: 'policy-123',
+            revision: 4,
+          },
+        },
+      },
+    };
+    return merge(hostInfo, overrides);
   }
 
   protected randomOsFields(): OSFields {
