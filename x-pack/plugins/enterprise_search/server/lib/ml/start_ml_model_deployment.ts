@@ -6,7 +6,7 @@
  */
 
 import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
@@ -25,7 +25,7 @@ const acceptableModelNames = ['.elser_model_1_SNAPSHOT'];
 
 export const startMlModelDeployment = async (
   modelName: string,
-  esClient: ElasticsearchClient,
+  clusterClient: IScopedClusterClient,
   mlClient: MlClient | undefined,
   trainedModelsProvider: MlTrainedModels | undefined,
   savedObjectService: MLSavedObjectService | undefined
@@ -91,7 +91,6 @@ export const startMlModelDeployment = async (
   });
 
   // and sync our objects
-  const clusterClient = esClient as unknown as IScopedClusterClient;
   const { syncSavedObjects } = syncSavedObjectsFactory(clusterClient, savedObjectService);
   await syncSavedObjects(false);
 
@@ -103,7 +102,7 @@ export const startMlModelDeployment = async (
     // if we're downloading - start up our background task so we can auto-deploy the model
     setTimeout(() => {
       watchDownloadToDeployModel(modelName, mlClient, trainedModelsProvider);
-    }, 2000);
+    }, 1000);
   } else if (returnStatus.deploymentState === MlModelDeploymentState.Downloaded) {
     // if we're downloaded, deploy it
     await deployModel(modelName, mlClient);
@@ -122,7 +121,7 @@ async function watchDownloadToDeployModel(
     // we're still downloading - reset out timeout
     setTimeout(() => {
       watchDownloadToDeployModel(modelName, mlClient, trainedModelsProvider);
-    }, 2000);
+    }, 1000);
   } else if (returnStatus.deploymentState === MlModelDeploymentState.Downloaded) {
     // if we're downloaded, deploy it
     await deployModel(modelName, mlClient);

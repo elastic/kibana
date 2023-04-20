@@ -1014,26 +1014,24 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const scopedClusterClient = client as unknown as IScopedClusterClient;
-
       // TODO : double check params for spaces and authorization
       const savedObjectService = mlSavedObjectServiceFactory(
         savedObjectsClient,
         savedObjectsClient,
         true,
         undefined,
-        scopedClusterClient,
+        client,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
 
       const mlClient = savedObjectService
-        ? await getMlClient(scopedClusterClient, savedObjectService)
+        ? await getMlClient(client, savedObjectService)
         : undefined;
 
       try {
         const deployResult = await startMlModelDeployment(
           modelName,
-          client.asCurrentUser,
+          client,
           mlClient,
           trainedModelsProvider,
           savedObjectService
