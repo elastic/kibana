@@ -6,7 +6,6 @@
  */
 
 import { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -24,6 +23,7 @@ import type {
 } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { SlackActionParams } from '../types';
+import { subtype } from '../slack/slack';
 
 export const getConnectorType = (): ConnectorTypeModel<
   unknown,
@@ -31,20 +31,7 @@ export const getConnectorType = (): ConnectorTypeModel<
   PostMessageParams
 > => ({
   id: SLACK_API_CONNECTOR_ID,
-  subtype: [
-    {
-      id: '.slack',
-      name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
-        defaultMessage: 'Webhook',
-      }),
-    },
-    {
-      id: '.slack_api',
-      name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
-        defaultMessage: 'Web API',
-      }),
-    },
-  ],
+  subtype,
   hideInUi: true,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,

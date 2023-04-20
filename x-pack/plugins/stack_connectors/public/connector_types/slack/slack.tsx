@@ -14,23 +14,25 @@ import type {
 import { SlackActionParams, SlackSecrets } from '../types';
 import { PostMessageParams } from '../../../common/slack_api/types';
 
+export const subtype = [
+  {
+    id: '.slack',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
+      defaultMessage: 'Webhook',
+    }),
+  },
+  {
+    id: '.slack_api',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+      defaultMessage: 'Web API',
+    }),
+  },
+];
+
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
-    subtype: [
-      {
-        id: '.slack',
-        name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
-          defaultMessage: 'Webhook',
-        }),
-      },
-      {
-        id: '.slack_api',
-        name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
-          defaultMessage: 'Web API',
-        }),
-      },
-    ],
+    subtype,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
       defaultMessage: 'Send a message to a Slack channel or user.',
