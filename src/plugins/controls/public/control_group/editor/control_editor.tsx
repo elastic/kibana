@@ -205,6 +205,7 @@ export const ControlEditor = ({
                     updateTitle(newDefaultTitle);
                   }
                 }}
+                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
               />
             </EuiFormRow>
           )}
