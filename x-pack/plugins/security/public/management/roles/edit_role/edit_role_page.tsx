@@ -180,7 +180,8 @@ function useRole(
           return;
         }
 
-        if (fetchedRole.elasticsearch.indices.length === 0) {
+        const isEditingExistingRole = !!roleName && action === 'edit';
+        if (!isEditingExistingRole && fetchedRole.elasticsearch.indices.length === 0) {
           const emptyOption: RoleIndexPrivilege = {
             names: [],
             privileges: [],
