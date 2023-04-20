@@ -35,6 +35,7 @@ export interface MLResponseError {
 }
 
 export interface ErrorMessage {
+  query: string;
   message: string;
 }
 

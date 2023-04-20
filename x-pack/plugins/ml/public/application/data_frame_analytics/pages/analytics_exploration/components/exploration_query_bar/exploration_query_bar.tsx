@@ -6,17 +6,19 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import { debounce } from 'lodash';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { Dictionary } from '../../../../../../../common/types/common';
+import { ErrorMessage } from '@kbn/ml-error-utils';
 
+import { Dictionary } from '../../../../../../../common/types/common';
 import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
@@ -24,11 +26,6 @@ import {
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
-
-interface ErrorMessage {
-  query: string;
-  message: string;
-}
 
 export interface ExplorationQueryBarProps {
   indexPattern: DataView;

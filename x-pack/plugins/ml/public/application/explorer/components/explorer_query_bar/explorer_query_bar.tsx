@@ -12,7 +12,8 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
+import type { ErrorMessage } from '@kbn/ml-error-utils';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 import { useMlKibana } from '../../../contexts/kibana';

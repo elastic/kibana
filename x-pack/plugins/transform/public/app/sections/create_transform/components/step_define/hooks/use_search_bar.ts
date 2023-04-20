@@ -9,11 +9,11 @@ import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
+import type { ErrorMessage } from '@kbn/ml-error-utils';
 
 import { getTransformConfigQuery } from '../../../../../common';
 
 import {
-  ErrorMessage,
   StepDefineExposedState,
   QUERY_LANGUAGE_KUERY,
   QUERY_LANGUAGE_LUCENE,
