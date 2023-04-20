@@ -210,7 +210,8 @@ export const ActionForm = ({
       return;
     }
     setIsAddActionPanelOpen(false);
-    const actionTypeConnectors = connectors.filter(
+    const allowGroupConnector = (actionTypeModel?.group ?? []).map((atm) => atm.id);
+    let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
@@ -223,7 +224,22 @@ export const ActionForm = ({
         frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+    } else {
+      actionTypeConnectors = connectors.filter((field) =>
+        allowGroupConnector.includes(field.actionTypeId)
+      );
+      if (actionTypeConnectors.length > 0) {
+        actions.push({
+          id: '',
+          actionTypeId: actionTypeConnectors[0].actionTypeId,
+          group: defaultActionGroupId,
+          params: {},
+          frequency: DEFAULT_FREQUENCY,
+        });
+        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      }
     }
+
     if (actionTypeConnectors.length === 0) {
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
@@ -363,22 +379,20 @@ export const ActionForm = ({
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
                   if (newConnector && newConnector.actionTypeId) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                    if (actionTypeRegistered.resetParamsOnConnectorChange) {
-                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
-                        if (i === index) {
-                          return {
-                            ..._item,
-                            actionTypeId: newConnector.actionTypeId,
-                            id: connectorId,
-                            params:
-                              actionTypeRegistered.resetParamsOnConnectorChange != null
-                                ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
-                                : {},
-                          };
-                        }
-                        return _item;
-                      });
-                      setActions(updatedActions);
+                    if (actionTypeRegistered.resetParamsOnConnectorChange && actions[index]) {
+                      const updatedAction = {
+                        ...actions[index],
+                        actionTypeId: newConnector.actionTypeId,
+                        id: connectorId,
+                        params:
+                          actionTypeRegistered.resetParamsOnConnectorChange != null
+                            ? actionTypeRegistered.resetParamsOnConnectorChange(
+                                actions[index].params
+                              )
+                            : {},
+                      };
+                      actions.splice(index, 0, updatedAction);
+                      setActions(actions);
                     }
                   }
                 }}
@@ -416,22 +430,17 @@ export const ActionForm = ({
                   newConnector.actionTypeId !== actionConnector.actionTypeId
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                  if (actionTypeRegistered.resetParamsOnConnectorChange) {
-                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
-                      if (i === index) {
-                        return {
-                          ..._item,
-                          actionTypeId: newConnector.actionTypeId,
-                          id,
-                          params:
-                            actionTypeRegistered.resetParamsOnConnectorChange != null
-                              ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
-                              : {},
-                        };
-                      }
-                      return _item;
-                    });
-                    setActions(updatedActions);
+                  if (actionTypeRegistered.resetParamsOnConnectorChange && actions[index]) {
+                    const updatedAction = {
+                      ...actions[index],
+                      actionTypeId: newConnector.actionTypeId,
+                      id,
+                      params:
+                        actionTypeRegistered.resetParamsOnConnectorChange != null
+                          ? actionTypeRegistered.resetParamsOnConnectorChange(actions[index].params)
+                          : {},
+                    };
+                    actions.splice(index, 0, updatedAction);
                   }
                 }
               }}

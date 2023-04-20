@@ -45,8 +45,14 @@ function ConnectorsSelectionComponent({
   );
 
   const selectedConnectors = useMemo(
-    () => getValueOfSelectedConnector(actionItem.id, validConnectors, actionTypeRegistered),
-    [actionItem.id, validConnectors, actionTypeRegistered]
+    () =>
+      getValueOfSelectedConnector(
+        actionItem.id,
+        validConnectors,
+        actionTypeRegistered,
+        allowGroupConnector
+      ),
+    [actionItem.id, validConnectors, actionTypeRegistered, allowGroupConnector]
   );
 
   const options = useMemo(
@@ -85,10 +91,15 @@ function ConnectorsSelectionComponent({
 const getValueOfSelectedConnector = (
   actionItemId: string,
   connectors: ActionConnector[],
-  actionTypeRegistered: ActionTypeModel
+  actionTypeRegistered: ActionTypeModel,
+  allowGroupConnector: string[] = []
 ): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
-  const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-
+  let selectedConnector = connectors.find((connector) => connector.id === actionItemId);
+  if (allowGroupConnector.length > 0 && !selectedConnector) {
+    selectedConnector = connectors.find((connector) =>
+      allowGroupConnector.includes(connector.actionTypeId)
+    );
+  }
   if (!selectedConnector) {
     return [];
   }
