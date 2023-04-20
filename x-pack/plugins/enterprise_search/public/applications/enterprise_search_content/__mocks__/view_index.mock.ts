@@ -13,6 +13,7 @@ import {
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
+  DisplayType,
 } from '../../../../common/types/connectors';
 
 import {
@@ -44,13 +45,16 @@ export const connectorIndex: ConnectorViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         key: 'foo',
         label: 'bar',
         options: [],
         order: 1,
         required: false,
         sensitive: false,
+        tooltip: '',
         value: 'barbar',
       },
     },
@@ -155,13 +159,16 @@ export const crawlerIndex: CrawlerViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         key: 'foo',
         label: 'bar',
         options: [],
         order: 1,
         required: false,
         sensitive: false,
+        tooltip: '',
         value: 'barbar',
       },
     },

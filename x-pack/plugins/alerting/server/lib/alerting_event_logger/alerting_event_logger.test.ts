@@ -69,6 +69,7 @@ const alert = {
     duration: '2343252346',
   },
   flapping: false,
+  maintenanceWindowIds: ['window-id1', 'window-id2'],
 };
 
 const action = {
@@ -1069,6 +1070,7 @@ describe('createAlertRecord', () => {
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
+    expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
     expect(record.kibana?.saved_objects).toEqual([

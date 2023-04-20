@@ -51,6 +51,7 @@ interface AlertOpts {
   group?: string;
   state?: AlertInstanceState;
   flapping: boolean;
+  maintenanceWindowIds?: string[];
 }
 
 interface ActionOpts {
@@ -257,6 +258,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     ],
     ruleName: context.ruleName,
     flapping: alert.flapping,
+    maintenanceWindowIds: alert.maintenanceWindowIds,
     revision: context.revision,
   });
 }

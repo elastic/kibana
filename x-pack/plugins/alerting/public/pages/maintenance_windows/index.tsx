@@ -6,23 +6,22 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiButton, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
 import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { AlertingDeepLinkId } from '../../config';
+import { MaintenanceWindowsList } from './components/maintenance_windows_list';
+import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
+import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindowsList } = {
-    isLoading: false,
-    maintenanceWindowsList: { total: 0 },
-  };
-  const { total } = maintenanceWindowsList || {};
+  const { isLoading, maintenanceWindows } = useFindMaintenanceWindows();
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -30,17 +29,36 @@ export const MaintenanceWindowsPage = React.memo(() => {
     navigateToCreateMaintenanceWindow();
   }, [navigateToCreateMaintenanceWindow]);
 
+  const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
+
+  if (isLoading) {
+    return <CenterJustifiedSpinner />;
+  }
+
   return (
     <>
       <EuiPageHeader
         bottomBorder
         pageTitle={i18n.MAINTENANCE_WINDOWS}
         description={i18n.MAINTENANCE_WINDOWS_DESCRIPTION}
+        rightSideItems={
+          !showEmptyPrompt
+            ? [
+                <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
+                  {i18n.CREATE_NEW_BUTTON}
+                </EuiButton>,
+              ]
+            : []
+        }
       />
-
-      {!isLoading && total === 0 ? (
+      {showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
-      ) : null}
+      ) : (
+        <>
+          <EuiSpacer size="xl" />
+          <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
+        </>
+      )}
     </>
   );
 });
