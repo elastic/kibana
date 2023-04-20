@@ -11,7 +11,6 @@ import type {
   ServerLogActionParams,
   ServiceNowActionParams,
   JiraActionParams,
-  SlackApiActionParams,
   WebhookActionParams,
   EmailActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
@@ -22,7 +21,6 @@ import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
 export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
-export const SLACK_API_ACTION_ID: ActionTypeId = '.slack_api';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
 export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
 export const INDEX_ACTION_ID: ActionTypeId = '.index';
@@ -105,9 +103,6 @@ export function populateAlertActions({
           message: translations.defaultActionMessage,
         };
         actions.push(recoveredAction);
-        break;
-      case SLACK_API_ACTION_ID:
-        action.params = getSlackApiActionParams(translations);
         break;
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
@@ -270,16 +265,6 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
         parent: null,
       },
       comments: [],
-    },
-  };
-}
-
-function getSlackApiActionParams({ defaultActionMessage }: Translations): SlackApiActionParams {
-  return {
-    subAction: 'postMessage',
-    subActionParams: {
-      channels: ['general'],
-      text: defaultActionMessage,
     },
   };
 }

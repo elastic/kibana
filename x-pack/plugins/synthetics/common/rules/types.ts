@@ -11,7 +11,6 @@ import type {
   PagerDutyConnectorTypeId,
   ServerLogConnectorTypeId,
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
-  SlackApiConnectorTypeId,
   SlackWebhookConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
@@ -21,7 +20,6 @@ import type {
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 export type ActionTypeId =
-  | typeof SlackApiConnectorTypeId
   | typeof SlackWebhookConnectorTypeId
   | typeof PagerDutyConnectorTypeId
   | typeof ServerLogConnectorTypeId
