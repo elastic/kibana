@@ -12,12 +12,12 @@ import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 
 import * as i18n from '../case_view/translations';
 
-interface UserActionMarkdownFooterProps {
+interface EditableMarkdownFooterProps {
   handleSaveAction: () => Promise<void>;
   handleCancelAction: () => void;
 }
 
-const UserActionMarkdownFooterComponent: React.FC<UserActionMarkdownFooterProps> = ({
+const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = ({
   handleSaveAction,
   handleCancelAction,
 }) => {
@@ -52,6 +52,6 @@ const UserActionMarkdownFooterComponent: React.FC<UserActionMarkdownFooterProps>
   );
 };
 
-UserActionMarkdownFooterComponent.displayName = 'UserActionMarkdownFooterComponent';
+EditableMarkdownFooterComponent.displayName = 'EditableMarkdownFooterComponent';
 
-export const UserActionMarkdownFooter = React.memo(UserActionMarkdownFooterComponent);
+export const EditableMarkdownFooter = React.memo(EditableMarkdownFooterComponent);

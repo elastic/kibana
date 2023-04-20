@@ -5,88 +5,99 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 import styled from 'styled-components';
-import type { EuiCommentProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
-  EuiCommentList,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import classNames from 'classnames';
-import type { UserActionBuilderArgs, UserActionTreeProps } from '../user_actions/types';
-import { UserActionMarkdown } from '../user_actions/markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from '../user_actions/translations';
-import { useUserActionsHandler } from '../user_actions/use_user_actions_handler';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
+import type { Case } from '../../containers/types';
+import type { OnUpdateFields } from '../case_view/types';
+import type { Content } from '../user_actions/schema';
+import { schema } from '../user_actions/schema';
 
 const DESCRIPTION_ID = 'description';
 
-type GetDescriptionUserActionArgs = Pick<UserActionBuilderArgs, 'caseData' | 'userProfiles'> &
-  Pick<UserActionTreeProps, 'onUpdateField'> & { isLoadingDescription: boolean };
+export interface DescriptionMarkdownRefObject {
+  setComment: (newComment: string) => void;
+}
+export interface DescriptionProps {
+  caseData: Case;
+  onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
+  isLoadingDescription: boolean;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+}
 
-const MyEuiCommentFooter = styled(EuiText)`
+const CommentFooter = styled(EuiText)`
   ${({ theme }) => `
     border-top: ${theme.eui.euiBorderThin};
     padding: ${theme.eui.euiSizeS};
   `}
 `;
 
-const MyEuiCommentList = styled(EuiCommentList)`
-  & .euiComment > [class*='euiTimelineItemIcon-top'] {
-    display: none;
-  }
-
-  & .draftFooter {
-    & .euiCommentEvent__body {
-      padding: 0;
-    }
-  }
-
-  & .euiComment.isEdit {
-    & .euiCommentEvent {
-      border: none;
-      box-shadow: none;
-    }
-
-    & .euiCommentEvent__body {
-      padding: 0;
-    }
-
-    & .euiCommentEvent__header {
-      display: none;
-    }
-  }
-
-  & .euiComment > [class*='euiTimelineItemIcon-center'] {
-    display: none;
-  }
-
-  & .collapsedList {
-    & .euiCommentEvent__header {
-      background: #f1f4fa;
-      border: 1px solid #d3dae6;
-      border-radius: 6px;
-      padding: 8px;
-    }
-  }
+const Panel = styled(EuiPanel)`
+  padding: 0;
 `;
 
-export const Description = React.memo(
-  ({ caseData, isLoadingDescription, onUpdateField }: GetDescriptionUserActionArgs) => {
+const Header = styled(EuiFlexGroup)`
+  ${({ theme }) => `
+    display: flex;
+    padding: ${theme.eui.euiSizeS};
+    border-radius: 6px;
+    background: #f1f4fa;
+  `}
+`;
+
+const Body = styled(EuiFlexItem)`
+  ${({ theme }) => `
+    padding: ${theme.eui.euiSize};
+    padding-top: 0;
+  `}
+`;
+
+export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionProps>(
+  ({ caseData, isLoadingDescription, onUpdateField }, ref) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+    const [isEditable, setIsEditable] = useState<boolean>(false);
+    const descriptionRef = useRef(null);
+    const { euiTheme } = useEuiTheme();
+    const initialState = { content: caseData.description };
+    const { form } = useForm<Content>({
+      defaultValue: initialState,
+      options: { stripEmptyFields: false },
+      schema,
+    });
 
     const { appId } = useCasesContext();
+    const { setFieldValue } = form;
 
-    const { commentRefs, manageMarkdownEditIds, handleManageMarkdownEditId } =
-      useUserActionsHandler();
+    const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
 
-    const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
+    const setComment = useCallback(
+      (newComment) => {
+        setFieldValue('content', newComment);
+      },
+      [setFieldValue]
+    );
+
+    useImperativeHandle(ref, () => ({
+      setComment,
+      editor: descriptionRef.current,
+    }));
 
     const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
       const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
@@ -94,80 +105,104 @@ export const Description = React.memo(
       return Boolean(sessionStorage.getItem(draftStorageKey));
     };
 
-    const descriptionCommentListObj: EuiCommentProps = {
-      username: null,
-      event: i18n.DESCRIPTION,
-      'data-test-subj': 'description',
-      timestamp: null,
-      children: !isCollapsed ? (
-        <>
-          <UserActionMarkdown
-            key={isEditable ? DESCRIPTION_ID : undefined}
-            caseId={caseData.id}
-            id={DESCRIPTION_ID}
-            ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
-            content={caseData.description}
-            isEditable={isEditable}
-            onSaveContent={(content: string) => {
-              onUpdateField({ key: DESCRIPTION_ID, value: content });
-            }}
-            onChangeEditable={handleManageMarkdownEditId}
-          />
-          {!isEditable &&
-          !isLoadingDescription &&
-          hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
-            <MyEuiCommentFooter>
+    const handleOnChangeEditable = useCallback(() => {
+      setIsEditable(false);
+      clearDraftComment();
+    }, [setIsEditable, clearDraftComment]);
+
+    const handleOnSave = useCallback(
+      (content: string) => {
+        onUpdateField({ key: DESCRIPTION_ID, value: content });
+        setIsEditable(false);
+        clearDraftComment();
+      },
+      [onUpdateField, setIsEditable, clearDraftComment]
+    );
+
+    const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
+
+    if (
+      hasIncomingLensState &&
+      draftComment !== null &&
+      draftComment?.commentId === DESCRIPTION_ID &&
+      !isEditable
+    ) {
+      setIsEditable(true);
+    }
+
+    if (isLoadingDescription) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner data-test-subj="description-loading" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return isEditable ? (
+      <EditableMarkdown
+        id="description"
+        data-test-subj="description"
+        caseId={caseData.id}
+        content={caseData.description}
+        onChangeEditable={handleOnChangeEditable}
+        onSaveContent={handleOnSave}
+        editorRef={descriptionRef}
+        form={form}
+        fieldName="content"
+      />
+    ) : (
+      <Panel hasShadow={false} hasBorder={true} data-test-subj="description">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <Header
+              justifyContent="spaceBetween"
+              {...(!isCollapsed
+                ? {
+                    css: css`
+                      border-bottom: ${euiTheme.border.thin};
+                    `,
+                  }
+                : {})}
+            >
+              <EuiFlexItem>
+                <EuiText size="s">{i18n.DESCRIPTION}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={i18n.EDIT_DESCRIPTION}
+                    iconType="pencil"
+                    onClick={() => setIsEditable(true)}
+                    data-test-subj="description-edit-icon"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                    iconType="fold"
+                    onClick={toggleCollapse}
+                    data-test-subj="description-collapse-icon"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Header>
+          </EuiFlexItem>
+          {!isCollapsed ? (
+            <Body>
+              <ScrollableMarkdown content={caseData.description} />
+            </Body>
+          ) : null}
+          {hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
+            <CommentFooter>
               <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_DESCRIPTION}
               </EuiText>
-            </MyEuiCommentFooter>
-          ) : (
-            ''
-          )}
-        </>
-      ) : null,
-      timelineAvatar: null,
-      className: classNames({
-        isEdit: isEditable,
-        draftFooter:
-          !isEditable &&
-          !isLoadingDescription &&
-          hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
-        collapsedList: isCollapsed,
-      }),
-      actions: (
-        <>
-          <EuiButtonIcon
-            aria-label={i18n.EDIT_DESCRIPTION}
-            iconType="pencil"
-            onClick={() => {
-              handleManageMarkdownEditId(DESCRIPTION_ID);
-            }}
-            data-test-subj="description-edit-icon"
-          />
-          <EuiButtonIcon
-            aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
-            iconType="fold"
-            onClick={() => {
-              setIsCollapsed(!isCollapsed);
-            }}
-            data-test-subj="description-collapse-icon"
-          />
-        </>
-      ),
-    };
-
-    return isLoadingDescription ? (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner data-test-subj="description-loading" size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      <MyEuiCommentList
-        comments={[descriptionCommentListObj]}
-        data-test-subj="description-comment-list"
-      />
+            </CommentFooter>
+          ) : null}
+        </EuiFlexGroup>
+      </Panel>
     );
   }
 );
