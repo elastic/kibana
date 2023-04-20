@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type {
+  SavedObjectsUpdateResponse,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
   CommentAttributesNoSO,
-  CommentRequest,
   CommentAttributes,
   CommentPatchAttributes,
   CommentAttributesWithoutRefs,
@@ -21,11 +23,15 @@ import {
   extractPersistableStateReferencesFromSO,
 } from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentRequestAttributes,
+} from '../common/types/attachments';
 import { isCommentRequestTypeExternalReferenceSO } from '../common/utils';
 import type { PartialField } from '../types';
 import { SOReferenceExtractor } from './so_reference_extractor';
 
-export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) => {
+export const getAttachmentSOExtractor = (attachment: Partial<AttachmentRequestAttributes>) => {
   const fieldsToExtract = [];
 
   if (isCommentRequestTypeExternalReferenceSO(attachment)) {
@@ -47,7 +53,7 @@ type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
  * then the error field will be set and attributes will be undefined.
  */
 export const injectAttachmentAttributesAndHandleErrors = (
-  savedObject: OptionalAttributes<CommentAttributesWithoutRefs>,
+  savedObject: OptionalAttributes<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): OptionalAttributes<CommentAttributes> => {
   if (!hasAttributes(savedObject)) {
@@ -64,7 +70,7 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 };
 
 export const injectAttachmentSOAttributesFromRefs = (
-  savedObject: SavedObject<CommentAttributesWithoutRefs>,
+  savedObject: SavedObject<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);

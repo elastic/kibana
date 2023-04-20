@@ -7,11 +7,9 @@
 
 import type {
   SavedObject,
-  SavedObjectReference,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
-  SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
@@ -19,7 +17,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
-  CommentPatchAttributes as AttachmentPatchAttributes,
 } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -32,50 +29,19 @@ import {
   injectAttachmentSOAttributesFromRefsForPatch,
 } from '../so_references';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import type { IndexRefresh } from '../types';
-import type { AttachedToCaseArgs, ServiceContext } from './types';
+import type {
+  AlertsAttachedToCaseArgs,
+  AttachmentsAttachedToCaseArgs,
+  BulkCreateAttachments,
+  BulkUpdateAttachmentArgs,
+  CountActionsAttachedToCaseArgs,
+  CreateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ServiceContext,
+  UpdateAttachmentArgs,
+} from './types';
 import { AttachmentGetter } from './operations/get';
-
-type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
-
-interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
-  attachmentType: CommentType;
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
-
-interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
-
-interface DeleteAttachmentArgs extends IndexRefresh {
-  attachmentIds: string[];
-}
-
-interface CreateAttachmentArgs extends IndexRefresh {
-  attributes: AttachmentAttributes;
-  references: SavedObjectReference[];
-  id: string;
-}
-
-interface BulkCreateAttachments extends IndexRefresh {
-  attachments: Array<{
-    attributes: AttachmentAttributes;
-    references: SavedObjectReference[];
-    id: string;
-  }>;
-}
-
-interface UpdateArgs {
-  attachmentId: string;
-  updatedAttributes: AttachmentPatchAttributes;
-  options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
-}
-
-export type UpdateAttachmentArgs = UpdateArgs;
-
-interface BulkUpdateAttachmentArgs extends IndexRefresh {
-  comments: UpdateArgs[];
-}
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;
@@ -207,7 +173,7 @@ export class AttachmentService {
         );
 
       const attachment =
-        await this.context.unsecuredSavedObjectsClient.create<AttachmentAttributesWithoutRefs>(
+        await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           extractedAttributes,
           {
@@ -234,7 +200,7 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to bulk create attachments`);
       const res =
-        await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentAttributesWithoutRefs>(
+        await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(
@@ -380,7 +346,7 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to find comments`);
       const res =
-        await this.context.unsecuredSavedObjectsClient.find<AttachmentAttributesWithoutRefs>({
+        await this.context.unsecuredSavedObjectsClient.find<AttachmentPersistedAttributes>({
           sortField: defaultSortField,
           ...options,
           type: CASE_COMMENT_SAVED_OBJECT,

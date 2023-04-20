@@ -56,6 +56,7 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
+import type { AttachmentRequestAttributes } from './types/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -258,7 +259,7 @@ export const isCommentRequestTypeAlert = (
  * A type narrowing function for external reference so attachments.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
-  context: Partial<CommentRequest>
+  context: Partial<AttachmentRequestAttributes>
 ): context is CommentRequestExternalReferenceSOType => {
   return (
     context.type === CommentType.externalReference &&
