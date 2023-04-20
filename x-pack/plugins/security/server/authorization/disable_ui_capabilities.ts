@@ -30,7 +30,6 @@ export function disableUICapabilitiesFactory(
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
-  // .filter(f => f.privileges !== null)
   const featureNavLinkIds = features
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
@@ -68,12 +67,12 @@ export function disableUICapabilitiesFactory(
       };
     }, {});
 
-  function isCatalogueItemReferencedByFeatureSet(
+  const isCatalogueItemReferencedByFeatureSet = (
     catalogueEntry: string,
     featureSet: Array<Partial<{ catalogue: RecursiveReadonlyArray<string> | undefined }>>
-  ) {
+  ) => {
     return featureSet.some((feature) => (feature.catalogue ?? []).includes(catalogueEntry));
-  }
+  };
 
   const shouldAffectCapability = (featureId: keyof UICapabilities, uiCapability: string) => {
     // This method answers: 'Should we affect a capability based on privileges?'
@@ -82,7 +81,9 @@ export function disableUICapabilitiesFactory(
     // The spaces and file_upload plugins have their own capabilites switchers
 
     // Always affect global settings
-    if (featureId === 'globalSettings') return true;
+    if (featureId === 'globalSettings') {
+      return true;
+    }
 
     // If the feature is 'catalogue', return true if it is the 'spaces' capability
     // (we always want to affect that) or if we have a feature that references it
