@@ -101,7 +101,7 @@ export function ErrorCountRuleType(props: Props) {
   );
 
   const onGroupByChange = useCallback(
-    (group: string[] | string | null) => {
+    (group: string[] | null) => {
       setRuleParams('groupBy', group ?? []);
     },
     [setRuleParams]
