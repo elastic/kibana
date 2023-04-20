@@ -38,7 +38,7 @@ export function HeaderTitle(props: Props) {
       <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
         <SloStatusBadge slo={slo} />
-        <SloActiveAlertsBadge activeAlerts={activeAlerts[slo.id]} />
+        <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts[slo.id]} />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

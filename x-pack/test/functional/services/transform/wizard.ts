@@ -1052,9 +1052,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(60 * 1000, async () => {
         const allFields = await pageObjects.discover.getAllFieldNames();
         if (Array.isArray(allFields)) {
-          // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
-          const fields = allFields.map((n) => n.replace('.​', '.'));
-          expect(fields).to.contain(
+          expect(allFields).to.contain(
             field,
             `Expected Discover to contain field ${field}, got ${allFields.join()}`
           );

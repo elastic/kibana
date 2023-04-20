@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -42,6 +43,46 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.getTrainedModelsStats(params);
+            });
+        },
+        async startTrainedModelDeployment(params: estypes.MlStartTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.startTrainedModelDeployment(params);
+            });
+        },
+        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.stopTrainedModelDeployment(params);
+            });
+        },
+        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.inferTrainedModel(params);
+            });
+        },
+        async deleteTrainedModel(params: estypes.MlDeleteTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canDeleteTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.deleteTrainedModel(params);
+            });
+        },
+        async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.updateTrainedModelDeployment(params);
             });
         },
       };

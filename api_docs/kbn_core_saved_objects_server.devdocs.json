@@ -5932,6 +5932,26 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               },
@@ -5950,26 +5970,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/packages/get.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/request_responses.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/request_responses.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/request_responses.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/request_responses.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/__mocks__/request_responses.ts"
               }
             ]
           },
@@ -6126,6 +6126,10 @@
           {
             "plugin": "actions",
             "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
             "plugin": "alerting",
@@ -8043,6 +8047,24 @@
             ],
             "signature": [
               "\"strict\" | \"lax\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "\nOptional setting to allow compatible handling of the `migrationVersion` field.\nThis is needed to return the `migrationVersion` field in the same format as it was before migrating to the `typeMigrationVersion` property.\n"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
