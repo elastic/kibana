@@ -36,15 +36,18 @@ import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/gener
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 
+export const elasticsearchUrl = (): string => {
+  const cloudContext = useCloudDetails();
+  const url =
+    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || 'https://localhost:9200';
+  return url;
+};
+
 export const SearchApplicationAPI = () => {
   const { engineName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
-
-  const cloudContext = useCloudDetails();
-  const elasticsearchUrl =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || 'https://localhost:9200';
 
   const steps = [
     {
@@ -128,7 +131,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {elasticsearchUrl}
+                {elasticsearchUrl()}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>

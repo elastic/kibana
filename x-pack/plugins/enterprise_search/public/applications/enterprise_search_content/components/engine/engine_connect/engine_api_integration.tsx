@@ -16,8 +16,7 @@ import { EngineViewLogic } from '../engine_view_logic';
 
 import { EngineApiLogic } from './engine_api_logic';
 
-import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
+import { elasticsearchUrl } from './search_application_api';
 
 
 const SearchUISnippet = (elasticsearchUrl: string, engineName: string, apiKey: string) => `6
@@ -51,20 +50,16 @@ export const EngineApiIntegrationStage: React.FC = () => {
   const { engineName } = useValues(EngineViewLogic);
   const { apiKey } = useValues(EngineApiLogic);
 
-  const cloudContext = useCloudDetails();
-  const elasticsearchUrl =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || 'https://localhost:9200';
-
   const Tabs: Record<TabId, Tab> = {
     curl: {
-      code: cURLSnippet(elasticsearchUrl, engineName, apiKey),
+      code: cURLSnippet(elasticsearchUrl(), engineName, apiKey),
       language: 'bash',
       title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.curlTitle', {
         defaultMessage: 'cURL',
       }),
     },
     searchui: {
-      code: SearchUISnippet(elasticsearchUrl, engineName, apiKey),
+      code: SearchUISnippet(elasticsearchUrl(), engineName, apiKey),
       language: 'javascript',
       title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.searchUITitle', {
         defaultMessage: 'Search UI',
