@@ -59,7 +59,15 @@ export interface SolutionSideNavPanelItemsProps {
  * Renders the side navigation panel for secondary links
  */
 export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.memo(
-  ({ onClose, onOutsideClick, title, categories, items, bottomOffset, topOffset }) => {
+  function SolutionSideNavPanel({
+    onClose,
+    onOutsideClick,
+    title,
+    categories,
+    items,
+    bottomOffset,
+    topOffset,
+  }) {
     const { euiTheme } = useEuiTheme();
     const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
 
@@ -132,7 +140,7 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
 );
 
 const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesProps> = React.memo(
-  ({ categories, items, onClose }) => {
+  function SolutionSideNavPanelCategories({ categories, items, onClose }) {
     const { euiTheme } = useEuiTheme();
     const sideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme);
     const titleClasses = classNames(sideNavTitleStyles);
@@ -169,7 +177,7 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
 );
 
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
-  ({ items, onClose }) => {
+  function SolutionSideNavPanelItems({ items, onClose }) {
     const panelLinkClassNames = classNames('solutionSideNavPanelLink');
     const panelLinkItemClassNames = classNames('solutionSideNavPanelLinkItem');
     const { tracker } = useTelemetryContext();

@@ -9,7 +9,7 @@ import { TableId } from '../common/types';
 import { defaultHeaders } from './header';
 
 // FIXME add strong typings
-export const mockGlobalState: any = {
+export const mockGlobalState = {
   app: {
     notesById: {},
     errors: [

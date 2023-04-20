@@ -9,8 +9,12 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { ExpandedDetail } from '../../common/types/detail_panel';
-import { ColumnHeaderOptions, SessionViewConfig, SortColumnTable } from '../../common/types';
-import { ViewSelection } from '../../common/types';
+import type {
+  ColumnHeaderOptions,
+  SessionViewConfig,
+  SortColumnTable,
+  ViewSelection,
+} from '../../common/types';
 
 export interface DataTableModelSettings {
   defaultColumns: Array<

@@ -8,12 +8,11 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
-import type { SolutionSideNavItem } from './types';
 import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
-import type { LinkCategories } from './types';
+import type { SolutionSideNavItem, LinkCategories } from './types';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {

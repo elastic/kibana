@@ -59,114 +59,119 @@ type NavItemsById = Record<
   { title: string; panelItems: SolutionSideNavItem[]; categories?: LinkCategories }
 >;
 
-export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(
-  ({ items, selectedId, footerItems = [], panelBottomOffset, panelTopOffset, tracker }) => {
-    const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
+export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(function SolutionSideNav({
+  items,
+  selectedId,
+  footerItems = [],
+  panelBottomOffset,
+  panelTopOffset,
+  tracker,
+}) {
+  const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
-    const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
-    const activePanelNavIdRef = useRef<ActivePanelNav>(null);
+  const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
+  const activePanelNavIdRef = useRef<ActivePanelNav>(null);
 
-    const openPanelNav = (id: string) => {
-      activePanelNavIdRef.current = id;
-      setActivePanelNavId(id);
-    };
+  const openPanelNav = (id: string) => {
+    activePanelNavIdRef.current = id;
+    setActivePanelNavId(id);
+  };
 
-    const onClosePanelNav = useCallback(() => {
-      activePanelNavIdRef.current = null;
-      setActivePanelNavId(null);
-    }, []);
+  const onClosePanelNav = useCallback(() => {
+    activePanelNavIdRef.current = null;
+    setActivePanelNavId(null);
+  }, []);
 
-    const onOutsidePanelClick = useCallback(() => {
-      const currentPanelNavId = activePanelNavIdRef.current;
-      setTimeout(() => {
-        // This event is triggered on outside click.
-        // Closing the side nav at the end of event loop to make sure it
-        // closes also if the active panel button has been clicked (toggle),
-        // but it does not close if any any other panel open button has been clicked.
-        if (activePanelNavIdRef.current === currentPanelNavId) {
-          onClosePanelNav();
-        }
-      });
-    }, [onClosePanelNav]);
-
-    const navItemsById = useMemo<NavItemsById>(
-      () =>
-        [...items, ...footerItems].reduce<NavItemsById>((acc, navItem) => {
-          if (navItem.items?.length) {
-            acc[navItem.id] = {
-              title: navItem.label,
-              panelItems: navItem.items,
-              categories: navItem.categories,
-            };
-          }
-          return acc;
-        }, {}),
-      [items, footerItems]
-    );
-
-    const panelNav = useMemo(() => {
-      if (activePanelNavId == null || !navItemsById[activePanelNavId]) {
-        return null;
+  const onOutsidePanelClick = useCallback(() => {
+    const currentPanelNavId = activePanelNavIdRef.current;
+    setTimeout(() => {
+      // This event is triggered on outside click.
+      // Closing the side nav at the end of event loop to make sure it
+      // closes also if the active panel button has been clicked (toggle),
+      // but it does not close if any any other panel open button has been clicked.
+      if (activePanelNavIdRef.current === currentPanelNavId) {
+        onClosePanelNav();
       }
-      const { panelItems, title, categories } = navItemsById[activePanelNavId];
-      return (
-        <SolutionSideNavPanel
-          onClose={onClosePanelNav}
-          onOutsideClick={onOutsidePanelClick}
-          items={panelItems}
-          title={title}
-          categories={categories}
-          bottomOffset={panelBottomOffset}
-          topOffset={panelTopOffset}
-        />
-      );
-    }, [
-      activePanelNavId,
-      navItemsById,
-      onClosePanelNav,
-      onOutsidePanelClick,
-      panelBottomOffset,
-      panelTopOffset,
-    ]);
+    });
+  }, [onClosePanelNav]);
 
+  const navItemsById = useMemo<NavItemsById>(
+    () =>
+      [...items, ...footerItems].reduce<NavItemsById>((acc, navItem) => {
+        if (navItem.items?.length) {
+          acc[navItem.id] = {
+            title: navItem.label,
+            panelItems: navItem.items,
+            categories: navItem.categories,
+          };
+        }
+        return acc;
+      }, {}),
+    [items, footerItems]
+  );
+
+  const panelNav = useMemo(() => {
+    if (activePanelNavId == null || !navItemsById[activePanelNavId]) {
+      return null;
+    }
+    const { panelItems, title, categories } = navItemsById[activePanelNavId];
     return (
-      <TelemetryContextProvider tracker={tracker}>
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none" direction="column">
-              <EuiFlexItem>
-                <EuiListGroup gutterSize="none">
-                  <SolutionSideNavItems
-                    items={items}
-                    selectedId={selectedId}
-                    activePanelNavId={activePanelNavId}
-                    isMobileSize={isMobileSize}
-                    navItemsById={navItemsById}
-                    onOpenPanelNav={openPanelNav}
-                  />
-                </EuiListGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiListGroup gutterSize="none">
-                  <SolutionSideNavItems
-                    items={footerItems}
-                    selectedId={selectedId}
-                    activePanelNavId={activePanelNavId}
-                    isMobileSize={isMobileSize}
-                    navItemsById={navItemsById}
-                    onOpenPanelNav={openPanelNav}
-                  />
-                </EuiListGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {panelNav}
-      </TelemetryContextProvider>
+      <SolutionSideNavPanel
+        onClose={onClosePanelNav}
+        onOutsideClick={onOutsidePanelClick}
+        items={panelItems}
+        title={title}
+        categories={categories}
+        bottomOffset={panelBottomOffset}
+        topOffset={panelTopOffset}
+      />
     );
-  }
-);
+  }, [
+    activePanelNavId,
+    navItemsById,
+    onClosePanelNav,
+    onOutsidePanelClick,
+    panelBottomOffset,
+    panelTopOffset,
+  ]);
+
+  return (
+    <TelemetryContextProvider tracker={tracker}>
+      <EuiFlexGroup gutterSize="none" direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexItem>
+              <EuiListGroup gutterSize="none">
+                <SolutionSideNavItems
+                  items={items}
+                  selectedId={selectedId}
+                  activePanelNavId={activePanelNavId}
+                  isMobileSize={isMobileSize}
+                  navItemsById={navItemsById}
+                  onOpenPanelNav={openPanelNav}
+                />
+              </EuiListGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiListGroup gutterSize="none">
+                <SolutionSideNavItems
+                  items={footerItems}
+                  selectedId={selectedId}
+                  activePanelNavId={activePanelNavId}
+                  isMobileSize={isMobileSize}
+                  navItemsById={navItemsById}
+                  onOpenPanelNav={openPanelNav}
+                />
+              </EuiListGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {panelNav}
+    </TelemetryContextProvider>
+  );
+});
 
 const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = ({
   items,
@@ -191,7 +196,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = ({
 );
 
 const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  ({ item, isSelected, isActive, hasPanelNav, onOpenPanelNav }) => {
+  function SolutionSideNavItem({ item, isSelected, isActive, hasPanelNav, onOpenPanelNav }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 

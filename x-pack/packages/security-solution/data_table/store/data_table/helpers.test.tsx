@@ -14,11 +14,12 @@ import {
 import { mockGlobalState } from '../../mock/global_state';
 import { SortColumnTable, TableId } from '../../common/types';
 import type { DataTableModelSettings } from './model';
+import type { TableById } from './types';
 
 const id = 'foo';
 const defaultTableById = {
   ...mockGlobalState.dataTable.tableById,
-};
+} as unknown as TableById;
 
 describe('setInitializeDataTableSettings', () => {
   test('it returns the expected sort when dataTableSettingsProps has an override', () => {
@@ -68,7 +69,7 @@ describe('setInitializeDataTableSettings', () => {
 
 describe('updateDataTableColumnOrder', () => {
   test('it returns the columns in the new expected order', () => {
-    const originalIdOrder = defaultTableById[TableId.test].columns.map((x: any) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
+    const originalIdOrder = defaultTableById[TableId.test].columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
 
     // the new order swaps the positions of the first and second columns:
     const newIdOrder = [originalIdOrder[1], originalIdOrder[0], ...originalIdOrder.slice(2)]; // ['event.severity', '@timestamp', 'event.category', '...']
@@ -93,7 +94,7 @@ describe('updateDataTableColumnOrder', () => {
   });
 
   test('it omits unknown column IDs when re-ordering columns', () => {
-    const originalIdOrder = defaultTableById[TableId.test].columns.map((x: any) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
+    const originalIdOrder = defaultTableById[TableId.test].columns.map((x) => x.id); // ['@timestamp', 'event.severity', 'event.category', '...']
     const unknownColumId = 'does.not.exist';
     const newIdOrder = [originalIdOrder[0], unknownColumId, ...originalIdOrder.slice(1)]; // ['@timestamp', 'does.not.exist', 'event.severity', 'event.category', '...']
 
