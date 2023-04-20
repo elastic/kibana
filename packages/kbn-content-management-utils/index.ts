@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
+export * from './src/types';
+export * from './src/schema';
