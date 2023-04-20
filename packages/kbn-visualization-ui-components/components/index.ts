@@ -16,4 +16,6 @@ export * from './debounced_value';
 
 export * from './tooltip_wrapper';
 
+export * from './color_picker';
+
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';

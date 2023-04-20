@@ -13,6 +13,7 @@ export {
   DebouncedInput,
   useDebouncedValue,
   TooltipWrapper,
+  ColorPicker,
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption } from './components';
