@@ -36,7 +36,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
-const selectControlCss = { width: '300px' };
+const selectControlCss = { width: '350px' };
 
 /**
  * Contains panels with controls and change point results.
@@ -270,14 +270,14 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={true} css={selectControlCss}>
+        <EuiFlexItem grow={false} css={selectControlCss}>
           <MetricFieldSelector
             value={fieldConfig.metricField!}
             onChange={(v) => onChangeFn('metricField', v)}
           />
         </EuiFlexItem>
         {splitFieldsOptions.length > 0 ? (
-          <EuiFlexItem grow={true} css={selectControlCss}>
+          <EuiFlexItem grow={false} css={selectControlCss}>
             <SplitFieldSelector
               value={fieldConfig.splitField}
               onChange={(v) => onChangeFn('splitField', v!)}
