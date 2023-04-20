@@ -39,7 +39,8 @@ export type EnginesListActions = Pick<
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
-  closeEngineCreate(): void;
+
+  // closeEngineCreate(): void;
   deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
   deleteError: DeleteEnginesApiLogicActions['apiError'];
   deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
@@ -50,13 +51,15 @@ export type EnginesListActions = Pick<
   openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
     engine: EnterpriseSearchEngine;
   };
-  openEngineCreate(): void;
+  openCreateFlyout(): void;
+  closeCreateFlyout(): void;
+  // setCreateEngineFlyoutFlag(): void;
   setIsFirstRequest(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
 
 interface EngineListValues {
-  createEngineFlyoutOpen: boolean;
+  isCreateEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
@@ -76,11 +79,11 @@ interface EngineListValues {
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
   actions: {
     closeDeleteEngineModal: true,
-    closeEngineCreate: true,
+    // closeEngineCreate: true,
     fetchEngines: true,
     onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
     openDeleteEngineModal: (engine) => ({ engine }),
-    openEngineCreate: true,
+    // openEngineCreate: true,
     setIsFirstRequest: true,
     setSearchQuery: (searchQuery: string) => ({ searchQuery }),
   },
@@ -111,13 +114,12 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   path: ['enterprise_search', 'content', 'engine_list_logic'],
 
   reducers: ({}) => ({
-    createEngineFlyoutOpen: [
-      false,
-      {
-        closeEngineCreate: () => false,
-        openEngineCreate: () => true,
-      },
-    ],
+    // isCreateEngineFlyoutOpen: [
+    //   false,
+    //   {
+    //     closeCreateFlyout: false,
+    //   },
+    // ],
     deleteModalEngine: [
       null,
       {

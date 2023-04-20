@@ -60,14 +60,12 @@ describe('CreateEngineLogic', () => {
     });
     it('engineCreated is handled', () => {
       jest.spyOn(CreateEngineLogic.actions, 'fetchEngines');
-      jest.spyOn(CreateEngineLogic.actions, 'closeEngineCreate');
 
       CreateEngineApiLogic.actions.apiSuccess({
         result: 'created',
       });
 
       expect(CreateEngineLogic.actions.fetchEngines).toHaveBeenCalledTimes(1);
-      expect(CreateEngineLogic.actions.closeEngineCreate).toHaveBeenCalledTimes(1);
     });
   });
   describe('selectors', () => {

@@ -24,7 +24,7 @@ export const EnginesRouter: React.FC = () => {
         <EnginesList />
       </Route>
       <Route path={ENGINE_CREATION_PATH}>
-        <EnginesList isCreateEngineFlyoutOpen />
+        <EnginesList createEngineFlyoutOpen />
       </Route>
       <Route path={ENGINE_PATH}>
         <EngineRouter />

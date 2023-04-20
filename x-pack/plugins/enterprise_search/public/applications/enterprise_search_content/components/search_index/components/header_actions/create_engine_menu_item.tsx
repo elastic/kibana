@@ -57,7 +57,7 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
               {i18n.translate(
                 'xpack.enterpriseSearch.content.index.searchApplication.createSearchApplication',
                 {
-                  defaultMessage: 'Create an Search Application',
+                  defaultMessage: 'Create a Search Application',
                 }
               )}
             </p>

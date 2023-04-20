@@ -31,7 +31,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../workplace_search/constants';
-import { ENGINE_CREATION_PATH } from '../../routes';
+import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
@@ -44,9 +44,11 @@ import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
-export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
+interface CreateEngineButtonProps {
+  disabled: boolean;
+}
+export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const { openEngineCreate } = useActions(EnginesListLogic);
 
   return (
     <EuiPopover
@@ -65,7 +67,7 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
             data-test-subj="enterprise-search-content-engines-creation-button"
             data-telemetry-id="entSearchContent-engines-list-createEngine"
             isDisabled={disabled}
-            onClick={openEngineCreate}
+            onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
             to={ENGINE_CREATION_PATH}
           >
             {i18n.translate(
@@ -101,29 +103,26 @@ export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }
   );
 };
 interface ListProps {
-  isCreateEngineFlyoutOpen?: boolean;
+  createEngineFlyoutOpen?: boolean;
 }
 
-export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) => {
+export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => {
   const {
     closeDeleteEngineModal,
-    closeEngineCreate,
     fetchEngines,
     onPaginate,
     openDeleteEngineModal,
     setSearchQuery,
     setIsFirstRequest,
   } = useActions(EnginesListLogic);
-  const { openEngineCreate } = useActions(EnginesListLogic);
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
 
-  const { isCloud } = useValues(KibanaLogic);
+  const { isCloud, navigateToUrl } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const isGated = !isCloud && !hasPlatinumLicense;
 
   const {
-    createEngineFlyoutOpen,
     deleteModalEngineName,
     hasNoEngines,
     isDeleteModalVisible,
@@ -148,9 +147,6 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
     if (!isGated) {
       setIsFirstRequest();
     }
-    if (!!isCreateEngineFlyoutOpen) {
-      openEngineCreate();
-    }
   }, []);
 
   return (
@@ -160,7 +156,7 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
       ) : null}
 
       <EngineListIndicesFlyout />
-      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
+      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={() => navigateToUrl(ENGINES_PATH)} />}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.searchApplications.breadcrumb', {
@@ -238,7 +234,7 @@ export const EnginesList: React.FC<ListProps> = ({ isCreateEngineFlyoutOpen }) =
                 'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder.description',
                 {
                   defaultMessage:
-                    'Locate an search application via name or by its included indices.',
+                    'Locate a search application via name or by its included indices.',
                 }
               )}
             </EuiText>

@@ -19,7 +19,6 @@ import { EnginesListLogic } from './engines_list_logic';
 const NAME_VALIDATION = new RegExp(/^[a-z0-9\-]+$/);
 
 export interface CreateEngineLogicActions {
-  closeEngineCreate: () => void;
   createEngine: () => void;
   createEngineRequest: CreateEngineApiLogicActions['makeRequest'];
   engineCreateError: CreateEngineApiLogicActions['apiError'];
@@ -53,7 +52,7 @@ export const CreateEngineLogic = kea<
   connect: {
     actions: [
       EnginesListLogic,
-      ['closeEngineCreate', 'fetchEngines'],
+      ['fetchEngines'],
       CreateEngineApiLogic,
       [
         'makeRequest as createEngineRequest',
@@ -72,7 +71,6 @@ export const CreateEngineLogic = kea<
     },
     engineCreated: () => {
       actions.fetchEngines();
-      actions.closeEngineCreate();
     },
   }),
   path: ['enterprise_search', 'content', 'create_engine_logic'],
