@@ -2481,6 +2481,20 @@
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.maintenanceWindowIds",
+            "type": "Array",
+            "tags": [],
+            "label": "maintenanceWindowIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
