@@ -237,7 +237,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     isHiddenIndex: [
       () => [selectors.indexData],
-      (data: FetchIndexApiResponse | undefined) => data?.hidden || data?.name.startsWith('.'),
+      (data: FetchIndexApiResponse | undefined) =>
+        data?.hidden || (data?.name ?? '').startsWith('.'),
     ],
     isSyncing: [
       () => [selectors.indexData, selectors.syncStatus],
