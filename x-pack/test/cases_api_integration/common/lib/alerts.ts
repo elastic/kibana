@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { CaseResponse, CommentType } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   getRuleForSignalTesting,
@@ -25,7 +25,7 @@ import {
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';
-import { createCase } from './api/case';
+import { createCase, deleteCases } from './api/case';
 import { createComment, deleteAllComments } from './api';
 import { postCaseReq } from './mock';
 
@@ -102,6 +102,100 @@ export const createCaseAttachAlertAndDeleteAlert = async ({
   alerts: Alerts;
   getAlerts: (alerts: Alerts) => Promise<Array<Record<string, unknown>>>;
 }) => {
+  const updatedCases = await createCaseAndAttachAlert({
+    supertest,
+    totalCases,
+    owner,
+    alerts,
+    getAlerts,
+  });
+
+  const caseToDelete = updatedCases[indexOfCaseToDelete];
+
+  await deleteAllComments({
+    supertest,
+    caseId: caseToDelete.id,
+    expectedHttpCode,
+    auth: deleteCommentAuth,
+  });
+
+  const alertAfterDeletion = await getAlerts(alerts);
+  const caseIdsWithoutRemovedCase = getCaseIdsWithoutRemovedCases({
+    expectedHttpCode,
+    updatedCases,
+    caseIdsToDelete: [caseToDelete.id],
+  });
+
+  for (const alert of alertAfterDeletion) {
+    expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
+  }
+};
+
+export const createCaseAttachAlertAndDeleteCase = async ({
+  supertest,
+  totalCases,
+  indicesOfCaseToDelete,
+  owner,
+  expectedHttpCode = 204,
+  deleteCaseAuth = { user: superUser, space: 'space1' },
+  alerts,
+  getAlerts,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  totalCases: number;
+  indicesOfCaseToDelete: number[];
+  owner: string;
+  expectedHttpCode?: number;
+  deleteCaseAuth?: { user: User; space: string | null };
+  alerts: Alerts;
+  getAlerts: (alerts: Alerts) => Promise<Array<Record<string, unknown>>>;
+}) => {
+  const updatedCases = await createCaseAndAttachAlert({
+    supertest,
+    totalCases,
+    owner,
+    alerts,
+    getAlerts,
+  });
+
+  const casesToDelete = updatedCases.filter((_, filterIndex) =>
+    indicesOfCaseToDelete.some((indexToDelete) => indexToDelete === filterIndex)
+  );
+
+  const caseIdsToDelete = casesToDelete.map((theCase) => theCase.id);
+
+  await deleteCases({
+    supertest,
+    caseIDs: caseIdsToDelete,
+    expectedHttpCode,
+    auth: deleteCaseAuth,
+  });
+
+  const alertAfterDeletion = await getAlerts(alerts);
+  const caseIdsWithoutRemovedCase = getCaseIdsWithoutRemovedCases({
+    expectedHttpCode,
+    updatedCases,
+    caseIdsToDelete,
+  });
+
+  for (const alert of alertAfterDeletion) {
+    expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
+  }
+};
+
+export const createCaseAndAttachAlert = async ({
+  supertest,
+  totalCases,
+  owner,
+  alerts,
+  getAlerts,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  totalCases: number;
+  owner: string;
+  alerts: Alerts;
+  getAlerts: (alerts: Alerts) => Promise<Array<Record<string, unknown>>>;
+}): Promise<CaseResponse[]> => {
   const cases = await Promise.all(
     [...Array(totalCases).keys()].map((index) =>
       createCase(
@@ -147,25 +241,21 @@ export const createCaseAttachAlertAndDeleteAlert = async ({
     expect(alert[ALERT_CASE_IDS]).eql(caseIds);
   }
 
-  const caseToDelete = updatedCases[indexOfCaseToDelete];
+  return updatedCases;
+};
 
-  await deleteAllComments({
-    supertest,
-    caseId: caseToDelete.id,
-    expectedHttpCode,
-    auth: deleteCommentAuth,
-  });
-
-  const alertAfterDeletion = await getAlerts(alerts);
-
-  const caseIdsWithoutRemovedCase =
-    expectedHttpCode === 204
-      ? updatedCases
-          .filter((theCase) => theCase.id !== caseToDelete.id)
-          .map((theCase) => theCase.id)
-      : updatedCases.map((theCase) => theCase.id);
-
-  for (const alert of alertAfterDeletion) {
-    expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
-  }
+export const getCaseIdsWithoutRemovedCases = ({
+  updatedCases,
+  caseIdsToDelete,
+  expectedHttpCode,
+}: {
+  expectedHttpCode: number;
+  updatedCases: Array<{ id: string }>;
+  caseIdsToDelete: string[];
+}) => {
+  return expectedHttpCode === 204
+    ? updatedCases
+        .filter((theCase) => !caseIdsToDelete.some((id) => theCase.id === id))
+        .map((theCase) => theCase.id)
+    : updatedCases.map((theCase) => theCase.id);
 };

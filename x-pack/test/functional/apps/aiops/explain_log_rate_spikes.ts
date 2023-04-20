@@ -10,7 +10,7 @@ import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { TestData } from './types';
+import { isTestDataExpectedWithSampleProbability, type TestData } from './types';
 import { explainLogRateSpikesTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
@@ -43,9 +43,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikesPage.assertTimeRangeSelectorSectionExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
+      if (testData.query) {
+        await aiops.explainLogRateSpikesPage.setQueryInput(testData.query);
+      }
       await aiops.explainLogRateSpikesPage.clickUseFullDataButton(
         testData.expected.totalDocCountFormatted
       );
+
+      if (isTestDataExpectedWithSampleProbability(testData.expected)) {
+        await aiops.explainLogRateSpikesPage.assertSamplingProbability(
+          testData.expected.sampleProbabilityFormatted
+        );
+      } else {
+        await aiops.explainLogRateSpikesPage.assertSamplingProbabilityMissing();
+      }
+
       await headerPage.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
@@ -147,21 +159,53 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
 
-      const analysisGroupsTable =
-        await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
-
-      expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
-        orderBy(testData.expected.analysisGroupsTable, 'group')
-      );
+      if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+        const analysisGroupsTable =
+          await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+        expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
+          orderBy(testData.expected.analysisGroupsTable, 'group')
+        );
+      }
 
       await ml.testExecution.logTestStep('expand table row');
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
       await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
-      const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-      expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
-        orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
+      if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+        const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
+        expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
+          orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
+        );
+      }
+
+      // Assert the field selector that allows to costumize grouping
+      await aiops.explainLogRateSpikesPage.assertFieldFilterPopoverButtonExists(false);
+      await aiops.explainLogRateSpikesPage.clickFieldFilterPopoverButton(true);
+      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList(
+        testData.expected.fieldSelectorPopover
       );
+
+      // Filter fields
+      await aiops.explainLogRateSpikesPage.setFieldSelectorSearch(testData.fieldSelectorSearch);
+      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList([
+        testData.fieldSelectorSearch,
+      ]);
+      await aiops.explainLogRateSpikesPage.clickFieldSelectorDisableAllSelectedButton();
+      await aiops.explainLogRateSpikesPage.assertFieldFilterApplyButtonExists(
+        !testData.fieldSelectorApplyAvailable
+      );
+
+      if (testData.fieldSelectorApplyAvailable) {
+        await aiops.explainLogRateSpikesPage.clickFieldFilterApplyButton();
+
+        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+          const filteredAnalysisGroupsTable =
+            await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+          expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
+            orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
+          );
+        }
+      }
     });
   }
 

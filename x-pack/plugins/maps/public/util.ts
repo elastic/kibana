@@ -6,11 +6,12 @@
  */
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
+import { getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
 export function getKibanaTileMap(): unknown {
-  return getTilemap();
+  const mapsEms = getMapsEmsStart();
+  return mapsEms.config.tilemap ? mapsEms.config.tilemap : {};
 }
 
 export async function getEmsFileLayers(): Promise<FileLayer[]> {

@@ -54,6 +54,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
 jest.mock('uuid', () => ({
@@ -143,6 +144,9 @@ describe('Task Runner Cancel', () => {
       },
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
+    getMaintenanceWindowClientWithRequest: jest
+      .fn()
+      .mockReturnValue(maintenanceWindowClientMock.create()),
   };
 
   beforeEach(() => {
@@ -172,6 +176,9 @@ describe('Task Runner Cancel', () => {
     );
     taskRunnerFactoryInitializerParams.getRulesSettingsClientWithRequest.mockReturnValue(
       rulesSettingsClientMock.create()
+    );
+    taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
+      maintenanceWindowClientMock.create()
     );
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
