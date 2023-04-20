@@ -16,20 +16,15 @@ import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 
-import { upgradeAgentPolicySchemaVersion } from '../setup/upgrade_agent_policy_schema_version';
-
 import {
   type MessageSigningServiceInterface,
   MessageSigningService,
 } from './message_signing_service';
 
-jest.mock('../setup/upgrade_agent_policy_schema_version');
-
 describe('MessageSigningService', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let esoClientMock: jest.Mocked<EncryptedSavedObjectsClient>;
   let messageSigningService: MessageSigningServiceInterface;
-  const upgradeAgentPolicySchemaVersionMocked = upgradeAgentPolicySchemaVersion as jest.Mock;
 
   function mockCreatePointInTimeFinderAsInternalUser(savedObjects: unknown[] = []) {
     esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
