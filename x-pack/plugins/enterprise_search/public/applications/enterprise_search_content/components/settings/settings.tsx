@@ -45,7 +45,7 @@ export const Settings: React.FC = () => {
             values={{
               link: (
                 <EuiLink href={docLinks.ingestPipelines} target="_blank">
-                  {i18n.translate('xpack.enterpriseSearch.content.settings.description', {
+                  {i18n.translate('xpack.enterpriseSearch.content.settings.ingestLink', {
                     defaultMessage: 'Learn more about ingest pipelines.',
                   })}
                 </EuiLink>
