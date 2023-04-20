@@ -4839,6 +4839,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -4986,6 +4999,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -5073,6 +5099,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -5160,6 +5199,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }

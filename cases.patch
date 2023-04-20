@@ -1,0 +1,1943 @@
+diff --git a/packages/core/saved-objects/core-saved-objects-server/index.ts b/packages/core/saved-objects/core-saved-objects-server/index.ts
+index ed4981770f2..e24edb73f4d 100644
+--- a/packages/core/saved-objects/core-saved-objects-server/index.ts
++++ b/packages/core/saved-objects/core-saved-objects-server/index.ts
+@@ -52,7 +52,11 @@ export type {
+   SavedObjectsExportablePredicate,
+ } from './src/saved_objects_management';
+ export type { SavedObjectStatusMeta } from './src/saved_objects_status';
+-export { MAIN_SAVED_OBJECT_INDEX } from './src/saved_objects_index_pattern';
++export {
++  MAIN_SAVED_OBJECT_INDEX,
++  TASK_MANAGER_SAVED_OBJECT_INDEX,
++  SavedObjectsIndexPatterns,
++} from './src/saved_objects_index_pattern';
+ export type {
+   SavedObjectsType,
+   SavedObjectTypeExcludeFromUpgradeFilterHook,
+diff --git a/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts b/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts
+index 53d05d7c1d4..5eeeb541f03 100644
+--- a/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts
++++ b/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts
+@@ -6,4 +6,17 @@
+  * Side Public License, v 1.
+  */
+
++/**
++ * Collect and centralize the names of the different saved object indices.
++ * Note that all of them start with the '.kibana' prefix.
++ * There are multiple places in the code that these indices have the form .kibana*.
++ * However, beware that there are some system indices that have the same prefix
++ * but are NOT used to store saved objects, e.g.: .kibana_security_session_1
++ */
+ export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
++export const TASK_MANAGER_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_task_manager`;
++export const SavedObjectsIndexPatterns = [
++  MAIN_SAVED_OBJECT_INDEX,
++  TASK_MANAGER_SAVED_OBJECT_INDEX,
++  `${MAIN_SAVED_OBJECT_INDEX}_cases`,
++];
+diff --git a/packages/kbn-es-archiver/src/actions/empty_kibana_index.ts b/packages/kbn-es-archiver/src/actions/empty_kibana_index.ts
+index c9b67e4745d..cfc809636fd 100644
+--- a/packages/kbn-es-archiver/src/actions/empty_kibana_index.ts
++++ b/packages/kbn-es-archiver/src/actions/empty_kibana_index.ts
+@@ -10,6 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
+ import { ToolingLog } from '@kbn/tooling-log';
+ import { KbnClient } from '@kbn/test';
+
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import { migrateSavedObjectIndices, createStats, cleanSavedObjectIndices } from '../lib';
+
+ export async function emptyKibanaIndexAction({
+@@ -25,6 +26,6 @@ export async function emptyKibanaIndexAction({
+
+   await cleanSavedObjectIndices({ client, stats, log });
+   await migrateSavedObjectIndices(kbnClient);
+-  stats.createdIndex('.kibana');
++  SavedObjectsIndexPatterns.forEach((indexPattern) => stats.createdIndex(indexPattern));
+   return stats.toJSON();
+ }
+diff --git a/packages/kbn-es-archiver/src/actions/load.ts b/packages/kbn-es-archiver/src/actions/load.ts
+index b6a4c46d427..efda58193b1 100644
+--- a/packages/kbn-es-archiver/src/actions/load.ts
++++ b/packages/kbn-es-archiver/src/actions/load.ts
+@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
+ import type { KbnClient } from '@kbn/test';
+ import type { Client } from '@elastic/elasticsearch';
+ import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import { ES_CLIENT_HEADERS } from '../client_headers';
+
+ import {
+@@ -104,14 +105,15 @@ export async function loadAction({
+     }
+   );
+
+-  // If we affected the Kibana index, we need to ensure it's migrated...
+-  if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
++  // If we affected saved objects indices, we need to ensure they are migrated...
++  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
+     await migrateSavedObjectIndices(kbnClient);
+     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
+
+     if (kibanaPluginIds.includes('spaces')) {
+-      await createDefaultSpace({ client, index: '.kibana' });
+-      log.debug('[%s] Ensured that default space exists in .kibana', name);
++      // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
++      await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
++      log.debug(`[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`, name);
+     }
+   }
+
+diff --git a/packages/kbn-es-archiver/src/lib/docs/generate_doc_records_stream.ts b/packages/kbn-es-archiver/src/lib/docs/generate_doc_records_stream.ts
+index 6e3310a7347..f0c6db9c89f 100644
+--- a/packages/kbn-es-archiver/src/lib/docs/generate_doc_records_stream.ts
++++ b/packages/kbn-es-archiver/src/lib/docs/generate_doc_records_stream.ts
+@@ -8,6 +8,7 @@
+
+ import { Transform } from 'stream';
+ import type { Client } from '@elastic/elasticsearch';
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import { Stats } from '../stats';
+ import { Progress } from '../progress';
+ import { ES_CLIENT_HEADERS } from '../../client_headers';
+@@ -78,7 +79,9 @@ export function createGenerateDocRecordsStream({
+                 // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
+                 // when it is loaded it can skip migration, if possible
+                 index:
+-                  hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
++                  hit._index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !keepIndexNames
++                    ? `${MAIN_SAVED_OBJECT_INDEX}_1`
++                    : hit._index,
+                 data_stream: dataStream,
+                 id: hit._id,
+                 source: hit._source,
+diff --git a/packages/kbn-es-archiver/src/lib/indices/create_index_stream.ts b/packages/kbn-es-archiver/src/lib/indices/create_index_stream.ts
+index 38f4bed7552..a13c1b7e856 100644
+--- a/packages/kbn-es-archiver/src/lib/indices/create_index_stream.ts
++++ b/packages/kbn-es-archiver/src/lib/indices/create_index_stream.ts
+@@ -14,6 +14,10 @@ import type { Client } from '@elastic/elasticsearch';
+ import { ToolingLog } from '@kbn/tooling-log';
+
+ import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
++import {
++  MAIN_SAVED_OBJECT_INDEX,
++  TASK_MANAGER_SAVED_OBJECT_INDEX,
++} from '@kbn/core-saved-objects-server';
+ import { Stats } from '../stats';
+ import { deleteSavedObjectIndices } from './kibana_index';
+ import { deleteIndex } from './delete_index';
+@@ -96,8 +100,8 @@ export function createCreateIndexStream({
+
+   async function handleIndex(record: DocRecord) {
+     const { index, settings, mappings, aliases } = record.value;
+-    const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
+-    const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
++    const isKibanaTaskManager = index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX);
++    const isKibana = index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !isKibanaTaskManager;
+
+     if (docsOnly) {
+       return;
+diff --git a/packages/kbn-es-archiver/src/lib/indices/delete_index_stream.ts b/packages/kbn-es-archiver/src/lib/indices/delete_index_stream.ts
+index c7633465ccc..1c10ab0fc27 100644
+--- a/packages/kbn-es-archiver/src/lib/indices/delete_index_stream.ts
++++ b/packages/kbn-es-archiver/src/lib/indices/delete_index_stream.ts
+@@ -10,6 +10,7 @@ import { Transform } from 'stream';
+ import type { Client } from '@elastic/elasticsearch';
+ import { ToolingLog } from '@kbn/tooling-log';
+
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import { Stats } from '../stats';
+ import { deleteIndex } from './delete_index';
+ import { cleanSavedObjectIndices } from './kibana_index';
+@@ -28,7 +29,7 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
+         if (record.type === 'index') {
+           const { index } = record.value;
+
+-          if (index.startsWith('.kibana')) {
++          if (index.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
+             await cleanSavedObjectIndices({ client, stats, log });
+           } else {
+             await deleteIndex({ client, stats, log, index });
+diff --git a/packages/kbn-es-archiver/src/lib/indices/generate_index_records_stream.ts b/packages/kbn-es-archiver/src/lib/indices/generate_index_records_stream.ts
+index de32e93e273..2f2dd60982a 100644
+--- a/packages/kbn-es-archiver/src/lib/indices/generate_index_records_stream.ts
++++ b/packages/kbn-es-archiver/src/lib/indices/generate_index_records_stream.ts
+@@ -9,6 +9,7 @@
+ import type { Client } from '@elastic/elasticsearch';
+ import { Transform } from 'stream';
+ import { ToolingLog } from '@kbn/tooling-log';
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import { Stats } from '../stats';
+ import { ES_CLIENT_HEADERS } from '../../client_headers';
+ import { getIndexTemplate } from '..';
+@@ -100,7 +101,10 @@ export function createGenerateIndexRecordsStream({
+               value: {
+                 // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
+                 // when it is loaded it can skip migration, if possible
+-                index: index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : index,
++                index:
++                  index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !keepIndexNames
++                    ? `${MAIN_SAVED_OBJECT_INDEX}_1`
++                    : index,
+                 settings,
+                 mappings,
+                 aliases,
+diff --git a/packages/kbn-es-archiver/src/lib/indices/kibana_index.ts b/packages/kbn-es-archiver/src/lib/indices/kibana_index.ts
+index 6a02113bbf7..75aa5f5fce3 100644
+--- a/packages/kbn-es-archiver/src/lib/indices/kibana_index.ts
++++ b/packages/kbn-es-archiver/src/lib/indices/kibana_index.ts
+@@ -11,12 +11,17 @@ import { inspect } from 'util';
+ import type { Client } from '@elastic/elasticsearch';
+ import { ToolingLog } from '@kbn/tooling-log';
+ import { KbnClient } from '@kbn/test';
++import {
++  MAIN_SAVED_OBJECT_INDEX,
++  SavedObjectsIndexPatterns,
++  TASK_MANAGER_SAVED_OBJECT_INDEX,
++} from '@kbn/core-saved-objects-server';
+ import { Stats } from '../stats';
+ import { deleteIndex } from './delete_index';
+ import { ES_CLIENT_HEADERS } from '../../client_headers';
+
+ /**
+- * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
++ * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
+  */
+ export async function deleteSavedObjectIndices({
+   client,
+@@ -29,8 +34,10 @@ export async function deleteSavedObjectIndices({
+   onlyTaskManager?: boolean;
+   log: ToolingLog;
+ }) {
+-  const indexPattern = onlyTaskManager ? '.kibana_task_manager*' : '.kibana*';
+-  const indexNames = await fetchKibanaIndices(client, indexPattern);
++  // WARNING note that we are deleting ALL .kibana* indices here, NOT only the saved object ones
++  const indexNames = (await fetchKibanaIndices(client)).filter(
++    (indexName) => !onlyTaskManager || indexName.includes(TASK_MANAGER_SAVED_OBJECT_INDEX)
++  );
+   if (!indexNames.length) {
+     return;
+   }
+@@ -65,22 +72,28 @@ export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
+ }
+
+ /**
+- * Migrations mean that the Kibana index will look something like:
+- * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
+- * with .kibana, then filters out any that aren't actually Kibana's core
+- * index (e.g. we don't want to remove .kibana_task_manager or the like).
++ * Check if the given index is a Kibana saved object index.
++ * This includes most .kibana_*
++ * but we must make sure that indices such as '.kibana_security_session_1' are NOT deleted.
++ *
++ * IMPORTANT
++ * Note that we can have more than 2 system indices (different SO types can go to different indices)
++ * ATM we have '.kibana', '.kibana_task_manager', '.kibana_cases'
++ * This method also takes into account legacy indices: .kibana_1, .kibana_task_manager_1.
++ * @param [index] the name of the index to check
++ * @returns boolean 'true' if the index is a Kibana saved object index.
+  */
++
++const LEGACY_INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})(:?_\\d*)?$`);
++const INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})_(pre)?\\d+.\\d+.\\d+`);
++
+ function isKibanaIndex(index?: string): index is string {
+-  return Boolean(
+-    index &&
+-      (/^\.kibana(:?_\d*)?$/.test(index) ||
+-        /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index))
+-  );
++  return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
+ }
+
+-async function fetchKibanaIndices(client: Client, indexPattern: string) {
++async function fetchKibanaIndices(client: Client) {
+   const resp = await client.cat.indices(
+-    { index: indexPattern, format: 'json' },
++    { index: `${MAIN_SAVED_OBJECT_INDEX}*`, format: 'json' },
+     {
+       headers: ES_CLIENT_HEADERS,
+     }
+@@ -107,7 +120,7 @@ export async function cleanSavedObjectIndices({
+   while (true) {
+     const resp = await client.deleteByQuery(
+       {
+-        index: `.kibana,.kibana_task_manager`,
++        index: SavedObjectsIndexPatterns,
+         body: {
+           query: {
+             bool: {
+@@ -144,7 +157,7 @@ export async function cleanSavedObjectIndices({
+       `.kibana rather than deleting the whole index`
+   );
+
+-  stats.deletedIndex('.kibana');
++  SavedObjectsIndexPatterns.forEach((indexPattern) => stats.deletedIndex(indexPattern));
+ }
+
+ export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
+diff --git a/packages/kbn-es-archiver/tsconfig.json b/packages/kbn-es-archiver/tsconfig.json
+index 0301480548f..15fccdf68be 100644
+--- a/packages/kbn-es-archiver/tsconfig.json
++++ b/packages/kbn-es-archiver/tsconfig.json
+@@ -11,6 +11,7 @@
+     "**/*.ts"
+   ],
+   "kbn_references": [
++    "@kbn/core-saved-objects-server",
+     "@kbn/dev-utils",
+     "@kbn/test",
+     "@kbn/tooling-log",
+diff --git a/packages/kbn-ftr-common-functional-services/services/kibana_server/extend_es_archiver.ts b/packages/kbn-ftr-common-functional-services/services/kibana_server/extend_es_archiver.ts
+index 98c28960bf5..4c2613d273c 100644
+--- a/packages/kbn-ftr-common-functional-services/services/kibana_server/extend_es_archiver.ts
++++ b/packages/kbn-ftr-common-functional-services/services/kibana_server/extend_es_archiver.ts
+@@ -6,6 +6,7 @@
+  * Side Public License, v 1.
+  */
+
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import type { ProvidedType } from '@kbn/test';
+
+ import type { EsArchiverProvider } from '../es_archiver';
+@@ -13,7 +14,6 @@ import type { RetryService } from '../retry';
+ import type { KibanaServerProvider } from './kibana_server';
+
+ const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload', 'emptyKibanaIndex'] as const;
+-const KIBANA_INDEX = '.kibana';
+
+ interface Options {
+   esArchiver: ProvidedType<typeof EsArchiverProvider>;
+@@ -38,7 +38,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }:
+       const statsKeys = Object.keys(stats);
+       const kibanaKeys = statsKeys.filter(
+         // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
+-        (key) => key.includes(KIBANA_INDEX) && stats[key].created
++        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && stats[key].created
+       );
+
+       // if the kibana index was created by the esArchiver then update the uiSettings
+diff --git a/packages/kbn-ftr-common-functional-services/tsconfig.json b/packages/kbn-ftr-common-functional-services/tsconfig.json
+index 639991bb2ce..3641c807e4d 100644
+--- a/packages/kbn-ftr-common-functional-services/tsconfig.json
++++ b/packages/kbn-ftr-common-functional-services/tsconfig.json
+@@ -11,6 +11,7 @@
+     "**/*.ts",
+   ],
+   "kbn_references": [
++    "@kbn/core-saved-objects-server",
+     "@kbn/tooling-log",
+     "@kbn/es-archiver",
+     "@kbn/test"
+diff --git a/src/core/server/integration_tests/saved_objects/migrations/group1/7.7.2_xpack_100k.test.ts b/src/core/server/integration_tests/saved_objects/migrations/group1/7.7.2_xpack_100k.test.ts
+index b8010eacbba..5f3451d262c 100644
+--- a/src/core/server/integration_tests/saved_objects/migrations/group1/7.7.2_xpack_100k.test.ts
++++ b/src/core/server/integration_tests/saved_objects/migrations/group1/7.7.2_xpack_100k.test.ts
+@@ -8,9 +8,6 @@
+
+ import path from 'path';
+ import { unlink } from 'fs/promises';
+-import { REPO_ROOT } from '@kbn/repo-info';
+-import { Env } from '@kbn/config';
+-import { getEnvOptions } from '@kbn/config-mocks';
+ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+ import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+ import { Root } from '@kbn/core-root-server-internal';
+@@ -19,8 +16,8 @@ import {
+   createRootWithCorePlugins,
+   type TestElasticsearchUtils,
+ } from '@kbn/core-test-helpers-kbn-server';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+
+-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+ const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
+
+ async function removeLogFile() {
+@@ -105,8 +102,6 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
+     await new Promise((resolve) => setTimeout(resolve, 10000));
+   };
+
+-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
+-
+   beforeAll(async () => {
+     await removeLogFile();
+     await startServers({
+@@ -121,7 +116,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
+
+   it('copies all the document of the previous index to the new one', async () => {
+     const migratedIndexResponse = await esClient.count({
+-      index: migratedIndex,
++      index: SavedObjectsIndexPatterns,
+     });
+     const oldIndexResponse = await esClient.count({
+       index: '.kibana_1',
+diff --git a/src/core/server/integration_tests/saved_objects/migrations/group3/split_kibana_index.test.ts b/src/core/server/integration_tests/saved_objects/migrations/group3/split_kibana_index.test.ts
+index a9a5dfc2e7e..a75dcb30f1d 100644
+--- a/src/core/server/integration_tests/saved_objects/migrations/group3/split_kibana_index.test.ts
++++ b/src/core/server/integration_tests/saved_objects/migrations/group3/split_kibana_index.test.ts
+@@ -196,12 +196,6 @@ describe('split .kibana index into multiple system indices', () => {
+             "lens",
+             "lens-ui-telemetry",
+             "map",
+-            "cases-comments",
+-            "cases-configure",
+-            "cases-connector-mappings",
+-            "cases",
+-            "cases-user-actions",
+-            "cases-telemetry",
+             "slo",
+             "ingest_manager_settings",
+             "ingest-agent-policies",
+@@ -250,6 +244,14 @@ describe('split .kibana index into multiple system indices', () => {
+             "apm-server-schema",
+             "apm-service-group",
+           ],
++          ".kibana_cases": Array [
++            "cases-comments",
++            "cases-configure",
++            "cases-connector-mappings",
++            "cases",
++            "cases-user-actions",
++            "cases-telemetry",
++          ],
+           ".kibana_so_search": Array [
+             "search",
+           ],
+diff --git a/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy.test.ts b/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy.test.ts
+index e38231a6e0e..38377cff6fe 100644
+--- a/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy.test.ts
++++ b/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy.test.ts
+@@ -9,7 +9,7 @@
+ import Hapi from '@hapi/hapi';
+ import h2o2 from '@hapi/h2o2';
+ import { URL } from 'url';
+-import type { SavedObject } from '@kbn/core-saved-objects-server';
++import { SavedObject, SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+ import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+ import { Root } from '@kbn/core-root-server-internal';
+@@ -18,6 +18,7 @@ import {
+   createTestServers,
+   type TestElasticsearchUtils,
+ } from '@kbn/core-test-helpers-kbn-server';
++import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+ import {
+   declareGetRoute,
+   declareDeleteRoute,
+@@ -30,6 +31,7 @@ import {
+   declarePostUpdateByQueryRoute,
+   declarePassthroughRoute,
+   setProxyInterrupt,
++  allCombinationsPermutations,
+ } from './repository_with_proxy_utils';
+
+ let esServer: TestElasticsearchUtils;
+@@ -98,17 +100,24 @@ describe('404s from proxies', () => {
+     await hapiServer.register(h2o2);
+     // register specific routes to modify the response and a catch-all to relay the request/response as-is
+
+-    declareGetRoute(hapiServer, esHostname, esPort);
+-    declareDeleteRoute(hapiServer, esHostname, esPort);
+-    declarePostUpdateRoute(hapiServer, esHostname, esPort);
++    allCombinationsPermutations(
++      SavedObjectsIndexPatterns.map((indexPattern) => `${indexPattern}_${pkg.version}`)
++    )
++      .map((indices) => indices.join(','))
++      .forEach((kbnIndexPath) => {
++        declareGetRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++        declareDeleteRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++        declarePostUpdateRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++
++        declareGetSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++        declarePostSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++        declarePostPitRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++        declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, kbnIndexPath);
++      });
+
+-    declareGetSearchRoute(hapiServer, esHostname, esPort);
+-    declarePostSearchRoute(hapiServer, esHostname, esPort);
++    // register index-agnostic routes
+     declarePostBulkRoute(hapiServer, esHostname, esPort);
+     declarePostMgetRoute(hapiServer, esHostname, esPort);
+-    declarePostPitRoute(hapiServer, esHostname, esPort);
+-    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
+-
+     declarePassthroughRoute(hapiServer, esHostname, esPort);
+
+     await hapiServer.start();
+diff --git a/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy_utils.ts b/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy_utils.ts
+index 499d0d01d9d..35b6b37b9c4 100644
+--- a/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy_utils.ts
++++ b/src/core/server/integration_tests/saved_objects/service/lib/repository_with_proxy_utils.ts
+@@ -7,7 +7,6 @@
+  */
+ import Hapi from '@hapi/hapi';
+ import { IncomingMessage } from 'http';
+-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+
+ // proxy setup
+ const defaultProxyOptions = (hostname: string, port: string) => ({
+@@ -52,10 +51,13 @@ const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseTool
+     .code(404);
+ };
+
+-const kbnIndex = `.kibana_${pkg.version}`;
+-
+ // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
+-export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declareGetRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'GET',
+     path: `/${kbnIndex}/_doc/{type*}`,
+@@ -70,7 +72,12 @@ export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port:
+     },
+   });
+ // DELETE /.kibana_8.0.0/_doc/{type*} route (repository.delete calls)
+-export const declareDeleteRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declareDeleteRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'DELETE',
+     path: `/${kbnIndex}/_doc/{_id*}`,
+@@ -133,7 +140,12 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string,
+     },
+   });
+ // GET _search route
+-export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declareGetSearchRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'GET',
+     path: `/${kbnIndex}/_search`,
+@@ -149,7 +161,12 @@ export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string,
+     },
+   });
+ // POST _search route (`find` calls)
+-export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declarePostSearchRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'POST',
+     path: `/${kbnIndex}/_search`,
+@@ -168,7 +185,12 @@ export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string
+     },
+   });
+ // POST _update
+-export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declarePostUpdateRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'POST',
+     path: `/${kbnIndex}/_update/{_id*}`,
+@@ -187,7 +209,12 @@ export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string
+     },
+   });
+ // POST _pit
+-export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
++export const declarePostPitRoute = (
++  hapiServer: Hapi.Server,
++  hostname: string,
++  port: string,
++  kbnIndex: string
++) =>
+   hapiServer.route({
+     method: 'POST',
+     path: `/${kbnIndex}/_pit`,
+@@ -209,7 +236,8 @@ export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, p
+ export const declarePostUpdateByQueryRoute = (
+   hapiServer: Hapi.Server,
+   hostname: string,
+-  port: string
++  port: string,
++  kbnIndex: string
+ ) =>
+   hapiServer.route({
+     method: 'POST',
+@@ -244,3 +272,22 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
+       },
+     },
+   });
++
++export function allCombinationsPermutations<T>(collection: T[]): T[][] {
++  const recur = (subcollection: T[], size: number): T[][] => {
++    if (size <= 0) {
++      return [[]];
++    }
++    const permutations: T[][] = [];
++    subcollection.forEach((value, index, array) => {
++      array = array.slice();
++      array.splice(index, 1);
++      recur(array, size - 1).forEach((permutation) => {
++        permutation.unshift(value);
++        permutations.push(permutation);
++      });
++    });
++    return permutations;
++  };
++  return collection.map((_, n) => recur(collection, n + 1)).flat();
++}
+diff --git a/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types/mappings.json b/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types/mappings.json
+index fb2337c1521..7ed55c8e2bd 100644
+--- a/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types/mappings.json
++++ b/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types/mappings.json
+@@ -37,6 +37,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/test/functional/fixtures/es_archiver/deprecations_service/mappings.json b/test/functional/fixtures/es_archiver/deprecations_service/mappings.json
+index 47bd39ebf8b..83ca46d08e1 100644
+--- a/test/functional/fixtures/es_archiver/deprecations_service/mappings.json
++++ b/test/functional/fixtures/es_archiver/deprecations_service/mappings.json
+@@ -36,6 +36,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/test/functional/fixtures/es_archiver/saved_objects_management/export_transform/mappings.json b/test/functional/fixtures/es_archiver/saved_objects_management/export_transform/mappings.json
+index 84628ef0366..64a6b167cb9 100644
+--- a/test/functional/fixtures/es_archiver/saved_objects_management/export_transform/mappings.json
++++ b/test/functional/fixtures/es_archiver/saved_objects_management/export_transform/mappings.json
+@@ -36,6 +36,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects/mappings.json b/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects/mappings.json
+index 43711680a1f..f79ae3ae71d 100644
+--- a/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects/mappings.json
++++ b/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects/mappings.json
+@@ -36,6 +36,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform/mappings.json b/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform/mappings.json
+index 84628ef0366..64a6b167cb9 100644
+--- a/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform/mappings.json
++++ b/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform/mappings.json
+@@ -36,6 +36,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management/mappings.json b/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management/mappings.json
+index 6ffcd71f29e..3b078d3f905 100644
+--- a/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management/mappings.json
++++ b/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management/mappings.json
+@@ -36,6 +36,111 @@
+           "url": "c7f66a0df8b1b52f17c28c4adb111105",
+           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
++        },
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
+         }
+       },
+       "dynamic": "strict",
+diff --git a/x-pack/plugins/cases/common/constants/index.ts b/x-pack/plugins/cases/common/constants/index.ts
+index 83bd0cb6600..8027a74996d 100644
+--- a/x-pack/plugins/cases/common/constants/index.ts
++++ b/x-pack/plugins/cases/common/constants/index.ts
+@@ -18,6 +18,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
+  * Saved objects
+  */
+
++export const CASES_INDEX = '.kibana_cases';
+ export const CASE_SAVED_OBJECT = 'cases' as const;
+ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' as const;
+ export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
+diff --git a/x-pack/plugins/cases/server/saved_object_types/cases.ts b/x-pack/plugins/cases/server/saved_object_types/cases.ts
+index 1d70808f14d..f9a7fbc7a77 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/cases.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/cases.ts
+@@ -12,7 +12,7 @@ import type {
+   SavedObjectsExportTransformContext,
+   SavedObjectsType,
+ } from '@kbn/core/server';
+-import { CASE_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_SAVED_OBJECT } from '../../common/constants';
+ import type { ESCaseAttributes } from '../services/cases/types';
+ import { handleExport } from './import_export/export';
+ import { caseMigrations } from './migrations';
+@@ -22,6 +22,7 @@ export const createCaseSavedObjectType = (
+   logger: Logger
+ ): SavedObjectsType => ({
+   name: CASE_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: true,
+   namespaceType: 'multiple-isolated',
+   convertToMultiNamespaceTypeVersion: '8.0.0',
+diff --git a/x-pack/plugins/cases/server/saved_object_types/comments.ts b/x-pack/plugins/cases/server/saved_object_types/comments.ts
+index 071f26b1e2b..ad61d8bfc2e 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/comments.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/comments.ts
+@@ -6,7 +6,7 @@
+  */
+
+ import type { SavedObjectsType } from '@kbn/core/server';
+-import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
+ import type { CreateCommentsMigrationsDeps } from './migrations';
+ import { createCommentsMigrations } from './migrations';
+
+@@ -21,6 +21,7 @@ export const createCaseCommentSavedObjectType = ({
+   migrationDeps: CreateCommentsMigrationsDeps;
+ }): SavedObjectsType => ({
+   name: CASE_COMMENT_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: true,
+   namespaceType: 'multiple-isolated',
+   convertToMultiNamespaceTypeVersion: '8.0.0',
+diff --git a/x-pack/plugins/cases/server/saved_object_types/configure.ts b/x-pack/plugins/cases/server/saved_object_types/configure.ts
+index cd8b98daa3c..e5834b3da74 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/configure.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/configure.ts
+@@ -6,7 +6,7 @@
+  */
+
+ import type { SavedObjectsType } from '@kbn/core/server';
+-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
+ import { configureMigrations } from './migrations';
+
+ /**
+@@ -16,6 +16,7 @@ import { configureMigrations } from './migrations';
+
+ export const caseConfigureSavedObjectType: SavedObjectsType = {
+   name: CASE_CONFIGURE_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: true,
+   namespaceType: 'multiple-isolated',
+   convertToMultiNamespaceTypeVersion: '8.0.0',
+diff --git a/x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts b/x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts
+index 81f9e1ca6f2..4393a645752 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts
+@@ -6,7 +6,7 @@
+  */
+
+ import type { SavedObjectsType } from '@kbn/core/server';
+-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
+ import { connectorMappingsMigrations } from './migrations';
+
+ /**
+@@ -16,6 +16,7 @@ import { connectorMappingsMigrations } from './migrations';
+
+ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
+   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: true,
+   namespaceType: 'multiple-isolated',
+   convertToMultiNamespaceTypeVersion: '8.0.0',
+diff --git a/x-pack/plugins/cases/server/saved_object_types/telemetry.ts b/x-pack/plugins/cases/server/saved_object_types/telemetry.ts
+index 515d1e63c78..216c151bc67 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/telemetry.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/telemetry.ts
+@@ -6,10 +6,11 @@
+  */
+
+ import type { SavedObjectsType } from '@kbn/core/server';
+-import { CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
+
+ export const casesTelemetrySavedObjectType: SavedObjectsType = {
+   name: CASE_TELEMETRY_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: false,
+   namespaceType: 'agnostic',
+   mappings: {
+diff --git a/x-pack/plugins/cases/server/saved_object_types/user_actions.ts b/x-pack/plugins/cases/server/saved_object_types/user_actions.ts
+index 60180595999..f3f14661d1f 100644
+--- a/x-pack/plugins/cases/server/saved_object_types/user_actions.ts
++++ b/x-pack/plugins/cases/server/saved_object_types/user_actions.ts
+@@ -6,7 +6,7 @@
+  */
+
+ import type { SavedObjectsType } from '@kbn/core/server';
+-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
++import { CASES_INDEX, CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
+ import type { UserActionsMigrationsDeps } from './migrations/user_actions';
+ import { createUserActionsMigrations } from './migrations/user_actions';
+
+@@ -19,6 +19,7 @@ export const createCaseUserActionSavedObjectType = (
+   migrationDeps: UserActionsMigrationsDeps
+ ): SavedObjectsType => ({
+   name: CASE_USER_ACTION_SAVED_OBJECT,
++  indexPattern: CASES_INDEX,
+   hidden: true,
+   namespaceType: 'multiple-isolated',
+   convertToMultiNamespaceTypeVersion: '8.0.0',
+diff --git a/x-pack/test/api_integration/apis/security/index_fields.ts b/x-pack/test/api_integration/apis/security/index_fields.ts
+index 8fc9c36accd..fcf9b3bf4cd 100644
+--- a/x-pack/test/api_integration/apis/security/index_fields.ts
++++ b/x-pack/test/api_integration/apis/security/index_fields.ts
+@@ -5,6 +5,7 @@
+  * 2.0.
+  */
+
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import expect from '@kbn/expect';
+ import { FtrProviderContext } from '../../ftr_provider_context';
+
+@@ -24,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
+     describe('GET /internal/security/fields/{query}', () => {
+       it('should return a list of available index mapping fields', async () => {
+         await supertest
+-          .get('/internal/security/fields/.kibana')
++          .get(`/internal/security/fields/${SavedObjectsIndexPatterns.join(',')}`)
+           .set('kbn-xsrf', 'xxx')
+           .send()
+           .expect(200)
+diff --git a/x-pack/test/api_integration/apis/security_solution/utils.ts b/x-pack/test/api_integration/apis/security_solution/utils.ts
+index f5e65c6da3e..587bff53683 100644
+--- a/x-pack/test/api_integration/apis/security_solution/utils.ts
++++ b/x-pack/test/api_integration/apis/security_solution/utils.ts
+@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+ import type { TransportResult } from '@elastic/elasticsearch';
+ import type { Client } from '@elastic/elasticsearch';
+ import { JsonObject } from '@kbn/utility-types';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+
+ export async function getSavedObjectFromES<T>(
+   es: Client,
+@@ -17,7 +18,7 @@ export async function getSavedObjectFromES<T>(
+ ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
+   return await es.search<T>(
+     {
+-      index: '.kibana',
++      index: SavedObjectsIndexPatterns,
+       body: {
+         query: {
+           bool: {
+diff --git a/x-pack/test/cases_api_integration/common/lib/api/index.ts b/x-pack/test/cases_api_integration/common/lib/api/index.ts
+index 3bf0c470b9b..9bd93f65f77 100644
+--- a/x-pack/test/cases_api_integration/common/lib/api/index.ts
++++ b/x-pack/test/cases_api_integration/common/lib/api/index.ts
+@@ -13,6 +13,7 @@ import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+
+ import type SuperTest from 'supertest';
+ import {
++  CASES_INDEX,
+   CASES_INTERNAL_URL,
+   CASES_URL,
+   CASE_CONFIGURE_URL,
+@@ -190,7 +191,7 @@ export const deleteAllCaseItems = async (es: Client) => {
+
+ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
+   await es.deleteByQuery({
+-    index: '.kibana',
++    index: CASES_INDEX,
+     q: 'type:cases-user-actions',
+     wait_for_completion: true,
+     refresh: true,
+@@ -201,7 +202,7 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
+
+ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
+   await es.deleteByQuery({
+-    index: '.kibana',
++    index: CASES_INDEX,
+     q: 'type:cases',
+     wait_for_completion: true,
+     refresh: true,
+@@ -212,7 +213,7 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
+
+ export const deleteComments = async (es: Client): Promise<void> => {
+   await es.deleteByQuery({
+-    index: '.kibana',
++    index: CASES_INDEX,
+     q: 'type:cases-comments',
+     wait_for_completion: true,
+     refresh: true,
+@@ -223,7 +224,7 @@ export const deleteComments = async (es: Client): Promise<void> => {
+
+ export const deleteConfiguration = async (es: Client): Promise<void> => {
+   await es.deleteByQuery({
+-    index: '.kibana',
++    index: CASES_INDEX,
+     q: 'type:cases-configure',
+     wait_for_completion: true,
+     refresh: true,
+@@ -234,7 +235,7 @@ export const deleteConfiguration = async (es: Client): Promise<void> => {
+
+ export const deleteMappings = async (es: Client): Promise<void> => {
+   await es.deleteByQuery({
+-    index: '.kibana',
++    index: CASES_INDEX,
+     q: 'type:cases-connector-mappings',
+     wait_for_completion: true,
+     refresh: true,
+@@ -289,7 +290,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
+     unknown
+   > = await es.search(
+     {
+-      index: '.kibana',
++      index: CASES_INDEX,
+       body: {
+         query: {
+           term: {
+@@ -319,7 +320,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) =>
+     unknown
+   > = await es.search(
+     {
+-      index: '.kibana',
++      index: CASES_INDEX,
+       body: {
+         query: {
+           term: {
+@@ -342,7 +343,7 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
+     unknown
+   > = await es.search(
+     {
+-      index: '.kibana',
++      index: CASES_INDEX,
+       body: {
+         query: {
+           term: {
+@@ -724,7 +725,7 @@ export const getSOFromKibanaIndex = async ({
+ }) => {
+   const esResponse = await es.get<SavedObjectsRawDocSource>(
+     {
+-      index: '.kibana',
++      index: CASES_INDEX,
+       id: `${soType}:${soId}`,
+     },
+     { meta: true }
+diff --git a/x-pack/test/cases_api_integration/security_and_spaces/tests/common/cases/find_cases.ts b/x-pack/test/cases_api_integration/security_and_spaces/tests/common/cases/find_cases.ts
+index 712ec4722d5..ace37645945 100644
+--- a/x-pack/test/cases_api_integration/security_and_spaces/tests/common/cases/find_cases.ts
++++ b/x-pack/test/cases_api_integration/security_and_spaces/tests/common/cases/find_cases.ts
+@@ -15,6 +15,7 @@ import {
+   CaseStatuses,
+   CommentType,
+ } from '@kbn/cases-plugin/common/api';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
+ import {
+@@ -523,7 +524,7 @@ export default ({ getService }: FtrProviderContext): void => {
+        */
+       const getAllCasesSortedByCreatedAtAsc = async () => {
+         const cases = await es.search<CaseAttributes>({
+-          index: '.kibana',
++          index: SavedObjectsIndexPatterns,
+           body: {
+             size: 10000,
+             sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
+diff --git a/x-pack/test/common/lib/test_data_loader.ts b/x-pack/test/common/lib/test_data_loader.ts
+index b379d4b61e3..889797f6e92 100644
+--- a/x-pack/test/common/lib/test_data_loader.ts
++++ b/x-pack/test/common/lib/test_data_loader.ts
+@@ -6,6 +6,7 @@
+  */
+
+ import { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import Fs from 'fs/promises';
+ import { FtrProviderContext } from '../ftr_provider_context';
+
+@@ -176,7 +177,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
+
+     deleteAllSavedObjectsFromKibanaIndex: async () => {
+       await es.deleteByQuery({
+-        index: '.kibana',
++        index: SavedObjectsIndexPatterns,
+         wait_for_completion: true,
+         body: {
+           // @ts-expect-error
+diff --git a/x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json b/x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
+index 34ddbc9ac78..d33a852644a 100644
+--- a/x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
++++ b/x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
+@@ -8,6 +8,113 @@
+     "index": ".kibana_$KIBANA_PACKAGE_VERSION_001",
+     "mappings": {
+       "dynamic": "false",
++      "_meta": {
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
++        }
++      },
+       "properties": {
+         "space": {
+           "dynamic": false,
+diff --git a/x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json b/x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
+index 3f837ae5fa2..afc7a29ac67 100644
+--- a/x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
++++ b/x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces/mappings.json
+@@ -7,7 +7,114 @@
+     },
+     "index": ".kibana_$KIBANA_PACKAGE_VERSION_001",
+     "mappings": {
+-      "dynamic": "false"
++      "dynamic": "false",
++      "_meta": {
++        "indexTypesMap": {
++          ".kibana_task_manager": [
++              "task"
++          ],
++          ".kibana": [
++              "core-usage-stats",
++              "legacy-url-alias",
++              "config",
++              "config-global",
++              "usage-counters",
++              "guided-onboarding-guide-state",
++              "guided-onboarding-plugin-state",
++              "ui-metric",
++              "application_usage_totals",
++              "application_usage_daily",
++              "event_loop_delays_daily",
++              "url",
++              "index-pattern",
++              "sample-data-telemetry",
++              "space",
++              "spaces-usage-stats",
++              "exception-list-agnostic",
++              "exception-list",
++              "telemetry",
++              "file",
++              "fileShare",
++              "action",
++              "action_task_params",
++              "connector_token",
++              "query",
++              "kql-telemetry",
++              "search-session",
++              "search-telemetry",
++              "file-upload-usage-collection-telemetry",
++              "alert",
++              "api_key_pending_invalidation",
++              "rules-settings",
++              "search",
++              "tag",
++              "graph-workspace",
++              "visualization",
++              "canvas-element",
++              "canvas-workpad",
++              "canvas-workpad-template",
++              "dashboard",
++              "lens",
++              "lens-ui-telemetry",
++              "map",
++              "slo",
++              "ingest_manager_settings",
++              "ingest-agent-policies",
++              "ingest-outputs",
++              "ingest-package-policies",
++              "epm-packages",
++              "epm-packages-assets",
++              "fleet-preconfiguration-deletion-record",
++              "ingest-download-sources",
++              "fleet-fleet-server-host",
++              "fleet-proxy",
++              "fleet-message-signing-keys",
++              "osquery-manager-usage-metric",
++              "osquery-saved-query",
++              "osquery-pack",
++              "osquery-pack-asset",
++              "csp-rule-template",
++              "ml-job",
++              "ml-trained-model",
++              "ml-module",
++              "uptime-dynamic-settings",
++              "synthetics-privates-locations",
++              "synthetics-monitor",
++              "uptime-synthetics-api-key",
++              "synthetics-param",
++              "siem-ui-timeline-note",
++              "siem-ui-timeline-pinned-event",
++              "siem-detection-engine-rule-actions",
++              "security-rule",
++              "siem-ui-timeline",
++              "endpoint:user-artifact",
++              "endpoint:user-artifact-manifest",
++              "security-solution-signals-migration",
++              "infrastructure-ui-source",
++              "metrics-explorer-view",
++              "inventory-view",
++              "infrastructure-monitoring-log-view",
++              "upgrade-assistant-reindex-operation",
++              "upgrade-assistant-ml-upgrade-operation",
++              "monitoring-telemetry",
++              "enterprise_search_telemetry",
++              "app_search_telemetry",
++              "workplace_search_telemetry",
++              "apm-indices",
++              "apm-telemetry",
++              "apm-server-schema",
++              "apm-service-group"
++          ],
++          ".kibana_cases": [
++              "cases-comments",
++              "cases-configure",
++              "cases-connector-mappings",
++              "cases",
++              "cases-user-actions",
++              "cases-telemetry"
++          ]
++        }
++      }
+     },
+     "settings": {
+       "index": {
+diff --git a/x-pack/test/spaces_api_integration/common/lib/space_test_utils.ts b/x-pack/test/spaces_api_integration/common/lib/space_test_utils.ts
+index b7e698244ee..f3ca946e895 100644
+--- a/x-pack/test/spaces_api_integration/common/lib/space_test_utils.ts
++++ b/x-pack/test/spaces_api_integration/common/lib/space_test_utils.ts
+@@ -6,6 +6,7 @@
+  */
+
+ import type { Client } from '@elastic/elasticsearch';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+ export function getUrlPrefix(spaceId?: string) {
+@@ -39,7 +40,7 @@ export function getTestScenariosForSpace(spaceId: string) {
+
+ export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
+   return es.search({
+-    index: '.kibana',
++    index: SavedObjectsIndexPatterns,
+     body: {
+       size: 0,
+       runtime_mappings: {
+diff --git a/x-pack/test/spaces_api_integration/common/suites/delete.ts b/x-pack/test/spaces_api_integration/common/suites/delete.ts
+index a1c73125ede..02ee0b0c5fd 100644
+--- a/x-pack/test/spaces_api_integration/common/suites/delete.ts
++++ b/x-pack/test/spaces_api_integration/common/suites/delete.ts
+@@ -8,6 +8,7 @@
+ import expect from '@kbn/expect';
+ import { SuperTest } from 'supertest';
+ import type { Client } from '@elastic/elasticsearch';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
+ import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+ import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+@@ -105,7 +106,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
+     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
+     // are updated to remove it, and of those, any that don't exist in any space are deleted.
+     const multiNamespaceResponse = await es.search<Record<string, any>>({
+-      index: '.kibana',
++      index: SavedObjectsIndexPatterns,
+       size: 100,
+       body: { query: { terms: { type: ['sharedtype'] } } },
+     });
+diff --git a/x-pack/test/spaces_api_integration/common/suites/disable_legacy_url_aliases.ts b/x-pack/test/spaces_api_integration/common/suites/disable_legacy_url_aliases.ts
+index 4719d0e5164..002ed6c3e65 100644
+--- a/x-pack/test/spaces_api_integration/common/suites/disable_legacy_url_aliases.ts
++++ b/x-pack/test/spaces_api_integration/common/suites/disable_legacy_url_aliases.ts
+@@ -6,12 +6,13 @@
+  */
+
+ import expect from '@kbn/expect';
+-import { SuperTest } from 'supertest';
++import type { SuperTest } from 'supertest';
+ import type { Client } from '@elastic/elasticsearch';
+ import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
++import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+ import { SPACES } from '../lib/spaces';
+ import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
+-import {
++import type {
+   ExpectResponseBody,
+   TestDefinition,
+   TestSuite,
+@@ -62,7 +63,8 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
+       }
+       const esResponse = await es.get<RawLegacyUrlAlias>(
+         {
+-          index: '.kibana',
++          // affected by the .kibana split, assumes LEGACY_URL_ALIAS_TYPE is stored in .kibana
++          index: MAIN_SAVED_OBJECT_INDEX,
+           id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
+         },
+         { ignore: [404] }
+diff --git a/x-pack/test/spaces_api_integration/common/suites/update_objects_spaces.ts b/x-pack/test/spaces_api_integration/common/suites/update_objects_spaces.ts
+index 5528ceaa276..3895842844e 100644
+--- a/x-pack/test/spaces_api_integration/common/suites/update_objects_spaces.ts
++++ b/x-pack/test/spaces_api_integration/common/suites/update_objects_spaces.ts
+@@ -14,6 +14,7 @@ import {
+   SavedObjectsErrorHelpers,
+   SavedObjectsUpdateObjectsSpacesResponse,
+ } from '@kbn/core/server';
++import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+ import { SPACES } from '../lib/spaces';
+ import {
+   expectResponses,
+@@ -98,11 +99,11 @@ export function updateObjectsSpacesTestSuiteFactory(
+             if (expectAliasDifference !== undefined) {
+               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
+               if (!hasRefreshed) {
+-                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
++                await es.indices.refresh({ index: SavedObjectsIndexPatterns }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                 hasRefreshed = true;
+               }
+               const searchResponse = await es.search({
+-                index: '.kibana',
++                index: SavedObjectsIndexPatterns,
+                 body: {
+                   size: 0,
+                   query: { terms: { type: ['legacy-url-alias'] } },
