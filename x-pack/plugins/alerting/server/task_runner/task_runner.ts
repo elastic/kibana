@@ -571,7 +571,7 @@ export class TaskRunner<
     this.alertingEventLogger.start();
 
     return await loadRule<Params>({
-      paramValidator: this.ruleType.validate?.params,
+      paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
       context: this.context,
@@ -715,7 +715,7 @@ export class TaskRunner<
       schedule = asOk(
         (
           await loadRule<Params>({
-            paramValidator: this.ruleType.validate?.params,
+            paramValidator: this.ruleType.validate.params,
             ruleId,
             spaceId,
             context: this.context,
