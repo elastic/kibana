@@ -99,6 +99,33 @@ describe('useGetGroupSelector', () => {
     });
   });
 
+  it('On group change to none, remove all previously selected groups', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroups: ['host.name', 'user.name'],
+      },
+    };
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
+        },
+      },
+    });
+    act(() => result.current.props.onGroupChange('none'));
+
+    expect(dispatch).toHaveBeenCalledWith({
+      payload: {
+        id: groupingId,
+        activeGroups: ['none'],
+      },
+      type: ActionType.updateActiveGroups,
+    });
+  });
+
   it('On group change, resets active page, sets active group, and leaves options alone', () => {
     const testGroup = {
       [groupingId]: {
