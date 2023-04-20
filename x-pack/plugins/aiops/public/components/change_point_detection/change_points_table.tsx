@@ -189,7 +189,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                 color: 'primary',
                 type: 'icon',
                 onClick: (item) => {
-                  if (!item.group) return;
                   filterManager.addFilters(
                     getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
                   );
@@ -214,7 +213,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                 color: 'primary',
                 type: 'icon',
                 onClick: (item) => {
-                  if (!item.group) return;
                   filterManager.addFilters(
                     getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
                   );
