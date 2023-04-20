@@ -137,6 +137,10 @@ export interface NavigationProps {
    * Target for the logo icon
    */
   homeHref: string;
+  /**
+   * Control of the link that takes the user to their projects or deployments
+   */
+  linkToCloud?: 'projects' | 'deployments';
 }
 
 export type NavigationBucketProps = (SolutionProperties &

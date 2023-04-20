@@ -69,6 +69,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     return {
       ...params,
       homeHref: '#',
+      linkToCloud: 'projects',
     };
   }
 }

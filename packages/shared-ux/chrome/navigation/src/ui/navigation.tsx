@@ -94,6 +94,26 @@ export const Navigation = (props: NavigationProps) => {
     );
   };
 
+  const LinkToCloud = () => {
+    // FIXME: link directly to the current project or deployment
+    switch (props.linkToCloud) {
+      case 'projects':
+        return (
+          <a href="https://cloud.elastic.co/projects">
+            <EuiCollapsibleNavGroup iconType="spaces" title="My projects" />
+          </a>
+        );
+      case 'deployments':
+        return (
+          <a href="https://cloud.elastic.co/deployments">
+            <EuiCollapsibleNavGroup iconType="spaces" title="My deployments" />
+          </a>
+        );
+      default:
+        return null;
+    }
+  };
+
   // higher-order-component to keep the common props DRY
   const NavigationBucketHoc = (outerProps: Omit<NavigationBucketProps, 'activeNavItemId'>) => (
     <NavigationBucket {...outerProps} activeNavItemId={activeNav} />
@@ -108,6 +128,8 @@ export const Navigation = (props: NavigationProps) => {
         >
           <NavHeader />
         </EuiCollapsibleNavGroup>
+
+        <LinkToCloud />
 
         {recentItems ? <NavigationBucketHoc {...recent} /> : null}
 
