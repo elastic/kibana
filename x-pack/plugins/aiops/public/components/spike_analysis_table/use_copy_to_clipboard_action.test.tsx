@@ -34,7 +34,7 @@ describe('useCopyToClipboardAction', () => {
       (result.current as Action).render(significantTerms[0])
     );
 
-    const button = getByTestId('aiopsTableActionButtonEnabled');
+    const button = getByTestId('aiopsTableActionButtonCopyToClipboard enabled');
 
     userEvent.hover(button);
 
