@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDeploymentIdFromDeploymentUrl } from './utils';
+import { parseDeploymentIdFromDeploymentUrl } from './parse_deployment_id_from_deployment_url';
 
 describe('parseDeploymentIdFromDeploymentUrl', () => {
   it('should return undefined if there is no deploymentUrl configured', () => {
