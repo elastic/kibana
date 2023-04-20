@@ -18,11 +18,9 @@ export function useFinishAndArchiveMaintenanceWindow() {
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = (maintenanceWindowId: string) => {
-    return Promise.all([
-      finishMaintenanceWindow({ http, maintenanceWindowId }),
-      archiveMaintenanceWindow({ http, maintenanceWindowId, archive: true }),
-    ]).then(([, archivedMaintenanceWindow]) => archivedMaintenanceWindow);
+  const mutationFn = async (maintenanceWindowId: string) => {
+    await finishMaintenanceWindow({ http, maintenanceWindowId });
+    return archiveMaintenanceWindow({ http, maintenanceWindowId, archive: true });
   };
 
   return useMutation(mutationFn, {

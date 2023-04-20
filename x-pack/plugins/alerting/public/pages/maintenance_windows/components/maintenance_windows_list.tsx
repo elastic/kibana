@@ -10,15 +10,16 @@ import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiButton,
   useEuiBackgroundColor,
   SearchFilterConfig,
+  EuiBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
+import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
 import { StatusFilter } from './status_filter';
 import { TableActionsPopover } from './table_actions_popover';
@@ -41,24 +42,8 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'status',
     name: i18n.TABLE_STATUS,
-    render: (status: string) => {
-      return (
-        <EuiButton
-          css={css`
-            cursor: default;
-
-            :hover:not(:disabled) {
-              text-decoration: none;
-            }
-          `}
-          fill={status === MaintenanceWindowStatus.Running}
-          color={STATUS_DISPLAY[status].color as StatusColor}
-          size="s"
-          onClick={() => {}}
-        >
-          {STATUS_DISPLAY[status].label}
-        </EuiButton>
-      );
+    render: (status: MaintenanceWindowStatus) => {
+      return <EuiBadge color="none">{STATUS_DISPLAY[status]}</EuiBadge>;
     },
     sortable: ({ status }) => STATUS_SORT[status],
   },
@@ -100,7 +85,9 @@ const search: { filters: SearchFilterConfig[] } = {
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items, refreshData }) => {
+    const { euiTheme } = useEuiTheme();
     const warningBackgroundColor = useEuiBackgroundColor('warning');
+    const successBackgroundColor = useEuiBackgroundColor('success');
     const subduedBackgroundColor = useEuiBackgroundColor('subdued');
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
@@ -112,14 +99,51 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         .euiTableRow {
           &.running {
             background-color: ${warningBackgroundColor};
+            .euiBadge {
+              background-color: ${euiTheme.colors.warning};
+              .euiBadge__text {
+                color: ${euiTheme.colors.text};
+              }
+            }
           }
-
+          &.upcoming {
+            .euiBadge {
+              background-color: ${warningBackgroundColor};
+            }
+            .euiBadge__text {
+              color: ${euiTheme.colors.warningText};
+            }
+          }
+          &.finished {
+            .euiBadge {
+              background-color: ${successBackgroundColor};
+            }
+            .euiBadge__text {
+              color: ${euiTheme.colors.successText};
+            }
+          }
           &.archived {
             background-color: ${subduedBackgroundColor};
+            .euiBadge {
+              background-color: ${euiTheme.colors.lightestShade};
+            }
+            .euiBadge__text {
+              color: ${euiTheme.colors.subduedText};
+            }
           }
         }
       `;
-    }, [warningBackgroundColor, subduedBackgroundColor]);
+    }, [
+      warningBackgroundColor,
+      subduedBackgroundColor,
+      successBackgroundColor,
+      euiTheme.colors.warning,
+      euiTheme.colors.text,
+      euiTheme.colors.warningText,
+      euiTheme.colors.successText,
+      euiTheme.colors.lightestShade,
+      euiTheme.colors.subduedText,
+    ]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {
