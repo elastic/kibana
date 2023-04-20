@@ -47,6 +47,7 @@ import { THROTTLE_FIELD_HELP_TEXT, THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY } from '.
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
+  summaryActionMessageParams: ActionVariables;
   ruleType?: Type;
 }
 
@@ -97,6 +98,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   onSubmit,
   setForm,
   actionMessageParams,
+  summaryActionMessageParams,
   ruleType,
 }) => {
   const [isLoadingCaseAction] = useManageCaseAction();
@@ -194,13 +196,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
+              summaryMessageVariables: summaryActionMessageParams,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams]
+    [throttle, actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {

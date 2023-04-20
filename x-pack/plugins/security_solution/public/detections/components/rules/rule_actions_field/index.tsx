@@ -83,6 +83,7 @@ const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
+  summaryMessageVariables: ActionVariables;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -116,7 +117,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  messageVariables,
+  summaryMessageVariables,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
@@ -213,6 +218,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       getActionForm({
         actions,
         messageVariables,
+        summaryMessageVariables,
         defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
@@ -233,6 +239,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       actions,
       getActionForm,
       messageVariables,
+      summaryMessageVariables,
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,

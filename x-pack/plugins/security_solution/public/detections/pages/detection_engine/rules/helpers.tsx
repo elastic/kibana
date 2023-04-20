@@ -432,17 +432,26 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   return ruleParamsKeys;
 };
 
-const transformRuleKeysToActionVariables = (actionMessageRuleParams: string[]): ActionVariables => {
+const transformRuleKeysToActionVariables = (
+  actionMessageRuleParams: string[],
+  isSummaryAction = false
+): ActionVariables => {
   return {
-    state: [{ name: 'signals_count', description: 'state.signals_count' }],
+    ...(isSummaryAction
+      ? { state: [{ name: 'signals_count', description: 'state.signals_count' }] }
+      : {}),
     params: [],
     context: [
-      {
-        name: 'results_link',
-        description: 'context.results_link',
-        useWithTripleBracesInTemplates: true,
-      },
-      { name: 'alerts', description: 'context.alerts' },
+      ...(isSummaryAction
+        ? [
+            {
+              name: 'results_link',
+              description: 'context.results_link',
+              useWithTripleBracesInTemplates: true,
+            },
+            { name: 'alerts', description: 'context.alerts' },
+          ]
+        : []),
       ...actionMessageRuleParams.map((param) => {
         const extendedParam = `rule.${param}`;
         return { name: extendedParam, description: `context.${extendedParam}` };
@@ -451,20 +460,32 @@ const transformRuleKeysToActionVariables = (actionMessageRuleParams: string[]): 
   };
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
-  if (!ruleType) {
-    return { state: [], params: [] };
-  }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+export const getActionMessageParams = memoizeOne(
+  (
+    ruleType: Type | undefined
+  ): { actionMessageParams: ActionVariables; summaryActionMessageParams: ActionVariables } => {
+    if (!ruleType) {
+      return {
+        actionMessageParams: { state: [], params: [] },
+        summaryActionMessageParams: { state: [], params: [] },
+      };
+    }
+    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
 
-  return transformRuleKeysToActionVariables(actionMessageRuleParams);
-});
+    const actionMessageParams = transformRuleKeysToActionVariables(actionMessageRuleParams);
+    const summaryActionMessageParams = transformRuleKeysToActionVariables(
+      actionMessageRuleParams,
+      true
+    );
+    return { actionMessageParams, summaryActionMessageParams };
+  }
+);
 
 /**
  * returns action variables available for all rule types
  */
-export const getAllActionMessageParams = () =>
-  transformRuleKeysToActionVariables(getAllRuleParamsKeys());
+export const getAllActionMessageParams = (isSummaryAction = false) =>
+  transformRuleKeysToActionVariables(getAllRuleParamsKeys(), isSummaryAction);
 
 export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
   max-width: 1000px;

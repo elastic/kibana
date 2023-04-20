@@ -135,6 +135,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
   );
 
   const messageVariables = useMemo(() => getAllActionMessageParams(), []);
+  const summaryMessageVariables = useMemo(() => getAllActionMessageParams(true), []);
 
   return (
     <BulkEditFormWrapper
@@ -179,6 +180,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         component={RuleActionsField}
         componentProps={{
           messageVariables,
+          summaryMessageVariables,
         }}
       />
       <EuiSpacer size="m" />

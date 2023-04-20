@@ -167,7 +167,10 @@ const CreateRulePageComponent: React.FC = () => {
   });
   const { mutateAsync: createRule, isLoading } = useCreateRule();
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
-  const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
+  const { actionMessageParams, summaryActionMessageParams } = useMemo(
+    () => getActionMessageParams(ruleType),
+    [ruleType]
+  );
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
@@ -563,6 +566,7 @@ const CreateRulePageComponent: React.FC = () => {
                             setForm={setFormHook}
                             onSubmit={() => submitStep(RuleStep.ruleActions)}
                             actionMessageParams={actionMessageParams}
+                            summaryActionMessageParams={summaryActionMessageParams}
                             // We need a key to make this component remount when edit/view mode is toggled
                             // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                             key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
