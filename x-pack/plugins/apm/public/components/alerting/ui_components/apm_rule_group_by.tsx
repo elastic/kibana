@@ -41,21 +41,12 @@ export function APMRuleGroupBy({
   };
 
   const getUserSelectedOptions = (groupBy: string[] | undefined) => {
-    return Array.isArray(groupBy)
-      ? groupBy
-          .filter((group) => !preSelectedOptions.includes(group))
-          .map((field) => ({
-            label: field,
-            color: errorOptions?.includes(field) ? 'danger' : undefined,
-          }))
-      : groupBy && !preSelectedOptions.includes(groupBy)
-      ? [
-          {
-            label: groupBy,
-            color: errorOptions?.includes(groupBy) ? 'danger' : undefined,
-          },
-        ]
-      : [];
+    return (groupBy ?? [])
+      .filter((group) => !preSelectedOptions.includes(group))
+      .map((field) => ({
+        label: field,
+        color: errorOptions?.includes(field) ? 'danger' : undefined,
+      }));
   };
 
   const selectedOptions = [

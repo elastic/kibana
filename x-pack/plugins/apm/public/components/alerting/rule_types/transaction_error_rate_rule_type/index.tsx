@@ -109,7 +109,7 @@ export function TransactionErrorRateRuleType(props: Props) {
 
   const onGroupByChange = useCallback(
     (group: string[] | string | null) => {
-      setRuleParams('groupBy', group && group.length ? group : '');
+      setRuleParams('groupBy', group ?? []);
     },
     [setRuleParams]
   );

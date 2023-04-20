@@ -104,9 +104,8 @@ export function registerTransactionErrorRateRuleType({
           TRANSACTION_TYPE,
         ];
 
-        const allGroupbyFields: string[] = [
-          ruleParams.groupBy ?? predefinedGroupby,
-        ].flat();
+        const allGroupbyFields: string[] =
+          ruleParams.groupBy ?? predefinedGroupby;
 
         const config = await firstValueFrom(config$);
 
