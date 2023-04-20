@@ -57,7 +57,7 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/hosts' 
          "must_not": []
       }
    },
-   "timeRange": {
+   "range": {
       "from": "2023-04-18T11:15:31.407Z",
       "to":   "2023-04-18T11:30:31.407Z"
    },
