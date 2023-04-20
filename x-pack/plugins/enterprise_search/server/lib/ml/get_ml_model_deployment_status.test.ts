@@ -123,9 +123,9 @@ describe('getMlModelDeploymentStatus', () => {
               state: 'starting',
               target_allocation_count: 3,
             },
+            start_time: 123456,
           },
           model_id: 'mockModelName',
-          start_time: 123456,
         },
       ],
     };
@@ -170,9 +170,9 @@ describe('getMlModelDeploymentStatus', () => {
               state: 'started',
               target_allocation_count: 3,
             },
+            start_time: 123456,
           },
           model_id: 'mockModelName',
-          start_time: 123456,
         },
       ],
     };
@@ -217,9 +217,9 @@ describe('getMlModelDeploymentStatus', () => {
               state: 'fully_allocated',
               target_allocation_count: 3,
             },
+            start_time: 123456,
           },
           model_id: 'mockModelName',
-          start_time: 123456,
         },
       ],
     };

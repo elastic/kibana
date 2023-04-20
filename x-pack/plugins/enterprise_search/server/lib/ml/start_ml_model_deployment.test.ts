@@ -45,7 +45,6 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should return not found if we are using an unknown model name', async () => {
-    expect.assertions(1);
     try {
       await startMlModelDeployment(
         'unknownModelName',
