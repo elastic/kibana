@@ -59,7 +59,7 @@ export {
   ALERTING_CASES_SAVED_OBJECT_INDEX,
   SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
-  SavedObjectsIndexPatterns,
+  ALL_SAVED_OBJECT_INDICES,
 } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,

@@ -13,7 +13,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import {
   MAIN_SAVED_OBJECT_INDEX,
-  SavedObjectsIndexPatterns,
+  ALL_SAVED_OBJECT_INDICES,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
@@ -83,8 +83,8 @@ export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
  * @returns boolean 'true' if the index is a Kibana saved object index.
  */
 
-const LEGACY_INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})(:?_\\d*)?$`);
-const INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})_(pre)?\\d+.\\d+.\\d+`);
+const LEGACY_INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})(:?_\\d*)?$`);
+const INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})_(pre)?\\d+.\\d+.\\d+`);
 
 function isSavedObjectIndex(index?: string): index is string {
   return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
@@ -119,7 +119,7 @@ export async function cleanSavedObjectIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: SavedObjectsIndexPatterns,
+        index: ALL_SAVED_OBJECT_INDICES,
         body: {
           query: {
             bool: {
@@ -156,7 +156,7 @@ export async function cleanSavedObjectIndices({
       `.kibana rather than deleting the whole index`
   );
 
-  SavedObjectsIndexPatterns.forEach((indexPattern) => stats.deletedIndex(indexPattern));
+  ALL_SAVED_OBJECT_INDICES.forEach((indexPattern) => stats.deletedIndex(indexPattern));
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {

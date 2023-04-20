@@ -6,7 +6,7 @@
  */
 
 import { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import Fs from 'fs/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -177,7 +177,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
 
     deleteAllSavedObjectsFromKibanaIndex: async () => {
       await es.deleteByQuery({
-        index: SavedObjectsIndexPatterns,
+        index: ALL_SAVED_OBJECT_INDICES,
         wait_for_completion: true,
         body: {
           // @ts-expect-error

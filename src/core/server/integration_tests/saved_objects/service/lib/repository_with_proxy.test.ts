@@ -9,7 +9,7 @@
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import { SavedObject, SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+import { SavedObject, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -101,7 +101,7 @@ describe('404s from proxies', () => {
     // register specific routes to modify the response and a catch-all to relay the request/response as-is
 
     allCombinationsPermutations(
-      SavedObjectsIndexPatterns.map((indexPattern) => `${indexPattern}_${pkg.version}`)
+      ALL_SAVED_OBJECT_INDICES.map((indexPattern) => `${indexPattern}_${pkg.version}`)
     )
       .map((indices) => indices.join(','))
       .forEach((kbnIndexPath) => {
