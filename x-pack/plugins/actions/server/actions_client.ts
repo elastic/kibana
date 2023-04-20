@@ -196,10 +196,7 @@ export class ActionsClient {
   }: CreateOptions): Promise<ActionResult> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
-    if (
-      this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-      undefined
-    ) {
+    if (this.preconfiguredActions.some((preconfiguredAction) => preconfiguredAction.id === id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
           defaultMessage: 'This {id} already exist in preconfigured action.',
