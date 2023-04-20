@@ -13,7 +13,6 @@ import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 
 import {
   type MlAnomalyRecordDoc,
-  MLAnomalyDoc,
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
@@ -141,7 +140,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   anomalySearch(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http<ESSearchResponse<MLAnomalyDoc>>({
+    return httpService.http<ESSearchResponse<MlAnomalyRecordDoc>>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       method: 'POST',
       body,
@@ -151,7 +150,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   anomalySearch$(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http$<ESSearchResponse<MLAnomalyDoc>>({
+    return httpService.http$<ESSearchResponse<MlAnomalyRecordDoc>>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       method: 'POST',
       body,

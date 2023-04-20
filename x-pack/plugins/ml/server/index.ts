@@ -20,8 +20,6 @@ export type {
   Modules as MlModules,
   ResultsService as MlResultsService,
   TrainedModels as MlTrainedModels,
-} from './shared';
-export {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
