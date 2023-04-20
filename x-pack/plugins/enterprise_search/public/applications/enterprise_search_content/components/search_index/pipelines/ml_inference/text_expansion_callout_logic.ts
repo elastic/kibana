@@ -98,6 +98,7 @@ export const TextExpansionCalloutLogic = kea<
   },
   events: ({ actions }) => ({
     afterMount: () => {
+      console.log('afterMount');
       actions.fetchTextExpansionModel(undefined);
     },
   }),

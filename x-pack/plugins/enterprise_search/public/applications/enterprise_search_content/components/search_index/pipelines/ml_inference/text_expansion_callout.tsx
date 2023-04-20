@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -26,38 +26,32 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { MLInferenceLogic } from './ml_inference_logic';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { CreateTextExpansionModelResponse } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 
 export interface TextExpansionCallOutState {
   createTextExpansionModel: (args: undefined) => CreateTextExpansionModelResponse | undefined;
   dismiss: () => void;
-  dismissable: boolean;
   isCreateButtonDisabled: boolean;
+  isDismissable: boolean;
   show: boolean;
 }
 
 export interface TextExpansionCallOutProps {
-  dismissable?: boolean;
+  isDismissable?: boolean;
 }
 
 export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
   'enterprise-search-text-expansion-callout-dismissed';
 
 export const useTextExpansionCallOutData = ({
-  dismissable = false,
+  isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
-  const { supportedMLModels } = useValues(MLInferenceLogic);
   const { isCreateButtonDisabled } = useValues(TextExpansionCalloutLogic);
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
-  const doesNotHaveTextExpansionModel = useMemo(() => {
-    return !supportedMLModels.some((m) => m.inference_config?.text_expansion);
-  }, [supportedMLModels]);
-
   const [show, setShow] = useState<boolean>(() => {
-    if (!dismissable) return true;
+    if (!isDismissable) return true;
 
     try {
       return localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY) !== 'true';
@@ -81,9 +75,9 @@ export const useTextExpansionCallOutData = ({
   return {
     createTextExpansionModel,
     dismiss,
-    dismissable,
     isCreateButtonDisabled,
-    show: doesNotHaveTextExpansionModel && show,
+    isDismissable: isDismissable,
+    show,
   };
 };
 
@@ -104,12 +98,12 @@ const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState,
 
 const DeployModel = ({
   createTextExpansionModel,
-  dismissable,
   dismiss,
   isCreateButtonDisabled,
+  isDismissable,
 }: Pick<
   TextExpansionCallOutState,
-  'createTextExpansionModel' | 'dismiss' | 'dismissable' | 'isCreateButtonDisabled'
+  'createTextExpansionModel' | 'dismiss' | 'isCreateButtonDisabled' | 'isDismissable'
 >) => (
   <EuiPanel color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -134,7 +128,7 @@ const DeployModel = ({
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-        {dismissable && (
+        {isDismissable && (
           <EuiFlexItem grow={false}>
             <TextExpansionDismissButton dismiss={dismiss} />
           </EuiFlexItem>
@@ -175,9 +169,9 @@ const DeployModel = ({
 );
 
 const ModelDownloadInProgress = ({
-  dismissable,
   dismiss,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'dismissable'>) => (
+  isDismissable,
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
   <EuiPanel color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
@@ -195,7 +189,7 @@ const ModelDownloadInProgress = ({
               </h4>
             </EuiTitle>
           </EuiFlexItem>
-          {dismissable && (
+          {isDismissable && (
             <EuiFlexItem grow={false}>
               <TextExpansionDismissButton dismiss={dismiss} />
             </EuiFlexItem>
@@ -215,12 +209,12 @@ const ModelDownloadInProgress = ({
 );
 
 const ModelDownloaded = ({
-  dismissable,
   dismiss,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'dismissable'>) => (
+  isDismissable,
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
   <EuiPanel color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
-      {dismissable && (
+      {isDismissable && (
         <EuiFlexItem grow={false}>
           <TextExpansionDismissButton dismiss={dismiss} />
         </EuiFlexItem>
@@ -230,7 +224,7 @@ const ModelDownloaded = ({
 );
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
-  const { dismiss, dismissable, show } = useTextExpansionCallOutData(props);
+  const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
   const { isCreateButtonDisabled, isModelDownloadInProgress, isModelDownloaded } =
     useValues(TextExpansionCalloutLogic);
@@ -239,6 +233,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
   //   fetchTextExpansionModel(undefined);
   // }, [isModelDownloadInProgress]);
 
+  console.log('show callout', show)
   if (!show) return null;
 
   console.log(
@@ -247,17 +242,18 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
     'isModelDownloaded',
     isModelDownloaded
   );
+  
   if (!!isModelDownloadInProgress) {
-    return <ModelDownloadInProgress dismiss={dismiss} dismissable={dismissable} />;
+    return <ModelDownloadInProgress dismiss={dismiss} isDismissable={isDismissable} />;
   } else if (!!isModelDownloaded) {
-    return <ModelDownloaded dismiss={dismiss} dismissable={dismissable} />;
+    return <ModelDownloaded dismiss={dismiss} isDismissable={isDismissable} />;
   }
 
   return (
     <DeployModel
       createTextExpansionModel={createTextExpansionModel}
       dismiss={dismiss}
-      dismissable={dismissable}
+      isDismissable={isDismissable}
       isCreateButtonDisabled={isCreateButtonDisabled}
     />
   );
