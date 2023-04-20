@@ -22,6 +22,7 @@ import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule'
 import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
+import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 
@@ -31,6 +32,7 @@ export interface CreateMaintenanceWindowFormProps {
   onCancel: () => void;
   onSuccess: () => void;
   initialValue?: FormProps;
+  maintenanceWindowId?: string;
 }
 
 export const useTimeZone = (): string => {
@@ -39,28 +41,42 @@ export const useTimeZone = (): string => {
 };
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>(
-  ({ onCancel, onSuccess, initialValue }) => {
-    const [defaultDateValue] = useState<string>(moment().toISOString());
+  ({ onCancel, onSuccess, initialValue, maintenanceWindowId }) => {
+    const [defaultStartDateValue] = useState<string>(moment().toISOString());
+    const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
     const timezone = useTimeZone();
 
-    const { mutate: createMaintenanceWindow } = useCreateMaintenanceWindow();
+    const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
+    const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
+      useCreateMaintenanceWindow();
+    const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
+      useUpdateMaintenanceWindow();
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
         if (isValid) {
           const startDate = moment(formData.startDate);
           const endDate = moment(formData.endDate);
-          await createMaintenanceWindow(
-            {
-              title: formData.title,
-              duration: endDate.diff(startDate),
-              rRule: convertToRRule(startDate, timezone, formData.recurringSchedule),
-            },
-            { onSuccess }
-          );
+          const maintenanceWindow = {
+            title: formData.title,
+            duration: endDate.diff(startDate),
+            rRule: convertToRRule(startDate, timezone, formData.recurringSchedule),
+          };
+          if (isEditMode) {
+            updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
+          } else {
+            createMaintenanceWindow(maintenanceWindow, { onSuccess });
+          }
         }
       },
-      [createMaintenanceWindow, onSuccess, timezone]
+      [
+        isEditMode,
+        maintenanceWindowId,
+        updateMaintenanceWindow,
+        createMaintenanceWindow,
+        onSuccess,
+        timezone,
+      ]
     );
 
     const { form } = useForm<FormProps>({
@@ -101,7 +117,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'startDate',
                           config: {
                             label: i18n.CREATE_FORM_SCHEDULE,
-                            defaultValue: defaultDateValue,
+                            defaultValue: defaultStartDateValue,
                             validations: [],
                           },
                         },
@@ -109,7 +125,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'endDate',
                           config: {
                             label: '',
-                            defaultValue: defaultDateValue,
+                            defaultValue: defaultEndDateValue,
                             validations: [],
                           },
                         },
@@ -149,7 +165,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SubmitButton />
+            <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Form>
