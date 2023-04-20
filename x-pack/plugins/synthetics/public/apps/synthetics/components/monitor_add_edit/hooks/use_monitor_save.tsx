@@ -6,8 +6,9 @@
  */
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useRouteMatch } from 'react-router-dom';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
@@ -18,6 +19,8 @@ import { cleanMonitorListState } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
+  const core = useKibana();
+  const theme$ = core.services.theme?.theme$;
   const dispatch = useDispatch();
   const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -51,11 +54,16 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
       dispatch(cleanMonitorListState());
       kibanaService.toasts.addSuccess({
         title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
-        text: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT,
+        text: toMountPoint(
+          <p data-test-subj="synthetcsMonitorSaveSubtext">
+            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT}
+          </p>,
+          { theme$ }
+        ),
         toastLifeTimeMs: 3000,
       });
     }
-  }, [data, status, monitorId, loading, refreshApp, dispatch]);
+  }, [data, status, monitorId, loading, refreshApp, dispatch, theme$]);
 
   return { status, loading, isEdit };
 };
@@ -70,7 +78,7 @@ const MONITOR_SUCCESS_LABEL = i18n.translate(
 const MONITOR_SUCCESS_LABEL_SUBTEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorAddedSuccessMessage.subtext',
   {
-    defaultMessage: 'Scheduling for first run in progress.',
+    defaultMessage: 'It will next run according to its defined schedule.',
   }
 );
 
@@ -91,6 +99,6 @@ const MONITOR_FAILURE_LABEL = i18n.translate(
 const MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorFailureMessage',
   {
-    defaultMessage: 'Scheduling for next run in progress.',
+    defaultMessage: 'It will next run according to its defined schedule.',
   }
 );
