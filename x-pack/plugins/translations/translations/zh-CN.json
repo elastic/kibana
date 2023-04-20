@@ -12227,8 +12227,6 @@
     "xpack.enterpriseSearch.content.engine.api.step3.curlTitle": "cURL",
     "xpack.enterpriseSearch.content.engine.api.step3.intro": "了解如何将您的引擎与由 Elastic 维护的语言客户端进行集成，以帮助构建搜索体验。",
     "xpack.enterpriseSearch.content.engine.api.step3.searchUITitle": "搜索 UI",
-    "xpack.enterpriseSearch.content.engine.headerActions.actionsButton.ariaLabel": "引擎操作菜单按钮",
-    "xpack.enterpriseSearch.content.engine.headerActions.delete": "删除此引擎",
     "xpack.enterpriseSearch.content.engine.indices.actions.columnTitle": "操作",
     "xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title": "从引擎中移除此索引",
     "xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.title": "查看此索引",

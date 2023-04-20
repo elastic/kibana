@@ -135,7 +135,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
-    // Don't fetch engines if we don't have a valid license
+    // Don't fetch search applications if we don't have a valid license
     if (!isGated) {
       fetchEngines();
     }
@@ -167,7 +167,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.description"
-              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
+              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how Search applications work in Enterprise search {documentationUrl}"
               values={{
                 documentationUrl: (
                   <EuiLink
@@ -196,7 +196,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
             ? [<CreateEngineButton disabled={isGated} />]
             : [],
         }}
-        pageViewTelemetry="Engines"
+        pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}
       >
         {isGated && (

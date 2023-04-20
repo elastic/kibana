@@ -56,7 +56,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
-        defaultMessage: 'Engine Name',
+        defaultMessage: 'Search Application Name',
       }),
       mobileOptions: {
         header: true,

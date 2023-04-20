@@ -87,7 +87,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
               content={i18n.translate(
                 'xpack.enterpriseSearch.content.index.searchEngines.createEngineDisabledTooltip',
                 {
-                  defaultMessage: 'You cannot create engines from hidden indices.',
+                  defaultMessage: 'You cannot create search applications from hidden indices.',
                 }
               )}
             >
