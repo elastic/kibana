@@ -38,7 +38,6 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import rison from '@kbn/rison';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   Rule,
