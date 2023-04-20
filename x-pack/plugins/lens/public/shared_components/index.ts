@@ -28,10 +28,8 @@ export {
 } from './axis/extent';
 export { TooltipWrapper } from './tooltip_wrapper';
 export * from './coloring';
-export { useDebouncedValue } from './debounced_value';
 export * from './helpers';
 export { LegendActionPopover } from './legend/action/legend_action_popover';
-export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis/title/axis_title_settings';
 export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';

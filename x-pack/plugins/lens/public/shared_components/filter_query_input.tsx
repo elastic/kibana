@@ -17,7 +17,8 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
-import { QueryInput, useDebouncedValue, validateQuery } from '.';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { QueryInput, validateQuery } from '.';
 import type { IndexPattern } from '../types';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {

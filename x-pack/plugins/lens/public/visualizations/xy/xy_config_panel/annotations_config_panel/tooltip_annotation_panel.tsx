@@ -11,9 +11,9 @@ import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import type { IndexPattern } from '../../../../types';
 import {
-  useDebouncedValue,
   NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,

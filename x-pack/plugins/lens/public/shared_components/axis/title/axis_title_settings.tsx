@@ -8,8 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import type { AxesSettingsConfig } from '../../../visualizations/xy/types';
-import { type LabelMode, useDebouncedValue, VisLabel } from '../..';
+import { type LabelMode, VisLabel } from '../..';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

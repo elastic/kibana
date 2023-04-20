@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { FieldPicker, TruncatedLabel } from './components';
+export {
+  FieldPicker,
+  TruncatedLabel,
+  NameInput,
+  DebouncedInput,
+  useDebouncedValue,
+} from './components';
 
 export type { DataType, FieldOptionValue, FieldOption } from './components';

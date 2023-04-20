@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDebouncedValue } from '../debounced_value';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { LensAppServices } from '../../app_plugin/types';
 
 export const QueryInput = ({

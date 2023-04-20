@@ -25,12 +25,10 @@ import {
 import moment from 'moment';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import { NameInput } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { FormatFactory } from '../../../../../common/types';
-import {
-  DimensionEditorSection,
-  NameInput,
-  useDebouncedValue,
-} from '../../../../shared_components';
+import { DimensionEditorSection } from '../../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
 import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
 import { ColorPicker } from '../color_picker';
