@@ -180,7 +180,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
     });
 
-    describe.skip('#Landing page', () => {
+    describe('#Landing page', () => {
       beforeEach(() => {
         setHostViewEnabled(false);
       });
@@ -222,7 +222,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('#Single host Flyout', () => {
+    describe('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
@@ -378,7 +378,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe.skip('Metrics Tab', () => {
+      describe('Metrics Tab', () => {
         before(async () => {
           browser.scrollTop();
           await pageObjects.infraHostsView.visitMetricsTab();
