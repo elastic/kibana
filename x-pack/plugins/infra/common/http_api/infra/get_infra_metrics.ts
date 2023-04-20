@@ -38,7 +38,7 @@ export const MetadataRT = rt.type({
   value: rt.union([rt.string, rt.number, rt.null]),
 });
 
-export const GetMetricsRequestBodyPayloadRT = rt.intersection([
+export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
   }),
@@ -57,7 +57,7 @@ export const MetricsItemRT = rt.type({
   metadata: rt.array(MetadataRT),
 });
 
-export const GetMetricsResponsePayloadRT = rt.type({
+export const GetInfraMetricsResponsePayloadRT = rt.type({
   type: rt.literal('host'),
   nodes: rt.array(MetricsItemRT),
 });
@@ -67,8 +67,8 @@ export type Metadata = rt.TypeOf<typeof MetadataRT>;
 export type MetricType = rt.TypeOf<typeof MetricTypeRT>;
 export type MetricsItem = rt.TypeOf<typeof MetricsItemRT>;
 
-export type GetMetricsRequestBodyPayload = Omit<
-  rt.TypeOf<typeof GetMetricsRequestBodyPayloadRT>,
+export type GetInfraMetricsRequestBodyPayload = Omit<
+  rt.TypeOf<typeof GetInfraMetricsRequestBodyPayloadRT>,
   'limit' | 'range'
 > & {
   limit?: number;
@@ -77,4 +77,4 @@ export type GetMetricsRequestBodyPayload = Omit<
     to: string;
   };
 };
-export type GetMetricsResponsePayload = rt.TypeOf<typeof GetMetricsResponsePayloadRT>;
+export type GetInfraMetricsResponsePayload = rt.TypeOf<typeof GetInfraMetricsResponsePayloadRT>;

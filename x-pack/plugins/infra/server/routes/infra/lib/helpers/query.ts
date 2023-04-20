@@ -6,11 +6,14 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ES_SEARCH_STRATEGY, ISearchClient } from '@kbn/data-plugin/common';
+import { ISearchClient } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import { GetMetricsRequestBodyPayload, MetricType } from '../../../../../common/http_api/metrics';
+import {
+  GetInfraMetricsRequestBodyPayload,
+  MetricType,
+} from '../../../../../common/http_api/infra';
 import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
 
 export const createFilters = ({
@@ -18,7 +21,7 @@ export const createFilters = ({
   extraFilter,
   hostNamesShortList = [],
 }: {
-  params: GetMetricsRequestBodyPayload;
+  params: GetInfraMetricsRequestBodyPayload;
   hostNamesShortList?: string[];
   extraFilter?: estypes.QueryDslQueryContainer;
 }) => {
@@ -66,18 +69,11 @@ export const runQuery = <T>(
   decoder: (aggregation: Record<string, estypes.AggregationsAggregate> | undefined) => T | undefined
 ): Observable<T | undefined> => {
   return serchClient
-    .search(
-      {
-        params: queryRequest,
-      },
-      {
-        strategy: ES_SEARCH_STRATEGY,
-      }
-    )
+    .search({
+      params: queryRequest,
+    })
     .pipe(
-      map((res) => {
-        return decoder(res.rawResponse.aggregations);
-      }),
+      map((res) => decoder(res.rawResponse.aggregations)),
       catchError((err) => {
         const error = {
           message: err.message,

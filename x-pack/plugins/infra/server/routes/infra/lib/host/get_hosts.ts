@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { GetMetricsResponsePayload } from '../../../../../common/http_api/metrics';
+import { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
 import { getFilteredHosts } from './get_filtered_hosts';
 import { mapToApiResponse } from '../mapper';
 import { hasFilters } from '../utils';
 import { GetHostsArgs } from '../types';
 import { getAllHosts } from './get_all_hosts';
 
-export const getHosts = async (args: GetHostsArgs): Promise<GetMetricsResponsePayload> => {
+export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsResponsePayload> => {
   const runFilterQuery = hasFilters(args.params.query);
   // filter first to prevent filter clauses from impacting the metrics aggregations.
   const hostNamesShortList = runFilterQuery ? await getFilteredHostNames(args) : [];

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './get_metrics';
+export * from './get_infra_metrics';

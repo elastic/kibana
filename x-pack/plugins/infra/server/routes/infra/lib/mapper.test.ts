@@ -6,9 +6,9 @@
  */
 
 import { mapToApiResponse } from './mapper';
-import { GetMetricsRequestBodyPayload } from '../../../../common/http_api/metrics';
+import { GetInfraMetricsRequestBodyPayload } from '../../../../common/http_api/infra';
 
-const metricsApiRequest: GetMetricsRequestBodyPayload = {
+const metricsApiRequest: GetInfraMetricsRequestBodyPayload = {
   type: 'host',
   limit: 20,
   metrics: [
@@ -90,7 +90,8 @@ describe('mapper', () => {
     ]);
 
     expect(hosts).toEqual({
-      hosts: [
+      type: 'host',
+      nodes: [
         {
           metadata: [
             { name: 'host.os.name', value: null },

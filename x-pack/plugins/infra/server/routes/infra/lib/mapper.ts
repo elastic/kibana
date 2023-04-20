@@ -7,11 +7,11 @@
 
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 import {
-  GetMetricsRequestBodyPayload,
-  GetMetricsResponsePayload,
+  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsResponsePayload,
   Metadata,
   Metrics,
-} from '../../../../common/http_api/metrics';
+} from '../../../../common/http_api/infra';
 
 import {
   FilteredMetricsTypeRT,
@@ -22,9 +22,9 @@ import {
 import { METADATA_AGGREGATION_NAME } from './constants';
 
 export const mapToApiResponse = (
-  params: GetMetricsRequestBodyPayload,
+  params: GetInfraMetricsRequestBodyPayload,
   buckets?: HostsMetricsSearchBucket[] | undefined
-): GetMetricsResponsePayload => {
+): GetInfraMetricsResponsePayload => {
   if (!buckets) {
     return {
       type: params.type,
@@ -69,7 +69,7 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): Metadata[] => 
 };
 
 const convertMetricBucket = (
-  params: GetMetricsRequestBodyPayload,
+  params: GetInfraMetricsRequestBodyPayload,
   bucket: HostsMetricsSearchBucket
 ): Metrics[] => {
   return params.metrics.map((returnedMetric) => {

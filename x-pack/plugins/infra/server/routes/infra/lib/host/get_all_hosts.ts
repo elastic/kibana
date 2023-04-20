@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { ESSearchRequest } from '@kbn/es-types';
 import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { GetMetricsRequestBodyPayload } from '../../../../../common/http_api/metrics';
+import { GetInfraMetricsRequestBodyPayload } from '../../../../../common/http_api/infra';
 import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION } from '../constants';
 import {
   GetHostsArgs,
@@ -30,7 +30,7 @@ export const getAllHosts = async (
 };
 
 const createQuery = (
-  params: GetMetricsRequestBodyPayload,
+  params: GetInfraMetricsRequestBodyPayload,
   sourceConfig: InfraStaticSourceConfiguration,
   hostNamesShortList: string[]
 ): ESSearchRequest => {
@@ -56,7 +56,7 @@ const createQuery = (
 };
 
 const createAggregations = (
-  { limit }: GetMetricsRequestBodyPayload,
+  { limit }: GetInfraMetricsRequestBodyPayload,
   metricAggregations: Record<string, estypes.AggregationsAggregationContainer>
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   return {

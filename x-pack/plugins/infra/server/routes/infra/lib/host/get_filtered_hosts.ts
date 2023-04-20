@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { GetMetricsRequestBodyPayload } from '../../../../../common/http_api/metrics';
+import { GetInfraMetricsRequestBodyPayload } from '../../../../../common/http_api/infra';
 import {
   FilteredHostsSearchAggregationResponseRT,
   FilteredHostsSearchAggregationResponse,
@@ -32,7 +32,7 @@ export const getFilteredHosts = async ({
 };
 
 const createQuery = (
-  params: GetMetricsRequestBodyPayload,
+  params: GetInfraMetricsRequestBodyPayload,
   sourceConfig: InfraStaticSourceConfiguration
 ): ESSearchRequest => {
   assertQueryStructure(params.query);

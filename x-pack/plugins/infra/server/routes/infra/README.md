@@ -2,7 +2,7 @@
 
 This API returns a list of hosts and their metrics.
 
-**POST /api/metrics**
+**POST /api/metrics/infra**
 parameters:
 
 - type: asset type. 'host' is the only one supported now
@@ -23,7 +23,7 @@ The response includes:
 Request
 
 ```bash
-curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/hosts' \
+curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/metrics/infra' \
 --header 'kbn-xsrf: xxxx' \
 --header 'Content-Type: application/json' \
 --data '{

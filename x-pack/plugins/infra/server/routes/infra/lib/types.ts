@@ -10,7 +10,7 @@ import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
 import { InfraStaticSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 
-import { GetMetricsRequestBodyPayload } from '../../../../common/http_api/metrics';
+import { GetInfraMetricsRequestBodyPayload } from '../../../../common/http_api/infra';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 
 export const FilteredMetricsTypeRT = rt.type({
@@ -77,7 +77,7 @@ export interface HostsMetricsAggregationQueryConfig {
 export interface GetHostsArgs {
   searchClient: ISearchClient;
   sourceConfig: InfraStaticSourceConfiguration;
-  params: GetMetricsRequestBodyPayload;
+  params: GetInfraMetricsRequestBodyPayload;
 }
 
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;
