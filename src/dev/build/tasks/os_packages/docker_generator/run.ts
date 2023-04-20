@@ -55,7 +55,7 @@ export async function runDockerGenerator(
   const configuredNamespace = config.getDockerNamespace();
   const imageNamespace = configuredNamespace
     ? configuredNamespace
-    : flags.cloud
+    : (flags.cloud || flags.serverless)
     ? 'kibana-ci'
     : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
@@ -106,7 +106,7 @@ export async function runDockerGenerator(
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
-    serverless: flags.serverless
+    serverless: flags.serverless,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
