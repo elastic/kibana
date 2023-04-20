@@ -18,7 +18,7 @@ import React, { type FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FilterStateStore } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
 import {
@@ -34,6 +34,36 @@ export interface ChangePointsTableProps {
   fieldConfig: FieldConfig;
   isLoading: boolean;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
+}
+
+function getFilterConfig(
+  index: string,
+  item: Required<ChangePointAnnotation>,
+  negate: boolean
+): Filter {
+  return {
+    meta: {
+      disabled: false,
+      negate,
+      alias: null,
+      index,
+      key: `${item.group.name}_${item.group.value}`,
+      // @ts-ignore FilterMeta type definition misses the field property
+      field: item.group.name,
+      params: {
+        query: item.group.value,
+      },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        [item.group.name]: item.group.value,
+      },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+  };
 }
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
@@ -143,47 +173,54 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }),
             actions: [
               {
-                name: i18n.translate('xpack.aiops.changePointDetection.actions.addFilterColumn', {
-                  defaultMessage: 'Add filter',
-                }),
-                description: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.addFilterColumn',
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
                   {
-                    defaultMessage: 'Add filter',
+                    defaultMessage: 'Filter for value',
                   }
                 ),
-                icon: 'filterInclude',
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                  {
+                    defaultMessage: 'Filter for value',
+                  }
+                ),
+                icon: 'plusInCircle',
                 color: 'primary',
                 type: 'icon',
                 onClick: (item) => {
                   if (!item.group) return;
-
-                  filterManager.addFilters({
-                    meta: {
-                      disabled: false,
-                      negate: false,
-                      alias: null,
-                      index: dataView.id!,
-                      key: `${item.group.name}_${item.group.value}`,
-                      // @ts-ignore FilterMeta type definition misses the field property
-                      field: item.group.name,
-                      params: {
-                        query: item.group.value,
-                      },
-                      type: 'phrase',
-                    },
-                    query: {
-                      match_phrase: {
-                        [item.group.name]: item.group.value,
-                      },
-                    },
-                    $state: {
-                      store: FilterStateStore.APP_STATE,
-                    },
-                  });
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
+                  );
                 },
                 isPrimary: true,
-                'data-test-subj': 'aiopsChangePointAddFilter',
+                'data-test-subj': 'aiopsChangePointFilterForValue',
+              },
+              {
+                name: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                description: i18n.translate(
+                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                  {
+                    defaultMessage: 'Filter out value',
+                  }
+                ),
+                icon: 'minusInCircle',
+                color: 'primary',
+                type: 'icon',
+                onClick: (item) => {
+                  if (!item.group) return;
+                  filterManager.addFilters(
+                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
+                  );
+                },
+                isPrimary: true,
+                'data-test-subj': 'aiopsChangePointFilterForValue',
               },
             ] as Array<DefaultItemAction<ChangePointAnnotation>>,
           },
