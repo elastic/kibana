@@ -465,7 +465,7 @@ export const CANCEL_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.cancelModal.subtitle',
   {
     defaultMessage:
-      'Rule notifications resume immediately. Running maintenance window events are canceled.',
+      'Rule notifications resume immediately. Running maintenance window events are canceled; upcoming events are unaffected.',
   }
 );
 
@@ -479,7 +479,7 @@ export const CANCEL_MODAL_BUTTON = i18n.translate(
 export const TABLE_ACTION_CANCEL_AND_ARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.cancelAndArchive',
   {
-    defaultMessage: 'Cancel and Archive',
+    defaultMessage: 'Cancel and archive',
   }
 );
 
@@ -494,7 +494,7 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle',
   {
     defaultMessage:
-      'Rule notifications resume immediately. Running and upcoming maintenance window events are canceled.',
+      'Rule notifications resume immediately. All running and upcoming maintenance window events are canceled and the window is queued for deletion.',
   }
 );
 
@@ -509,7 +509,8 @@ export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.a
 export const ARCHIVE_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.archive.subtitle',
   {
-    defaultMessage: 'Upcoming maintenance window events are canceled.',
+    defaultMessage:
+      'Upcoming maintenance window events are canceled and the window is queued for deletion.',
   }
 );
 
