@@ -6,12 +6,7 @@
  */
 
 import * as i18n from '../translations';
-import type {
-  Bucket,
-  UnallowedValueCount,
-  UnallowedValueRequestItem,
-  UnallowedValueSearchResult,
-} from '../types';
+import type { Bucket, UnallowedValueCount, UnallowedValueSearchResult } from '../types';
 
 const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
 
@@ -26,53 +21,44 @@ export const getUnallowedValueCount = ({ doc_count, key }: Bucket): UnallowedVal
 });
 
 export const getUnallowedValues = ({
-  requestItems,
   searchResults,
 }: {
-  requestItems: UnallowedValueRequestItem[];
   searchResults: UnallowedValueSearchResult[] | null;
 }): Record<string, UnallowedValueCount[]> => {
   if (searchResults == null || !Array.isArray(searchResults)) {
     return {};
   }
 
-  return requestItems.reduce((acc, { indexFieldName }) => {
-    const searchResult = searchResults.find(
-      (x) =>
-        typeof x.aggregations === 'object' && Array.isArray(x.aggregations[indexFieldName]?.buckets)
+  return searchResults.reduce((unallowedValuesInAllResults, searchResult) => {
+    const unallowedValuesInSingleResult = Object.keys(searchResult.aggregations || {}).reduce(
+      (acc, indexFieldName) => {
+        const buckets = searchResult?.aggregations?.[indexFieldName].buckets;
+
+        return {
+          ...acc,
+          [indexFieldName]:
+            buckets?.flatMap((x) => (isBucket(x) ? getUnallowedValueCount(x) : [])) || [],
+        };
+      },
+      {}
     );
 
-    if (
-      searchResult != null &&
-      searchResult.aggregations != null &&
-      searchResult.aggregations[indexFieldName] != null
-    ) {
-      const buckets = searchResult.aggregations[indexFieldName]?.buckets;
-
-      return {
-        ...acc,
-        [indexFieldName]: buckets?.flatMap((x) => (isBucket(x) ? getUnallowedValueCount(x) : [])),
-      };
-    } else {
-      return {
-        ...acc,
-        [indexFieldName]: [],
-      };
-    }
-  }, {});
+    return {
+      ...unallowedValuesInAllResults,
+      ...unallowedValuesInSingleResult,
+    };
+  }, {} as unknown as Record<string, UnallowedValueCount[]>);
 };
 
 export async function fetchUnallowedValues({
   abortController,
   indexName,
-  requestItems,
 }: {
   abortController: AbortController;
   indexName: string;
-  requestItems: UnallowedValueRequestItem[];
 }): Promise<UnallowedValueSearchResult[]> {
   const response = await fetch(UNALLOWED_VALUES_API_ROUTE, {
-    body: JSON.stringify(requestItems),
+    body: JSON.stringify([{ indexName }]),
     headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
     method: 'POST',
     signal: abortController.signal,

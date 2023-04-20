@@ -97,7 +97,6 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   const requestItems = useMemo(
     () =>
       getUnallowedValueRequestItems({
-        ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
         indexName,
       }),
     [indexName]

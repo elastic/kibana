@@ -48,11 +48,9 @@ export const useUnallowedValues = ({
         const searchResults = await fetchUnallowedValues({
           abortController,
           indexName,
-          requestItems,
         });
 
         const unallowedValuesMap = getUnallowedValues({
-          requestItems,
           searchResults,
         });
 

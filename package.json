@@ -356,6 +356,7 @@
     "@kbn/ecs": "link:packages/kbn-ecs",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/packages/kbn-ecs-data-quality-dashboard",
     "@kbn/ecs-data-quality-dashboard-plugin": "link:x-pack/plugins/ecs_data_quality_dashboard",
+    "@kbn/ecs-data-quality-utils": "link:x-pack/packages/kbn-ecs-data-quality-utils",
     "@kbn/elasticsearch-client-plugin": "link:test/plugin_functional/plugins/elasticsearch_client_plugin",
     "@kbn/elasticsearch-client-xpack-plugin": "link:x-pack/test/plugin_api_integration/plugins/elasticsearch_client",
     "@kbn/embeddable-enhanced-plugin": "link:x-pack/plugins/embeddable_enhanced",

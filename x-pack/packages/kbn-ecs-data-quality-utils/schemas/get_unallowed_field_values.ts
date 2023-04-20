@@ -10,11 +10,3 @@ import * as t from 'io-ts';
 export const AllowedValues = t.array(t.string);
 
 export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
-
-export const GetUnallowedFieldValuesBody = t.array(
-  t.type({
-    indexName: t.string,
-  })
-);
-
-export type GetUnallowedFieldValuesInputs = t.TypeOf<typeof GetUnallowedFieldValuesBody>;

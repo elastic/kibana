@@ -62,8 +62,6 @@ export interface PartitionedFieldMetadataStats {
 }
 
 export interface UnallowedValueRequestItem {
-  allowedValues: string[];
-  indexFieldName: string;
   indexName: string;
 }
 

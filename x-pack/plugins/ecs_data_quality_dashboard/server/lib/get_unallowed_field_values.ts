@@ -6,27 +6,14 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
-import {
-  getMSearchRequestBody,
-  getMSearchRequestHeader,
-} from '../helpers/get_unallowed_field_requests';
+import { getUnallowedFieldValues as findUnallowedValues } from '@kbn/ecs-data-quality-utils';
 import { GetUnallowedFieldValuesInputs } from '../schemas/get_unallowed_field_values';
 
 export const getUnallowedFieldValues = (
   esClient: ElasticsearchClient,
   items: GetUnallowedFieldValuesInputs
-) => {
-  const searches: MsearchRequestItem[] = items.reduce<MsearchRequestItem[]>(
-    (acc, { indexName, indexFieldName, allowedValues }) =>
-      acc.concat([
-        getMSearchRequestHeader(indexName),
-        getMSearchRequestBody({ indexName, indexFieldName, allowedValues }),
-      ]),
-    []
+) =>
+  findUnallowedValues(
+    esClient,
+    items.map(({ indexName }) => indexName)
   );
-
-  return esClient.msearch({
-    searches,
-  });
-};

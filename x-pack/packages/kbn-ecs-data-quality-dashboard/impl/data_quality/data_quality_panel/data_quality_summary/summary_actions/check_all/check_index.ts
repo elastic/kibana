@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
@@ -42,20 +41,14 @@ export async function checkIndex({
   try {
     const indexes = await fetchMappings({ abortController, patternOrIndexName: indexName });
 
-    const requestItems = getUnallowedValueRequestItems({
-      ecsMetadata,
-      indexName,
-    });
-
     const searchResults = await fetchUnallowedValues({
       abortController,
       indexName,
-      requestItems,
     });
 
     const unallowedValues = getUnallowedValues({
-      requestItems,
       searchResults,
+      indexName,
     });
 
     const mappingsProperties = getMappingsProperties({
