@@ -664,12 +664,14 @@ describe('#importSavedObjectsFromStream', () => {
           id: obj1.id,
           meta: { title: obj1.attributes.title, icon: `${obj1.type}-icon` },
           overwrite: true,
+          managed: false,
         },
         {
           type: obj2.type,
           id: obj2.id,
           meta: { title: obj2.attributes.title, icon: `${obj2.type}-icon` },
           destinationId: obj2.destinationId,
+          managed: false,
         },
         {
           type: obj3.type,
@@ -677,6 +679,7 @@ describe('#importSavedObjectsFromStream', () => {
           meta: { title: obj3.attributes.title, icon: `${obj3.type}-icon` },
           destinationId: obj3.destinationId,
           createNewCopy: true,
+          managed: false,
         },
       ];
       const errors = [
@@ -727,12 +730,14 @@ describe('#importSavedObjectsFromStream', () => {
           id: obj1.id,
           overwrite: true,
           meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
+          managed: false,
         },
         {
           type: obj2.type,
           id: obj2.id,
           overwrite: true,
           meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
+          managed: false,
         },
       ];
 

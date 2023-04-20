@@ -97,6 +97,7 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;
+  managed?: boolean;
 }
 
 /**
@@ -125,6 +126,10 @@ export interface SavedObjectsImportSuccess {
    * If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
    */
   overwrite?: boolean;
+  /**
+   * @TINA add consistent, relevant description
+   */
+  managed?: boolean;
 }
 
 /**

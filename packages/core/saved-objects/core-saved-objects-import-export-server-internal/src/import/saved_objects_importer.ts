@@ -57,6 +57,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     overwrite,
     refresh,
     compatibilityMode,
+    managed = false, // @TINA set the default here and pass that all the way through.
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -69,6 +70,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 
@@ -78,6 +80,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     compatibilityMode,
     namespace,
     retries,
+    managed = false, // @TINA set the default here and pass that all the way through.
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
@@ -89,6 +92,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 }

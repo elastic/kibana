@@ -19,19 +19,36 @@ import {
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
 
+interface CreateOptions {
+  type: string;
+  id: string;
+  originId?: string;
+  managed?: boolean;
+}
 /**
  * Function to create a realistic-looking import object given a type, ID, and optional originId
  */
-const createObject = (type: string, id: string, originId?: string): SavedObject => ({
+const createObject = (createOptions: CreateOptions): SavedObject => {
+  const { type, id, originId, managed } = createOptions;
+  return {
+    type,
+    id,
+    attributes: {},
+    references: [
+      { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
+      { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importStateMap entry
+      { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importStateMap entry
+    ],
+    ...(originId && { originId }),
+    ...(managed && { managed }),
+  };
+};
+
+const createOptionsFrom = (type: string, id: string, originId?: string, managed?: boolean) => ({
   type,
   id,
-  attributes: {},
-  references: [
-    { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
-    { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importStateMap entry
-    { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importStateMap entry
-  ],
-  ...(originId && { originId }),
+  originId,
+  managed,
 });
 
 const createLegacyUrlAliasObject = (
@@ -51,19 +68,19 @@ const OTHER_TYPE = 'other';
 /**
  * Create a variety of different objects to exercise different import / result scenarios
  */
-const obj1 = createObject(MULTI_NS_TYPE, 'id-1', 'originId-a'); // -> success
-const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'originId-b'); // -> conflict
-const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-c'); // -> conflict (with known importId and omitOriginId=true)
-const obj4 = createObject(MULTI_NS_TYPE, 'id-4', 'originId-d'); // -> conflict (with known importId)
-const obj5 = createObject(MULTI_NS_TYPE, 'id-5', 'originId-e'); // -> unresolvable conflict
-const obj6 = createObject(MULTI_NS_TYPE, 'id-6'); // -> success
-const obj7 = createObject(MULTI_NS_TYPE, 'id-7'); // -> conflict
-const obj8 = createObject(MULTI_NS_TYPE, 'id-8'); // -> conflict (with known importId)
-const obj9 = createObject(MULTI_NS_TYPE, 'id-9'); // -> unresolvable conflict
-const obj10 = createObject(OTHER_TYPE, 'id-10', 'originId-f'); // -> success
-const obj11 = createObject(OTHER_TYPE, 'id-11', 'originId-g'); // -> conflict
-const obj12 = createObject(OTHER_TYPE, 'id-12'); // -> success
-const obj13 = createObject(OTHER_TYPE, 'id-13'); // -> conflict
+const obj1 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-1', 'originId-a', true)); // -> success
+const obj2 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-2', 'originId-b')); // -> conflict
+const obj3 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-3', 'originId-c')); // -> conflict (with known importId and omitOriginId=true)
+const obj4 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-4', 'originId-d')); // -> conflict (with known importId)
+const obj5 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-5', 'originId-e')); // -> unresolvable conflict
+const obj6 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-6', undefined, true)); // -> success
+const obj7 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-7')); // -> conflict
+const obj8 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-8')); // -> conflict (with known importId)
+const obj9 = createObject(createOptionsFrom(MULTI_NS_TYPE, 'id-9')); // -> unresolvable conflict
+const obj10 = createObject(createOptionsFrom(OTHER_TYPE, 'id-10', 'originId-f')); // -> success
+const obj11 = createObject(createOptionsFrom(OTHER_TYPE, 'id-11', 'originId-g')); // -> conflict
+const obj12 = createObject(createOptionsFrom(OTHER_TYPE, 'id-12')); // -> success
+const obj13 = createObject(createOptionsFrom(OTHER_TYPE, 'id-13')); // -> conflict
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
@@ -71,7 +88,7 @@ const importId4 = 'id-bar';
 const importId8 = 'id-baz';
 const importStateMap = new Map([
   [`${obj3.type}:${obj3.id}`, { destinationId: importId3, omitOriginId: true }],
-  [`${obj4.type}:${obj4.id}`, { destinationId: importId4 }],
+  [`${obj4.type}:${obj4.id}`, { destinationId: importId4, managed: true }],
   [`${obj8.type}:${obj8.id}`, { destinationId: importId8 }],
 ]);
 
@@ -99,7 +116,7 @@ describe('#createSavedObjects', () => {
   };
 
   const getExpectedBulkCreateArgsObjects = (objects: SavedObject[], retry?: boolean) =>
-    objects.map(({ type, id, attributes, originId }) => ({
+    objects.map(({ type, id, attributes, originId, managed }) => ({
       type,
       id: retry ? `new-id-for-${id}` : id, // if this was a retry, we regenerated the id -- this is mocked below
       attributes,
@@ -110,6 +127,7 @@ describe('#createSavedObjects', () => {
       ],
       // if the import object had an originId, and/or if we regenerated the id, expect an originId to be included in the create args
       ...((originId || retry) && { originId: originId || id }),
+      ...(managed && { managed }),
     }));
 
   const expectBulkCreateArgs = {
@@ -131,7 +149,7 @@ describe('#createSavedObjects', () => {
 
   const getResultMock = {
     success: (
-      { type, id, attributes, references, originId }: SavedObject,
+      { type, id, attributes, references, originId, managed }: SavedObject,
       { namespace }: CreateSavedObjectsParams
     ): SavedObject => ({
       type,
@@ -139,6 +157,7 @@ describe('#createSavedObjects', () => {
       attributes,
       references,
       ...(originId && { originId }),
+      ...(managed && { managed }),
       version: 'some-version',
       updated_at: 'some-date',
       namespaces: [namespace ?? 'default'],
@@ -253,7 +272,7 @@ describe('#createSavedObjects', () => {
       }
     });
 
-    test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
+    test('calls bulkCreate when unresolvable errors or no errors are present with docs that have managed set', async () => {
       for (const error of unresolvableErrors) {
         const options = setupParams({ objects: objs, accumulatedErrors: [error] });
         setupMockResults(options);
@@ -288,7 +307,7 @@ describe('#createSavedObjects', () => {
     });
   });
 
-  it('filters out version from objects before create', async () => {
+  it('filters out version from objects before create and accepts managed', async () => {
     const options = setupParams({ objects: [{ ...obj1, version: 'foo' }] });
     bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, options)] });
 

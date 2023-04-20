@@ -69,6 +69,14 @@ export interface SavedObjectsImportOptions {
    * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
    */
   compatibilityMode?: boolean;
+  /**
+   * If true, will import as a managed object, else will import as not managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**
@@ -89,6 +97,14 @@ export interface SavedObjectsResolveImportErrorsOptions {
    * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
    */
   compatibilityMode?: boolean;
+  /**
+   * If true, will import as a managed object, else will import as not managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
