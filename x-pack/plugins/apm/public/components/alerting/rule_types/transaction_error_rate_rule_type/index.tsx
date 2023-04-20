@@ -38,7 +38,7 @@ interface RuleParams {
   environment?: string;
 }
 
-interface Props {
+export interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
