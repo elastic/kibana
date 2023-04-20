@@ -7,11 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -43,6 +41,7 @@ import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_d
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
+import { ReactQueryProvider } from '../../containers/react_query_provider';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -51,14 +50,6 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: { keepPreviousData: true },
-        },
-      })
-  );
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -81,8 +72,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
         <WaffleOptionsProvider>
           <WaffleTimeProvider>
             <WaffleFiltersProvider>
-              <QueryClientProvider client={queryClient}>
-                <ReactQueryDevtools initialIsOpen={false} />
+              <ReactQueryProvider>
                 <InfraMLCapabilitiesProvider>
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"
@@ -129,7 +119,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <Route render={() => <NotFoundPage title="Infrastructure" />} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>
-              </QueryClientProvider>
+              </ReactQueryProvider>
             </WaffleFiltersProvider>
           </WaffleTimeProvider>
         </WaffleOptionsProvider>
