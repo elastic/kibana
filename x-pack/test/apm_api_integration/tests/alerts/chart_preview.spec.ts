@@ -115,5 +115,54 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )
       ).to.equal(true);
     });
+
+    it('transaction_duration with transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: 'opbeans-java',
+            transactionName: 'DispatcherServlet#doGet',
+            transactionType: 'request',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview[0].data[0]).to.eql({
+        x: 1627974600000,
+        y: 18485.85714285714,
+      });
+    });
+
+    it('transaction_duration with nonexistent transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: 'opbeans-java',
+            transactionType: 'request',
+            transactionName: 'foo',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+      const response = await apmApiClient.readUser({
+        ...options,
+        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.latencyChartPreview).to.eql([]);
+    });
   });
 }
