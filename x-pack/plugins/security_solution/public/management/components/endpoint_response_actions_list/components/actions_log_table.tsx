@@ -149,13 +149,12 @@ const getResponseActionListTableColumns = ({
     },
     // conditional hostnames column
     {
-      // field: 'hosts',
+      field: 'hosts',
       name: TABLE_COLUMN_NAMES.hosts,
       width: '20%',
       truncateText: true,
-      render: (action: ActionListApiResponse['data'][number]) => {
-        // render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
-        const hosts = action.hosts && Object.values(action.hosts);
+      render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
+        const hosts = _hosts && Object.values(_hosts);
         // join hostnames if the action is for multiple agents
         // and skip empty strings for names if any
         const _hostnames = hosts
@@ -170,9 +169,7 @@ const getResponseActionListTableColumns = ({
         let hostnames = _hostnames;
 
         if (!_hostnames) {
-          if (action.errors?.length) {
-            hostnames = action.agents[0];
-          } else if (hosts.length > 1) {
+          if (hosts.length > 1) {
             // when action was for a single agent and no host name
             hostnames = UX_MESSAGES.unenrolled.hosts;
           } else if (hosts.length === 1) {

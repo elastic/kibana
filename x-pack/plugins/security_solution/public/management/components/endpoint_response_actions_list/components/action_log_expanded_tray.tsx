@@ -89,7 +89,14 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
     const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
 
     if (errors) {
-      return <>{map(errors, (error) => error)}</>;
+      return (
+        // temporary solution, waiting for UI
+        <>
+          {map(errors, (error) => (
+            <div>{`${error} (host: ${action.agents[0]})`}</div>
+          ))}
+        </>
+      );
     }
 
     if (isExpired) {
