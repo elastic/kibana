@@ -234,16 +234,8 @@ export function MetricEditor({
       {percentileSelect}
       {labelInput}
 
-      <EuiFormRow
-        label={getMaskI18nLabel({ bucketsName, isJoin })}
-        display="columnCompressed"
-      >
-        <MaskExpression
-          fields={fields}
-          isJoin={isJoin}
-          metric={metric}
-          onChange={onChange}
-        />
+      <EuiFormRow label={getMaskI18nLabel({ bucketsName, isJoin })} display="columnCompressed">
+        <MaskExpression fields={fields} isJoin={isJoin} metric={metric} onChange={onChange} />
       </EuiFormRow>
 
       {removeButton}

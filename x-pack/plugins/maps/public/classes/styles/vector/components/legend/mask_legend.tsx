@@ -10,7 +10,11 @@ import { EuiText } from '@elastic/eui';
 import { FIELD_ORIGIN, MASK_OPERATOR } from '../../../../../../common/constants';
 import type { IESAggField } from '../../../../fields/agg';
 import type { IESAggSource } from '../../../../sources/es_agg_source';
-import { getMaskI18nDescription, getMaskI18nLabel, getMaskI18nValue } from '../../../../layers/vector_layer/mask';
+import {
+  getMaskI18nDescription,
+  getMaskI18nLabel,
+  getMaskI18nValue,
+} from '../../../../layers/vector_layer/mask';
 
 interface Props {
   esAggField: IESAggField;
@@ -64,10 +68,7 @@ export class MaskLegend extends Component<Props, State> {
       aggLabel: this.state.aggLabel,
       isJoin,
     });
-    const maskValue = getMaskI18nValue(
-      this.props.operator,
-      this.props.value
-    );
+    const maskValue = getMaskI18nValue(this.props.operator, this.props.value);
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
