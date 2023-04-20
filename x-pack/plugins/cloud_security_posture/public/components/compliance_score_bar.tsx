@@ -12,6 +12,9 @@ import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import { statusColors } from '../common/constants';
 
+/**
+ * This component will take 100% of the width set by the parent
+ * */
 export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
@@ -25,6 +28,7 @@ export const ComplianceScoreBar = ({
   return (
     <EuiToolTip
       anchorProps={{
+        // ensures the compliance bar takes full width of its parent
         css: css`
           width: 100%;
         `,
@@ -43,7 +47,7 @@ export const ComplianceScoreBar = ({
         justifyContent="flexEnd"
         style={{ gap: euiTheme.size.s }}
       >
-        <EuiFlexItem grow>
+        <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="none"
             style={{
@@ -74,7 +78,7 @@ export const ComplianceScoreBar = ({
         <EuiFlexItem grow={false}>
           <EuiText
             size="xs"
-            style={{ fontWeight: euiTheme.font.weight.bold, minWidth: 10 }}
+            style={{ fontWeight: euiTheme.font.weight.bold }}
           >{`${complianceScore.toFixed(0)}%`}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
