@@ -136,3 +136,19 @@ export const VIEW_ALL = (text: string) =>
     values: { text },
     defaultMessage: 'View all {text}',
   });
+export const VISUALIZATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.visualizationsTitle',
+  { defaultMessage: 'Visualizations' }
+);
+
+export const ANALYZER_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle',
+  { defaultMessage: 'Analyzer preview' }
+);
+
+export const ANALYZER_PREVIEW_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
+  {
+    defaultMessage: 'analyzer preview.',
+  }
+);
