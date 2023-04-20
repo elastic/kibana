@@ -18,7 +18,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.enterpriseSearch.content.indices.configurationConnector.config.description.firstParagraph"
-          defaultMessage="Now that your connector is deployed, enhance the deployed connector client for your custom data source. There are several {link} you can build on to add your data source specific implementation logic."
+          defaultMessage="Now that your connector is deployed, enhance the connector client for your custom data source. There are several {link} you can customize with your own additional implementation logic."
           values={{
             link: (
               <EuiLink

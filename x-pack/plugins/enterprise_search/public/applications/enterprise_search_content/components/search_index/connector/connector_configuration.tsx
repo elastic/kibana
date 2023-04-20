@@ -120,7 +120,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
-                                href="https://github.com/elastic/connectors-python/tree/main/lib/connectors"
+                                href="https://github.com/elastic/connectors-python/tree/main/connectors"
                                 target="_blank"
                                 external
                               >
@@ -141,7 +141,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
-                                href="https://github.com/elastic/connectors-python/tree/blob/config.yml"
+                                href="https://github.com/elastic/connectors-python/blob/main/config.yml"
                                 target="_blank"
                                 external
                               >
