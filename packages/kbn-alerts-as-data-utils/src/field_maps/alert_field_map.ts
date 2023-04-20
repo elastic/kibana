@@ -157,7 +157,7 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_URL]: {
-    type: 'text',
+    type: 'keyword',
     array: false,
     index: false,
     required: false,

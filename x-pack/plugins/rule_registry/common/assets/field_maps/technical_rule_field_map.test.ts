@@ -279,7 +279,7 @@ it('matches snapshot', () => {
         "ignore_above": 2048,
         "index": false,
         "required": false,
-        "type": "text",
+        "type": "keyword",
       },
       "kibana.alert.uuid": Object {
         "array": false,
