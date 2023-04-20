@@ -6,19 +6,11 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import type {
-  ClientRequestParamsOf,
-  ReturnOf,
-  RouteRepositoryClient,
-} from '@kbn/server-route-repository';
+import type { RouteRepositoryClient } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { FetchOptions } from '../../../common/fetch_options';
+import type { ObservabilityOnboardingServerRouteRepository } from '../../../server/routes';
 import { CallApi, callApi } from './call_api';
-import type {
-  ObservabilityOnboardingServerRouteRepository,
-  APIEndpoint,
-} from '../../../server';
 
 export type ObservabilityOnboardingClientOptions = Omit<
   FetchOptions,
@@ -37,28 +29,15 @@ export type AutoAbortedObservabilityClient = RouteRepositoryClient<
   Omit<ObservabilityOnboardingClientOptions, 'signal'>
 >;
 
-export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
-  ObservabilityOnboardingServerRouteRepository,
-  TEndpoint
-> & {
-  _inspect?: InspectResponse;
-};
-
-export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
-  ClientRequestParamsOf<
-    ObservabilityOnboardingServerRouteRepository,
-    TEndpoint
-  >;
-
-export let calObservabilityOnboardingApi: ObservabilityOnboardingClient =
+export let callObservabilityOnboardingApi: ObservabilityOnboardingClient =
   () => {
     throw new Error(
-      'calObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.'
+      'callObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.'
     );
   };
 
 export function createCallApi(core: CoreStart | CoreSetup) {
-  calObservabilityOnboardingApi = ((endpoint, options) => {
+  callObservabilityOnboardingApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };

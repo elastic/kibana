@@ -6,10 +6,8 @@
  */
 import type {
   EndpointOf,
-  ReturnOf,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { PickByValue } from 'utility-types';
 import { statusRouteRepository } from './status/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
@@ -29,24 +27,5 @@ export type ObservabilityOnboardingServerRouteRepository = ReturnType<
   typeof getTypedObservabilityOnboardingServerRouteRepository
 >;
 
-// Ensure no APIs return arrays (or, by proxy, the any type),
-// to guarantee compatibility with _inspect.
-
 export type APIEndpoint =
   EndpointOf<ObservabilityOnboardingServerRouteRepository>;
-
-type EndpointReturnTypes = {
-  [Endpoint in APIEndpoint]: ReturnOf<
-    ObservabilityOnboardingServerRouteRepository,
-    Endpoint
-  >;
-};
-
-type ArrayLikeReturnTypes = PickByValue<EndpointReturnTypes, any[]>;
-
-type ViolatingEndpoints = keyof ArrayLikeReturnTypes;
-
-function assertType<T = never, U extends T = never>() {}
-
-// if any endpoint has an array-like return type, the assertion below will fail
-assertType<never, ViolatingEndpoints>();

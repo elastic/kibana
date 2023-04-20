@@ -15,7 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import {
   AutoAbortedObservabilityClient,
-  calObservabilityOnboardingApi,
+  callObservabilityOnboardingApi,
 } from '../services/rest/create_call_api';
 
 export enum FETCH_STATUS {
@@ -57,7 +57,7 @@ const createAutoAbortedAPMClient = (
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedObservabilityClient => {
   return ((endpoint, options) => {
-    return calObservabilityOnboardingApi(endpoint, {
+    return callObservabilityOnboardingApi(endpoint, {
       ...options,
       signal,
     } as any)

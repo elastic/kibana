@@ -5,12 +5,6 @@
  * 2.0.
  */
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  EndpointOf,
-  ReturnOf,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
-
 import { ObservabilityOnboardingServerRouteRepository } from '.';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
@@ -39,10 +33,3 @@ export interface ObservabilityOnboardingRouteCreateOptions {
     tags: string[];
   };
 }
-
-export type AbstractObservabilityOnboardingServerRouteRepository =
-  ServerRouteRepository;
-
-export type ObservabilityOnboardingAPIReturnType<
-  TEndpoint extends EndpointOf<ObservabilityOnboardingServerRouteRepository>
-> = ReturnOf<ObservabilityOnboardingServerRouteRepository, TEndpoint>;

@@ -28,12 +28,12 @@ import type { ObservabilityOnboardingConfig } from '../server';
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
 
-export interface ApmPluginSetupDeps {
+export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
 }
 
-export interface ApmPluginStartDeps {
+export interface ObservabilityOnboardingPluginStartDeps {
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
@@ -48,7 +48,10 @@ export class ObservabilityOnboardingPlugin
 {
   constructor(private ctx: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(
+    core: CoreSetup,
+    plugins: ObservabilityOnboardingPluginSetupDeps
+  ) {
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
     } = this.ctx.config.get<ObservabilityOnboardingConfig>();
@@ -83,11 +86,14 @@ export class ObservabilityOnboardingPlugin
             core: coreStart,
             deps: pluginSetupDeps,
             appMountParameters,
-            corePlugins: corePlugins as ApmPluginStartDeps,
+            corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
           });
         },
       });
     }
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+  public start(
+    core: CoreStart,
+    plugins: ObservabilityOnboardingPluginStartDeps
+  ) {}
 }

@@ -12,22 +12,13 @@ import {
 } from '@kbn/core/server';
 import { ObservabilityOnboardingPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ObservabilityOnboardingPlugin(initContext);
-
-export { ObservabilityOnboardingPlugin } from './plugin';
-export type { ObservabilityOnboardingPluginSetup } from './plugin';
-export type {
-  APIEndpoint,
-  ObservabilityOnboardingServerRouteRepository,
-} from './routes';
-export type { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
-
 const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });
+
+export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
@@ -37,4 +28,11 @@ export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   schema: configSchema,
 };
 
-export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ObservabilityOnboardingPlugin(initializerContext);
+}
+
+export type {
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart,
+} from './types';

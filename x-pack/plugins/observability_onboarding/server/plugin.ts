@@ -17,27 +17,35 @@ import { getObservabilityOnboardingServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { ObservabilityOnboardingRouteHandlerResources } from './routes/types';
 import {
+  ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginSetupDependencies,
+  ObservabilityOnboardingPluginStart,
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
-
-export type ObservabilityOnboardingPluginSetup = ReturnType<
-  ObservabilityOnboardingPlugin['setup']
->;
+import { ObservabilityOnboardingConfig } from '.';
 
 export class ObservabilityOnboardingPlugin
-  implements Plugin<ObservabilityOnboardingPluginSetup>
+  implements
+    Plugin<
+      ObservabilityOnboardingPluginSetup,
+      ObservabilityOnboardingPluginStart,
+      ObservabilityOnboardingPluginSetupDependencies,
+      ObservabilityOnboardingPluginStartDependencies
+    >
 {
-  private logger?: Logger;
-  constructor(private readonly initContext: PluginInitializerContext) {
+  private readonly logger: Logger;
+  constructor(
+    private readonly initContext: PluginInitializerContext<ObservabilityOnboardingConfig>
+  ) {
     this.initContext = initContext;
+    this.logger = this.initContext.logger.get();
   }
 
   public setup(
     core: CoreSetup<ObservabilityOnboardingPluginStartDependencies>,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
-    this.logger = this.initContext.logger.get();
+    this.logger.debug('observability_onboarding: Setup');
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
@@ -62,7 +70,11 @@ export class ObservabilityOnboardingPlugin
     return {};
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    this.logger.debug('observability_onboarding: Started');
+
+    return {};
+  }
 
   public stop() {}
 }

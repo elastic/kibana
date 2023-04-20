@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreRequestHandlerContext,
-  CustomRequestHandlerContext,
-} from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -25,7 +22,10 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   observability: undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityOnboardingPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilityOnboardingPluginStart {}
+
 export type ObservabilityOnboardingRequestHandlerContext =
-  CustomRequestHandlerContext<{
-    core: Promise<CoreRequestHandlerContext>;
-  }>;
+  CustomRequestHandlerContext<{}>;

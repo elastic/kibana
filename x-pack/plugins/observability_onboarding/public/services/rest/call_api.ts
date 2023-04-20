@@ -6,20 +6,9 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { isString, startsWith } from 'lodash';
-import LRU from 'lru-cache';
-import hash from 'object-hash';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { FetchOptions } from '../../../common/fetch_options';
 
-function fetchOptionsWithDebug(
-  fetchOptions: FetchOptions,
-  inspectableEsQueriesEnabled: boolean
-) {
-  const debugEnabled =
-    inspectableEsQueriesEnabled &&
-    startsWith(fetchOptions.pathname, '/internal/observability/onboarding');
-
+function getFetchOptions(fetchOptions: FetchOptions) {
   const { body, ...rest } = fetchOptions;
 
   return {
@@ -27,37 +16,21 @@ function fetchOptionsWithDebug(
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
-      ...(debugEnabled ? { _inspect: true } : {}),
     },
   };
-}
-
-const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
-
-export function clearCache() {
-  cache.reset();
 }
 
 export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
-  { http, uiSettings }: CoreStart | CoreSetup,
+  { http }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  const inspectableEsQueriesEnabled: boolean = uiSettings.get(
-    enableInspectEsQueries
-  );
-  const cacheKey = getCacheKey(fetchOptions);
-  const cacheResponse = cache.get(cacheKey);
-  if (cacheResponse) {
-    return cacheResponse;
-  }
-
   const {
     pathname,
     method = 'get',
     ...options
-  } = fetchOptionsWithDebug(fetchOptions, inspectableEsQueriesEnabled);
+  } = getFetchOptions(fetchOptions);
 
   const lowercaseMethod = method.toLowerCase() as
     | 'get'
@@ -68,35 +41,5 @@ export async function callApi<T = void>(
 
   const res = await http[lowercaseMethod]<T>(pathname, options);
 
-  if (isCachable(fetchOptions)) {
-    cache.set(cacheKey, res);
-  }
-
   return res;
-}
-
-// only cache items that has a time range with `start` and `end` params,
-// and where `end` is not a timestamp in the future
-function isCachable(fetchOptions: FetchOptions) {
-  if (fetchOptions.isCachable !== undefined) {
-    return fetchOptions.isCachable;
-  }
-
-  if (
-    !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
-  ) {
-    return false;
-  }
-
-  return (
-    isString(fetchOptions.query.end) &&
-    new Date(fetchOptions.query.end).getTime() < Date.now()
-  );
-}
-
-// order the options object to make sure that two objects with the same arguments, produce produce the
-// same cache key regardless of the order of properties
-function getCacheKey(options: FetchOptions) {
-  const { pathname, method, body, query, headers } = options;
-  return hash({ pathname, method, body, query, headers });
 }

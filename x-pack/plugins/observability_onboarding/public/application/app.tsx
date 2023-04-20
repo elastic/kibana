@@ -5,41 +5,40 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { Theme, ThemeProvider } from '@emotion/react';
 import {
+  APP_WRAPPER_CLASS,
   AppMountParameters,
   CoreStart,
-  APP_WRAPPER_CLASS,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
+  useKibana,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import {
-  DatePickerContextProvider,
-  InspectorContextProvider,
-  useBreadcrumbs,
-} from '@kbn/observability-plugin/public';
-import { Theme, ThemeProvider } from '@emotion/react';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Home } from '../components/app/home';
+import {
+  ObservabilityOnboardingPluginSetupDeps,
+  ObservabilityOnboardingPluginStartDeps,
+} from '../plugin';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<
+  T extends { [K in keyof T]?: string | undefined } = {}
+> = string | ((props: RouteComponentProps<T>) => string) | null;
 
-export interface RouteDefinition<T = any> extends RouteProps {
+export interface RouteDefinition<
+  T extends { [K in keyof T]?: string | undefined } = any
+> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
 }
 
@@ -62,7 +61,7 @@ export const onboardingRoutes: RouteDefinition[] = [
 function ObservabilityOnboardingApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  const { http } = useKibana<ApmPluginStartDeps>().services;
+  const { http } = useKibana<ObservabilityOnboardingPluginStartDeps>().services;
   const basePath = http.basePath.get();
 
   useBreadcrumbs([
@@ -102,8 +101,8 @@ export function ObservabilityOnboardingAppRoot({
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  corePlugins: ApmPluginStartDeps;
+  deps: ObservabilityOnboardingPluginSetupDeps;
+  corePlugins: ObservabilityOnboardingPluginStartDeps;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -136,13 +135,9 @@ export function ObservabilityOnboardingAppRoot({
               history={history}
               router={observabilityOnboardingRouter}
             >
-              <DatePickerContextProvider>
-                <InspectorContextProvider>
-                  <EuiErrorBoundary>
-                    <ObservabilityOnboardingApp />
-                  </EuiErrorBoundary>
-                </InspectorContextProvider>
-              </DatePickerContextProvider>
+              <EuiErrorBoundary>
+                <ObservabilityOnboardingApp />
+              </EuiErrorBoundary>
             </RouterProvider>
           </i18nCore.Context>
         </KibanaThemeProvider>
@@ -162,9 +157,9 @@ export const renderApp = ({
   corePlugins,
 }: {
   core: CoreStart;
-  deps: ApmPluginSetupDeps;
+  deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
-  corePlugins: ApmPluginStartDeps;
+  corePlugins: ObservabilityOnboardingPluginStartDeps;
 }) => {
   const { element } = appMountParameters;
 
