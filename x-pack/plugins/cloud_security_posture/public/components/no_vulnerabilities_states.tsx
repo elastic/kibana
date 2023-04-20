@@ -52,7 +52,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingDescription"
-          defaultMessage="Results will appear here as soon as they are available"
+          defaultMessage="Results will appear here as soon as they are available."
         />
       </p>
     }
