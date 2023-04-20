@@ -12,7 +12,7 @@ import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 
 const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({ r_rule: rRule, ...rest }) => ({
   ...rest,
-  rRule: { ...rRule },
+  rRule,
 });
 
 export async function archiveMaintenanceWindow({

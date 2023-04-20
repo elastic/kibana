@@ -79,7 +79,7 @@ describe('useFinishMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to cancel maintenance window.')
+      expect(mockAddDanger).toBeCalledWith("Failed to cancel maintenance window '123'")
     );
   });
 });

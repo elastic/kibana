@@ -81,7 +81,7 @@ describe('useArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to archive maintenance window.')
+      expect(mockAddDanger).toBeCalledWith("Failed to archive maintenance window '123'")
     );
   });
 
@@ -110,7 +110,7 @@ describe('useArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to unarchive maintenance window.')
+      expect(mockAddDanger).toBeCalledWith("Failed to unarchive maintenance window '123'")
     );
   });
 });
