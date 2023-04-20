@@ -465,7 +465,7 @@ export const CANCEL_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.cancelModal.subtitle',
   {
     defaultMessage:
-      'Rule notifications resume immediately. Running maintenance window events are canceled.',
+      'Rule notifications resume immediately. Running maintenance window events are canceled; upcoming events are unaffected.',
   }
 );
 
