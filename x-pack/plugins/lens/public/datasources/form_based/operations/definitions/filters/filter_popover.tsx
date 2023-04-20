@@ -12,10 +12,12 @@ import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
-import { isQueryValid, QueryInput } from '../../../../../shared_components';
+import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPattern } from '../../../../../types';
 import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';
+import { LensAppServices } from '../../../../../app_plugin/types';
 
 export const FilterPopover = ({
   filter,
@@ -60,7 +62,7 @@ export const FilterPopover = ({
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
         value={filter.input}
-        indexPattern={
+        dataView={
           indexPattern.id
             ? { type: 'id', value: indexPattern.id }
             : { type: 'title', value: indexPattern.title }
@@ -70,6 +72,7 @@ export const FilterPopover = ({
         onSubmit={() => {
           if (inputRef.current) inputRef.current.focus();
         }}
+        services={useKibana<LensAppServices>().services}
       />
       <EuiSpacer size="s" />
       <LabelInput

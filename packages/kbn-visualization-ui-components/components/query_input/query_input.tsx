@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -10,34 +11,49 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { LensAppServices } from '../../app_plugin/types';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { useDebouncedValue } from '../debounced_value';
+
+export interface QueryInputServices {
+  http: HttpStart;
+  storage: IStorageWrapper;
+  dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
+  uiSettings: IUiSettingsClient;
+  notifications: NotificationsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  docLinks: DocLinksStart;
+}
 
 export const QueryInput = ({
   value,
   onChange,
-  indexPattern,
+  dataView,
   isInvalid,
   onSubmit,
   disableAutoFocus,
   ['data-test-subj']: dataTestSubj,
   placeholder,
+  services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },
 }: {
   value: Query;
   onChange: (input: Query) => void;
-  indexPattern: string | { type: 'title' | 'id'; value: string };
+  dataView: string | { type: 'title' | 'id'; value: string };
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
   'data-test-subj'?: string;
   placeholder?: string;
+  services: QueryInputServices;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
-  const lensAppServices = useKibana<LensAppServices>().services;
-
-  const { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews } =
-    lensAppServices;
 
   return (
     <QueryStringInput
@@ -46,7 +62,7 @@ export const QueryInput = ({
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
-      indexPatterns={[indexPattern]}
+      indexPatterns={[dataView]}
       query={inputValue}
       onChange={(newQuery) => {
         if (!isEqual(newQuery, inputValue)) {

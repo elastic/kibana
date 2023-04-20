@@ -20,6 +20,10 @@ export {
   DragDropBuckets,
   DraggableBucketContainer,
   FieldsBucketContainer,
+  FilterQueryInput,
+  QueryInput,
+  validateQuery,
+  isQueryValid,
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';

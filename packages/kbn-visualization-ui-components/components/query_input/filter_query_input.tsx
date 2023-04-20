@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,10 +18,10 @@ import {
   EuiIconTip,
   EuiPopoverProps,
 } from '@elastic/eui';
-import type { Query } from '@kbn/es-query';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import type { DataViewBase, Query } from '@kbn/es-query';
+import { useDebouncedValue } from '../debounced_value';
 import { QueryInput, validateQuery } from '.';
-import type { IndexPattern } from '../types';
+import type { QueryInputServices } from '.';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
   defaultMessage: 'Filter by',
@@ -34,19 +36,21 @@ export const defaultFilter: Query = {
 export function FilterQueryInput({
   inputFilter,
   onChange,
-  indexPattern,
+  dataView,
   helpMessage,
   label = filterByLabel,
   initiallyOpen,
   ['data-test-subj']: dataTestSubj,
+  queryInputServices,
 }: {
   inputFilter: Query | undefined;
   onChange: (query: Query) => void;
-  indexPattern: IndexPattern;
+  dataView: DataViewBase;
   helpMessage?: string | null;
   label?: string;
   initiallyOpen?: boolean;
   ['data-test-subj']?: string;
+  queryInputServices: QueryInputServices;
 }) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
   const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
@@ -58,10 +62,10 @@ export function FilterQueryInput({
     setFilterPopoverOpen(false);
   }, []);
 
-  const { isValid: isInputFilterValid } = validateQuery(inputFilter, indexPattern);
+  const { isValid: isInputFilterValid } = validateQuery(inputFilter, dataView);
   const { isValid: isQueryInputValid, error: queryInputError } = validateQuery(
     queryInput,
-    indexPattern
+    dataView
   );
 
   return (
@@ -131,10 +135,10 @@ export function FilterQueryInput({
               data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
-                indexPattern={
-                  indexPattern.id
-                    ? { type: 'id', value: indexPattern.id }
-                    : { type: 'title', value: indexPattern.title }
+                dataView={
+                  dataView.id
+                    ? { type: 'id', value: dataView.id }
+                    : { type: 'title', value: dataView.title }
                 }
                 disableAutoFocus={true}
                 value={queryInput}
@@ -142,6 +146,7 @@ export function FilterQueryInput({
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
                 data-test-subj={dataTestSubj}
+                services={queryInputServices}
               />
             </EuiFormRow>
           </EuiPopover>

@@ -18,8 +18,8 @@ import {
   NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
+  isQueryValid,
 } from '@kbn/visualization-ui-components';
-import { isQueryValid } from '../../../../../shared_components';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';

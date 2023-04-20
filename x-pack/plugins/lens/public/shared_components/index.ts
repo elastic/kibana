@@ -10,7 +10,6 @@ export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend/legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 export { ChangeIndexPattern, fieldContainsData } from './dataview_picker';
-export { QueryInput, isQueryValid, validateQuery } from './query_input';
 export { RangeInputField } from './range_input_field';
 export {
   AxisBoundsControl,
@@ -27,6 +26,5 @@ export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis/title/axis_title_settings';
 export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';
 export { DimensionEditorSection } from './dimension_section';
-export { FilterQueryInput } from './filter_query_input';
 export * from './static_header';
 export * from './vis_label';

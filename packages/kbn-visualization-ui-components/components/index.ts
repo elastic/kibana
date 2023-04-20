@@ -22,6 +22,8 @@ export * from './icon_select';
 
 export * from './drag_drop_bucket';
 
+export * from './query_input';
+
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';
 
 export type { IconSet } from './icon_select';

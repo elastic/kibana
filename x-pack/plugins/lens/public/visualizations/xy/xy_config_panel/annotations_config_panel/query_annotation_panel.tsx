@@ -11,10 +11,16 @@ import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plug
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
-import { FilterQueryInput } from '../../../../shared_components';
+import {
+  FieldOption,
+  FilterQueryInput,
+  FieldOptionValue,
+  FieldPicker,
+} from '@kbn/visualization-ui-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
+import { LensAppServices } from '../../../../app_plugin/types';
 
 export const defaultQuery: Query = {
   query: '',
@@ -81,7 +87,8 @@ export const ConfigPanelQueryAnnotation = ({
             onChange({ filter: { type: 'kibana_query', ...query } });
           }}
           data-test-subj="lnsXY-annotation-query-based-query-input"
-          indexPattern={currentIndexPattern}
+          dataView={currentIndexPattern}
+          queryInputServices={useKibana<LensAppServices>().services}
         />
       </EuiFormRow>
 
