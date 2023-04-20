@@ -23,8 +23,9 @@ export const RangeRT = rt.type({
 });
 
 export const InfraAssetMetadataTypeRT = rt.keyof({
-  'host.os.name': null,
   'cloud.provider': null,
+  'host.ip': null,
+  'host.os.name': null,
 });
 
 export const InfraAssetMetricsRT = rt.type({
@@ -64,6 +65,7 @@ export const GetInfraMetricsResponsePayloadRT = rt.type({
 
 export type InfraAssetMetrics = rt.TypeOf<typeof InfraAssetMetricsRT>;
 export type InfraAssetMetadata = rt.TypeOf<typeof InfraAssetMetadataRT>;
+export type InfraAssetMetadataType = rt.TypeOf<typeof InfraAssetMetadataTypeRT>;
 export type InfraAssetMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
 export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
 

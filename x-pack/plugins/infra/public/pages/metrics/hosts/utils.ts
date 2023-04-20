@@ -6,13 +6,12 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { SnapshotNode } from '../../../../common/http_api';
 
-export const createHostsFilter = (hostNodes: SnapshotNode[]): Filter => {
+export const createHostsFilter = (hostNames: string[]): Filter => {
   return {
     query: {
       terms: {
-        'host.name': hostNodes.map((p) => p.name),
+        'host.name': hostNames,
       },
     },
     meta: {},

@@ -13,21 +13,14 @@ import { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
-import type {
-  SnapshotNode,
-  SnapshotNodeMetric,
-  SnapshotMetricInput,
-} from '../../../../../common/http_api';
+import { InfraAssetMetricsItem, InfraAssetMetricType } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 
 /**
  * Columns and items types
  */
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-
-type HostMetric = 'cpu' | 'diskLatency' | 'rx' | 'tx' | 'memory' | 'memoryTotal';
-
-type HostMetrics = Record<HostMetric, SnapshotNodeMetric>;
+type HostMetrics = Record<InfraAssetMetricType, number | null>;
 
 export interface HostNodeRow extends HostMetrics {
   os?: string | null;
@@ -45,24 +38,45 @@ interface HostTableParams {
 /**
  * Helper functions
  */
-const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) => {
+const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
-const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }) => ({
-    id: `${name}-${path.at(-1)?.os ?? '-'}`,
-    name,
-    os: path.at(-1)?.os ?? '-',
-    ip: path.at(-1)?.ip ?? '',
-    title: {
-      name,
-      cloudProvider: path.at(-1)?.cloudProvider ?? null,
-    },
-    ...metrics.reduce((data, metric) => {
-      data[metric.name as HostMetric] = metric;
-      return data;
-    }, {} as HostMetrics),
+const buildItemsList = (nodes: InfraAssetMetricsItem[]) => {
+  return nodes.map(({ metrics, metadata, name }) => ({
+    ...metadata.reduce((acc, curr) => {
+      switch (curr.name) {
+        case 'host.os.name':
+          const os = curr.value ?? '-';
+          return {
+            ...acc,
+            id: `${name}-${os}`,
+            os,
+          };
+        case 'host.ip':
+          return {
+            ...acc,
+            ip: curr.value ?? '',
+          };
+        case 'cloud.provider':
+          return {
+            ...acc,
+            title: {
+              name,
+              cloudProvider: curr.value ?? null,
+            },
+          };
+        default:
+          return acc;
+      }
+    }, {}),
+    ...metrics.reduce(
+      (acc, curr) => ({
+        ...acc,
+        [curr.name]: curr.value,
+      }),
+      {} as HostMetrics
+    ),
   })) as HostNodeRow[];
 };
 
@@ -120,7 +134,7 @@ const toggleDialogActionLabel = i18n.translate(
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
-export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) => {
+export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTableParams) => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -197,7 +211,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageCpuUsageLabel,
-        field: 'cpu.avg',
+        field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
         render: (avg: number) => formatMetric('cpu', avg),
@@ -205,7 +219,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: diskLatencyLabel,
-        field: 'diskLatency.avg',
+        field: 'diskLatency',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskLatency',
         render: (avg: number) => formatMetric('diskLatency', avg),
@@ -213,7 +227,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageRXLabel,
-        field: 'rx.avg',
+        field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
@@ -221,7 +235,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageTXLabel,
-        field: 'tx.avg',
+        field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
@@ -229,7 +243,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageTotalMemoryLabel,
-        field: 'memoryTotal.avg',
+        field: 'memoryTotal',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryTotal',
         render: (avg: number) => formatMetric('memoryTotal', avg),
@@ -237,7 +251,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageMemoryUsageLabel,
-        field: 'memory.avg',
+        field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memory',
         render: (avg: number) => formatMetric('memory', avg),

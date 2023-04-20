@@ -18,6 +18,7 @@ import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
+import { HostLimitOptions } from '../types';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -26,12 +27,14 @@ const DEFAULT_QUERY = {
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
+const INITIAL_SELECTED_LIMIT: HostLimitOptions = 20;
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
+  limit: INITIAL_SELECTED_LIMIT,
 };
 
 const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
@@ -110,6 +113,7 @@ const HostsStateRT = rt.type({
   panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
+  limit: rt.number,
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
@@ -118,10 +122,7 @@ export type HostsSearchPayload = Partial<HostsState>;
 
 export type HostsStateUpdater = (params: HostsSearchPayload) => void;
 
-export interface StringDateRangeTimestamp {
-  from: number;
-  to: number;
-}
+export type StringDateRange = rt.TypeOf<typeof StringDateRangeRT>;
 
 const encodeUrlState = HostsStateRT.encode;
 const decodeUrlState = (value: unknown) => {
