@@ -125,3 +125,53 @@ triggering data was:
 {{#context.hits}} - {{_source.message}}
 {{/context.hits}}
 --------------------------------------------------
+
+== Enhancing Mustache variables
+
+There are a number of ways that the values contained in Mustache variables can be enhanced, when the Mustache template is rendered:
+
+=== JSON rendering of objects
+
+Some alerting connectors expect JSON values to be passed as parameters when the connector is invoked, for example the Webhook connector and the Elasticsearch index connector.  The following capabilities are available:
+
+==== Rendering referenced objects as JSON
+
+When an object is referenced in a Mustache template, compared to a string or numeric value, the object will be rendered as it's JSON representation.  For instance, to see all the `context.*` variables available in a template, you can add the string `{{context}}` to the template, which will render in the final value as the JSON representation of the variables available.
+
+Another trick to keep in mind is that Mustache will treat `{{.}}` as the current "view" (set of available variables), so to see **all** the variables available to a template, and not just the `context.*` variables, add `{{.}}` to your template instead.
+
+JSON arrays however, are slightly different.  Mustache already has a rendering for them, which basically provides the string version of the elements, joined with a `,` (comma) character between them.  These are not legal JSON values.  In order to access a JSON array value as it's JSON representation, access the `.asJSON` property of the array instead.
+
+For example, if the variable `context.values` was an array of numbers `[1,2,3]`, the Mustache template rendering of `{{context.values}}` would be `1,2,3`, but the rendering of `{{context.values.asJSON}}` would be `[1,2,3]`.
+
+The Mustache lambda `{{#ParseHjson}}` provides some ease-of-use capabilities when constructing JSON objects.  https://hjson.github.io/[Hjson] is a syntax extension to JSON.  It has the following features:
+
+- missing / trailing commas in arrays and objects are generally not a problem
+- comments are supported
+- property names can be specified without quotes
+- property values can be specified without quotes (one per line and no commas)
+- de-dent support for leading whitespace in multi-line strings
+- also supports legal JSON documents
+
+To use it, surround your Hjson content with `{{#ParseHjson}}your content here{{/ParseHjson}}`.
+
+For example, here's an example template:
+
+    {{#ParseHjson}}
+    {
+      # add the rule id and name to the JSON document
+      ruleId:   "{{rule.id}}"
+      ruleName: "{{rule.name}}"
+    }
+    {{/ParseHjson}}
+
+When rendered, this will generate:
+
+    {
+      "ruleId": "<the rule id is here>"
+      "ruleName": "<the rule name is here>"
+    }
+
+=== Formatting dates
+
+=== Performing mathematical operations
