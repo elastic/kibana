@@ -63,7 +63,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const timeRangeMs = useMemo(() => {
     // If time range is available via jobCreator, use that
     // else mimic Discover and set timeRange to be now for data view without time field
-    return start && end ? { from: start, to: start } : undefined;
+    return start && end ? { from: start, to: end } : undefined;
   }, [start, end]);
 
   // store whether the advanced and additional sections have been expanded.
