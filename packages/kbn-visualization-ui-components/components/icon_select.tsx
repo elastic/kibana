@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
-import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  IconType,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
@@ -33,7 +41,7 @@ const IconView = (props: { value?: string; label: string; icon?: IconType }) => 
   );
 };
 
-export function IconSelect<Icon extends string = AvailableReferenceLineIcon>({
+export function IconSelect<Icon extends string>({
   value,
   onChange,
   customIconSet,
@@ -72,5 +80,34 @@ export function IconSelect<Icon extends string = AvailableReferenceLineIcon>({
         ) : undefined
       }
     />
+  );
+}
+
+export function IconSelectSetting<Icon extends string = string>({
+  currentIcon,
+  setIcon,
+  customIconSet,
+  defaultIcon = 'empty',
+}: {
+  currentIcon?: Icon;
+  setIcon: (icon: Icon) => void;
+  customIconSet: IconSet<Icon>;
+  defaultIcon?: string;
+}) {
+  return (
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
+        defaultMessage: 'Icon decoration',
+      })}
+    >
+      <IconSelect
+        defaultIcon={defaultIcon}
+        customIconSet={customIconSet}
+        value={currentIcon}
+        onChange={setIcon}
+      />
+    </EuiFormRow>
   );
 }

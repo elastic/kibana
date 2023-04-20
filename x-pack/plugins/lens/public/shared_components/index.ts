@@ -36,4 +36,3 @@ export { DimensionEditorSection } from './dimension_section';
 export { FilterQueryInput } from './filter_query_input';
 export * from './static_header';
 export * from './vis_label';
-export { IconSelect } from './icon_select/icon_select';

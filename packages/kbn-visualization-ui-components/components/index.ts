@@ -18,4 +18,8 @@ export * from './tooltip_wrapper';
 
 export * from './color_picker';
 
+export * from './icon_select';
+
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';
+
+export type { IconSet } from './icon_select';

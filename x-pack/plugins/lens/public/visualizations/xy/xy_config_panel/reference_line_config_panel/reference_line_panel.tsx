@@ -10,8 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { ColorPicker } from '@kbn/visualization-ui-components';
+import {
+  useDebouncedValue,
+  IconSelectSetting,
+  ColorPicker,
+} from '@kbn/visualization-ui-components';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';
@@ -20,7 +23,6 @@ import { updateLayer } from '..';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
 import {
-  IconSelectSetting,
   MarkerDecorationPosition,
   TextDecorationSetting,
 } from '../shared/marker_decoration_settings';
@@ -77,8 +79,8 @@ export const ReferenceLinePanel = (
     <>
       <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
       <IconSelectSetting
-        setConfig={setConfig}
-        currentConfig={localConfig}
+        setIcon={(icon) => setConfig({ icon })}
+        currentIcon={localConfig?.icon}
         customIconSet={referenceLineIconsSet}
       />
       <MarkerDecorationPosition

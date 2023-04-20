@@ -14,6 +14,8 @@ export {
   useDebouncedValue,
   TooltipWrapper,
   ColorPicker,
+  IconSelect,
+  IconSelectSetting,
 } from './components';
 
-export type { DataType, FieldOptionValue, FieldOption } from './components';
+export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';

@@ -24,7 +24,12 @@ import {
 } from '@kbn/event-annotation-plugin/common';
 import moment from 'moment';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import {
+  IconSelectSetting,
+  FieldOption,
+  FieldOptionValue,
+  FieldPicker,
+} from '@kbn/visualization-ui-components';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { ColorPicker } from '@kbn/visualization-ui-components';
@@ -32,7 +37,7 @@ import { FormatFactory } from '../../../../../common/types';
 import { DimensionEditorSection } from '../../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
 import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
-import { IconSelectSetting, TextDecorationSetting } from '../shared/marker_decoration_settings';
+import { TextDecorationSetting } from '../shared/marker_decoration_settings';
 import { LineStyleSettings } from '../shared/line_style_settings';
 import { updateLayer } from '..';
 import { annotationsIconSet } from './icon_set';
@@ -210,12 +215,9 @@ export const AnnotationsPanel = (
         {!isRange && (
           <>
             <IconSelectSetting
-              setConfig={setAnnotations}
+              setIcon={(icon) => setAnnotations({ icon })}
               defaultIcon="triangle"
-              currentConfig={{
-                axisMode: 'bottom',
-                ...currentAnnotation,
-              }}
+              currentIcon={currentAnnotation?.icon}
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
