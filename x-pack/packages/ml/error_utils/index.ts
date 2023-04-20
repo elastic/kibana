@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { MLRequestFailure } from './request_error';
-export { extractErrorMessage, extractErrorProperties } from './process_errors';
+export { MLRequestFailure } from './src/request_error';
+export { extractErrorMessage, extractErrorProperties } from './src/process_errors';
 export type {
   ErrorType,
   ErrorMessage,
@@ -15,5 +15,5 @@ export type {
   MLErrorObject,
   MLHttpFetchError,
   MLResponseError,
-} from './types';
-export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './types';
+} from './src/types';
+export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './src/types';

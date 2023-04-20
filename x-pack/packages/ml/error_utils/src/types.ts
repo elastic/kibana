@@ -6,7 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 
 export interface EsErrorRootCause {
   type: string;
