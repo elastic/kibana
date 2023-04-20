@@ -43,7 +43,7 @@ export interface CreateMaintenanceWindowFormProps {
   maintenanceWindowId?: string;
 }
 
-const useDefaultTimzezone = () => {
+const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
   if (!kibanaTz || kibanaTz === 'Browser') {
     return { defaultTimezone: moment.tz?.guess() ?? 'UTC', isBrowser: true };
@@ -56,7 +56,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   ({ onCancel, onSuccess, initialValue, maintenanceWindowId }) => {
     const [defaultStartDateValue] = useState<string>(moment().toISOString());
     const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
-    const { defaultTimezone, isBrowser } = useDefaultTimzezone();
+    const { defaultTimezone, isBrowser } = useDefaultTimezone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
     const { mutate: createMaintenanceWindow, isLoading: isCreateLoading } =
