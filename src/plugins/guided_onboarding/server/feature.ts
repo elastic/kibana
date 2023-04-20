@@ -29,6 +29,8 @@ export const GUIDED_ONBOARDING_FEATURE: KibanaFeatureConfig = {
       ui: ['enabled'],
     },
     read: {
+      // we haven't implemented "read-only" access yet, so this feature can only be granted
+      // as "all" or "none"
       disabled: true,
       savedObject: {
         all: [],
