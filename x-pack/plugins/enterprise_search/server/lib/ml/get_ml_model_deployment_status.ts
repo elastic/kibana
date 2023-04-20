@@ -13,8 +13,6 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
-import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
-
 export const getMlModelDeploymentStatus = async (
   modelName: string,
   trainedModelsProvider: MlTrainedModels | undefined
@@ -24,8 +22,8 @@ export const getMlModelDeploymentStatus = async (
   }
 
   const modelDetailsRequest: MlGetTrainedModelsRequest = {
-    model_id: modelName,
     include: 'definition_status',
+    model_id: modelName,
   };
 
   // get the model details to see if we're downloaded...
@@ -42,7 +40,6 @@ export const getMlModelDeploymentStatus = async (
   }
 
   // are we downloaded? If not - we should be downloading...
-  // TODO: ensure the types are updated to include this
   if (!modelDetailsResponse.trained_model_configs[0].fully_defined) {
     // not downloaded yet!
     return {
@@ -63,13 +60,14 @@ export const getMlModelDeploymentStatus = async (
     !modelStatsResponse.trained_model_stats ||
     modelStatsResponse.trained_model_stats.length < 1
   ) {
-    const notFoundError: ElasticsearchResponseError = {
-      meta: {
-        statusCode: 404,
-      },
-      name: 'ResponseError',
+    // if we're here - we're downloaded, but not deployed if we can't find the stats
+    return {
+      deploymentState: MlModelDeploymentState.Downloaded,
+      modelId: modelName,
+      nodeAllocationCount: 0,
+      startTime: 0,
+      targetAllocationCount: 0,
     };
-    throw notFoundError;
   }
 
   const modelDeployment = modelStatsResponse.trained_model_stats[0].deployment_stats;
