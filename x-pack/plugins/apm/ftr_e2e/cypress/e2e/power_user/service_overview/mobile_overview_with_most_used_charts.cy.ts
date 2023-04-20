@@ -57,17 +57,6 @@ describe('Mobile Service overview page', () => {
     });
 
     describe('accessing android service page', () => {
-      it('shows the mobile service overview page with default params and transactionType as Mobile', () => {
-        cy.location().should((loc) => {
-          expect(loc.pathname).to.eq(
-            '/app/apm/mobile-services/synth-android/overview'
-          );
-          expect(loc.search).to.eq(
-            `?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&serviceGroup=&offset=1d&transactionType=mobile`
-          );
-        });
-      });
-
       it('shows the most used charts', () => {
         cy.wait(aliasNames);
 

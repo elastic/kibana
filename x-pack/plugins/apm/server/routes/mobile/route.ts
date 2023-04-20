@@ -106,24 +106,25 @@ const mobileChartsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { kuery, environment, start, end, transactionType } = params.query;
 
-    const deviceOsAndAppVersionChart = await getMobileMostUsedCharts({
-      kuery,
-      environment,
-      transactionType,
-      start,
-      end,
-      serviceName,
-      apmEventClient,
-    });
-
-    const nctChart = await getMobileMostUsedNCTCharts({
-      kuery,
-      environment,
-      start,
-      end,
-      serviceName,
-      apmEventClient,
-    });
+    const [deviceOsAndAppVersionChart, nctChart] = await Promise.all([
+      getMobileMostUsedCharts({
+        kuery,
+        environment,
+        transactionType,
+        start,
+        end,
+        serviceName,
+        apmEventClient,
+      }),
+      getMobileMostUsedNCTCharts({
+        kuery,
+        environment,
+        start,
+        end,
+        serviceName,
+        apmEventClient,
+      }),
+    ]);
 
     return { mostUsedCharts: [...deviceOsAndAppVersionChart, nctChart] };
   },

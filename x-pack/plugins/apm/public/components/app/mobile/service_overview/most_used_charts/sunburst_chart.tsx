@@ -23,9 +23,11 @@ import {
   EuiText,
   EuiSpacer,
   EuiProgress,
+  useEuiFontSize,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { IconChartDonut } from '@kbn/chart-icons';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ChartContainer } from '../../../../shared/charts/chart_container';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 
@@ -80,7 +82,13 @@ export function SunburstChart({
       }}
     >
       <EuiTitle size="xs">
-        <h2 style={{ fontSize: '0.8571rem' }}>{label}</h2>
+        <h2
+          css={css`
+            font-size: ${useEuiFontSize('xs').fontSize};
+          `}
+        >
+          {label}
+        </h2>
       </EuiTitle>
       {ProgressLoader}
       <EuiSpacer size="m" />
@@ -127,17 +135,22 @@ export function SunburstChart({
   );
 }
 
+const noResultsFoundStyle = css({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
 export function NoResultsFound() {
+  const noResultsFoundText = i18n.translate(
+    'xpack.apm.mobile.charts.noResultsFound',
+    {
+      defaultMessage: 'No results found',
+    }
+  );
   return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <div css={noResultsFoundStyle}>
       <EuiText
         data-test-subj="mostUsedNoResultsFound"
         textAlign="center"
@@ -146,12 +159,7 @@ export function NoResultsFound() {
       >
         <EuiIcon type={IconChartDonut} color="subdued" size="l" />
         <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.apm.mobile.charts.noResultsFound"
-            defaultMessage="No results found"
-          />
-        </p>
+        <p>{noResultsFoundText}</p>
       </EuiText>
     </div>
   );
