@@ -428,3 +428,18 @@ export const TABLE_START_TIME = i18n.translate(
 export const TABLE_END_TIME = i18n.translate('xpack.alerting.maintenanceWindows.table.endTime', {
   defaultMessage: 'End time',
 });
+
+export const EXPERIMENTAL_LABEL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
