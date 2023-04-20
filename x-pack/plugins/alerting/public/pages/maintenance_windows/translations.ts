@@ -102,6 +102,13 @@ export const CREATE_FORM_SCHEDULE_INVALID = i18n.translate(
   }
 );
 
+export const CREATE_FORM_TIMEZONE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.timezone',
+  {
+    defaultMessage: 'Time zone',
+  }
+);
+
 export const CREATE_FORM_REPEAT = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.repeat',
   {
