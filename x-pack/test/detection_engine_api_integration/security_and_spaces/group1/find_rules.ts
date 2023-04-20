@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -89,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
       expect(body).to.eql({
-        data: [omit(getComplexRuleOutput(), 'throttle')],
+        data: [getComplexRuleOutput()],
         page: 1,
         perPage: 20,
         total: 1,
