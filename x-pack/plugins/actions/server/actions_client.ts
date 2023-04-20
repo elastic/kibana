@@ -106,6 +106,7 @@ interface Action extends ActionUpdate {
 
 export interface CreateOptions {
   action: Action;
+  options?: { id?: string };
 }
 
 interface ConstructorOptions {
@@ -191,8 +192,9 @@ export class ActionsClient {
    */
   public async create({
     action: { actionTypeId, name, config, secrets },
+    options,
   }: CreateOptions): Promise<ActionResult> {
-    const id = SavedObjectsUtils.generateId();
+    const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized('create', actionTypeId);
