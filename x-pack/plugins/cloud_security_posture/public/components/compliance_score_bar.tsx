@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { calculatePostureScore } from '../../common/utils/helpers';
@@ -22,22 +23,27 @@ export const ComplianceScoreBar = ({
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="flexEnd"
-      style={{ gap: euiTheme.size.s }}
+    <EuiToolTip
+      anchorProps={{
+        css: css`
+          width: 100%;
+        `,
+      }}
+      content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
+        defaultMessage: '{failed} failed and {passed} passed findings',
+        values: {
+          passed: totalPassed,
+          failed: totalFailed,
+        },
+      })}
     >
-      <EuiFlexItem>
-        <EuiToolTip
-          content={i18n.translate('xpack.csp.complianceScoreBar.tooltipTitle', {
-            defaultMessage: '{failed} failed and {passed} passed findings',
-            values: {
-              passed: totalPassed,
-              failed: totalFailed,
-            },
-          })}
-        >
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="flexEnd"
+        style={{ gap: euiTheme.size.s }}
+      >
+        <EuiFlexItem grow>
           <EuiFlexGroup
             gutterSize="none"
             style={{
@@ -64,14 +70,14 @@ export const ComplianceScoreBar = ({
               />
             )}
           </EuiFlexGroup>
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          style={{ fontWeight: euiTheme.font.weight.bold }}
-        >{`${complianceScore.toFixed(0)}%`}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            style={{ fontWeight: euiTheme.font.weight.bold, minWidth: 10 }}
+          >{`${complianceScore.toFixed(0)}%`}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 };
