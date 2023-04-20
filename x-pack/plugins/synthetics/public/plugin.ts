@@ -46,6 +46,10 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
@@ -66,6 +70,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -80,6 +85,7 @@ export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
@@ -273,7 +279,7 @@ function registerUptimeRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
   plugins: ClientPluginsSetup
 ) {
-  plugins.observability.navigation.registerSections(
+  plugins.observabilityShared.navigation.registerSections(
     from(core.getStartServices()).pipe(
       map(([coreStart]) => {
         if (coreStart.application.capabilities.uptime.show) {
