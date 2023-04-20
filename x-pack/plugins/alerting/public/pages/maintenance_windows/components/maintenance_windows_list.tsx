@@ -10,7 +10,6 @@ import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
-  useEuiBackgroundColor,
   SearchFilterConfig,
   EuiBadge,
   useEuiTheme,
@@ -43,7 +42,9 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'status',
     name: i18n.TABLE_STATUS,
     render: (status: MaintenanceWindowStatus) => {
-      return <EuiBadge color="none">{STATUS_DISPLAY[status]}</EuiBadge>;
+      return (
+        <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
+      );
     },
     sortable: ({ status }) => STATUS_SORT[status],
   },
@@ -86,9 +87,6 @@ const search: { filters: SearchFilterConfig[] } = {
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items, refreshData }) => {
     const { euiTheme } = useEuiTheme();
-    const warningBackgroundColor = useEuiBackgroundColor('warning');
-    const successBackgroundColor = useEuiBackgroundColor('success');
-    const subduedBackgroundColor = useEuiBackgroundColor('subdued');
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
@@ -98,52 +96,11 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       return css`
         .euiTableRow {
           &.running {
-            background-color: ${warningBackgroundColor};
-            .euiBadge {
-              background-color: ${euiTheme.colors.warning};
-              .euiBadge__text {
-                color: ${euiTheme.colors.text};
-              }
-            }
-          }
-          &.upcoming {
-            .euiBadge {
-              background-color: ${warningBackgroundColor};
-            }
-            .euiBadge__text {
-              color: ${euiTheme.colors.warningText};
-            }
-          }
-          &.finished {
-            .euiBadge {
-              background-color: ${successBackgroundColor};
-            }
-            .euiBadge__text {
-              color: ${euiTheme.colors.successText};
-            }
-          }
-          &.archived {
-            background-color: ${subduedBackgroundColor};
-            .euiBadge {
-              background-color: ${euiTheme.colors.lightestShade};
-            }
-            .euiBadge__text {
-              color: ${euiTheme.colors.subduedText};
-            }
+            background-color: ${euiTheme.colors.highlight};
           }
         }
       `;
-    }, [
-      warningBackgroundColor,
-      subduedBackgroundColor,
-      successBackgroundColor,
-      euiTheme.colors.warning,
-      euiTheme.colors.text,
-      euiTheme.colors.warningText,
-      euiTheme.colors.successText,
-      euiTheme.colors.lightestShade,
-      euiTheme.colors.subduedText,
-    ]);
+    }, [euiTheme.colors.highlight]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
       {

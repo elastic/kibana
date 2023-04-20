@@ -108,10 +108,10 @@ export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_R
 );
 
 export const STATUS_DISPLAY = {
-  [MaintenanceWindowStatus.Running]: i18n.TABLE_STATUS_RUNNING,
-  [MaintenanceWindowStatus.Upcoming]: i18n.TABLE_STATUS_UPCOMING,
-  [MaintenanceWindowStatus.Finished]: i18n.TABLE_STATUS_FINISHED,
-  [MaintenanceWindowStatus.Archived]: i18n.TABLE_STATUS_ARCHIVED,
+  [MaintenanceWindowStatus.Running]: { color: 'primary', label: i18n.TABLE_STATUS_RUNNING },
+  [MaintenanceWindowStatus.Upcoming]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
+  [MaintenanceWindowStatus.Finished]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
+  [MaintenanceWindowStatus.Archived]: { color: 'default', label: i18n.TABLE_STATUS_ARCHIVED },
 };
 
 export const STATUS_SORT = {
