@@ -12,8 +12,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",
   ],
   "exclude": [
