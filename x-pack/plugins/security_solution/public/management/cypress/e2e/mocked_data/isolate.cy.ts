@@ -128,9 +128,6 @@ describe('Isolate command', () => {
       cy.visit('/app/security/alerts');
       closeAllToasts();
 
-      // cy.getByTestSubj('filters-global-container').within(() => {
-      //   cy.getByTestSubj('queryInput').click().type(`_id:${alertId} {enter}`);
-      // });
       cy.getByTestSubj('alertsTable').within(() => {
         cy.getByTestSubj('expand-event')
           .first()
