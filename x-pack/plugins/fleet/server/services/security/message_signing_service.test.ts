@@ -128,8 +128,6 @@ describe('MessageSigningService', () => {
         public_key: expect.any(String),
         passphrase: expect.any(String),
       });
-
-      expect(upgradeAgentPolicySchemaVersionMocked).toBeCalledTimes(1);
     });
 
     it('does not generate key pair if one exists', async () => {
