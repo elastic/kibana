@@ -166,6 +166,7 @@ export const getTopNavLinks = ({
       const { grid, ...otherState } = appState;
       const relativeUrl = services.locator.getRedirectUrl({
         ...otherState,
+        ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
           : { dataViewSpec: dataView?.toSpec() }),
@@ -173,6 +174,10 @@ export const getTopNavLinks = ({
         refreshInterval,
       });
       const shareableUrl = relativeToAbsolute(relativeUrl);
+      const shareableUrlForSavedObject = await services.locator.getUrl(
+        { savedSearchId: savedSearch.id },
+        { absolute: true }
+      );
       const sharingData = await getSharingData(searchSource, appState, services);
 
       services.share.toggleShareContextMenu({
@@ -180,6 +185,7 @@ export const getTopNavLinks = ({
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
         shareableUrl,
+        shareableUrlForSavedObject,
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
