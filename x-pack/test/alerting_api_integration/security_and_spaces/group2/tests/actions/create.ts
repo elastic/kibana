@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
@@ -259,7 +260,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle create action request appropriately with a predefined id', async () => {
-          const predefinedId = `aSuperRAdId_${scenario.id.replace(/\s/g, '_')}`;
+          const predefinedId = uuidv4();
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector/${predefinedId}`)
             .auth(user.username, user.password)
