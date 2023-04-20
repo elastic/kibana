@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { OsqueryActionResultsProps } from './osquery_results/types';
+import type { OsqueryActionResultProps } from './osquery_results/types';
 import type { StartServices } from '../types';
 
 interface BigServices extends StartServices {
@@ -14,13 +14,13 @@ interface BigServices extends StartServices {
   storage: unknown;
 }
 
-const OsqueryResults = lazy(() => import('./osquery_results'));
+const OsqueryResult = lazy(() => import('./osquery_results'));
 
-export const getLazyOsqueryResults =
+export const getLazyOsqueryResult =
   // eslint-disable-next-line react/display-name
-  (services: BigServices) => (props: OsqueryActionResultsProps) =>
+  (services: BigServices) => (props: OsqueryActionResultProps) =>
     (
       <Suspense fallback={null}>
-        <OsqueryResults services={services} {...props} />
+        <OsqueryResult services={services} {...props} />
       </Suspense>
     );

@@ -7,16 +7,22 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
-import { ActionsLogTable } from '../../../management/components/endpoint_response_actions_list/components/actions_log_table';
-import { useGetEndpointActionList } from '../../../management/hooks';
-import type { ExpandedEventFieldsObject, RawEventData } from './types';
+import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { map } from 'lodash';
+import { FormattedRelative } from '@kbn/i18n-react';
+import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
+import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
+import { useKibana } from '../../lib/kibana';
+import {
+  useGetAutomatedActionList,
+  useGetAutomatedActionResponseList,
+} from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -24,46 +30,64 @@ const TabContentWrapper = styled.div`
 `;
 
 export const useEndpointResponseActionsTab = ({
-  rawEventData,
+  responseActions,
+  ruleName,
+  ecsData,
+  alertIds,
 }: {
-  rawEventData?: RawEventData;
+  ecsData?: Ecs;
+  responseActions?: Array<{
+    action_type_id: RESPONSE_ACTION_TYPES;
+    params: Record<string, unknown>;
+  }>;
+  ruleName?: string[];
+  alertIds: string[];
 }) => {
+  const {
+    services: { osquery },
+  } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const {
-    data: actionList,
-    isFetching,
-    isFetched,
-  } = useGetEndpointActionList(
+  const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
+
+  const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
-      alertId: [rawEventData?._id ?? ''],
-      withAutomatedActions: true,
+      alertIds,
     },
-    { retry: false, enabled: rawEventData && responseActionsEnabled }
+    { skip: shouldEarlyReturn }
   );
 
-  const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
+  const { OsqueryResult } = osquery;
 
-  const expandedEventFieldsObject = rawEventData
-    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
-    : undefined;
+  const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
 
-  const responseActions = useMemo(
-    () => expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions,
-    [expandedEventFieldsObject]
-  );
-
-  const endpointResponseActions = useMemo(
-    () =>
-      responseActions?.filter(
-        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
-      ),
-    [responseActions]
-  );
-
-  if (!endpointResponseActions?.length || !rawEventData || !responseActionsEnabled) {
+  if (shouldEarlyReturn || !responseActions?.length) {
     return;
   }
+
+  const renderItems = () => {
+    return map(automatedList?.items, (item) => {
+      if (item && 'input_type' in item && item?.input_type === 'osquery') {
+        const actionId = item.action_id;
+        const queryId = item.queries[0].id;
+        const startDate = item['@timestamp'];
+
+        return (
+          <OsqueryResult
+            key={actionId}
+            actionId={actionId}
+            queryId={queryId}
+            startDate={startDate}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        );
+      }
+      if (item && 'EndpointActions' in item && item?.EndpointActions.input_type === 'endpoint') {
+        return <EndpointResponseActionResults action={item} ruleName={ruleName?.[0]} />;
+      }
+    });
+  };
 
   return {
     id: EventsViewType.endpointView,
@@ -78,21 +102,53 @@ export const useEndpointResponseActionsTab = ({
       <>
         <EuiSpacer size="s" />
         <TabContentWrapper data-test-subj="endpointViewWrapper">
-          {isFetched && totalItemCount ? (
-            <ActionsLogTable
-              data-test-subj="endpoint-actions-results-table"
-              isFlyout={false}
-              onShowActionDetails={() => null}
-              items={actionList?.data || []}
-              loading={isFetching}
-              onChange={() => null}
-              totalItemCount={totalItemCount}
-              queryParams={{ withAutomatedActions: true }}
-              showHostNames
-            />
-          ) : null}
+          {isFetched && totalItemCount ? renderItems() : null}
         </TabContentWrapper>
       </>
     ),
   };
+};
+
+interface EndpointResponseActionResultsProps {
+  action: LogsEndpointAction;
+  ruleName?: string;
+}
+
+// TODO add i18n an move outside of this file
+const EndpointResponseActionResults = ({
+  action,
+  ruleName,
+}: EndpointResponseActionResultsProps) => {
+  const { action_id: actionId, expiration } = action.EndpointActions;
+  const { data: responseData } = useGetAutomatedActionResponseList({ actionId, expiration });
+
+  const eventText = useMemo(() => {
+    const command = action.EndpointActions.data.command;
+    if (command === 'isolate') {
+      return 'isolated the host';
+    }
+    if (command === 'unisolate') {
+      return 'released the host';
+    }
+    return `executed command ${command}`;
+  }, [action.EndpointActions.data.command]);
+
+  return (
+    <EuiComment
+      username={ruleName}
+      timestamp={<FormattedRelative value={action['@timestamp']} />}
+      event={eventText}
+      data-test-subj={'endpoint-results-comment'}
+    >
+      <ActionsLogExpandedTray
+        action={
+          {
+            ...action.EndpointActions.data,
+            startedAt: action['@timestamp'],
+            ...responseData,
+          } as unknown as ActionDetails
+        }
+      />
+    </EuiComment>
+  );
 };
