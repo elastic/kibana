@@ -181,8 +181,6 @@ export const getPackagePolicyUpdateCallback = (
       newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
       newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
       newPackagePolicy.inputs[0].config.policy.value = newEndpointPackagePolicy;
-
-      return newPackagePolicy;
     }
 
     return newPackagePolicy;
