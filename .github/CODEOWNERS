@@ -317,6 +317,7 @@ packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+x-pack/packages/kbn-ecs-data-quality-utils @elastic/security-threat-hunting-investigations
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
