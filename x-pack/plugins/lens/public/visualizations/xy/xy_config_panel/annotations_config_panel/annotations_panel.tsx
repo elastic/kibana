@@ -29,12 +29,12 @@ import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
+  NameInput,
+  useDebouncedValue,
+  DimensionEditorSection,
+  ColorPicker,
 } from '@kbn/visualization-ui-components';
-import { NameInput } from '@kbn/visualization-ui-components';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { ColorPicker } from '@kbn/visualization-ui-components';
 import { FormatFactory } from '../../../../../common/types';
-import { DimensionEditorSection } from '../../../../shared_components';
 import { isHorizontalChart } from '../../state_helpers';
 import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
 import { TextDecorationSetting } from '../shared/marker_decoration_settings';

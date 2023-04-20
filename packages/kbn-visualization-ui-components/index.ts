@@ -24,6 +24,7 @@ export {
   QueryInput,
   validateQuery,
   isQueryValid,
+  DimensionEditorSection,
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';

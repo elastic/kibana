@@ -25,6 +25,5 @@ export { LegendActionPopover } from './legend/action/legend_action_popover';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis/title/axis_title_settings';
 export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';
-export { DimensionEditorSection } from './dimension_section';
 export * from './static_header';
 export * from './vis_label';
