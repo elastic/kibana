@@ -210,7 +210,7 @@ export const ActionForm = ({
       return;
     }
     setIsAddActionPanelOpen(false);
-    const allowGroupConnector = (actionTypeModel?.group ?? []).map((atm) => atm.id);
+    const allowGroupConnector = (actionTypeModel?.subtype ?? []).map((atm) => atm.id);
     let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
@@ -379,20 +379,22 @@ export const ActionForm = ({
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
                   if (newConnector && newConnector.actionTypeId) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                    if (actionTypeRegistered.resetParamsOnConnectorChange && actions[index]) {
-                      const updatedAction = {
-                        ...actions[index],
-                        actionTypeId: newConnector.actionTypeId,
-                        id: connectorId,
-                        params:
-                          actionTypeRegistered.resetParamsOnConnectorChange != null
-                            ? actionTypeRegistered.resetParamsOnConnectorChange(
-                                actions[index].params
-                              )
-                            : {},
-                      };
-                      actions.splice(index, 0, updatedAction);
-                      setActions(actions);
+                    if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                        if (i === index) {
+                          return {
+                            ..._item,
+                            actionTypeId: newConnector.actionTypeId,
+                            id: connectorId,
+                            params:
+                              actionTypeRegistered.resetParamsOnConnectorChange != null
+                                ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                                : {},
+                          };
+                        }
+                        return _item;
+                      });
+                      setActions(updatedActions);
                     }
                   }
                 }}
@@ -430,17 +432,22 @@ export const ActionForm = ({
                   newConnector.actionTypeId !== actionConnector.actionTypeId
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
-                  if (actionTypeRegistered.resetParamsOnConnectorChange && actions[index]) {
-                    const updatedAction = {
-                      ...actions[index],
-                      actionTypeId: newConnector.actionTypeId,
-                      id,
-                      params:
-                        actionTypeRegistered.resetParamsOnConnectorChange != null
-                          ? actionTypeRegistered.resetParamsOnConnectorChange(actions[index].params)
-                          : {},
-                    };
-                    actions.splice(index, 0, updatedAction);
+                  if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                      if (i === index) {
+                        return {
+                          ..._item,
+                          actionTypeId: newConnector.actionTypeId,
+                          id,
+                          params:
+                            actionTypeRegistered.resetParamsOnConnectorChange != null
+                              ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                              : {},
+                        };
+                      }
+                      return _item;
+                    });
+                    setActions(updatedActions);
                   }
                 }
               }}

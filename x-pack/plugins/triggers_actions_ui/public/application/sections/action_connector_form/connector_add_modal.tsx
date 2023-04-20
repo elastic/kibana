@@ -74,10 +74,10 @@ const ConnectorAddModal = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.group
-      ? (actionTypeModel?.group ?? []).map((gAction) => ({
-          ...actionTypeRegistry.get(gAction.id),
-          name: gAction.name,
+    actionTypeModel && actionTypeModel.subtype
+      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
+          ...actionTypeRegistry.get(subtypeAction.id),
+          name: subtypeAction.name,
         }))
       : [];
 

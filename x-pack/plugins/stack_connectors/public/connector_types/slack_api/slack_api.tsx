@@ -31,7 +31,7 @@ export const getConnectorType = (): ConnectorTypeModel<
   PostMessageParams
 > => ({
   id: SLACK_API_CONNECTOR_ID,
-  group: [
+  subtype: [
     {
       id: '.slack',
       name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {

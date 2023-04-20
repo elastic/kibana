@@ -65,7 +65,7 @@ export const AddConnectorInline = ({
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
-  const allowGroupConnector = (actionTypeRegistered?.group ?? []).map((g) => g.id);
+  const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((subtype) => subtype.id);
   const connectorDropdownErrors = useMemo(
     () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
     [actionTypeRegistered.actionTypeTitle]

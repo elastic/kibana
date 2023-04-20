@@ -17,7 +17,7 @@ import { PostMessageParams } from '../../../common/slack_api/types';
 export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
-    group: [
+    subtype: [
       {
         id: '.slack',
         name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {

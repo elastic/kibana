@@ -89,10 +89,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.group
-      ? (actionTypeModel?.group ?? []).map((gAction) => ({
-          ...actionTypeRegistry.get(gAction.id),
-          name: gAction.name,
+    actionTypeModel && actionTypeModel.subtype
+      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
+          ...actionTypeRegistry.get(subtypeAction.id),
+          name: subtypeAction.name,
         }))
       : [];
 
