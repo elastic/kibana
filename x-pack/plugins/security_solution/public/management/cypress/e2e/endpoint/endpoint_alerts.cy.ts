@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getAlertsTableRows, navigateToAlertsList } from '../../screens/alerts';
 import { waitForEndpointAlerts } from '../../tasks/alerts';
 import { request } from '../../tasks/common';
-import { navigateToEndpointList } from '../../screens/endpoints';
 import { getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
@@ -71,34 +71,34 @@ describe('Endpoint generated alerts', () => {
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {
-    // FIXME:PT remove this (only for dev)
-    navigateToEndpointList();
+    // Triggers a Malicious Behaviour alert on Linux system
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${createdHost.agentId}`;
 
-    const executeCommand = `bash -c cat /dev/tcp/foo | grep ${createdHost.agentId}`;
-
-    // 1. send `execute` command that triggers malicious behaviour
+    // Send `execute` command that triggers malicious behaviour using the `execute` response action
     request<ResponseActionApiResponse>({
       method: 'POST',
       url: EXECUTE_ROUTE,
       body: {
         endpoint_ids: [createdHost.agentId],
         parameters: {
-          // Triggers a Malicious Behaviour alert on Linux system
-          command: executeCommand,
+          command: executeMaliciousCommand,
         },
       },
     })
       .then((response) => waitForActionToComplete(response.body.data.id))
-      .then(() =>
-        waitForEndpointAlerts(createdHost.agentId, [
+      .then(() => {
+        return waitForEndpointAlerts(createdHost.agentId, [
           {
-            term: { 'process.group_leader.args': executeCommand },
+            term: { 'process.group_leader.args': executeMaliciousCommand },
           },
-        ])
-      );
+        ]);
+      })
+      .then(() => {
+        return navigateToAlertsList(
+          `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
+        );
+      });
 
-    // 4. check that alert show up on alerts list
-
-    cy.log('Reached end of test');
+    getAlertsTableRows().should('have.length.greaterThan', 0);
   });
 });
