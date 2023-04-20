@@ -35,7 +35,7 @@ export function usePreferredDataSourceAndBucketSize<
       ?
           | ApmDocumentType.ServiceTransactionMetric
           | ApmDocumentType.TransactionMetric
-          | ApmDocumentType.TransactionMetric
+          | ApmDocumentType.TransactionEvent
       : ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
 } | null {
