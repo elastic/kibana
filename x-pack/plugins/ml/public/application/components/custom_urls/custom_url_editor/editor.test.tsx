@@ -16,6 +16,7 @@ import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function prepareTest(
   customUrl: CustomUrlSettings,
@@ -55,6 +56,7 @@ function prepareTest(
   ] as DataViewListItem[];
 
   const queryEntityFieldNames = ['airline'];
+  const job = { job_id: 'id', analysis_config: { influencers: ['airline'] } } as Job;
 
   const props = {
     customUrl,
@@ -63,6 +65,9 @@ function prepareTest(
     dashboards,
     dataViewListItems,
     queryEntityFieldNames,
+    job,
+    showTimeRangeSelector: true,
+    showCustomTimeRangeSelector: false,
   };
 
   return shallow(<CustomUrlEditor {...props} />);
