@@ -115,7 +115,6 @@ export function registerErrorCountRuleType({
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                   ...termQuery(SERVICE_NAME, ruleParams.serviceName),
                   ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey),
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -168,7 +167,12 @@ export function registerErrorCountRuleType({
               windowUnit: ruleParams.windowUnit,
             });
 
-            const id = [ApmRuleType.ErrorCount, serviceName, environment]
+            const id = [
+              ApmRuleType.ErrorCount,
+              serviceName,
+              environment,
+              ruleParams.errorGroupingKey,
+            ]
               .filter((name) => name)
               .join('_');
 
