@@ -189,6 +189,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: enginePath,
           }),
           items: [
@@ -223,13 +224,17 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
             },
             {
-              id: 'enterpriseSearchEngineAPI',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {
-                defaultMessage: 'API',
-              }),
+              id: 'enterpriseSearchApplicationConnect',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.applications.searchApplications.connectTitle',
+                {
+                  defaultMessage: 'Connect',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.API}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
               }),
             },
           ],
