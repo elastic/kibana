@@ -53,6 +53,7 @@ export const MSearchTable = () => {
       entityNamePlural={`ContentItems`}
       tableListTitle={`MSearch Demo`}
       urlStateEnabled={false}
+      emptyPrompt={<>No data found. Try to install some sample data first.</>}
       onClickTitle={(item) => {
         alert(`Clicked item ${item.attributes.title} (${item.id})`);
       }}

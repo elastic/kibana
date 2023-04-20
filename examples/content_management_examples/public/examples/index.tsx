@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line no-restricted-imports
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -53,9 +53,7 @@ export const renderApp = (
 
           <EuiPageTemplate.Section>
             <Switch>
-              <Route path="/" exact={true}>
-                <TodoApp contentClient={contentManagement.client} />
-              </Route>
+              <Redirect from="/" to="/todos" exact />
               <Route path="/todos">
                 <TodoApp contentClient={contentManagement.client} />
               </Route>

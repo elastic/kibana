@@ -25,7 +25,7 @@ export const MSearchApp = (props: {
       <I18nProvider>
         <TableListViewKibanaProvider
           core={{
-            application: props.core.application as any, // TODO: fix it on the TableListView side
+            application: props.core.application,
             notifications: props.core.notifications,
             overlays: props.core.overlays,
             http: props.core.http,
