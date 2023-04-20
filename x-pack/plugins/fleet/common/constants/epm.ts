@@ -22,9 +22,6 @@ export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
-export const FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID =
-  'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395';
-
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 /*
  Package rules:

@@ -79,7 +79,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, getStartServices } = routeDependencies;
+  const { router, license, coreStart, dataViews } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -314,7 +314,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
       async (ctx, req, res) => {
         try {
-          const [{ savedObjects, elasticsearch }, { dataViews }] = await getStartServices();
+          const { savedObjects, elasticsearch } = coreStart;
           const savedObjectsClient = savedObjects.getScopedClient(req);
           const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 

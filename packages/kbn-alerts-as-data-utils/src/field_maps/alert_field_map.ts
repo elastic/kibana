@@ -13,6 +13,7 @@ import {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -22,6 +23,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -63,6 +65,11 @@ export const alertFieldMap = {
   },
   [ALERT_FLAPPING_HISTORY]: {
     type: 'boolean',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
     array: true,
     required: false,
   },
@@ -109,6 +116,11 @@ export const alertFieldMap = {
   },
   [ALERT_RULE_PRODUCER]: {
     type: 'keyword',
+    array: false,
+    required: true,
+  },
+  [ALERT_RULE_REVISION]: {
+    type: 'long',
     array: false,
     required: true,
   },

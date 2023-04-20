@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -34,16 +35,19 @@ export class PolicyWatcher {
   private policyService: PackagePolicyClient;
   private subscription: Subscription | undefined;
   private soStart: SavedObjectsServiceStart;
+  private cloud: CloudSetup;
   constructor(
     policyService: PackagePolicyClient,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
+    cloud: CloudSetup,
     logger: Logger
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
     this.logger = logger;
     this.soStart = soStart;
+    this.cloud = cloud;
   }
 
   /**
@@ -101,6 +105,9 @@ export class PolicyWatcher {
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
+        updatePolicy.inputs[0].config.policy.value.meta.license = license.type || '';
+        // add cloud info to policy meta
+        updatePolicy.inputs[0].config.policy.value.meta.cloud = this.cloud?.isCloudEnabled;
 
         try {
           if (!isEndpointPolicyValidForLicense(policyConfig, license)) {

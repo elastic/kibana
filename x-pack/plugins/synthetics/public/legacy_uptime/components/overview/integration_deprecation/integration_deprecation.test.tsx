@@ -15,7 +15,7 @@ import * as observabilityPublic from '@kbn/observability-plugin/public';
 export const mockStorage = new StubBrowserStorage();
 jest.mock('@kbn/observability-plugin/public');
 
-const DEPRECATION_TITLE = 'Migrate your Elastic Synthetics integration monitors before Elastic 8.8';
+const DEPRECATION_TITLE = 'Migrate your Elastic Synthetics integration monitors';
 
 describe('IntegrationDeprecation', () => {
   const { FETCH_STATUS } = observabilityPublic;

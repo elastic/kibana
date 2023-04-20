@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { arrayFormatter, Formatter } from './common';
+import { arrayFormatter } from './formatting_utils';
+import { Formatter } from './common';
 import { ConfigKey, TLSFields } from '../../../common/runtime_types/monitor_management';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;
@@ -16,5 +17,5 @@ export const tlsFormatters: TLSFormatMap = {
   [ConfigKey.TLS_KEY]: null,
   [ConfigKey.TLS_KEY_PASSPHRASE]: null,
   [ConfigKey.TLS_VERIFICATION_MODE]: null,
-  [ConfigKey.TLS_VERSION]: (fields) => arrayFormatter(fields[ConfigKey.TLS_VERSION]),
+  [ConfigKey.TLS_VERSION]: arrayFormatter,
 };

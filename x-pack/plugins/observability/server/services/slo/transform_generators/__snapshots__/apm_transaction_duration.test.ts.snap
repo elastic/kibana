@@ -142,12 +142,14 @@ Object {
 exports[`APM Transaction Duration Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
     "version": 1,
   },
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
-    "index": "slo-observability.sli-v1",
-    "pipeline": "slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v1",
+    "pipeline": ".slo-observability.sli.monthly",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -287,12 +289,14 @@ Object {
 exports[`APM Transaction Duration Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
     "version": 1,
   },
   "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
-    "index": "slo-observability.sli-v1",
-    "pipeline": "slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v1",
+    "pipeline": ".slo-observability.sli.monthly",
   },
   "frequency": "1m",
   "pivot": Object {

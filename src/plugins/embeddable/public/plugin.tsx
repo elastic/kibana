@@ -24,6 +24,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -67,6 +68,7 @@ export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface EmbeddableSetup {
@@ -154,7 +156,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    const { uiActions, inspector, savedObjectsManagement } = deps;
+    const { uiActions, inspector, savedObjectsManagement, savedObjectsTaggingOss } = deps;
     const { overlays, theme, uiSettings } = core;
 
     const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
@@ -211,7 +213,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             SavedObjectFinder={getSavedObjectFinder(
               core.uiSettings,
               core.http,
-              savedObjectsManagement
+              savedObjectsManagement,
+              savedObjectsTaggingOss?.getTaggingApi()
             )}
             containerContext={containerContext}
             theme={theme}

@@ -100,28 +100,21 @@ exports[`it renders without crashing 1`] = `
       </h3>
     }
   >
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={true}
-      labelType="label"
-    >
-      <EuiComboBox
-        async={false}
-        compressed={false}
-        fullWidth={false}
-        isClearable={true}
-        isDisabled={false}
-        onChange={[Function]}
-        onCreateOption={[Function]}
-        options={Array []}
-        placeholder="Add a user…"
-        selectedOptions={Array []}
-        singleSelection={false}
-        sortMatchesBy="none"
-      />
-    </EuiFormRow>
+    <EuiComboBox
+      aria-label="Run as privileges"
+      async={false}
+      compressed={false}
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[Function]}
+      onCreateOption={[Function]}
+      options={Array []}
+      placeholder="Add a user…"
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
   </EuiDescribedFormGroup>
   <EuiSpacer />
   <EuiTitle
@@ -172,6 +165,7 @@ exports[`it renders without crashing 1`] = `
     }
     editable={true}
     indexPatterns={Array []}
+    indexType="indices"
     indicesAPIClient={
       Object {
         "getFields": [MockFunction],
@@ -206,18 +200,89 @@ exports[`it renders without crashing 1`] = `
       }
     }
   />
-  <EuiHorizontalRule />
-  <EuiButton
-    color="primary"
-    iconType="plusInCircle"
-    onClick={[Function]}
-    size="m"
+  <EuiSpacer />
+  <EuiSpacer />
+  <EuiTitle
+    size="xs"
   >
-    <FormattedMessage
-      defaultMessage="Add index privilege"
-      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-      values={Object {}}
-    />
-  </EuiButton>
+    <h3>
+      <FormattedMessage
+        defaultMessage="Remote index privileges"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesTitle"
+        values={Object {}}
+      />
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiText
+    color="subdued"
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Control access to the data in remote clusters. "
+        id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
+        values={Object {}}
+      />
+      <EuiLink
+        className="editRole__learnMore"
+        href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Learn more"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    </p>
+  </EuiText>
+  <IndexPrivileges
+    availableIndexPrivileges={
+      Array [
+        "all",
+        "read",
+        "write",
+        "index",
+      ]
+    }
+    editable={true}
+    indexType="remote_indices"
+    indicesAPIClient={
+      Object {
+        "getFields": [MockFunction],
+      }
+    }
+    license={
+      Object {
+        "features$": Observable {
+          "_subscribe": [Function],
+        },
+        "getFeatures": [MockFunction],
+        "hasAtLeast": [MockFunction],
+        "isEnabled": [MockFunction],
+        "isLicenseAvailable": [MockFunction],
+      }
+    }
+    onChange={[MockFunction]}
+    role={
+      Object {
+        "elasticsearch": Object {
+          "cluster": Array [],
+          "indices": Array [],
+          "run_as": Array [],
+        },
+        "kibana": Array [],
+        "name": "",
+      }
+    }
+    validator={
+      RoleValidator {
+        "shouldValidate": undefined,
+      }
+    }
+  />
 </CollapsiblePanel>
 `;

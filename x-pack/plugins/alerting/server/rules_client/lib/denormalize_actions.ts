@@ -8,11 +8,11 @@
 import { SavedObjectReference } from '@kbn/core/server';
 import { RawRule } from '../../types';
 import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
-import { NormalizedAlertActionWithUuid, RulesClientContext } from '../types';
+import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
 
 export async function denormalizeActions(
   context: RulesClientContext,
-  alertActions: NormalizedAlertActionWithUuid[]
+  alertActions: NormalizedAlertActionWithGeneratedValues[]
 ): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
   const actions: RawRule['actions'] = [];

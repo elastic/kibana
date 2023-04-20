@@ -6,9 +6,9 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanPrivateLocations,

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
@@ -238,6 +239,20 @@ export const basicCase: Case = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+};
+
+export const basicFileMock: FileJSON = {
+  id: '7d47d130-bcec-11ed-afa1-0242ac120002',
+  name: 'my-super-cool-screenshot',
+  mimeType: 'image/png',
+  created: basicCreatedAt,
+  updated: basicCreatedAt,
+  size: 999,
+  meta: '',
+  alt: '',
+  fileKind: '',
+  status: 'READY',
+  extension: 'png',
 };
 
 export const caseWithAlerts = {
@@ -877,8 +892,8 @@ export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
 
 export const findCaseUserActionsResponse: FindCaseUserActions = {
   page: 1,
-  perPage: 1000,
-  total: 20,
+  perPage: 10,
+  total: 30,
   userActions: [...caseUserActionsWithRegisteredAttachments],
 };
 

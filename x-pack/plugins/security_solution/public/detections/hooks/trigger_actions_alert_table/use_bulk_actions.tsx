@@ -11,15 +11,14 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import { useCallback } from 'react';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import type { inputsModel, State } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store';
-import type { TableId } from '../../../../common/types';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
-import { useBulkAddToCaseActions } from '../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 
 // check to see if the query is a known "empty" shape
 export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
@@ -89,7 +88,5 @@ export const getBulkActionHook =
       refetch: refetchGlobalQuery,
     });
 
-    const caseActions = useBulkAddToCaseActions();
-
-    return [...alertActions, ...caseActions, timelineAction];
+    return [...alertActions, timelineAction];
   };

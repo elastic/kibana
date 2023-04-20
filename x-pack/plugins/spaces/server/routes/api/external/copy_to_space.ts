@@ -68,11 +68,16 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
             includeReferences: schema.boolean({ defaultValue: false }),
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: true }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
           },
           {
             validate: (object) => {
               if (object.overwrite && object.createNewCopies) {
                 return 'cannot use [overwrite] with [createNewCopies]';
+              }
+
+              if (object.compatibilityMode && object.createNewCopies) {
+                return 'cannot use [compatibilityMode] with [createNewCopies]';
               }
             },
           }
@@ -87,11 +92,17 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         includeReferences,
         overwrite,
         createNewCopies,
+        compatibilityMode,
       } = request.body;
 
       const { headers } = request;
       usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementCopySavedObjects({ headers, createNewCopies, overwrite })
+        usageStatsClient.incrementCopySavedObjects({
+          headers,
+          createNewCopies,
+          overwrite,
+          compatibilityMode,
+        })
       );
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
@@ -104,6 +115,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         includeReferences,
         overwrite,
         createNewCopies,
+        compatibilityMode,
       });
       return response.ok({ body: copyResponse });
     })
@@ -116,51 +128,66 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         tags: ['access:copySavedObjectsToSpaces'],
       },
       validate: {
-        body: schema.object({
-          retries: schema.recordOf(
-            schema.string({
-              validate: (spaceId) => {
-                if (!SPACE_ID_REGEX.test(spaceId)) {
-                  return `Invalid space id: ${spaceId}`;
-                }
-              },
-            }),
-            schema.arrayOf(
+        body: schema.object(
+          {
+            retries: schema.recordOf(
+              schema.string({
+                validate: (spaceId) => {
+                  if (!SPACE_ID_REGEX.test(spaceId)) {
+                    return `Invalid space id: ${spaceId}`;
+                  }
+                },
+              }),
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  id: schema.string(),
+                  overwrite: schema.boolean({ defaultValue: false }),
+                  destinationId: schema.maybe(schema.string()),
+                  createNewCopy: schema.maybe(schema.boolean()),
+                  ignoreMissingReferences: schema.maybe(schema.boolean()),
+                })
+              )
+            ),
+            objects: schema.arrayOf(
               schema.object({
                 type: schema.string(),
                 id: schema.string(),
-                overwrite: schema.boolean({ defaultValue: false }),
-                destinationId: schema.maybe(schema.string()),
-                createNewCopy: schema.maybe(schema.boolean()),
-                ignoreMissingReferences: schema.maybe(schema.boolean()),
-              })
-            )
-          ),
-          objects: schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-            }),
-            {
-              validate: (objects) => {
-                if (!areObjectsUnique(objects)) {
-                  return 'duplicate objects are not allowed';
-                }
-              },
-            }
-          ),
-          includeReferences: schema.boolean({ defaultValue: false }),
-          createNewCopies: schema.boolean({ defaultValue: true }),
-        }),
+              }),
+              {
+                validate: (objects) => {
+                  if (!areObjectsUnique(objects)) {
+                    return 'duplicate objects are not allowed';
+                  }
+                },
+              }
+            ),
+            includeReferences: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: true }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
+          },
+          {
+            validate: (object) => {
+              if (object.createNewCopies && object.compatibilityMode) {
+                return 'cannot use [createNewCopies] with [compatibilityMode]';
+              }
+            },
+          }
+        ),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();
-      const { objects, includeReferences, retries, createNewCopies } = request.body;
+      const { objects, includeReferences, retries, createNewCopies, compatibilityMode } =
+        request.body;
 
       const { headers } = request;
       usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementResolveCopySavedObjectsErrors({ headers, createNewCopies })
+        usageStatsClient.incrementResolveCopySavedObjectsErrors({
+          headers,
+          createNewCopies,
+          compatibilityMode,
+        })
       );
 
       const resolveCopySavedObjectsToSpacesConflicts =
@@ -173,6 +200,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           includeReferences,
           retries,
           createNewCopies,
+          compatibilityMode,
         }
       );
       return response.ok({ body: resolveConflictsResponse });

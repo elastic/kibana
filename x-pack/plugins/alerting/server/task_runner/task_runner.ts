@@ -47,6 +47,7 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
+  MaintenanceWindow,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -260,6 +261,7 @@ export class TaskRunner<
       enabled,
       actions,
       muteAll,
+      revision,
       snoozeSchedule,
     } = rule;
     const {
@@ -314,6 +316,22 @@ export class TaskRunner<
     });
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
+
+    let activeMaintenanceWindows: MaintenanceWindow[] = [];
+    try {
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
+        interval: rule.schedule.interval,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
+      );
+    }
+
+    const maintenanceWindowIds = activeMaintenanceWindows.map(
+      (maintenanceWindow) => maintenanceWindow.id
+    );
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -379,6 +397,7 @@ export class TaskRunner<
                 tags,
                 consumer,
                 producer: ruleType.producer,
+                revision,
                 ruleTypeId: rule.alertTypeId,
                 ruleTypeName: ruleType.name,
                 enabled,
@@ -395,6 +414,7 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
+              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
             })
           );
 
@@ -442,6 +462,7 @@ export class TaskRunner<
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
         notifyWhen,
+        maintenanceWindowIds,
       });
     });
 
@@ -456,6 +477,7 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
+      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
@@ -467,6 +489,10 @@ export class TaskRunner<
 
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+      } else if (maintenanceWindowIds.length) {
+        this.logger.debug(
+          `no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`
+        );
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`

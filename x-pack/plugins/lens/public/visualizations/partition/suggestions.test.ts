@@ -8,14 +8,13 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-} from '../../../common';
+} from '../../../common/constants';
 import { layerTypes } from '../../../common/layer_types';
 
 describe('suggestions', () => {
@@ -456,6 +455,7 @@ describe('suggestions', () => {
       });
       expect(currentSuggestions).toHaveLength(5);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
+      expect(currentSuggestions.every((s) => s.incomplete)).toEqual(true);
     });
 
     it('should suggest a donut chart as initial state when only one bucket', () => {
@@ -1040,6 +1040,7 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
+            "incomplete": false,
             "previewIcon": [Function],
             "score": 0.61,
             "state": Object {
@@ -1149,6 +1150,7 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
+            "incomplete": false,
             "previewIcon": [Function],
             "score": 0.46,
             "state": Object {

@@ -137,6 +137,21 @@ describe('createOrUpdateIndexTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
   });
 
+  it(`should retry simulateTemplate on transient ES errors`, async () => {
+    clusterClient.indices.simulateTemplate
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.putIndexTemplate.mockResolvedValue({ acknowledged: true });
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate,
+    });
+
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledTimes(3);
+  });
+
   it(`should log and throw error if max retries exceeded`, async () => {
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.putIndexTemplate.mockRejectedValue(new EsErrors.ConnectionError('foo'));

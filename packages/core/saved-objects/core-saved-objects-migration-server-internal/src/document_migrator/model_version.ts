@@ -20,6 +20,8 @@ import {
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType } from './types';
 
+const noopTransform: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
+
 export const getModelVersionTransforms = ({
   typeDefinition,
   log,
@@ -32,45 +34,54 @@ export const getModelVersionTransforms = ({
       ? typeDefinition.modelVersions()
       : typeDefinition.modelVersions ?? {};
 
-  const transforms = Object.entries(modelVersionMap)
-    .filter(([_, definition]) => !!definition.modelChange.transformation)
-    .map<Transform>(([rawModelVersion, definition]) => {
-      const modelVersion = assertValidModelVersion(rawModelVersion);
-      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
-      return {
-        version: virtualVersion,
-        transform: convertModelVersionTransformFn({
-          log,
-          modelVersion,
-          virtualVersion,
-          definition,
-        }),
-        transformType: TransformType.Migrate,
-      };
-    });
-
-  return transforms;
+  return Object.entries(modelVersionMap).map<Transform>(([rawModelVersion, definition]) => {
+    const modelVersion = assertValidModelVersion(rawModelVersion);
+    const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+    return {
+      version: virtualVersion,
+      transform: convertModelVersionTransformFn({
+        log,
+        modelVersion,
+        virtualVersion,
+        definition,
+        type: 'up',
+      }),
+      transformDown: convertModelVersionTransformFn({
+        log,
+        modelVersion,
+        virtualVersion,
+        definition,
+        type: 'down',
+      }),
+      transformType: TransformType.Migrate,
+    };
+  });
 };
 
 export const convertModelVersionTransformFn = ({
   virtualVersion,
   modelVersion,
   definition,
+  type,
   log,
 }: {
   virtualVersion: string;
   modelVersion: number;
   definition: SavedObjectsModelVersion;
+  type: 'up' | 'down';
   log: Logger;
 }): TransformFn => {
   if (!definition.modelChange.transformation) {
-    throw new Error('cannot convert model change without a transform');
+    return noopTransform;
   }
   const context: SavedObjectModelTransformationContext = {
     log,
     modelVersion,
   };
-  const modelTransformFn = definition.modelChange.transformation.up;
+  const modelTransformFn =
+    type === 'up'
+      ? definition.modelChange.transformation.up
+      : definition.modelChange.transformation.down;
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {

@@ -109,8 +109,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
+      // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
+      await findings.waitForPluginInitialized();
+
+      // Prepare mocked findings
       await findings.index.remove();
       await findings.index.add(data);
+
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
@@ -181,6 +186,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         return a.localeCompare(b);
       };
 
+      /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
+      const sleep = (num: number) => {
+        return new Promise((res) => setTimeout(res, num));
+      };
+
       it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
         type TestCase = [string, SortDirection, SortingMethod];
         const testCases: TestCase[] = [
@@ -195,13 +205,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
+          /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
+          await sleep(1000);
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
-
           const sorted = values
             .slice()
             .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => expect(value).to.be(sorted[i]));
+          values.forEach((value, i) => {
+            expect(value).to.be.eql(
+              sorted[i],
+              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
+            );
+          });
         }
       });
     });

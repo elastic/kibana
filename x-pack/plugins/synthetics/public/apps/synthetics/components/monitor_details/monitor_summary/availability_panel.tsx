@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -22,7 +22,7 @@ interface AvailabilityPanelprops {
 export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
   const {
     services: {
-      observability: { ExploratoryViewEmbeddable },
+      exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
   const selectedLocation = useSelectedLocation();

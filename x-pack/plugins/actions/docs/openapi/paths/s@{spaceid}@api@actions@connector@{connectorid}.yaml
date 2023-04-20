@@ -19,11 +19,7 @@ get:
             getConnectorResponse:
               $ref: '../components/examples/get_connector_response.yaml'
     '401':
-      description: Authorization information is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/401_response.yaml'
+      $ref: '../components/responses/401.yaml'
     '404':
       description: Object is not found.
       content:
@@ -59,11 +55,7 @@ delete:
     '204':
       description: Indicates a successful call.
     '401':
-      description: Authorization information is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/401_response.yaml'
+      $ref: '../components/responses/401.yaml'
     '404':
       description: Object is not found.
       content:
@@ -145,17 +137,9 @@ put:
                 type: integer
                 example: 400
     '401':
-      description: Authorization information is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/401_response.yaml'
+      $ref: '../components/responses/401.yaml'
     '404':
-      description: Object is not found.
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/404_response.yaml'
+      $ref: '../components/responses/404.yaml'
   servers:
     - url: https://localhost:5601
 servers:

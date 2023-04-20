@@ -17,13 +17,13 @@ import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality
 
 export const useLogEntryCategoriesModule = ({
   indexPattern,
-  sourceId,
+  logViewId,
   spaceId,
   timestampField,
   runtimeMappings,
 }: {
   indexPattern: string;
-  sourceId: string;
+  logViewId: string;
   spaceId: string;
   timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
@@ -31,12 +31,12 @@ export const useLogEntryCategoriesModule = ({
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
       indices: indexPattern.split(','),
-      sourceId,
+      sourceId: logViewId,
       spaceId,
       timestampField,
       runtimeMappings,
     }),
-    [indexPattern, sourceId, spaceId, timestampField, runtimeMappings]
+    [indexPattern, logViewId, spaceId, timestampField, runtimeMappings]
   );
 
   const logAnalysisModule = useLogAnalysisModule({
