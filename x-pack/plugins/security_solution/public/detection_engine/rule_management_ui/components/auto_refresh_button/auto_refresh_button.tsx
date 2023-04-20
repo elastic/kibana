@@ -6,18 +6,18 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextColor,
 } from '@elastic/eui';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export interface AutoRefreshButtonProps {
   isRefreshOn: boolean;

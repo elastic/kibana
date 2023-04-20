@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
-import { Story, ComponentMeta, ComponentStory } from '@storybook/react';
+import type { Story, ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { AutoRefreshButton } from './auto_refresh_button';
 import type { AutoRefreshButtonProps } from './auto_refresh_button';
