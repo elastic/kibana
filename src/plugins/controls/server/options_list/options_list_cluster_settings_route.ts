@@ -8,18 +8,17 @@
 
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 
 export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();
   router.get(
     {
-      path: '/api/kibana/controls/optionsList/getClusterSettings',
+      path: '/api/kibana/controls/optionsList/getExpensiveQueriesSetting',
       validate: false,
     },
     async (context, _, response) => {
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asInternalUser;
         const settings = await esClient.cluster.getSettings({
           include_defaults: true,
           filter_path: '**.allow_expensive_queries',
@@ -40,17 +39,6 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
           },
         });
       } catch (e) {
-        if (e instanceof errors.ResponseError && e.body.error.type === 'security_exception') {
-          /**
-           * in cases where the user does not have the 'monitor' permission this check will fail. In these cases, we will
-           * fall back to assume that the allowExpensiveQueries setting is on, because it defaults to true.
-           */
-          return response.ok({
-            body: {
-              allowExpensiveQueries: true,
-            },
-          });
-        }
         const kbnErr = getKbnServerError(e);
         return reportServerError(response, kbnErr);
       }
