@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { AnomalyRecordDoc } from './anomalies';
+import { MlAnomalyRecordDoc } from './anomalies';
 
 /**
  * Base Interface for basic custom URL.
@@ -26,7 +26,7 @@ export interface KibanaUrlConfigWithTimeRange extends BaseUrlConfig {
 
 export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
 
-export interface CustomUrlAnomalyRecordDoc extends AnomalyRecordDoc {
+export interface CustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
   earliest: string;
   latest: string;
 }

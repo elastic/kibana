@@ -12,7 +12,7 @@ import type { KibanaUrlConfig } from './custom_urls';
  * Influencers are the entities that have contributed to, or are to blame for, the anomalies.
  * Influencer results are available only if an influencer_field_name is specified in the job configuration.
  */
-export interface Influencer {
+export interface MlInfluencer {
   /**
    * The field name of the influencer.
    */
@@ -24,15 +24,13 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
-export type MLAnomalyDoc = AnomalyRecordDoc;
-
-export type RecordForInfluencer = AnomalyRecordDoc;
+export type MlRecordForInfluencer = MlAnomalyRecordDoc;
 
 /**
  * Anomaly record document. Records contain the detailed analytical results.
  * They describe the anomalous activity that has been identified in the input data based on the detector configuration.
  */
-export interface AnomalyRecordDoc {
+export interface MlAnomalyRecordDoc {
   /**
    * Index signature to cover dynamic attributes added to the record depending on the fields being analyzed.
    * For example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document.
@@ -130,7 +128,7 @@ export interface AnomalyRecordDoc {
    * If influencers was specified in the detector configuration, this array contains influencers
    * that contributed to or were to blame for an anomaly.
    */
-  influencers?: Influencer[];
+  influencers?: MlInfluencer[];
 
   /**
    * The field used to split the data. In particular, this property is used for analyzing the splits
@@ -238,7 +236,7 @@ export interface AnomalyRecordDoc {
 /**
  * Anomaly table record, representing the fields shown in the ML UI anomalies table.
  */
-export interface AnomaliesTableRecord {
+export interface MlAnomaliesTableRecord {
   /**
    * The start time of the interval for which the anomaly data in the table is being aggregated.
    * Anomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job.
@@ -248,7 +246,7 @@ export interface AnomaliesTableRecord {
   /**
    * The source anomaly record document, containing the full source anomaly record fields.
    */
-  source: AnomalyRecordDoc;
+  source: MlAnomalyRecordDoc;
 
   /**
    * Unique identifier for the table row.
@@ -345,14 +343,14 @@ export interface AnomaliesTableRecord {
  * and rules length.
  * Used by the AnomaliesTable component
  */
-export interface AnomaliesTableRecordExtended extends AnomaliesTableRecord {
+export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
   detector: string;
   rulesLength?: number;
 }
 
-export type PartitionFieldsType = typeof PARTITION_FIELDS[number];
+export type MlPartitionFieldsType = typeof PARTITION_FIELDS[number];
 
-export interface AnomalyCategorizerStatsDoc {
+export interface MlAnomalyCategorizerStatsDoc {
   [key: string]: any;
   job_id: string;
   result_type: 'categorizer_stats';
@@ -369,9 +367,9 @@ export interface AnomalyCategorizerStatsDoc {
   timestamp: number;
 }
 
-export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
+export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 
 /**
  * The type of the anomaly result, such as bucket, influencer or record.
  */
-export type AnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];
+export type MlAnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];
