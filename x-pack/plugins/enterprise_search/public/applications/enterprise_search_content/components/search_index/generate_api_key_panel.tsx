@@ -55,7 +55,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                   <p>
                     {i18n.translate('xpack.enterpriseSearch.content.overview.emptyPrompt.body', {
                       defaultMessage:
-                        'Adding documents to an externally managed index is not recommended.',
+                        'We do not recommend adding documents to an externally managed index.',
                     })}
                   </p>
                 }
