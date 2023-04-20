@@ -284,7 +284,7 @@ describe('mappingFromFieldMap', () => {
                 url: {
                   ignore_above: 2048,
                   index: false,
-                  type: 'text',
+                  type: 'keyword',
                 },
                 uuid: {
                   type: 'keyword',
