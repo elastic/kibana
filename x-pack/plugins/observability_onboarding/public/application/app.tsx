@@ -44,7 +44,7 @@ export interface RouteDefinition<T = any> extends RouteProps {
 }
 
 export const onBoardingTitle = i18n.translate(
-  'xpack.observability.onboarding.breadcrumbs.onboarding',
+  'xpack.observability_onboarding.breadcrumbs.onboarding',
   {
     defaultMessage: 'Onboarding',
   }
@@ -71,7 +71,7 @@ function ObservabilityOnboardingApp() {
       href: basePath + '/app/observabilityOnboarding',
     },
     {
-      text: i18n.translate('xpack.observability.onboarding.breadcrumbs.logs', {
+      text: i18n.translate('xpack.observability_onboarding.breadcrumbs.logs', {
         defaultMessage: 'Logs',
       }),
     },
