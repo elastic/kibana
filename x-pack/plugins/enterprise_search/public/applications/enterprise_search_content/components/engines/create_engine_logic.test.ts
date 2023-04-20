@@ -9,7 +9,10 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
+
+import { ENGINES_PATH } from '../../routes';
 
 import { CreateEngineLogic, CreateEngineLogicValues } from './create_engine_logic';
 
@@ -58,12 +61,15 @@ describe('CreateEngineLogic', () => {
         indices: ['search-index-01'],
       });
     });
-    it('engineCreated is handled', () => {
+    it('engineCreated is handled and is navigated to Search application list page', () => {
       jest.spyOn(CreateEngineLogic.actions, 'fetchEngines');
-
+      jest
+        .spyOn(KibanaLogic.values, 'navigateToUrl')
+        .mockImplementationOnce(() => Promise.resolve());
       CreateEngineApiLogic.actions.apiSuccess({
         result: 'created',
       });
+      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
 
       expect(CreateEngineLogic.actions.fetchEngines).toHaveBeenCalledTimes(1);
     });

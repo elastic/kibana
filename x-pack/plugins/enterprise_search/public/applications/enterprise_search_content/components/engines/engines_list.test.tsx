@@ -180,12 +180,12 @@ describe('CreateEngineButton', () => {
     it('renders a button and does not show a popover when focused', () => {
       const wrapper = mount(<CreateEngineButton disabled={false} />);
 
-      const anchor = wrapper.find(
-        'a[data-test-subj="enterprise-search-content-engines-creation-button"]'
+      const button = wrapper.find(
+        'button[data-test-subj="enterprise-search-content-engines-creation-button"]'
       );
 
-      expect(anchor).toHaveLength(1);
-      expect(anchor.prop('disabled')).toBeFalsy();
+      expect(button).toHaveLength(1);
+      expect(button.prop('disabled')).toBeFalsy();
 
       let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
 
@@ -206,12 +206,12 @@ describe('CreateEngineButton', () => {
     it('renders a button and does not show a popover when hovered', () => {
       const wrapper = mount(<CreateEngineButton disabled={false} />);
 
-      const anchor = wrapper.find(
-        'a[data-test-subj="enterprise-search-content-engines-creation-button"]'
+      const button = wrapper.find(
+        'button[data-test-subj="enterprise-search-content-engines-creation-button"]'
       );
 
-      expect(anchor).toHaveLength(1);
-      expect(anchor.prop('disabled')).toBeFalsy();
+      expect(button).toHaveLength(1);
+      expect(button.prop('disabled')).toBeFalsy();
 
       let popover = wrapper.find('div[data-test-subj="create-engine-button-popover-content"]');
 

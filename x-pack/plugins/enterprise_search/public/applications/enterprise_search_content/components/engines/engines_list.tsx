@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
 
 import {
+  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,6 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../workplace_search/constants';
 import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
@@ -61,14 +61,13 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
           onFocus={() => setShowPopover(true)}
           tabIndex={0}
         >
-          <EuiButtonTo
+          <EuiButton
             fill
             iconType="plusInCircle"
             data-test-subj="enterprise-search-content-engines-creation-button"
             data-telemetry-id="entSearchContent-engines-list-createEngine"
             isDisabled={disabled}
             onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
-            to={ENGINE_CREATION_PATH}
           >
             {i18n.translate(
               'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
@@ -76,7 +75,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
                 defaultMessage: 'Create Search Application',
               }
             )}
-          </EuiButtonTo>
+          </EuiButton>
         </div>
       }
     >

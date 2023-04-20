@@ -8,11 +8,13 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   CreateEngineApiLogic,
   CreateEngineApiLogicActions,
 } from '../../api/engines/create_engine_api_logic';
+import { ENGINES_PATH } from '../../routes';
 
 import { EnginesListLogic } from './engines_list_logic';
 
@@ -71,6 +73,7 @@ export const CreateEngineLogic = kea<
     },
     engineCreated: () => {
       actions.fetchEngines();
+      KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
   }),
   path: ['enterprise_search', 'content', 'create_engine_logic'],

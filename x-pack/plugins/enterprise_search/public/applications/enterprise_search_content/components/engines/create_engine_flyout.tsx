@@ -26,6 +26,8 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiCallOut,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,10 +41,6 @@ import { docLinks } from '../../../shared/doc_links';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
 import { parseQueryParams } from '../../../shared/query_params';
-
-import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
-
-import { ENGINES_PATH } from '../../routes';
 
 import { indexToOption, IndicesSelectComboBox } from './components/indices_select_combobox';
 import { CreateEngineLogic } from './create_engine_logic';
@@ -171,18 +169,17 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmptyTo
+            <EuiButtonEmpty
               disabled={formDisabled}
               data-telemetry-id="entSearchContent-engines-createEngine-cancel"
               onClick={onClose}
-              to={ENGINES_PATH}
             >
               {CANCEL_BUTTON_LABEL}
-            </EuiButtonEmptyTo>
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <EuiButtonTo
+            <EuiButton
               isDisabled={createDisabled || formDisabled}
               data-telemetry-id="entSearchContent-engines-createEngine-submit"
               fill
@@ -190,12 +187,11 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               onClick={() => {
                 createEngine();
               }}
-              to={ENGINES_PATH}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngine.submit', {
                 defaultMessage: 'Create this Search Application',
               })}
-            </EuiButtonTo>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
