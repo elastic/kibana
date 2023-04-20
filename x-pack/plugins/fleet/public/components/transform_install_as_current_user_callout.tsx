@@ -26,7 +26,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
   count: number;
 }> = ({ count }) => {
   return (
-    <EuiCallOut color="primary">
+    <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage
         id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout"
         defaultMessage="This package has {count, plural, one {one transform asset} other {# transform assets}} which will be created and started with the same roles as the user installing the package."

@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 // Extended version of x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts
 // to prevent bundle being required in security_solution
-// FIXME: Put this in a package
 export class HTTPAuthorizationHeader {
   /**
    * The authentication scheme. Should be consumed in a case-insensitive manner.
