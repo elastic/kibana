@@ -12,12 +12,14 @@ export const paths = {
   alerting: {
     maintenanceWindows: `/${MAINTENANCE_WINDOWS_APP_ID}`,
     maintenanceWindowsCreate: '/create',
+    maintenanceWindowsEdit: '/edit/:maintenanceWindowId',
   },
 };
 
 export const AlertingDeepLinkId = {
   maintenanceWindows: MAINTENANCE_WINDOWS_APP_ID,
   maintenanceWindowsCreate: 'create',
+  maintenanceWindowsEdit: 'edit',
 };
 
 export type IAlertingDeepLinkId = typeof AlertingDeepLinkId[keyof typeof AlertingDeepLinkId];
