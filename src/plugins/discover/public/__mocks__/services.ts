@@ -65,6 +65,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
   }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
+  expressionsPlugin.run = jest.fn(() =>
+    of({
+      partial: false,
+      result: {
+        rows: [],
+      },
+    })
+  ) as unknown as typeof expressionsPlugin.run;
   dataPlugin.search.searchSource.createEmpty = jest.fn(() => {
     const deps = {
       getConfig: jest.fn(),
@@ -184,7 +192,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
-    lens: { EmbeddableComponent: jest.fn(() => null) },
+    lens: {
+      EmbeddableComponent: jest.fn(() => null),
+      stateHelperApi: jest.fn(() => {
+        return {
+          suggestions: jest.fn(),
+        };
+      }),
+    },
     locator: {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),

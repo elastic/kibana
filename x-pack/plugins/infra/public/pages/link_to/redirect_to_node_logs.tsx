@@ -14,28 +14,28 @@ import { flowRight } from 'lodash';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
-import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useLogView } from '../../hooks/use_log_view';
 import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
+import { replaceLogViewInQueryString } from '../../observability_logs/log_view_state';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
   nodeType: InventoryItemType;
-  sourceId?: string;
+  logViewId?: string;
 }>;
 
 export const RedirectToNodeLogs = ({
   match: {
-    params: { nodeId, nodeType, sourceId = 'default' },
+    params: { nodeId, nodeType, logViewId = 'default' },
   },
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
   const { isLoading, load } = useLogView({
-    logViewId: sourceId,
+    initialLogViewReference: { type: 'log-view-reference', logViewId },
     logViews: services.logViews.client,
   });
 
@@ -65,7 +65,7 @@ export const RedirectToNodeLogs = ({
   const searchString = flowRight(
     replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
     replaceLogPositionInQueryString(time),
-    replaceSourceIdInQueryString(sourceId)
+    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
 
   return <Redirect to={`/stream?${searchString}`} />;

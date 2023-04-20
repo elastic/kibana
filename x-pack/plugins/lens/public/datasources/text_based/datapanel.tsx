@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiHighlight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -19,19 +18,17 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldList,
   FieldListFilters,
-  FieldIcon,
-  GetCustomFieldType,
-  wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
+  GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
-import { FieldButton } from '@kbn/react-field';
+import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { FieldItem } from '../common/field_item';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -55,6 +52,8 @@ export function TextBasedDataPanel({
   expressions,
   dataViews,
   layerFields,
+  hasSuggestionForField,
+  dropOntoWorkspace,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
@@ -111,36 +110,26 @@ export function TextBasedDataPanel({
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, fieldSearchHighlight }) => {
+    ({ field, groupIndex, itemIndex, fieldSearchHighlight, groupName }) => {
       if (!field) {
         return <></>;
       }
+
       return (
-        <DragDrop
-          draggable
-          order={[itemIndex]}
-          value={{
-            field: field.name,
-            id: field.id,
-            humanData: { label: field.name },
-          }}
-          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-        >
-          <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
-            isActive={false}
-            onClick={() => {}}
-            fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
-            fieldName={
-              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-                {wrapFieldNameOnDot(field.name)}
-              </EuiHighlight>
-            }
-          />
-        </DragDrop>
+        <FieldItem
+          field={field}
+          exists
+          hideDetails
+          itemIndex={itemIndex}
+          groupIndex={groupIndex}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
+          highlight={fieldSearchHighlight}
+          getCustomFieldType={getCustomFieldType}
+        />
       );
     },
-    []
+    [hasSuggestionForField, dropOntoWorkspace]
   );
 
   return (

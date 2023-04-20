@@ -2552,29 +2552,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.getFeaturesUICapabilities",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeaturesUICapabilities",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.enableReportingUiCapabilities",
             "type": "Function",
             "tags": [],

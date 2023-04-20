@@ -15,13 +15,16 @@ import { useHostsTable } from '../hooks/use_hosts_table';
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { Flyout } from './host_details_flyout/flyout';
 
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items } = useHostsTable(hostNodes, { time: searchCriteria.dateRange });
+  const { columns, items, isFlyoutOpen, closeFlyout, clickedItem } = useHostsTable(hostNodes, {
+    time: searchCriteria.dateRange,
+  });
 
   const noData = items.length === 0;
 
@@ -46,7 +49,7 @@ export const HostsTable = () => {
   if (loading) {
     return (
       <InfraLoadingPanel
-        height="185px"
+        height="400px"
         width="auto"
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
@@ -74,18 +77,23 @@ export const HostsTable = () => {
   }
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="hostsView-table"
-      pagination={properties.pagination}
-      sorting={
-        typeof properties.sorting === 'boolean' ? properties.sorting : { sort: properties.sorting }
-      }
-      rowProps={{
-        'data-test-subj': 'hostsView-tableRow',
-      }}
-      items={items}
-      columns={columns}
-      onTableChange={onTableChange}
-    />
+    <>
+      <EuiInMemoryTable
+        data-test-subj="hostsView-table"
+        pagination={properties.pagination}
+        sorting={
+          typeof properties.sorting === 'boolean'
+            ? properties.sorting
+            : { sort: properties.sorting }
+        }
+        rowProps={{
+          'data-test-subj': 'hostsView-tableRow',
+        }}
+        items={items}
+        columns={columns}
+        onTableChange={onTableChange}
+      />
+      {isFlyoutOpen && clickedItem && <Flyout node={clickedItem} closeFlyout={closeFlyout} />}
+    </>
   );
 };

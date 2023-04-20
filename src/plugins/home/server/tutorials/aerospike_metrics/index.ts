@@ -56,6 +56,6 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web'],
+    integrationBrowserCategories: ['observability', 'datastore'],
   };
 }

@@ -7,8 +7,8 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from './services/synthetics_services';
 
@@ -136,8 +136,10 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ testRunId, docType: 'stepEnd', stepIndex: 1 });
 
     await page.waitForSelector('text=1 step completed');
-    await page.waitForSelector('text=Go to https://www.google.com');
-    await page.waitForSelector('text=1.42 s');
+    await page.waitForSelector(
+      '.euiTableRowCell--hideForMobile :has-text("Go to https://www.google.com")'
+    );
+    await page.waitForSelector('.euiTableRowCell--hideForMobile :has-text("1.42 s")');
     await page.waitForSelector('text=Complete');
   });
 
@@ -146,7 +148,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await retry.tryForTime(90 * 1000, async () => {
       await page.waitForSelector('text=2 steps completed');
       await page.waitForSelector('text="Go to step 2"');
-      await page.waitForSelector('text=788 ms');
+      await page.waitForSelector('div:has-text("788 ms")');
       await page.waitForSelector('text=IN PROGRESS');
     });
   });

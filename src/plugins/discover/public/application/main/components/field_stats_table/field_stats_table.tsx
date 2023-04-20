@@ -111,13 +111,13 @@ export interface FieldStatisticsTableProps {
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     dataView,
+    savedSearch,
     query,
     columns,
     filters,
     stateContainer,
     onAddFilter,
     trackUiMetric,
-    savedSearch,
     searchSessionId,
   } = props;
   const totalHits$ = stateContainer?.dataState.data$.totalHits$;
@@ -185,6 +185,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   }, [
     embeddable,
     dataView,
+    savedSearch,
     query,
     columns,
     filters,
@@ -192,7 +193,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     totalHits$,
     stateContainer,
-    savedSearch,
   ]);
 
   useEffect(() => {
@@ -219,7 +219,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
             dataView,
-            savedSearch: stateContainer?.savedSearchState.getState(),
+            savedSearch,
             query,
             showPreviewByDefault,
             onAddFilter,

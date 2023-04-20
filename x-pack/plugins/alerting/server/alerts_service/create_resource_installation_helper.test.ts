@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { IRuleTypeAlerts } from '../types';
 import {
@@ -19,11 +20,11 @@ import { retryUntil } from './test_utils';
 const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
   loggingSystemMock.createLogger();
 
-const initFn = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
-  logger.info(context.context);
+const initFn = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
+  logger.info(`${context.context}_${namespace}`);
 };
 
-const initFnWithError = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
+const initFnWithError = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
   throw new Error('no go');
 };
 
@@ -42,9 +43,10 @@ const getCommonInitPromise = async (
 
 const getContextInitialized = async (
   helper: ResourceInstallationHelper,
-  context: string = 'test1'
+  context: string = 'test1',
+  namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
-  const { result } = await helper.getInitializedContext(context);
+  const { result } = await helper.getInitializedContext(context, namespace);
   return result;
 };
 
@@ -73,10 +75,14 @@ describe('createResourceInstallationHelper', () => {
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 3);
 
     expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
-    expect(logger.info).toHaveBeenNthCalledWith(2, 'test1');
-    expect(logger.info).toHaveBeenNthCalledWith(3, 'test2');
-    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
-    expect(await helper.getInitializedContext('test2')).toEqual({ result: true });
+    expect(logger.info).toHaveBeenNthCalledWith(2, 'test1_default');
+    expect(logger.info).toHaveBeenNthCalledWith(3, 'test2_default');
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+      result: true,
+    });
+    expect(await helper.getInitializedContext('test2', DEFAULT_NAMESPACE_STRING)).toEqual({
+      result: true,
+    });
   });
 
   test(`should return false if context is unrecognized`, async () => {
@@ -93,10 +99,12 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 2);
 
-    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
-    expect(await helper.getInitializedContext('test2')).toEqual({
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+      result: true,
+    });
+    expect(await helper.getInitializedContext('test2', DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
-      error: `Unrecognized context test2`,
+      error: `Unrecognized context test2_default`,
     });
   });
 
@@ -117,7 +125,7 @@ describe('createResourceInstallationHelper', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `Common resources were not initialized, cannot initialize context for test1`
     );
-    expect(await helper.getInitializedContext('test1')).toEqual({
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `error initializing`,
     });
@@ -137,7 +145,7 @@ describe('createResourceInstallationHelper', () => {
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
-    expect(await helper.getInitializedContext('test1')).toEqual({
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `fail`,
     });
@@ -161,7 +169,7 @@ describe('createResourceInstallationHelper', () => {
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - no go`);
-    expect(await helper.getInitializedContext('test1')).toEqual({
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `no go`,
     });

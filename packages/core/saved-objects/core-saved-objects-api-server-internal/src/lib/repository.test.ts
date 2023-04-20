@@ -929,21 +929,35 @@ describe('SavedObjectsRepository', () => {
         });
 
         // Assert that both raw docs from the ES response are deserialized
-        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
-          ...response.items[0].create,
-          _source: {
-            ...response.items[0].create._source,
-            namespaces: response.items[0].create._source.namespaces,
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(
+          1,
+          {
+            ...response.items[0].create,
+            _source: {
+              ...response.items[0].create._source,
+              namespaces: response.items[0].create._source.namespaces,
+              coreMigrationVersion: expect.any(String),
+              typeMigrationVersion: '1.1.1',
+            },
+            _id: expect.stringMatching(
+              /^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/
+            ),
           },
-          _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
-        });
-        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, {
-          ...response.items[1].create,
-          _source: {
-            ...response.items[1].create._source,
-            namespaces: response.items[1].create._source.namespaces,
+          expect.any(Object)
+        );
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(
+          2,
+          {
+            ...response.items[1].create,
+            _source: {
+              ...response.items[1].create._source,
+              namespaces: response.items[1].create._source.namespaces,
+              coreMigrationVersion: expect.any(String),
+              typeMigrationVersion: '1.1.1',
+            },
           },
-        });
+          expect.any(Object)
+        );
 
         // Assert that ID's are deserialized to remove the type and namespace
         expect(result.saved_objects[0].id).toEqual(
@@ -2946,7 +2960,8 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
         });
       });
     });
@@ -3533,6 +3548,7 @@ describe('SavedObjectsRepository', () => {
                 'references',
                 'migrationVersion',
                 'coreMigrationVersion',
+                'typeMigrationVersion',
                 'updated_at',
                 'created_at',
                 'originId',
@@ -5220,6 +5236,26 @@ describe('SavedObjectsRepository', () => {
       mockUpdateObjectsSpaces.mockRejectedValue(expectedResult);
 
       await expect(repository.updateObjectsSpaces([], [], [])).rejects.toEqual(expectedResult);
+    });
+  });
+
+  describe('#getCurrentNamespace', () => {
+    it('returns `undefined` for `undefined` namespace argument', async () => {
+      expect(repository.getCurrentNamespace()).toBeUndefined();
+    });
+
+    it('throws if `*` namespace argument is provided', async () => {
+      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
+        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      );
+    });
+
+    it('properly handles `default` namespace', async () => {
+      expect(repository.getCurrentNamespace('default')).toBeUndefined();
+    });
+
+    it('properly handles non-`default` namespace', async () => {
+      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
     });
   });
 });

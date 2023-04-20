@@ -7,7 +7,7 @@
  */
 
 import {
-  getEmptySavedSearch,
+  getNewSavedSearch,
   getSavedSearch,
   SavedSearch,
   saveSavedSearch,
@@ -25,9 +25,18 @@ import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
 export interface UpdateParams {
+  /**
+   * The next data view to be used
+   */
   nextDataView?: DataView | undefined;
+  /**
+   * The next AppState that should be used for updating the saved search
+   */
   nextState?: DiscoverAppState | undefined;
-  filterAndQuery?: boolean;
+  /**
+   * use filter and query services to update the saved search
+   */
+  updateByFilterAndQuery?: boolean;
 }
 
 /**
@@ -53,7 +62,7 @@ export interface DiscoverSavedSearchContainer {
   /**
    * Get the title of the current saved search
    */
-  getTitle: () => string;
+  getTitle: () => string | undefined;
   /**
    * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
    * Can be used to track if the saved search has been modified and displayed in the UI
@@ -102,7 +111,7 @@ export function getSavedSearchContainer({
 }: {
   services: DiscoverServices;
 }): DiscoverSavedSearchContainer {
-  const initialSavedSearch = getEmptySavedSearch(services.data);
+  const initialSavedSearch = getNewSavedSearch(services.data);
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
@@ -117,7 +126,7 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
-  const getTitle = () => savedSearchCurrent$.getValue().title ?? '';
+  const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
@@ -146,6 +155,7 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
+    updateSavedSearch({ savedSearch: nextSavedSearch, services });
 
     const id = await saveSavedSearch(
       nextSavedSearch,
@@ -159,7 +169,7 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-  const update = ({ nextDataView, nextState, filterAndQuery }: UpdateParams) => {
+  const update = ({ nextDataView, nextState, updateByFilterAndQuery }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = getState();
@@ -174,15 +184,8 @@ export function getSavedSearchContainer({
         state: nextState || {},
         services,
       },
-      !filterAndQuery
+      updateByFilterAndQuery
     );
-
-    nextSavedSearch.searchSource.setField('index', dataView);
-    if (nextState) {
-      nextSavedSearch.searchSource
-        .setField('query', nextState.query)
-        .setField('filter', nextState.filters);
-    }
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
@@ -193,6 +196,7 @@ export function getSavedSearchContainer({
   };
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
+    addLog('[savedSearch] load', { id, dataView });
     const loadedSavedSearch = await getSavedSearch(id, {
       search: services.data.search,
       savedObjectsClient: services.core.savedObjects.client,
@@ -224,8 +228,11 @@ export function getSavedSearchContainer({
   };
 }
 
+/**
+ * Copies a saved search object, due to the stateful nature of searchSource it has to be copied with a dedicated function
+ * @param savedSearch
+ */
 export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
-  // due to the stateful nature of searchSource it has to be copied separately
   return {
     ...savedSearch,
     ...{ searchSource: savedSearch.searchSource.createCopy() },

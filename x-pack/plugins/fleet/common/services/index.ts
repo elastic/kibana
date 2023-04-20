@@ -63,3 +63,5 @@ export {
 
 export { getAllowedOutputTypeForPolicy } from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
+
+export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_helpers';

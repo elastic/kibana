@@ -116,7 +116,7 @@ async function createSetupSideEffects(
     settingsService.settingsSetup(soClient),
   ]);
 
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');

@@ -48,17 +48,18 @@ describe('Manage shared exception list', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createRule({
-        ...getNewRule(),
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList2().list_id,
-            type: getExceptionList2().type,
-            namespace_type: getExceptionList2().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList2().list_id,
+              type: getExceptionList2().type,
+              namespace_type: getExceptionList2().namespace_type,
+            },
+          ],
+        })
+      )
     );
 
     // Create exception list not used by any rules

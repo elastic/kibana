@@ -64,7 +64,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     hasStoppedJobs,
     jobIds,
     categoryQualityWarnings,
-    sourceConfiguration: { sourceId },
+    sourceConfiguration: { sourceId: logViewId },
   } = useLogEntryCategoriesModuleContext();
 
   const {
@@ -109,7 +109,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     endTime: categoryQueryTimeRange.timeRange.endTime,
     filteredDatasets: categoryQueryDatasets,
     onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
-    sourceId,
+    logViewReference: { type: 'log-view-reference', logViewId },
     startTime: categoryQueryTimeRange.timeRange.startTime,
   });
 
@@ -206,7 +206,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
 
   return (
     <ViewLogInContextProvider
-      sourceId={sourceId}
+      logViewReference={{ type: 'log-view-reference', logViewId }}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
     >
@@ -265,7 +265,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
             <TopCategoriesSection
               isLoadingTopCategories={isLoadingTopLogEntryCategories}
               jobId={jobIds['log-entry-categories-count']}
-              sourceId={sourceId}
+              logViewReference={{ type: 'log-view-reference', logViewId }}
               timeRange={categoryQueryTimeRange.timeRange}
               topCategories={topLogEntryCategories}
               sortOptions={sortOptions}

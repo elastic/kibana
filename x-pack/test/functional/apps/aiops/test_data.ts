@@ -15,13 +15,36 @@ export const farequoteDataViewTestData: TestData = {
   brushDeviationTargetTimestamp: 1455033600000,
   brushIntervalFactor: 1,
   chartClickCoordinates: [0, 0],
+  fieldSelectorSearch: 'airline',
+  fieldSelectorApplyAvailable: false,
   expected: {
     totalDocCountFormatted: '86,374',
+    sampleProbabilityFormatted: '0.5',
+    fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+  },
+};
+
+export const farequoteDataViewTestDataWithQuery: TestData = {
+  suiteTitle: 'farequote with spike',
+  dataGenerator: 'farequote_with_spike',
+  isSavedSearch: false,
+  sourceIndexOrSavedSearch: 'ft_farequote',
+  brushDeviationTargetTimestamp: 1455033600000,
+  brushIntervalFactor: 1,
+  chartClickCoordinates: [0, 0],
+  fieldSelectorSearch: 'airline',
+  fieldSelectorApplyAvailable: false,
+  query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
+  expected: {
+    totalDocCountFormatted: '48,799',
     analysisGroupsTable: [
-      { docCount: '297', group: 'airline: AAL' },
+      {
+        docCount: '297',
+        group: '* airline: AAL',
+      },
       {
         docCount: '100',
-        group: 'airline: UALcustom_field.keyword: deviation',
+        group: '* custom_field.keyword: deviation* airline: UAL',
       },
     ],
     analysisTable: [
@@ -29,10 +52,11 @@ export const farequoteDataViewTestData: TestData = {
         fieldName: 'airline',
         fieldValue: 'AAL',
         logRate: 'Chart type:bar chart',
-        pValue: '4.66e-11',
+        pValue: '1.18e-8',
         impact: 'High',
       },
     ],
+    fieldSelectorPopover: ['airline', 'custom_field.keyword'],
   },
 };
 
@@ -51,25 +75,54 @@ export const artificialLogDataViewTestData: TestData = {
   brushDeviationTargetTimestamp: DEVIATION_TS + DAY_MS / 2,
   brushIntervalFactor: 10,
   chartClickCoordinates: [-200, 30],
+  fieldSelectorSearch: 'user',
+  fieldSelectorApplyAvailable: true,
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
-      { group: 'user: Peter', docCount: '1981' },
-      { group: 'response_code: 500url: home.phpurl: login.php', docCount: '792' },
+      {
+        group: 'response_code: 500url: home.php',
+        docCount: '792',
+      },
+      {
+        group: 'url: login.phpresponse_code: 500',
+        docCount: '790',
+      },
+      {
+        docCount: '636',
+        group: 'user: Peterurl: home.php',
+      },
+      {
+        docCount: '632',
+        group: 'user: Peterurl: login.php',
+      },
+    ],
+    filteredAnalysisGroupsTable: [
+      { group: '* url: home.phpresponse_code: 500', docCount: '792' },
+      { group: '* url: login.phpresponse_code: 500', docCount: '790' },
     ],
     analysisTable: [
       {
-        fieldName: 'user',
-        fieldValue: 'Peter',
+        fieldName: 'response_code',
+        fieldValue: '500',
         logRate: 'Chart type:bar chart',
-        pValue: '2.75e-21',
+        pValue: '3.61e-12',
         impact: 'High',
       },
+      {
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        impact: 'Low',
+        logRate: 'Chart type:bar chart',
+        pValue: '0.00974',
+      },
     ],
+    fieldSelectorPopover: ['response_code', 'url', 'user'],
   },
 };
 
 export const explainLogRateSpikesTestData: TestData[] = [
   farequoteDataViewTestData,
+  farequoteDataViewTestDataWithQuery,
   artificialLogDataViewTestData,
 ];

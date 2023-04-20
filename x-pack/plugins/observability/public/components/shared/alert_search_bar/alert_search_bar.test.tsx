@@ -91,7 +91,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             range: {
-              '@timestamp': expect.objectContaining({
+              'kibana.alert.time_range': expect.objectContaining({
                 format: 'strict_date_optional_time',
                 gte: mockedFrom,
                 lte: mockedTo,
@@ -138,7 +138,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             range: {
-              '@timestamp': expect.objectContaining({
+              'kibana.alert.time_range': expect.objectContaining({
                 format: 'strict_date_optional_time',
                 gte: mockedFrom,
                 lte: mockedTo,

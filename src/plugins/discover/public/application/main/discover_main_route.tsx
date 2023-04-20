@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
@@ -124,11 +125,16 @@ export function DiscoverMainRoute(props: Props) {
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        const currentSavedSearch = await stateContainer.actions.loadSavedSearch(
-          id,
-          nextDataView,
-          historyLocationState?.dataViewSpec
-        );
+        // reset appState in case a saved search with id is loaded and the url is empty
+        // so the saved search is loaded in a clean state
+        // else it might be updated by the previous app state
+        const useAppState = !stateContainer.appState.isEmptyURL();
+        const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
+          savedSearchId: id,
+          dataView: nextDataView,
+          dataViewSpec: historyLocationState?.dataViewSpec,
+          useAppState,
+        });
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -170,7 +176,7 @@ export function DiscoverMainRoute(props: Props) {
     },
     [
       checkData,
-      stateContainer.actions,
+      stateContainer,
       id,
       historyLocationState?.dataViewSpec,
       chrome,
@@ -194,9 +200,20 @@ export function DiscoverMainRoute(props: Props) {
     [loadSavedSearch]
   );
 
+  // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
     loadSavedSearch();
   }, [loadSavedSearch, id]);
+
+  // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
+  useUrl({
+    history,
+    savedSearchId: id,
+    onNewUrl: () => {
+      const dataView = stateContainer.internalState.getState().dataView;
+      loadSavedSearch(dataView);
+    },
+  });
 
   if (showNoDataPage) {
     const analyticsServices = {

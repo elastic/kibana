@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect } from 'react';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useHistory } from 'react-router-dom';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
@@ -77,19 +78,24 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
+  }, [chrome, docLinks]);
+
+  useEffect(() => {
     return () => {
       // clear session when navigating away from discover main
       data.search.session.clear();
     };
-  }, [data.search.session, chrome, docLinks]);
+  }, [data.search.session]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverLayoutMemoized
-      navigateTo={navigateTo}
-      stateContainer={stateContainer}
-      persistDataView={persistDataView}
-    />
+    <RootDragDropProvider>
+      <DiscoverLayoutMemoized
+        navigateTo={navigateTo}
+        stateContainer={stateContainer}
+        persistDataView={persistDataView}
+      />
+    </RootDragDropProvider>
   );
 }

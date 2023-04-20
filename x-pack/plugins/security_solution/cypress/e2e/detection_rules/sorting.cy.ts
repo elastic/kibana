@@ -37,10 +37,10 @@ describe('Alerts detection rules', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: '1' });
-    createRule({ ...getExistingRule(), rule_id: '2' });
-    createRule({ ...getNewOverrideRule(), rule_id: '3' });
-    createRule({ ...getNewThresholdRule(), rule_id: '4' });
+    createRule(getNewRule({ rule_id: '1' }));
+    createRule(getExistingRule({ rule_id: '2' }));
+    createRule(getNewOverrideRule({ rule_id: '3' }));
+    createRule(getNewThresholdRule({ rule_id: '4' }));
   });
 
   it('Sorts by enabled rules', () => {
@@ -62,8 +62,8 @@ describe('Alerts detection rules', () => {
   });
 
   it('Pagination updates page number and results', () => {
-    createRule({ ...getNewRule(), name: 'Test a rule', rule_id: '5' });
-    createRule({ ...getNewRule(), name: 'Not same as first rule', rule_id: '6' });
+    createRule(getNewRule({ name: 'Test a rule', rule_id: '5' }));
+    createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6' }));
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();

@@ -24,12 +24,14 @@ import {
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
@@ -78,7 +80,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -109,12 +110,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutput();
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
         outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
         outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
@@ -151,6 +150,13 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(2);
+        expect(
+          sidecarActionsResults.hits.hits.map((hit) => hit?._source?.references[0].id).sort()
+        ).to.eql([rule1.id, rule2.id].sort());
+
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
@@ -168,12 +174,15 @@ export default ({ getService }: FtrProviderContext) => {
           .send([updatedRule1, updatedRule2])
           .expect(200);
 
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.version = 2;
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [
             {
               action_type_id: '.slack',
@@ -236,8 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
         body.forEach((response) => {
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.version = 2;
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [];
           outputRule.throttle = 'no_actions';
           const bodyToCompare = removeServerGeneratedProperties(response);
@@ -262,7 +270,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
@@ -291,12 +298,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule1 = getSimpleRuleOutput('rule-1');
         outputRule1.name = 'some other name';
-        outputRule1.version = 2;
         outputRule1.revision = 1;
 
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
-        outputRule2.version = 2;
         outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
@@ -322,13 +327,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it updates enabled and another property', async () => {
+      it('should change the revision of a rule when it updates enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
@@ -345,7 +349,6 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
         outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -378,7 +381,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 3;
         outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -446,7 +448,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -484,7 +485,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);

@@ -8,9 +8,9 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
@@ -51,6 +51,7 @@ afterEach(() => {
 });
 
 const defaultContext = {
+  dataTestSubjPrefix: 'lnsDragDrop',
   dragging: undefined,
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
@@ -775,7 +776,7 @@ describe('LayerPanel', () => {
       );
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroup"] DragDrop .domDragDrop')
         .first();
 
       dragDropElement.simulate('dragOver');
@@ -825,7 +826,8 @@ describe('LayerPanel', () => {
       const dragDropElement = instance
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension');
+        .find('.lnsLayerPanel__dimension')
+        .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -889,7 +891,7 @@ describe('LayerPanel', () => {
       // Simulate drop on the pre-populated dimension
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
         .at(0);
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -904,8 +906,8 @@ describe('LayerPanel', () => {
       // Simulate drop on the empty dimension
 
       const updatedDragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
-        .at(2);
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
+        .last();
 
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');

@@ -7,6 +7,9 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import path from 'path';
+
+const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 
 async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -38,7 +41,7 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        '--xpack.profiling.enabled=true',
+        `--config=${kibanaYamlFilePath}`,
       ],
     },
   };

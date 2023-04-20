@@ -12,7 +12,6 @@
     ],
     "requiredPlugins": [
       "features",
-      "spaces",
       "security",
       "licensing",
       "data",
@@ -26,10 +25,11 @@
       "embeddable",
     ],
     "optionalPlugins": [
-      "usageCollection",
-      "home",
       "customIntegrations",
-      "ml"
+      "home",
+      "ml",
+      "spaces",
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact",

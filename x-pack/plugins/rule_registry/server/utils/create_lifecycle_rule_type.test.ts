@@ -77,10 +77,14 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
+  let uuidCounter = 1;
+  const getUuid = jest.fn(() => `uuid-${uuidCounter++}`);
+
   const alertFactory = {
     create: () => {
       return {
         scheduleActions,
+        getUuid,
       } as any;
     },
     alertLimit: {
@@ -115,6 +119,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
+          revision: 0,
           ruleTypeId: 'ruleTypeId',
           ruleTypeName: 'ruleTypeName',
           schedule: {
@@ -255,6 +260,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
@@ -291,6 +297,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",

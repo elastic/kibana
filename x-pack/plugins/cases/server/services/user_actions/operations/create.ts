@@ -288,6 +288,11 @@ export class UserActionPersister {
     refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     this.context.log.debug(`Attempting to create a bulk create case user action`);
+
+    if (attachments.length <= 0) {
+      return;
+    }
+
     const userActions = attachments.reduce<UserActionEvent[]>((acc, attachment) => {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
       const commentUserAction = userActionBuilder?.build({

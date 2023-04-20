@@ -48,7 +48,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.actions.undoChanges();
+          state.actions.undoSavedSearchChanges();
         }
       }
     }
@@ -67,14 +67,13 @@ async function saveDataSource({
   }
 
   try {
-    const nextSavedSearch = await state.savedSearchState.persist(savedSearch, saveOptions);
-    if (nextSavedSearch) {
-      onSuccess(nextSavedSearch.id!);
+    const response = await state.savedSearchState.persist(savedSearch, saveOptions);
+    if (response?.id) {
+      onSuccess(response.id!);
     }
-    return nextSavedSearch;
-  } catch (e) {
-    onError(e);
-    return savedSearch;
+    return response;
+  } catch (error) {
+    onError(error);
   }
 }
 
@@ -136,20 +135,16 @@ export async function onSaveSearch({
     }
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
-    try {
-      const response = await saveDataSource({
-        saveOptions,
-        services,
-        navigateTo,
-        savedSearch,
-        state,
-        navigateOrReloadSavedSearch,
-      });
-      onSaveCb?.();
-      return response;
-    } catch (e) {
-      // If the save wasn't successful, put the original values back.
-
+    const response = await saveDataSource({
+      saveOptions,
+      services,
+      navigateTo,
+      savedSearch,
+      state,
+      navigateOrReloadSavedSearch,
+    });
+    // If the save wasn't successful, put the original values back.
+    if (!response) {
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
@@ -157,8 +152,11 @@ export async function onSaveSearch({
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
+    } else {
       state.appState.resetInitialState();
     }
+    onSaveCb?.();
+    return response;
   };
 
   const saveModal = (

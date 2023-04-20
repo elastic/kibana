@@ -28,6 +28,19 @@ describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
 
+  describe('getTitle', () => {
+    it('returns undefined for new saved searches', () => {
+      const container = getSavedSearchContainer({ services });
+      expect(container.getTitle()).toBe(undefined);
+    });
+
+    it('returns the title of a persisted saved searches', () => {
+      const container = getSavedSearchContainer({ services });
+      container.set(savedSearch);
+      expect(container.getTitle()).toBe(savedSearch.title);
+    });
+  });
+
   describe('set', () => {
     it('should update the current and initial state of the saved search', () => {
       const container = getSavedSearchContainer({ services });
@@ -160,6 +173,30 @@ describe('DiscoverSavedSearchContainer', () => {
 
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+    });
+
+    it('takes care of persisting timeRestore correctly ', async () => {
+      discoverServiceMock.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+      discoverServiceMock.timefilter.getRefreshInterval = jest.fn(() => ({
+        value: 0,
+        pause: true,
+      }));
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+      });
+      const savedSearchToPersist = {
+        ...savedSearchMockWithTimeField,
+        title: 'My updated saved search',
+        timeRestore: true,
+      };
+      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
+      expect(discoverServiceMock.timefilter.getTime).toHaveBeenCalled();
+      expect(discoverServiceMock.timefilter.getRefreshInterval).toHaveBeenCalled();
+      expect(savedSearchToPersist.timeRange).toEqual({ from: 'now-15m', to: 'now' });
+      expect(savedSearchToPersist.refreshInterval).toEqual({
+        value: 0,
+        pause: true,
+      });
     });
 
     it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {

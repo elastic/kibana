@@ -10,7 +10,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { FIRED_ACTION } from './executor';
+import { ALERT_ACTION } from './executor';
 
 export enum AlertStates {
   OK,
@@ -27,4 +27,4 @@ export type BurnRateRuleParams = {
 export type BurnRateRuleTypeState = RuleTypeState; // no specific rule state
 export type BurnRateAlertState = AlertState; // no specific alert state
 export type BurnRateAlertContext = AlertContext; // no specific alert context
-export type BurnRateAllowedActionGroups = ActionGroupIdsOf<typeof FIRED_ACTION>;
+export type BurnRateAllowedActionGroups = ActionGroupIdsOf<typeof ALERT_ACTION>;

@@ -20,7 +20,7 @@ import {
 } from '../../../common/mock';
 import type { AlertsTableComponentProps } from './alerts_grouping';
 import { GroupedAlertsTableComponent } from './alerts_grouping';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -156,10 +156,6 @@ jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
 
-jest.mock('./timeline_actions/use_bulk_add_to_case_actions', () => ({
-  useBulkAddToCaseActions: jest.fn(() => []),
-}));
-
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -222,26 +218,15 @@ describe('GroupedAlertsTable', () => {
     );
   });
 
-  it('renders alerts table when no group selected', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
-    expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
-  });
-
-  it('renders grouped alerts when group selected', async () => {
+  it('renders grouping table', async () => {
     (isNoneGroup as jest.Mock).mockReturnValue(false);
 
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders store={groupingStore}>
         <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
     expect(getByTestId('grouping-table')).toBeInTheDocument();
-    expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
     expect(getGrouping.mock.calls[0][0].isLoading).toEqual(false);
   });
 

@@ -3858,6 +3858,9 @@
           },
           "400": {
             "$ref": "#/components/responses/error"
+          },
+          "409": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4065,6 +4068,9 @@
             }
           },
           "400": {
+            "$ref": "#/components/responses/error"
+          },
+          "409": {
             "$ref": "#/components/responses/error"
           }
         }

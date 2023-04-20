@@ -33,7 +33,7 @@ import {
   removeServerGeneratedProperties,
   downgradeImmutableRule,
   createRule,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   installMockPrebuiltRules,
   getRule,
   createExceptionList,
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const rule = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+          await waitForRuleSuccess({ supertest, log, id: rule.id });
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
           const expected = {
@@ -568,7 +568,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const { id: createdId } = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, createdId);
+          await waitForRuleSuccess({ supertest, log, id: createdId });
           await waitForSignalsToBePresent(supertest, log, 10, [createdId]);
           const signalsOpen = await getSignalsByIds(supertest, log, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);

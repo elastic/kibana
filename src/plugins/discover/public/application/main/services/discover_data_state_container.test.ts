@@ -80,7 +80,7 @@ describe('test getDataStateContainer', () => {
       savedSearch: savedSearchMockWithSQL,
     });
     stateContainer.savedSearchState.load = jest.fn().mockResolvedValue(savedSearchMockWithSQL);
-    await stateContainer.actions.loadSavedSearch(savedSearchMockWithSQL.id);
+    await stateContainer.actions.loadSavedSearch({ savedSearchId: savedSearchMockWithSQL.id });
 
     expect(stateContainer.dataState.data$.main$.getValue().recordRawType).toBe(RecordRawType.PLAIN);
   });
