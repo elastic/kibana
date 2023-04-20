@@ -18,7 +18,6 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { useQueryClient } from '@tanstack/react-query';
 
 export function RulesPage() {
   const {
