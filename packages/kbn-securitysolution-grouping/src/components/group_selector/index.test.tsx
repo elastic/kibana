@@ -90,4 +90,38 @@ describe('group selector', () => {
     fireEvent.click(getByTestId('panel-none'));
     expect(onGroupChange).toHaveBeenCalled();
   });
+  it('Labels button in correct selection order', () => {
+    const { getByTestId, rerender } = render(
+      <GroupSelector
+        {...testProps}
+        groupsSelected={[...testProps.groupsSelected, 'user.name', 'host.name']}
+      />
+    );
+    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, User name, Host name');
+    rerender(
+      <GroupSelector
+        {...testProps}
+        groupsSelected={[...testProps.groupsSelected, 'host.name', 'user.name']}
+      />
+    );
+    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name, User name');
+  });
+  it('Labels button with selection not in options', () => {
+    const { getByTestId } = render(
+      <GroupSelector
+        {...testProps}
+        groupsSelected={[...testProps.groupsSelected, 'ugly.name', 'host.name']}
+      />
+    );
+    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name');
+  });
+  it('Labels button when `none` is selected', () => {
+    const { getByTestId } = render(
+      <GroupSelector
+        {...testProps}
+        groupsSelected={[...testProps.groupsSelected, 'ugly.name', 'host.name']}
+      />
+    );
+    expect(getByTestId('group-selector-dropdown').title).toEqual('Rule name, Host name');
+  });
 });
