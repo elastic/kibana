@@ -8,20 +8,19 @@ import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiSkeletonText,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
+
 import { useData } from '../../hooks/use_data';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -32,6 +31,7 @@ import { InformationText } from './information_text';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
+import { LoadingCategorization } from './loading_categorization';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -211,10 +211,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
-                {i18n.translate('xpack.aiops.categorizeFlyout.title', {
-                  defaultMessage: 'Pattern analysis of {name}',
-                  values: { name: selectedField.name },
-                })}
+                <FormattedMessage
+                  id="xpack.aiops.categorizeFlyout.title"
+                  defaultMessage="Pattern analysis of {name}"
+                  values={{ name: selectedField.name }}
+                />
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -228,13 +229,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
-        {loading === true ? (
-          <>
-            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
-            <EuiSpacer />
-            <EuiSkeletonText lines={10} />
-          </>
-        ) : null}
+        {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText
           loading={loading}
