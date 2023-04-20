@@ -475,6 +475,7 @@
     "@kbn/maps-plugin": "link:x-pack/plugins/maps",
     "@kbn/ml-agg-utils": "link:x-pack/packages/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/packages/ml/anomaly_utils",
+    "@kbn/ml-data-frame-analytics": "link:x-pack/packages/ml/data_frame_analytics",
     "@kbn/ml-date-picker": "link:x-pack/packages/ml/date_picker",
     "@kbn/ml-error-utils": "link:x-pack/packages/ml/error_utils",
     "@kbn/ml-is-defined": "link:x-pack/packages/ml/is_defined",

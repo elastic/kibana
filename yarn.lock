@@ -4566,6 +4566,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-data-frame-analytics@link:x-pack/packages/ml/data_frame_analytics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
   uid ""
@@ -5025,7 +5029,7 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
-  
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
