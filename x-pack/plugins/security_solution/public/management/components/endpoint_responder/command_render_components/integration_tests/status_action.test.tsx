@@ -21,7 +21,6 @@ import { useGetEndpointDetails } from '../../../../hooks';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 
-jest.mock('../../../../../common/experimental_features_service');
 jest.mock('../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 jest.mock('../../../../hooks');
 
