@@ -41,7 +41,7 @@ export const AnalyticsCollectionsLogic = kea<
     }),
   },
   connect: {
-    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [FetchAnalyticsCollectionsAPILogic, ['makeRequest']],
     values: [FetchAnalyticsCollectionsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
