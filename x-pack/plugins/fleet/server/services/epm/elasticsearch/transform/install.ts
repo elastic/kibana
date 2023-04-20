@@ -415,13 +415,15 @@ const installTransformsAssets = async (
     // so we set runAsKibanaSystem: true by default (e.g. when run_as_kibana_system set to true/not defined in yml file).
     // If package should be installed as the logged in user, set run_as_kibana_system: false,
     // and pass es-secondary-authorization in header when creating the transforms.
-    const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-      authorizationHeader,
-      logger,
-      pkgName: installablePackage.name,
-      pkgVersion: installablePackage.version,
-      username,
-    });
+    const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
+      ? await generateTransformSecondaryAuthHeaders({
+          authorizationHeader,
+          logger,
+          pkgName: installablePackage.name,
+          pkgVersion: installablePackage.version,
+          username,
+        })
+      : undefined;
 
     // delete all previous transform
     await Promise.all([
