@@ -22,11 +22,6 @@ const queryKeys = {
   get: (id?: string) => ['inventory-views-get', id].filter(Boolean),
 };
 
-const placeholderView = {
-  id: null,
-  attributes: {},
-};
-
 export const useInventoryViews = () => {
   const { inventoryViews } = useKibanaContextForPlugin().services;
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -66,7 +61,7 @@ export const useInventoryViews = () => {
     queryKey: queryKeys.get(currentViewId),
     queryFn: ({ queryKey: [, id] }) => inventoryViews.getInventoryView(id),
     onError: (error) => notify.getViewFailure(error.response.message),
-    placeholderData: placeholderView,
+    placeholderData: null,
   });
 
   const { mutate: setDefaultViewById } = useMutation({
@@ -154,7 +149,7 @@ export const useInventoryViews = () => {
         switchViewById(defaultViewId);
       }
     },
-    onSettled: (updatedView) => {
+    onSettled: () => {
       fetchViews(); // Invalidate views list cache and refetch views
     },
   });
@@ -179,7 +174,6 @@ export const useInventoryViews = () => {
 };
 
 const inventoryViewIdRT = rt.string;
-
 type InventoryViewId = rt.TypeOf<typeof inventoryViewIdRT>;
 
 const encodeUrlState = inventoryViewIdRT.encode;
