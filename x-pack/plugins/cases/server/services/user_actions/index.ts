@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type {
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsFindResponse,
-  SavedObjectsRawDoc,
-} from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
-  CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionDeprecatedResponse,
   CaseUserActionInjectedAttributes,
-  User,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -30,98 +23,22 @@ import { buildFilter, combineFilters } from '../../client/utils';
 import type {
   CaseConnectorActivity,
   CaseConnectorFields,
+  ConnectorActivityAggsResult,
+  ConnectorFieldsBeforePushAggsResult,
+  GetUsersResponse,
+  ParticipantsAggsResult,
   PushInfo,
   PushTimeFrameInfo,
   ServiceContext,
+  TimeFrameInfo,
+  TopHits,
+  UserActionsStatsAggsResult,
 } from './types';
 import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
 import { UserActionFinder } from './operations/find';
 import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
-
-export interface UserActionItem {
-  attributes: CaseUserActionAttributesWithoutConnectorId;
-  references: SavedObjectReference[];
-}
-
-interface TopHits {
-  hits: {
-    total: number;
-    hits: SavedObjectsRawDoc[];
-  };
-}
-
-interface TimeFrameInfo {
-  mostRecent: TopHits;
-  oldest: TopHits;
-}
-
-interface ConnectorActivityAggsResult {
-  references: {
-    connectors: {
-      ids: {
-        buckets: Array<{
-          key: string;
-          reverse: {
-            connectorActivity: {
-              buckets: {
-                changeConnector: TimeFrameInfo;
-                createCase: TimeFrameInfo;
-                pushInfo: TimeFrameInfo;
-              };
-            };
-          };
-        }>;
-      };
-    };
-  };
-}
-
-interface ConnectorFieldsBeforePushAggsResult {
-  references: {
-    connectors: {
-      reverse: {
-        ids: {
-          buckets: Record<string, TimeFrameInfo>;
-        };
-      };
-    };
-  };
-}
-
-interface UserActionsStatsAggsResult {
-  total: number;
-  totals: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-interface ParticipantsAggsResult {
-  participants: {
-    buckets: Array<{
-      key: string;
-      docs: {
-        hits: {
-          hits: SavedObjectsRawDoc[];
-        };
-      };
-    }>;
-  };
-  assignees: {
-    buckets: Array<{
-      key: string;
-    }>;
-  };
-}
-
-interface GetUsersResponse {
-  participants: Array<{ id: string; owner: string; user: User }>;
-  assignedAndUnassignedUsers: Set<string>;
-}
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;

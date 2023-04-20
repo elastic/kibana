@@ -12,7 +12,6 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type {
-  UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
   CaseUserActionInjectedAttributes,
@@ -24,15 +23,10 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 
-import type { ServiceContext } from '../types';
+import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
-
-interface FindOptions extends UserActionFindRequest {
-  caseId: string;
-  filter?: KueryNode;
-}
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
