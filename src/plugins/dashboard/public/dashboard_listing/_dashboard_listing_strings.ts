@@ -110,14 +110,14 @@ export const resetConfirmStrings = {
   getResetSubtitle: (viewMode: ViewMode) =>
     viewMode === ViewMode.EDIT
       ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-          defaultMessage: `Resetting will cause all unsaved changes to be lost.`,
+          defaultMessage: `All unsaved changes will be lost.`,
         })
       : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
           defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
         }),
   getResetConfirmButtonText: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Reset',
+      defaultMessage: 'Reset dashboard',
     }),
 };
 

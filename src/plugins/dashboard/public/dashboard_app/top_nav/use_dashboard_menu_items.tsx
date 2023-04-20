@@ -196,7 +196,7 @@ export const useDashboardMenuItems = ({
         id: 'cancel',
         disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
-        run: () => resetChanges(ViewMode.EDIT, true),
+        run: () => resetChanges(true),
       } as TopNavMenuData,
 
       share: {
