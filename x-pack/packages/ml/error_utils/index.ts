@@ -15,5 +15,6 @@ export type {
   MLErrorObject,
   MLHttpFetchError,
   MLResponseError,
+  QueryErrorMessage,
 } from './src/types';
 export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './src/types';

@@ -16,7 +16,7 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { ErrorMessage } from '@kbn/ml-error-utils';
+import { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { Dictionary } from '../../../../../../../common/types/common';
 import {
@@ -52,7 +52,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<QueryErrorMessage | undefined>(undefined);
 
   const { services } = useMlKibana();
   const {

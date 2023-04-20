@@ -35,8 +35,14 @@ export interface MLResponseError {
 }
 
 export interface ErrorMessage {
-  query: string;
   message: string;
+}
+
+/**
+ * To be used for client side errors related to search query bars.
+ */
+export interface QueryErrorMessage extends ErrorMessage {
+  query: string;
 }
 
 export interface MLErrorObject {

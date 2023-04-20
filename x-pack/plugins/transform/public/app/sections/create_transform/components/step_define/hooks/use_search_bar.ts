@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import type { ErrorMessage } from '@kbn/ml-error-utils';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { getTransformConfigQuery } from '../../../../../common';
 
@@ -43,7 +43,7 @@ export const useSearchBar = (
 
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<QueryErrorMessage | undefined>(undefined);
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
