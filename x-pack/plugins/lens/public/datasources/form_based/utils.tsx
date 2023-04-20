@@ -514,7 +514,7 @@ export function getNotifiableFeatures(
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
-        defaultMessage: 'Layers with reduced sampling',
+        defaultMessage: 'Sampling probability by layer',
       }),
       longMessage: (
         <ReducedSamplingSectionEntries
