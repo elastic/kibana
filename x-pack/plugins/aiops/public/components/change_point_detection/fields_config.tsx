@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
+import React, { type FC, useCallback, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -16,7 +15,6 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -144,50 +142,67 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
 
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+
   const {
     results: annotations,
     isLoading: annotationsLoading,
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const accordionId = useGeneratedHtmlId({ prefix: 'fieldConfig' });
-
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-      <EuiAccordion
-        id={accordionId}
-        initialIsOpen={true}
-        buttonElement={'div'}
-        buttonContent={
-          <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
-            <EuiFlexItem css={{ visibility: progress === null ? 'hidden' : 'visible' }} grow={true}>
-              <EuiProgress
-                label={
-                  <FormattedMessage
-                    id="xpack.aiops.changePointDetection.progressBarLabel"
-                    defaultMessage="Fetching change points"
-                  />
-                }
-                value={progress ?? 0}
-                max={100}
-                valueText
-                size="m"
+      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+                aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
+                  defaultMessage: 'Expand configuration',
+                })}
               />
-              <EuiSpacer size="s" />
             </EuiFlexItem>
-          </FieldsControls>
-        }
-        extraAction={
+            <EuiFlexItem grow={false}>
+              <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
+                <EuiFlexItem
+                  css={{ visibility: progress === null ? 'hidden' : 'visible' }}
+                  grow={true}
+                >
+                  <EuiProgress
+                    label={
+                      <FormattedMessage
+                        id="xpack.aiops.changePointDetection.progressBarLabel"
+                        defaultMessage="Fetching change points"
+                      />
+                    }
+                    value={progress ?? 0}
+                    max={100}
+                    valueText
+                    size="m"
+                  />
+                  <EuiSpacer size="s" />
+                </EuiFlexItem>
+              </FieldsControls>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             disabled={removeDisabled}
-            aria-label="trash"
+            aria-label={i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
+              defaultMessage: 'Remove configuration',
+            })}
             iconType="trash"
             color="danger"
             onClick={onRemove}
           />
-        }
-        paddingSize="s"
-      >
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isExpanded ? (
         <ChangePointResults
           fieldConfig={fieldConfig}
           isLoading={annotationsLoading}
@@ -195,7 +210,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
           splitFieldCardinality={splitFieldCardinality}
           onSelectionChange={onSelectionChange}
         />
-      </EuiAccordion>
+      ) : null}
     </EuiPanel>
   );
 };
