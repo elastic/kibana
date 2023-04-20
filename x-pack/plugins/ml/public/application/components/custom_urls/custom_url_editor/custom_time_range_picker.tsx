@@ -132,7 +132,9 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
                   onChange={handleStartChange}
                   startDate={start}
                   endDate={end}
-                  aria-label="Start date"
+                  aria-label={i18n.translate('xpack.ml.customUrlsEditor.customTimeRangeStartDate', {
+                    defaultMessage: 'Start date',
+                  })}
                   showTimeSelect
                 />
               }
@@ -142,12 +144,9 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
                   onChange={handleEndChange}
                   startDate={start}
                   endDate={end}
-                  aria-label={i18n.translate(
-                    'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
-                    {
-                      defaultMessage: 'End date',
-                    }
-                  )}
+                  aria-label={i18n.translate('xpack.ml.customUrlsEditor.customTimeRangeEndDate', {
+                    defaultMessage: 'End date',
+                  })}
                   showTimeSelect
                 />
               }
