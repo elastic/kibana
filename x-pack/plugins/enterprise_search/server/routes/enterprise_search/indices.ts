@@ -11,7 +11,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { i18n } from '@kbn/i18n';
 import { getMlClient } from '@kbn/ml-plugin/server/lib/ml_client';
