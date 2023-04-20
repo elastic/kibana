@@ -279,7 +279,23 @@ export default function (program) {
 
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
+    
+    const defaultConfig = getConfigPath();
+    const cliConfigs = opts.config || [];
+    const envConfigs = getEnvConfigs();
+
+    // CLI override || ENV override || config/kibana.yml 
+    const configs = [];
+    if (cliConfigs.length) {
+      configs.push(...cliConfigs)
+    }
+    if (!configs.length && envConfigs.length) {
+      configs.push(...envConfigs)
+    }
+    if (!configs.length) {
+      configs.push(defaultConfig)
+    }
+
     const serverlessMode = getServerlessProjectMode(opts);
 
     // we "unshift" .serverless. config so that it only overrides defaults
