@@ -130,6 +130,7 @@ export interface DocLinks {
     readonly licenseManagement: string;
     readonly machineLearningStart: string;
     readonly mailService: string;
+    readonly mlDocumentEnrichment: string;
     readonly start: string;
     readonly syncRules: string;
     readonly troubleshootSetup: string;
