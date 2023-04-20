@@ -16,14 +16,18 @@ import {
 import { actionFormSelector } from '../../screens/common/rule_actions';
 
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
-import type { RuleActionFrequency } from '../../tasks/common/rule_actions';
+import type { RuleActionCustomFrequency } from '../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
   assertSlackRuleAction,
   addEmailConnectorAndRuleAction,
   assertEmailRuleAction,
-  assertSelectedActionFrequency,
-  pickActionFrequency,
+  assertSelectedCustomFrequencyOption,
+  assertSelectedPerRuleRunFrequencyOption,
+  assertSelectedSummaryOfAlertsOption,
+  pickCustomFrequencyOption,
+  pickPerRuleRunFrequencyOption,
+  pickSummaryOfAlertsOption,
 } from '../../tasks/common/rule_actions';
 import {
   waitForRulesTableToBeLoaded,
@@ -127,8 +131,7 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Add a rule action to rules (existing connector)', () => {
-      const expectedActionFrequency: RuleActionFrequency = {
-        customFrequency: 'Custom frequency',
+      const expectedActionFrequency: RuleActionCustomFrequency = {
         throttle: 1,
         throttleUnit: 'd',
       };
@@ -143,7 +146,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
       addSlackRuleAction(expectedSlackMessage);
-      pickActionFrequency(expectedActionFrequency);
+      pickSummaryOfAlertsOption();
+      pickCustomFrequencyOption(expectedActionFrequency);
 
       submitBulkEditForm();
       waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfRulesToBeEdited });
@@ -151,7 +155,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-      assertSelectedActionFrequency(expectedActionFrequency, 1);
+      assertSelectedSummaryOfAlertsOption();
+      assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
       assertSlackRuleAction(expectedExistingSlackMessage, 0);
       assertSlackRuleAction(expectedSlackMessage, 1);
       // ensure there is no third action
@@ -159,10 +164,6 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Overwrite rule actions in rules', () => {
-      const expectedActionFrequency: RuleActionFrequency = {
-        customFrequency: 'Per rule run',
-      };
-
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // select both custom and prebuilt rules
@@ -170,7 +171,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       openBulkEditRuleActionsForm();
 
       addSlackRuleAction(expectedSlackMessage);
-      pickActionFrequency(expectedActionFrequency);
+      pickSummaryOfAlertsOption();
+      pickPerRuleRunFrequencyOption();
 
       // check overwrite box, ensure warning is displayed
       checkOverwriteRuleActionsCheckbox();
@@ -184,15 +186,15 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-      assertSelectedActionFrequency(expectedActionFrequency);
+      assertSelectedSummaryOfAlertsOption();
+      assertSelectedPerRuleRunFrequencyOption();
       assertSlackRuleAction(expectedSlackMessage);
       // ensure existing action was overwritten
       cy.get(actionFormSelector(1)).should('not.exist');
     });
 
     it('Add a rule action to rules (new connector)', () => {
-      const expectedActionFrequency: RuleActionFrequency = {
-        customFrequency: 'Custom frequency',
+      const expectedActionFrequency: RuleActionCustomFrequency = {
         throttle: 2,
         throttleUnit: 'h',
       };
@@ -203,7 +205,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       openBulkEditRuleActionsForm();
 
       addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
-      pickActionFrequency(expectedActionFrequency);
+      pickSummaryOfAlertsOption();
+      pickCustomFrequencyOption(expectedActionFrequency);
 
       submitBulkEditForm();
       waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
@@ -211,7 +214,8 @@ describe.skip('Detection rules, bulk edit of rule actions', () => {
       // check if rule has been updated
       goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
-      assertSelectedActionFrequency(expectedActionFrequency, 1);
+      assertSelectedSummaryOfAlertsOption();
+      assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
       assertEmailRuleAction(expectedEmail, expectedSubject);
     });
   });
