@@ -34,6 +34,7 @@ import {
   getMobileMostUsedNCTCharts,
   MobileMostUsedNCTChartResponse,
 } from './get_mobile_most_used_charts/get_nct_chart';
+import { MobilePropertyType } from '../../../common/mobile_types';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -94,9 +95,7 @@ const mobileChartsRoute = createApmServerRoute({
     resources
   ): Promise<{
     mostUsedCharts: Array<{
-      key:
-        | MobileMostUsedChartResponse[number]['key']
-        | MobileMostUsedNCTChartResponse['key'];
+      key: MobilePropertyType;
       options: MobileMostUsedChartResponse[number]['options'] &
         MobileMostUsedNCTChartResponse['options'];
     }>;
