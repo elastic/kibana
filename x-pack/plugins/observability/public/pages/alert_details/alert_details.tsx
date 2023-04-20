@@ -75,7 +75,7 @@ export function AlertDetails() {
     return <CenterJustifiedSpinner />;
   }
 
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
   if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
     return <PageNotFound />;
   }
@@ -108,7 +108,7 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle title={alert?.reason} active={Boolean(alert?.active)} />,
+        pageTitle: <PageTitle alert={alert} />,
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -118,11 +118,11 @@ export function AlertDetails() {
             <HeaderActions alert={alert} />
           </CasesContext>,
         ],
-        bottomBorder: false,
+        bottomBorder: true,
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} alertSummaryFields={summaryFields} />
+      <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
         <AlertDetailsAppSection

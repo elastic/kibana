@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
 export type { VisTypeXyPluginSetup } from './plugin';
@@ -29,9 +26,6 @@ export type { ValidationVisOptionsProps } from './editor/components/common/valid
 export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
 export { getPositions } from './editor/positions';
 export { getScaleTypes } from './editor/scale_types';
-
-// Export common types
-export * from '../common';
 
 export function plugin() {
   return new Plugin();

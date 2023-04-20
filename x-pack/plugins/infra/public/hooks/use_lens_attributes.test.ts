@@ -10,9 +10,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { InfraClientStartDeps } from '../types';
+import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 
@@ -48,7 +48,11 @@ describe('useHostTable hook', () => {
   it('should return the basic lens attributes', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
+        visualizationType: 'lineChart',
         type: 'load',
+        options: {
+          title: 'Injected Normalized Load',
+        },
         dataView: mockDataView,
       })
     );
@@ -57,12 +61,12 @@ describe('useHostTable hook', () => {
     const { state, title } = result.current.attributes ?? {};
     const { datasourceStates, filters } = state ?? {};
 
-    expect(title).toBe('Normalized Load');
+    expect(title).toBe('Injected Normalized Load');
     expect(datasourceStates).toEqual({
       formBased: {
         layers: {
           layer1: {
-            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'y_cpu_cores_usage'],
+            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'formula_accessor'],
             columns: {
               hosts_aggs_breakdown: {
                 dataType: 'string',
@@ -100,7 +104,7 @@ describe('useHostTable hook', () => {
                 scale: 'interval',
                 sourceField: '@timestamp',
               },
-              y_cpu_cores_usage: {
+              formula_accessor: {
                 customLabel: false,
                 dataType: 'number',
                 filter: undefined,
@@ -156,44 +160,34 @@ describe('useHostTable hook', () => {
     });
     expect(filters).toEqual([
       {
-        $state: { store: 'appState' },
         meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.cores',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
+          index: 'mock-id',
         },
-        query: { exists: { field: 'system.load.cores' } },
-      },
-      {
-        $state: { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.1',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
+        query: {
+          exists: {
+            field: 'host.name',
+          },
         },
-        query: { exists: { field: 'system.load.1' } },
       },
     ]);
   });
 
-  it('should return attributes with injected values', async () => {
+  it('should return extra actions', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
+        visualizationType: 'lineChart',
         type: 'load',
         dataView: mockDataView,
       })
     );
     await waitForNextUpdate();
 
-    const injectedData = {
+    const extraActions = result.current.getExtraActions({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+        mode: 'relative',
+      },
       query: {
         language: 'kuery',
         query: '{term: { host.name: "a"}}',
@@ -213,17 +207,8 @@ describe('useHostTable hook', () => {
           query: { range: { 'system.load.cores': { gte: 0 } } },
         },
       ],
-      title: 'Injected CPU Cores',
-    };
+    });
 
-    const injectedAttributes = result.current.injectData(injectedData);
-
-    const { state, title } = injectedAttributes ?? {};
-    const { filters, query } = state ?? {};
-
-    expect(title).toEqual(injectedData.title);
-    expect(query).toEqual(injectedData.query);
-    expect(filters).toHaveLength(3);
-    expect(filters).toContain(injectedData.filters[0]);
+    expect(extraActions.openInLens).not.toBeNull();
   });
 });

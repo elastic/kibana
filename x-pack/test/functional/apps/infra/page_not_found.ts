@@ -8,16 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const logsPages = [
-  'logs/stream',
-  'logs/anomalies',
-  'logs/log-categories',
-  'logs/settings',
-  'logs/analysis',
-  'logs/log-rate',
-  'logs',
-  'logs/link-to',
-];
+const logsPages = ['logs/stream', 'logs/anomalies', 'logs/log-categories', 'logs/settings'];
 
 const metricsPages = [
   'metrics/inventory',
@@ -25,10 +16,6 @@ const metricsPages = [
   'metrics/explorer',
   'metrics/settings',
   'metrics/detail/hosts/host_name',
-  'metrics',
-  'metrics/snapshot',
-  'metrics/metrics-explorer',
-  'metrics/link-to',
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

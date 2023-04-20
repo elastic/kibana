@@ -33,7 +33,9 @@ export function transformSignificantTermToGroup(
       group: duplicates.group.map((d) => ({
         fieldName: d.fieldName,
         fieldValue: d.fieldValue,
-        duplicate: false,
+        duplicate: 1,
+        docCount,
+        pValue,
       })),
       docCount,
       pValue,
@@ -45,7 +47,9 @@ export function transformSignificantTermToGroup(
         {
           fieldName,
           fieldValue,
-          duplicate: false,
+          duplicate: 1,
+          docCount,
+          pValue,
         },
       ],
       docCount,

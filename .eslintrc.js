@@ -867,6 +867,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -886,7 +887,11 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      files: [
+        'x-pack/plugins/apm/**/*.stories.*',
+        'x-pack/plugins/observability/**/*.stories.*',
+        'x-pack/plugins/exploratory_view/**/*.stories.*',
+      ],
       rules: {
         'react/function-component-definition': [
           'off',
@@ -901,6 +906,7 @@ module.exports = {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',

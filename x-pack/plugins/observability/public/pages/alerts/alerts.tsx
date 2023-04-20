@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,6 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
@@ -28,9 +28,7 @@ import {
   useAlertSearchBarStateContainer,
 } from '../../components/shared/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
-import { getNoDataConfig } from '../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { observabilityFeatureId } from '../../../common';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
 import type { ObservabilityAppServices } from '../../application/types';
 
@@ -44,14 +42,12 @@ const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 function InternalAlertsPage() {
   const {
-    cases,
     charts,
     data: {
       query: {
         timefilter: { timefilter: timeFilterService },
       },
     },
-    docLinks,
     http,
     notifications: { toasts },
     triggersActionsUi: {
@@ -62,11 +58,22 @@ function InternalAlertsPage() {
     },
   } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+    replace: false,
+  });
 
-  const chartThemes = {
+  const onBrushEnd: BrushEndListener = (brushEvent) => {
+    const { x } = brushEvent as XYBrushEvent;
+    if (x) {
+      const [start, end] = x;
+      alertSearchBarStateProps.onRangeFromChange(new Date(start).toISOString());
+      alertSearchBarStateProps.onRangeToChange(new Date(end).toISOString());
+    }
+  };
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
+    onBrushEnd,
   };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
@@ -153,28 +160,14 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
-
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
-  const noDataConfig = getNoDataConfig({
-    hasData,
-    basePath: http.basePath,
-    docsLink: docLinks.links.observability.guide,
-  });
-
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
-        noDataConfig={noDataConfig}
-        isPageDataLoaded={isAllRequestsComplete}
-        data-test-subj={noDataConfig ? 'noDataPage' : 'alertsPageWithData'}
+        data-test-subj="alertsPageWithData"
         pageHeader={{
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
@@ -197,29 +190,23 @@ function InternalAlertsPage() {
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
-              chartThemes={chartThemes}
+              chartProps={chartProps}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CasesContext
-              owner={[observabilityFeatureId]}
-              permissions={userCasesPermissions}
-              features={{ alerts: { sync: false } }}
-            >
-              {esQuery && (
-                <AlertsStateTable
-                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                  configurationId={AlertConsumers.OBSERVABILITY}
-                  id={ALERTS_TABLE_ID}
-                  flyoutSize="s"
-                  featureIds={observabilityAlertFeatureIds}
-                  query={esQuery}
-                  showExpandToDetails={false}
-                  showAlertStatusWithFlapping
-                  pageSize={ALERTS_PER_PAGE}
-                />
-              )}
-            </CasesContext>
+            {esQuery && (
+              <AlertsStateTable
+                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                configurationId={AlertConsumers.OBSERVABILITY}
+                id={ALERTS_TABLE_ID}
+                flyoutSize="s"
+                featureIds={observabilityAlertFeatureIds}
+                query={esQuery}
+                showExpandToDetails={false}
+                showAlertStatusWithFlapping
+                pageSize={ALERTS_PER_PAGE}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </ObservabilityPageTemplate>

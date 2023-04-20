@@ -18,8 +18,9 @@ import type { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -76,7 +77,8 @@ export const getHostRiskScoreColumns = ({
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>
-          {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

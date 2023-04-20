@@ -9,6 +9,7 @@ jest.mock('../epm/packages');
 
 import type { PackagePolicy, RegistryDataStream } from '../../types';
 
+import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
@@ -404,7 +405,7 @@ describe('getDataStreamPrivileges()', () => {
       type: 'logs',
       dataset: 'test',
       hidden: true,
-    } as RegistryDataStream;
+    } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({
@@ -420,12 +421,61 @@ describe('getDataStreamPrivileges()', () => {
       elasticsearch: {
         privileges: { indices: ['read', 'monitor'] },
       },
-    } as RegistryDataStream;
+    } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({
       names: ['logs-test-namespace'],
       privileges: ['read', 'monitor'],
+    });
+  });
+
+  it('sets a wildcard namespace when dynamic_namespace: true', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'test',
+      elasticsearch: {
+        dynamic_namespace: true,
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toMatchObject({
+      names: ['logs-test-*'],
+      privileges: ['auto_configure', 'create_doc'],
+    });
+  });
+
+  it('sets a wildcard dataset when dynamic_dataset: true', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'test',
+      elasticsearch: {
+        dynamic_dataset: true,
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toMatchObject({
+      names: ['logs-*-namespace'],
+      privileges: ['auto_configure', 'create_doc'],
+    });
+  });
+
+  it('sets a wildcard namespace and dataset when dynamic_namespace: true and dynamic_dataset: true', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'test',
+      elasticsearch: {
+        dynamic_dataset: true,
+        dynamic_namespace: true,
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toMatchObject({
+      names: ['logs-*-*'],
+      privileges: ['auto_configure', 'create_doc'],
     });
   });
 });

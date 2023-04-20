@@ -72,7 +72,13 @@ class InternalEngineTransporter implements Transporter {
         ...response.hits,
         hits: response.hits.hits.map((hit) => ({
           ...hit,
-          _id: btoa(JSON.stringify([hit._index, hit._id])),
+          // The `__id` field is the actual document ID.
+          __id: hit._id,
+          // Search UI expects a unique `_id` for use as a React key but
+          // because Search Applications can have multiple indices, keys
+          // can be duplicated. Here we prefix the `_id` with the index
+          // name to ensure uniqueness.
+          _id: `${hit._index}__${hit._id}`,
         })),
       },
     };
@@ -80,6 +86,10 @@ class InternalEngineTransporter implements Transporter {
     return withUniqueIds;
   }
 }
+
+const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
+  defaultMessage: 'Search Preview',
+});
 
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
@@ -108,13 +118,11 @@ export const EngineSearchPreview: React.FC = () => {
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
+      pageChrome={[engineName, pageTitle]}
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
-          defaultMessage: 'Search Preview',
-        }),
+        pageTitle,
         rightSideItems: [
           <>
             <EuiButton

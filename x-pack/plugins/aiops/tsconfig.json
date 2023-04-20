@@ -48,6 +48,9 @@
     "@kbn/ml-local-storage",
     "@kbn/ml-query-utils",
     "@kbn/ml-is-defined",
+    "@kbn/ml-route-utils",
+    "@kbn/unified-field-list-plugin",
+    "@kbn/ml-random-sampler-utils",
   ],
   "exclude": [
     "target/**/*",

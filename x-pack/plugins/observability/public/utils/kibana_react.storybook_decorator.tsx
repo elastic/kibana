@@ -25,7 +25,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const config: ConfigSchema = {
     unsafe: {
       alertDetails: {
-        apm: { enabled: false },
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
@@ -92,6 +91,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         theme: {
           theme$: createTheme$Mock(),
         },
+        triggersActionsUi: { getAddRuleFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {

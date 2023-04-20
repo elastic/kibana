@@ -128,13 +128,26 @@ export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
 
+// Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
   '[data-test-subj="manageExceptionListCreateButton"]';
 
 export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
+export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
+  '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
+
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT =
+  'input[data-test-subj="createSharedExceptionListNameInput"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
+  'textarea[data-test-subj="createSharedExceptionListDescriptionInput"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_BTN =
+  'button[data-test-subj="exception-lists-form-create-shared"]';
 
 // Exception list management
 export const EXCEPTIONS_LIST_MANAGEMENT_NAME =

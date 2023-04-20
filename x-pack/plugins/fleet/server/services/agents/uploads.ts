@@ -186,6 +186,7 @@ export async function getAgentUploadFile(
       metadataIndex: FILE_STORAGE_METADATA_AGENT_INDEX,
       elasticsearchClient: esClient,
       logger: appContextService.getLogger(),
+      indexIsAlias: true,
     });
 
     const file = await fileClient.get({

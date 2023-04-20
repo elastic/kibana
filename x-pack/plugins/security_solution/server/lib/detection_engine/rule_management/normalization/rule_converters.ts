@@ -42,6 +42,7 @@ import {
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
+  transformAlertToRuleAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
 import {
@@ -51,8 +52,6 @@ import {
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -75,7 +74,6 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import {
-  transformActions,
   transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
@@ -390,27 +388,6 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
-const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const incrementVersion = (nextParams: PatchRuleRequestBody, existingRule: RuleParams) => {
-  // The the version from nextParams if it's provided
-  if (nextParams.version) {
-    return nextParams.version;
-  }
-
-  // If the rule is immutable, keep the current version
-  if (existingRule.immutable) {
-    return existingRule.version;
-  }
-
-  // For custom rules, check modified params to deicide whether version increment is needed
-  for (const key in nextParams) {
-    if (!versionExcludedKeys.includes(key)) {
-      return existingRule.version + 1;
-    }
-  }
-  return existingRule.version;
-};
-
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
@@ -456,9 +433,7 @@ export const convertPatchAPIToInternalSchema = (
       references: nextParams.references ?? existingParams.references,
       namespace: nextParams.namespace ?? existingParams.namespace,
       note: nextParams.note ?? existingParams.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version: incrementVersion(nextParams, existingParams),
+      version: nextParams.version ?? existingParams.version,
       exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
@@ -669,8 +644,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  legacyRuleActions?: LegacyRuleActions | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
@@ -698,8 +672,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    throttle: transformFromAlertThrottle(rule),
+    actions: rule.actions.map(transformAlertToRuleAction),
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

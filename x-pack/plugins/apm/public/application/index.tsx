@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'react-vis/dist/style.css';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   AppMountParameters,
@@ -50,6 +49,7 @@ export const renderApp = ({
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
+    observabilityShared: pluginsStart.observabilityShared,
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,

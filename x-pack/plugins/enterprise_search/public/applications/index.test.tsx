@@ -12,7 +12,9 @@ import { getContext } from 'kea';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
@@ -29,7 +31,9 @@ describe('renderApp', () => {
     core: coreMock.createStart(),
     plugins: {
       charts: chartPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       guidedOnboarding: guidedOnboardingMock.createStart(),
+      lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
     },

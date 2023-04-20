@@ -23,12 +23,14 @@ import {
   createRule,
   getSimpleMlRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -53,7 +55,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -70,10 +71,6 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
-        outputRule.version = 2;
-        // TODO: Followup to #147398
-        // NOTE: Once we remove `version` increment, revision will not be updated as `machine_learning_job_id` value doesn't actually change
-        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -90,7 +87,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -110,7 +106,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -128,13 +123,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should not change the version of a rule when it patches only enabled', async () => {
+      it('should not change the revision of a rule when it patches only enabled', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
@@ -151,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it patches enabled and another property', async () => {
+      it('should change the revision of a rule when it patches enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
@@ -164,7 +158,6 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
         outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -192,7 +185,6 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
-        outputRule.version = 3;
         outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -361,6 +353,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await createLegacyRuleAction(supertest, rule.id, connector.body.id);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule.id);
+
         // patch disable the rule
         const patchResponse = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
@@ -383,8 +380,12 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ];
         outputRule.throttle = '1h';
-        outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
+        outputRule.revision = 1;
         expect(bodyToCompare).to.eql(outputRule);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should give a 404 if it is given a fake id', async () => {

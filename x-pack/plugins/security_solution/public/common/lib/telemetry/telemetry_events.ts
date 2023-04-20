@@ -95,8 +95,57 @@ const alertsGroupingTakeActionEvent: TelemetryEvent = {
   },
 };
 
+const entityClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.EntityDetailsClicked,
+  schema: {
+    entity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity name (host|user)',
+        optional: false,
+      },
+    },
+  },
+};
+
+const entityAlertsClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.EntityAlertsClicked,
+  schema: {
+    entity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity name (host|user)',
+        optional: false,
+      },
+    },
+  },
+};
+
+const entityRiskFilteredEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.EntityRiskFiltered,
+  schema: {
+    entity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity name (host|user)',
+        optional: false,
+      },
+    },
+    selectedSeverity: {
+      type: 'keyword',
+      _meta: {
+        description: 'Selected severity (Unknown|Low|Moderate|High|Critical)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
   alertsGroupingTakeActionEvent,
+  entityClickedEvent,
+  entityAlertsClickedEvent,
+  entityRiskFilteredEvent,
 ];

@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
-import { i18n } from '@kbn/i18n';
 
 import {
   createRangeSliderExtract,
@@ -20,7 +21,7 @@ import {
   RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,
 } from '../../../common/range_slider/types';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
@@ -41,10 +42,10 @@ export class RangeSliderEmbeddableFactory
 
   public canCreateNew = () => false;
 
-  public isEditable = () => Promise.resolve(false);
+  public isEditable = () => Promise.resolve(true);
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
 
     return Promise.resolve(
@@ -68,10 +69,8 @@ export class RangeSliderEmbeddableFactory
     return newInput;
   };
 
-  public isFieldCompatible = (dataControlField: DataControlField) => {
-    if (dataControlField.field.aggregatable && dataControlField.field.type === 'number') {
-      dataControlField.compatibleControlTypes.push(this.type);
-    }
+  public isFieldCompatible = (field: DataViewField) => {
+    return field.aggregatable && field.type === 'number';
   };
 
   public inject = createRangeSliderInject();

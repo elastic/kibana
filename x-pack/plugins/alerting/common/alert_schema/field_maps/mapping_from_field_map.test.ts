@@ -216,6 +216,9 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                maintenance_window_ids: {
+                  type: 'keyword',
+                },
                 instance: {
                   properties: {
                     id: {
@@ -253,6 +256,9 @@ describe('mappingFromFieldMap', () => {
                     },
                     producer: {
                       type: 'keyword',
+                    },
+                    revision: {
+                      type: 'long',
                     },
                     rule_type_id: {
                       type: 'keyword',

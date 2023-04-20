@@ -72,6 +72,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.maintenance_window_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,
@@ -162,6 +167,11 @@ it('matches snapshot', () => {
         "array": true,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.rule.revision": Object {
+        "array": false,
+        "required": true,
+        "type": "long",
       },
       "kibana.alert.rule.rule_id": Object {
         "array": false,

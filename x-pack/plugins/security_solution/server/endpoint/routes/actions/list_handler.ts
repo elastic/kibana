@@ -57,13 +57,15 @@ export const actionListHandler = (
         commands,
         statuses,
         withOutputs,
+        withAutomatedActions,
+        alertId,
       },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
       const indexExists = await doesLogsEndpointActionsIndexExist({
-        context,
+        esClient,
         logger,
         indexName: ENDPOINT_ACTIONS_INDEX,
       });
@@ -74,6 +76,8 @@ export const actionListHandler = (
 
       const requestParams = {
         withOutputs: formatStringIds(withOutputs),
+        alertId: formatStringIds(alertId),
+        withAutomatedActions,
         commands: formatCommandValues(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
@@ -85,7 +89,6 @@ export const actionListHandler = (
         userIds: formatStringIds(userIds),
         logger,
       };
-
       // wrapper method to branch logic for
       // normal paged search via page, size
       // vs full search for status filters

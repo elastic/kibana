@@ -173,5 +173,11 @@ describe('When using execute action from response actions console', () => {
         'Command execution was successful.'
       );
     });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
+        'Command execution was successful.Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      );
+    });
   });
 });

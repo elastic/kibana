@@ -20,14 +20,6 @@ export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
     },
   });
 
-export const ENTITY_RISK = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskClassificationTitle', {
-    defaultMessage: '{riskEntity} risk classification',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-    },
-  });
-
 export const ENTITY_NAME = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.nameTitle', {
     defaultMessage: '{riskEntity} Name',

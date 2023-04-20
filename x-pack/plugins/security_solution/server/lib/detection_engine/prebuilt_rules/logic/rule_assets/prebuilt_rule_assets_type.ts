@@ -12,9 +12,6 @@ export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
-    name: {
-      type: 'keyword',
-    },
     rule_id: {
       type: 'keyword',
     },

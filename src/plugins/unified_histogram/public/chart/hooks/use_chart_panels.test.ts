@@ -85,4 +85,24 @@ describe('test useChartPanels', () => {
     (resetChartHeightButton.onClick as Function)();
     expect(onResetChartHeight).toBeCalled();
   });
+  test('useChartsPanel when isPlainRecord', async () => {
+    const { result } = renderHook(() => {
+      return useChartPanels({
+        toggleHideChart: jest.fn(),
+        onTimeIntervalChange: jest.fn(),
+        closePopover: jest.fn(),
+        onResetChartHeight: jest.fn(),
+        isPlainRecord: true,
+        chart: {
+          hidden: true,
+          timeInterval: 'auto',
+        },
+      });
+    });
+    const panels: EuiContextMenuPanelDescriptor[] = result.current;
+    const panel0: EuiContextMenuPanelDescriptor = result.current[0];
+    expect(panels.length).toBe(1);
+    expect(panel0!.items).toHaveLength(1);
+    expect(panel0!.items![0].icon).toBe('eye');
+  });
 });

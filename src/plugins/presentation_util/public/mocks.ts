@@ -10,10 +10,14 @@ import { CoreStart } from '@kbn/core/public';
 import { PresentationUtilPluginStart } from './types';
 import { pluginServices } from './services';
 import { registry } from './services/plugin_services';
-import { registerExpressionsLanguage } from '.';
+import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
+import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
+import { createReduxTools } from './redux_tools/create_redux_tools';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
-  pluginServices.setRegistry(registry.start({ coreStart, startPlugins: { dataViews: {} } as any }));
+  pluginServices.setRegistry(
+    registry.start({ coreStart, startPlugins: { dataViews: {}, uiActions: {} } as any })
+  );
 
   const startContract: PresentationUtilPluginStart = {
     ContextProvider: pluginServices.getContextProvider(),
@@ -25,6 +29,14 @@ const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart 
 
 export const presentationUtilPluginMock = {
   createStartContract,
+};
+
+/**
+ * A non async-imported version of the real redux embeddable tools package for mocking purposes.
+ */
+export const mockedReduxEmbeddablePackage: ReduxToolsPackage = {
+  createReduxEmbeddableTools,
+  createReduxTools,
 };
 
 export * from './__stories__/fixtures/flights';

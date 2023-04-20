@@ -14,6 +14,7 @@ properties:
       - environment
       - transactionType
       - transactionName
+      - index
     properties:
       service:
         description: The APM service name

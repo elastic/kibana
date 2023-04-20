@@ -12,32 +12,16 @@ import { GroupStats } from './group_stats';
 
 const onTakeActionsOpen = jest.fn();
 const testProps = {
-  badgeMetricStats: [
-    { title: "IP's:", value: 1 },
-    { title: 'Rules:', value: 2 },
-    { title: 'Alerts:', value: 2, width: 50, color: '#a83632' },
-  ],
-  bucket: {
-    key: '9nk5mo2fby',
-    doc_count: 2,
-    hostsCountAggregation: { value: 1 },
-    ruleTags: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-    alertsCount: { value: 2 },
-    rulesCountAggregation: { value: 2 },
-    severitiesSubAggregation: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [{ key: 'low', doc_count: 2 }],
-    },
-    countSeveritySubAggregation: { value: 1 },
-    usersCountAggregation: { value: 1 },
-  },
+  bucketKey: '9nk5mo2fby',
   onTakeActionsOpen,
-  customMetricStats: [
+  statRenderers: [
     {
       title: 'Severity',
-      customStatRenderer: <p data-test-subj="customMetricStat" />,
+      renderer: <p data-test-subj="customMetricStat" />,
     },
+    { title: "IP's:", badge: { value: 1 } },
+    { title: 'Rules:', badge: { value: 2 } },
+    { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
   ],
   takeActionItems: [
     <p data-test-subj="takeActionItem-1" key={1} />,
@@ -49,13 +33,16 @@ describe('Group stats', () => {
     jest.clearAllMocks();
   });
   it('renders each stat item', () => {
-    const { getByTestId } = render(<GroupStats {...testProps} />);
+    const { getByTestId, queryByTestId } = render(<GroupStats {...testProps} />);
     expect(getByTestId('group-stats')).toBeInTheDocument();
-    testProps.badgeMetricStats.forEach(({ title: stat }) => {
-      expect(getByTestId(`metric-${stat}`)).toBeInTheDocument();
-    });
-    testProps.customMetricStats.forEach(({ title: stat }) => {
-      expect(getByTestId(`customMetric-${stat}`)).toBeInTheDocument();
+    testProps.statRenderers.forEach(({ title: stat, renderer }) => {
+      if (renderer != null) {
+        expect(getByTestId(`customMetric-${stat}`)).toBeInTheDocument();
+        expect(queryByTestId(`metric-${stat}`)).not.toBeInTheDocument();
+      } else {
+        expect(getByTestId(`metric-${stat}`)).toBeInTheDocument();
+        expect(queryByTestId(`customMetric-${stat}`)).not.toBeInTheDocument();
+      }
     });
   });
   it('when onTakeActionsOpen is defined, call onTakeActionsOpen on popover click', () => {

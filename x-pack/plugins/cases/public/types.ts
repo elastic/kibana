@@ -23,7 +23,11 @@ import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -31,6 +35,7 @@ import type {
   CasesStatusRequest,
   CommentRequestAlertType,
   CommentRequestExternalReferenceNoSOType,
+  CommentRequestExternalReferenceSOType,
   CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
@@ -44,7 +49,7 @@ import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_se
 import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
-import type { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
@@ -69,6 +74,7 @@ export interface CasesPluginStart {
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   apm?: ApmBase;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 /**
@@ -100,6 +106,10 @@ export interface CasesUiStart {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
+      bulkGet: <Field extends keyof CaseResponse = keyof CaseResponse>(
+        params: CasesBulkGetRequestCertainFields<Field>,
+        signal?: AbortSignal
+      ) => Promise<CasesBulkGetResponseCertainFields<Field>>;
     };
   };
   ui: {
@@ -135,8 +145,8 @@ export interface CasesUiStart {
     getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   };
   hooks: {
-    getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
-    getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
     /**
@@ -150,7 +160,7 @@ export interface CasesUiStart {
     canUseCases: ReturnType<typeof canUseCases>;
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
-    groupAlertsByRule: typeof groupAlertsByRule;
+    groupAlertsByRule: GroupAlertsByRule;
   };
 }
 
@@ -158,7 +168,8 @@ export type SupportedCaseAttachment =
   | CommentRequestAlertType
   | CommentRequestUserType
   | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType;
+  | CommentRequestExternalReferenceNoSOType
+  | CommentRequestExternalReferenceSOType;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

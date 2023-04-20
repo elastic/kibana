@@ -61,7 +61,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('visualize integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/88639
+  describe.skip('visualize integration', () => {
     before(async () => {
       // clean up any left-over visualizations and tags from tests that didn't clean up after themselves
       await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });

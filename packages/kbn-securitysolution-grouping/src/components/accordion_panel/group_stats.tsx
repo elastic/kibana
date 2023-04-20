@@ -16,23 +16,20 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { BadgeMetric, CustomMetric } from '.';
+import { StatRenderer } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
-import type { RawBucket } from '../types';
 
 interface GroupStatsProps<T> {
-  badgeMetricStats?: BadgeMetric[];
-  bucket: RawBucket<T>;
-  customMetricStats?: CustomMetric[];
+  bucketKey: string;
+  statRenderers?: StatRenderer[];
   onTakeActionsOpen?: () => void;
   takeActionItems: JSX.Element[];
 }
 
 const GroupStatsComponent = <T,>({
-  badgeMetricStats,
-  bucket,
-  customMetricStats,
+  bucketKey,
+  statRenderers,
   onTakeActionsOpen,
   takeActionItems,
 }: GroupStatsProps<T>) => {
@@ -43,42 +40,39 @@ const GroupStatsComponent = <T,>({
     [isPopoverOpen, onTakeActionsOpen]
   );
 
-  const badgesComponents = useMemo(
+  const statsComponent = useMemo(
     () =>
-      badgeMetricStats?.map((metric) => (
-        <EuiFlexItem grow={false} key={metric.title}>
-          <span css={statsContainerCss} data-test-subj={`metric-${metric.title}`}>
-            <>
-              {metric.title}
-              <EuiToolTip position="top" content={metric.value}>
-                <EuiBadge
-                  style={{ marginLeft: 10, width: metric.width ?? 35 }}
-                  color={metric.color ?? 'hollow'}
-                >
-                  {metric.value > 99 ? '99+' : metric.value.toString()}
-                </EuiBadge>
-              </EuiToolTip>
-            </>
-          </span>
-        </EuiFlexItem>
-      )),
-    [badgeMetricStats]
+      statRenderers?.map((stat) => {
+        const { dataTestSubj, component } =
+          stat.badge != null
+            ? {
+                dataTestSubj: `metric-${stat.title}`,
+                component: (
+                  <EuiToolTip position="top" content={stat.badge.value}>
+                    <EuiBadge
+                      style={{ marginLeft: 10, width: stat.badge.width ?? 35 }}
+                      color={stat.badge.color ?? 'hollow'}
+                    >
+                      {stat.badge.value > 99 ? '99+' : stat.badge.value.toString()}
+                    </EuiBadge>
+                  </EuiToolTip>
+                ),
+              }
+            : { dataTestSubj: `customMetric-${stat.title}`, component: stat.renderer };
+
+        return (
+          <EuiFlexItem grow={false} key={stat.title}>
+            <span css={statsContainerCss} data-test-subj={dataTestSubj}>
+              {stat.title}
+              {component}
+            </span>
+          </EuiFlexItem>
+        );
+      }),
+    [statRenderers]
   );
 
-  const customComponents = useMemo(
-    () =>
-      customMetricStats?.map((customMetric) => (
-        <EuiFlexItem grow={false} key={customMetric.title}>
-          <span css={statsContainerCss} data-test-subj={`customMetric-${customMetric.title}`}>
-            {customMetric.title}
-            {customMetric.customStatRenderer}
-          </span>
-        </EuiFlexItem>
-      )),
-    [customMetricStats]
-  );
-
-  const popoverComponent = useMemo(
+  const takeActionMenu = useMemo(
     () => (
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -107,13 +101,12 @@ const GroupStatsComponent = <T,>({
   return (
     <EuiFlexGroup
       data-test-subj="group-stats"
-      key={`stats-${bucket.key[0]}`}
+      key={`stats-${bucketKey}`}
       gutterSize="none"
       alignItems="center"
     >
-      {customComponents}
-      {badgesComponents}
-      {popoverComponent}
+      {statsComponent}
+      {takeActionMenu}
     </EuiFlexGroup>
   );
 };

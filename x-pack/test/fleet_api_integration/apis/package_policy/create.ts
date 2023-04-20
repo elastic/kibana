@@ -245,7 +245,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    it('should return a 400 if there is another package policy with the same name', async function () {
+    it('should return a 409 if there is another package policy with the same name', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -279,10 +279,10 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
-    it('should return a 400 if there is a package policy with the same name on a different policy', async function () {
+    it('should return a 409 if there is a package policy with the same name on a different policy', async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -325,7 +325,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
     it('should return a 400 with required variables not provided', async function () {
@@ -444,6 +444,31 @@ export default function (providerContext: FtrProviderContext) {
       const { item: policy } = await getPackagePolicyById(policyId);
 
       expect(policy.name).to.equal(nameWithWhitespace.trim());
+    });
+
+    it('should return a 200 when a package has no variables or data streams', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'no-variables-or-data-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'single_input_no_streams',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
     });
 
     describe('input only packages', () => {

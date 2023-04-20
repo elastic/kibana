@@ -155,7 +155,6 @@ export const sampleAreaVis = {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
@@ -174,7 +173,6 @@ export const sampleAreaVis = {
             min: 0,
             max: 3,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
@@ -193,7 +191,6 @@ export const sampleAreaVis = {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',

@@ -36,6 +36,7 @@ import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
 import { useServices } from '../../../../app_context';
+import { renderDiscoverLink } from '../../../../lib/render_discover_link';
 
 const tabToHumanizedMap = {
   [TAB_SUMMARY]: (
@@ -158,6 +159,7 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
         <EuiTitle id="indexDetailsFlyoutTitle">
           <h2>
             {indexName}
+            {renderDiscoverLink(indexName)}
             {renderBadges(index, undefined, extensionsService)}
           </h2>
         </EuiTitle>

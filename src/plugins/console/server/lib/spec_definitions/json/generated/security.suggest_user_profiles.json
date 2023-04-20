@@ -1,0 +1,15 @@
+{
+  "security.suggest_user_profiles": {
+    "url_params": {
+      "data": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/_suggest"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-suggest-user-profile.html"
+  }
+}

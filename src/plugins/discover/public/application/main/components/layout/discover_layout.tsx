@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { DragContext } from '@kbn/dom-drag-drop';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
@@ -44,6 +45,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { ErrorCallout } from '../../../../components/common/error_callout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -55,11 +57,9 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
   inspectorAdapters,
-  expandedDoc,
   navigateTo,
   onChangeDataView,
   onUpdateQuery,
-  setExpandedDoc,
   resetSavedSearch,
   savedSearch,
   searchSource,
@@ -121,8 +121,8 @@ export function DiscoverLayout({
   );
 
   const onOpenInspector = useInspector({
-    setExpandedDoc,
     inspector,
+    stateContainer,
     inspectorAdapters,
     savedSearch,
   });
@@ -208,6 +208,17 @@ export function DiscoverLayout({
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
+  const dragDropContext = useContext(DragContext);
+  const draggingFieldName = dragDropContext.dragging?.id;
+
+  const onDropFieldToTable = useMemo(() => {
+    if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {
+      return undefined;
+    }
+
+    return () => onAddColumn(draggingFieldName);
+  }, [onAddColumn, draggingFieldName, currentColumns]);
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
       const globalQueryState = data.query.getState();
@@ -217,8 +228,6 @@ export function DiscoverLayout({
           isTimeBased={isTimeBased}
           query={globalQueryState.query}
           filters={globalQueryState.filters}
-          data={data}
-          error={dataState.error}
           dataView={dataView}
           onDisableFilters={onDisableFilters}
         />
@@ -240,8 +249,6 @@ export function DiscoverLayout({
           dataView={dataView}
           navigateTo={navigateTo}
           resetSavedSearch={resetSavedSearch}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
           stateContainer={stateContainer}
           columns={currentColumns}
@@ -250,6 +257,7 @@ export function DiscoverLayout({
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
+          onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -257,9 +265,7 @@ export function DiscoverLayout({
   }, [
     currentColumns,
     data,
-    dataState.error,
     dataView,
-    expandedDoc,
     inspectorAdapters,
     isPlainRecord,
     isTimeBased,
@@ -270,10 +276,11 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    setExpandedDoc,
     stateContainer,
     viewMode,
+    onDropFieldToTable,
   ]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -358,19 +365,29 @@ export function DiscoverLayout({
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
-            <EuiPageContent
-              panelRef={resizeRef}
-              verticalPosition={contentCentered ? 'center' : undefined}
-              horizontalPosition={contentCentered ? 'center' : undefined}
-              paddingSize="none"
-              hasShadow={false}
-              className={classNames('dscPageContent', {
-                'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': resultState === 'none',
-              })}
-            >
-              {mainDisplay}
-            </EuiPageContent>
+            {resultState === 'none' && dataState.error ? (
+              <ErrorCallout
+                title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                  defaultMessage: 'Unable to retrieve search results',
+                })}
+                error={dataState.error}
+                data-test-subj="discoverNoResultsError"
+              />
+            ) : (
+              <EuiPageContent
+                panelRef={resizeRef}
+                verticalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={contentCentered ? 'center' : undefined}
+                paddingSize="none"
+                hasShadow={false}
+                className={classNames('dscPageContent', {
+                  'dscPageContent--centered': contentCentered,
+                  'dscPageContent--emptyPrompt': resultState === 'none',
+                })}
+              >
+                {mainDisplay}
+              </EuiPageContent>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

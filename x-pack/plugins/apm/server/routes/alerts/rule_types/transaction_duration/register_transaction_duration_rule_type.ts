@@ -32,6 +32,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import {
@@ -73,7 +74,6 @@ export function registerTransactionDurationRuleType({
   ruleDataClient,
   config$,
   logger,
-  observability,
   basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -89,14 +89,13 @@ export function registerTransactionDurationRuleType({
     validate: { params: transactionDurationParamsSchema },
     actionVariables: {
       context: [
-        ...(observability.getAlertDetailsConfig()?.apm.enabled
-          ? [apmActionVariables.alertDetailsUrl]
-          : []),
+        apmActionVariables.alertDetailsUrl,
         apmActionVariables.environment,
         apmActionVariables.interval,
         apmActionVariables.reason,
         apmActionVariables.serviceName,
         apmActionVariables.transactionType,
+        apmActionVariables.transactionName,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
         apmActionVariables.viewInAppUrl,
@@ -149,12 +148,9 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
+                ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName),
                 ...environmentQuery(ruleParams.environment),
               ] as QueryDslQueryContainer[],
             },
@@ -271,6 +267,7 @@ export function registerTransactionDurationRuleType({
               [SERVICE_NAME]: serviceName,
               ...getEnvironmentEsField(environment),
               [TRANSACTION_TYPE]: transactionType,
+              [TRANSACTION_NAME]: ruleParams.transactionName,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
@@ -287,6 +284,7 @@ export function registerTransactionDurationRuleType({
             ),
             reason,
             serviceName,
+            transactionName: ruleParams.transactionName, // #Note once we group by transactionName, use the transactionName key from the bucket
             threshold: ruleParams.threshold,
             transactionType,
             triggerValue: transactionDurationFormatted,

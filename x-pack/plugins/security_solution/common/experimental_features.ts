@@ -64,9 +64,14 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the detection response actions in rule + alerts
+   * Enables the automated response actions in rule + alerts
    */
   responseActionsEnabled: true,
+
+  /**
+   * Enables the automated endpoint response action in rule + alerts
+   */
+  endpointResponseActionsEnabled: false,
 
   /**
    * Enables endpoint package level rbac
@@ -118,6 +123,12 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /*
+   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   *
+   **/
+  newUserDetailsFlyout: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

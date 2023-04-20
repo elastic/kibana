@@ -235,7 +235,7 @@ describe('ConnectorsDropdown', () => {
         .find('[data-test-subj="dropdown-connectors"]')
         .first()
         .text()
-        .includes('My SN connector, is selected')
+        .includes('My SN connector')
     ).toBeTruthy();
   });
 

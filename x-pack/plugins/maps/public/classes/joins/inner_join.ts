@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
@@ -137,8 +138,11 @@ export class InnerJoin {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
-    return await this.getRightJoinSource().getTooltipProperties(properties);
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
+    return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
   }
 
   getIndexPatternIds() {

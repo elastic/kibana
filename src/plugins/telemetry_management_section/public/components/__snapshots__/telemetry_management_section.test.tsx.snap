@@ -305,6 +305,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       },
       "isScreenshotMode": false,
       "notifications": Object {
+        "showErrorDialog": [MockFunction],
         "toasts": Object {
           "add": [MockFunction],
           "addDanger": [MockFunction],
