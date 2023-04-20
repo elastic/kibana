@@ -23,6 +23,7 @@ export const fetchEngineFieldCapabilities = async (
     fields: '*',
     include_unmapped: true,
     index: indices,
+    filters: '-metadata',
   });
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
