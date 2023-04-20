@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ANALYTICS_PLUGIN, ENTERPRISE_SEARCH_ELASTICSEARCH_URL } from '../../../../../../common/constants';
+import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
 import { COLLECTION_INTEGRATE_PATH } from '../../../../analytics/routes';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
