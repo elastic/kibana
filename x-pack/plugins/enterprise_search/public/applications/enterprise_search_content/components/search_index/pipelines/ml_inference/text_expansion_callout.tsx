@@ -26,12 +26,9 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { CreateTextExpansionModelResponse } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export interface TextExpansionCallOutState {
-  createTextExpansionModel: (args: undefined) => CreateTextExpansionModelResponse | undefined;
   dismiss: () => void;
   isCreateButtonDisabled: boolean;
   isDismissable: boolean;
@@ -98,76 +95,76 @@ const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState,
 };
 
 const DeployModel = ({
-  createTextExpansionModel,
   dismiss,
   isCreateButtonDisabled,
   isDismissable,
-}: Pick<
-  TextExpansionCallOutState,
-  'createTextExpansionModel' | 'dismiss' | 'isCreateButtonDisabled' | 'isDismissable'
->) => (
-  <EuiPanel color="success">
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="success">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
-              defaultMessage="New"
-            />
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiTitle size="xs">
-            <h4>
-              <EuiText color="text">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
-                  defaultMessage="Improve your results with ELSER"
-                />
-              </EuiText>
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        {isDismissable && (
-          <EuiFlexItem grow={false}>
-            <TextExpansionDismissButton dismiss={dismiss} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiFlexGroup direction="column">
-        <EuiText>
-          <FormattedHTMLMessage
-            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
-            defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
-            tagName="p"
-          />
-        </EuiText>
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isCreateButtonDisabled' | 'isDismissable'>) => {
+  const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
+
+  return (
+    <EuiPanel color="success">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiButton
-            color="success"
-            disabled={isCreateButtonDisabled}
-            iconType="launch"
-            onClick={() => createTextExpansionModel(undefined)}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping',
-              {
-                defaultMessage: 'Deploy',
-              }
-            )}
-          </EuiButton>
-          <EuiLink target="_blank" href={docLinks.elser}>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
-              defaultMessage="Learn more"
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="success">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
+                defaultMessage="New"
+              />
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiTitle size="xs">
+              <h4>
+                <EuiText color="text">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
+                    defaultMessage="Improve your results with ELSER"
+                  />
+                </EuiText>
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          {isDismissable && (
+            <EuiFlexItem grow={false}>
+              <TextExpansionDismissButton dismiss={dismiss} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="column">
+          <EuiText>
+            <FormattedHTMLMessage
+              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
+              defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
+              tagName="p"
             />
-          </EuiLink>
+          </EuiText>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiButton
+              color="success"
+              disabled={isCreateButtonDisabled}
+              iconType="launch"
+              onClick={() => createTextExpansionModel(undefined)}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping',
+                {
+                  defaultMessage: 'Deploy',
+                }
+              )}
+            </EuiButton>
+            <EuiLink target="_blank" href={docLinks.elser}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexGroup>
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+    </EuiPanel>
+  );
+};
 
 const ModelDownloadInProgress = ({
   dismiss,
@@ -226,23 +223,10 @@ const ModelDownloaded = ({
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
-  const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
   const { isCreateButtonDisabled, isModelDownloadInProgress, isModelDownloaded } =
     useValues(TextExpansionCalloutLogic);
 
-  // useEffect(() => {
-  //   fetchTextExpansionModel(undefined);
-  // }, [isModelDownloadInProgress]);
-
-  console.log('show callout', show);
   if (!show) return null;
-
-  console.log(
-    'isModelDownloadInProgress',
-    isModelDownloadInProgress,
-    'isModelDownloaded',
-    isModelDownloaded
-  );
 
   if (!!isModelDownloadInProgress) {
     return <ModelDownloadInProgress dismiss={dismiss} isDismissable={isDismissable} />;
@@ -252,7 +236,6 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
 
   return (
     <DeployModel
-      createTextExpansionModel={createTextExpansionModel}
       dismiss={dismiss}
       isDismissable={isDismissable}
       isCreateButtonDisabled={isCreateButtonDisabled}
