@@ -14,13 +14,13 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { DashboardRedirect } from '../types';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 
 export const useDashboardMenuItems = ({
   redirectTo,
@@ -46,19 +46,13 @@ export const useDashboardMenuItems = ({
   /**
    * Unpack dashboard state from redux
    */
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-    actions: { setViewMode, setFullScreenMode },
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const dashboard = useDashboardAPI();
 
-  const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
-  const hasOverlays = select((state) => state.componentState.hasOverlays);
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const dashboardTitle = select((state) => state.explicitInput.title);
-  const viewMode = select((state) => state.explicitInput.viewMode);
+  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
+  const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
 
   /**
    * Show the Dashboard app's share menu
@@ -96,24 +90,24 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardContainer
+    dashboard
       .runQuickSave()
       .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
-  }, [dashboardContainer]);
+  }, [dashboard]);
 
   /**
    * Show the dashboard's save modal
    */
   const saveDashboardAs = useCallback(() => {
-    dashboardContainer.runSaveAs().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardContainer]);
+    dashboard.runSaveAs().then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboard]);
 
   /**
    * Clone the dashboard
    */
   const clone = useCallback(() => {
-    dashboardContainer.runClone().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardContainer]);
+    dashboard.runClone().then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboard]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -122,19 +116,19 @@ export const useDashboardMenuItems = ({
    */
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
-      dashboardContainer.clearOverlays();
+      dashboard.clearOverlays();
       if (hasUnsavedChanges) {
         confirmDiscardUnsavedChanges(() => {
           batch(() => {
-            dashboardContainer.resetToLastSavedState();
-            if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+            dashboard.resetToLastSavedState();
+            if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
           });
         }, viewMode);
       } else {
-        if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
+        if (switchToViewMode) dashboard.dispatch.setViewMode(ViewMode.VIEW);
       }
     },
-    [dashboardContainer, dispatch, hasUnsavedChanges, viewMode, setViewMode]
+    [dashboard, hasUnsavedChanges, viewMode]
   );
 
   /**
@@ -146,7 +140,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.fullScreen,
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
-        run: () => dispatch(setFullScreenMode(true)),
+        run: () => dashboard.dispatch.setFullScreenMode(true),
       } as TopNavMenuData,
 
       labs: {
@@ -164,8 +158,8 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          dashboardContainer.clearOverlays();
-          dispatch(setViewMode(ViewMode.EDIT));
+          dashboard.dispatch.setViewMode(ViewMode.EDIT);
+          dashboard.clearOverlays();
         },
       } as TopNavMenuData,
 
@@ -212,7 +206,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: isSaveInProgress || hasOverlays,
-        run: () => dashboardContainer.showSettings(),
+        run: () => dashboard.showSettings(),
       } as TopNavMenuData,
 
       clone: {
@@ -225,19 +219,16 @@ export const useDashboardMenuItems = ({
     };
   }, [
     quickSaveDashboard,
-    dashboardContainer,
     hasUnsavedChanges,
-    setFullScreenMode,
     isSaveInProgress,
     saveDashboardAs,
     setIsLabsShown,
     resetChanges,
-    lastSavedId,
-    setViewMode,
     hasOverlays,
+    lastSavedId,
     isLabsShown,
     showShare,
-    dispatch,
+    dashboard,
     clone,
   ]);
 

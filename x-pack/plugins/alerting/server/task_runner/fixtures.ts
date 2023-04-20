@@ -233,7 +233,13 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({
+  action,
+  group,
+  state,
+  id,
+  maintenanceWindowIds = [],
+}: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -255,6 +261,7 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    maintenanceWindowIds,
   };
 };
 

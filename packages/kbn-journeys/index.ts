@@ -7,6 +7,7 @@
  */
 
 export { JourneyConfig } from './journey/journey_config';
+export { JOURNEY_APM_CONFIG } from './journey/journey_apm_config';
 export type {
   ScalabilityAction,
   ScalabilitySetup,

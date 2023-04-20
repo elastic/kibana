@@ -7,6 +7,7 @@
 import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
@@ -19,13 +20,14 @@ import type {
 } from '../types';
 
 describe('Create Default Policy tests ', () => {
+  const cloud = cloudMock.createSetup();
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
 
   const createDefaultPolicyCallback = (config: AnyPolicyCreateConfig | undefined): PolicyConfig => {
-    return createDefaultPolicy(licenseService, config);
+    return createDefaultPolicy(licenseService, config, cloud);
   };
 
   beforeEach(() => {
@@ -169,8 +171,9 @@ describe('Create Default Policy tests ', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
       const defaultPolicy = policyFactory();
-      // update defaultPolicy w/ platinum license
+      // update defaultPolicy w/ platinum license & cloud info
       defaultPolicy.meta.license = 'platinum';
+      defaultPolicy.meta.cloud = true;
       expect(policy).toMatchObject(defaultPolicy);
     });
   });
