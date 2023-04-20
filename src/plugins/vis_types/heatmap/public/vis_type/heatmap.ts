@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
@@ -15,7 +14,6 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plu
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
-import { SplitTooltip } from './split_tooltip';
 import { convertToLens } from '../convert_to_lens';
 
 export const getHeatmapVisTypeDefinition = ({
@@ -129,11 +127,6 @@ export const getHeatmapVisTypeDefinition = ({
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        // TODO: Remove when split chart aggs are supported
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
         title: i18n.translate('visTypeHeatmap.heatmap.splitTitle', {
           defaultMessage: 'Split chart',
         }),

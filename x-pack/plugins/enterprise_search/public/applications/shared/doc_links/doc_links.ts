@@ -60,8 +60,15 @@ class DocLinks {
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
   public connectors: string;
+  public connectorsAzureBlobStorage: string;
+  public connectorsGoogleCloudStorage: string;
+  public connectorsMicrosoftSQL: string;
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
+  public connectorsNetworkDrive: string;
+  public connectorsOracle: string;
+  public connectorsPostgreSQL: string;
+  public connectorsS3: string;
   public connectorsWorkplaceSearch: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -78,6 +85,7 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
+  public ingestionApis: string;
   public ingestPipelines: string;
   public kibanaSecurity: string;
   public languageAnalyzers: string;
@@ -179,8 +187,15 @@ class DocLinks {
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
     this.connectors = '';
+    this.connectorsAzureBlobStorage = '';
+    this.connectorsGoogleCloudStorage = '';
+    this.connectorsMicrosoftSQL = '';
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
+    this.connectorsNetworkDrive = '';
+    this.connectorsOracle = '';
+    this.connectorsPostgreSQL = '';
+    this.connectorsS3 = '';
     this.connectorsWorkplaceSearch = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -197,6 +212,7 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
+    this.ingestionApis = '';
     this.ingestPipelines = '';
     this.kibanaSecurity = '';
     this.languageAnalyzers = '';
@@ -317,6 +333,7 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
+    this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;

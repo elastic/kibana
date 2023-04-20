@@ -4166,15 +4166,7 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -4218,7 +4210,15 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; createFilter: (indexPattern: ",
+              "; setRefreshInterval: (refreshInterval: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ">) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6328,7 +6328,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; reload: () => Promise<void>; destroy: () => void; getQuery: () => Promise<",
+          "; getDescription: () => string; destroy: () => void; getQuery: () => Promise<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6400,7 +6400,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
           "Observable",
           "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {

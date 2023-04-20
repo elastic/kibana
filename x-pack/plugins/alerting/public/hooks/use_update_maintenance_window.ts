@@ -29,12 +29,12 @@ export function useUpdateMaintenanceWindow() {
   };
 
   return useMutation(mutationFn, {
-    onSuccess: (data) => {
+    onSuccess: (variables: MaintenanceWindow) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsUpdateSuccess', {
           defaultMessage: "Updated maintenance window '{title}'",
           values: {
-            title: data.title,
+            title: variables.title,
           },
         })
       );
