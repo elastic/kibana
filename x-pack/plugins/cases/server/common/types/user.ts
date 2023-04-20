@@ -11,7 +11,3 @@ export interface User {
   username: undefined | null | string;
   profile_uid?: string;
 }
-
-export interface UserProfile {
-  uid: string;
-}

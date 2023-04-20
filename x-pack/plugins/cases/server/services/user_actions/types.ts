@@ -28,7 +28,7 @@ import type {
   UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { UnsafeUserActionPersistedAttributes } from '../../common/types/user_actions/common';
+import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 
 export interface BuilderParameters {
   title: {
@@ -99,7 +99,7 @@ export interface CommonArguments {
 }
 
 export interface SavedObjectParameters {
-  attributes: UnsafeUserActionPersistedAttributes;
+  attributes: UserActionPersistedAttributes;
   references: SavedObjectReference[];
 }
 

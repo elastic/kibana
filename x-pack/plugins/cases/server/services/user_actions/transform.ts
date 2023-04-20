@@ -33,7 +33,7 @@ import { isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { findReferenceId } from '../../common/references';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions/attributes';
+import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,

@@ -8,11 +8,10 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type {
-  CaseUserActionAttributesWithoutConnectorId,
   UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
@@ -28,7 +27,7 @@ import {
 import type { ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
-import type { UserActionPersistedAttributes } from '../../../common/types/user_actions/attributes';
+import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 
 interface FindOptions extends UserActionFindRequest {
   caseId: string;
@@ -196,7 +195,7 @@ export class UserActionFinder {
       const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
 
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
