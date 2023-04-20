@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useAsync from 'react-use/lib/useAsync';
@@ -120,6 +128,7 @@ export const ControlEditor = ({
   });
 
   const {
+    loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
       selectedDataView: undefined,
       fieldRegistry: undefined,
@@ -140,12 +149,12 @@ export const ControlEditor = ({
     () => setControlEditorValid(Boolean(selectedField) && Boolean(selectedDataView)),
     [selectedField, setControlEditorValid, selectedDataView]
   );
+
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
   const CustomSettings =
     factory && (factory as IEditableControlFactory).controlEditorOptionsComponent;
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -161,23 +170,21 @@ export const ControlEditor = ({
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
             <DataViewPicker
-              dataViews={state.dataViewListItems}
-              selectedDataViewId={dataView?.id}
+              dataViews={dataViewListItems}
+              selectedDataViewId={selectedDataViewId}
               onChangeDataViewId={(dataViewId) => {
                 setLastUsedDataViewId?.(dataViewId);
-                if (dataViewId === dataView?.id) return;
-
+                if (dataViewId === selectedDataViewId) return;
                 onTypeEditorChange({ dataViewId });
                 setSelectedField(undefined);
-                get(dataViewId).then((newDataView) => {
-                  setState((s) => ({ ...s, selectedDataView: newDataView }));
-                });
+                setSelectedDataViewId(dataViewId);
               }}
               trigger={{
                 label:
-                  state.selectedDataView?.getName() ??
+                  selectedDataView?.getName() ??
                   ControlGroupStrings.manageControl.getSelectDataViewMessage(),
               }}
+              selectableProps={{ isLoading: dataViewListLoading }}
             />
           </EuiFormRow>
           {fieldRegistry && (
@@ -185,7 +192,7 @@ export const ControlEditor = ({
               <FieldPicker
                 filterPredicate={(field: DataViewField) => Boolean(fieldRegistry[field.name])}
                 selectedFieldName={selectedField}
-                dataView={dataView}
+                dataView={selectedDataView}
                 onSelectField={(field) => {
                   onTypeEditorChange({
                     fieldName: field.name,
@@ -228,6 +235,7 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
+
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
             <>
               <EuiButtonGroup
@@ -262,7 +270,7 @@ export const ControlEditor = ({
               <CustomSettings
                 onChange={onTypeEditorChange}
                 initialInput={embeddable?.getInput()}
-                fieldType={fieldRegistry[selectedField].field.type}
+                fieldType={fieldRegistry?.[selectedField].field.type}
               />
             </EuiFormRow>
           )}
