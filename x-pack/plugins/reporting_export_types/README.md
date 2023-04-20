@@ -8,3 +8,7 @@ There are three constructs that interact: the `ReportingPlugin`, the `ExportType
 - PDFExportTypeDefinition
 
 The `ReportingPlugin`  calls the `ReportingExportTypesPlugin` and creates an instance of the `ExportTypeRegistry`. These export types use the `ReportingPlugin`'s registerExportType() within the `ExportTypeRegistry`. The `ReportingPlugin` uses the getExportType() method to use the registered export types for exporting.
+
+### Problems this solves
+
+The `ExportTypesPlugin` allows reporting to create its `ExportTypeRegistry`. This registry can be referenced in UI facing points of reporting can be enabled or disabled. 

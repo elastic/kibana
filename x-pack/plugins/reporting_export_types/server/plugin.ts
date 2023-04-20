@@ -7,25 +7,29 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExportTypesRegistry } from '@kbn/reporting-plugin/public/lib/export_types_registry';
+// import { ExportTypesRegistry } from '@kbn/reporting-plugin/public/lib/export_types_registry';
 import { CSVExportType, ExportTypeEntry } from './export_definitions';
 
 export interface ExportTypesPluginSetup {
-  /** added to the reporting plugin and registers in the public reporting setup() */
-  getTypes: (core: any, type: any) => ExportTypesPlugin['setup'];
-  // public reporting plugin also creates the et registry
-  registry: () => ExportTypesRegistry;
+  // /** added to the reporting plugin and registers in the public reporting setup() */
+  // getTypes: (core: any, type: any) => ExportTypesPlugin['setup'];
+  // // public reporting plugin also creates the et registry
+  // registry: () => ExportTypesRegistry;
+  enableCsvReporting(): void; // CSVExportType;
+  enablePDFReporting(): void; // PDFExportType;
+  enablePNGReporting(): void; // PNGExportType;
 }
 
 export interface ExportTypesPluginStart {
   /** Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle */
+  getReportingType(): ExportTypeEntry;
 }
 /** This plugin creates the export types in export type definitions */
 export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportTypesPluginStart> {
   private exportType?: ExportTypeEntry;
   // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
 
-  public setup(core: CoreSetup<ExportTypesPluginSetup>, plugins: object) {
+  public setup(core: CoreSetup<ExportTypesPluginSetup>, plugins: ReportingSetupDeps) {
     return {
       register: (type: ExportTypeEntry) => {
         // does the entry need to be independent or is it just one of the three types

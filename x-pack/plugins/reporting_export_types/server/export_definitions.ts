@@ -32,3 +32,5 @@ export interface PDFExportType {
 
 // Creating this type to be used when the entries aren't yet sorted into the export types
 export type ExportTypeEntry = Partial<CSVExportType | PNGExportType | PDFExportType>;
+
+// ExportTypeDefintion interface in reporting/server/types.ts
