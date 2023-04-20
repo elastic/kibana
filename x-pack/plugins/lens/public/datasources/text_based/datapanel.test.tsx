@@ -18,7 +18,7 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { EuiHighlight } from '@elastic/eui';
+import { EuiHighlight, EuiToken } from '@elastic/eui';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
@@ -273,5 +273,16 @@ describe('TextBased Query Languages Data Panel', () => {
         .find(EuiHighlight)
         .map((item) => item.prop('children'))
     ).toEqual(['memory']);
+  });
+
+  it('should render correct field type icons', async () => {
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiToken)
+        .map((item) => item.prop('iconType'))
+    ).toEqual(['tokenNumber', 'tokenNumber', 'tokenDate']);
   });
 });
