@@ -5,30 +5,15 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
-import type { ConnectorMappings } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import type { IndexRefresh } from '../types';
-
-interface ClientArgs {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}
-interface FindConnectorMappingsArgs extends ClientArgs {
-  options?: SavedObjectFindOptionsKueryNode;
-}
-
-interface PostConnectorMappingsArgs extends ClientArgs, IndexRefresh {
-  attributes: ConnectorMappings;
-  references: SavedObjectReference[];
-}
-
-interface UpdateConnectorMappingsArgs extends ClientArgs, IndexRefresh {
-  mappingId: string;
-  attributes: Partial<ConnectorMappings>;
-  references: SavedObjectReference[];
-}
+import type {
+  FindConnectorMappingsArgs,
+  PostConnectorMappingsArgs,
+  UpdateConnectorMappingsArgs,
+} from './types';
+import type { ConnectorMappingsPersistedAttributes } from '../../common/types/connector_mappings';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
@@ -36,7 +21,7 @@ export class ConnectorMappingsService {
   public async find({ unsecuredSavedObjectsClient, options }: FindConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to find all connector mappings`);
-      return await unsecuredSavedObjectsClient.find<ConnectorMappings>({
+      return await unsecuredSavedObjectsClient.find<ConnectorMappingsPersistedAttributes>({
         ...options,
         type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
       });
@@ -54,7 +39,7 @@ export class ConnectorMappingsService {
   }: PostConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
-      return await unsecuredSavedObjectsClient.create<ConnectorMappings>(
+      return await unsecuredSavedObjectsClient.create<ConnectorMappingsPersistedAttributes>(
         CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         attributes,
         {
@@ -77,7 +62,7 @@ export class ConnectorMappingsService {
   }: UpdateConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
-      return await unsecuredSavedObjectsClient.update<ConnectorMappings>(
+      return await unsecuredSavedObjectsClient.update<ConnectorMappingsPersistedAttributes>(
         CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         mappingId,
         attributes,
