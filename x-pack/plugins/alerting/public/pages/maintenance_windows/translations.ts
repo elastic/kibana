@@ -479,7 +479,7 @@ export const CANCEL_MODAL_BUTTON = i18n.translate(
 export const TABLE_ACTION_CANCEL_AND_ARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.cancelAndArchive',
   {
-    defaultMessage: 'Cancel and Archive',
+    defaultMessage: 'Cancel and archive',
   }
 );
 
