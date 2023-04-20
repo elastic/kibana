@@ -104,7 +104,7 @@ export const useAddToRulesTable = ({
         name: commonI18n.LINK_COLUMN,
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
-        render: (_, rule: Rule) => (
+        render: (_: unknown, rule: Rule) => (
           <LinkRuleSwitch rule={rule} linkedRules={linkedRules} onRuleLinkChange={setLinkedRules} />
         ),
       },
