@@ -11,12 +11,6 @@ export { LegendSettingsPopover } from './legend/legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 export { ChangeIndexPattern, fieldContainsData } from './dataview_picker';
 export { QueryInput, isQueryValid, validateQuery } from './query_input';
-export {
-  NewBucketButton,
-  DraggableBucketContainer,
-  DragDropBuckets,
-  FieldsBucketContainer,
-} from './drag_drop_bucket';
 export { RangeInputField } from './range_input_field';
 export {
   AxisBoundsControl,

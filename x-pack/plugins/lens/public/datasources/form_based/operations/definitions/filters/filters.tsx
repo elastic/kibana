@@ -15,11 +15,11 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
+  NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
-  isQueryValid,
-  NewBucketButton,
-} from '../../../../../shared_components';
+} from '@kbn/visualization-ui-components';
+import { isQueryValid } from '../../../../../shared_components';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';

@@ -16,6 +16,10 @@ export {
   ColorPicker,
   IconSelect,
   IconSelectSetting,
+  NewBucketButton,
+  DragDropBuckets,
+  DraggableBucketContainer,
+  FieldsBucketContainer,
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';

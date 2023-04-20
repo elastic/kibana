@@ -20,6 +20,8 @@ export * from './color_picker';
 
 export * from './icon_select';
 
+export * from './drag_drop_bucket';
+
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';
 
 export type { IconSet } from './icon_select';

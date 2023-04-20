@@ -11,14 +11,14 @@ import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import type { IndexPattern } from '../../../../types';
 import {
+  useDebouncedValue,
   NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
   FieldsBucketContainer,
-} from '../../../../shared_components';
+} from '@kbn/visualization-ui-components';
+import type { IndexPattern } from '../../../../types';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;
 

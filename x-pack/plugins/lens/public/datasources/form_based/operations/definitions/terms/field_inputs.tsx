@@ -8,14 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { IndexPattern } from '../../../../../types';
 import {
+  useDebouncedValue,
   DragDropBuckets,
   FieldsBucketContainer,
   NewBucketButton,
   DraggableBucketContainer,
-} from '../../../../../shared_components';
+} from '@kbn/visualization-ui-components';
+import { IndexPattern } from '../../../../../types';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
