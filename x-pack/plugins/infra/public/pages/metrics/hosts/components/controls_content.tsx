@@ -6,12 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { ControlGroupContainer, type ControlGroupInput } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupAPI,
+  ControlGroupRenderer,
+  type ControlGroupInput,
+} from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Subscription } from 'rxjs';
-import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
@@ -50,7 +53,8 @@ export const ControlsContent: React.FC<Props> = ({
   }, [controlPanels, dataView?.id, filters, query, timeRange]);
 
   const loadCompleteHandler = useCallback(
-    (controlGroup: ControlGroupContainer) => {
+    (controlGroup: ControlGroupAPI) => {
+      if (!controlGroup) return;
       inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
         onFiltersChange(newFilters);
       });
@@ -70,9 +74,9 @@ export const ControlsContent: React.FC<Props> = ({
   }, []);
 
   return (
-    <LazyControlsRenderer
+    <ControlGroupRenderer
       getCreationOptions={getInitialInput}
-      onLoadComplete={loadCompleteHandler}
+      ref={loadCompleteHandler}
       timeRange={timeRange}
       query={query}
       filters={filters}
