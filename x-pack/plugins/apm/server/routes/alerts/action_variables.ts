@@ -94,6 +94,6 @@ export const apmActionVariables = {
         defaultMessage: 'The error grouping key the alert is created for',
       }
     ),
-    name: 'viewInAppUrl' as const,
+    name: 'errorGroupingKey' as const,
   },
 };
