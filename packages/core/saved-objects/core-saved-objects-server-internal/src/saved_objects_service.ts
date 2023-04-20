@@ -52,7 +52,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { MAIN_SAVED_OBJECT_INDEX, SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -198,7 +198,7 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
-      getAllIndices: () => [...SavedObjectsIndexPatterns],
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -355,7 +355,7 @@ export class SavedObjectsService
         });
         return [...indices];
       },
-      getAllIndices: () => [...SavedObjectsIndexPatterns],
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 

@@ -13,7 +13,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import {
   MAIN_SAVED_OBJECT_INDEX,
-  SavedObjectsIndexPatterns,
+  ALL_SAVED_OBJECT_INDICES,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
@@ -23,7 +23,7 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 /**
  * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
  */
-export async function deleteKibanaIndices({
+export async function deleteSavedObjectIndices({
   client,
   stats,
   onlyTaskManager = false,
@@ -66,7 +66,7 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex(kbnClient: KbnClient) {
+export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
   await kbnClient.savedObjects.migrate();
 }
 
@@ -83,8 +83,8 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
  * @returns boolean 'true' if the index is a Kibana saved object index.
  */
 
-const LEGACY_INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})(:?_\\d*)?$`);
-const INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})_(pre)?\\d+.\\d+.\\d+`);
+const LEGACY_INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})(:?_\\d*)?$`);
+const INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})_(pre)?\\d+.\\d+.\\d+`);
 
 function isSavedObjectIndex(index?: string): index is string {
   return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
@@ -107,7 +107,7 @@ async function fetchSavedObjectIndices(client: Client) {
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
 
-export async function cleanKibanaIndices({
+export async function cleanSavedObjectIndices({
   client,
   stats,
   log,
@@ -119,7 +119,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: SavedObjectsIndexPatterns,
+        index: ALL_SAVED_OBJECT_INDICES,
         body: {
           query: {
             bool: {
@@ -156,7 +156,7 @@ export async function cleanKibanaIndices({
       `.kibana rather than deleting the whole index`
   );
 
-  SavedObjectsIndexPatterns.forEach((indexPattern) => stats.deletedIndex(indexPattern));
+  ALL_SAVED_OBJECT_INDICES.forEach((indexPattern) => stats.deletedIndex(indexPattern));
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {

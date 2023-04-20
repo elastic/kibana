@@ -13,7 +13,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { cleanKibanaIndices } from './kibana_index';
+import { cleanSavedObjectIndices } from './kibana_index';
 import { deleteDataStream } from './delete_data_stream';
 
 export function createDeleteIndexStream(client: Client, stats: Stats, log: ToolingLog) {
@@ -30,7 +30,7 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
           const { index } = record.value;
 
           if (index.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
-            await cleanKibanaIndices({ client, stats, log });
+            await cleanSavedObjectIndices({ client, stats, log });
           } else {
             await deleteIndex({ client, stats, log, index });
           }
