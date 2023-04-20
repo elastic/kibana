@@ -119,7 +119,7 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.customUrlsEditor.customTimeRangeLabel"
-                defaultMessage="Custom Time range"
+                defaultMessage="Custom time range"
               />
             }
           >

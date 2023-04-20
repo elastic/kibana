@@ -86,6 +86,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   job,
 }) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
+  const [hasTimefield, setHasTimefield] = useState<boolean>(false);
 
   const {
     services: {
@@ -104,6 +105,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         dataViewToUse = await dataViews.get(dataViewId ?? '');
       } catch (e) {
         dataViewToUse = undefined;
+      }
+      if (dataViewToUse && dataViewToUse.timeFieldName) {
+        setHasTimefield(true);
       }
       const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
       setQueryEntityFieldNames(dropDownOptions);
@@ -356,8 +360,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               />
             </EuiFormRow>
           )}
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-        showCustomTimeRangeSelector ? (
+        {type === URL_TYPE.KIBANA_DASHBOARD ||
+        (type === URL_TYPE.KIBANA_DISCOVER && showCustomTimeRangeSelector && hasTimefield) ? (
           <CustomTimeRangePicker
             onCustomTimeRangeChange={onCustomTimeRangeChange}
             customTimeRange={customUrl?.customTimeRange}
