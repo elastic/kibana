@@ -102,6 +102,7 @@ export function ErrorCountRuleType(props: Props) {
         if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
           setRuleParams('environment', ENVIRONMENT_ALL.value);
+          setRuleParams('errorGroupingKey', undefined);
         }
       }}
     />,
