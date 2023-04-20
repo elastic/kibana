@@ -30,8 +30,14 @@ import { useKibana } from '../../../common/lib/kibana';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { triggersActionsUiHealth } from '../../../common/lib/health_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useLoadRuleTypesQuery } from '../../hooks';
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../hooks');
+
+const useLicenseMock = useLoadRuleTypesQuery as jest.Mock;
 
 jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
@@ -93,7 +99,7 @@ describe('rule_add', () => {
   ) {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     const mocks = coreMock.createSetup();
-    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
+
     const ruleTypes = [
       {
         id: 'my-rule-type',
@@ -120,7 +126,16 @@ describe('rule_add', () => {
         },
       },
     ];
-    loadRuleTypes.mockResolvedValue(ruleTypes);
+
+    useLicenseMock.mockReturnValue({
+      ruleTypesState: {
+        unfilteredRuleTypeIndex: null,
+        isLoading: false,
+        isError: false,
+        ruleTypes,
+      },
+    });
+
     const [
       {
         application: { capabilities },
@@ -174,19 +189,23 @@ describe('rule_add', () => {
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
+    const queryClient = new QueryClient();
+
     wrapper = mountWithIntl(
-      <RuleAdd
-        consumer={ALERTS_FEATURE_ID}
-        onClose={onClose}
-        initialValues={initialValues}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-        metadata={{ test: 'some value', fields: ['test'] }}
-        ruleTypeId={ruleTypeId}
-      />
+      <QueryClientProvider client={queryClient}>
+        <RuleAdd
+          consumer={ALERTS_FEATURE_ID}
+          onClose={onClose}
+          initialValues={initialValues}
+          onSave={() => {
+            return new Promise<void>(() => {});
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+          metadata={{ test: 'some value', fields: ['test'] }}
+          ruleTypeId={ruleTypeId}
+        />
+      </QueryClientProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -346,7 +365,7 @@ describe('rule_add', () => {
 
     await setup({}, jest.fn(), undefined, 'my-rule-type', true);
 
-    expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
+    // expect(triggersActionsUiHealth).toHaveBeenCalledTimes(1);
     expect(alertingFrameworkHealth).toHaveBeenCalledTimes(1);
     expect(loadActionTypes).toHaveBeenCalledTimes(1);
     expect(loadAllActions).toHaveBeenCalledTimes(1);

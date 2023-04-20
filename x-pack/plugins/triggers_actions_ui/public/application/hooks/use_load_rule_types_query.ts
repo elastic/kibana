@@ -46,8 +46,8 @@ export const useLoadRuleTypesQuery = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const queryFn = () => {
-    return loadRuleTypes({ http });
+  const queryFn = async () => {
+    return await loadRuleTypes({ http });
   };
 
   const onErrorFn = () => {
@@ -63,8 +63,8 @@ export const useLoadRuleTypesQuery = ({
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
-    staleTime: 9000000,
-    cacheTime: 9000000,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 5 * 60 * 1000,
     enabled,
   });
   const ruleTypes = data ? data.filter((item) => filteredRuleTypes.includes(item.id)) : [];

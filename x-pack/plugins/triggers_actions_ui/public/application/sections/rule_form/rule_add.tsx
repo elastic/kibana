@@ -30,12 +30,12 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import RuleAddFooter from './rule_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { useLoadRuleTypesQuery } from '../../hooks';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
-import { useLoadRuleTypesQuery } from '../../hooks';
 
 const RuleAdd = ({
   consumer,
@@ -111,12 +111,16 @@ const RuleAdd = ({
 
   const {
     ruleTypesState: {
-      unfilteredRuleTypeIndex: ruleTypeIndex,
+      unfilteredRuleTypeIndex: ruleTypeIndexFromHook,
       isLoading: ruleTypesIsLoading,
       isError: ruleTypesLoadError,
       ruleTypes,
     },
-  } = useLoadRuleTypesQuery({ filteredRuleTypes: filteredRuleTypes || [], enabled: true });
+  } = useLoadRuleTypesQuery({
+    filteredRuleTypes: filteredRuleTypes || [],
+    enabled: !props.ruleTypeIndex,
+  });
+  const ruleTypeIndex = !props.ruleTypeIndex ? ruleTypeIndexFromHook : props.ruleTypeIndex;
 
   useEffect(() => {
     if (isEmpty(rule.params) && !isEmpty(initialRuleParams)) {
