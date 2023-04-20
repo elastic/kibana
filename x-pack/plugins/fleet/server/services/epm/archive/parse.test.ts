@@ -193,6 +193,24 @@ describe('parseDataStreamElasticsearchEntry', () => {
       },
     });
   });
+  it('Should handle dynamic_dataset', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_dataset: true,
+      })
+    ).toEqual({
+      dynamic_dataset: true,
+    });
+  });
+  it('Should handle dynamic_namespace', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_namespace: true,
+      })
+    ).toEqual({
+      dynamic_namespace: true,
+    });
+  });
 });
 
 describe('parseTopLevelElasticsearchEntry', () => {
@@ -491,6 +509,39 @@ describe('parseAndVerifyDataStreams', () => {
       {
         dataset: 'ds',
         elasticsearch: {},
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse dotted elasticsearch keys', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        manifests: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0
+          elasticsearch.dynamic_dataset: true`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: {
+          dynamic_dataset: true,
+        },
         package: 'input-only',
         path: 'stream1',
         release: 'ga',
