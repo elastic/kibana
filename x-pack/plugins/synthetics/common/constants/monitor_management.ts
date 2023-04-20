@@ -65,11 +65,7 @@ export enum ConfigKey {
   TLS_VERSION = 'ssl.supported_protocols',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
-  THROTTLING_CONFIG = 'throttling.config',
-  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
-  DOWNLOAD_SPEED = 'throttling.download_speed',
-  UPLOAD_SPEED = 'throttling.upload_speed',
-  LATENCY = 'throttling.latency',
+  THROTTLING_CONFIG = 'throttling',
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
@@ -106,4 +102,10 @@ export enum LegacyConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  THROTTLING_CONFIG = 'throttling.config',
+  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
+  DOWNLOAD_SPEED = 'throttling.download_speed',
+  UPLOAD_SPEED = 'throttling.upload_speed',
+  LATENCY = 'throttling.latency',
 }

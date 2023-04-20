@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { DragContext } from '@kbn/dom-drag-drop';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
@@ -206,6 +207,17 @@ export function DiscoverLayout({
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
+  const dragDropContext = useContext(DragContext);
+  const draggingFieldName = dragDropContext.dragging?.id;
+
+  const onDropFieldToTable = useMemo(() => {
+    if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {
+      return undefined;
+    }
+
+    return () => onAddColumn(draggingFieldName);
+  }, [onAddColumn, draggingFieldName, currentColumns]);
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
       const globalQueryState = data.query.getState();
@@ -244,6 +256,7 @@ export function DiscoverLayout({
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
+          onDropFieldToTable={onDropFieldToTable}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -264,7 +277,9 @@ export function DiscoverLayout({
     savedSearch,
     stateContainer,
     viewMode,
+    onDropFieldToTable,
   ]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1

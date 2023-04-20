@@ -189,17 +189,18 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: enginePath,
           }),
           items: [
             {
-              id: 'enterpriseSearchEngineOverview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.overviewTitle', {
-                defaultMessage: 'Overview',
+              id: 'enterpriseSearchEnginePreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+                defaultMessage: 'Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.OVERVIEW}`,
+                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
               }),
             },
             {
@@ -223,23 +224,17 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
             },
             {
-              id: 'enterpriseSearchEnginePreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
-              }),
+              id: 'enterpriseSearchApplicationConnect',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.applications.searchApplications.connectTitle',
+                {
+                  defaultMessage: 'Connect',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEngineAPI',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {
-                defaultMessage: 'API',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.API}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
               }),
             },
           ],

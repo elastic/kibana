@@ -20,10 +20,11 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query }: any) => ({
+export const getFindingsQuery = ({ query, sort }: any) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
   query,
   size: MAX_FINDINGS_TO_LOAD,
+  sort,
 });
 
 export const useLatestVulnerabilities = (options: any) => {
