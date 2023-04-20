@@ -13,14 +13,16 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  exportExceptionList,
-  waitForExceptionsTableToBeLoaded,
-  createSharedExceptionList,
   assertExceptionListsExists,
   duplicateSharedExceptionListFromListsManagementPageByListId,
   findSharedExceptionListItemsByName,
   deleteExceptionListWithoutRuleReferenceByListId,
   deleteExceptionListWithRuleReferenceByListId,
+  exportExceptionList,
+  waitForExceptionsTableToBeLoaded,
+  createSharedExceptionList,
+  linkRulesToExceptionList,
+  assertNumberLinkedRules,
 } from '../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
@@ -58,6 +60,8 @@ describe('Manage shared exception list', () => {
       esArchiverResetKibana();
       login();
 
+      createRule(getNewRule({ name: 'Another rule' }));
+
       // Create exception list associated with a rule
       createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
         createRule(
@@ -88,7 +92,7 @@ describe('Manage shared exception list', () => {
     it('Export exception list', function () {
       cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-      exportExceptionList();
+      exportExceptionList(getExceptionList1().list_id);
 
       cy.wait('@export').then(({ response }) => {
         cy.wrap(response?.body).should(
@@ -103,9 +107,15 @@ describe('Manage shared exception list', () => {
       });
     });
 
+    it('Link rules to shared exception list', function () {
+      assertNumberLinkedRules(getExceptionList2().list_id, '1');
+      linkRulesToExceptionList(getExceptionList2().list_id, 1);
+      assertNumberLinkedRules(getExceptionList2().list_id, '2');
+    });
+
     it('Create exception list', function () {
       createSharedExceptionList(
-        { name: 'Newly created list', description: 'This is my list.' },
+        { name: EXCEPTION_LIST_NAME, description: 'This is my list.' },
         true
       );
 
@@ -142,10 +152,7 @@ describe('Manage shared exception list', () => {
   });
 
   describe('Duplicate', () => {
-    beforeEach(() => {
-      esArchiverResetKibana();
-      login();
-
+    before(() => {
       // Create exception list associated with a rule
       createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
@@ -188,6 +195,11 @@ describe('Manage shared exception list', () => {
 
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
+    });
+
+    beforeEach(() => {
+      esArchiverResetKibana();
+      login();
     });
 
     it('Duplicate exception list with expired items', function () {

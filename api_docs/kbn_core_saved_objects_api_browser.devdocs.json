@@ -1868,7 +1868,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
+                "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
               },
               {
                 "plugin": "infra",
@@ -3861,11 +3861,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing/dashboard_listing.tsx"
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
             "plugin": "lens",

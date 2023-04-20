@@ -174,7 +174,7 @@ export class SyntheticsService {
                 service.isAllowed = allowed;
                 service.signupUrl = signupUrl;
 
-                if (service.isAllowed) {
+                if (service.isAllowed && service.config.manifestUrl) {
                   service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
@@ -349,6 +349,10 @@ export class SyntheticsService {
 
     subject.subscribe(async (monitors) => {
       try {
+        if (monitors.length === 0 || !this.config.manifestUrl) {
+          return;
+        }
+
         if (!output) {
           output = await this.getOutput();
 
@@ -365,7 +369,7 @@ export class SyntheticsService {
 
         this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
-        service.syncErrors = await this.apiClient.put({
+        service.syncErrors = await this.apiClient.syncMonitors({
           monitors,
           output,
           licenseLevel: license.type,

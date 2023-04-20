@@ -369,6 +369,9 @@ export const useListDetailsView = (exceptionListId: string) => {
             i18n.EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION
           );
           setShowManageButtonLoader(false);
+        })
+        .finally(() => {
+          initializeList();
         });
     } catch (err) {
       handleErrorStatus(err);
@@ -377,10 +380,11 @@ export const useListDetailsView = (exceptionListId: string) => {
     list,
     getRulesToAdd,
     getRulesToRemove,
-    exceptionListId,
     resetManageRulesAfterSaving,
-    handleErrorStatus,
+    exceptionListId,
     invalidateFetchRuleByIdQuery,
+    handleErrorStatus,
+    initializeList,
   ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);

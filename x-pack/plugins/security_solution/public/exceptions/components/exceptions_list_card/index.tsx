@@ -113,7 +113,6 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       toggleAccordion,
       openAccordionId,
       menuActionItems,
-      listRulesCount,
       listDescription,
       exceptionItemsCount,
       onEditExceptionItem,
@@ -196,8 +195,11 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
                         </EuiFlexItem>
-                        <EuiFlexItem>
-                          <TitleBadge title={i18n.RULES} badgeString={listRulesCount} />
+                        <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge">
+                          <TitleBadge
+                            title={i18n.RULES}
+                            badgeString={linkedRules.length.toString()}
+                          />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <HeaderMenu

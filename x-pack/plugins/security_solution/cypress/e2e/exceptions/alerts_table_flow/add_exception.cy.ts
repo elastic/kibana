@@ -79,7 +79,7 @@ describe('Exceptions Table', () => {
 
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
-    exportExceptionList();
+    exportExceptionList(getExceptionList1().list_id);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should(

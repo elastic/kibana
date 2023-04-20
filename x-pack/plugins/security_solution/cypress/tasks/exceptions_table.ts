@@ -29,8 +29,12 @@ import {
   EXCEPTIONS_TABLE_DUPLICATE_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
-  exceptionsTableListManagementListContainerByListId,
   EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME,
+  exceptionsTableListManagementListContainerByListId,
+  EXCEPTIONS_TABLE_LINK_RULES_BTN,
+  RULE_ACTION_LINK_RULE_SWITCH,
+  LINKED_RULES_BADGE,
+  MANAGE_RULES_SAVE,
 } from '../screens/exceptions';
 import { assertExceptionItemsExists } from './exceptions';
 
@@ -42,10 +46,28 @@ export const expandExceptionActions = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
 };
 
-export const exportExceptionList = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+export const exportExceptionList = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_MODAL_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN).first().click();
+};
+
+export const assertNumberLinkedRules = (listId: string, numberOfRulesAsString: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(LINKED_RULES_BADGE)
+    .contains(numberOfRulesAsString);
+};
+
+export const linkRulesToExceptionList = (listId: string, ruleSwitch: number = 0) => {
+  cy.log(`Open link rules flyout for list_id: '${listId}'`);
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
+  cy.get(EXCEPTIONS_TABLE_LINK_RULES_BTN).first().click();
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
+  cy.get(MANAGE_RULES_SAVE).first().click();
 };
 
 export const deleteExceptionListWithoutRuleReferenceByListId = (listId: string) => {
