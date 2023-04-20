@@ -185,8 +185,6 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.revision = 1;
         // Expect an empty array
         outputRule.actions = [];
-        // Expect "no_actions"
-        outputRule.throttle = 'no_actions';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -221,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: connector.body.id,
           action_type_id: connector.body.connector_type_id,
           params: {
-            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
         };
         // update a simple rule's name
@@ -229,7 +227,6 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
         updatedRule.actions = [action1];
-        updatedRule.throttle = '1d';
         delete updatedRule.id;
 
         const { body } = await supertest
@@ -249,14 +246,12 @@ export default ({ getService }: FtrProviderContext) => {
             group: 'default',
             id: connector.body.id,
             params: {
-              message:
-                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: bodyToCompare.actions![0].uuid,
-            frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
         ];
-        outputRule.throttle = '1d';
 
         expect(bodyToCompare).to.eql(outputRule);
 

@@ -671,7 +671,7 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle,
+    throttle: undefined,
     actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,

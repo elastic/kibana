@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
-          expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(rule.throttle).to.eql(undefined);
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
+          expect(readRule.throttle).to.eql(undefined);
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, we should return "NOTIFICATION_THROTTLE_NO_ACTIONS" when doing a read', async () => {
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(readRule.throttle).to.eql(undefined);
         });
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(readRule.throttle).to.eql(undefined);
         });
 
         it('When creating a new action and attaching it to a rule, if we change the alert to a "muteAll" through the kibana alerting API, we should get back "NOTIFICATION_THROTTLE_NO_ACTIONS" ', async () => {
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send()
             .expect(204);
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(readRule.throttle).to.eql(undefined);
         });
       });
 
@@ -267,7 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
           await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.name = 'some other name';
           const updated = await updateRule(supertest, log, ruleWithWebHookAction);
-          expect(updated.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
+          expect(updated.throttle).to.eql(undefined);
         });
 
         it('will not change the "muteAll" or "notifyWhen" if we update some part of the rule', async () => {
@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext) => {
           await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.actions = [];
           const updated = await updateRule(supertest, log, ruleWithWebHookAction);
-          expect(updated.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(updated.throttle).to.eql(undefined);
         });
       });
 
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ rule_id: rule.rule_id, name: 'some other name' })
             .expect(200);
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_RULE);
+          expect(readRule.throttle).to.eql(undefined);
         });
 
         it('will not change the "muteAll" or "notifyWhen" if we patch part of the rule', async () => {
@@ -368,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ rule_id: rule.rule_id, actions: [] })
             .expect(200);
           const readRule = await getRule(supertest, log, rule.rule_id);
-          expect(readRule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          expect(readRule.throttle).to.eql(undefined);
         });
       });
     });

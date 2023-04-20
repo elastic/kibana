@@ -142,7 +142,6 @@ export default ({ getService }: FtrProviderContext) => {
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-          throttle: 'rule',
         };
         expect(bodyToCompare).to.eql(ruleWithActions);
       });
@@ -187,7 +186,6 @@ export default ({ getService }: FtrProviderContext) => {
               frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ],
-          throttle: '1h', // <-- throttle makes this a scheduled action
         };
         expect(bodyToCompare).to.eql(ruleWithActions);
       });
@@ -251,7 +249,6 @@ export default ({ getService }: FtrProviderContext) => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           expect(bodyToCompare).to.eql(ruleWithActions);
         });

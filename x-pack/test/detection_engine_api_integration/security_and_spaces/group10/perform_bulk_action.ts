@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
@@ -168,7 +167,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
       expect(rule).to.eql({
         ...getSimpleRuleOutput(),
-        throttle: 'rule',
         actions: [
           {
             action_type_id: '.webhook',
@@ -1877,12 +1875,20 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].throttle).to.be('1h');
+            expect(body.attributes.results.updated[0].throttle).to.be(undefined);
+
+            const expectedActions = body.attributes.results.updated[0].actions.map(
+              (action: any) => ({
+                ...action,
+                frequency: { summary: true, throttle: '8h', notifyWhen: 'onThrottleInterval' },
+              })
+            );
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.throttle).to.eql('1h');
+            expect(readRule.throttle).to.eql(undefined);
+            expect(readRule.actions).to.eql(expectedActions);
           });
         });
 
@@ -2046,33 +2052,31 @@ export default ({ getService }: FtrProviderContext): void => {
                 .expect(200);
 
               // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(
-                NOTIFICATION_THROTTLE_NO_ACTIONS
-              );
+              expect(body.attributes.results.updated[0].throttle).to.eql(undefined);
 
               // Check that the updates have been persisted
               const { body: rule } = await fetchRule(ruleId).expect(200);
 
-              expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+              expect(rule.throttle).to.eql(undefined);
             });
           });
 
           const casesForNonEmptyActions = [
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
-              expectedThrottle: NOTIFICATION_THROTTLE_RULE,
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1h',
-              expectedThrottle: '1h',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1d',
-              expectedThrottle: '1d',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '7d',
-              expectedThrottle: '7d',
+              expectedThrottle: undefined,
             },
           ];
           [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
@@ -2110,10 +2114,23 @@ export default ({ getService }: FtrProviderContext): void => {
                   // Check that the updated rule is returned with the response
                   expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
+                  const expectedActions = body.attributes.results.updated[0].actions.map(
+                    (action: any) => ({
+                      ...action,
+                      frequency: {
+                        summary: true,
+                        throttle: payloadThrottle !== 'rule' ? payloadThrottle : null,
+                        notifyWhen:
+                          payloadThrottle !== 'rule' ? 'onThrottleInterval' : 'onActiveAlert',
+                      },
+                    })
+                  );
+
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
 
                   expect(rule.throttle).to.eql(expectedThrottle);
+                  expect(rule.actions).to.eql(expectedActions);
                 });
               });
             }

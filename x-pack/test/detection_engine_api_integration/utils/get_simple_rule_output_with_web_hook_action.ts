@@ -14,7 +14,6 @@ export const getSimpleRuleOutputWithWebHookAction = (
   uuid: string
 ): RuleWithoutServerGeneratedProperties => ({
   ...getSimpleRuleOutput(),
-  throttle: 'rule',
   actions: [
     {
       action_type_id: '.webhook',

@@ -8,6 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -219,7 +220,6 @@ export default ({ getService }: FtrProviderContext): void => {
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-          throttle: 'rule',
         };
         expect(firstRule).toEqual(outputRule1);
       });
@@ -273,7 +273,6 @@ export default ({ getService }: FtrProviderContext): void => {
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-          throttle: 'rule',
         };
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
@@ -284,7 +283,6 @@ export default ({ getService }: FtrProviderContext): void => {
               frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
-          throttle: 'rule',
         };
         expect(firstRule).toEqual(outputRule1);
         expect(secondRule).toEqual(outputRule2);
@@ -460,7 +458,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -548,7 +545,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -667,7 +663,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
 
           const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
@@ -694,7 +689,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
@@ -709,7 +703,8 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-function expectToMatchRuleSchema(obj: unknown): void {
+function expectToMatchRuleSchema(obj: RuleResponse): void {
+  expect(obj.throttle).toBeUndefined();
   expect(obj).toEqual({
     id: expect.any(String),
     rule_id: expect.any(String),
@@ -745,7 +740,6 @@ function expectToMatchRuleSchema(obj: unknown): void {
     language: expect.any(String),
     index: expect.arrayContaining([]),
     query: expect.any(String),
-    throttle: expect.any(String),
     actions: expect.arrayContaining([]),
   });
 }

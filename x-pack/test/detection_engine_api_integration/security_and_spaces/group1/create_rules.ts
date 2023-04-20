@@ -200,7 +200,6 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'query',
             threat: [],
-            throttle: 'no_actions',
             exceptions_list: [],
             version: 1,
           };

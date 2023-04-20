@@ -380,7 +380,6 @@ export default ({ getService }: FtrProviderContext) => {
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ];
-        outputRule.throttle = '1h';
         outputRule.revision = 1;
         expect(bodyToCompare).to.eql(outputRule);
 

@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: connector.body.id,
           action_type_id: connector.body.connector_type_id,
           params: {
-            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
         };
         const [rule1, rule2] = await Promise.all([
@@ -160,12 +160,10 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
-        updatedRule1.throttle = '1d';
 
         const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
         updatedRule2.actions = [action1];
-        updatedRule2.throttle = '1d';
 
         // update both rule names
         const { body }: { body: RuleResponse[] } = await supertest
@@ -189,14 +187,12 @@ export default ({ getService }: FtrProviderContext) => {
               group: 'default',
               id: connector.body.id,
               params: {
-                message:
-                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               uuid: bodyToCompare.actions[0].uuid,
-              frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ];
-          outputRule.throttle = '1d';
 
           expect(bodyToCompare).to.eql(outputRule);
         });
@@ -248,7 +244,6 @@ export default ({ getService }: FtrProviderContext) => {
           outputRule.name = 'some other name';
           outputRule.revision = 1;
           outputRule.actions = [];
-          outputRule.throttle = 'no_actions';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
