@@ -13,8 +13,7 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
-import { MarkdownRenderer } from '../../markdown_editor';
-import { ContentWrapper } from '../../markdown_editor';
+import { MarkdownRenderer, ContentWrapper } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
