@@ -17,7 +17,6 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
   ALERT_INSTANCE_ID,
-  ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import {
   QueryDslQueryContainer,
@@ -578,7 +577,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
             params: {
               days: alertsFilter.timeframe.days,
               timezone: alertsFilter.timeframe.timezone,
-              datetimeField: ALERT_LAST_DETECTED,
+              datetimeField: TIMESTAMP,
             },
           },
         },
@@ -612,7 +611,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
               start: alertsFilter.timeframe.hours.start,
               end: alertsFilter.timeframe.hours.end,
               timezone: alertsFilter.timeframe.timezone,
-              datetimeField: ALERT_LAST_DETECTED,
+              datetimeField: TIMESTAMP,
             },
           },
         },

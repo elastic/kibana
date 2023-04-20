@@ -2148,11 +2148,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2160,12 +2161,13 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
@@ -2232,11 +2234,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2244,12 +2247,13 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
@@ -2316,11 +2320,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2328,12 +2333,13 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
