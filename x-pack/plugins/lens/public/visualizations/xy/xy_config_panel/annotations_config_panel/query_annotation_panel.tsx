@@ -11,12 +11,8 @@ import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plug
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import {
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
-  FilterQueryInput,
-} from '../../../../shared_components';
+import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import { FilterQueryInput } from '../../../../shared_components';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
 

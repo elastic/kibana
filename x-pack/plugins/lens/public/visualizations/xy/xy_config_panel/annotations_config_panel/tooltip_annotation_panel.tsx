@@ -10,11 +10,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
 import type { IndexPattern } from '../../../../types';
 import {
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
   useDebouncedValue,
   NewBucketButton,
   DragDropBuckets,

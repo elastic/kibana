@@ -24,11 +24,7 @@ import {
 } from '@kbn/event-annotation-plugin/common';
 import moment from 'moment';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import {
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
-} from '../../../../shared_components/field_picker';
+import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
 import { FormatFactory } from '../../../../../common/types';
 import {
   DimensionEditorSection,

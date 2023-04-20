@@ -9,8 +9,6 @@ export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend/legend_settings_popover';
 export { PalettePicker } from './palette_picker';
-export { FieldPicker, TruncatedLabel } from './field_picker';
-export type { FieldOption, FieldOptionValue } from './field_picker';
 export { ChangeIndexPattern, fieldContainsData } from './dataview_picker';
 export { QueryInput, isQueryValid, validateQuery } from './query_input';
 export {
