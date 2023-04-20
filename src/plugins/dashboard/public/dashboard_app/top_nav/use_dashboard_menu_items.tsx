@@ -116,7 +116,7 @@ export const useDashboardMenuItems = ({
   }, [maybeRedirect, dashboardContainer]);
 
   /**
-   * Show the dashboard's "Confirm discard changes" modal. If confirmed:
+   * Show the dashboard's "Confirm reset changes" modal. If confirmed:
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
@@ -130,9 +130,9 @@ export const useDashboardMenuItems = ({
             if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
           });
         }, viewMode);
-        return;
+      } else {
+        if (switchToViewMode) dispatch(setViewMode(ViewMode.VIEW));
       }
-      dispatch(setViewMode(ViewMode.VIEW));
     },
     [dashboardContainer, dispatch, hasUnsavedChanges, viewMode, setViewMode]
   );
