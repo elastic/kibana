@@ -18,7 +18,6 @@ import { EngineApiLogic } from './engine_api_logic';
 
 import { elasticsearchUrl } from './search_application_api';
 
-
 const SearchUISnippet = (elasticsearchUrl: string, engineName: string, apiKey: string) => `6
 import EnginesAPIConnector from "@elastic/search-ui-engines-connector";
 

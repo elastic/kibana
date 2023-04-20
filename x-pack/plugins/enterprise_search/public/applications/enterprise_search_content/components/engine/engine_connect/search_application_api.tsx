@@ -23,6 +23,8 @@ import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
 import { COLLECTION_INTEGRATE_PATH } from '../../../../analytics/routes';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -32,9 +34,6 @@ import { EngineViewLogic } from '../engine_view_logic';
 import { EngineApiIntegrationStage } from './engine_api_integration';
 import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
-
-import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 
 export const elasticsearchUrl = (): string => {
   const defaultUrl = 'http://localhost:9200';
