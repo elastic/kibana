@@ -62,24 +62,27 @@ export const RuleActionAlertsFilter = t.partial({
       t.partial({ dsl: t.string }),
     ]),
   ]),
-  timeframe: t.partial({
-    timezone: t.string,
-    days: t.array(
-      t.union([
-        t.literal(1),
-        t.literal(2),
-        t.literal(3),
-        t.literal(4),
-        t.literal(5),
-        t.literal(6),
-        t.literal(7),
-      ])
-    ),
-    hours: t.strict({
-      start: t.string,
-      end: t.string,
+  timeframe: t.union([
+    t.undefined,
+    t.strict({
+      timezone: t.string,
+      days: t.array(
+        t.union([
+          t.literal(1),
+          t.literal(2),
+          t.literal(3),
+          t.literal(4),
+          t.literal(5),
+          t.literal(6),
+          t.literal(7),
+        ])
+      ),
+      hours: t.strict({
+        start: t.string,
+        end: t.string,
+      }),
     }),
-  }),
+  ]),
 });
 
 export type RuleAction = t.TypeOf<typeof RuleAction>;
