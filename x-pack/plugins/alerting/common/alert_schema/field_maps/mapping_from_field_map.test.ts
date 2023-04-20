@@ -200,6 +200,9 @@ describe('mappingFromFieldMap', () => {
                 case_ids: {
                   type: 'keyword',
                 },
+                context: {
+                  type: 'object',
+                },
                 duration: {
                   properties: {
                     us: {
