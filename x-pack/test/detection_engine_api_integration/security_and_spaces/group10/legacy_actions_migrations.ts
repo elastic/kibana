@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(sidecarActionsSOAfterMigration.hits.hits.length).to.eql(0);
 
       expect(ruleSO?.alert.actions).to.eql([]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
+      expect(ruleSO?.alert.throttle).to.eql('no_actions');
+      expect(ruleSO?.alert.notifyWhen).to.eql('onThrottleInterval');
     });
 
     it('migrates legacy actions for rule with action run on every run', async () => {
@@ -123,13 +123,29 @@ export default ({ getService }: FtrProviderContext) => {
           },
           uuid: ruleSO?.alert.actions[0].uuid,
         },
+        {
+          actionRef: 'action_1',
+          actionTypeId: '.email',
+          group: 'default',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            subject: 'Test Actions',
+            to: ['test@test.com'],
+          },
+          uuid: ruleSO?.alert.actions[1].uuid,
+        },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql('rule');
       expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
           name: 'action_0',
+          type: 'action',
+        },
+        {
+          id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
+          name: 'action_1',
           type: 'action',
         },
       ]);

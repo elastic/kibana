@@ -91,6 +91,7 @@ const Application = (props: SyntheticsAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                observabilityShared: startPlugins.observabilityShared,
                 exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,

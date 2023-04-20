@@ -90,14 +90,15 @@
         "type": "Type",
         "tags": [
           "note",
+          "note",
           "experimental"
         ],
         "label": "ApiVersion",
         "description": [
-          "\nA Kibana HTTP API version"
+          "\nA Kibana HTTP API version\n"
         ],
         "signature": [
-          "`${number}`"
+          "string"
         ],
         "path": "packages/core/http/core-http-common/src/versioning.ts",
         "deprecated": false,

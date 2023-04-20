@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,8 +17,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
-import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
@@ -41,21 +40,6 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
   const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
     refetchInterval: 10000,
   });
-
-  const pendingActionRequests = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingActions'>
-  >(() => {
-    const pendingActions = endpointPendingActions?.data?.[0].pending_actions;
-    return {
-      pendingActions: {
-        pendingIsolate: pendingActions?.isolate ?? 0,
-        pendingUnIsolate: pendingActions?.unisolate ?? 0,
-        pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
-        pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
-        pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
-      },
-    };
-  }, [endpointPendingActions?.data]);
 
   if (isFetching && endpointPendingActions === undefined) {
     return <EuiSkeletonText lines={2} />;
@@ -90,10 +74,8 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EndpointAgentAndIsolationStatus
-                  status={endpointDetails.host_status}
-                  isIsolated={endpointDetails.metadata.Endpoint.state?.isolation}
-                  {...pendingActionRequests}
+                <EndpointAgentStatus
+                  endpointHostInfo={endpointDetails}
                   data-test-subj="responderHeaderEndpointAgentIsolationStatus"
                 />
               </EuiFlexItem>

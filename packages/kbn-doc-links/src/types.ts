@@ -114,8 +114,15 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsAzureBlobStorage: string;
+    readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
+    readonly connectorsNetworkDrive: string;
+    readonly connectorsOracle: string;
+    readonly connectorsPostgreSQL: string;
+    readonly connectorsS3: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -124,6 +131,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
+    readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
@@ -450,6 +458,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    api: string;
   }>;
   readonly ecs: {
     readonly guide: string;
