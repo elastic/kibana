@@ -40,6 +40,12 @@ import { isManagedTransform } from '../../../../common/managed_transforms_utils'
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
 
+const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
+  'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
+  {
+    defaultMessage: 'This transform was created with insufficient permissions.',
+  }
+);
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
@@ -156,27 +162,22 @@ export const useColumns = (
       render: (item) => {
         const needsReauth = needsReauthorization(item);
 
+        const actionMsg = canStartStopTransform
+          ? i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.reauthorizeTooltip',
+              {
+                defaultMessage: 'Reauthorize to start transforms.',
+              }
+            )
+          : i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.contactAdminTooltip',
+              {
+                defaultMessage: 'Contact your administrator to request the required permissions.',
+              }
+            );
         const needsReauthTooltipIcon = needsReauth ? (
           <>
-            <EuiToolTip
-              content={
-                canStartStopTransform
-                  ? i18n.translate(
-                      'xpack.transform.transformList.needsReauthorizationBadge.reauthorizeTooltip',
-                      {
-                        defaultMessage:
-                          'This transform was created with insufficient permissions. Reauthorize to start transforms.',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.transform.transformList.needsReauthorizationBadge.contactAdminTooltip',
-                      {
-                        defaultMessage:
-                          'This transform was created with insufficient permissions. Contact your administrator to request the required permissions.',
-                      }
-                    )
-              }
-            >
+            <EuiToolTip content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}>
               <EuiIcon size="s" color="warning" type={'alert'} />
             </EuiToolTip>
             &nbsp;

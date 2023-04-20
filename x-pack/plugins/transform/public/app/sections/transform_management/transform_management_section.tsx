@@ -86,29 +86,35 @@ export const TransformManagement: FC = () => {
 
     if (!unauthorizedCnt) return null;
 
+    const insufficientPermissionsMsg = i18n.translate(
+      'xpack.transform.transformList.unauthorizedTransformsCallout.insufficientPermissionsMsg',
+      {
+        defaultMessage:
+          '{unauthorizedCnt, plural, one {A transform was created with insufficient permissions.} other {# transforms were created with insufficient permissions.}}',
+        values: { unauthorizedCnt },
+      }
+    );
+    const actionMsg = canStartStopTransform
+      ? i18n.translate(
+          'xpack.transform.transformList.unauthorizedTransformsCallout.reauthorizeMsg',
+          {
+            defaultMessage:
+              'Reauthorize to start {unauthorizedCnt, plural, one {transform} other {# transforms}}.',
+            values: { unauthorizedCnt },
+          }
+        )
+      : i18n.translate(
+          'xpack.transform.transformList.unauthorizedTransformsCallout.contactAdminMsg',
+          {
+            defaultMessage: 'Contact your administrator to request the required permissions.',
+          }
+        );
     return (
       <>
         <EuiCallOut
+          iconType="alert"
           color="warning"
-          title={
-            canStartStopTransform
-              ? i18n.translate(
-                  'xpack.transform.transformList.unauthorizedTransformsCallout.reauthorizeMsg',
-                  {
-                    defaultMessage:
-                      '{unauthorizedCnt, plural, one {A transform was installed but requires more permissions to run.} other {# transforms were installed but require more permissions to run.}} Reauthorize to start transforms.',
-                    values: { unauthorizedCnt },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.transform.transformList.unauthorizedTransformsCallout.contactAdminMsg',
-                  {
-                    defaultMessage:
-                      '{unauthorizedCnt, plural, one {A transform was installed but requires more permissions to run.} other {# transforms were installed but require more permissions to run.}} Contact your administrator to request the required permissions.',
-                    values: { unauthorizedCnt },
-                  }
-                )
-          }
+          title={`${insufficientPermissionsMsg} ${actionMsg}`}
         />
         <EuiSpacer size="s" />
       </>
