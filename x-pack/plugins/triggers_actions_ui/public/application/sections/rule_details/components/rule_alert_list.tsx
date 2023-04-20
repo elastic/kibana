@@ -100,7 +100,7 @@ const alertsTableColumns = (
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.maintenanceWindowIds',
       {
-        defaultMessage: 'Maintenance window IDs',
+        defaultMessage: 'Maintenance windows',
       }
     ),
     sortable: false,
