@@ -16,6 +16,8 @@ export {
   RootDragDropProvider,
   ChildDragDropProvider,
   ReorderProvider,
+  DropOverlayWrapper,
+  type DropOverlayWrapperProps,
 } from './src';
 
 export { DropTargetSwapDuplicateCombine } from './src/drop_targets';

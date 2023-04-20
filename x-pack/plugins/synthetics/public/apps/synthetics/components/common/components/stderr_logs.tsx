@@ -68,10 +68,10 @@ export const StdErrorLogs = ({
 
   const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
 
-  const { discover, observability } = useKibana<ClientPluginsStart>().services;
+  const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
   const { data: discoverLink } = useFetcher(async () => {
-    const dataView = await observability.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
+    const dataView = await exploratoryView.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
     return discover.locator?.getUrl({
       query: { language: 'kuery', query: `monitor.check_group: ${checkGroup}` },
       indexPatternId: dataView?.id,
