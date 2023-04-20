@@ -127,7 +127,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
 
   const [hostFlyoutOpen, setHostFlyoutOpen, setFlyoutClosed] = useHostFlyoutOpen();
 
-  const closeFlyout = () => setFlyoutClosed({ clickedItemId: '' });
+  const closeFlyout = () => setFlyoutClosed();
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -166,7 +166,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
                 clickedItemId: id,
               });
               if (id === hostFlyoutOpen.clickedItemId) {
-                setFlyoutClosed({ clickedItemId: '' });
+                setFlyoutClosed();
               } else {
                 setHostFlyoutOpen({ clickedItemId: id });
               }
