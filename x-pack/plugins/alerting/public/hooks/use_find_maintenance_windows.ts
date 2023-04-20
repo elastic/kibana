@@ -36,6 +36,7 @@ export const useFindMaintenanceWindows = () => {
     onError: onErrorFn,
     refetchOnWindowFocus: false,
     retry: false,
+    cacheTime: 0,
   });
 
   return {
