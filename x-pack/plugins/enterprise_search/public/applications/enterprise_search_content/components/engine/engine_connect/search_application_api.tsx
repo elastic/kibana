@@ -37,9 +37,10 @@ import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details'
 import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 
 export const elasticsearchUrl = (): string => {
+  const defaultUrl = 'http://localhost:9200';
   const cloudContext = useCloudDetails();
   const url =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || 'https://localhost:9200';
+    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || defaultUrl;
   return url;
 };
 
