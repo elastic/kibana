@@ -280,6 +280,42 @@ describe('AlertingEventLogger', () => {
     });
   });
 
+  describe('setMaintenanceWindowIds()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should throw error if event is null', () => {
+      alertingEventLogger.initialize(context);
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    it('should update event maintenance window IDs correctly', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setMaintenanceWindowIds([]);
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      expect(alertingEventLogger.getEvent()).toEqual(event);
+
+      alertingEventLogger.setMaintenanceWindowIds(['test-id-1', 'test-id-2']);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: ['test-id-1', 'test-id-2'],
+          },
+        },
+      });
+    });
+  });
+
   describe('logTimeout()', () => {
     test('should throw error if alertingEventLogger has not been initialized', () => {
       expect(() => alertingEventLogger.logTimeout()).toThrowErrorMatchingInlineSnapshot(

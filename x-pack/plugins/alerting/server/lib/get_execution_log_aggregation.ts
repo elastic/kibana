@@ -41,6 +41,7 @@ const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_co
 const NUMBER_OF_RECOVERED_ALERTS_FIELD =
   'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+const MAINTENANCE_WINDOW_IDS_FIELD = 'kibana.alert.maintenance_window_ids';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -83,6 +84,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    maintenanceWindowIds: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
@@ -418,6 +420,14 @@ export function getExecutionLogAggregation({
                     },
                   },
                 },
+                maintenanceWindowIds: {
+                  top_hits: {
+                    size: 1,
+                    _source: {
+                      includes: MAINTENANCE_WINDOW_IDS_FIELD,
+                    },
+                  },
+                },
               },
             },
             // If there was a timeout, this filter will return non-zero doc count
@@ -496,6 +506,10 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
   const version = outcomeAndMessage.kibana?.version ?? '';
 
+  const maintenanceWindowIds =
+    bucket?.ruleExecution?.maintenanceWindowIds?.hits?.hits[0]?._source?.kibana?.alert
+      ?.maintenance_window_ids || [];
+
   const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
   const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
   const ruleName = outcomeAndMessage ? outcomeAndMessage.rule?.name ?? '' : '';
@@ -520,6 +534,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     rule_id: ruleId,
     space_ids: spaceIds,
     rule_name: ruleName,
+    maintenance_window_ids: maintenanceWindowIds,
   };
 }
 

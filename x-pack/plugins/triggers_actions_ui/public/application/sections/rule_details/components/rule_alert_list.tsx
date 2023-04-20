@@ -92,6 +92,21 @@ const alertsTableColumns = (
     'data-test-subj': 'alertsTableCell-duration',
   },
   {
+    field: 'maintenanceWindowIds',
+    width: '250px',
+    render: (value: string[]) => {
+      return Array.isArray(value) ? JSON.stringify(value) : '';
+    },
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.maintenanceWindowIds',
+      {
+        defaultMessage: 'Maintenance window IDs',
+      }
+    ),
+    sortable: false,
+    'data-test-subj': 'alertsTableCell-maintenanceWindowIds',
+  },
+  {
     field: '',
     align: RIGHT_ALIGNMENT,
     width: '60px',
