@@ -28,8 +28,9 @@ import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
 
 export const AnalyticsOverview: React.FC = () => {
-  const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
-  const { analyticsCollections, isLoading, hasNoAnalyticsCollections, isFirstRequest } =
+  const { fetchAnalyticsCollections, searchAnalyticsCollections } =
+    useActions(AnalyticsCollectionsLogic);
+  const { analyticsCollections, hasNoAnalyticsCollections, isFetching, isSearching } =
     useValues(AnalyticsCollectionsLogic);
 
   const { isCloud } = useValues(KibanaLogic);
@@ -39,14 +40,14 @@ export const AnalyticsOverview: React.FC = () => {
 
   useEffect(() => {
     if (isGated) return;
-    fetchAnalyticsCollections({ query: '' });
+    fetchAnalyticsCollections();
   }, []);
 
   return (
     <EnterpriseSearchAnalyticsPageTemplate
       pageChrome={[]}
       restrictWidth
-      isLoading={isLoading && !isGated}
+      isLoading={isFetching && !isGated}
       pageViewTelemetry="Analytics Collections Overview"
       pageHeader={{
         description: i18n.translate(
@@ -66,7 +67,7 @@ export const AnalyticsOverview: React.FC = () => {
         <EuiFlexItem>
           <LicensingCallout feature={LICENSING_FEATURE.ANALYTICS} />
         </EuiFlexItem>
-      ) : hasNoAnalyticsCollections && isFirstRequest ? (
+      ) : hasNoAnalyticsCollections && !isSearching ? (
         <>
           <EuiSpacer size="l" />
           <AnalyticsOverviewEmptyPage />
@@ -74,9 +75,8 @@ export const AnalyticsOverview: React.FC = () => {
       ) : (
         <AnalyticsCollectionTable
           collections={analyticsCollections}
-          onSearch={(query) => {
-            fetchAnalyticsCollections({ query });
-          }}
+          isSearching={isSearching}
+          onSearch={searchAnalyticsCollections}
         />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>
