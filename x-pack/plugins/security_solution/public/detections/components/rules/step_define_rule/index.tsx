@@ -574,11 +574,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: SuppressionMissingFieldsOptions.SingleAlertForAllDocuments,
+            id: SuppressionMissingFieldsOptions.DoNotSuppress,
             label: 'Suppress on missing field value',
           },
           {
-            id: SuppressionMissingFieldsOptions.OneAlertPerDocument,
+            id: SuppressionMissingFieldsOptions.Supress,
             label: 'Do not suppress',
           },
         ]}

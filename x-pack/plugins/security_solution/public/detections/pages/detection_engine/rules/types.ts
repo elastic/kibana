@@ -149,8 +149,8 @@ export enum GroupByOptions {
 }
 
 export enum SuppressionMissingFieldsOptions {
-  SingleAlertForAllDocuments = 'singleAlertForAllDocuments',
-  OneAlertPerDocument = 'oneAlertPerDocument',
+  DoNotSuppress = 'doNotSuppress',
+  Supress = 'supress',
 }
 
 /**

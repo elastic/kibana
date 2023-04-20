@@ -13,8 +13,8 @@ import {
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
 export const AlertSuppressionMissingFields = t.union([
-  t.literal('singleAlertForAllDocuments'),
-  t.literal('oneAlertPerDocument'),
+  t.literal('doNotSuppress'),
+  t.literal('supress'),
 ]);
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({

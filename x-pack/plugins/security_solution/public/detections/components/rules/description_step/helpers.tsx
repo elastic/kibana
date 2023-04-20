@@ -605,7 +605,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === SuppressionMissingFieldsOptions.OneAlertPerDocument
+    value === SuppressionMissingFieldsOptions.Supress
       ? 'Suppress on missing field value'
       : 'Do not suppress';
 

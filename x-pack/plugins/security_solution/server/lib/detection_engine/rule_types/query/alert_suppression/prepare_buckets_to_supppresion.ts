@@ -38,8 +38,8 @@ export const prepareBucketsToSuppression: PrepareSuppressionBuckets = async ({
   maxSignals,
   aggregatableTimestampField,
 }) => {
-  // no changes needed if no strategy specified or it is SingleAlertForAllDocuments
-  if (!strategy || strategy === AlertSuppressionMissingFieldsStrategy.SingleAlertForAllDocuments) {
+  // no changes needed if no strategy specified or it is DoNotSuppress
+  if (!strategy || strategy === AlertSuppressionMissingFieldsStrategy.DoNotSuppress) {
     return buckets;
   }
 
