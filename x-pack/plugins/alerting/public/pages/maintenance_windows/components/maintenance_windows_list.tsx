@@ -10,6 +10,8 @@ import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
   SearchFilterConfig,
   EuiBadge,
   useEuiTheme,
@@ -19,6 +21,7 @@ import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
+import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
 import { StatusFilter } from './status_filter';
 import { TableActionsPopover } from './table_actions_popover';
@@ -52,7 +55,18 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
+    render: (startDate: string, item: MaintenanceWindowFindResponse) => {
+      return (
+        <EuiFlexGroup responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
+          {item.events.length > 1 ? (
+            <EuiFlexItem grow={false}>
+              <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      );
+    },
     sortable: true,
   },
   {
