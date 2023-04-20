@@ -132,6 +132,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         number_of_allocations: number;
         threads_per_allocation: number;
         priority: 'low' | 'normal';
+        deployment_id?: string;
       }
     ) {
       return httpService.http<{ acknowledge: boolean }>({

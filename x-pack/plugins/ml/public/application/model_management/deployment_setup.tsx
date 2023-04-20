@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiDescribedFormGroup,
   EuiLink,
+  EuiFieldText,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -42,6 +43,7 @@ export interface ThreadingParams {
   numOfAllocations: number;
   threadsPerAllocations?: number;
   priority?: 'low' | 'normal';
+  deploymentId?: string;
 }
 
 const THREADS_MAX_EXPONENT = 4;
@@ -72,6 +74,44 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
+      <EuiDescribedFormGroup
+        titleSize={'xxs'}
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdLabel"
+              defaultMessage="Deployment ID"
+            />
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdHelp"
+            defaultMessage="Specify unique identifier for the model deployment"
+          />
+        }
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdLabel"
+              defaultMessage="Deployment ID"
+            />
+          }
+          hasChildLabel={false}
+        >
+          <EuiFieldText
+            placeholder="Placeholder text"
+            value={config.deploymentId ?? ''}
+            onChange={(e) => {
+              onConfigChange({ ...config, deploymentId: e.target.value });
+            }}
+            aria-label="Use aria labels when no actual label is in use"
+            data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
       {config.priority !== undefined ? (
         <EuiDescribedFormGroup
           titleSize={'xxs'}
@@ -262,6 +302,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       numOfAllocations: 1,
       threadsPerAllocations: 1,
       priority: isCloudTrial() ? 'low' : 'normal',
+      deploymentId: modelId,
     }
   );
 
@@ -373,7 +414,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  * @param overlays
  * @param theme$
  */
-export const getUserInputThreadingParamsProvider =
+export const getUserInputModelDeploymentParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
   (modelId: string, initialParams?: ThreadingParams): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve) => {

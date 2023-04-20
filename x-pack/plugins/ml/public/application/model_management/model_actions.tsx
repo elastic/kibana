@@ -18,7 +18,7 @@ import {
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { getUserInputThreadingParamsProvider } from './deployment_setup';
+import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import { DataFrameAnalysisConfigType } from '../../../common/types/data_frame_analytics';
@@ -67,8 +67,9 @@ export function useModelActions({
     [overlays, theme]
   );
 
-  const getUserInputThreadingParams = useMemo(
-    () => getUserInputThreadingParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
+  const getUserInputModelDeploymentParams = useMemo(
+    () =>
+      getUserInputModelDeploymentParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
     [overlays, theme.theme$, startModelDeploymentDocUrl]
   );
 
@@ -161,16 +162,17 @@ export function useModelActions({
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {
-          const threadingParams = await getUserInputThreadingParams(item.model_id);
+          const modelDeploymentParams = await getUserInputModelDeploymentParams(item.model_id);
 
-          if (!threadingParams) return;
+          if (!modelDeploymentParams) return;
 
           try {
             onLoading(true);
             await trainedModelsApiService.startModelAllocation(item.model_id, {
-              number_of_allocations: threadingParams.numOfAllocations,
-              threads_per_allocation: threadingParams.threadsPerAllocations!,
-              priority: threadingParams.priority!,
+              number_of_allocations: modelDeploymentParams.numOfAllocations,
+              threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
+              priority: modelDeploymentParams.priority!,
+              deployment_id: modelDeploymentParams.deploymentId,
             });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
@@ -215,7 +217,7 @@ export function useModelActions({
           !isLoading &&
           item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
         onClick: async (item) => {
-          const threadingParams = await getUserInputThreadingParams(item.model_id, {
+          const threadingParams = await getUserInputModelDeploymentParams(item.model_id, {
             numOfAllocations: item.stats?.deployment_stats?.number_of_allocations!,
           });
 
@@ -374,7 +376,7 @@ export function useModelActions({
       displayErrorToast,
       displaySuccessToast,
       getUserConfirmation,
-      getUserInputThreadingParams,
+      getUserInputModelDeploymentParams,
       isBuiltInModel,
       navigateToPath,
       navigateToUrl,
