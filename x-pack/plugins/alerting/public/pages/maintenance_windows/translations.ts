@@ -494,7 +494,7 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle',
   {
     defaultMessage:
-      'Rule notifications resume immediately. Running and upcoming maintenance window events are canceled.',
+      'Rule notifications resume immediately. All running and upcoming maintenance window events are canceled and the window is queued for deletion.',
   }
 );
 
