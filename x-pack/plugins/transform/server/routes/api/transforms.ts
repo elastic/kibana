@@ -327,6 +327,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
           let apiKeyWithCurrentUserPermission;
+
+          // If security is not enabled or available, user should not have the need to reauthorize
+          // in that case, start anyway
           if (securityStart) {
             apiKeyWithCurrentUserPermission = await securityStart.authc.apiKeys.grantAsInternalUser(
               req,
@@ -335,14 +338,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
                 role_descriptors: {},
               }
             );
-          } else {
-            // If security is not enabled or available, user should be able to generate API key
-            apiKeyWithCurrentUserPermission = await elasticsearch.client
-              .asScoped(req)
-              .asInternalUser.security.createApiKey({
-                name: 'auto-generated-transform-api-key',
-                role_descriptors: {},
-              });
           }
           const secondaryAuth = generateTransformSecondaryAuthHeaders(
             apiKeyWithCurrentUserPermission
