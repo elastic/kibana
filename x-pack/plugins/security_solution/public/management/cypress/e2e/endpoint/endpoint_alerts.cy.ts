@@ -53,12 +53,15 @@ describe('Endpoint generated alerts', () => {
   });
 
   after(() => {
-    // FIXME:PT implement
-    // 1. delete VM created
-    // 2, Force-delete host from fleet (so we can delete policy)
-    // 3, Removed policy created
-    //
-    //
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost).then(() => {});
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    // FIXME:PT implement additional data deletion
     // ?. Clean up:
     //      created action
     //      created action response

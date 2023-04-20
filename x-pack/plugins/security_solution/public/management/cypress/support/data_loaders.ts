@@ -39,7 +39,10 @@ import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import { createAndEnrollEndpointHost } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import {
+  createAndEnrollEndpointHost,
+  destroyEndpointHost,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
  * Cypress plugin for adding data loading related `task`s
@@ -173,8 +176,11 @@ export const dataLoadersForRealEndpoints = (
       });
     },
 
-    destroyEndpointHost: async () => {
-      // FIXME:PT implement
+    destroyEndpointHost: async (
+      createdHost: CreateAndEnrollEndpointHostResponse
+    ): Promise<null> => {
+      const { kbnClient } = await stackServicesPromise;
+      return destroyEndpointHost(kbnClient, createdHost).then(() => null);
     },
   });
 };
