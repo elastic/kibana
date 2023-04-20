@@ -615,7 +615,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.maintenanceWindowIds',
           {
-            defaultMessage: 'Maintenance window IDs',
+            defaultMessage: 'Maintenance windows',
           }
         ),
         actions: {
