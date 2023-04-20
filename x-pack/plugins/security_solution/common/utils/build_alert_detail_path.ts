@@ -16,7 +16,7 @@ export const buildAlertDetailPath = ({
   alertId: string;
   index: string;
   timestamp: string;
-}) => `${ALERTS_PATH}/${alertId}?index=${index}&timestamp=${timestamp}`;
+}) => `${ALERTS_PATH}/redirect/${alertId}?index=${index}&timestamp=${timestamp}`;
 
 export const getAlertDetailsUrl = ({
   alertId,
@@ -33,5 +33,7 @@ export const getAlertDetailsUrl = ({
 }) => {
   const alertDetailPath = buildAlertDetailPath({ alertId, index, timestamp });
   const alertDetailPathWithAppPath = `${APP_PATH}${alertDetailPath}`;
-  return addSpaceIdToPath(basePath, spaceId ?? undefined, alertDetailPathWithAppPath);
+  return basePath
+    ? addSpaceIdToPath(basePath, spaceId ?? undefined, alertDetailPathWithAppPath)
+    : undefined;
 };
