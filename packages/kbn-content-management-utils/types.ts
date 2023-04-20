@@ -40,7 +40,7 @@ export interface Reference {
 }
 
 /** Saved Object create options - Pick and Omit to customize */
-export interface CreateOptions {
+export interface SavedObjectCreateOptions {
   /** (not recommended) Specify an id for the document */
   id?: string;
   /** Overwrite existing documents (defaults to false) */
@@ -68,7 +68,7 @@ export interface CreateOptions {
 }
 
 /** Saved Object search options - Pick and Omit to customize */
-export interface SearchOptions {
+export interface SavedObjectSearchOptions {
   /** the page of results to return */
   page?: number;
   /** the number of objects per page */
@@ -151,7 +151,7 @@ export interface SearchOptions {
 }
 
 /** Saved Object update options  - Pick and Omit to customize */
-export interface UpdateOptions<Attributes = unknown> {
+export interface SavedObjectUpdateOptions<Attributes = unknown> {
   /** Array of referenced saved objects. */
   references?: Reference[];
   version?: string;
@@ -210,7 +210,13 @@ type PartialItem<Attributes extends object> = Omit<
  * @argument ContentType - content management type. assumed to be the same as saved object type
  * @argument Attributes - attributes of the saved object
  */
-export interface ContentManagementCrudTypes<ContentType extends string, Attributes extends object> {
+export interface ContentManagementCrudTypes<
+  ContentType extends string,
+  Attributes extends object,
+  CreateOptions extends object,
+  UpdateOptions extends object,
+  SearchOptions extends object
+> {
   /**
    * Complete saved object
    */
@@ -219,7 +225,18 @@ export interface ContentManagementCrudTypes<ContentType extends string, Attribut
    * Partial saved object, used as output for update
    */
   PartialItem: PartialItem<Attributes>;
-
+  /**
+   * Create options
+   */
+  CreateOptions: CreateOptions;
+  /**
+   * Update options
+   */
+  UpdateOptions: UpdateOptions;
+  /**
+   * Search options
+   */
+  SearchOptions: SearchOptions;
   /**
    * Get item params
    */

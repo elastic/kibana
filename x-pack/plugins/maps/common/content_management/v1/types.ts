@@ -7,12 +7,21 @@
 
 import type {
   ContentManagementCrudTypes,
-  CreateOptions,
-  UpdateOptions,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
-export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
+export type MapCrudTypes = ContentManagementCrudTypes<
+  MapContentType,
+  MapAttributes,
+  Pick<SavedObjectCreateOptions, 'references'>,
+  Pick<SavedObjectUpdateOptions, 'references'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type MapAttributes = {
@@ -35,13 +44,13 @@ export type MapGetOut = MapCrudTypes['GetOut'];
 
 export type MapCreateIn = MapCrudTypes['CreateIn'];
 export type MapCreateOut = MapCrudTypes['CreateOut'];
-export type MapCreateOptions = Pick<CreateOptions, 'references'>;
+export type MapCreateOptions = MapCrudTypes['CreateOptions'];
 
 // ----------- UPDATE --------------
 
 export type MapUpdateIn = MapCrudTypes['UpdateIn'];
 export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-export type MapUpdateOptions = Pick<UpdateOptions, 'references'>;
+export type MapUpdateOptions = MapCrudTypes['UpdateOptions'];
 
 // ----------- DELETE --------------
 
@@ -52,7 +61,4 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
-export interface MapSearchOptions {
-  /** Flag to indicate to only search the text on the "title" field */
-  onlyTitle?: boolean;
-}
+export type MapSearchOptions = MapCrudTypes['SearchOptions'];
