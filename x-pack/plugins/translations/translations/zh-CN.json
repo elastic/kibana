@@ -36288,7 +36288,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearly": "每年",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel": "每",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatLabel": "重复",
-    "xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch": "设为定期",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "保存计划",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "时区",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "告警摆动检测",
