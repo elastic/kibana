@@ -354,7 +354,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           });
         }
       });
-
       orderedPanels.forEach((panel) => {
         if (panel.explicitInput.fieldName)
           controlGroup?.addOptionsListControl({
