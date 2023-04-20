@@ -12,7 +12,7 @@ import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import {
   GetInfraMetricsRequestBodyPayload,
-  MetricType,
+  InfraAssetMetricType,
 } from '../../../../../common/http_api/infra';
 import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
 
@@ -87,7 +87,7 @@ export const runQuery = <T>(
 };
 
 export const getInventoryModelAggregations = (
-  metrics: MetricType[]
+  metrics: InfraAssetMetricType[]
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
   return metrics.reduce(

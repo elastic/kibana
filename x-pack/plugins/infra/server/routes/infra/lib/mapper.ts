@@ -9,8 +9,8 @@ import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types
 import {
   GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsResponsePayload,
-  Metadata,
-  Metrics,
+  InfraAssetMetadata,
+  InfraAssetMetrics,
 } from '../../../../common/http_api/infra';
 
 import {
@@ -53,7 +53,7 @@ const normalizeValue = (value: string | number | null) => {
   return value;
 };
 
-const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): Metadata[] => {
+const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): InfraAssetMetadata[] => {
   const metadataAggregation = bucket[METADATA_AGGREGATION_NAME];
   return TopMetricsTypeRT.is(metadataAggregation)
     ? metadataAggregation.top
@@ -63,7 +63,7 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): Metadata[] => 
             ({
               name: key,
               value: normalizeValue(value),
-            } as Metadata)
+            } as InfraAssetMetadata)
         )
     : [];
 };
@@ -71,13 +71,13 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): Metadata[] => 
 const convertMetricBucket = (
   params: GetInfraMetricsRequestBodyPayload,
   bucket: HostsMetricsSearchBucket
-): Metrics[] => {
+): InfraAssetMetrics[] => {
   return params.metrics.map((returnedMetric) => {
     const metricBucket = bucket[returnedMetric.type];
     return {
       name: returnedMetric.type,
       value: HostsMetricsSearchValueRT.is(metricBucket) ? getMetricValue(metricBucket) ?? 0 : null,
-    } as Metrics;
+    } as InfraAssetMetrics;
   });
 };
 

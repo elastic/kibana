@@ -8,7 +8,7 @@
 import { createLiteralValueFromUndefinedRT, inRangeRt, dateRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
-export const MetricTypeRT = rt.keyof({
+export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
   diskLatency: null,
   memory: null,
@@ -22,19 +22,19 @@ export const RangeRT = rt.type({
   to: dateRt,
 });
 
-export const MetadataTypeRT = rt.keyof({
+export const InfraAssetMetadataTypeRT = rt.keyof({
   'host.os.name': null,
   'cloud.provider': null,
 });
 
-export const MetricsRT = rt.type({
-  name: MetricTypeRT,
+export const InfraAssetMetricsRT = rt.type({
+  name: InfraMetricTypeRT,
   value: rt.union([rt.number, rt.null]),
 });
 
-export const MetadataRT = rt.type({
+export const InfraAssetMetadataRT = rt.type({
   // keep the actual field name from the index mappings
-  name: MetadataTypeRT,
+  name: InfraAssetMetadataTypeRT,
   value: rt.union([rt.string, rt.number, rt.null]),
 });
 
@@ -45,27 +45,27 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   rt.type({
     type: rt.literal('host'),
     limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(20)]),
-    metrics: rt.array(rt.type({ type: MetricTypeRT })),
+    metrics: rt.array(rt.type({ type: InfraMetricTypeRT })),
     sourceId: rt.string,
     range: RangeRT,
   }),
 ]);
 
-export const MetricsItemRT = rt.type({
+export const InfraAssetMetricsItemRT = rt.type({
   name: rt.string,
-  metrics: rt.array(MetricsRT),
-  metadata: rt.array(MetadataRT),
+  metrics: rt.array(InfraAssetMetricsRT),
+  metadata: rt.array(InfraAssetMetadataRT),
 });
 
 export const GetInfraMetricsResponsePayloadRT = rt.type({
   type: rt.literal('host'),
-  nodes: rt.array(MetricsItemRT),
+  nodes: rt.array(InfraAssetMetricsItemRT),
 });
 
-export type Metrics = rt.TypeOf<typeof MetricsRT>;
-export type Metadata = rt.TypeOf<typeof MetadataRT>;
-export type MetricType = rt.TypeOf<typeof MetricTypeRT>;
-export type MetricsItem = rt.TypeOf<typeof MetricsItemRT>;
+export type InfraAssetMetrics = rt.TypeOf<typeof InfraAssetMetricsRT>;
+export type InfraAssetMetadata = rt.TypeOf<typeof InfraAssetMetadataRT>;
+export type InfraAssetMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
+export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
 
 export type GetInfraMetricsRequestBodyPayload = Omit<
   rt.TypeOf<typeof GetInfraMetricsRequestBodyPayloadRT>,
