@@ -32,7 +32,7 @@ import {
 export const strings = {
   getFilterSetButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-      defaultMessage: 'Saved query menu',
+      defaultMessage: 'Query menu',
     }),
   getSavedQueryPopoverSaveChangesButtonText: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
