@@ -12,11 +12,11 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { UIProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ApmUrlParams } from '../../../context/url_params_context/types';
+} from '../../../common/es_fields/apm';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { UIProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmUrlParams } from '../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,
