@@ -7,28 +7,23 @@
  */
 import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   return {
     generate: ({ range }) => {
       const withTx = apm
-        .service({
-          name: 'service-with-transactions',
-          environment: 'production',
-          agentName: 'java',
-        })
+        .service('service-with-transactions', ENVIRONMENT, 'java')
         .instance('instance');
 
       const withErrorsOnly = apm
-        .service({ name: 'service-with-errors-only', environment: 'production', agentName: 'java' })
+        .service('service-with-errors-only', ENVIRONMENT, 'java')
         .instance('instance');
 
       const withAppMetricsOnly = apm
-        .service({
-          name: 'service-with-app-metrics-only',
-          environment: 'production',
-          agentName: 'java',
-        })
+        .service('service-with-app-metrics-only', ENVIRONMENT, 'java')
         .instance('instance');
 
       return range
