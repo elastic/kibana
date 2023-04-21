@@ -9,6 +9,7 @@ import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
+  ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -168,6 +169,45 @@ export function TransactionTypeField({
           'xpack.apm.transactionTypesSelectPlaceholder',
           {
             defaultMessage: 'Select transaction type',
+          }
+        )}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
+        serviceName={serviceName}
+      />
+    </PopoverExpression>
+  );
+}
+
+export function ErrorGroupingKeyField({
+  currentValue,
+  onChange,
+  serviceName,
+}: {
+  currentValue?: string;
+  onChange: (value?: string) => void;
+  serviceName?: string;
+}) {
+  const label = i18n.translate('xpack.apm.alerting.fields.error.group.id', {
+    defaultMessage: 'Error grouping key',
+  });
+  return (
+    <PopoverExpression value={currentValue || allOptionText} title={label}>
+      <SuggestionsSelect
+        customOptions={[{ label: allOptionText, value: undefined }]}
+        customOptionText={i18n.translate(
+          'xpack.apm.errorKeySelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
+          }
+        )}
+        defaultValue={currentValue}
+        fieldName={ERROR_GROUP_ID}
+        onChange={onChange}
+        placeholder={i18n.translate(
+          'xpack.apm.errorGroupingKeySelectPlaceholder',
+          {
+            defaultMessage: 'Select error grouping key',
           }
         )}
         start={moment().subtract(24, 'h').toISOString()}
