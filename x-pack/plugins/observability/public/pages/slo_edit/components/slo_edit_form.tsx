@@ -58,7 +58,9 @@ export function SloEditForm({ slo }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const { data: rules, isLoading } = useFetchRulesForSlo({ sloIds: slo?.id ? [slo.id] : undefined });
+  const { data: rules, isLoading } = useFetchRulesForSlo({
+    sloIds: slo?.id ? [slo.id] : undefined,
+  });
   const urlStateStorage = createKbnUrlStateStorage({
     history,
     useHash: false,
