@@ -263,10 +263,10 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 }
 
                 const operationType = choices[0].value!;
+                if (incompleteColumn) {
+                  onResetIncomplete();
+                }
                 if (column?.operationType === operationType) {
-                  if (incompleteColumn) {
-                    onResetIncomplete();
-                  }
                   return;
                 }
                 const possibleFieldNames =
