@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type Boom from '@hapi/boom';
+
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface EsErrorRootCause {
   type: string;
@@ -60,22 +62,26 @@ export type MLHttpFetchError = MLHttpFetchErrorBase<MLResponseError>;
 
 export type ErrorType = MLHttpFetchError | EsErrorBody | Boom.Boom | string | undefined;
 
-export function isEsErrorBody(error: any): error is EsErrorBody {
-  return error && error.error?.reason !== undefined;
+export function isEsErrorBody(error: unknown): error is EsErrorBody {
+  return isPopulatedObject(error, ['error']) && isPopulatedObject(error.error, ['reason']);
 }
 
-export function isErrorString(error: any): error is string {
+export function isErrorString(error: unknown): error is string {
   return typeof error === 'string';
 }
 
-export function isErrorMessage(error: any): error is ErrorMessage {
-  return error && error.message !== undefined && typeof error.message === 'string';
+export function isErrorMessage(error: unknown): error is ErrorMessage {
+  return isPopulatedObject(error, ['message']) && typeof error.message === 'string';
 }
 
-export function isMLResponseError(error: any): error is MLResponseError {
-  return typeof error.body === 'object' && 'message' in error.body;
+export function isMLResponseError(error: unknown): error is MLResponseError {
+  return (
+    isPopulatedObject(error, ['body']) &&
+    isPopulatedObject(error.body, ['message']) &&
+    'message' in error.body
+  );
 }
 
-export function isBoomError(error: any): error is Boom.Boom {
-  return error?.isBoom === true;
+export function isBoomError(error: unknown): error is Boom.Boom {
+  return isPopulatedObject(error, ['isBoom']) && error.isBoom === true;
 }
