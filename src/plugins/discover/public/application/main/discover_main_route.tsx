@@ -51,7 +51,7 @@ export function DiscoverMainRoute(props: Props) {
     http: { basePath },
     dataViewEditor,
   } = services;
-  const { id } = useParams<DiscoverLandingParams>();
+  const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
@@ -81,7 +81,7 @@ export function DiscoverMainRoute(props: Props) {
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'app',
-    id: id || 'new',
+    id: savedSearchId || 'new',
   });
 
   const checkData = useCallback(async () => {
@@ -130,7 +130,7 @@ export function DiscoverMainRoute(props: Props) {
         // else it might be updated by the previous app state
         const useAppState = !stateContainer.appState.isEmptyURL();
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
-          savedSearchId: id,
+          savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
           useAppState,
@@ -160,7 +160,7 @@ export function DiscoverMainRoute(props: Props) {
               search: '/',
               'index-pattern': {
                 app: 'management',
-                path: `kibana/objects/savedSearches/${id}`,
+                path: `kibana/objects/savedSearches/${savedSearchId}`,
               },
             },
             toastNotifications,
@@ -177,7 +177,7 @@ export function DiscoverMainRoute(props: Props) {
     [
       checkData,
       stateContainer,
-      id,
+      savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
       history,
@@ -203,12 +203,12 @@ export function DiscoverMainRoute(props: Props) {
   // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
     loadSavedSearch();
-  }, [loadSavedSearch, id]);
+  }, [loadSavedSearch, savedSearchId]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
     history,
-    savedSearchId: id,
+    savedSearchId,
     onNewUrl: () => {
       const dataView = stateContainer.internalState.getState().dataView;
       loadSavedSearch(dataView);
