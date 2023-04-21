@@ -23,7 +23,7 @@ export function useUrl({
     // this listener is waiting for such a path http://localhost:5601/app/discover#/
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
+    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/' && !savedSearchId) {
         onNewUrl();
       }
