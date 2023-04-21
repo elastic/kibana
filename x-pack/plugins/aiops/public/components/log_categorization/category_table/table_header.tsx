@@ -33,7 +33,7 @@ export const TableHeader: FC<Props> = ({
           <EuiText size="s">
             <FormattedMessage
               id="xpack.aiops.logCategorization.counts"
-              defaultMessage="Showing {count} patterns"
+              defaultMessage="{count} patterns found"
               values={{ count: categoriesCount }}
             />
             {selectedCategoriesCount > 0 ? (

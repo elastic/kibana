@@ -65,7 +65,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
             {
               defaultMessage:
-                'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
+                'Random sampling can be turned on to increase the speed of analysis, although some accuracy will be lost.',
             }
           ),
           buttonText: i18n.translate(
@@ -81,7 +81,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.message',
             {
               defaultMessage:
-                'The total document count and chart use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
+                'The pattern analysis will use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
             }
           ),
           buttonText: i18n.translate(
@@ -99,7 +99,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.message',
             {
               defaultMessage:
-                'The total document count and chart use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+                'The pattern analysis will use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
             }
           ),
           buttonText: i18n.translate(

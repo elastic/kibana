@@ -82,7 +82,7 @@ export const CategoryTable: FC<Props> = ({
     ) {
       onAddFilter(
         createFilter('', selectedField.name, selectedCategories, mode, category),
-        `Categories - ${selectedField.name}`
+        `Patterns - ${selectedField.name}`
       );
       onClose();
       return;
