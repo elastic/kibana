@@ -26,6 +26,7 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ExportTypesRegistry } from '@kbn/reporting-export-types/server';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -89,7 +90,7 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
-  private exportTypesRegistry = getExportTypesRegistry();
+  // private exportTypesRegistry = new ExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type
@@ -108,6 +109,7 @@ export class ReportingCore {
 
     this.getContract = () => ({
       usesUiCapabilities: () => syncConfig.roles.enabled === false,
+      registerExportType: (exportType) => this.exportTypesRegistry.register(exportType),
     });
 
     this.executing = new Set();

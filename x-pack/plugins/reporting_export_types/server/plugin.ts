@@ -6,40 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-// import { ExportTypesRegistry } from '@kbn/reporting-plugin/public/lib/export_types_registry';
-import { CSVExportType, ExportTypeEntry } from './export_definitions';
+import { Plugin } from '@kbn/core/server';
+import { ReportingSetup } from '@kbn/reporting-plugin/server/types';
+import { ExportTypeDefinition } from './export_types/types';
 
-export interface ExportTypesPluginSetup {
-  // /** added to the reporting plugin and registers in the public reporting setup() */
-  // getTypes: (core: any, type: any) => ExportTypesPlugin['setup'];
-  // // public reporting plugin also creates the et registry
-  // registry: () => ExportTypesRegistry;
-  enableCsvReporting(): void; // CSVExportType;
-  enablePDFReporting(): void; // PDFExportType;
-  enablePNGReporting(): void; // PNGExportType;
+export interface ExportTypesPluginSetupDependencies {
+  // this plugin is dependent on the Reporting plugin
+  reporting: ReportingSetup;
 }
 
-export interface ExportTypesPluginStart {
-  /** Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle */
-  getReportingType(): ExportTypeEntry;
-}
-/** This plugin creates the export types in export type definitions */
-export class ExportTypesPlugin implements Plugin<ExportTypesPluginSetup, ExportTypesPluginStart> {
-  private exportType?: ExportTypeEntry;
-  // getContract from ReportingPublicPlugin x-pack/plugins/reporting/public/plugin.ts
+/** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
+export class ExportTypesPlugin implements Plugin<void, void> {
+  public type: ExportTypeDefinition | undefined;
+  // on setup() this plugin needs to use the reporting plugin to register the export types
+  public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
+    reporting.registerExportType(this.type);
+  }
 
-  public setup(core: CoreSetup<ExportTypesPluginSetup>, plugins: ReportingSetupDeps) {
-    return {
-      register: (type: ExportTypeEntry) => {
-        // does the entry need to be independent or is it just one of the three types
-        // is this where we could see if it's serverless and needs to be disabled etc or is that probably in the reporting plugin itself
-        return {} as CSVExportType;
-      },
-    };
-  }
-  public start(core: CoreStart) {
-    // return this.getContract()
-    return;
-  }
+  // do nothing here
+  public start() {}
 }
