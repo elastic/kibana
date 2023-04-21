@@ -101,7 +101,7 @@ export function RulesPage() {
     urlStateStorage.set('_a', { lastResponse, params, search: newSearch, status, type });
   };
 
-  const handleRuleParamFilterChange = (newParams: Record<string, string | number>) => {
+  const handleRuleParamFilterChange = (newParams: Record<string, string | number | object>) => {
     setParams(newParams);
     urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
   };

@@ -23,7 +23,7 @@ export const mapFiltersToKueryNode = ({
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleLastRunOutcomesFilter?: string[];
-  ruleParamsFilter?: Record<string, string | number>;
+  ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
 }): KueryNode | null => {
