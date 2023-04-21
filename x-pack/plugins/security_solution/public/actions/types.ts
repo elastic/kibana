@@ -33,6 +33,15 @@ export interface SecurityMetadata extends Record<string, unknown> {
    */
   negateFilters?: boolean;
   /**
+   * `metadata.telemetry` is used by the telemetry service to add context to the event.
+   */
+  telemetry?: {
+    /**
+     * It defines which UI component renders the CellActions.
+     */
+    component: string;
+  };
+  /**
    * `metadata.andFilters` is used by the addToTimelineAction to add
    * an "and" query to the main data provider
    */

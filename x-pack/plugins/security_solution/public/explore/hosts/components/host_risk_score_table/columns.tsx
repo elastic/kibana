@@ -21,6 +21,7 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
 import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -46,6 +47,9 @@ export const getHostRiskScoreColumns = ({
               value: hostName,
               type: 'keyword',
               aggregatable: true,
+            }}
+            metadata={{
+              telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
             <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />

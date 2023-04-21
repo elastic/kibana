@@ -6,10 +6,9 @@
  */
 
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
-import type { StartPlugins, StartServices } from '../types';
+import type { StartServices } from '../types';
 import { createFilterInCellActionFactory, createFilterOutCellActionFactory } from './filter';
 import {
   createAddToTimelineLensAction,
@@ -24,18 +23,20 @@ import {
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { SecurityCellActionsTrigger } from './constants';
 import type { SecurityCellActionName, SecurityCellActions } from './types';
+import { enhanceActionWithTelemetry } from './telemetry';
 
 export const registerUIActions = (
-  { uiActions }: StartPlugins,
   store: SecurityAppStore,
   history: H.History,
   services: StartServices
 ) => {
-  registerLensActions(uiActions, store);
-  registerCellActions(uiActions, store, history, services);
+  registerLensActions(store, services);
+  registerCellActions(store, history, services);
 };
 
-const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
+const registerLensActions = (store: SecurityAppStore, services: StartServices) => {
+  const { uiActions } = services;
+
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
@@ -44,7 +45,6 @@ const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore)
 };
 
 const registerCellActions = (
-  uiActions: UiActionsStart,
   store: SecurityAppStore,
   history: H.History,
   services: StartServices
@@ -59,43 +59,51 @@ const registerCellActions = (
     toggleColumn: createToggleColumnCellActionFactory({ store }),
   };
 
-  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DEFAULT, cellActions, [
-    'filterIn',
-    'filterOut',
-    'addToTimeline',
-    'showTopN',
-    'copyToClipboard',
-  ]);
+  registerCellActionsTrigger({
+    triggerId: SecurityCellActionsTrigger.DEFAULT,
+    cellActions,
+    actionsOrder: ['filterIn', 'filterOut', 'addToTimeline', 'showTopN', 'copyToClipboard'],
+    services,
+  });
 
-  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DETAILS_FLYOUT, cellActions, [
-    'filterIn',
-    'filterOut',
-    'addToTimeline',
-    'toggleColumn',
-    'showTopN',
-    'copyToClipboard',
-  ]);
+  registerCellActionsTrigger({
+    triggerId: SecurityCellActionsTrigger.DETAILS_FLYOUT,
+    cellActions,
+    actionsOrder: [
+      'filterIn',
+      'filterOut',
+      'addToTimeline',
+      'toggleColumn',
+      'showTopN',
+      'copyToClipboard',
+    ],
+    services,
+  });
 
-  registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.ALERTS_COUNT, cellActions, [
+  registerCellActionsTrigger({triggerId: SecurityCellActionsTrigger.ALERTS_COUNT, cellActions, actionsOrder: [
     'addToNewTimeline',
-  ]);
+  ],
+    services,});
 };
 
-const registerCellActionsTrigger = (
-  uiActions: UiActionsStart,
-  triggerId: SecurityCellActionsTrigger,
-  cellActions: SecurityCellActions,
-  actionsOrder: SecurityCellActionName[]
-) => {
+const registerCellActionsTrigger = ({
+  triggerId,
+  cellActions,
+  actionsOrder,
+  services,
+}: {
+  triggerId: SecurityCellActionsTrigger;
+  cellActions: SecurityCellActions;
+  actionsOrder: SecurityCellActionName[];
+  services: StartServices;
+}) => {
+  const { uiActions } = services;
   uiActions.registerTrigger({ id: triggerId });
 
   actionsOrder.forEach((actionName, order) => {
     const actionFactory = cellActions[actionName];
-    if (actionFactory) {
-      uiActions.addTriggerAction(
-        triggerId,
-        actionFactory({ id: `${triggerId}-${actionName}`, order })
-      );
-    }
+    const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+
+    uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
   });
 };

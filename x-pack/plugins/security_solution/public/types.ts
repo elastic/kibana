@@ -33,6 +33,7 @@ import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
@@ -65,6 +66,7 @@ import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 
 export interface SetupPlugins {
+  cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
@@ -96,6 +98,7 @@ export interface StartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
+  cloud?: CloudStart;
   cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
