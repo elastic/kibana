@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { relativeToAbsolute } from '@kbn/core-application-browser-internal';
+import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -159,12 +160,15 @@ export const getTopNavLinks = ({
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
 
+      const { locator } = services;
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
       const refreshInterval = timefilter.getRefreshInterval();
       const { grid, ...otherState } = appState;
-      const relativeUrl = services.locator.getRedirectUrl({
+
+      // Share -> Get links -> Snapshot
+      const params: DiscoverAppLocatorParams = {
         ...otherState,
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
@@ -172,20 +176,24 @@ export const getTopNavLinks = ({
           : { dataViewSpec: dataView?.toSpec() }),
         timeRange,
         refreshInterval,
-      });
+      };
+      const relativeUrl = locator.getRedirectUrl(params);
       const shareableUrl = relativeToAbsolute(relativeUrl);
-      const shareableUrlForSavedObject = await services.locator.getUrl(
+
+      // Share -> Get links -> Saved object
+      const shareableUrlForSavedObject = await locator.getUrl(
         { savedSearchId: savedSearch.id },
         { absolute: true }
       );
-      const sharingData = await getSharingData(searchSource, appState, services);
 
+      const sharingData = await getSharingData(searchSource, appState, services);
       services.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
         shareableUrl,
         shareableUrlForSavedObject,
+        shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
