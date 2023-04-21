@@ -17,7 +17,10 @@ export interface RulesListNotifyBadgeProps {
    *  Rule's snooze settings, if `undefined` is passed the component is shown in loading state
    */
   snoozeSettings: RuleSnoozeSettings | undefined;
-  disabled?: boolean;
+  /**
+   * Whether the component is disabled or not, string give a disabled reason displayed as a tooltip
+   */
+  disabled?: boolean | string;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;

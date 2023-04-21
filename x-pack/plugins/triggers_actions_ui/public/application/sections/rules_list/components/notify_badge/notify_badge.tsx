@@ -125,7 +125,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || disabled}
+        disabled={isLoading || !!disabled}
         data-test-subj="rulesListNotifyBadge-snoozed"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         minWidth={85}
@@ -144,7 +144,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || disabled}
+        disabled={isLoading || !!disabled}
         data-test-subj="rulesListNotifyBadge-scheduled"
         minWidth={85}
         iconType="calendar"
@@ -166,7 +166,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || disabled}
+        disabled={isLoading || !!disabled}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
@@ -182,7 +182,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || disabled}
+        disabled={isLoading || !!disabled}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
@@ -215,11 +215,15 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   ]);
 
   const buttonWithToolTip = useMemo(() => {
-    if (isPopoverOpen || showTooltipInline) {
-      return button;
-    }
-    return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
-  }, [isPopoverOpen, button, snoozeTooltipText, showTooltipInline]);
+    const tooltipContent =
+      typeof disabled === 'string'
+        ? disabled
+        : isPopoverOpen || showTooltipInline
+        ? undefined
+        : snoozeTooltipText;
+
+    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
+  }, [disabled, isPopoverOpen, button, snoozeTooltipText, showTooltipInline]);
 
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
@@ -258,7 +262,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const popover = (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
-      isOpen={isPopoverOpen}
+      isOpen={isPopoverOpen && !disabled}
       closePopover={closePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
