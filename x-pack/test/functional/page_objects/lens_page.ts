@@ -1045,6 +1045,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, {});
     },
 
+    async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
+      const el = await await find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"] span`
+      );
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
     async getCountOfDatatableColumns() {
       const table = await find.byCssSelector('.euiDataGrid');
       const $ = await table.parseDomContent();
