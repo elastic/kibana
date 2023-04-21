@@ -44,9 +44,16 @@ const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   return packagePolicy.package?.name === 'endpoint';
 };
 
-const shouldUpdateMetaValues = (endpointPackagePolicy: PolicyConfig, currentLicenseType: string, currentCloudInfo: boolean) => {
-  return endpointPackagePolicy.meta.license !== currentLicenseType || endpointPackagePolicy.meta.cloud !== currentCloudInfo
-}
+const shouldUpdateMetaValues = (
+  endpointPackagePolicy: PolicyConfig,
+  currentLicenseType: string,
+  currentCloudInfo: boolean
+) => {
+  return (
+    endpointPackagePolicy.meta.license !== currentLicenseType ||
+    endpointPackagePolicy.meta.cloud !== currentCloudInfo
+  );
+};
 
 /**
  * Callback to handle creation of PackagePolicies in Fleet
@@ -175,9 +182,17 @@ export const getPackagePolicyUpdateCallback = (
 
     notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
 
-    const newEndpointPackagePolicy = newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig
+    const newEndpointPackagePolicy = newPackagePolicy.inputs[0].config?.policy
+      ?.value as PolicyConfig;
 
-    if (newPackagePolicy.inputs[0].config?.policy?.value && shouldUpdateMetaValues(newEndpointPackagePolicy, licenseService.getLicenseType(), cloud?.isCloudEnabled)) {
+    if (
+      newPackagePolicy.inputs[0].config?.policy?.value &&
+      shouldUpdateMetaValues(
+        newEndpointPackagePolicy,
+        licenseService.getLicenseType(),
+        cloud?.isCloudEnabled
+      )
+    ) {
       newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
       newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
       newPackagePolicy.inputs[0].config.policy.value = newEndpointPackagePolicy;
