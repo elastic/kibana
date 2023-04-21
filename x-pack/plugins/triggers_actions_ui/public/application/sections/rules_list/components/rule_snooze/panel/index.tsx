@@ -46,7 +46,9 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       try {
         await snoozeRule(schedule);
       } finally {
-        setIsLoading(false);
+        if (!inPopover) {
+          setIsLoading(false);
+        }
       }
     },
     [setIsLoading, snoozeRule]
@@ -58,7 +60,9 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       try {
         await unsnoozeRule(scheduleIds);
       } finally {
-        setIsLoading(false);
+        if (!inPopover) {
+          setIsLoading(false);
+        }
       }
     },
     [setIsLoading, unsnoozeRule]
@@ -70,7 +74,9 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       try {
         await snoozeRule(schedule);
       } finally {
-        setIsLoading(false);
+        if (!inPopover) {
+          setIsLoading(false);
+        }
       }
     },
     [snoozeRule, setIsLoading]
@@ -82,7 +88,9 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       try {
         await unsnoozeRule(scheduleIds);
       } finally {
-        setIsLoading(false);
+        if (!inPopover) {
+          setIsLoading(false);
+        }
       }
     },
     [unsnoozeRule, setIsLoading]
