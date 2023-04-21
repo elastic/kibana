@@ -45,8 +45,8 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
               id="xpack.securitySolution.osquery.results.missingPrivileges"
               defaultMessage="To access these results, ask your administrator for {osquery} Kibana
               privileges."
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
-                // eslint-disable-next-line react/jsx-no-literals
                 osquery: <EuiCode>osquery</EuiCode>,
               }}
             />
