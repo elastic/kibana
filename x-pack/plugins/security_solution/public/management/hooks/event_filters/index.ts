@@ -22,10 +22,10 @@ import type {
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
-import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../../common/endpoint/constants';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
