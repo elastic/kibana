@@ -7,6 +7,7 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -900,57 +901,68 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <RuleTypeEuiFormRow
-            $isVisible={isQueryRule(ruleType)}
-            data-test-subj="alertSuppressionInput"
+          <EuiSpacer size="l" />
+          <EuiAccordion
+            data-test-subj="alertSuppressionAccordion"
+            id="alertSuppressionAccordion"
+            buttonContent={i18n.ALERT_SUPPRESSION_ACCORDION_BUTTON}
           >
-            <UseField
-              path="groupByFields"
-              component={GroupByFields}
-              componentProps={{
-                browserFields: termsAggregationFields,
-                isDisabled:
-                  !license.isAtLeast(minimumLicenseForSuppression) &&
-                  initialState.groupByFields.length === 0,
-              }}
-            />
-          </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isQueryRule(ruleType)}
-            data-test-subj="alertSuppressionDuration"
-          >
-            <UseMultiFields
-              fields={{
-                groupByRadioSelection: {
-                  path: 'groupByRadioSelection',
-                },
-                groupByDurationValue: {
-                  path: 'groupByDuration.value',
-                },
-                groupByDurationUnit: {
-                  path: 'groupByDuration.unit',
-                },
-              }}
-            >
-              {GroupByChildren}
-            </UseMultiFields>
-          </RuleTypeEuiFormRow>
+            <EuiSpacer size="l" />
 
-          <RuleTypeEuiFormRow
-            $isVisible={isQueryRule(ruleType)}
-            data-test-subj="alertSuppressionMissingFields"
-            label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
-          >
-            <UseMultiFields
-              fields={{
-                suppressionMissingFields: {
-                  path: 'suppressionMissingFields',
-                },
-              }}
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionInput"
             >
-              {AlertsSuppressionMissingFields}
-            </UseMultiFields>
-          </RuleTypeEuiFormRow>
+              <UseField
+                path="groupByFields"
+                component={GroupByFields}
+                componentProps={{
+                  browserFields: termsAggregationFields,
+                  isDisabled:
+                    !license.isAtLeast(minimumLicenseForSuppression) &&
+                    initialState.groupByFields.length === 0,
+                }}
+              />
+            </RuleTypeEuiFormRow>
+
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionDuration"
+            >
+              <UseMultiFields
+                fields={{
+                  groupByRadioSelection: {
+                    path: 'groupByRadioSelection',
+                  },
+                  groupByDurationValue: {
+                    path: 'groupByDuration.value',
+                  },
+                  groupByDurationUnit: {
+                    path: 'groupByDuration.unit',
+                  },
+                }}
+              >
+                {GroupByChildren}
+              </UseMultiFields>
+            </RuleTypeEuiFormRow>
+
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionMissingFields"
+              label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
+            >
+              <UseMultiFields
+                fields={{
+                  suppressionMissingFields: {
+                    path: 'suppressionMissingFields',
+                  },
+                }}
+              >
+                {AlertsSuppressionMissingFields}
+              </UseMultiFields>
+            </RuleTypeEuiFormRow>
+          </EuiAccordion>
+          <EuiSpacer size="l" />
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
