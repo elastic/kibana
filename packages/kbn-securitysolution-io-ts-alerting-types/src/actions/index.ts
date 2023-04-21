@@ -29,18 +29,41 @@ export const RuleActionUuid = NonEmptyString;
 export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
 export const RuleActionParams = saved_object_attributes;
 
-export const RuleActionAlertsFilter = t.strict({
+export const RuleActionAlertsFilter = t.partial({
   query: t.union([
-    t.null,
+    t.undefined,
     t.intersection([
       t.strict({
         kql: t.string,
+        filters: t.array(
+          t.intersection([
+            t.type({
+              meta: t.partial({
+                alias: t.union([t.string, t.null]),
+                disabled: t.boolean,
+                negate: t.boolean,
+                controlledBy: t.string,
+                group: t.string,
+                index: t.string,
+                isMultiIndex: t.boolean,
+                type: t.string,
+                key: t.string,
+                params: t.any,
+                value: t.string,
+              }),
+            }),
+            t.partial({
+              $state: t.type({ store: t.any }),
+              query: t.record(t.string, t.any),
+            }),
+          ])
+        ),
       }),
       t.partial({ dsl: t.string }),
     ]),
   ]),
   timeframe: t.union([
-    t.null,
+    t.undefined,
     t.strict({
       timezone: t.string,
       days: t.array(
