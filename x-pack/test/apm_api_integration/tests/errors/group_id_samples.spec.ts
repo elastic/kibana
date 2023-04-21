@@ -9,6 +9,7 @@ import { timerange } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -140,6 +141,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         const instance = service(serviceName, 'production', 'go').instance('a');
+        const errorMessage = 'Error 1';
+        const groupId = getErrorGroupingKey(errorMessage);
 
         await synthtraceEsClient.index([
           timerange(start, end)
@@ -153,22 +156,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .sample(false)
                   .errors(
-                    instance.error({ message: `Error 1` }).timestamp(timestamp),
-                    instance.error({ message: `Error 1` }).timestamp(timestamp + 1)
+                    instance.error({ message: errorMessage }).timestamp(timestamp),
+                    instance.error({ message: errorMessage }).timestamp(timestamp + 1)
                   ),
                 instance
                   .transaction('GET /api/foo')
                   .duration(100)
                   .timestamp(timestamp)
                   .sample(true)
-                  .errors(instance.error({ message: `Error 1` }).timestamp(timestamp)),
+                  .errors(instance.error({ message: errorMessage }).timestamp(timestamp)),
               ];
             }),
         ]);
 
-        errorGroupSamplesResponse = (
-          await callErrorGroupSamplesApi({ groupId: '0000000000000000000000000Error 1' })
-        ).body;
+        errorGroupSamplesResponse = (await callErrorGroupSamplesApi({ groupId })).body;
       });
 
       after(() => synthtraceEsClient.clean());
@@ -178,6 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // this checks whether the order of indexing is different from the order that is returned
         // if it is not, scoring/sorting is broken
+        expect(errorGroupSamplesResponse.errorSampleIds.length).to.be(3);
         expect(idsOfErrors).to.not.eql(orderBy(idsOfErrors));
       });
     });
