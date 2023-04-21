@@ -18,7 +18,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCodeEditor } from '../../../../../shared_imports';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+
 import { ErrableFormRow } from '../../../../../components/form_errors';
 import { WebhookAction } from '../../../../../../../common/types/action_types';
 
@@ -242,19 +243,29 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
       >
-        <EuiCodeEditor
-          mode="json"
-          width="100%"
-          height="200px"
-          theme="textmate"
+        <CodeEditor
+          languageId="json"
+          value={body || ''}
           data-test-subj="webhookBodyEditor"
+          height={200}
+          options={{
+            lineNumbers: 'off',
+            fontSize: 12,
+            tabSize: 2,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
           aria-label={i18n.translate(
             'xpack.watcher.sections.watchEdit.threshold.webhookAction.bodyCodeEditorAriaLabel',
             {
               defaultMessage: 'Code editor',
             }
           )}
-          value={body || ''}
           onChange={(json: string) => {
             editAction({ key: 'body', value: json });
           }}
