@@ -114,11 +114,13 @@ export const ExplainLogRateSpikesPage: FC = () => {
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
+    'explain_log_rage_spikes',
     currentSelectedSignificantTerm,
     currentSelectedGroup
   );
 
-  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
+  const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
+    documentStats;
 
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
@@ -198,6 +200,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
                     currentSelectedGroup
                   )}
                   totalCount={totalCount}
+                  sampleProbability={sampleProbability}
                   windowParameters={windowParameters}
                 />
               </EuiPanel>
@@ -212,6 +215,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
                   latest={latest}
                   windowParameters={windowParameters}
                   searchQuery={searchQuery}
+                  sampleProbability={sampleProbability}
                 />
               )}
               {windowParameters === undefined && (

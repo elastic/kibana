@@ -16,3 +16,5 @@ export const DASHBOARD_COUNTER_CARDS = {
 };
 export const DASHBOARD_TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-table-header-score';
 export const DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';
+export const KUBERNETES_DASHBOARD_TAB = 'kubernetes-dashboard-tab';
+export const CLOUD_DASHBOARD_TAB = 'cloud-dashboard-tab';

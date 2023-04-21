@@ -15,34 +15,28 @@ import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './form
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
+  const value = fields[ConfigKey.THROTTLING_CONFIG];
+  const defaultThrottling = DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG].value;
+
+  const thValue = value?.value;
+
+  if (!thValue || !defaultThrottling) return false;
+
+  if (thValue?.download === '0' && thValue?.upload === '0' && thValue?.latency === '0')
+    return false;
+  if (value?.label === 'no-throttling') return false;
 
   return {
-    download: parseInt(
-      fields[ConfigKey.DOWNLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.DOWNLOAD_SPEED],
-      10
-    ),
-    upload: parseInt(
-      fields[ConfigKey.UPLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.UPLOAD_SPEED],
-      10
-    ),
-    latency: parseInt(
-      fields[ConfigKey.LATENCY] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.LATENCY],
-      10
-    ),
+    download: Number(thValue?.download ?? defaultThrottling.download),
+    upload: Number(thValue?.upload ?? defaultThrottling.upload),
+    latency: Number(thValue?.latency ?? defaultThrottling.latency),
   };
 };
 
 export const browserFormatters: BrowserFormatMap = {
   ...basicBrowserFormatters,
   [ConfigKey.METADATA]: objectFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: arrayFormatter,
   [ConfigKey.SOURCE_INLINE]: null,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: null,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: null,
-  [ConfigKey.ZIP_URL_TLS_KEY]: null,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: null,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: null,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayFormatter,

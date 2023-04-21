@@ -23,7 +23,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
@@ -55,8 +54,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
   const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
+  const icon = nativeConnector.icon;
 
-  const icon = NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType];
   return (
     <>
       <EuiSpacer />

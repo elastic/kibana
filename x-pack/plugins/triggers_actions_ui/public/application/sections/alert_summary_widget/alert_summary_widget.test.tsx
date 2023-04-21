@@ -12,6 +12,10 @@ import { AlertSummaryWidget } from './alert_summary_widget';
 import { AlertSummaryWidgetProps } from './types';
 import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
+import {
+  ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
+  TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
+} from './components/constants';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
@@ -66,8 +70,12 @@ describe('AlertSummaryWidget', () => {
 
   it('should render counts and title correctly', async () => {
     const alertSummaryWidget = renderComponent();
-    expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('1');
-    expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('8');
+    expect(alertSummaryWidget.queryByTestId(ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '1'
+    );
+    expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
+      '8'
+    );
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });
 

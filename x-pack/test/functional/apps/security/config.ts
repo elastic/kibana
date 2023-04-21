@@ -12,6 +12,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./doc_level_security_roles.ts')],
   };
 }

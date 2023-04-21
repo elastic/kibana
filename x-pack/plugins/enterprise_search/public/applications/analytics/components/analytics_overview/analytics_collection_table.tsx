@@ -104,7 +104,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       },
       {
         css: [analyticsCollectionTableStyles.button],
-        id: FilterBy.NoResults,
+        id: FilterBy.Sessions,
         label: i18n.translate('xpack.enterpriseSearch.analytics.filtering.sessions', {
           defaultMessage: 'Sessions',
         }),
@@ -151,18 +151,14 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={timeRange.from}
-                  end={timeRange.to}
-                  onTimeChange={handleTimeChange}
-                  showUpdateButton={false}
-                  width="full"
-                  commonlyUsedRanges={defaultQuickRanges}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiSuperDatePicker
+              start={timeRange.from}
+              end={timeRange.to}
+              onTimeChange={handleTimeChange}
+              showUpdateButton={false}
+              width="full"
+              commonlyUsedRanges={defaultQuickRanges}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

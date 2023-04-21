@@ -55,6 +55,7 @@ import {
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
 import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 
 /*
  * Saved object types and mappings
@@ -212,6 +213,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
       '8.7.0': migratePackagePolicyToV870,
+      '8.8.0': migratePackagePolicyToV880,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -239,6 +241,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             id: { type: 'keyword' },
             type: { type: 'keyword' },
             version: { type: 'keyword' },
+            deferred: { type: 'boolean' },
           },
         },
         installed_kibana: {

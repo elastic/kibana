@@ -370,8 +370,8 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-6',
     attributes: {
       type: CommentType.alert,
-      index: 'test-index',
-      alertId: 'test-id',
+      index: 'test-index-3',
+      alertId: 'test-id-3',
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',

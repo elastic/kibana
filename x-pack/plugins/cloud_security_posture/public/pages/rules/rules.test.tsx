@@ -68,7 +68,14 @@ describe('<Rules />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: {
+          cspm: { status: 'indexed' },
+          kspm: { status: 'indexed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
       })
     );
 

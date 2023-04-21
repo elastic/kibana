@@ -12,8 +12,13 @@ import {
   getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
+  isSummaryActionOnInterval,
   isSummaryActionThrottled,
+  getSummaryActionTimeBounds,
 } from './rule_action_helper';
+
+const now = '2021-05-13T12:33:37.000Z';
+Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const mockOldAction: RuleAction = {
   id: '1',
@@ -175,12 +180,12 @@ describe('rule_action_helper', () => {
       jest.useRealTimers();
     });
     const logger = { debug: jest.fn() } as unknown as Logger;
-    const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const throttledSummaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
         action: mockAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -189,7 +194,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryActionThrottled({
         action: mockOldAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -201,7 +206,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, notifyWhen: 'onActiveAlert' },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -213,7 +218,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, throttle: null },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -222,7 +227,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is not in the task instance', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -232,7 +237,7 @@ describe('rule_action_helper', () => {
       jest.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -241,7 +246,7 @@ describe('rule_action_helper', () => {
     test('should return true for a throttling action', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(true);
@@ -250,7 +255,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is broken', () => {
       const result = isSummaryActionThrottled({
         action: undefined,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -259,7 +264,7 @@ describe('rule_action_helper', () => {
     test('should return false if there is no summary action in the state', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: undefined,
+        throttledSummaryActions: undefined,
         logger,
       });
       expect(result).toBe(false);
@@ -275,13 +280,93 @@ describe('rule_action_helper', () => {
             throttle: '1',
           },
         },
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
       expect(logger.debug).toHaveBeenCalledWith(
         "Action'slack:1', has an invalid throttle interval"
       );
+    });
+  });
+
+  describe('isSummaryActionOnInterval', () => {
+    test('returns true for a summary action on interval', () => {
+      expect(isSummaryActionOnInterval(mockSummaryAction)).toBe(true);
+    });
+
+    test('returns false for a non-summary ', () => {
+      expect(
+        isSummaryActionOnInterval({
+          ...mockAction,
+          frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        })
+      ).toBe(false);
+    });
+
+    test('returns false for a summary per rule run ', () => {
+      expect(
+        isSummaryActionOnInterval({
+          ...mockAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('getSummaryActionTimeBounds', () => {
+    test('returns undefined start and end action is not summary action', () => {
+      expect(getSummaryActionTimeBounds(mockAction, { interval: '1m' }, null)).toEqual({
+        start: undefined,
+        end: undefined,
+      });
+    });
+
+    test('returns start and end for summary action with throttle', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        mockSummaryAction,
+        { interval: '1m' },
+        null
+      );
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620822817000);
+      // start is end - throttle interval (1d)
+      expect(start).toEqual(new Date('2021-05-12T12:33:37.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action without throttle with previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        { interval: '1m' },
+        new Date('2021-05-13T12:31:57.000Z')
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909117000);
+      // start is previous started at time
+      expect(start).toEqual(new Date('2021-05-13T12:31:57.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action without throttle without previousStartedAt', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        { interval: '1m' },
+        null
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      expect(start).toEqual(1620909157000);
+      // start is end - schedule interval (1m)
+      expect(start).toEqual(new Date('2021-05-13T12:32:37.000Z').valueOf());
     });
   });
 });

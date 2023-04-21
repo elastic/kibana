@@ -39,7 +39,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewWithTimefieldMock,
-        getRelativeTimeRange: () => relativeTimeRange,
+        relativeTimeRange,
         lensAttributes,
       })
     );
@@ -59,7 +59,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: { ...dataViewWithTimefieldMock, id: undefined } as DataView,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
@@ -73,7 +73,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewMock,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
@@ -93,7 +93,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
@@ -107,7 +107,7 @@ describe('useEditVisualization', () => {
       useEditVisualization({
         services: unifiedHistogramServicesMock,
         dataView: dataViewWithTimefieldMock,
-        getRelativeTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );

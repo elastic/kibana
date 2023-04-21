@@ -35,7 +35,7 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { withLensData } from '../../../hoc/with_lens_data';
-import { COLLECTION_VIEW_PATH } from '../../../routes';
+import { COLLECTION_OVERVIEW_PATH } from '../../../routes';
 
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
@@ -93,7 +93,6 @@ const getChartStatus = (metric: number | null): ChartStatus => {
   if (metric && metric < 0) return ChartStatus.DECREASE;
   return ChartStatus.CONSTANT;
 };
-
 export const AnalyticsCollectionCard: React.FC<
   AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
 > = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
@@ -102,9 +101,8 @@ export const AnalyticsCollectionCard: React.FC<
   const cardStyles = AnalyticsCollectionCardStyles(euiTheme);
   const status = getChartStatus(secondaryMetric);
   const CARD_THEME = getCardTheme(euiTheme)[status];
-  const collectionViewUrl = generateEncodedPath(COLLECTION_VIEW_PATH, {
+  const collectionViewUrl = generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
     name: collection.name,
-    section: 'events',
   });
   const handleCardClick = (event: MouseEvent) => {
     event?.preventDefault();
@@ -333,6 +331,5 @@ export const AnalyticsCollectionCardWithLens = withLensData<
       visualizationType: 'lnsMetric',
     };
   },
-  getDataViewQuery: ({ collection }) => collection.events_datastream,
   initialValues,
 });

@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
   const kibanaServer = getService('kibanaServer');
 
+  // Failing: See https://github.com/elastic/kibana/issues/155447
   describe('dls', function () {
     before('initialize tests', async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await screenshot.take('Security_Roles');
     });
 
-    it('should add new user userEAST ', async function () {
+    it('should add new user userEAST', async function () {
       await PageObjects.security.createUser({
         username: 'userEast',
         password: 'changeme',
