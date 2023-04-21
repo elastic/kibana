@@ -170,6 +170,13 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         },
+        throttling: {
+          properties: {
+            label: {
+              type: 'keyword',
+            },
+          },
+        },
       },
     },
     management: {

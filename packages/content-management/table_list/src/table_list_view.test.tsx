@@ -66,6 +66,12 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
+const getActions = (testBed: TestBed) => ({
+  openSortSelect() {
+    testBed.find('tableSortSelectBtn').at(0).simulate('click');
+  },
+});
+
 describe('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -306,6 +312,36 @@ describe('TableListView', () => {
       expect(lastRowTitle).toBe('Item 19');
     });
 
+    test('should allow changing the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+        });
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      let { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
+
+      // Changing the "Rows per page" also sends the "sort" column information and thus updates the sorting.
+      // We test that the "sort by" column has not changed before and after changing the number of rows
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated');
+
+      // Open the "Rows per page" drop down
+      find('tablePaginationPopoverButton').simulate('click');
+      find('tablePagination-10-rows').simulate('click');
+
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+      expect(tableCellsValues.length).toBe(10);
+
+      expect(find('tableSortSelectBtn').at(0).text()).toBe('Recently updated'); // Still the same
+    });
+
     test('should navigate to page 2', async () => {
       let testBed: TestBed;
 
@@ -349,12 +385,6 @@ describe('TableListView', () => {
         memoryRouter: { wrapComponent: true },
       }
     );
-
-    const getActions = (testBed: TestBed) => ({
-      openSortSelect() {
-        testBed.find('tableSortSelectBtn').at(0).simulate('click');
-      },
-    });
 
     const hits: UserContentCommonSchema[] = [
       {

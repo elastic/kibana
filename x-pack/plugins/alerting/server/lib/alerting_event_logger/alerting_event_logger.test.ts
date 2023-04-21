@@ -27,6 +27,7 @@ import {
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
+import { schema } from '@kbn/config-schema';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -42,6 +43,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   ruleTaskTimeout: '1m',
+  validate: {
+    params: schema.any(),
+  },
 };
 
 const context: RuleContextOpts = {
@@ -68,6 +72,7 @@ const alert = {
     duration: '2343252346',
   },
   flapping: false,
+  maintenanceWindowIds: ['window-id1', 'window-id2'],
 };
 
 const action = {
@@ -1068,6 +1073,7 @@ describe('createAlertRecord', () => {
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
+    expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
     expect(record.kibana?.saved_objects).toEqual([

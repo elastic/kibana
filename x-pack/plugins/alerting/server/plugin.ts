@@ -502,6 +502,10 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
+    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
+      return maintenanceWindowClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
@@ -528,6 +532,7 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
