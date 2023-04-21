@@ -51,10 +51,10 @@ export const createSideNavDataFactory = (
 
       const fullId = [parentIds, id].filter(Boolean).join('.');
 
-      let newHref = href; // allow consumer to pass href, but default to an href formed using the locator
+      let calculatedHref = href; // allow consumer to pass href, but default to an href formed using the locator
       if (locator) {
         const storedLocator: Locator = locator; // never undefined
-        newHref = locator.getRedirectUrl(locatorParams ?? {}); // if consumer passes locator, an href they may have passed gets overwritten
+        calculatedHref = locator.getRedirectUrl(locatorParams ?? {}); // NOTE: calculated href overwrites href from props
         onClick = (event: React.MouseEvent) => {
           event.preventDefault();
           storedLocator.navigateSync(locatorParams ?? {});
@@ -86,7 +86,7 @@ export const createSideNavDataFactory = (
         name,
         isSelected,
         onClick,
-        href: newHref,
+        href: calculatedHref,
         items: filteredSubNav,
         ['data-test-subj']: `nav-item-${fullId}`,
       };
