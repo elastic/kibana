@@ -27853,7 +27853,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disable.successToastDescription": "已成功禁用 {totalRules, plural, other {{totalRules} 个规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.errorToastDescription": "无法复制 {rulesCount, plural, other {# 个规则}}。",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody": "您正在复制 {rulesCount, plural, other {# 个选定规则}}，请选择您希望如何复制现有例外",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalTitle": "复制存在例外的{rulesCount, plural, other {规则}}？",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with": "复制{rulesCount, plural, other {规则}}及其例外",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.without": "仅复制{rulesCount, plural, other {规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.successToastDescription": "已成功复制 {totalRules, plural, other {{totalRules} 个规则}}",

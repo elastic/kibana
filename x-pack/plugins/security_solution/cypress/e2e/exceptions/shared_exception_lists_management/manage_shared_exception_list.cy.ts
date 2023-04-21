@@ -115,7 +115,7 @@ describe('Manage shared exception list', () => {
 
     it('Create exception list', function () {
       createSharedExceptionList(
-        { name: EXCEPTION_LIST_NAME, description: 'This is my list.' },
+        { name: 'Newly created list', description: 'This is my list.' },
         true
       );
 
@@ -152,7 +152,10 @@ describe('Manage shared exception list', () => {
   });
 
   describe('Duplicate', () => {
-    before(() => {
+    beforeEach(() => {
+      esArchiverResetKibana();
+      login();
+
       // Create exception list associated with a rule
       createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
@@ -195,11 +198,6 @@ describe('Manage shared exception list', () => {
 
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
-    });
-
-    beforeEach(() => {
-      esArchiverResetKibana();
-      login();
     });
 
     it('Duplicate exception list with expired items', function () {

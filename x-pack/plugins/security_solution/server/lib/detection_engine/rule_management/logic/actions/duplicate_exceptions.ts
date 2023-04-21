@@ -5,10 +5,27 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RuleParams } from '../../../rule_schema';
+
+const ERROR_DUPLICATING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.cloneExceptions.errorDuplicatingList',
+  {
+    defaultMessage:
+      'Unable to duplicate rule default exceptions - unable to find their container with list_id:',
+  }
+);
+
+const ERROR_DUPLICATING_ITEMS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.cloneExceptions.errorDuplicatingListItems',
+  {
+    defaultMessage: 'Unable to duplicate rule default exception items for rule_id:',
+  }
+);
 
 interface DuplicateExceptionsParams {
   ruleId: RuleParams['ruleId'];
@@ -47,9 +64,7 @@ export const duplicateExceptions = async ({
     });
 
     if (listToDuplicate == null) {
-      throw new Error(
-        `Unable to duplicate rule default exceptions - unable to find their container with list_id: "${ruleDefaultList.list_id}"`
-      );
+      throw new Error(`${ERROR_DUPLICATING} "${ruleDefaultList.list_id}"`);
     } else {
       const ruleDefaultExceptionList = await exceptionsClient.duplicateExceptionListAndItems({
         list: listToDuplicate,
@@ -58,7 +73,7 @@ export const duplicateExceptions = async ({
       });
 
       if (ruleDefaultExceptionList == null) {
-        throw new Error(`Unable to duplicate rule default exception items for rule_id: ${ruleId}`);
+        throw new Error(`${ERROR_DUPLICATING_ITEMS} ${ruleId}`);
       }
 
       return [

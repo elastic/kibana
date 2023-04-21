@@ -38,10 +38,10 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
-export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"]';
+export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
 
-export const INCLUDE_EXPIRED_EXCEPTIONS_CHECKBOX =
-  'label[for="duplicateOptionsWithExpiredExceptions"]';
+export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
+  '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
 
 export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
 

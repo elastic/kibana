@@ -518,7 +518,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
 
-      // Check that the exceptions are duplicted
+      // Check that the exceptions are duplicated
       expect(body.attributes.results.created[0].exceptions_list).to.eql([
         {
           type: exceptionList.type,

@@ -25,6 +25,7 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
+import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
 import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
 export const ListsDetailViewComponent: FC = () => {
@@ -64,20 +65,18 @@ export const ListsDetailViewComponent: FC = () => {
   } = useListDetailsView(exceptionListId);
 
   const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
-    useState(false);
-  const [modalActionType, setActionType] = useState('export');
+    useState<CheckExceptionTtlActionTypes | null>(null);
 
   const onModalClose = useCallback(
-    () => setShowIncludeExpiredExceptionItemsModal(false),
+    () => setShowIncludeExpiredExceptionItemsModal(null),
     [setShowIncludeExpiredExceptionItemsModal]
   );
 
   const onModalOpen = useCallback(
-    (actionType: string) => {
-      setActionType(actionType);
-      setShowIncludeExpiredExceptionItemsModal(true);
+    (actionType: CheckExceptionTtlActionTypes) => {
+      setShowIncludeExpiredExceptionItemsModal(actionType);
     },
-    [setShowIncludeExpiredExceptionItemsModal, setActionType]
+    [setShowIncludeExpiredExceptionItemsModal]
   );
 
   const handleExportList = useCallback(() => {
@@ -144,8 +143,11 @@ export const ListsDetailViewComponent: FC = () => {
         ) : null}
         {showIncludeExpiredExceptionItemsModal && (
           <IncludeExpiredExceptionsModal
-            onModalConfirm={modalActionType === 'export' ? onExportList : onDuplicateList}
+            onModalConfirm={
+              showIncludeExpiredExceptionItemsModal === 'export' ? onExportList : onDuplicateList
+            }
             handleCloseModal={onModalClose}
+            action={showIncludeExpiredExceptionItemsModal}
           />
         )}
       </>
@@ -182,7 +184,6 @@ export const ListsDetailViewComponent: FC = () => {
     onCancelManageRules,
     onRuleSelectionChange,
     showIncludeExpiredExceptionItemsModal,
-    modalActionType,
     onExportList,
     onDuplicateList,
     onModalClose,

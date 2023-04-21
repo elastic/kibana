@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiRadioGroup,
-  EuiText,
-  EuiConfirmModal,
-  EuiSpacer,
-  EuiIconTip,
-  EuiCheckbox,
-} from '@elastic/eui';
+import { EuiRadioGroup, EuiText, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 
 import { bulkDuplicateRuleActions as i18n } from './translations';
@@ -32,8 +25,6 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   const [selectedDuplicateOption, setSelectedDuplicateOption] = useState(
     DuplicateOptions.withExceptions
   );
-  const [isIncludeExpiredExceptionItemsChecked, setIsIncludeExpiredExceptionItemsChecked] =
-    useState(true);
 
   const handleRadioChange = useCallback(
     (optionId) => {
@@ -42,20 +33,9 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
     [setSelectedDuplicateOption]
   );
 
-  const handleCheckboxChange = useCallback(() => {
-    setIsIncludeExpiredExceptionItemsChecked((isChecked) => !isChecked);
-  }, [setIsIncludeExpiredExceptionItemsChecked]);
-
   const handleConfirm = useCallback(() => {
-    if (
-      selectedDuplicateOption === DuplicateOptions.withExceptions &&
-      !isIncludeExpiredExceptionItemsChecked
-    ) {
-      onConfirm(DuplicateOptions.withExceptionsExcludeExpiredExceptions);
-    } else {
-      onConfirm(selectedDuplicateOption);
-    }
-  }, [isIncludeExpiredExceptionItemsChecked, onConfirm, selectedDuplicateOption]);
+    onConfirm(selectedDuplicateOption);
+  }, [onConfirm, selectedDuplicateOption]);
 
   return (
     <EuiConfirmModal
@@ -66,7 +46,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
       defaultFocusedButton="confirm"
       onCancel={onCancel}
     >
-      <EuiText>{i18n.MODAL_TEXT(rulesCount)} </EuiText>
+      <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
 
       <EuiSpacer />
       <EuiRadioGroup
@@ -74,24 +54,22 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
           {
             id: DuplicateOptions.withExceptions,
             label: (
-              <>
-                <EuiText size="s">
-                  {i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount)}{' '}
-                  <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
-                </EuiText>
-                <EuiSpacer size="s" />
-                {selectedDuplicateOption === DuplicateOptions.withExceptions && (
-                  <EuiCheckbox
-                    id={'duplicateOptionsWithExpiredExceptions'}
-                    label={i18n.DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL(rulesCount)}
-                    checked={isIncludeExpiredExceptionItemsChecked}
-                    onChange={handleCheckboxChange}
-                    data-test-subj="withExceptionsExcludeExpiredExceptions"
-                  />
-                )}
-              </>
+              <EuiText size="s">
+                {i18n.DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL(rulesCount)}
+                <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+              </EuiText>
             ),
             'data-test-subj': DuplicateOptions.withExceptions,
+          },
+          {
+            id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            label: (
+              <EuiText size="s">
+                {i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount)}
+                <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+              </EuiText>
+            ),
+            'data-test-subj': DuplicateOptions.withExceptionsExcludeExpiredExceptions,
           },
           {
             id: DuplicateOptions.withoutExceptions,

@@ -20,6 +20,8 @@ import type { ExceptionListInfo } from '../use_all_exception_lists';
 import { useListExceptionItems } from '../use_list_exception_items';
 import * as i18n from '../../translations';
 import { checkIfListCannotBeEdited } from '../../utils/list.utils';
+import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
+import { CHECK_EXCEPTION_TTL_ACTION_TYPES } from '../../components/expired_exceptions_list_items_modal';
 
 interface DuplicateListAction {
   listId: string;
@@ -67,12 +69,8 @@ export const useExceptionsListCard = ({
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
-  const [showIncludeExpiredExceptionsModalExport, setShowIncludeExpiredExceptionsModalExport] =
-    useState(false);
-  const [
-    showIncludeExpiredExceptionsModalDuplicate,
-    setShowIncludeExpiredExceptionsModalDuplicate,
-  ] = useState(false);
+  const [showIncludeExpiredExceptionsModal, setShowIncludeExpiredExceptionsModal] =
+    useState<CheckExceptionTtlActionTypes | null>(null);
 
   const {
     name: listName,
@@ -153,7 +151,7 @@ export const useExceptionsListCard = ({
               includeExpiredExceptions: true,
             })();
           } else {
-            setShowIncludeExpiredExceptionsModalExport(true);
+            setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT);
           }
         },
       },
@@ -163,7 +161,7 @@ export const useExceptionsListCard = ({
         label: i18n.DUPLICATE_EXCEPTION_LIST,
         disabled: listCannotBeEdited,
         onClick: (_: React.MouseEvent<Element, MouseEvent>) => {
-          setShowIncludeExpiredExceptionsModalDuplicate(true);
+          setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.DUPLICATE);
         },
       },
       {
@@ -223,17 +221,16 @@ export const useExceptionsListCard = ({
   );
 
   const onExportListClick = useCallback(() => {
-    setShowIncludeExpiredExceptionsModalExport(true);
-  }, [setShowIncludeExpiredExceptionsModalExport]);
+    setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT);
+  }, [setShowIncludeExpiredExceptionsModal]);
 
   const handleCancelExpiredExceptionsModal = () => {
-    setShowIncludeExpiredExceptionsModalExport(false);
-    setShowIncludeExpiredExceptionsModalDuplicate(false);
+    setShowIncludeExpiredExceptionsModal(null);
   };
 
   const handleConfirmExpiredExceptionsModal = useCallback(
     (includeExpiredExceptions: boolean): void => {
-      if (showIncludeExpiredExceptionsModalExport) {
+      if (showIncludeExpiredExceptionsModal === CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT) {
         handleExport({
           id: exceptionsList.id,
           listId: exceptionsList.list_id,
@@ -241,7 +238,8 @@ export const useExceptionsListCard = ({
           namespaceType: exceptionsList.namespace_type,
           includeExpiredExceptions,
         })();
-      } else {
+      }
+      if (showIncludeExpiredExceptionsModal === CHECK_EXCEPTION_TTL_ACTION_TYPES.DUPLICATE) {
         handleDuplicate({
           listId: exceptionsList.list_id,
           name: exceptionsList.name,
@@ -251,7 +249,7 @@ export const useExceptionsListCard = ({
       }
     },
     [
-      showIncludeExpiredExceptionsModalExport,
+      showIncludeExpiredExceptionsModal,
       handleExport,
       exceptionsList.id,
       exceptionsList.list_id,
@@ -299,8 +297,7 @@ export const useExceptionsListCard = ({
     emptyViewerTitle,
     emptyViewerBody,
     emptyViewerButtonText,
-    showIncludeExpiredExceptionsModal:
-      showIncludeExpiredExceptionsModalDuplicate || showIncludeExpiredExceptionsModalExport,
+    showIncludeExpiredExceptionsModal,
     onExportListClick,
     handleCancelExpiredExceptionsModal,
     handleConfirmExpiredExceptionsModal,

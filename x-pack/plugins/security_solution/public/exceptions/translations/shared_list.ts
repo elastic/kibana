@@ -391,18 +391,33 @@ export const EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON = i18n.translate(
   }
 );
 
-export const EXPIRED_EXCEPTIONS_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.expiredExceptionModalTitle',
+export const EXPIRED_EXCEPTIONS_MODAL_EXPORT_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalExportTitle',
   {
-    defaultMessage: 'Include expired exception items?',
+    defaultMessage: 'Export exception list?',
   }
 );
 
-export const EXPIRED_EXCEPTIONS_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeDescription',
+export const EXPIRED_EXCEPTIONS_MODAL_DUPLICATE_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalDuplicateTitle',
+  {
+    defaultMessage: 'Duplicate exception list?',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_DUPLICATE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeDuplicateDescription',
   {
     defaultMessage:
-      'Exception items may contain expiration dates - select whether you would like expired items to be included.',
+      'You’re duplicating an exception list. Switch the toggle off to exclude expired exceptions.',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_EXPORT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeExportDescription',
+  {
+    defaultMessage:
+      'You’re exporting an exception list. Switch the toggle off to exclude expired exceptions.',
   }
 );
 
@@ -413,9 +428,16 @@ export const EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
   }
 );
 
-export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_BUTTON = i18n.translate(
-  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmButton',
+export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_DUPLICATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmDuplicateButton',
   {
-    defaultMessage: 'Continue',
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_EXPORT_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmExportButton',
+  {
+    defaultMessage: 'Export',
   }
 );

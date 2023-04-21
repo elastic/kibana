@@ -275,6 +275,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
           <IncludeExpiredExceptionsModal
             handleCloseModal={handleCancelExpiredExceptionsModal}
             onModalConfirm={handleConfirmExpiredExceptionsModal}
+            action={showIncludeExpiredExceptionsModal}
           />
         ) : null}
       </EuiFlexGroup>
