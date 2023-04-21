@@ -101,7 +101,6 @@ export function DiscoverSidebarComponent({
   isProcessing,
   alwaysShowActionButtons = false,
   columns,
-  documents$,
   allFields,
   onAddField,
   onAddFilter,
@@ -125,7 +124,6 @@ export function DiscoverSidebarComponent({
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
 
-  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
   );
@@ -233,12 +231,10 @@ export function DiscoverSidebarComponent({
           onAddField={onAddField}
           onRemoveField={onRemoveField}
           onAddFilter={onAddFilter}
-          documents$={documents$}
           trackUiMetric={trackUiMetric}
           multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
           onEditField={editField}
           onDeleteField={deleteField}
-          showFieldStats={showFieldStats}
           contextualFields={columns}
           groupIndex={groupIndex}
           itemIndex={itemIndex}
@@ -256,12 +252,10 @@ export function DiscoverSidebarComponent({
       onAddField,
       onRemoveField,
       onAddFilter,
-      documents$,
       trackUiMetric,
       multiFieldsMap,
       editField,
       deleteField,
-      showFieldStats,
       columns,
       selectedFieldsState.selectedFieldsMap,
     ]
