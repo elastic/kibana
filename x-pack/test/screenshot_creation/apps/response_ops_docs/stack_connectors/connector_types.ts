@@ -57,5 +57,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
+
+    it('email connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('email');
+      await testSubjects.setValue('nameInput', 'Gmail connector');
+      await testSubjects.setValue('emailFromInput', 'test@gmail.com');
+      await testSubjects.setValue('emailServiceSelectInput', 'gmail');
+      await commonScreenshots.takeScreenshot('email-connector', screenshotDirectories);
+      const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
+      await flyOutCancelButton.click();
+    });
   });
 }
