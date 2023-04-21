@@ -6,10 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo } from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
-import { TopAlert } from '@kbn/observability-plugin/public';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import {
@@ -17,6 +26,7 @@ import {
   getPaddedAlertTimeRange,
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
+import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
@@ -41,9 +51,10 @@ const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 interface AppSectionProps {
   rule: MetricThresholdRule;
   alert: MetricThresholdAlert;
+  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
+export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceContext();
   const { euiTheme } = useEuiTheme();
@@ -74,14 +85,41 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
+  useEffect(() => {
+    setAlertSummaryFields([
+      {
+        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
+          defaultMessage: 'Rule',
+        }),
+        value: rule.name,
+      },
+    ]);
+  }, [alert, rule, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
       {rule.params.criteria.map((criterion, index) => (
         <EuiFlexItem key={generateUniqueKey(criterion)}>
           <EuiPanel hasBorder hasShadow={false}>
+            <EuiTitle size="xs">
+              <h4>
+                {criterion.aggType.toUpperCase()}{' '}
+                {'metric' in criterion ? criterion.metric : undefined}
+              </h4>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle"
+                defaultMessage="Last {lookback} {timeLabel}"
+                values={{
+                  lookback: criterion.timeSize,
+                  timeLabel: TIME_LABELS[criterion.timeUnit as keyof typeof TIME_LABELS],
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
             <EuiFlexGroup>
-              <EuiFlexItem style={{ maxHeight: 120, minWidth: 150 }} grow={1}>
+              <EuiFlexItem style={{ minWidth: 160 }} grow={1}>
                 <Threshold
                   chartProps={chartProps}
                   id={`threshold-${generateUniqueKey(criterion)}`}
@@ -99,14 +137,15 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
               </EuiFlexItem>
               <EuiFlexItem grow={5}>
                 <ExpressionChart
-                  expression={criterion}
+                  annotations={annotations}
+                  chartType={MetricsExplorerChartType.line}
                   derivedIndexPattern={derivedIndexPattern}
-                  source={source}
+                  expression={criterion}
                   filterQuery={rule.params.filterQueryText}
                   groupBy={rule.params.groupBy}
-                  chartType={MetricsExplorerChartType.line}
+                  hideTitle
+                  source={source}
                   timeRange={timeRange}
-                  annotations={annotations}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
