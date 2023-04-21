@@ -4,19 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel, EuiProgress } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiI18n } from '@elastic/eui';
-import { EuiLoadingChart } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-import useCustomCompareEffect from 'react-use/lib/useCustomCompareEffect';
-import { isEqual } from 'lodash';
+import { EuiIcon, EuiPanel, EuiI18n, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -25,6 +16,7 @@ import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { createHostsFilter } from '../../../utils';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { LensWrapper } from '../../chart/lens_wrapper';
+import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
 export interface MetricChartProps {
   title: string;
@@ -36,29 +28,17 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
-  const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { baseRequest, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
-  const [loadedOnce, setLoadedOnce] = useState(false);
-  const [internalLastReloadRequestTime, setInternalLastReloadRequestTime] = useState(
-    baseRequest.requestTs
-  );
-  const [internalSearchCriteria, setInternalSearchCriteria] = useState(searchCriteria);
 
-  useCustomCompareEffect(
-    () => {
-      // prevents updates on requestTs and serchCriteria states from relaoding the chart
-      // we want it to reload only once the table has finished loading
-      if (!loading) {
-        setInternalLastReloadRequestTime(baseRequest.requestTs);
-        setInternalSearchCriteria(searchCriteria);
-      }
-    },
-    [loading],
-    (prevDeps, nextDeps) => isEqual(prevDeps, nextDeps)
-  );
+  // prevents updates on requestTs and serchCriteria states from relaoding the chart
+  // we want it to reload only once the table has finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: baseRequest.requestTs,
+    ...searchCriteria,
+  });
 
   const { attributes, getExtraActions, error } = useLensAttributes({
     type,
@@ -78,14 +58,14 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   }, [currentPage, dataView]);
 
   const filters = [
-    ...internalSearchCriteria.filters,
-    ...internalSearchCriteria.panelFilters,
+    ...afterLoadedState.filters,
+    ...afterLoadedState.panelFilters,
     ...[hostsFilterQuery],
   ];
   const extraActionOptions = getExtraActions({
-    timeRange: internalSearchCriteria.dateRange,
+    timeRange: afterLoadedState.dateRange,
     filters,
-    query: internalSearchCriteria.query,
+    query: afterLoadedState.query,
   });
 
   const extraActions: Action[] = [extraActionOptions.openInLens];
@@ -131,44 +111,19 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <>
-          {loading && (
-            <EuiProgress
-              size="xs"
-              color="accent"
-              position="absolute"
-              style={{ zIndex: 1 }}
-              css={css`
-                top: ${loadedOnce ? euiTheme.size.l : 0};
-              `}
-            />
-          )}
-
-          {loading && !loadedOnce ? (
-            <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingChart mono size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <LensWrapper
-              id={`hostsViewsmetricsChart-${type}`}
-              attributes={attributes}
-              style={{ height: MIN_HEIGHT }}
-              extraActions={extraActions}
-              lastReloadRequestTime={internalLastReloadRequestTime}
-              dateRange={internalSearchCriteria.dateRange}
-              filters={filters}
-              query={internalSearchCriteria.query}
-              onBrushEnd={handleBrushEnd}
-              onLoad={() => {
-                if (loadedOnce) {
-                  setLoadedOnce(true);
-                }
-              }}
-            />
-          )}
-        </>
+        <LensWrapper
+          id={`hostsViewsmetricsChart-${type}`}
+          attributes={attributes}
+          style={{ height: MIN_HEIGHT }}
+          extraActions={extraActions}
+          lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+          dateRange={afterLoadedState.dateRange}
+          filters={filters}
+          query={afterLoadedState.query}
+          onBrushEnd={handleBrushEnd}
+          loading={loading}
+          hasTitle
+        />
       )}
     </EuiPanel>
   );
