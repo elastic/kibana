@@ -25,6 +25,8 @@ const removeFields = (scores: any[]) =>
     delete item['@timestamp'];
     delete item.riskiestInputs;
     delete item.notes;
+    delete item.alertsScore;
+    delete item.otherScore;
     return item;
   });
 
@@ -439,18 +441,18 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      context.skip('with category weights', () => {
+      context('with category weights', () => {
         it('weights risk inputs from different categories according to the category weight', async () => {
           const documentId = uuidv4();
-          const signal = buildDocument(
+          const userSignal = buildDocument(
             { 'event.kind': 'signal', 'user.name': 'user-1' },
             documentId
           );
-          const finding = buildDocument(
-            { 'event.kind': 'finding', 'user.name': 'user-1' },
+          const hostSignal = buildDocument(
+            { 'event.kind': 'signal', 'host.name': 'host-1' },
             documentId
           );
-          await indexListOfDocuments(Array(50).fill(signal).concat(Array(50).fill(finding)));
+          await indexListOfDocuments(Array(50).fill(userSignal).concat(Array(50).fill(hostSignal)));
 
           await createAndSyncRuleAndAlerts({
             query: `id: ${documentId}`,
@@ -459,26 +461,23 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           const { scores } = await getRiskScores({
             body: {
-              weights: [
-                { type: 'risk_category', value: 'alerts', host: 0.4, user: 0.8 },
-                { type: 'risk_category', value: 'findings', host: 0.8, user: 0.3 },
-              ],
+              weights: [{ type: 'risk_category', value: 'alerts', host: 0.4, user: 0.8 }],
             },
           });
 
           expect(removeFields(scores)).to.eql([
             {
               level: 'High',
-              totalScore: 186.47518232942502,
+              totalScore: 186.475182329425,
               totalScoreNormalized: 71.39172370958079,
               identifierField: 'user.name',
               identifierValue: 'user-1',
             },
             {
               level: 'Low',
-              totalScore: 93.23759116471251,
+              totalScore: 93.2375911647125,
               totalScoreNormalized: 35.695861854790394,
-              identifierField: 'user.name',
+              identifierField: 'host.name',
               identifierValue: 'host-1',
             },
           ]);
