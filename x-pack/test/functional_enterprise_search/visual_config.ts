@@ -26,7 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
-        '--enterpriseSearch.host=http://localhost:3002',
+        '--enterpriseSearch.host=http://localhost:3022',
       ],
     },
     testRunner: EnterpriseSearchCypressVisualTestRunner,
