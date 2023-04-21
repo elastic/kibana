@@ -40,7 +40,7 @@ export interface TextExpansionCallOutProps {
   isDismissable?: boolean;
 }
 
-const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
+export const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
@@ -55,7 +55,7 @@ const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState,
   );
 };
 
-const DeployModel = ({
+export const DeployModel = ({
   dismiss,
   isCreateButtonDisabled,
   isDismissable,
@@ -127,7 +127,7 @@ const DeployModel = ({
   );
 };
 
-const ModelDeploymentInProgress = ({
+export const ModelDeploymentInProgress = ({
   dismiss,
   isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
@@ -167,7 +167,7 @@ const ModelDeploymentInProgress = ({
   </EuiPanel>
 );
 
-const ModelDeployed = ({
+export const ModelDeployed = ({
   dismiss,
   isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
