@@ -90,7 +90,9 @@ export const RisksTable = ({
             compact
               ? css`
                   thead {
-                    display: none;
+                    .euiTableCellContent {
+                      padding: 0;
+                    }
                   }
                   .euiTable .euiTableRow .euiTableRowCell {
                     border-top: none;

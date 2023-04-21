@@ -17,7 +17,7 @@ import { RightPanelKey, RightPanelTableTabPath } from '..';
 
 export const HighlightedFields: FC = () => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields } =
+  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields, scopeId } =
     useRightPanelContext();
 
   const goToTableTab = useCallback(() => {
@@ -27,9 +27,10 @@ export const HighlightedFields: FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, indexName, openRightPanel]);
+  }, [eventId, indexName, openRightPanel, scopeId]);
 
   if (!dataFormattedForFieldBrowser || !browserFields || !eventId) {
     return <></>;

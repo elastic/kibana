@@ -28,6 +28,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -35,6 +36,7 @@ import {
   toggleOverviewTabDescriptionSection,
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabInsightsSection,
+  toggleOverviewTabVisualizationsSection,
 } from '../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
@@ -177,6 +179,17 @@ describe.skip(
           .should('be.visible')
           .click();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      });
+    });
+
+    describe('visualizations section', () => {
+      before(() => {
+        toggleOverviewTabInsightsSection();
+        toggleOverviewTabVisualizationsSection();
+      });
+
+      it('should display analyzer preview', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
       });
     });
   }
