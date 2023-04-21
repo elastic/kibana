@@ -35,7 +35,7 @@ export const IgnoreUnavailableSwitch: FC = () => {
         label={i18n.translate(
           'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.ignoreUnavailable.title',
           {
-            defaultMessage: 'Ignore unavailable',
+            defaultMessage: 'Ignore unavailable indices',
           }
         )}
       />
