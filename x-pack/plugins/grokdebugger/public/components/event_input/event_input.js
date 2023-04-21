@@ -18,7 +18,7 @@ export function EventInput({ value, onChange }) {
         <FormattedMessage id="xpack.grokDebugger.sampleDataLabel" defaultMessage="Sample Data" />
       }
       fullWidth
-      data-test-subj="aceEventInput"
+      data-test-subj="eventInput"
     >
       <CodeEditor
         languageId="plaintext"

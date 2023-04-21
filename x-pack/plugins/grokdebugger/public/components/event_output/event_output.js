@@ -19,9 +19,13 @@ export function EventOutput({ value }) {
         />
       }
       fullWidth
-      data-test-subj="aceEventOutput"
     >
-      <EuiCodeBlock paddingSize="m" language="json" isCopyable>
+      <EuiCodeBlock
+        paddingSize="m"
+        language="json"
+        isCopyable
+        data-test-subj="eventOutputCodeBlock"
+      >
         {JSON.stringify(value, null, 2)}
       </EuiCodeBlock>
     </EuiFormRow>

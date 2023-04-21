@@ -18,7 +18,7 @@ export function PatternInput({ value, onChange }) {
         <FormattedMessage id="xpack.grokDebugger.grokPatternLabel" defaultMessage="Grok Pattern" />
       }
       fullWidth
-      data-test-subj="acePatternInput"
+      data-test-subj="patternInput"
     >
       <CodeEditor
         languageId="plaintext"
