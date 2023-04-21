@@ -72,9 +72,10 @@ function MapsListViewComp({ history }: Props) {
   const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
+  // TLDR; render should be side effect free
+  //
   // setBreadcrumbs fires observables which cause state changes in ScreenReaderRouteAnnouncements.
   // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
-  // TLDR render should be side effect free
   useEffect(() => {
     getCoreChrome().docTitle.change(APP_NAME);
     getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
