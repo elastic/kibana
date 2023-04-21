@@ -43,7 +43,7 @@ export const getUnsuppressedAlerts: GetUnsuppressedAlerts = async ({
     return [];
   }
 
-  const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+  const { searchResult } = await singleSearchAfter({
     ...searchParams,
     additionalFilters: [
       ...(searchParams.additionalFilters || []),
