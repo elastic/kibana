@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteSignalsIndex,
   deleteAllRules,
   createRule,
   waitForSignalsToBePresent,
@@ -23,8 +24,6 @@ const removeFields = (scores: any[]) =>
   scores.map((item: any) => {
     delete item['@timestamp'];
     delete item.riskiestInputs;
-    delete item.otherScore;
-    delete item.alertsScore;
     delete item.notes;
     return item;
   });
@@ -41,10 +40,6 @@ const buildDocument = (body: any, id?: string) => {
   };
   return doc;
 };
-
-const buildRuleIdFilter = (ruleId: string): object => ({
-  bool: { filter: [{ term: { 'kibana.alert.rule.uuid': ruleId } }] },
-});
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -65,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
     maxSignals?: number;
     query: string;
     riskScoreOverride?: string;
-  }): Promise<string> => {
+  }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
     const { id } = await createRule(supertest, log, {
       ...rule,
@@ -82,7 +77,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
     await waitForRuleSuccess({ supertest, log, id });
     await waitForSignalsToBePresent(supertest, log, alerts, [id]);
-    return id;
   };
 
   const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: unknown[] }> => {
@@ -102,16 +96,9 @@ export default ({ getService }: FtrProviderContext): void => {
       maxSignals = 100,
     }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
   ) => {
-    const ruleId = await createAndSyncRuleAndAlerts({
-      query: `id: ${documentId}`,
-      alerts,
-      riskScore,
-      maxSignals,
-    });
+    await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
 
-    return await getRiskScores({
-      body: { filter: buildRuleIdFilter(ruleId) },
-    });
+    return await getRiskScores({ body: { debug: true } });
   };
 
   describe('Risk engine', () => {
@@ -133,11 +120,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
+        await deleteSignalsIndex(supertest, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -343,13 +333,13 @@ export default ({ getService }: FtrProviderContext): void => {
               .map((_doc, i) => ({ ...doc, 'event.risk_score': 100 - i }))
           );
 
-          const ruleId = await createAndSyncRuleAndAlerts({
+          await createAndSyncRuleAndAlerts({
             query: `id: ${documentId}`,
             alerts: 100,
             riskScore: 100,
             riskScoreOverride: 'event.risk_score',
           });
-          const { scores } = await getRiskScores({ body: { filter: buildRuleIdFilter(ruleId) } });
+          const { scores } = await getRiskScores({ body: {} });
 
           expect(removeFields(scores)).to.eql([
             {
@@ -369,16 +359,13 @@ export default ({ getService }: FtrProviderContext): void => {
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
 
-          const ruleId = await createAndSyncRuleAndAlerts({
+          await createAndSyncRuleAndAlerts({
             query: `id: ${documentId}`,
             alerts: 100,
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: {
-              weights: [{ type: 'global_identifier', host: 0.5 }],
-              filter: buildRuleIdFilter(ruleId),
-            },
+            body: { weights: [{ type: 'global_identifier', host: 0.5 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -397,16 +384,13 @@ export default ({ getService }: FtrProviderContext): void => {
           const doc = buildDocument({ user: { name: 'user-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
 
-          const ruleId = await createAndSyncRuleAndAlerts({
+          await createAndSyncRuleAndAlerts({
             query: `id: ${documentId}`,
             alerts: 100,
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: {
-              weights: [{ type: 'global_identifier', user: 0.7 }],
-              filter: buildRuleIdFilter(ruleId),
-            },
+            body: { weights: [{ type: 'global_identifier', user: 0.7 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -427,16 +411,13 @@ export default ({ getService }: FtrProviderContext): void => {
           const hostDocs = buildDocument({ 'host.name': 'host-1' }, usersId);
           await indexListOfDocuments(Array(50).fill(userDocs).concat(Array(50).fill(hostDocs)));
 
-          const ruleId = await createAndSyncRuleAndAlerts({
+          await createAndSyncRuleAndAlerts({
             query: `id: ${hostsId} OR ${usersId}`,
             alerts: 100,
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: {
-              weights: [{ type: 'global_identifier', host: 0.4, user: 0.8 }],
-              filter: buildRuleIdFilter(ruleId),
-            },
+            body: { weights: [{ type: 'global_identifier', host: 0.4, user: 0.8 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -471,7 +452,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
           await indexListOfDocuments(Array(50).fill(signal).concat(Array(50).fill(finding)));
 
-          const ruleId = await createAndSyncRuleAndAlerts({
+          await createAndSyncRuleAndAlerts({
             query: `id: ${documentId}`,
             alerts: 100,
             riskScore: 100,
@@ -482,7 +463,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 { type: 'risk_category', value: 'alerts', host: 0.4, user: 0.8 },
                 { type: 'risk_category', value: 'findings', host: 0.8, user: 0.3 },
               ],
-              filter: buildRuleIdFilter(ruleId),
             },
           });
 
