@@ -9,6 +9,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type IdentifierType = 'user' | 'host';
+export type RiskCategoryType = 'signals'; // TODO this should be 'alerts' instead of 'signals' but we don't have the category field in ECS
 
 export interface RiskScoreWeight {
   type: string;
@@ -47,8 +48,8 @@ export interface BaseRiskScore {
   '@timestamp': string;
   identifierField: string;
   identifierValue: string;
+  level: string;
   totalScore: number;
-  totalScoreLevel: string;
   totalScoreNormalized: number;
   alertsScore: number;
   notes: string[];
@@ -82,6 +83,8 @@ export interface RiskScoreBucket {
       normalized_score: number;
       notes: string[];
       level: string;
+      other_score: number;
+      signals_score: number;
     };
   };
 
