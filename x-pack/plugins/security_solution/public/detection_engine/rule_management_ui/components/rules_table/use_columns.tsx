@@ -117,16 +117,21 @@ const useRuleSnoozeColumn = (): TableColumn => {
     () => ({
       field: 'snooze',
       name: i18n.COLUMN_SNOOZE,
-      render: (_, rule: Rule) => (
-        <RuleSnoozeBadge
-          snoozeSettings={rulesSnoozeSettings.data[rule.id]}
-          error={
-            rulesSnoozeSettings.isError
-              ? rulesTableI18n.UNABLE_TO_FETCH_RULES_SNOOZE_SETTINGS
-              : undefined
-          }
-        />
-      ),
+      render: (_, rule: Rule) => {
+        const snoozeSettings = rulesSnoozeSettings.data[rule.id];
+        const { isFetching, isError } = rulesSnoozeSettings;
+
+        return (
+          <RuleSnoozeBadge
+            snoozeSettings={snoozeSettings}
+            error={
+              isError || (!snoozeSettings && !isFetching)
+                ? rulesTableI18n.UNABLE_TO_FETCH_RULES_SNOOZE_SETTINGS
+                : undefined
+            }
+          />
+        );
+      },
       width: '100px',
       sortable: false,
     }),

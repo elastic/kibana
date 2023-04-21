@@ -18,13 +18,17 @@ interface RuleDetailsSnoozeBadge {
 }
 
 export function RuleDetailsSnoozeSettings({ id }: RuleDetailsSnoozeBadge): JSX.Element {
-  const { data: [snoozeSettings] = [undefined], isError: isSnoozeSettingsFetchError } =
-    useFetchRulesSnoozeSettings([id]);
+  const { data: rulesSnoozeSettings, isFetching, isError } = useFetchRulesSnoozeSettings([id]);
+  const snoozeSettings = rulesSnoozeSettings?.[0];
 
   return (
     <RuleSnoozeBadge
       snoozeSettings={snoozeSettings}
-      error={isSnoozeSettingsFetchError ? i18n.UNABLE_TO_FETCH_RULE_SNOOZE_SETTINGS : undefined}
+      error={
+        isError || (!snoozeSettings && !isFetching)
+          ? i18n.UNABLE_TO_FETCH_RULE_SNOOZE_SETTINGS
+          : undefined
+      }
       showTooltipInline={true}
     />
   );
