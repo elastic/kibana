@@ -49,6 +49,6 @@ describe('Maintenance window callout on Rule Management page', () => {
   it('Displays the callout when there are running maintenance windows', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    cy.contains('A maintenance window is currently active');
+    cy.contains('A maintenance window is currently running');
   });
 });
