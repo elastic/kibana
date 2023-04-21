@@ -5802,7 +5802,6 @@
     "unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel": "应用已保存查询",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText": "取消",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText": "删除",
-    "unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel": "替换为选定已保存查询",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel": "另存为新的已保存查询",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText": "另存为新的",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText": "保存更改",
