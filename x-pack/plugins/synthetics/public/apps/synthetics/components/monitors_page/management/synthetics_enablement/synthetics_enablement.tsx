@@ -6,16 +6,16 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiTitle, EuiLink } from '@elastic/eui';
 import { useEnablement } from '../../../../hooks/use_enablement';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {
-  const { error, enablement, enableSynthetics, loading } = useEnablement();
+  const { error, enablement, loading } = useEnablement();
   const [shouldFocusEnablementButton, setShouldFocusEnablementButton] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
-  const { isEnabled, canEnable } = enablement;
+  const { isEnabled } = enablement;
   const isEnabledRef = useRef(isEnabled);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -44,11 +44,6 @@ export const EnablementEmptyState = () => {
     }
   }, [isEnabled, isEnabling, error]);
 
-  const handleEnableSynthetics = () => {
-    enableSynthetics();
-    setIsEnabling(true);
-  };
-
   useEffect(() => {
     if (shouldFocusEnablementButton) {
       buttonRef.current?.focus();
@@ -57,33 +52,8 @@ export const EnablementEmptyState = () => {
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt
-      title={
-        <h2>
-          {canEnable
-            ? labels.MONITOR_MANAGEMENT_ENABLEMENT_LABEL
-            : labels.SYNTHETICS_APP_DISABLED_LABEL}
-        </h2>
-      }
-      body={
-        <p>
-          {canEnable
-            ? labels.MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE
-            : labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}
-        </p>
-      }
-      actions={
-        canEnable ? (
-          <EuiButton
-            color="primary"
-            fill
-            onClick={handleEnableSynthetics}
-            data-test-subj="syntheticsEnableButton"
-            buttonRef={buttonRef}
-          >
-            {labels.MONITOR_MANAGEMENT_ENABLEMENT_BTN_LABEL}
-          </EuiButton>
-        ) : null
-      }
+      title={<h2>{labels.SYNTHETICS_APP_DISABLED_LABEL}</h2>}
+      body={<p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>}
       footer={
         <>
           <EuiTitle size="xxs">

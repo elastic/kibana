@@ -25,7 +25,7 @@ export function* fetchSyntheticsEnablementEffect() {
       fetchGetSyntheticsEnablement,
       getSyntheticsEnablementSuccess,
       getSyntheticsEnablementFailure,
-      null,
+      undefined,
       failureMessage
     )
   );
@@ -34,10 +34,6 @@ export function* fetchSyntheticsEnablementEffect() {
     fetchEffectFactory(fetchDisableSynthetics, disableSyntheticsSuccess, disableSyntheticsFailure)
   );
 }
-
-const successMessage = i18n.translate('xpack.synthetics.settings.enablement.success', {
-  defaultMessage: 'Monitor Management enabled successfully',
-});
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.enablement.fail', {
   defaultMessage: 'Failed to enable Monitor Management',
