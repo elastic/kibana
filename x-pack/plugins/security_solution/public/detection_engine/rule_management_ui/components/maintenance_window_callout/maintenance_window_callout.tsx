@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { useFetchRunningMaintenanceWindows } from './use_fetch_running_maintenance_windows';
+import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import * as i18n from './translations';
 
 export const MaintenanceWindowCallout = () => {
-  const { data } = useFetchRunningMaintenanceWindows();
-  const runningMaintenanceWindows = data || [];
+  const { data } = useFetchActiveMaintenanceWindows();
+  const activeMaintenanceWindows = data || [];
 
-  if (runningMaintenanceWindows.length > 0) {
+  if (activeMaintenanceWindows.find(({ status }) => status === 'running')) {
     return (
       <EuiCallOut title={i18n.MAINTENANCE_WINDOW_RUNNING} color="warning" iconType="iInCircle">
         {i18n.MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}

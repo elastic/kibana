@@ -7,6 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MAINTENANCE_WINDOW_RUNNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActive',
+  {
+    defaultMessage: 'A maintenance window is currently running',
+  }
+);
+
+export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActiveDescription',
+  {
+    defaultMessage: "Notification actions won't run while the maintenance window is running",
+  }
+);
+
 export const FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchError',
   {
@@ -18,19 +32,5 @@ export const FETCH_ERROR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchErrorDescription',
   {
     defaultMessage: "Notification actions won't run while the maintenance window is running.",
-  }
-);
-
-export const MAINTENANCE_WINDOW_RUNNING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowRunning',
-  {
-    defaultMessage: 'A maintenance window is currently running.',
-  }
-);
-
-export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowRunningDescription',
-  {
-    defaultMessage: "Notification actions won't run while the maintenance window is running",
   }
 );
