@@ -15,10 +15,6 @@ const createSetupContractMock = () => {
   };
 };
 
-const createStartContractMock = () => {
-  return {};
-};
-
 const createMock = () => {
   const mocked = serviceContractMock();
   mocked.setup.mockReturnValue(createSetupContractMock());
@@ -29,5 +25,4 @@ const createMock = () => {
 export const userSettingsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
 };

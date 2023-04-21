@@ -9,17 +9,14 @@
 import { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server';
 
 /**
  * @internal
  */
 export interface InternalUserSettingsServiceSetup {
   setUserProfileSettings: (client: UserProfileSettingsClientContract) => void;
-  getUserSettingDarkMode: (request: KibanaRequest) => Promise<string>;
-}
-
-export interface UserProfileSettingsClientContract {
-  get: (request: KibanaRequest) => Promise<Record<string, string>>;
+  getUserSettingDarkMode: (request: KibanaRequest) => Promise<boolean | undefined>;
 }
 
 export class UserSettingsService {
@@ -53,11 +50,13 @@ export class UserSettingsService {
     return result;
   }
 
-  private async getUserSettingDarkMode(userSettings: Record<string, string>): Promise<string> {
-    let result = '';
+  private async getUserSettingDarkMode(
+    userSettings: Record<string, string>
+  ): Promise<boolean | undefined> {
+    let result;
 
     if (userSettings?.darkMode) {
-      result = userSettings.darkMode;
+      result = userSettings.darkMode.toUpperCase() === 'DARK';
     }
 
     return result;

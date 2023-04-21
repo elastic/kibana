@@ -8,29 +8,73 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { UserSettingsService } from './user_settings_service';
-import { KibanaRequest } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 describe('#setup', () => {
   const coreContext: ReturnType<typeof mockCoreContext.create> = mockCoreContext.create();
+  const { createKibanaRequest } = httpServerMock;
 
-  it('fetches userSettings when client is set and returns proper values', async () => {
+  it('fetches userSettings when client is set and returns `true` when `darkMode` is set to `dark`', async () => {
     const service = new UserSettingsService(coreContext);
     const { setUserProfileSettings, getUserSettingDarkMode } = service.setup();
 
-    setUserProfileSettings({
+    const userProfileContract = {
       get: jest.fn().mockReturnValueOnce(Promise.resolve({ darkMode: 'dark' })),
-    });
+    };
 
-    const darkMode = await getUserSettingDarkMode({} as KibanaRequest);
-    expect(darkMode).toEqual('dark');
+    setUserProfileSettings(userProfileContract);
+
+    const kibanaRequest = createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual(true);
+    expect(userProfileContract.get).toHaveBeenCalledTimes(1);
+    expect(userProfileContract.get).toHaveBeenCalledWith(kibanaRequest);
   });
 
-  it('does not fetch userSettings when client is not set, returns an empty string, and logs a debug statement', async () => {
+  it('fetches userSettings when client is set and returns `false` when `darkMode` is set to `light`', async () => {
+    const service = new UserSettingsService(coreContext);
+    const { setUserProfileSettings, getUserSettingDarkMode } = service.setup();
+
+    const userProfileContract = {
+      get: jest.fn().mockReturnValueOnce(Promise.resolve({ darkMode: 'light' })),
+    };
+
+    setUserProfileSettings(userProfileContract);
+
+    const kibanaRequest = createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual(false);
+    expect(userProfileContract.get).toHaveBeenCalledTimes(1);
+    expect(userProfileContract.get).toHaveBeenCalledWith(kibanaRequest);
+  });
+
+  it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `` (the default value)', async () => {
+    const service = new UserSettingsService(coreContext);
+    const { setUserProfileSettings, getUserSettingDarkMode } = service.setup();
+
+    const userProfileContract = {
+      get: jest.fn().mockReturnValueOnce(Promise.resolve({ darkMode: '' })),
+    };
+
+    setUserProfileSettings(userProfileContract);
+
+    const kibanaRequest = createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
+
+    expect(darkMode).toEqual(undefined);
+    expect(userProfileContract.get).toHaveBeenCalledTimes(1);
+    expect(userProfileContract.get).toHaveBeenCalledWith(kibanaRequest);
+  });
+
+  it('does not fetch userSettings when client is not set, returns `undefined`, and logs a debug statement', async () => {
     const service = new UserSettingsService(coreContext);
     const { getUserSettingDarkMode } = service.setup();
+    const kibanaRequest = createKibanaRequest();
+    const darkMode = await getUserSettingDarkMode(kibanaRequest);
 
-    const darkMode = await getUserSettingDarkMode({} as KibanaRequest);
-    expect(darkMode).toEqual('');
+    expect(darkMode).toEqual(undefined);
     expect(coreContext.logger.get().debug).toHaveBeenCalledWith(
       'UserProfileSettingsClient not set'
     );

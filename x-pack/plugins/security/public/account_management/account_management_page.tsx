@@ -23,7 +23,7 @@ export const AccountManagementPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();
-  const userProfile = useUserProfile<UserProfileData>('*');
+  const userProfile = useUserProfile<UserProfileData>('avatar,userSettings');
 
   // If we fail to load profile, we treat it as a failure _only_ if user is supposed
   // to have a profile. For example, anonymous and users authenticated via

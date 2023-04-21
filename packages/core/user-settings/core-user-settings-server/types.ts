@@ -7,8 +7,13 @@
  */
 
 import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server-internal';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 /** @public */
 export interface UserSettingsServiceSetup {
   setUserProfileSettings: (client: UserProfileSettingsClientContract) => void;
+}
+
+export interface UserProfileSettingsClientContract {
+  get: (request: KibanaRequest) => Promise<Record<string, string>>;
 }

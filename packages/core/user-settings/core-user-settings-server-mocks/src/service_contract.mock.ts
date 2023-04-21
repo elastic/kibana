@@ -10,7 +10,5 @@ import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 export const serviceContractMock = (): jest.Mocked<UserSettingsService> => {
   return {
     setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
   } as unknown as jest.Mocked<UserSettingsService>;
 };

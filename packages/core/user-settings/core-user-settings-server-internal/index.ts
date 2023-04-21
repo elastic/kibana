@@ -7,7 +7,4 @@
  */
 
 export { UserSettingsService } from './user_settings_service';
-export type {
-  InternalUserSettingsServiceSetup,
-  UserProfileSettingsClientContract,
-} from './user_settings_service';
+export type { InternalUserSettingsServiceSetup } from './user_settings_service';

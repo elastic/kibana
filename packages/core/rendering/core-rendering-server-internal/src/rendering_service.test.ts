@@ -209,9 +209,9 @@ function renderDarkModeTestCases(
     });
 
     describe('Dark Mode', () => {
-      it('User settings should override the space setting', async () => {
+      it('UserSettings value should override the space setting', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
-          Promise.resolve('dark')
+          Promise.resolve(true)
         );
 
         getSettingValueMock.mockImplementation((settingName: string) => {
@@ -235,7 +235,7 @@ function renderDarkModeTestCases(
         });
       });
 
-      it('Space setting should if UsersSettings is undefined', async () => {
+      it('Space setting value should be used if UsersSettings value is undefined', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(undefined)
         );
@@ -253,30 +253,6 @@ function renderDarkModeTestCases(
 
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
-        });
-      });
-
-      it('Space setting should if User Setting is `empty`', async () => {
-        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
-          Promise.resolve('')
-        );
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return true;
-          }
-          return settingName;
-        });
-
-        const settings = { 'theme:darkMode': { userValue: true } };
-        uiSettings.client.getUserProvided.mockResolvedValue(settings);
-        const [render] = await getRender();
-        await render(createKibanaRequest(), uiSettings);
-
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
-          darkMode: true,
           themeVersion: 'v8',
           basePath: '/mock-server-basepath',
           buildNum: expect.any(Number),

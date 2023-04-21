@@ -158,12 +158,16 @@ export class RenderingService {
       // swallow error
     }
 
-    const userSettingDarkMode: string = (await userSettings?.getUserSettingDarkMode(request)) || '';
+    let userSettingDarkMode: boolean | undefined;
+
+    if (!isAnonymousPage) {
+      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
+    }
 
     let darkMode: boolean;
 
     if (userSettingDarkMode) {
-      darkMode = userSettingDarkMode === 'dark';
+      darkMode = userSettingDarkMode;
     } else {
       darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     }
