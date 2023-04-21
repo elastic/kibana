@@ -11,6 +11,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiButton } from '@elastic/eui';
+
 import {
   TextExpansionCallOut,
   DeployModel,
@@ -18,7 +20,6 @@ import {
   ModelDeployed,
   TextExpansionDismissButton,
 } from './text_expansion_callout';
-import { EuiButton } from '@elastic/eui';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({
