@@ -25,7 +25,7 @@ import {
   ChartDataItem,
   NumericDataItem,
   OrdinalDataItem,
-} from '../../../../common/types/field_histograms';
+} from './field_histograms';
 
 import { NON_AGGREGATABLE } from './common';
 

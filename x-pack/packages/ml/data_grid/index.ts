@@ -16,6 +16,7 @@ export {
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
   getProcessedFields,
+  INIT_MAX_COLUMNS,
 } from './src/common';
 export { getFieldType } from './src/use_column_chart';
 export { useDataGrid } from './src/use_data_grid';
