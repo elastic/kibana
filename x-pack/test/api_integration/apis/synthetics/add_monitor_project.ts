@@ -12,6 +12,10 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -190,11 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            'throttling.config': '5d/3u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '3',
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -253,7 +253,11 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
+            value: null,
+            id: 'no-throttling',
+            label: 'No throttling',
+          });
         }
       } finally {
         await Promise.all([

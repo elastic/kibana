@@ -28,8 +28,6 @@ import {
   createBulkErrorObject,
 } from '../../../../routes/utils';
 import { updateRules } from '../../../logic/crud/update_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
@@ -103,15 +101,9 @@ export const bulkUpdateRulesRoute = (
               ruleId: payloadRule.id,
             });
 
-            const migratedRule = await legacyMigrate({
-              rulesClient,
-              savedObjectsClient,
-              rule: existingRule,
-            });
-
             const rule = await updateRules({
               rulesClient,
-              existingRule: migratedRule,
+              existingRule,
               ruleUpdate: payloadRule,
             });
             if (rule != null) {

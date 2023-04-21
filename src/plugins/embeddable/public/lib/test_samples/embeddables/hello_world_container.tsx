@@ -42,9 +42,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
     private readonly options: HelloWorldContainerOptions,
-    initializeSettings?: EmbeddableContainerSettings<
-      ContainerInput<{ firstName: string; lastName: string }>
-    >
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     super(
       input,

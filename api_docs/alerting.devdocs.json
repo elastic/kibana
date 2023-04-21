@@ -2481,6 +2481,20 @@
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.maintenanceWindowIds",
+            "type": "Array",
+            "tags": [],
+            "label": "maintenanceWindowIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3035,9 +3049,9 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "{ params?: ",
+              "{ params: ",
               "RuleTypeParamsValidator",
-              "<Params> | undefined; } | undefined"
+              "<Params>; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -9228,6 +9242,18 @@
           "{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }"
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_API_FIND_RULES_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_API_FIND_RULES_PATH",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

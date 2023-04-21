@@ -48,7 +48,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       name: `Latency threshold | ${goService}`,
       params: {
         serviceName: goService,
-        transactionType: '',
+        transactionType: undefined,
         windowSize: 99,
         windowUnit: 'y',
         threshold: 100,
