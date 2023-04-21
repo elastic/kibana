@@ -105,7 +105,7 @@ export async function indexHostsAndAlerts(
   }
 
   for (let i = 0; i < numHosts; i++) {
-    const generator = new DocGenerator(random, undefined);
+    const generator = new DocGenerator(random);
     const indexedHosts = await indexEndpointHostDocs({
       numDocs,
       client,

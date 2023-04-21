@@ -12,6 +12,11 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+
+import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
+import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
+
 import type {
   GetInfoResponse,
   InstallPackageResponse,
@@ -54,12 +59,13 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import type { ReauthorizeTransformRequestSchema } from '../../types';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -282,7 +288,11 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+
   const { pkgName, pkgVersion } = request.params;
+
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
@@ -294,6 +304,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
+    authorizationHeader,
   });
 
   if (!res.error) {
@@ -334,6 +345,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
+
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
@@ -361,6 +373,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       body: { message: 'Requires Enterprise license' },
     });
   }
+
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -368,6 +381,10 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,
@@ -375,6 +392,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
+    authorizationHeader,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -428,6 +446,63 @@ export const getVerificationKeyIdHandler: FleetRequestHandler = async (
       id: packageVerificationKeyId || null,
     };
     return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+/**
+ * Create transform and optionally start transform
+ * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+ * If API Key has insufficient permissions, it should still create the transforms but not start it
+ * Instead of failing, we need to allow package to continue installing other assets
+ * and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
+ */
+export const reauthorizeTransformsHandler: FleetRequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
+  TypeOf<typeof ReauthorizeTransformRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { pkgName, pkgVersion } = request.params;
+  const { transforms } = request.body;
+
+  let username;
+  try {
+    const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+    if (user) {
+      username = user.username;
+    }
+  } catch (e) {
+    // User might not have permission to get username, or security is not enabled, and that's okay.
+  }
+
+  try {
+    const logger = appContextService.getLogger();
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
+    const secondaryAuth = await generateTransformSecondaryAuthHeaders({
+      authorizationHeader,
+      logger,
+      username,
+      pkgName,
+      pkgVersion,
+    });
+
+    const resp = await handleTransformReauthorizeAndStart({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName,
+      pkgVersion,
+      transforms,
+      secondaryAuth,
+      username,
+    });
+
+    return response.ok({ body: resp });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

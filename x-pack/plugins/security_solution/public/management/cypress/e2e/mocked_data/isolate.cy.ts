@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEndpointListPath } from '../../../common/routing';
 import {
   checkEndpointListForIsolatedHosts,
   checkFlyoutEndpointIsolation,
@@ -21,7 +22,7 @@ import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { closeAllToasts } from '../../tasks/close_all_toasts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
-import { APP_CASES_PATH } from '../../../../../common/constants';
+import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
@@ -67,7 +68,7 @@ describe('Isolate command', () => {
       login();
     });
     it('should allow filtering endpoint by Isolated status', () => {
-      cy.visit('/app/security/administration/endpoints');
+      cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
       cy.contains('Showing 2 endpoints');
@@ -119,7 +120,7 @@ describe('Isolate command', () => {
       let isolateRequestResponse: ActionDetails;
       let releaseRequestResponse: ActionDetails;
 
-      cy.visit('/app/security/alerts');
+      cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
 
       cy.getByTestSubj('alertsTable').within(() => {
