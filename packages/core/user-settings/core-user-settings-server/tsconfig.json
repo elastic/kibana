@@ -8,6 +8,7 @@
   },
   "kbn_references": [
     "@kbn/core-http-server",
+    "@kbn/core-user-settings-server-internal",
   ],
   "include": [
     "**/*.ts",
