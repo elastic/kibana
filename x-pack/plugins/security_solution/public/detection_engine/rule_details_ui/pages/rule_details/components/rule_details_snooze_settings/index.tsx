@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useFetchRulesSnoozeSettings } from '../../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
-import { RuleSnoozeBadge } from '../../../../../components/rule_snooze_settings';
+import { RuleSnoozeBadge } from '../../../../../components/rule_snooze_badge';
 import * as i18n from './translations';
 
 interface RuleDetailsSnoozeBadge {
