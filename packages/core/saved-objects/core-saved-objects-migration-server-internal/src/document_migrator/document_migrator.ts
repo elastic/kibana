@@ -49,19 +49,19 @@ export interface VersionedTransformer {
   /**
    * Migrates a document to its latest version.
    */
-  migrate: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  migrate(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc;
   /**
    * Migrates a document to the latest version and applies type conversions if applicable.
    * Also returns any additional document(s) that may have been created during the transformation process.
    */
-  migrateAndConvert: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
+  migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[];
   /**
    * Converts a document down to the specified version.
    */
-  transformDown: (
+  transformDown(
     doc: SavedObjectUnsanitizedDoc,
     options: { targetTypeVersion: string }
-  ) => SavedObjectUnsanitizedDoc;
+  ): SavedObjectUnsanitizedDoc;
 }
 
 /**
@@ -82,6 +82,9 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   constructor(options: DocumentMigratorOptions) {
     this.options = options;
+    this.migrate = (...args) => this.constructor.prototype.migrate.apply(this, args);
+    this.migrateAndConvert = (...args) =>
+      this.constructor.prototype.migrateAndConvert.apply(this, args);
   }
 
   /**
@@ -111,7 +114,7 @@ export class DocumentMigrator implements VersionedTransformer {
   /**
    * Prepares active migrations and document transformer function.
    */
-  public prepareMigrations = () => {
+  public prepareMigrations() {
     const { typeRegistry, kibanaVersion, log, convertVersion } = this.options;
     this.migrations = buildActiveMigrations({
       typeRegistry,
@@ -119,31 +122,31 @@ export class DocumentMigrator implements VersionedTransformer {
       log,
       convertVersion,
     });
-  };
+  }
 
   /**
    * Migrates a document to the latest version.
    */
-  public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+  public migrate(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     const { document } = this.transform(doc);
 
     return document;
-  };
+  }
 
   /**
    * Migrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may
    * have been created during the transformation process.
    */
-  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
+  public migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] {
     const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
 
     return [document, ...additionalDocs];
-  };
+  }
 
-  public transformDown = (
+  public transformDown(
     doc: SavedObjectUnsanitizedDoc,
     options: { targetTypeVersion: string }
-  ): SavedObjectUnsanitizedDoc => {
+  ): SavedObjectUnsanitizedDoc {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
@@ -156,7 +159,7 @@ export class DocumentMigrator implements VersionedTransformer {
     });
     const { document } = pipeline.run();
     return document;
-  };
+  }
 
   private transform(
     doc: SavedObjectUnsanitizedDoc,
