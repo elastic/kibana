@@ -10,7 +10,7 @@ import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
 } from '@kbn/ml-plugin/common';
-import { ANOMALY_SEVERITY } from '../ml_constants';
+import { ML_ANOMALY_SEVERITY } from '../ml_constants';
 import { ServiceHealthStatus } from '../service_health_status';
 
 export interface ServiceAnomalyStats {
@@ -23,7 +23,7 @@ export interface ServiceAnomalyStats {
 
 export function getSeverity(score: number | undefined) {
   if (score === undefined) {
-    return ANOMALY_SEVERITY.UNKNOWN;
+    return ML_ANOMALY_SEVERITY.UNKNOWN;
   }
 
   return getSeverityType(score);

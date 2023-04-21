@@ -6,7 +6,7 @@
  */
 
 // copied from ml/common, to keep the bundle size small
-export enum ANOMALY_SEVERITY {
+export enum ML_ANOMALY_SEVERITY {
   CRITICAL = 'critical',
   MAJOR = 'major',
   MINOR = 'minor',
@@ -15,7 +15,7 @@ export enum ANOMALY_SEVERITY {
   UNKNOWN = 'unknown',
 }
 
-export enum ANOMALY_THRESHOLD {
+export enum ML_ANOMALY_THRESHOLD {
   CRITICAL = 75,
   MAJOR = 50,
   MINOR = 25,

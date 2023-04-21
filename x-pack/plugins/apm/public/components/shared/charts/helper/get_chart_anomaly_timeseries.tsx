@@ -11,8 +11,8 @@ import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-plugin/public';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
-  ANOMALY_SEVERITY,
-  ANOMALY_THRESHOLD,
+  ML_ANOMALY_SEVERITY,
+  ML_ANOMALY_THRESHOLD,
 } from '../../../../../common/ml_constants';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
@@ -61,10 +61,13 @@ export function getChartAnomalyTimeseries({
   ];
 
   const severities = [
-    { severity: ANOMALY_SEVERITY.MAJOR, threshold: ANOMALY_THRESHOLD.MAJOR },
     {
-      severity: ANOMALY_SEVERITY.CRITICAL,
-      threshold: ANOMALY_THRESHOLD.CRITICAL,
+      severity: ML_ANOMALY_SEVERITY.MAJOR,
+      threshold: ML_ANOMALY_THRESHOLD.MAJOR,
+    },
+    {
+      severity: ML_ANOMALY_SEVERITY.CRITICAL,
+      threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
     },
   ];
 

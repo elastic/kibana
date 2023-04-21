@@ -8,7 +8,8 @@
 import React from 'react';
 import moment from 'moment';
 import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
-import { ANOMALY_SEVERITY, getSeverityColor, getSeverityType } from '@kbn/ml-plugin/public';
+import { getSeverityColor, getSeverityType } from '@kbn/ml-plugin/public';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-common';
 import { AnnotationTooltip } from './annotation_tooltip';
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
   const anomalyAnnotations: Map<string, { rect: RectAnnotationDatum[]; color: string }> = new Map();
 
-  Object.keys(ANOMALY_SEVERITY).forEach((severityLevel) => {
+  Object.keys(ML_ANOMALY_SEVERITY).forEach((severityLevel) => {
     anomalyAnnotations.set(severityLevel.toLowerCase(), { rect: [], color: '' });
   });
 
