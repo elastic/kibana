@@ -38,7 +38,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   useDefaultMessage,
 }) => {
   const { subAction, subActionParams } = actionParams;
-  const { channels, text } = subActionParams ?? {};
+  const { channels = [], text } = subActionParams ?? {};
   const { toasts } = useKibana().notifications;
 
   useEffect(() => {
@@ -141,11 +141,11 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
       <EuiFormRow
         fullWidth
         error={errors.channels}
-        isInvalid={errors.channels?.length > 0 && channels !== undefined}
+        isInvalid={errors.channels?.length > 0 && channels.length === 0}
       >
         <EuiFilterGroup>
           <EuiPopover
-            id={'id'}
+            id={'slackChannelsPopover'}
             button={button}
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
