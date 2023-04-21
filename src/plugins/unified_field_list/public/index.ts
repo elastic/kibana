@@ -7,12 +7,7 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-export type {
-  FieldStatsResponse,
-  BucketedAggregation,
-  NumberStatsResult,
-  TopValuesResult,
-} from '../common/types';
+export type { FieldStatsResponse, BucketedAggregation, NumberSummary } from '../common/types';
 export { FieldList, type FieldListProps } from './components/field_list';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
 export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
