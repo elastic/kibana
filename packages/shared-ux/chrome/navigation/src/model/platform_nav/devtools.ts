@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { LocatorId } from '@kbn/shared-ux-locators';
 import { NavItemProps } from '../../../types';
 
 export const devtoolsItemSet: NavItemProps[] = [
@@ -17,22 +16,22 @@ export const devtoolsItemSet: NavItemProps[] = [
       {
         name: 'Console',
         id: 'console',
-        locator: { id: LocatorId.ConsoleApp },
+        href: '/app/dev_tools#/console',
       },
       {
         name: 'Search profiler',
         id: 'search_profiler',
-        locator: { id: LocatorId.SearchProfiler },
+        href: '/app/dev_tools#/searchprofiler',
       },
       {
         name: 'Grok debugger',
         id: 'grok_debugger',
-        locator: { id: LocatorId.GrokDebugger },
+        href: '/app/dev_tools#/grokdebugger',
       },
       {
         name: 'Painless lab',
         id: 'painless_lab',
-        locator: { id: LocatorId.PainlessLab },
+        href: '/app/dev_tools#/painless_lab',
       },
     ],
   },

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { LocatorId } from '@kbn/shared-ux-locators';
 import { NavItemProps } from '../../../types';
 
 export const analyticsItemSet: NavItemProps[] = [
@@ -17,17 +16,17 @@ export const analyticsItemSet: NavItemProps[] = [
       {
         name: 'Discover',
         id: 'discover',
-        locator: { id: LocatorId.Discover },
+        href: '/app/discover',
       },
       {
         name: 'Dashboard',
         id: 'dashboard',
-        locator: { id: LocatorId.Dashboard },
+        href: '/app/dashboard',
       },
       {
         name: 'Visualize Library',
         id: 'visualize_library',
-        locator: { id: LocatorId.VisualizeLibrary },
+        href: '/app/visualize',
       },
     ],
   },

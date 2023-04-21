@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LocatorId } from '@kbn/shared-ux-locators';
 import { NavItemProps } from '../../../types';
-
-const { Management } = LocatorId;
 
 export const managementItemSet: NavItemProps[] = [
   {
@@ -19,7 +16,7 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Stack monitoring',
         id: 'stack_monitoring',
-        locator: { id: 'STACK_MONITORING_APP_LOCATOR' },
+        href: '/app/monitoring',
       },
     ],
   },
@@ -30,17 +27,17 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Integrations',
         id: 'integrations',
-        locator: { id: LocatorId.Integrations },
+        href: '/app/integrations',
       },
       {
         name: 'Fleet',
         id: 'fleet',
-        locator: { id: LocatorId.Fleet },
+        href: '/app/fleet',
       },
       {
         name: 'Osquery',
         id: 'osquery',
-        locator: { id: LocatorId.Osquery },
+        href: '/app/osquery',
       },
     ],
   },
@@ -55,12 +52,12 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Ingest pipelines',
             id: 'ingest_pipelines',
-            locator: { id: LocatorId.IngestPipelines },
+            href: '/app/management/ingest/ingest_pipelines',
           },
           {
             name: 'Logstash pipelines',
             id: 'logstash_pipelines',
-            locator: { id: LocatorId.LogstashPipelines },
+            href: '/app/management/ingest/pipelines',
           },
         ],
       },
@@ -71,37 +68,37 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Index management',
             id: 'index_management',
-            locator: { id: LocatorId.IndexManagement },
+            href: '/app/management/data/index_management',
           },
           {
             name: 'Index lifecycle policies',
             id: 'index_lifecycle_policies',
-            locator: { id: LocatorId.ILM },
+            // locator: { id: LocatorId.ILM },
           },
           {
             name: 'Snapshot and restore',
             id: 'snapshot_and_restore',
-            locator: { id: LocatorId.SnapshotRestore },
+            // locator: { id: LocatorId.SnapshotRestore },
           },
           {
             name: 'Rollup jobs',
             id: 'rollup_jobs',
-            locator: { id: LocatorId.Rollup },
+            // locator: { id: LocatorId.Rollup },
           },
           {
             name: 'Transforms',
             id: 'transforms',
-            locator: { id: LocatorId.Transform },
+            href: '/app/management/data/transform',
           },
           {
             name: 'Cross-cluster replication',
             id: 'cross_cluster_replication',
-            locator: { id: LocatorId.CrossClusterReplication },
+            // locator: { id: LocatorId.CrossClusterReplication },
           },
           {
             name: 'Remote clusters',
             id: 'remote_clusters',
-            locator: { id: LocatorId.RemoteClusters },
+            // locator: { id: LocatorId.RemoteClusters },
           },
         ],
       },
@@ -112,35 +109,32 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Rules',
             id: 'rules',
-            locator: { id: LocatorId.RulesManagement, params: { appId: 'triggersActions' } },
+            href: '/app/management/insightsAndAlerting/triggersActions/rules',
           },
           {
             name: 'Cases',
             id: 'cases',
-            locator: { id: LocatorId.CasesManagement, params: { appId: 'cases' } },
+            href: '/app/management/insightsAndAlerting/cases',
           },
           {
             name: 'Connectors',
             id: 'connectors',
-            locator: {
-              id: LocatorId.ConnectorsManagement,
-              params: { appId: 'triggersActionsConnectors' },
-            },
+            href: '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
           },
           {
             name: 'Reporting',
             id: 'reporting',
-            locator: { id: LocatorId.Reporting },
+            // locator: { id: LocatorId.Reporting },
           },
           {
             name: 'Machine learning',
             id: 'machine_learning',
-            locator: { id: LocatorId.MachineLearningManagement },
+            href: '/app/management/insightsAndAlerting/jobsListLink',
           },
           {
             name: 'Watcher',
             id: 'watcher',
-            locator: { id: LocatorId.Watcher },
+            // locator: { id: LocatorId.Watcher },
           },
         ],
       },
@@ -151,22 +145,22 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Users',
             id: 'users',
-            locator: { id: LocatorId.Security, params: { appId: 'users' } },
+            href: '/app/management/security/users',
           },
           {
             name: 'Roles',
             id: 'roles',
-            locator: { id: LocatorId.Security, params: { appId: 'roles' } },
+            href: '/app/management/security/roles',
           },
           {
             name: 'Role mappings',
             id: 'role_mappings',
-            locator: { id: LocatorId.Security, params: { appId: 'role_mappings' } },
+            href: '/app/management/security/role_mappings',
           },
           {
             name: 'API keys',
             id: 'api_keys',
-            locator: { id: LocatorId.Security, params: { appId: 'api_keys' } },
+            href: '/app/management/security/api_keys',
           },
         ],
       },
@@ -177,51 +171,39 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Data view',
             id: 'data_views',
-            locator: {
-              id: Management,
-              params: { sectionId: 'kibana', appId: 'dataViews' },
-            },
+            href: '/app/management/kibana/dataViews',
           },
           {
             name: 'Saved objects',
             id: 'saved_objects',
-            locator: {
-              id: Management,
-              params: { sectionId: 'kibana', appId: 'objects' },
-            },
+            href: '/app/management/kibana/objects',
           },
           {
             name: 'Tags',
             id: 'tags',
-            locator: { id: Management, params: { sectionId: 'kibana', appId: 'tags' } },
+            href: '/app/management/kibana/tags',
           },
           {
             name: 'Search sessions',
             id: 'search_sessions',
-            locator: {
-              id: Management,
-              params: { sectionId: 'kibana', appId: 'search_sessions' },
-            },
+            href: '/app/management/kibana/search_sessions',
           },
           {
             name: 'Spaces',
             id: 'spaces',
-            locator: { id: LocatorId.Spaces },
+            href: '/app/management/kibana/spaces',
           },
           {
             name: 'Advanced settings',
             id: 'advanced_settings',
-            locator: {
-              id: Management,
-              params: { sectionId: 'kibana', appId: 'settings' },
-            },
+            href: '/app/management/kibana/settings',
           },
         ],
       },
       {
         name: 'Upgrade assistant',
         id: 'upgrade_assistant',
-        locator: { id: LocatorId.UpgradeAssistant },
+        // locator: { id: LocatorId.UpgradeAssistant },
       },
     ],
   },
