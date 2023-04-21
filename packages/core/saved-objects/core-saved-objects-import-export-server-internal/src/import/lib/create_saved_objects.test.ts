@@ -55,12 +55,14 @@ const createLegacyUrlAliasObject = (
   sourceId: string,
   targetId: string,
   targetType: string,
-  targetNamespace: string = 'default'
+  targetNamespace: string = 'default',
+  managed?: boolean
 ): SavedObject<LegacyUrlAlias> => ({
   type: LEGACY_URL_ALIAS_TYPE,
   id: `${targetNamespace}:${targetType}:${sourceId}`,
   attributes: { sourceId, targetNamespace, targetType, targetId, purpose: 'savedObjectImport' },
   references: [],
+  managed: managed ?? false,
 });
 
 const MULTI_NS_TYPE = 'multi';
@@ -109,6 +111,7 @@ describe('#createSavedObjects', () => {
     namespace?: string;
     overwrite?: boolean;
     compatibilityMode?: boolean;
+    managed?: boolean;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
@@ -149,15 +152,16 @@ describe('#createSavedObjects', () => {
 
   const getResultMock = {
     success: (
-      { type, id, attributes, references, originId, managed }: SavedObject,
-      { namespace }: CreateSavedObjectsParams
+      { type, id, attributes, references, originId, managed: objectManaged }: SavedObject,
+      { namespace, managed }: CreateSavedObjectsParams
     ): SavedObject => ({
       type,
       id,
       attributes,
       references,
       ...(originId && { originId }),
-      ...(managed && { managed }),
+      ...((managed && { managed }) ??
+        (objectManaged && { managed: objectManaged }) ?? { managed: false }),
       version: 'some-version',
       updated_at: 'some-date',
       namespaces: [namespace ?? 'default'],
@@ -288,6 +292,7 @@ describe('#createSavedObjects', () => {
 
     test('when in compatibility mode, calls bulkCreate for legacy URL aliases when unresolvable errors or no errors are present', async () => {
       for (const error of unresolvableErrors) {
+        // options are ok, they return objects as declared
         const options = setupParams({
           objects: objs,
           accumulatedErrors: [error],
@@ -308,7 +313,9 @@ describe('#createSavedObjects', () => {
   });
 
   it('filters out version from objects before create and accepts managed', async () => {
-    const options = setupParams({ objects: [{ ...obj1, version: 'foo' }] });
+    const options = setupParams({ objects: [{ ...obj1, version: 'foo' }] }); // here optionsManaged is undefined
+    // const saved_objects = [getResultMock.success(obj1, options)];
+    // console.log('saved_objects[0]', JSON.stringify(saved_objects[0]));
     bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, options)] });
 
     await createSavedObjects(options);
@@ -318,8 +325,9 @@ describe('#createSavedObjects', () => {
   const testBulkCreateObjects = async ({
     namespace,
     compatibilityMode,
-  }: { namespace?: string; compatibilityMode?: boolean } = {}) => {
-    const options = setupParams({ objects: objs, namespace, compatibilityMode });
+    managed,
+  }: { namespace?: string; compatibilityMode?: boolean; managed?: boolean } = {}) => {
+    const options = setupParams({ objects: objs, namespace, compatibilityMode, managed });
     setupMockResults(options);
 
     await createSavedObjects(options);
@@ -380,8 +388,10 @@ describe('#createSavedObjects', () => {
 
   describe('with an undefined namespace', () => {
     test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
-      await testBulkCreateObjects();
-      await testBulkCreateObjects({ compatibilityMode: true });
+      const expectedObjects = await testBulkCreateObjects();
+      console.log('expectedObjects:', expectedObjects);
+      const realObjects = await testBulkCreateObjects({ compatibilityMode: true });
+      console.log('realObjects:', realObjects);
     });
     test('calls bulkCreate once with input options', async () => {
       await testBulkCreateOptions();

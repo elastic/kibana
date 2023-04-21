@@ -80,10 +80,12 @@ describe('#importSavedObjectsFromStream', () => {
         management: { icon: `${type}-icon` },
       } as any),
     importHooks = {},
+    managed,
   }: {
     createNewCopies?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
+    managed?: boolean;
   } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -98,19 +100,23 @@ describe('#importSavedObjectsFromStream', () => {
       namespace,
       createNewCopies,
       importHooks,
+      managed,
     };
   };
   const createObject = ({
     type = 'foo-type',
     title = 'some-title',
-  }: { type?: string; title?: string } = {}): SavedObject<{
+    managed = undefined, // yea, explicitly declare this as not set to test against existing objects
+  }: { type?: string; title?: string; managed?: boolean } = {}): SavedObject<{
     title: string;
+    managed?: boolean;
   }> => {
     return {
       type,
       id: uuidv4(),
       references: [],
       attributes: { title },
+      managed,
     };
   };
   const createError = (): SavedObjectsImportFailure => {
@@ -320,6 +326,7 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap,
           overwrite,
           namespace,
+          managed: options.managed,
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
@@ -382,6 +389,119 @@ describe('#importSavedObjectsFromStream', () => {
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
+    });
+
+    describe('managed option', () => {
+      test('if not specified, applied default to objects if missing and does not override existing flag if already present', async () => {
+        const obj1 = createObject({ type: 'foo', managed: true });
+        const obj2 = createObject({ type: 'bar', title: 'bar-title' });
+
+        const options = setupOptions({
+          createNewCopies: false,
+          getTypeImpl: (type) => {
+            if (type === 'foo') {
+              return {
+                management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+              };
+            }
+            return {
+              management: { icon: `${type}-icon` },
+            };
+          },
+        });
+
+        mockCheckConflicts.mockResolvedValue({
+          errors: [],
+          filteredObjects: [],
+          importStateMap: new Map(),
+          pendingOverwrites: new Set(),
+        });
+        mockCreateSavedObjects.mockResolvedValue({
+          errors: [],
+          createdObjects: [obj1, { ...obj2, managed: false }], // default applied in createSavedObjects
+        });
+
+        const result = await importSavedObjectsFromStream(options);
+        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        const successResults = [
+          {
+            type: obj1.type,
+            id: obj1.id,
+            meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
+            managed: true,
+          },
+          {
+            type: obj2.type,
+            id: obj2.id,
+            meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
+            managed: false,
+          },
+        ];
+
+        expect(result).toEqual({
+          success: true,
+          successCount: 2,
+          successResults,
+          warnings: [],
+        });
+      }); // assert that the documents being imported retain their prop or have the default applied
+      test('if specified, overrides existing flag if already present', async () => {
+        const obj1 = createObject({ type: 'foo', managed: false });
+        const obj2 = createObject({ type: 'bar', title: 'bar-title' });
+
+        const options = setupOptions({
+          createNewCopies: false,
+          managed: true,
+          getTypeImpl: (type) => {
+            if (type === 'foo') {
+              return {
+                management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+              };
+            }
+            return {
+              management: { icon: `${type}-icon` },
+            };
+          },
+        });
+
+        mockCheckConflicts.mockResolvedValue({
+          errors: [],
+          filteredObjects: [],
+          importStateMap: new Map(),
+          pendingOverwrites: new Set(),
+        });
+        mockCreateSavedObjects.mockResolvedValue({
+          errors: [],
+          createdObjects: [
+            { ...obj1, managed: true },
+            { ...obj2, managed: true },
+          ], // default applied in createSavedObjects
+        });
+
+        const result = await importSavedObjectsFromStream(options);
+        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        const successResults = [
+          {
+            type: obj1.type,
+            id: obj1.id,
+            meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
+            managed: true,
+          },
+          {
+            type: obj2.type,
+            id: obj2.id,
+            meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
+            managed: true,
+          },
+        ];
+
+        expect(result).toEqual({
+          success: true,
+          successCount: 2,
+          successResults,
+          warnings: [],
+        });
+      }); // assert that the documents being imported retain their prop or have the default applied
     });
   });
 

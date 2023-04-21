@@ -67,12 +67,14 @@ export async function collectSavedObjects({
         }
       }
       // Ensure migrations execute on every saved object
+      // Managed prop handling: // we don't make any assumptions about how to handle defaults for overwriting all abjects' managed flag if there isn't a `managed` option passed to the call. This allows us to retain the flag on objects being imported, if it's already present on the object.
+      // We fall back to false if managed isn't declared as an option and the object being imported doesn't already have the prop set. We do this to avoid having to run the core transform for backfilling.
       return {
         ...obj,
         ...(!obj.migrationVersion && !obj.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
         // override any managed flag on an object with that given as an option otherwise set the default to avoid having to do that with a core migration transform
         // this is a bulk opperation, applied to all objects being imported
-        ...(managed ? { managed } : { managed: obj.managed ?? false }),
+        ...{ managed: managed ?? obj.managed ?? false },
       };
     }),
     createConcatStream([]),

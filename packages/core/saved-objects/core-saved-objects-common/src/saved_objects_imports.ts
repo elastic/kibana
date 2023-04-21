@@ -97,7 +97,6 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;
-  managed?: boolean;
 }
 
 /**

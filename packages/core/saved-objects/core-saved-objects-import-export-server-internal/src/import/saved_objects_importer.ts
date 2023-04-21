@@ -57,7 +57,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     overwrite,
     refresh,
     compatibilityMode,
-    managed = false, // @TINA set the default here and pass that all the way through.
+    managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -80,7 +80,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     compatibilityMode,
     namespace,
     retries,
-    managed = false, // @TINA set the default here and pass that all the way through.
+    managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,

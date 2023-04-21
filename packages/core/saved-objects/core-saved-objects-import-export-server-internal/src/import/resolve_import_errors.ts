@@ -118,6 +118,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Replace references
   for (const savedObject of collectSavedObjectsResult.collectedObjects) {
+    // collectedObjects already have managed flag set
     const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
     if (!refMap) {
       continue;
@@ -211,7 +212,7 @@ export async function resolveSavedObjectsImportErrors({
     overwrite?: boolean
   ) => {
     const createSavedObjectsParams = {
-      objects,
+      objects, // these objects only have a title, no other properties
       accumulatedErrors,
       savedObjectsClient,
       importStateMap,
@@ -242,7 +243,7 @@ export async function resolveSavedObjectsImportErrors({
           ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
           ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
-          ...{ managed: createdObject.managed ?? managed ?? false },
+          ...{ managed: createdObject.managed ?? managed ?? false }, // double sure that this already exists but doing a check just in case
         };
       }),
     ];

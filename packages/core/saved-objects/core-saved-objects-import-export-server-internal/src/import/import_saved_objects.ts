@@ -160,6 +160,7 @@ export async function importSavedObjectsFromStream({
     namespace,
     refresh,
     compatibilityMode,
+    managed,
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
@@ -189,7 +190,6 @@ export async function importSavedObjectsFromStream({
       ...error,
       meta: { ...error.meta, icon },
       ...(attemptedOverwrite && { overwrite: true }),
-      ...{ managed: error.managed },
     };
   });
   const warnings = await executeImportHooks({

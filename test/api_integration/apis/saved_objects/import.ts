@@ -96,9 +96,9 @@ export default function ({ getService }: FtrProviderContext) {
               success: true,
               successCount: 3,
               successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
+                { ...indexPattern, overwrite: true, managed: false },
+                { ...visualization, overwrite: true, managed: false },
+                { ...dashboard, overwrite: true, managed: false },
               ],
               warnings: [],
             });
@@ -155,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
                 title: 'dashboard-b',
               },
               type: 'dashboard',
+              managed: false,
             },
             {
               id: 'dashboard-a',
@@ -163,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
                 title: 'dashboard-a',
               },
               type: 'dashboard',
+              managed: false,
             },
           ],
           warnings: [],
@@ -233,6 +235,39 @@ export default function ({ getService }: FtrProviderContext) {
                       },
                     ],
                   },
+                },
+              ],
+              warnings: [],
+            });
+          });
+      });
+
+      it('should retain existing saved object managed property', async () => {
+        const objectsToImport = [
+          JSON.stringify({
+            type: 'config',
+            id: '1234',
+            attributes: {},
+            references: [],
+            managed: true,
+          }),
+        ];
+        await supertest
+          .post('/api/saved_objects/_import')
+          .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
+          .expect(200)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              success: true,
+              successCount: 1,
+              successResults: [
+                {
+                  id: '1234',
+                  meta: {
+                    title: 'Advanced Settings [1234]',
+                  },
+                  type: 'config',
+                  managed: true,
                 },
               ],
               warnings: [],

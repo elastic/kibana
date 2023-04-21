@@ -491,46 +491,46 @@ describe(`POST ${URL}`, () => {
         )
         .expect(200);
 
-      // expect(result.body).toEqual({
-      //   success: true,
-      //   successCount: 2,
-      //   successResults: [
-      //     {
-      //       type: obj1.type,
-      //       id: 'my-vis',
-      //       meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
-      //       managed: obj1.managed,
-      //     },
-      //     {
-      //       type: obj2.type,
-      //       id: 'my-dashboard',
-      //       meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
-      //       destinationId: obj2.id,
-      //       managed: obj2.managed,
-      //     },
-      //   ],
-      //   warnings: [],
-      // });
-      // expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2); // successResults objects were created because no resolvable errors are present
-      // expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
-      //   1,
-      //   [
-      //     expect.objectContaining({
-      //       type: 'visualization',
-      //       id: 'my-vis',
-      //       references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
-      //       managed: false,
-      //     }),
-      //     expect.objectContaining({
-      //       type: 'dashboard',
-      //       id: 'new-id-2',
-      //       originId: 'my-dashboard',
-      //       references: [{ name: 'ref_0', type: 'visualization', id: 'my-vis' }],
-      //       managed: false,
-      //     }),
-      //   ],
-      //   expect.any(Object) // options
-      // );
+      expect(result.body).toEqual({
+        success: true,
+        successCount: 2,
+        successResults: [
+          {
+            type: obj1.type,
+            id: 'my-vis',
+            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+            managed: obj1.managed,
+          },
+          {
+            type: obj2.type,
+            id: 'my-dashboard',
+            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+            destinationId: obj2.id,
+            managed: obj2.managed,
+          },
+        ],
+        warnings: [],
+      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2); // successResults objects were created because no resolvable errors are present
+      expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+        1,
+        [
+          expect.objectContaining({
+            type: 'visualization',
+            id: 'my-vis',
+            references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+            managed: false,
+          }),
+          expect.objectContaining({
+            type: 'dashboard',
+            id: 'new-id-2',
+            originId: 'my-dashboard',
+            references: [{ name: 'ref_0', type: 'visualization', id: 'my-vis' }],
+            managed: false,
+          }),
+        ],
+        expect.any(Object) // options
+      );
       expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
         2,
         [expect.objectContaining(legacyUrlAliasObj2)],

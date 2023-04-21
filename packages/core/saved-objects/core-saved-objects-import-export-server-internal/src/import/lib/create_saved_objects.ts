@@ -50,7 +50,7 @@ export interface CreateSavedObjectsResult<T> {
  * the objects we create, and the create results should be mapped to the original IDs that consumers will be able to understand.
  */
 export const createSavedObjects = async <T>({
-  objects,
+  objects, // these already have the managed flag set
   accumulatedErrors,
   savedObjectsClient,
   importStateMap,
@@ -109,9 +109,10 @@ export const createSavedObjects = async <T>({
       ...object,
       ...(references && { references }),
       ...(originId && { originId }),
-      ...(managed && { managed }),
+      ...{ managed: managed ?? object.managed ?? false }, // trictly speaking this shouldn't be needed since the objects passed in should already have the flag set
     };
   });
+  console.log('objectsToCreate:', JSON.stringify(objectsToCreate));
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
   const hasResolvableErrors = accumulatedErrors.some(({ error: { type } }) =>
@@ -164,7 +165,7 @@ export const createSavedObjects = async <T>({
           targetId: result.id,
           purpose: 'savedObjectImport',
         },
-        managed, // we can safey create each doc with the given managed flag, even if it's set as the default, bulkCreate would "override" this otherwise.
+        ...{ managed: managed ?? false }, // we can safey create each doc with the given managed flag, even if it's set as the default, bulkCreate would "override" this otherwise.
       });
     }
   }
@@ -178,9 +179,12 @@ export const createSavedObjects = async <T>({
             overwrite,
             refresh,
           })
-        ).saved_objects
+        ).saved_objects // already have managed specified
       : [];
-
+  console.log(
+    'remappedResults.filter((obj) => !obj.error)',
+    JSON.stringify(remappedResults.filter((obj) => !obj.error))
+  );
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
     errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),
