@@ -18,9 +18,11 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
+import { DisplayType } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
@@ -42,10 +44,10 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { key, display, label, options, required, sensitive, value } = configEntry;
+  const { key, display, label, options, required, sensitive, tooltip, value } = configEntry;
 
   switch (display) {
-    case 'dropdown':
+    case DisplayType.DROPDOWN:
       return options.length > 3 ? (
         <EuiSelect
           disabled={status === Status.LOADING}
@@ -68,7 +70,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         />
       );
 
-    case 'numeric':
+    case DisplayType.NUMERIC:
       return (
         <EuiFieldNumber
           disabled={status === Status.LOADING}
@@ -80,7 +82,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         />
       );
 
-    case 'textarea':
+    case DisplayType.TEXTAREA:
       const textarea = (
         <EuiTextArea
           disabled={status === Status.LOADING}
@@ -100,12 +102,18 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         textarea
       );
 
-    case 'toggle':
+    case DisplayType.TOGGLE:
+      const toggleLabel = (
+        <EuiToolTip content={tooltip}>
+          <p>{label}</p>
+        </EuiToolTip>
+      );
+
       return (
         <EuiSwitch
           checked={ensureBooleanType(value)}
           disabled={status === Status.LOADING}
-          label={label}
+          label={toggleLabel}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.checked });
           }}

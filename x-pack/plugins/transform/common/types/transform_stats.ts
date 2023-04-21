@@ -11,6 +11,7 @@ import { type TransformHealth, type TransformState, TRANSFORM_STATE } from '../c
 import { TransformId } from './transform';
 
 export interface TransformHealthIssue {
+  type: string;
   issue: string;
   details?: string;
   count: number;
