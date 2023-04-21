@@ -712,7 +712,7 @@ describe('create()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       preconfiguredActions: [
         {
           id: preDefinedId,
