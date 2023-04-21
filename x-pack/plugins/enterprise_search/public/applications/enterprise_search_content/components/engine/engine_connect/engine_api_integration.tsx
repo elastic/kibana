@@ -72,7 +72,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
         <p>
           {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.intro', {
             defaultMessage:
-              'Learn how to integrate with your engine with the language clients maintained by Elastic to help build your search experience.',
+              'Learn how to integrate with your search application with the language clients maintained by Elastic to help build your search experience.',
           })}
         </p>
       </EuiText>

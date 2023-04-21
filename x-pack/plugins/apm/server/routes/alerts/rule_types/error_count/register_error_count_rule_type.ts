@@ -25,6 +25,7 @@ import {
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
 import {
+  ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -77,6 +78,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.interval,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
+          apmActionVariables.errorGroupingKey,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
@@ -112,6 +114,7 @@ export function registerErrorCountRuleType({
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                   ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -164,7 +167,12 @@ export function registerErrorCountRuleType({
               windowUnit: ruleParams.windowUnit,
             });
 
-            const id = [ApmRuleType.ErrorCount, serviceName, environment]
+            const id = [
+              ApmRuleType.ErrorCount,
+              serviceName,
+              environment,
+              ruleParams.errorGroupingKey,
+            ]
               .filter((name) => name)
               .join('_');
 
@@ -188,6 +196,7 @@ export function registerErrorCountRuleType({
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+                  [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
                   [ALERT_REASON]: alertReason,
                   ...sourceFields,
                 },
@@ -201,6 +210,7 @@ export function registerErrorCountRuleType({
                 reason: alertReason,
                 serviceName,
                 threshold: ruleParams.threshold,
+                errorGroupingKey: ruleParams.errorGroupingKey,
                 triggerValue: errorCount,
                 viewInAppUrl,
               });
