@@ -106,8 +106,7 @@ export const ConnectorConfigurationForm = () => {
                 (x) =>
                   x.ui_restrictions.length <= 0 &&
                   (x.depends_on.length <= 0 ||
-                    (x.depends_on.length > 0 &&
-                      dependenciesSatisfied(x.depends_on, dependencyLookup)))
+                    dependenciesSatisfied(x.depends_on, dependencyLookup))
               );
             // finds the next field that should appear below this field
             // ignores fields that are ui restricted or hidden due to not having dependencies met
@@ -117,8 +116,7 @@ export const ConnectorConfigurationForm = () => {
                 (x) =>
                   x.ui_restrictions.length <= 0 &&
                   (x.depends_on.length <= 0 ||
-                    (x.depends_on.length > 0 &&
-                      dependenciesSatisfied(x.depends_on, dependencyLookup)))
+                    dependenciesSatisfied(x.depends_on, dependencyLookup))
               );
 
             // show top spacing if fields before are undefined (i.e. this field is first to render)
