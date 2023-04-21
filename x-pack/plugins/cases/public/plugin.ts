@@ -9,7 +9,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
@@ -29,6 +28,7 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import type { CasesPluginSetup, CasesPluginStart, CasesUiSetup, CasesUiStart } from './types';
 
 /**
  * @public
@@ -59,9 +59,13 @@ export class CasesUiPlugin
     );
   }
 
-  private async registerActions(plugins: CasesPluginStart) {
+  private async registerActions(core: CoreStart, plugins: CasesPluginStart) {
     const { registerActions } = await this.lazyActions();
-    registerActions(plugins);
+    const getCreateCaseFlyoutProps = {
+      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+    };
+    registerActions(core, plugins, getCreateCaseFlyoutProps);
   }
 
   public async setup(core: CoreSetup, plugins: CasesPluginSetup): Promise<CasesUiSetup> {
@@ -131,7 +135,6 @@ export class CasesUiPlugin
       kibanaVersion: this.kibanaVersion,
       config,
     });
-    this.registerActions(plugins);
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
@@ -141,6 +144,8 @@ export class CasesUiPlugin
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });
+
+    this.registerActions(core, plugins);
 
     return {
       api: createClientAPI({ http: core.http }),

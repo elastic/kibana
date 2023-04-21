@@ -7,14 +7,28 @@
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { CasesPluginStart } from '../../../types';
+import type { CasesContextProps } from '../../cases_context';
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 
-export const registerUIActions = ({ uiActions }: CasesPluginStart) => {
-  registerLensActions(uiActions);
+export const registerUIActions = (
+  { uiSettings }: CoreStart,
+  { uiActions }: CasesPluginStart,
+  getCreateCaseFlyoutProps: CasesContextProps
+) => {
+  registerLensActions(uiActions, getCreateCaseFlyoutProps, uiSettings);
 };
 
-const registerLensActions = (uiActions: UiActionsStart) => {
-  const addToNewCaseAction = createAddToNewCaseLensAction({ order: 41 });
+const registerLensActions = (
+  uiActions: UiActionsStart,
+  getCreateCaseFlyoutProps: CasesContextProps,
+  uiSettings: IUiSettingsClient
+) => {
+  const addToNewCaseAction = createAddToNewCaseLensAction({
+    order: 41,
+    getCreateCaseFlyoutProps,
+    uiSettings,
+  });
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 };
