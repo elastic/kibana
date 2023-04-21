@@ -37,7 +37,7 @@ const propertyValues: string[] = [
 const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
   indexed_chars: {
-    type: FIELD_TYPES.TEXT,
+    type: FIELD_TYPES.NUMBER,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.attachment.indexedCharsFieldLabel',
