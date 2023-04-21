@@ -37,7 +37,7 @@ export const Instructions = (props: InstructionProps) => {
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
     useFleetServerUnhealthy();
-console.log('INSTR props: ', props)
+  console.log('INSTR props: ', props);
   const { isFleetServerStandalone } = useFleetServerStandalone();
 
   useEffect(() => {
