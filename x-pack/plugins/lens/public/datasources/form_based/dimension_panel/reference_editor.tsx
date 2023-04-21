@@ -263,6 +263,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 }
 
                 const operationType = choices[0].value!;
+                // When it has an incomplete state, make sure to clear it up before updating
                 if (incompleteColumn) {
                   onResetIncomplete();
                 }
