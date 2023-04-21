@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 
+import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
@@ -217,6 +218,18 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
+export interface RuleSnoozeSettings {
+  id: string;
+  mute_all: boolean;
+  snooze_schedule?: RuleSnooze;
+  active_snoozes?: string[];
+  is_snoozed_until?: string;
+}
+
+export interface RulesSnoozeSettingsResponse {
+  data: RuleSnoozeSettings[];
+}
+
 export type SortingOptions = t.TypeOf<typeof SortingOptions>;
 export const SortingOptions = t.type({
   field: FindRulesSortField,
@@ -241,6 +254,11 @@ export interface FetchRulesResponse {
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleSnoozingProps {
+  ids: string[];
   signal?: AbortSignal;
 }
 

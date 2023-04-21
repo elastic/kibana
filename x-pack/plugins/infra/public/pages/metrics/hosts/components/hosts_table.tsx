@@ -49,7 +49,7 @@ export const HostsTable = () => {
   if (loading) {
     return (
       <InfraLoadingPanel
-        height="185px"
+        height="400px"
         width="auto"
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
