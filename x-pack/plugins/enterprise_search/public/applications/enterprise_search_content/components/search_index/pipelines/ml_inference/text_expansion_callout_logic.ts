@@ -19,23 +19,6 @@ import {
   FetchTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
-// export enum MlModelDeploymentState {
-//   NotDeployed = '',
-//   Downloading = 'downloading',
-//   Downloaded = 'downloaded',
-//   Starting = 'starting',
-//   Started = 'started',
-//   FullyAllocated = 'fully_allocated',
-//   Error = 'error',
-// }
-
-// export interface MlModelDeploymentStatus {
-//   deploymentState: MlModelDeploymentState;
-//   modelId: string;
-//   nodeAllocationCount: number;
-//   startTime: number;
-//   targetAllocationCount: number;
-// }
 
 // On page load: call Get API
 // - If no model -> Deploy button
@@ -137,6 +120,10 @@ export const TextExpansionCalloutLogic = kea<
       }, duration);
       actions.setTextExpansionModelPollingId(timeoutId);
     },
+    createTextExpansionModelSuccess: () => {
+      actions.fetchTextExpansionModel(undefined);
+      actions.startPollingTextExpansionModel();
+    },
     fetchTextExpansionModelError: () => {
       if (values.isPollingTextExpansionModelActive) {
         actions.createTextExpansionModelPollingTimeout(
@@ -154,7 +141,7 @@ export const TextExpansionCalloutLogic = kea<
           );
         }
       } else if (
-        data?.deploymentState === 'downloaded' &&
+        data?.deploymentState === 'is_fully_downloaded' &&
         values.isPollingTextExpansionModelActive
       ) {
         actions.stopPollingTextExpansionModel();
@@ -194,7 +181,7 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'downloaded',
+      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'is_fully_downloaded',
     ],
     isPollingTextExpansionModelActive: [
       () => [selectors.textExpansionModelPollTimeoutId],
