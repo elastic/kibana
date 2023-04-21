@@ -190,4 +190,10 @@ type TestSubject =
   | 'droppableList.input-2'
   | 'prefixField.input'
   | 'suffixField.input'
+  | 'tileTypeField'
+  | 'targetFormatField'
+  | 'parentField.input'
+  | 'childrenField.input'
+  | 'nonChildrenField.input'
+  | 'precisionField.input'
   | 'patternDefinitionsField';

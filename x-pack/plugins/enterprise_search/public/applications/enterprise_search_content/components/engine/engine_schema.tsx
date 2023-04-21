@@ -153,6 +153,10 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
   );
 };
 
+const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.schema.pageTitle', {
+  defaultMessage: 'Schema',
+});
+
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
@@ -345,13 +349,11 @@ export const EngineSchema: React.FC = () => {
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
+      pageChrome={[engineName, pageTitle]}
       pageViewTelemetry={EngineViewTabs.SCHEMA}
       isLoading={isLoadingEngineSchema}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.schema.pageTitle', {
-          defaultMessage: 'Schema',
-        }),
+        pageTitle,
       }}
       engineName={engineName}
     >
