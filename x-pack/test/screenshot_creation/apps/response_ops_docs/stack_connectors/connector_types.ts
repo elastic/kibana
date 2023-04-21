@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
-    
+
     it('test email connector screenshots', async () => {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();
@@ -119,5 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+    });
   });
 }
