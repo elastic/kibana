@@ -23,6 +23,7 @@ import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calcultors';
 
+const BACKGROUND_UTILIZATION_LOAD_RUNNING_AVERAGE_WINDOW_SIZE = 5; // Average over 5 polling cycles which is 15 seconds with the default polling interval
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
 }
@@ -50,11 +51,10 @@ interface AdhocTaskStat extends TaskStat {
 
 export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
-  runningAverageWindowSize: number,
   adHocTaskCounter: AdHocTaskCounter,
   pollInterval: number
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
-  const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat(runningAverageWindowSize);
+  const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat();
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
     taskPollingLifecycle.events.pipe(
       filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
@@ -68,7 +68,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })
     );
 
-  const taskRunEventToRecurringStat = createTaskRunEventToRecurringStat(runningAverageWindowSize);
+  const taskRunEventToRecurringStat = createTaskRunEventToRecurringStat();
   const taskRunRecurringEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'recurring'>> =
     taskPollingLifecycle.events.pipe(
       filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
@@ -82,8 +82,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })
     );
 
-  const taskManagerUtilizationEventToLoadStat =
-    createTaskRunEventToLoadStat(runningAverageWindowSize);
+  const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat();
   const taskManagerWorkerUtilizationEvent$: Observable<
     Pick<BackgroundTaskUtilizationStat, 'load'>
   > = taskPollingLifecycle.events.pipe(
@@ -186,7 +185,7 @@ export function summarizeUtilizationStats({
   };
 }
 
-function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
+function createTaskRunEventToAdhocStat() {
   let createdCounter = 0;
   let actualCounter = 0;
   let adjustedCounter = 0;
@@ -216,7 +215,7 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
   };
 }
 
-function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
+function createTaskRunEventToRecurringStat() {
   let actualCounter = 0;
   let adjustedCounter = 0;
   let taskCounter = 0;
@@ -240,8 +239,10 @@ function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
   };
 }
 
-function createTaskRunEventToLoadStat(runningAverageWindowSize: number) {
-  const loadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+function createTaskRunEventToLoadStat() {
+  const loadQueue = createRunningAveragedStat<number>(
+    BACKGROUND_UTILIZATION_LOAD_RUNNING_AVERAGE_WINDOW_SIZE
+  );
   return (load: number): Pick<BackgroundTaskUtilizationStat, 'load'> => {
     const historicalLoad = loadQueue(load);
     return {

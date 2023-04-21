@@ -45,10 +45,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -104,10 +102,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -163,10 +159,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -217,10 +211,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -272,10 +264,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -331,10 +321,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -390,10 +378,8 @@ describe('Task Run Statistics', () => {
       });
       const adHocTaskCounter = new AdHocTaskCounter();
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         adHocTaskCounter,
         pollInterval
       );
@@ -445,10 +431,8 @@ describe('Task Run Statistics', () => {
         events$: events$ as Observable<TaskLifecycleEvent>,
       });
 
-      const runningAverageWindowSize = 5;
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        runningAverageWindowSize,
         new AdHocTaskCounter(),
         pollInterval
       );
