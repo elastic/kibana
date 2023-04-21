@@ -190,12 +190,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
 const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
   const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
     body: {
-      cluster: [
-        'manage_security',
-        'manage_api_key',
-        'manage_own_api_key',
-        ...serviceApiKeyPrivileges.cluster,
-      ],
+      cluster: ['manage_security', 'manage_api_key', ...serviceApiKeyPrivileges.cluster],
       index: serviceApiKeyPrivileges.indices,
     },
   });
@@ -210,15 +205,16 @@ const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
     read_pipeline: readPipeline,
   } = cluster || {};
 
-  const canManageApiKeys = manageSecurity || manageApiKey || manageOwnApiKey;
+  const canManageOwnApiKeys = manageOwnApiKey;
+  const canManageAllApiKeys = manageSecurity || manageApiKey;
   const hasClusterPermissions = readILM && readPipeline && monitor;
   const hasIndexPermissions = !Object.values(hasPrivileges.index?.['synthetics-*'] || []).includes(
     false
   );
 
   return {
-    canManageApiKeys,
-    canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
+    canManageApiKeys: canManageOwnApiKeys || canManageAllApiKeys,
+    canEnable: canManageAllApiKeys && hasClusterPermissions && hasIndexPermissions,
   };
 };
 
