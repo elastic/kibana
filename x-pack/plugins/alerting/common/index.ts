@@ -60,4 +60,4 @@ export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const INTERNAL_ALERTING_API_FIND_RULES_PATH = `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`;
 export const ALERTS_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = true;
+export const ENABLE_MAINTENANCE_WINDOWS = false;
