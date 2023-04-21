@@ -10,7 +10,7 @@ import { keyBy, merge } from 'lodash';
 import type { IdentifierType, RiskScoreWeight } from './types';
 
 export const RISK_CATEGORY_WEIGHT_TYPE = 'risk_category';
-export const GLOBAL_IDENTIFIER_WEIGHT_TYPE = 'global_identifier_type';
+export const GLOBAL_IDENTIFIER_WEIGHT_TYPE = 'global_identifier';
 
 const RISK_CATEGORIES = ['alerts'];
 const DEFAULT_CATEGORY_WEIGHTS: RiskScoreWeight[] = RISK_CATEGORIES.map((category) => ({
@@ -68,24 +68,35 @@ export const buildCategoryWeights = (userWeights?: RiskScoreWeight[]): RiskScore
   );
 };
 
-export const buildCategoryWeightAccounting = ({
+export const buildCategoryScoreAssignment = (): string => {
+  const otherClause = `results['other_score'] += current_score;`;
+
+  return RISK_CATEGORIES.map(
+    (category) =>
+      `if (inputs[i].category == '${convertCategoryToEventKindValue(
+        category
+      )}') { results['${category}_score'] += current_score; }`
+  )
+    .join(' else ')
+    .concat(` else { ${otherClause} }`);
+};
+
+export const buildWeightingOfScoreByCategory = ({
   userWeights,
   identifierType,
 }: {
   userWeights?: RiskScoreWeight[];
   identifierType: IdentifierType;
 }): string => {
-  const otherClause = `results['other_score'] += current_score;`;
+  const otherClause = `weighted_score = score;`;
   const categoryWeights = buildCategoryWeights(userWeights);
 
   return categoryWeights
     .map(
       (weight) =>
-        `if (inputs[i].category == '${convertCategoryToEventKindValue(
+        `if (category == '${convertCategoryToEventKindValue(
           weight.value
-        )}') { current_score *= ${getWeightForIdentifierType(weight, identifierType)}; results['${
-          weight.value
-        }_score'] += current_score; }`
+        )}') { weighted_score = score * ${getWeightForIdentifierType(weight, identifierType)}; }`
     )
     .join(' else ')
     .concat(` else { ${otherClause} }`);

@@ -13,8 +13,9 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { withSecuritySpan } from '../../utils/with_security_span';
 import {
+  buildCategoryScoreAssignment,
   buildCategoryScoreDeclarations,
-  buildCategoryWeightAccounting,
+  buildWeightingOfScoreByCategory,
   getGlobalWeightForIdentifierType,
 } from './category_weights';
 import type {
@@ -24,7 +25,6 @@ import type {
   GetScoresResponse,
   IdentifierType,
   RiskScoreBucket,
-  RiskScoreWeight,
   SimpleRiskScore,
 } from './types';
 
@@ -48,7 +48,7 @@ const bucketToResponse = ({
   level: bucket.risk_details.value.level,
   totalScore: bucket.risk_details.value.score,
   totalScoreNormalized: bucket.risk_details.value.normalized_score,
-  alertsScore: bucket.risk_details.value.signals_score,
+  alertsScore: bucket.risk_details.value.alerts_score,
   otherScore: bucket.risk_details.value.other_score,
   notes: bucket.risk_details.value.notes,
   riskiestInputs: enrichInputs
@@ -66,12 +66,8 @@ const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContaine
 
 const buildReduceScript = ({
   globalIdentifierTypeWeight,
-  identifierType,
-  weights,
 }: {
   globalIdentifierTypeWeight?: number;
-  identifierType: IdentifierType;
-  weights?: RiskScoreWeight[];
 }): string => {
   return `
     Map results = new HashMap();
@@ -79,7 +75,7 @@ const buildReduceScript = ({
     for (state in states) {
       inputs.addAll(state.inputs)
     }
-    Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+    Collections.sort(inputs, (a, b) -> b.get('weighted_score').compareTo(a.get('weighted_score')));
 
     double num_inputs_to_score = Math.min(inputs.length, params.max_risk_inputs_per_identity);
     results['notes'] = [];
@@ -92,9 +88,9 @@ const buildReduceScript = ({
     double total_score = 0;
     double current_score = 0;
     for (int i = 0; i < num_inputs_to_score; i++) {
-      current_score = inputs[i].score / Math.pow(i + 1, params.p);
+      current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
 
-      ${buildCategoryWeightAccounting({ userWeights: weights, identifierType })}
+      ${buildCategoryScoreAssignment()}
       total_score += current_score;
     }
 
@@ -167,9 +163,16 @@ const buildIdentifierTypeAggregation = (
             init_script: 'state.inputs = []',
             map_script: `
               Map fields = new HashMap();
-              fields.put('score', doc['${ALERT_RISK_SCORE}'].value);
-              fields.put('category', doc['${EVENT_KIND}'].value);
+              String category = doc['${EVENT_KIND}'].value;
+              double score = doc['${ALERT_RISK_SCORE}'].value;
+              double weighted_score = 0.0;
+
               fields.put('time', doc['@timestamp'].value);
+              fields.put('category', category);
+              fields.put('score', score);
+              ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
+              fields.put('weighted_score', weighted_score);
+
               state.inputs.add(fields);
             `,
             combine_script: 'return state;',
@@ -178,11 +181,7 @@ const buildIdentifierTypeAggregation = (
               p: 1.5,
               risk_cap: 261.2,
             },
-            reduce_script: buildReduceScript({
-              identifierType,
-              globalIdentifierTypeWeight,
-              weights,
-            }),
+            reduce_script: buildReduceScript({ globalIdentifierTypeWeight }),
           },
         },
       },

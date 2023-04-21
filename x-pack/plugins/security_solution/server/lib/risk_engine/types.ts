@@ -52,6 +52,7 @@ export interface BaseRiskScore {
   totalScore: number;
   totalScoreNormalized: number;
   alertsScore: number;
+  otherScore: number;
   notes: string[];
 }
 
@@ -83,8 +84,8 @@ export interface RiskScoreBucket {
       normalized_score: number;
       notes: string[];
       level: string;
+      alerts_score: number;
       other_score: number;
-      signals_score: number;
     };
   };
 

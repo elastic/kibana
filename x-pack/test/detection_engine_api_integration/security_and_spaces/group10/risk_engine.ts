@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { RISK_SCORES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
-import { GLOBAL_IDENTIFIER_WEIGHT_TYPE, RISK_CATEGORY_WEIGHT_TYPE } from '../../../../plugins/security_solution/server/lib/risk_engine/category_weights';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -26,7 +25,6 @@ const removeFields = (scores: any[]) =>
     delete item['@timestamp'];
     delete item.riskiestInputs;
     delete item.notes;
-    delete item.category;
     return item;
   });
 
@@ -100,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
   ) => {
     await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
 
-    return await getRiskScores({ body: {} });
+    return await getRiskScores({ body: { debug: true } });
   };
 
   describe('Risk engine', () => {
@@ -367,7 +365,7 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: { weights: [{ type: GLOBAL_IDENTIFIER_WEIGHT_TYPE, host: 0.5 }] },
+            body: { weights: [{ type: 'global_identifier', host: 0.5 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -392,7 +390,7 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: { weights: [{ type: GLOBAL_IDENTIFIER_WEIGHT_TYPE, user: 0.7 }] },
+            body: { weights: [{ type: 'global_identifier', user: 0.7 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -419,7 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
             riskScore: 100,
           });
           const { scores } = await getRiskScores({
-            body: { weights: [{ type: GLOBAL_IDENTIFIER_WEIGHT_TYPE, host: 0.4, user: 0.8 }] },
+            body: { weights: [{ type: 'global_identifier', host: 0.4, user: 0.8 }] },
           });
 
           expect(removeFields(scores)).to.eql([
@@ -462,8 +460,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { scores } = await getRiskScores({
             body: {
               weights: [
-                { type: RISK_CATEGORY_WEIGHT_TYPE, value: 'signals', host: 0.4, user: 0.8 },
-                { type: RISK_CATEGORY_WEIGHT_TYPE, value: 'findings', host: 0.8, user: 0.3 },
+                { type: 'risk_category', value: 'alerts', host: 0.4, user: 0.8 },
+                { type: 'risk_category', value: 'findings', host: 0.8, user: 0.3 },
               ],
             },
           });
