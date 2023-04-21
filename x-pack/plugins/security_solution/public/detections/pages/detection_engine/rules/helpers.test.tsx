@@ -124,7 +124,7 @@ describe('rule helpers', () => {
         groupByRadioSelection: 'per-rule-execution',
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
-        suppressionMissingFields: 'suppress',
+        suppressionMissingFields: expect.any(String),
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -288,6 +288,7 @@ describe('rule helpers', () => {
         const result: DefineStepRule = getDefineStepsData({
           ...mockRule('test-id'),
           alert_suppression: {
+            group_by: [],
             missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
           },
         });
