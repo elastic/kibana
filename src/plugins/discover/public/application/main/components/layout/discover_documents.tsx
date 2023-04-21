@@ -41,6 +41,7 @@ import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -73,7 +74,7 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = stateContainer.savedSearchState.getState();
+  const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {

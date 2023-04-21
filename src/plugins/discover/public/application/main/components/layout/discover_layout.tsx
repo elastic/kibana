@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
@@ -91,6 +92,7 @@ export function DiscoverLayout({
   });
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
+  const savedSearch = useSavedSearchInitial();
 
   const fetchCounter = useRef<number>(0);
 
@@ -286,7 +288,7 @@ export function DiscoverLayout({
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
-          savedSearch={stateContainer.savedSearchState.getState()}
+          savedSearch={savedSearch}
           spaces={spaces}
           history={history}
         />
