@@ -10,7 +10,6 @@ import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuleParams, TransactionErrorRateRuleType } from '.';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { AlertMetadata } from '../../utils/helper';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
