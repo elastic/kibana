@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
@@ -43,6 +42,8 @@ export function LoadListAndRender(props: Props) {
     return () => {
       ignore = true;
     };
+  // only run on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   if (!mapsLoaded) {
