@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 export type { ControlGroupContainer } from './embeddable/control_group_container';
 export type { ControlGroupInput, ControlGroupOutput } from './types';
 
@@ -19,11 +17,14 @@ export { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from './actions';
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
+  type ControlGroupInputBuilder,
+  type AddRangeSliderControlProps,
   controlGroupInputBuilder,
-} from './control_group_input_builder';
+} from './external_api/control_group_input_builder';
+
+export type { ControlGroupAPI, AwaitingControlGroupAPI } from './external_api/control_group_api';
 
 export {
   type ControlGroupRendererProps,
-  useControlGroupContainerContext,
-} from './control_group_renderer';
-export const LazyControlGroupRenderer = React.lazy(() => import('./control_group_renderer'));
+  ControlGroupRenderer,
+} from './external_api/control_group_renderer';

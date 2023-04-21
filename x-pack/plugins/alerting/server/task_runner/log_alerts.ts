@@ -28,6 +28,7 @@ export interface LogAlertsParams<
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
+  maintenanceWindowIds?: string[];
 }
 
 export function logAlerts<
@@ -45,6 +46,7 @@ export function logAlerts<
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
+  maintenanceWindowIds,
 }: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
@@ -104,6 +106,7 @@ export function logAlerts<
         message,
         state,
         flapping: recoveredAlerts[id].getFlapping(),
+        maintenanceWindowIds,
       });
     }
 
@@ -121,6 +124,7 @@ export function logAlerts<
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        maintenanceWindowIds,
       });
     }
 
@@ -138,6 +142,7 @@ export function logAlerts<
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        maintenanceWindowIds,
       });
     }
   }
