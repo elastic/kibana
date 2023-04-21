@@ -74,7 +74,7 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders disabled deploy button if it is set to disabled', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled={true} isDismissable={false} />
+        <DeployModel dismiss={() => {}} isCreateButtonDisabled isDismissable={false} />
       );
       expect(wrapper.find(EuiButton).length).toBe(1);
       const button = wrapper.find(EuiButton);
@@ -82,7 +82,7 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders dismiss button if it is set to dismissable', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled={false} isDismissable={true} />
+        <DeployModel dismiss={() => {}} isCreateButtonDisabled={false} isDismissable />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
@@ -96,9 +96,7 @@ describe('TextExpansionCallOut', () => {
 
   describe('ModelDeploymentInProgress', () => {
     it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(
-        <ModelDeploymentInProgress dismiss={() => {}} isDismissable={true} />
-      );
+      const wrapper = shallow(<ModelDeploymentInProgress dismiss={() => {}} isDismissable />);
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
@@ -111,7 +109,7 @@ describe('TextExpansionCallOut', () => {
 
   describe('ModelDeployed', () => {
     it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(<ModelDeployed dismiss={() => {}} isDismissable={true} />);
+      const wrapper = shallow(<ModelDeployed dismiss={() => {}} isDismissable />);
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {

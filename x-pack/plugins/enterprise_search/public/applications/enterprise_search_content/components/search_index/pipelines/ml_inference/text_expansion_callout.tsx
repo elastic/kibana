@@ -40,7 +40,9 @@ export interface TextExpansionCallOutProps {
   isDismissable?: boolean;
 }
 
-export const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
+export const TextExpansionDismissButton = ({
+  dismiss,
+}: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
