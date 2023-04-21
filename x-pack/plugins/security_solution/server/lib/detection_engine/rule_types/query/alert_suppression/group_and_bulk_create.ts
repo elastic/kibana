@@ -21,7 +21,8 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../../common/detection_engine/constants';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../../common/detection_engine/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 import { getUnsuppressedAlerts } from './get_unsuppressed_alerts';
 
 export interface BucketHistory {
@@ -156,10 +157,10 @@ export const groupAndBulkCreate = async ({
         from: tuple.from,
       });
 
-      // TODO DEFAULT
       // if we don not suppress alerts ofr docs with missing values, we will create aggregation for null missing buckets
       const suppressOnMissingFields =
-        runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ===
+        (runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
+          DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
         AlertSuppressionMissingFieldsStrategy.Suppress;
 
       const groupingAggregation = buildGroupByFieldAggregation({
