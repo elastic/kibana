@@ -92,6 +92,7 @@ export interface ReferenceEditorProps {
   ) => void;
   onChooseField: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn: () => void;
+  onResetIncomplete: () => void;
   onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
   // Services
@@ -116,6 +117,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     functionLabel,
     onChooseField,
     onDeleteColumn,
+    onResetIncomplete,
     onChooseFunction,
     fieldLabel,
     operationDefinitionMap,
@@ -262,6 +264,9 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
 
                 const operationType = choices[0].value!;
                 if (column?.operationType === operationType) {
+                  if (incompleteColumn) {
+                    onResetIncomplete();
+                  }
                   return;
                 }
                 const possibleFieldNames =
