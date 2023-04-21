@@ -10,8 +10,8 @@ import { escapeRegExp, memoize } from 'lodash';
 import { FieldListItem } from '../types';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const globRegex = glob.split('*').filter(Boolean).map(escapeRegExp).join('.*');
-  return new RegExp(globRegex, 'i');
+  const globRegex = glob.split('*').map(escapeRegExp).join('.*');
+  return new RegExp(globRegex.includes('*') ? `^${globRegex}$` : globRegex, 'i');
 });
 
 export const fieldNameWildcardMatcher = (

@@ -24,9 +24,15 @@ describe('UnifiedFieldList fieldNameWildcardMatcher()', () => {
     expect(fieldNameWildcardMatcher({ name: 'test.this_value' } as DataViewField, search)).toBe(
       true
     );
-    expect(
-      fieldNameWildcardMatcher({ name: 'test.this_value.anyway' } as DataViewField, search)
-    ).toBe(true);
     expect(fieldNameWildcardMatcher({ name: 'message.test' } as DataViewField, search)).toBe(false);
+    expect(
+      fieldNameWildcardMatcher({ name: 'test.this_value.maybe' } as DataViewField, search)
+    ).toBe(false);
+    expect(
+      fieldNameWildcardMatcher({ name: 'test.this_value.maybe' } as DataViewField, `${search}*`)
+    ).toBe(true);
+    expect(
+      fieldNameWildcardMatcher({ name: 'test.this_value.maybe' } as DataViewField, '*value*')
+    ).toBe(true);
   });
 });
