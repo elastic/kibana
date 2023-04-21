@@ -82,21 +82,13 @@ export function getMaskI18nDescription({
   bucketsName?: string;
   isJoin: boolean;
 }): string {
-  return isJoin
-    ? i18n.translate('xpack.maps.mask.maskJoinDescription', {
-        defaultMessage: '{maskAdverb} {aggLabel} is ',
-        values: {
-          aggLabel: aggLabel ? aggLabel : VALUE,
-          maskAdverb: WHEN_JOIN_METRIC,
-        },
-      })
-    : i18n.translate('xpack.maps.mask.maskDescription', {
-        defaultMessage: '{maskAdverb} {aggLabel} is ',
-        values: {
-          aggLabel: aggLabel ? aggLabel : VALUE,
-          maskAdverb: WHEN,
-        },
-      });
+  return i18n.translate('xpack.maps.mask.maskDescription', {
+    defaultMessage: '{maskAdverb} {aggLabel} is ',
+    values: {
+      aggLabel: aggLabel ? aggLabel : VALUE,
+      maskAdverb: isJoin ? WHEN_JOIN_METRIC : WHEN,
+    },
+  });
 }
 
 export class Mask {
