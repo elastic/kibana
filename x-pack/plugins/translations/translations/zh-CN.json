@@ -35078,7 +35078,6 @@
     "xpack.synthetics.monitorManagement.steps": "步长",
     "xpack.synthetics.monitorManagement.summary.heading": "摘要",
     "xpack.synthetics.monitorManagement.syntheticsDisabledSuccess": "已成功禁用监测管理。",
-    "xpack.synthetics.monitorManagement.syntheticsEnabledFailure": "无法启用监测管理。请联系支持人员。",
     "xpack.synthetics.monitorManagement.syntheticsEnableLabel.management": "启用监测管理",
     "xpack.synthetics.monitorManagement.syntheticsEnableSuccess": "已成功启用监测管理。",
     "xpack.synthetics.monitorManagement.testResult": "测试结果",
