@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { indexThresholdRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
@@ -148,6 +149,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         screenshotDirectories,
         1400,
         1024
+      );
+    });
+
+    it('example index threshold rule conditions', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleSearchField', indexThresholdRuleName);
+      const actionPanel = await testSubjects.find('collapsedItemActions');
+      await actionPanel.click();
+      const editRuleMenu = await testSubjects.find('editRule');
+      await editRuleMenu.click();
+      await testSubjects.scrollIntoView('intervalInput');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rule-flyout-rule-conditions',
+        screenshotDirectories,
+        1400,
+        1500
       );
     });
   });

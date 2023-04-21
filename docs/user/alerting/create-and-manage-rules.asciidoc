@@ -67,7 +67,7 @@ Each action uses a connector, which provides connection information for a {kib} 
 After you select a connector, set the action frequency. If the rule type supports alert summaries, you can choose to create a summary of alerts on each check interval or on a custom interval. For example, if you create a metrics threshold rule, you can send email notifications that summarize the new, ongoing, and recovered alerts each day:
 
 [role="screenshot"]
-image::images/rule-flyout-action-summary.png[UI for defining rule conditions on an index threshold rule,500]
+image::images/rule-flyout-action-summary.png[UI for defining rule conditions on a metric threshold rule,500]
 
 TIP: If you choose a custom action interval, it cannot be shorter than the rule's check interval.
 
