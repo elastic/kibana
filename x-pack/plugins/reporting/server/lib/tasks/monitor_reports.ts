@@ -139,7 +139,7 @@ export class MonitorReportsTask implements ReportingTask {
           return;
         },
 
-        cancel: async () => ({ state: {} }),
+        cancel: async () => {},
       };
     };
   }

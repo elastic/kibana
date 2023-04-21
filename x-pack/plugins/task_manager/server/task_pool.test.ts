@@ -404,7 +404,7 @@ describe('TaskPool', () => {
       isExpired: false,
       taskExecutionId: uuidv4(),
       id: uuidv4(),
-      cancel: async () => undefined,
+      cancel: async () => {},
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
       stage: TaskRunningStage.PENDING,

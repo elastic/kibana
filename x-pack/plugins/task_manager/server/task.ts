@@ -69,6 +69,15 @@ export type SuccessfulRunResult = {
     }
 );
 
+export interface RecurringRunResult {
+  schedule?: IntervalSchedule;
+  /**
+   * The state which will be passed to the next run of this task (if this is a
+   * recurring task). See the RunContext type definition for more details.
+   */
+  state: Record<string, unknown>;
+}
+
 export type FailedRunResult = SuccessfulRunResult & {
   /**
    * If specified, indicates that the task failed to accomplish its work. This is
@@ -87,14 +96,24 @@ export interface FailedTaskResult {
 }
 
 export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type RecurringRunFunction = () => Promise<RecurringRunResult | void>;
+export type AdHocTaskRunFunction = () => Promise<void>;
+export type CancelFunction = () => Promise<void>;
 export interface CancellableTask {
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
 }
+export interface CancellableRecurringTask extends CancellableTask {
+  run: RecurringRunFunction;
+}
+export interface CancellableAdHocTask extends CancellableTask {
+  run: AdHocTaskRunFunction;
+}
 
 export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type RecurringTaskRunCreatorFunction = (context: RunContext) => CancellableRecurringTask;
+export type AdHocTaskRunCreatorFunction = (context: RunContext) => CancellableAdHocTask;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -152,13 +171,29 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
-  /**
-   * Creates an object that has a run function which performs the task's work,
-   * and an optional cancel function which cancels the task.
-   */
-  createTaskRunner: TaskRunCreatorFunction;
-};
+export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> &
+  (
+    | {
+        /**
+         * Creates an object that has a run function which performs the task's work,
+         * and an optional cancel function which cancels the task.
+         */
+        createTaskRunner: TaskRunCreatorFunction;
+      }
+    | {
+        mode: TaskMode.RECURRING;
+        createTaskRunner: RecurringTaskRunCreatorFunction;
+      }
+    | {
+        mode: TaskMode.AD_HOC;
+        createTaskRunner: AdHocTaskRunCreatorFunction;
+      }
+  );
+
+export enum TaskMode {
+  RECURRING = 'recurring',
+  AD_HOC = 'adhoc',
+}
 
 export enum TaskStatus {
   Idle = 'idle',

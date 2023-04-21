@@ -21,7 +21,7 @@ export type {
   IntervalSchedule,
 } from './task';
 
-export { TaskStatus } from './task';
+export { TaskStatus, TaskMode } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 

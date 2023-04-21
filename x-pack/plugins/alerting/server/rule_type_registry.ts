@@ -12,7 +12,7 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { RunContext, TaskManagerSetupContract, TaskMode } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -268,6 +268,7 @@ export class RuleTypeRegistry {
     );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
+        mode: TaskMode.RECURRING,
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>

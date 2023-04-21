@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { RunContext, TaskManagerSetupContract, TaskMode } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -150,6 +150,7 @@ export class ActionTypeRegistry {
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
+        mode: TaskMode.AD_HOC,
         title: actionType.name,
         maxAttempts,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
