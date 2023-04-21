@@ -802,6 +802,11 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
+
+        {showSearchBar && !isEmpty(filters.ruleParams) ? (
+          <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
+        ) : null}
+
         {showRulesList && (
           <>
             {showSearchBar ? (
@@ -825,10 +830,6 @@ export const RulesList = ({
                 />
                 <EuiSpacer size="s" />
               </>
-            ) : null}
-
-            {showSearchBar && !isEmpty(filters.ruleParams) ? (
-              <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
             ) : null}
 
             <RulesListTable
