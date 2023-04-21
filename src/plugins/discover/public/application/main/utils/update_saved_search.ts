@@ -12,6 +12,16 @@ import { cloneDeep } from 'lodash';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 
+/**
+ * Updates the saved search with a given data view & Appstate
+ * Is executed on every change of those, for making sure the saved search is
+ * up to date before fetching data and persisting or sharing
+ * @param savedSearch
+ * @param dataView
+ * @param state
+ * @param services
+ * @param useFilterAndQueryServices - when true data services are being used for updating filter + query
+ */
 export function updateSavedSearch(
   {
     savedSearch,
@@ -24,13 +34,13 @@ export function updateSavedSearch(
     state?: DiscoverAppState;
     services: DiscoverServices;
   },
-  updateByFilterAndQuery: boolean = false
+  useFilterAndQueryServices: boolean = false
 ) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
-  if (updateByFilterAndQuery || !state) {
+  if (useFilterAndQueryServices || !state) {
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery() || null)
       .setField('filter', services.data.query.filterManager.getFilters() || []);

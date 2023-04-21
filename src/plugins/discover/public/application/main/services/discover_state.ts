@@ -445,7 +445,7 @@ export function getDiscoverStateContainer({
       await savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
-        updateByFilterAndQuery: true,
+        useFilterAndQueryServices: true,
       });
       fetchData();
     });

@@ -36,7 +36,7 @@ export interface UpdateParams {
   /**
    * use filter and query services to update the saved search
    */
-  updateByFilterAndQuery?: boolean;
+  useFilterAndQueryServices?: boolean;
 }
 
 /**
@@ -169,7 +169,7 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-  const update = ({ nextDataView, nextState, updateByFilterAndQuery }: UpdateParams) => {
+  const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = getState();
@@ -184,7 +184,7 @@ export function getSavedSearchContainer({
         state: nextState || {},
         services,
       },
-      updateByFilterAndQuery
+      useFilterAndQueryServices
     );
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
