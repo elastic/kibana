@@ -43,18 +43,12 @@ export function useArchiveMaintenanceWindow() {
       });
       toasts.addSuccess(archive ? archiveToast : unarchiveToast);
     },
-    onError: (error, { archive, maintenanceWindowId }) => {
+    onError: (error, { archive }) => {
       const archiveToast = i18n.translate('xpack.alerting.maintenanceWindowsArchiveFailure', {
-        defaultMessage: "Failed to archive maintenance window '{id}'",
-        values: {
-          id: maintenanceWindowId,
-        },
+        defaultMessage: 'Failed to archive maintenance window.',
       });
       const unarchiveToast = i18n.translate('xpack.alerting.maintenanceWindowsUnarchiveFailure', {
-        defaultMessage: "Failed to unarchive maintenance window '{id}'",
-        values: {
-          id: maintenanceWindowId,
-        },
+        defaultMessage: 'Failed to unarchive maintenance window.',
       });
       toasts.addDanger(archive ? archiveToast : unarchiveToast);
     },

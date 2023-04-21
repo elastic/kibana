@@ -88,7 +88,7 @@ describe('useFinishAndArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith("Failed to cancel and archive maintenance window '123'")
+      expect(mockAddDanger).toBeCalledWith('Failed to cancel and archive maintenance window.')
     );
   });
 
@@ -104,7 +104,7 @@ describe('useFinishAndArchiveMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith("Failed to cancel and archive maintenance window '123'")
+      expect(mockAddDanger).toBeCalledWith('Failed to cancel and archive maintenance window.')
     );
   });
 });

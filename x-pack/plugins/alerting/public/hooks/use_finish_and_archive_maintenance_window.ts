@@ -34,13 +34,10 @@ export function useFinishAndArchiveMaintenanceWindow() {
         })
       );
     },
-    onError: (error, variables) => {
+    onError: () => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsFinishedAndArchiveFailure', {
-          defaultMessage: "Failed to cancel and archive maintenance window '{id}'",
-          values: {
-            id: variables,
-          },
+          defaultMessage: 'Failed to cancel and archive maintenance window.',
         })
       );
     },

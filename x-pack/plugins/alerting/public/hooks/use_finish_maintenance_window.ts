@@ -32,13 +32,10 @@ export function useFinishMaintenanceWindow() {
         })
       );
     },
-    onError: (error, variables) => {
+    onError: () => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsFinishedFailure', {
-          defaultMessage: "Failed to cancel maintenance window '{id}'",
-          values: {
-            id: variables,
-          },
+          defaultMessage: 'Failed to cancel maintenance window.',
         })
       );
     },
