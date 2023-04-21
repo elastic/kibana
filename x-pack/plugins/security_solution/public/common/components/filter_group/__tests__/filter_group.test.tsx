@@ -6,11 +6,17 @@
  */
 
 import { FilterGroup } from '..';
-import type { FC } from 'react';
+import type { ComponentProps, FC } from 'react';
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../../common/constants';
-import { TestProviders } from '../../../mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../mock';
 import type {
   AwaitingControlGroupAPI,
   ControlGroupContainer,
@@ -21,6 +27,15 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { Subject } from 'rxjs';
 import { initialInputData, sampleOutputData } from './mock.data';
+import { createStore } from '../../../store';
+import { useGetInitialUrlParamValue } from '../../../utils/global_query_string/helpers';
+
+jest.mock('../../../utils/global_query_string/helpers', () => {
+  return {
+    ...jest.requireActual('../../../utils/global_query_string/helpers'),
+    useGetInitialUrlParamValue: jest.fn().mockImplementation(() => () => null),
+  };
+});
 
 jest.mock('../../../hooks/use_space_id', () => {
   return {
@@ -28,12 +43,18 @@ jest.mock('../../../hooks/use_space_id', () => {
   };
 });
 
+const LOCAL_STORAGE_KEY = 'securitySolution.test_space_id.pageFilters';
+
 const TEST_IDS = {
   FILTER_CONTROLS: 'filter_group__items',
   FILTER_LOADING: 'filter-group__loading',
   MOCKED_CONTROL: 'mocked_control_group',
   ADD_CONTROL: 'filter-group__add-control',
   SAVE_CONTROL: 'filter-group__save',
+  SAVE_CHANGE_POPOVER: 'filter-group__save-popover',
+  FILTERS_CHANGED_BANNER: 'filter-group--changed-banner',
+  FILTERS_CHANGED_BANNER_SAVE: 'filter-group__save',
+  FILTERS_CHANGED_BANNER_DISCARD: 'filter-group__discard',
   CONTEXT_MENU: {
     BTN: 'filter-group__context',
     MENU: 'filter-group__context-menu',
@@ -76,7 +97,7 @@ const MockedControlGroupRenderer: FC<ControlGroupRendererProps> = forwardRef<
   AwaitingControlGroupAPI,
   ControlGroupRendererProps
 >(({ getCreationOptions }, ref) => {
-  useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupContainer);
+  useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupContainer, []);
   const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
 
   useEffect(() => {
@@ -104,15 +125,30 @@ jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_
   };
 });
 
-const onFilterChangeMock = jest.fn();
+jest.mock('../../../utils/global_query_string', () => {
+  return {
+    ...jest.requireActual('../../../utils/global_query_string'),
+  };
+});
 
-const TestComponent = () => (
-  <TestProviders>
+const onFilterChangeMock = jest.fn();
+const onInitMock = jest.fn();
+
+const state = mockGlobalState;
+const { storage } = createSecuritySolutionStorageMock();
+
+const getStoreWithCustomState = (newState: typeof state = state) => {
+  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+};
+
+const TestComponent: FC<ComponentProps<typeof TestProviders>> = (props) => (
+  <TestProviders {...props}>
     <FilterGroup
       initialControls={DEFAULT_DETECTION_PAGE_FILTERS}
       dataViewId="security-solution-default"
       chainingSystem="HIERARCHICAL"
       onFilterChange={onFilterChangeMock}
+      onInit={onInitMock}
     />
   </TestProviders>
 );
@@ -129,11 +165,15 @@ describe(' Filter Group Component ', () => {
   describe('Basic Functions ', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      global.localStorage.clear();
     });
     it('should render', async () => {
       render(<TestComponent />);
       expect(screen.getByTestId(TEST_IDS.MOCKED_CONTROL)).toBeVisible();
       expect(screen.getByTestId(TEST_IDS.FILTER_CONTROLS)).toBeVisible();
+
+      expect(onInitMock.mock.calls.length).toBe(1);
+      expect(onInitMock.mock.calls[0][0]).toMatchObject(controlGroupMock);
     });
 
     it('should have context menu open when clicked', async () => {
@@ -147,13 +187,10 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    it('should go into edit model without any issues', async () => {
+    it('should go into edit mode without any issues', async () => {
       render(<TestComponent />);
-
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
-
       await openContextMenu();
-
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeVisible();
@@ -302,23 +339,6 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    it('should call onFilterChange when new filters have been published', async () => {
-      render(<TestComponent />);
-      updateControlGroupInputMock(initialInputData as ControlGroupInput);
-      updateControlGroupOutputMock(sampleOutputData);
-      await waitFor(() => {
-        expect(onFilterChangeMock.mock.calls.length).toBe(1);
-        expect(onFilterChangeMock.mock.calls[0][0]).toMatchObject(sampleOutputData.filters);
-      });
-
-      // updating output should call filter change again with different output
-      const changedOutput = { ...sampleOutputData, filters: [] };
-      updateControlGroupOutputMock(changedOutput);
-      await waitFor(() => {
-        expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject(changedOutput.filters);
-      });
-    });
-
     it('should have Context menu changed when pending changes', async () => {
       render(<TestComponent />);
 
@@ -337,6 +357,10 @@ describe(' Filter Group Component ', () => {
       } as ControlGroupInput;
 
       updateControlGroupInputMock(newInputData);
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      });
 
       await openContextMenu();
 
@@ -364,6 +388,9 @@ describe(' Filter Group Component ', () => {
 
       updateControlGroupInputMock(newInputData);
 
+      // await waitFor(() => {
+      // expect(screen.getByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      // });
       await openContextMenu();
 
       await waitFor(() => {
@@ -373,16 +400,225 @@ describe(' Filter Group Component ', () => {
       controlGroupMock.updateInput.mockClear();
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.DISCARD));
 
-      expect(controlGroupMock.updateInput).toHaveBeenCalled();
-      expect(controlGroupMock.updateInput.mock.calls.length).toBe(2);
-      // discard changes
-      expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
-        panels: initialInputData.panels,
+      await waitFor(() => {
+        expect(controlGroupMock.updateInput).toHaveBeenCalled();
+        expect(controlGroupMock.updateInput.mock.calls.length).toBe(2);
+        // discard changes
+        expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
+          panels: initialInputData.panels,
+        });
+
+        // shift to view mode
+        expect(controlGroupMock.updateInput.mock.calls[1][0]).toMatchObject({
+          viewMode: 'view',
+        });
+      });
+    });
+
+    it('should reset controls on clicking reset', async () => {
+      render(<TestComponent />);
+
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+
+      await openContextMenu();
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible();
       });
 
-      // shift to view mode
-      expect(controlGroupMock.updateInput.mock.calls[1][0]).toMatchObject({
-        viewMode: 'view',
+      controlGroupMock.addOptionsListControl.mockClear();
+      controlGroupMock.updateInput.mockClear();
+      controlGroupMock.reload.mockClear();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
+
+      await waitFor(() => {
+        // blanks the input
+        expect(controlGroupMock.updateInput.mock.calls.length).toBe(2);
+        expect(controlGroupMock.reload.mock.calls.length).toBe(1);
+
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(4);
+      });
+    });
+
+    it('should restore controls saved in local storage', () => {
+      global.localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          ...initialInputData,
+          panels: {
+            '0': initialInputData.panels['0'],
+          },
+        })
+      );
+
+      // should create only one control
+      //
+      render(<TestComponent />);
+      expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
+    });
+
+    it('should show/hide pending changes popover on mouseout/mouseover', async () => {
+      render(<TestComponent />);
+
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+
+      await openContextMenu();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+
+      // delete some panels
+      const newInputData = {
+        ...initialInputData,
+        panels: {
+          '0': initialInputData.panels['0'],
+        },
+      } as ControlGroupInput;
+
+      updateControlGroupInputMock(newInputData);
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      });
+
+      fireEvent.mouseOver(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      fireEvent.mouseOut(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeNull();
+      });
+
+      fireEvent.mouseOver(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      });
+    });
+  });
+
+  describe('Filter Changed Banner', () => {
+    beforeAll(() => {
+      (useGetInitialUrlParamValue as jest.Mock).mockImplementation(() => {
+        return () => [
+          {
+            fieldName: 'abc',
+          },
+        ];
+      });
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      global.localStorage.clear();
+    });
+
+    it('should show banner if url filter and stored filters are not same', async () => {
+      global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
+
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
+      });
+    });
+
+    it('should use url filters if url and stored filters are not same', async () => {
+      global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
+      expect(controlGroupMock.addOptionsListControl.mock.calls[0][1]).toMatchObject({
+        hideExclude: true,
+        hideSort: true,
+        hidePanelTitles: true,
+        placeholder: '',
+        ...DEFAULT_DETECTION_PAGE_FILTERS[0],
+      });
+
+      expect(controlGroupMock.addOptionsListControl.mock.calls[1][1]).toMatchObject({
+        hideExclude: true,
+        hideSort: true,
+        hidePanelTitles: true,
+        placeholder: '',
+        fieldName: 'abc',
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
+      });
+    });
+
+    it('should ignore url params if there is an error in using them', async () => {
+      (useGetInitialUrlParamValue as jest.Mock).mockImplementation(() => {
+        return () => ({
+          fieldName: 'abc',
+        });
+      });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn());
+
+      render(<TestComponent />);
+
+      expect(consoleErrorSpy.mock.calls.length).toBe(1);
+      expect(String(consoleErrorSpy.mock.calls[0][0])).toMatch(/Url Params must be an array/i);
+    });
+  });
+
+  describe('onFilterChange', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.useFakeTimers();
+    });
+    it('should call onFilterChange when new filters have been published', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      updateControlGroupOutputMock(sampleOutputData);
+      await waitFor(() => {
+        expect(onFilterChangeMock.mock.calls.length).toBe(1);
+        expect(onFilterChangeMock.mock.calls[0][0]).toMatchObject(sampleOutputData.filters);
+      });
+
+      // updating output should call filter change again with different output
+      const changedOutput = { ...sampleOutputData, filters: [] };
+      updateControlGroupOutputMock(changedOutput);
+      await waitFor(() => {
+        expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject(changedOutput.filters);
+      });
+    });
+
+    it('should pass empty onFilterChange as the initial state. Eg. in case of error', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      updateControlGroupOutputMock(sampleOutputData);
+
+      jest.advanceTimersByTime(1000);
+      updateControlGroupOutputMock({
+        ...sampleOutputData,
+        filters: undefined,
+      });
+      await waitFor(() => {
+        expect(onFilterChangeMock.mock.calls.length).toBe(2);
+        expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject([]);
+      });
+
+      // updating output should call filter change again with different output
+      const changedOutput = { ...sampleOutputData, filters: [] };
+      updateControlGroupOutputMock(changedOutput);
+      await waitFor(() => {
+        expect(onFilterChangeMock.mock.calls[1][0]).toMatchObject(changedOutput.filters);
+      });
+    });
+
+    it('should not call onFilterChange if same set of filters are published twice', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      updateControlGroupOutputMock(sampleOutputData);
+
+      jest.advanceTimersByTime(1000);
+
+      // updating output should call filter change again with different output
+      const changedOutput = { ...sampleOutputData };
+      onFilterChangeMock.mockClear();
+      updateControlGroupOutputMock(changedOutput);
+      await waitFor(() => {
+        expect(onFilterChangeMock).not.toHaveBeenCalled();
       });
     });
   });

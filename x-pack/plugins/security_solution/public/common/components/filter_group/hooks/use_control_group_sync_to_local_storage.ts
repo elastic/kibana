@@ -16,7 +16,7 @@ interface UseControlGroupSyncToLocalStorageArgs {
 }
 
 type UseControlGroupSyncToLocalStorage = (args: UseControlGroupSyncToLocalStorageArgs) => {
-  controlGroupInput: ControlGroupInput;
+  controlGroupInput: ControlGroupInput | undefined;
   setControlGroupInput: Dispatch<SetStateAction<ControlGroupInput>>;
   getStoredControlGroupInput: () => ControlGroupInput | undefined;
 };

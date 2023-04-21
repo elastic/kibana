@@ -10,12 +10,7 @@ import React from 'react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
-import {
-  ADD_CONTROLS,
-  ADD_CONTROLS_MAX_LIMIT,
-  DISCARD_CHANGES,
-  PENDING_CHANGES_REMINDER,
-} from './translations';
+import { ADD_CONTROLS, ADD_CONTROLS_MAX_LIMIT, PENDING_CHANGES_REMINDER } from './translations';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
@@ -80,25 +75,5 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
         <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" size="s" />
       </div>
     </EuiPopover>
-  );
-};
-
-interface DiscardChangesProps {
-  onClick: () => void;
-}
-
-export const DiscardChanges: FC<DiscardChangesProps> = ({ onClick }) => {
-  return (
-    <EuiToolTip content={DISCARD_CHANGES} position="top" display="block">
-      <EuiButtonIcon
-        size="s"
-        iconSize="m"
-        display="base"
-        color="danger"
-        iconType={'minusInCircle'}
-        data-test-subj={'filter-group__discard'}
-        onClick={onClick}
-      />
-    </EuiToolTip>
   );
 };

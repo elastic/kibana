@@ -84,7 +84,9 @@ export const FilterGroupContextMenu = () => {
   const resetButton = useMemo(
     () => (
       <EuiContextMenuItem
+        key={'reset'}
         icon="eraser"
+        aria-label={CONTEXT_MENU_RESET}
         onClick={withContextMenuAction(resetSelection)}
         data-test-subj="filter-group__context--reset"
         toolTipContent={CONTEXT_MENU_RESET_TOOLTIP}
@@ -98,7 +100,9 @@ export const FilterGroupContextMenu = () => {
   const editControlsButton = useMemo(
     () => (
       <EuiContextMenuItem
+        key={'edit'}
         icon={isViewMode ? 'pencil' : 'minusInCircle'}
+        aria-label={isViewMode ? `filter_group__context--edit` : `filter_group__context--discard`}
         onClick={
           isViewMode
             ? withContextMenuAction(switchToEditMode)

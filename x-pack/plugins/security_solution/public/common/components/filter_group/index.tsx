@@ -58,7 +58,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     timeRange,
     filters,
     query,
-    chainingSystem = 'HIERARCHICAL',
+    chainingSystem,
     initialControls,
     spaceId,
     onInit,
@@ -110,6 +110,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return;
     }
     try {
+      if (!Array.isArray(param)) {
+        throw Error('Url Params must be an array');
+      }
       const storedControlGroupInput = getStoredControlInput();
       if (storedControlGroupInput) {
         const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
@@ -149,7 +152,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
-      if (isEqual(getStoredControlInput(), newInput)) return;
+      if (isEqual(getStoredControlInput(), newInput)) {
+        return;
+      }
       if (!isEqual(newInput.panels, getStoredControlInput()?.panels) && !isViewMode) {
         setHasPendingChanges(true);
       }
@@ -413,6 +418,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
                 <AddControl
                   onClick={addControlsHandler}
                   isDisabled={
+                    controlGroupInputUpdates &&
                     Object.values(controlGroupInputUpdates.panels).length >= NUM_OF_CONTROLS.MAX
                   }
                 />
