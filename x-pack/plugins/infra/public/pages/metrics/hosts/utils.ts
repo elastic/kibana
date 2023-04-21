@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { DataViewBase, Filter } from '@kbn/es-query';
 
-export const createHostsFilter = (hostNames: string[]): Filter => {
+export const createHostsFilter = (hostNames: string[], dataView?: DataViewBase): Filter => {
   return {
     query: {
       terms: {
         'host.name': hostNames,
       },
     },
-    meta: {},
+    meta: dataView
+      ? {
+          value: hostNames.join(),
+          type: 'phrases',
+          params: hostNames,
+          index: dataView.id,
+          key: 'host.name',
+        }
+      : {},
   };
 };

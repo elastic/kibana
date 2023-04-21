@@ -13,6 +13,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
 import { LensAttributes } from '../../../../../common/visualizations';
@@ -27,6 +28,7 @@ export interface Props {
   lastReloadRequestTime?: number;
   style?: React.CSSProperties;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
+  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }
 
 export const LensWrapper = ({
@@ -38,6 +40,7 @@ export const LensWrapper = ({
   extraActions,
   style,
   onBrushEnd,
+  onLoad,
   lastReloadRequestTime,
 }: Props) => {
   const intersectionRef = React.useRef(null);
@@ -86,6 +89,7 @@ export const LensWrapper = ({
             name: id,
           }}
           onBrushEnd={onBrushEnd}
+          onLoad={onLoad}
         />
       )}
     </div>

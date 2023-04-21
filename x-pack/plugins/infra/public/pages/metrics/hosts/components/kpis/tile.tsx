@@ -4,23 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiI18n } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiI18n,
+  EuiToolTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { LensWrapper } from '../chart/lens_wrapper';
+import { createHostsFilter } from '../../utils';
+import { useHostCountContext } from '../../hooks/use_host_count';
+import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { ChartLoader } from '../chart/chart_loader';
 
 export interface KPIChartProps {
   title: string;
@@ -35,7 +43,6 @@ const MIN_HEIGHT = 150;
 
 export const Tile = ({
   title,
-  subtitle,
   type,
   backgroundColor,
   toolTip,
@@ -43,14 +50,29 @@ export const Tile = ({
 }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest } = useHostsViewContext();
+  const { baseRequest, hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+
+  const getSubtitle = () => {
+    const showLimitSubtitle = searchCriteria.limit < (hostCountData?.count.value ?? 0);
+    return showLimitSubtitle
+      ? i18n.translate(`xpack.infra.hostsViewPage.metricTrend.${type}.subtitle.limit`, {
+          defaultMessage: 'Average (of {limit} hosts)',
+          values: {
+            limit: searchCriteria.limit,
+          },
+        })
+      : i18n.translate(`xpack.infra.hostsViewPage.metricTrend.${type}.subtitle`, {
+          defaultMessage: 'Average',
+        });
+  };
 
   const { attributes, getExtraActions, error } = useLensAttributes({
     type,
     dataView,
     options: {
       title,
-      subtitle,
+      subtitle: getSubtitle(),
       backgroundColor,
       showTrendLine: trendLine,
       showTitle: false,
@@ -58,7 +80,18 @@ export const Tile = ({
     visualizationType: 'metricChart',
   });
 
-  const filters = [...searchCriteria.filters, ...searchCriteria.panelFilters];
+  const hostsFilterQuery = useMemo(() => {
+    return createHostsFilter(
+      hostNodes.map((p) => p.name),
+      dataView
+    );
+  }, [hostNodes, dataView]);
+
+  const filters = [
+    ...searchCriteria.filters,
+    ...searchCriteria.panelFilters,
+    ...[hostsFilterQuery],
+  ];
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
     filters,
@@ -77,6 +110,15 @@ export const Tile = ({
       },
     });
   };
+
+  const loading = hostsLoading || hostCountLoading;
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    attributes,
+    lastReloadRequestTime: baseRequest.requestTs,
+    filters,
+    query: searchCriteria.query,
+    dateRange: searchCriteria.dateRange,
+  });
 
   return (
     <EuiPanelStyled
@@ -106,32 +148,37 @@ export const Tile = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiToolTip
-          className="eui-fullWidth"
-          delay="regular"
-          content={toolTip}
-          anchorClassName="eui-fullWidth"
-        >
-          <LensWrapper
-            id={`hostViewKPIChart-${type}`}
-            attributes={attributes}
-            style={{ height: MIN_HEIGHT }}
-            extraActions={extraActions}
-            lastReloadRequestTime={baseRequest.requestTs}
-            dateRange={searchCriteria.dateRange}
-            filters={filters}
-            query={searchCriteria.query}
-            onBrushEnd={handleBrushEnd}
-          />
-        </EuiToolTip>
+        <ChartLoader loading={loading}>
+          <EuiToolTip
+            className="eui-fullWidth"
+            delay="regular"
+            content={toolTip}
+            anchorClassName="eui-fullWidth"
+          >
+            <LensWrapper
+              id={`hostViewKPIChart-${type}`}
+              attributes={afterLoadedState.attributes}
+              style={{ height: MIN_HEIGHT }}
+              extraActions={extraActions}
+              lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+              dateRange={afterLoadedState.dateRange}
+              filters={afterLoadedState.filters}
+              query={afterLoadedState.query}
+              onBrushEnd={handleBrushEnd}
+            />
+          </EuiToolTip>
+        </ChartLoader>
       )}
     </EuiPanelStyled>
   );
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
+  position: relative;
+  border-radius: ${({ theme }) => theme.eui.euiSizeS};
+  overflow: hidden;
   .echMetric {
-    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
+    border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;
   }
 `;

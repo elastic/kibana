@@ -53,7 +53,7 @@ export const UnifiedSearchBar = () => {
 
   return (
     <StickyContainer>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}
@@ -72,7 +72,7 @@ export const UnifiedSearchBar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" alignItems="center">
+          <EuiFlexGroup direction="row" alignItems="center" wrap>
             <EuiFlexItem>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}

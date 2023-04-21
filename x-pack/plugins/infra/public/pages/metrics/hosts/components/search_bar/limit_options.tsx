@@ -31,9 +31,8 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
       direction="row"
       alignItems="center"
       justifyContent="spaceBetween"
-      wrap={false}
       responsive={false}
-      gutterSize="s"
+      gutterSize="xs"
     >
       <EuiFlexItem grow={false}>
         <EuiText size="xs" textAlign="left">
