@@ -33,5 +33,6 @@ export default defineCypressConfig({
   // eslint-disable-next-line sort-keys
   e2e: {
     baseUrl: 'http://localhost:5601',
+    supportFile: './cypress/support/e2e.ts',
   },
 });

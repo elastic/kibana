@@ -22,34 +22,27 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-// import './commands';
+// Enforce building this file.
+export {};
 
-// declare global {
-//   // eslint-disable-next-line @typescript-eslint/no-namespace
-//   namespace Cypress {
-//     interface Chainable {
-//       getBySel(value: string, ...args: any[]): Chainable<any>;
-//       getKibanaVersion(): Chainable<string>;
-//     }
-//   }
-// }
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      getBySel(value: string, ...args: any[]): Chainable<any>;
+      getKibanaVersion(): Chainable<string>;
+    }
+  }
+}
 
-// function getBySel(selector: string, ...args: any[]) {
-//   return cy.get(`[data-test-subj="${selector}"]`, ...args);
-// }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getBySel(selector: string, ...args: any[]) {
+  return cy.get(`[data-test-subj="${selector}"]`, ...args);
+}
 
-// function getKibanaVersion() {
-//   return cy.request('/api/status').then(({ body }) => {
-//     return body.version.number;
-//   });
-// }
+Cypress.Commands.add('getBySel', getBySel);
 
-// Cypress.Commands.add('getBySel', getBySel);
-// Cypress.Commands.add('getKibanaVersion', getKibanaVersion);
-
-// // Alternatively you can use CommonJS syntax:
-// // require('./commands')
-// Cypress.on('uncaught:exception', () => {
-//   return false;
-// });
+Cypress.on('uncaught:exception', () => {
+  return false;
+});
