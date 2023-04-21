@@ -79,6 +79,7 @@ export const useNavigateToTimeline = () => {
   const openTimelineWithFilters = useCallback(
     (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
       const dataProviders = [];
+
       for (const orFilterGroup of filters) {
         const mainFilter = orFilterGroup[0];
 
@@ -98,6 +99,7 @@ export const useNavigateToTimeline = () => {
           dataProviders.push(dataProvider);
         }
       }
+
       navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]
