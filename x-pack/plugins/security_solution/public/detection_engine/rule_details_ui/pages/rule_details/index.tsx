@@ -540,22 +540,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionMessage = lastExecution?.message ?? '';
 
   const ruleStatusInfo = useMemo(() => {
-    return ruleLoading ? (
-      <EuiFlexItem>
-        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-      </EuiFlexItem>
-    ) : (
+    return (
       <>
-        <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-          <EuiButtonIcon
-            data-test-subj="refreshButton"
-            color="primary"
-            onClick={refreshRule}
-            iconType="refresh"
-            aria-label={ruleI18n.REFRESH}
-            isDisabled={!isExistingRule}
-          />
-        </RuleStatus>
+        {ruleLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+          </EuiFlexItem>
+        ) : (
+          <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+            <EuiButtonIcon
+              data-test-subj="refreshButton"
+              color="primary"
+              onClick={refreshRule}
+              iconType="refresh"
+              aria-label={ruleI18n.REFRESH}
+              isDisabled={!isExistingRule}
+            />
+          </RuleStatus>
+        )}
         <EuiFlexItem grow={false}>
           <RuleDetailsSnoozeSettings id={ruleId} />
         </EuiFlexItem>
