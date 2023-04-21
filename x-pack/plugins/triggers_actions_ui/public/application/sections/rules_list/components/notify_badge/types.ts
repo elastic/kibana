@@ -12,10 +12,7 @@ export interface RulesListNotifyBadgeProps {
     RuleTableItem,
     'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
   >;
-  isOpen: boolean;
   previousSnoozeInterval?: string | null;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  onClose: () => void;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;

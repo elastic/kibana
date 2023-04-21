@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
 import { unsnoozeRule as unsnoozeRuleApi } from '../../../../lib/rule_api/unsnooze';
@@ -18,7 +18,6 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
 > = (props) => {
   const { onRuleChanged, rule, showTooltipInline, showOnHover } = props;
   const { http } = useKibana().services;
-  const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
 
   const onSnoozeRule = useCallback(
     (snoozeSchedule: SnoozeSchedule) =>
@@ -32,20 +31,9 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
     [http, rule?.id]
   );
 
-  const openSnooze = useCallback(() => {
-    setCurrentlyOpenNotify(rule?.id);
-  }, [rule?.id]);
-
-  const closeSnooze = useCallback(() => {
-    setCurrentlyOpenNotify('');
-  }, []);
-
   return (
     <RulesListNotifyBadge
       rule={rule}
-      isOpen={currentlyOpenNotify === rule?.id}
-      onClick={openSnooze}
-      onClose={closeSnooze}
       onRuleChanged={onRuleChanged}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}

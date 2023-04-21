@@ -58,11 +58,8 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   statusMessage,
   loadExecutionLogAggregations,
 }) => {
-  const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
 
-  const openSnooze = useCallback(() => setIsSnoozeOpen(true), [setIsSnoozeOpen]);
-  const closeSnooze = useCallback(() => setIsSnoozeOpen(false), [setIsSnoozeOpen]);
   const onSnoozeRule = useCallback(
     (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
@@ -187,9 +184,6 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
           rule={{ ...rule, isEditable }}
-          isOpen={isSnoozeOpen}
-          onClick={openSnooze}
-          onClose={closeSnooze}
           onRuleChanged={requestRefresh}
           snoozeRule={onSnoozeRule}
           unsnoozeRule={onUnsnoozeRule}
