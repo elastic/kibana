@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import * as labels from './labels';
 import { useEnablement } from '../../../hooks';
 
 export const DisabledCallout = ({ total }: { total: number }) => {
-  const { enablement, enableSynthetics, invalidApiKeyError, loading } = useEnablement();
+  const { enablement, invalidApiKeyError, loading } = useEnablement();
 
   const showDisableCallout = !enablement.isEnabled && total > 0;
   const showInvalidApiKeyCallout = invalidApiKeyError && total > 0;
@@ -20,31 +20,18 @@ export const DisabledCallout = ({ total }: { total: number }) => {
     return null;
   }
 
-  return (
+  return !enablement.canEnable && !loading ? (
     <>
       <EuiCallOut title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning">
         <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
-        {enablement.canEnable || loading ? (
-          <EuiButton
-            data-test-subj="syntheticsMonitorManagementPageButton"
-            color="warning"
-            onClick={() => {
-              enableSynthetics();
-            }}
-            isLoading={loading}
-          >
-            {labels.SYNTHETICS_ENABLE_LABEL}
-          </EuiButton>
-        ) : (
-          <p>
-            {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink data-test-subj="syntheticsMonitorManagementPageLink" href="#" target="_blank">
-              {labels.LEARN_MORE_LABEL}
-            </EuiLink>
-          </p>
-        )}
+        <p>
+          {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
+          <EuiLink data-test-subj="syntheticsMonitorManagementPageLink" href="#" target="_blank">
+            {labels.LEARN_MORE_LABEL}
+          </EuiLink>
+        </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
-  );
+  ) : null;
 };

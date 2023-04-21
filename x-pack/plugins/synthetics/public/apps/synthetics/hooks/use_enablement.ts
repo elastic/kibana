@@ -7,12 +7,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getSyntheticsEnablement,
-  enableSynthetics,
-  disableSynthetics,
-  selectSyntheticsEnablement,
-} from '../state';
+import { getSyntheticsEnablement, disableSynthetics, selectSyntheticsEnablement } from '../state';
 
 export function useEnablement() {
   const dispatch = useDispatch();
@@ -35,7 +30,6 @@ export function useEnablement() {
     invalidApiKeyError: enablement ? !Boolean(enablement?.isValidApiKey) : false,
     error,
     loading,
-    enableSynthetics: useCallback(() => dispatch(enableSynthetics()), [dispatch]),
     disableSynthetics: useCallback(() => dispatch(disableSynthetics()), [dispatch]),
   };
 }
