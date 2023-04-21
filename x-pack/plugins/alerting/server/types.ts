@@ -138,7 +138,7 @@ export type ExecutorType<
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
-  validate: (object: unknown) => Params;
+  validate: (object: Partial<Params>) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
@@ -236,8 +236,8 @@ export interface RuleType<
 > {
   id: string;
   name: string;
-  validate?: {
-    params?: RuleTypeParamsValidator<Params>;
+  validate: {
+    params: RuleTypeParamsValidator<Params>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];

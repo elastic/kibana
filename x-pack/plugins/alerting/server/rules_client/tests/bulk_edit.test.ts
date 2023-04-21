@@ -210,6 +210,9 @@ describe('bulkEdit()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -686,6 +689,9 @@ describe('bulkEdit()', () => {
         },
         producer: 'alerts',
         getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const existingAction = {
         frequency: {
