@@ -33,8 +33,9 @@ export async function getServiceLocations(server: UptimeServerSetup) {
   if (server.config.service?.devUrl) {
     locations = [getDevLocation(server.config.service.devUrl)];
   }
+  const manifestUrl = server.config.service?.manifestUrl;
 
-  if (!server.config.service?.manifestUrl) {
+  if (!manifestUrl || manifestUrl === 'mockDevUrl') {
     return { locations };
   }
 

@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
 
-import { EuiButton, EuiFlexItem, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
@@ -20,6 +30,7 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
+import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../workplace_search/constants';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
@@ -33,20 +44,54 @@ import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
 export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
+  const [showPopover, setShowPopover] = useState<boolean>(false);
   const { openEngineCreate } = useActions(EnginesListLogic);
   return (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      data-test-subj="enterprise-search-content-engines-creation-button"
-      data-telemetry-id="entSearchContent-engines-list-createEngine"
-      disabled={disabled}
-      onClick={openEngineCreate}
+    <EuiPopover
+      isOpen={disabled && showPopover}
+      closePopover={() => setShowPopover(false)}
+      button={
+        <div
+          data-test-subj="create-engine-button-hover-target"
+          onMouseEnter={() => setShowPopover(true)}
+          onFocus={() => setShowPopover(true)}
+          tabIndex={0}
+        >
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="enterprise-search-content-engines-creation-button"
+            data-telemetry-id="entSearchContent-engines-list-createEngine"
+            disabled={disabled}
+            onClick={openEngineCreate}
+          >
+            {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
+              defaultMessage: 'Create Search Application',
+            })}
+          </EuiButton>
+        </div>
+      }
     >
-      {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-        defaultMessage: 'Create Search Application',
-      })}
-    </EuiButton>
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.engines.createEngineDisabledPopover.title"
+          defaultMessage="Platinum only feature"
+        />
+      </EuiPopoverTitle>
+      <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engines.createEngineDisabledPopover.body"
+              defaultMessage="Search Applications require a Platinum license or higher and are not available to Standard license self-managed deployments."
+            />
+          </EuiText>
+          <EuiLink target="_blank" href={docLinks.licenseManagement}>
+            {EXPLORE_PLATINUM_FEATURES_LINK}
+          </EuiLink>
+        </EuiFlexGroup>
+      </div>
+    </EuiPopover>
   );
 };
 
