@@ -4839,6 +4839,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -4986,6 +4999,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -5073,6 +5099,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -5160,6 +5199,19 @@
                         },
                         "total": {
                           "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -5387,6 +5439,38 @@
               }
             },
             "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "vulnerabilities": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_vulnerabilities": {
               "properties": {
                 "doc_count": {
                   "type": "long"

@@ -554,6 +554,30 @@
           "trackAdoption": true,
           "references": [
             {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/application.tsx"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/plugin.ts"
             },
@@ -888,7 +912,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -1809,8 +1835,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",

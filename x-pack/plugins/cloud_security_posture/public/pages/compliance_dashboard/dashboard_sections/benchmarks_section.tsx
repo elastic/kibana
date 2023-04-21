@@ -186,25 +186,31 @@ export const BenchmarksSection = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <RisksTable
-              compact
-              data={cluster.groupedFindingsEvaluation}
-              maxItems={3}
-              onCellClick={(resourceTypeName) =>
-                navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
-              }
-              viewAllButtonTitle={i18n.translate(
-                'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                {
-                  defaultMessage: 'View all failed findings for this {postureAsset}',
-                  values: {
-                    postureAsset:
-                      dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
-                  },
+            <div
+              style={{
+                paddingRight: euiTheme.size.base,
+              }}
+            >
+              <RisksTable
+                compact
+                data={cluster.groupedFindingsEvaluation}
+                maxItems={3}
+                onCellClick={(resourceTypeName) =>
+                  navToFailedFindingsByClusterAndSection(cluster, resourceTypeName)
                 }
-              )}
-              onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
-            />
+                viewAllButtonTitle={i18n.translate(
+                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                  {
+                    defaultMessage: 'View all failed findings for this {postureAsset}',
+                    values: {
+                      postureAsset:
+                        dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
+                    },
+                  }
+                )}
+                onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
+              />
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}

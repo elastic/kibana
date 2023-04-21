@@ -79,6 +79,59 @@
       },
       {
         "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DropOverlayWrapper",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "DropOverlayWrapper",
+        "description": [
+          "\nThis prevents the in-place droppable styles (under children) and allows to rather show an overlay with droppable styles (on top of children)"
+        ],
+        "signature": [
+          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/dom-drag-drop",
+            "scope": "public",
+            "docId": "kibKbnDomDragDropPluginApi",
+            "section": "def-public.DropOverlayWrapperProps",
+            "text": "DropOverlayWrapperProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropOverlayWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  isVisible,\n  children,\n  overlayProps,\n  className,\n  ...otherProps\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropOverlayWrapperProps",
+                "text": "DropOverlayWrapperProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
         "id": "def-public.ReorderProvider",
         "type": "Function",
         "tags": [
@@ -89,7 +142,7 @@
           "\nTo create a reordering group, surround the elements from the same group with a `ReorderProvider`"
         ],
         "signature": [
-          "({\n  id,\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { id: string; children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          "({\n  id,\n  children,\n  className,\n  draggingHeight = REORDER_ITEM_HEIGHT,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { id: string; children: React.ReactNode; className?: string | undefined; draggingHeight?: number | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
         "deprecated": false,
@@ -100,7 +153,7 @@
             "id": "def-public.ReorderProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
+            "label": "{\n  id,\n  children,\n  className,\n  draggingHeight = REORDER_ITEM_HEIGHT,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
             "description": [],
             "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
             "deprecated": false,
@@ -140,6 +193,20 @@
                 "description": [],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.ReorderProvider.$1.draggingHeight",
+                "type": "number",
+                "tags": [],
+                "label": "draggingHeight",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "deprecated": false,
@@ -568,6 +635,61 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DropOverlayWrapperProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DropOverlayWrapperProps",
+        "description": [
+          "\nDropOverlayWrapper Props"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropOverlayWrapperProps.isVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isVisible",
+            "description": [],
+            "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropOverlayWrapperProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropOverlayWrapperProps.overlayProps",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "overlayProps",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

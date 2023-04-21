@@ -22,6 +22,7 @@ export { Enrich } from './enrich';
 export { Fail } from './fail';
 export { Fingerprint } from './fingerprint';
 export { Foreach } from './foreach';
+export { GeoGrid } from './geogrid';
 export { GeoIP } from './geoip';
 export { Grok } from './grok';
 export { Gsub } from './gsub';
