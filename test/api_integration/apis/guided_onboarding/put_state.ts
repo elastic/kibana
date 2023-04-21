@@ -10,6 +10,9 @@ import expect from '@kbn/expect';
 import {
   testGuideStep1ActiveState,
   testGuideNotActiveState,
+  testGuideStep1InProgressState,
+  testGuideStep2ActiveState,
+  testGuideParams,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   pluginStateSavedObjectsType,
@@ -160,6 +163,30 @@ export default function testPutState({ getService }: FtrProviderContext) {
         id: 'kubernetes',
       });
       expect(kubernetesGuide.attributes.isActive).to.eql(true);
+    });
+
+    it('saves dynamic params if provided', async () => {
+      // create a guide
+      await createGuides(kibanaServer, [testGuideStep1InProgressState]);
+
+      // complete step1 with dynamic params
+      await supertest
+        .put(putStatePath)
+        .set('kbn-xsrf', 'true')
+        .send({
+          guide: {
+            ...testGuideStep2ActiveState,
+            params: testGuideParams,
+          },
+        })
+        .expect(200);
+
+      // check that params object was saved
+      const testGuideSO = await kibanaServer.savedObjects.get({
+        type: guideStateSavedObjectsType,
+        id: testGuideId,
+      });
+      expect(testGuideSO.attributes.params).to.eql(testGuideParams);
     });
   });
 }

@@ -185,7 +185,10 @@ export const getTestBrowserSyntheticsPolicy = ({
             screenshots: { value: 'on', type: 'text' },
             synthetics_args: { value: null, type: 'text' },
             ignore_https_errors: { value: false, type: 'bool' },
-            'throttling.config': { value: '5d/3u/20l', type: 'text' },
+            'throttling.config': {
+              value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
+              type: 'text',
+            },
             'filter_journeys.tags': { value: null, type: 'yaml' },
             'filter_journeys.match': { value: null, type: 'text' },
             'source.zip_url.ssl.certificate_authorities': { type: 'yaml' },
@@ -218,7 +221,7 @@ export const getTestBrowserSyntheticsPolicy = ({
             enabled: true,
             schedule: '@every 3m',
             timeout: '16s',
-            throttling: '5d/3u/20l',
+            throttling: { download: 5, upload: 3, latency: 20 },
             tags: ['cookie-test', 'browser'],
             'source.inline.script':
               'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
