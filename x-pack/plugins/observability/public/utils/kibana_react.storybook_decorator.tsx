@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ComponentType } from 'react';
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
