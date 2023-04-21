@@ -90,10 +90,8 @@ export function registerErrorCountRuleType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ params: ruleParams, services, spaceId }) => {
-        const predefinedGroupby: string[] = [SERVICE_NAME, SERVICE_ENVIRONMENT];
-
-        const allGroupbyFields: string[] =
-          ruleParams.groupBy ?? predefinedGroupby;
+        const predefinedGroupby = [SERVICE_NAME, SERVICE_ENVIRONMENT];
+        const allGroupbyFields = ruleParams.groupBy ?? predefinedGroupby;
 
         const config = await firstValueFrom(config$);
 
