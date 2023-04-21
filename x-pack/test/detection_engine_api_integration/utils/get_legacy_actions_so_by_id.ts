@@ -16,7 +16,7 @@ interface LegacyActionSO extends LegacyRuleActions {
 }
 
 /**
- * Fetch legacy action sidecar SOs from the .kibana index
+ * Fetch legacy action sidecar SOs from the security solution savedObjects index
  * @param es The ElasticSearch service
  * @param id SO id
  */

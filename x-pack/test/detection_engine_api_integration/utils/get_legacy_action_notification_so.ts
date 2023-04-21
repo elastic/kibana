@@ -16,7 +16,7 @@ interface LegacyActionNotificationSO extends LegacyRuleNotificationAlertTypePara
 }
 
 /**
- * Fetch all legacy action sidecar notification SOs from the .kibana index
+ * Fetch all legacy action sidecar notification SOs from the alerting savedObjects index
  * @param es The ElasticSearch service
  */
 export const getLegacyActionNotificationSO = async (

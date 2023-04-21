@@ -17,7 +17,7 @@ interface RuleSO {
 }
 
 /**
- * Fetch legacy action sidecar SOs from the .kibana index
+ * Fetch legacy action sidecar SOs from the alerting savedObjects index
  * @param es The ElasticSearch service
  * @param id SO id
  */

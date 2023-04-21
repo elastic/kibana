@@ -15,7 +15,7 @@ interface LegacyActionSO extends LegacyRuleActions {
 }
 
 /**
- * Fetch all legacy action sidecar SOs from the .kibana index
+ * Fetch all legacy action sidecar SOs from the security solution savedObjects index
  * @param es The ElasticSearch service
  */
 export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyActionSO>> =>

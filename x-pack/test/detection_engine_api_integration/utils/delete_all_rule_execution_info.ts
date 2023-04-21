@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { countDownES } from './count_down_es';
 
 /**
- * Remove all rules execution info saved objects from the .kibana index
+ * Remove all rules execution info saved objects from the security solution savedObjects index
  * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
