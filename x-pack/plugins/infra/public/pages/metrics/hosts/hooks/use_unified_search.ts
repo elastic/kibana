@@ -19,20 +19,18 @@ import {
   HostsSearchPayload,
   useHostsUrlState,
   type HostsState,
-  type StringDateRange,
+  type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
 
 const buildQuerySubmittedPayload = (
-  hostState: HostsState & { parsedDateRange: StringDateRange }
+  hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
 ) => {
   const { panelFilters, filters, parsedDateRange, query: queryObj } = hostState;
 
   return {
     control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
     filters: filters.map((filter) => JSON.stringify(filter)),
-    interval: telemetryTimeRangeFormatter(
-      new Date(parsedDateRange.to).getTime() - new Date(parsedDateRange.from).getTime()
-    ),
+    interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
     query: queryObj.query,
   };
 };
@@ -74,6 +72,15 @@ export const useUnifiedSearch = () => {
 
     return { from, to };
   }, [searchCriteria.dateRange]);
+
+  const getDateRangeAsTimestamp = useCallback(() => {
+    const parsedDate = getParsedDateRange();
+
+    const from = new Date(parsedDate.from).getTime();
+    const to = new Date(parsedDate.to).getTime();
+
+    return { from, to };
+  }, [getParsedDateRange]);
 
   const buildQuery = useCallback(() => {
     return buildEsQuery(dataView, searchCriteria.query, [
@@ -118,16 +125,17 @@ export const useUnifiedSearch = () => {
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
-    const parsedDateRange = getParsedDateRange();
+    const parsedDateRange = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(
       buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange })
     );
-  }, [getParsedDateRange, searchCriteria, telemetry]);
+  }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
 
   return {
     buildQuery,
     onSubmit,
     getParsedDateRange,
+    getDateRangeAsTimestamp,
     searchCriteria,
   };
 };

@@ -123,6 +123,10 @@ export type HostsSearchPayload = Partial<HostsState>;
 export type HostsStateUpdater = (params: HostsSearchPayload) => void;
 
 export type StringDateRange = rt.TypeOf<typeof StringDateRangeRT>;
+export interface StringDateRangeTimestamp {
+  from: number;
+  to: number;
+}
 
 const encodeUrlState = HostsStateRT.encode;
 const decodeUrlState = (value: unknown) => {

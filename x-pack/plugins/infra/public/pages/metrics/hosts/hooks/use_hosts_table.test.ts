@@ -7,24 +7,24 @@
 
 import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 
 describe('useHostTable hook', () => {
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const nodes: SnapshotNode[] = [
+    const nodes: InfraAssetMetricsItem[] = [
       {
         metrics: [
           {
             name: 'rx',
-            avg: 252456.92916666667,
+            value: 252456.92916666667,
           },
           {
             name: 'tx',
-            avg: 252758.425,
+            value: 252758.425,
           },
           {
             name: 'memory',
-            avg: 0.94525,
+            value: 0.94525,
           },
           {
             name: 'cpu',
@@ -32,25 +32,28 @@ describe('useHostTable hook', () => {
           },
           {
             name: 'memoryTotal',
-            avg: 34359.738368,
+            value: 34359.738368,
           },
         ],
-        path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
+        metadata: [
+          { name: 'host.os.name', value: null },
+          { name: 'cloud.provider', value: 'aws' },
+        ],
         name: 'host-0',
       },
       {
         metrics: [
           {
             name: 'rx',
-            avg: 95.86339715321859,
+            value: 95.86339715321859,
           },
           {
             name: 'tx',
-            avg: 110.38566859563191,
+            value: 110.38566859563191,
           },
           {
             name: 'memory',
-            avg: 0.5400000214576721,
+            value: 0.5400000214576721,
           },
           {
             name: 'cpu',
@@ -58,18 +61,19 @@ describe('useHostTable hook', () => {
           },
           {
             name: 'memoryTotal',
-            avg: 9.194304,
+            value: 9.194304,
           },
         ],
-        path: [
-          { value: 'host-1', label: 'host-1' },
-          { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
+        metadata: [
+          { name: 'host.os.name', value: 'macOS' },
+          { name: 'cloud.provider', value: 'aws' },
+          { name: 'host.ip', value: '243.86.94.22' },
         ],
         name: 'host-1',
       },
     ];
 
-    const items = [
+    const expected = [
       {
         name: 'host-0',
         os: '-',
@@ -79,27 +83,11 @@ describe('useHostTable hook', () => {
           cloudProvider: 'aws',
           name: 'host-0',
         },
-        rx: {
-          name: 'rx',
-          avg: 252456.92916666667,
-        },
-        tx: {
-          name: 'tx',
-          avg: 252758.425,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.94525,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.6353277777777777,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-
-          avg: 34359.738368,
-        },
+        rx: 252456.92916666667,
+        tx: 252758.425,
+        memory: 0.94525,
+        cpu: 0.6353277777777777,
+        memoryTotal: 34359.738368,
       },
       {
         name: 'host-1',
@@ -110,32 +98,17 @@ describe('useHostTable hook', () => {
           cloudProvider: null,
           name: 'host-1',
         },
-        rx: {
-          name: 'rx',
-          avg: 95.86339715321859,
-        },
-        tx: {
-          name: 'tx',
-          avg: 110.38566859563191,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.5400000214576721,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.8647805555555556,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-          avg: 9.194304,
-        },
+        rx: 95.86339715321859,
+        tx: 110.38566859563191,
+        memory: 0.5400000214576721,
+        cpu: 0.8647805555555556,
+        memoryTotal: 9.194304,
       },
     ];
-    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
 
+    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
     const { result } = renderHook(() => useHostsTable(nodes, { time }));
 
-    expect(result.current.items).toStrictEqual(items);
+    expect(result.current.items).toStrictEqual(expected);
   });
 });
