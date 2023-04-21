@@ -31,19 +31,20 @@ export function RuleSnoozeBadge({
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
-  const isLoading = !snoozeSettings;
-  const rule = useMemo(
-    () => ({
-      id: snoozeSettings?.id ?? '',
-      muteAll: snoozeSettings?.muteAll ?? false,
-      activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
-      isSnoozedUntil: snoozeSettings?.isSnoozedUntil
-        ? new Date(snoozeSettings.isSnoozedUntil)
+  const ruleSnoozeSettings = useMemo(
+    () =>
+      snoozeSettings
+        ? {
+            id: snoozeSettings?.id ?? '',
+            muteAll: snoozeSettings?.muteAll ?? false,
+            activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
+            isSnoozedUntil: snoozeSettings?.isSnoozedUntil
+              ? new Date(snoozeSettings.isSnoozedUntil)
+              : undefined,
+            snoozeSchedule: snoozeSettings?.snoozeSchedule,
+          }
         : undefined,
-      snoozeSchedule: snoozeSettings?.snoozeSchedule,
-      isEditable: hasCRUDPermissions,
-    }),
-    [snoozeSettings, hasCRUDPermissions]
+    [snoozeSettings]
   );
 
   if (error) {
@@ -56,8 +57,8 @@ export function RuleSnoozeBadge({
 
   return (
     <RulesListNotifyBadge
-      rule={rule}
-      isLoading={isLoading}
+      snoozeSettings={ruleSnoozeSettings}
+      disabled={!hasCRUDPermissions}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
     />

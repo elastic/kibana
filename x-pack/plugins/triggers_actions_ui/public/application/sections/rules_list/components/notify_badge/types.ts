@@ -27,5 +27,5 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'snoozeSettings' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+  'snoozeSettings' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
 >;
