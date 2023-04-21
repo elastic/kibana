@@ -35,7 +35,6 @@ import {
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -64,6 +63,7 @@ import { isGlobalPolicyEffected } from '../../../../components/effected_policy_s
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
 import { EventFiltersApiClient } from '../../service/api_client';
+import { useFetchEventFiltersFields } from '../../../../services/policies/hooks';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -146,7 +146,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchEventFiltersFields(
       indexNames,
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
