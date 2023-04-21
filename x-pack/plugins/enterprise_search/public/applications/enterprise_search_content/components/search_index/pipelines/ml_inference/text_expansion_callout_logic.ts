@@ -57,29 +57,45 @@ import {
 // Error handling
 // - If any API call returns error -> Error panel
 
+const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
+const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
+
 interface TextExpansionCalloutActions {
+  clearTextExpansionModelPollingId: () => void;
   createTextExpansionModel: CreateTextExpansionModelApiLogicActions['makeRequest'];
+  createTextExpansionModelPollingTimeout: (duration: number) => { duration: number };
   createTextExpansionModelSuccess: CreateTextExpansionModelApiLogicActions['apiSuccess'];
   fetchTextExpansionModel: FetchTextExpansionModelApiLogicActions['makeRequest'];
+  fetchTextExpansionModelError: FetchTextExpansionModelApiLogicActions['apiError'];
   fetchTextExpansionModelSuccess: FetchTextExpansionModelApiLogicActions['apiSuccess'];
-  textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
+  setTextExpansionModelPollingId: (pollTimeoutId: ReturnType<typeof setTimeout>) => {
+    pollTimeoutId: ReturnType<typeof setTimeout>;
+  };
   startPollingTextExpansionModel: () => void;
   stopPollingTextExpansionModel: () => void;
+  textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
 export interface TextExpansionCalloutValues {
-  createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
   createTextExpansionModelStatus: Status;
+  createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
+  isPollingTextExpansionModelActive: boolean;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
+  textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
 }
 
 export const TextExpansionCalloutLogic = kea<
   MakeLogicType<TextExpansionCalloutValues, TextExpansionCalloutActions>
 >({
   actions: {
+    clearTextExpansionModelPollingId: true,
+    createTextExpansionModelPollingTimeout: (duration) => ({ duration }),
+    setTextExpansionModelPollingId: (pollTimeoutId: ReturnType<typeof setTimeout>) => ({
+      pollTimeoutId,
+    }),
     startPollingTextExpansionModel: true,
     stopPollingTextExpansionModel: true,
   },
@@ -88,34 +104,85 @@ export const TextExpansionCalloutLogic = kea<
       CreateTextExpansionModelApiLogic,
       ['makeRequest as createTextExpansionModel', 'apiSuccess as createTextExpansionModelSuccess'],
       FetchTextExpansionModelApiLogic,
-      ['makeRequest as fetchTextExpansionModel', 'apiSuccess as fetchTextExpansionModelSuccess'],
+      [
+        'makeRequest as fetchTextExpansionModel',
+        'apiSuccess as fetchTextExpansionModelSuccess',
+        'apiError as fetchTextExpansionModelError',
+      ],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
-      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
+      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'], // error as ...
       FetchTextExpansionModelApiLogic,
       ['data as textExpansionModel'],
     ],
   },
-  events: ({ actions }) => ({
+  events: ({ actions, values }) => ({
     afterMount: () => {
-      console.log('afterMount');
       actions.fetchTextExpansionModel(undefined);
     },
-  }),
-  listeners: ({ actions }) => ({
-    fetchTextExpansionModelSuccess: (data) => {
-      console.log('fetchTextExpansionModelSuccess listener', data);
-      if (data?.deploymentState === 'downloading') {
-        console.log('START polling');
-        actions.startPollingTextExpansionModel();
-      } else if (data?.deploymentState === 'downloaded') {
-        console.log('END polling');
+    beforeUnmount: () => {
+      if (values.textExpansionModelPollTimeoutId !== null) {
         actions.stopPollingTextExpansionModel();
       }
     },
   }),
+  listeners: ({ actions, values }) => ({
+    createTextExpansionModelPollingTimeout: ({ duration }) => {
+      if (values.textExpansionModelPollTimeoutId !== null) {
+        clearTimeout(values.textExpansionModelPollTimeoutId);
+      }
+      const timeoutId = setTimeout(() => {
+        actions.fetchTextExpansionModel(undefined);
+      }, duration);
+      actions.setTextExpansionModelPollingId(timeoutId);
+    },
+    fetchTextExpansionModelError: () => {
+      if (values.isPollingTextExpansionModelActive) {
+        actions.createTextExpansionModelPollingTimeout(
+          FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE
+        );
+      }
+    },
+    fetchTextExpansionModelSuccess: (data) => {
+      if (data?.deploymentState === 'downloading') {
+        if (!values.isPollingTextExpansionModelActive) {
+          actions.startPollingTextExpansionModel();
+        } else {
+          actions.createTextExpansionModelPollingTimeout(
+            FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION
+          );
+        }
+      } else if (
+        data?.deploymentState === 'downloaded' &&
+        values.isPollingTextExpansionModelActive
+      ) {
+        actions.stopPollingTextExpansionModel();
+      }
+    },
+    startPollingTextExpansionModel: () => {
+      if (values.textExpansionModelPollTimeoutId !== null) {
+        clearTimeout(values.textExpansionModelPollTimeoutId);
+      }
+      actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
+    },
+    stopPollingTextExpansionModel: () => {
+      if (values.textExpansionModelPollTimeoutId !== null) {
+        clearTimeout(values.textExpansionModelPollTimeoutId);
+        actions.clearTextExpansionModelPollingId();
+      }
+    },
+  }),
   path: ['enterprise_search', 'content', 'text_expansion_callout_logic'],
+  reducers: {
+    textExpansionModelPollTimeoutId: [
+      null,
+      {
+        clearTextExpansionModelPollingId: () => null,
+        setTextExpansionModelPollingId: (_, { pollTimeoutId }) => pollTimeoutId,
+      },
+    ],
+  },
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
       () => [selectors.createTextExpansionModelStatus],
@@ -123,17 +190,16 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => {
-        console.log('isModelDownloadInProgress', data);
-        return data?.deploymentState === 'downloading';
-      },
+      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'downloading',
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => {
-        console.log('isModelDownloaded', data);
-        return data?.deploymentState === 'downloaded';
-      },
+      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'downloaded',
+    ],
+    isPollingTextExpansionModelActive: [
+      () => [selectors.textExpansionModelPollTimeoutId],
+      (pollingTimeoutId: TextExpansionCalloutValues['textExpansionModelPollTimeoutId']) =>
+        pollingTimeoutId !== null,
     ],
   }),
 });
