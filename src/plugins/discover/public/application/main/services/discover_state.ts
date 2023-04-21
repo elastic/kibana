@@ -24,17 +24,13 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { cloneDeep, isEqual } from 'lodash';
-import { getValidFilters } from '../../../utils/get_valid_filters';
-import { cleanupUrlState } from '../utils/cleanup_url_state';
+import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
-import { loadSavedSearch as loadNextSavedSearch } from './load_saved_search';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
-import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
@@ -42,7 +38,6 @@ import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
-  getInitialState,
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
@@ -85,7 +80,7 @@ export interface LoadParams {
    */
   dataViewSpec?: DataViewSpec;
   /**
-   * determins if AppState should be used to update the saved search
+   * determines if AppState should be used to update the saved search
    * URL is overwriting savedSearch params in this case
    */
   useAppState?: boolean;
@@ -272,25 +267,7 @@ export function getDiscoverStateContainer({
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
-  /**
-   * Load the data view of the given id
-   * A fallback data view is returned, given there's no match
-   * This is usually the default data view
-   */
-  const loadAndResolveDataView = async (id?: string, dataViewSpec?: DataViewSpec) => {
-    const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
-    const adHodDataView = adHocDataViews.find((dataView) => dataView.id === id);
-    if (adHodDataView) return { fallback: false, dataView: adHodDataView };
 
-    const nextDataViewData = await loadDataView({
-      services,
-      id,
-      dataViewSpec,
-      dataViewList: savedDataViews,
-    });
-    const nextDataView = resolveDataView(nextDataViewData, services.toastNotifications);
-    return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
-  };
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
@@ -360,60 +337,14 @@ export function getDiscoverStateContainer({
   };
 
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
-    const { savedSearchId, dataView, dataViewSpec, useAppState } = params ?? {};
-    const appState = useAppState ? appStateContainer.getState() : undefined;
-    // First let's clean up the previous state
-    services.filterManager.setAppFilters([]);
-    services.data.query.queryString.clearQuery();
-    if (!useAppState) {
-      appStateContainer.set({});
-    }
-    // Then, take care of data view and saved search loading, deriving the next state
-    const actualDataView = dataView
-      ? dataView
-      : (await loadAndResolveDataView(appState?.index, dataViewSpec)).dataView;
-
-    const nextSavedSearch = await loadNextSavedSearch({
-      id: savedSearchId,
-      dataView: actualDataView,
-      appState,
+    return loadSavedSearchFn(params ?? {}, {
+      appStateContainer,
+      dataStateContainer,
+      internalStateContainer,
       savedSearchContainer,
+      services,
+      setDataView,
     });
-    const nextAppState = getInitialState(undefined, nextSavedSearch, services);
-    appStateContainer.set(
-      appState ? { ...nextAppState, ...cleanupUrlState({ ...appState }) } : nextAppState
-    );
-
-    const savedSearchDataView = nextSavedSearch.searchSource.getField('index');
-    if (savedSearchDataView) {
-      setDataView(savedSearchDataView);
-      if (!savedSearchDataView.isPersisted()) {
-        internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
-      }
-    }
-    // Finally notify dataStateContainer, data.query and filterManager about new derived state
-    dataStateContainer.reset(nextSavedSearch);
-
-    // set data service filters
-    const filters = nextSavedSearch.searchSource.getField('filter');
-
-    if (Array.isArray(filters) && filters.length) {
-      services.data.query.filterManager.setAppFilters(cloneDeep(filters));
-    }
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = services.filterManager.getFilters();
-    const validFilters = getValidFilters(actualDataView, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      services.filterManager.setFilters(validFilters);
-    }
-    // set data service query
-    const query = nextSavedSearch.searchSource.getField('query');
-    if (query) {
-      services.data.query.queryString.setQuery(query);
-    }
-
-    return nextSavedSearch;
   };
 
   /**
@@ -430,7 +361,8 @@ export function getDiscoverStateContainer({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        loadAndResolveDataView,
+        internalState: internalStateContainer,
+        services,
         setDataView,
       })
     );

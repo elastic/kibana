@@ -10,6 +10,7 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -17,16 +18,14 @@ describe('buildStateSubscribe', () => {
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
   stateContainer.actions.setDataView = jest.fn();
-  const loadAndResolveDataView = jest.fn(() =>
-    Promise.resolve({ fallback: false, dataView: dataViewComplexMock })
-  );
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
       appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
-      loadAndResolveDataView,
+      internalState: stateContainer.internalState,
+      services: discoverServiceMock,
       setDataView: stateContainer.actions.setDataView,
     });
   };

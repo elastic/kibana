@@ -9,6 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
@@ -103,15 +105,22 @@ export async function loadDataView({
 }
 
 /**
- * Function used in the discover controller to message the user about the state of the current
+ * Function used message the user about the state of the current
  * data view
  */
 export function resolveDataView(
   ip: DataViewData,
-  toastNotifications: ToastsStart,
-  isTextBasedQuery?: boolean
+  savedSearch: SavedSearch | undefined,
+  toastNotifications: ToastsStart
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
+
+  const ownDataView = savedSearch?.searchSource.getField('index');
+
+  if (ownDataView && !stateVal) {
+    // the given saved search has its own data view, and no data view was specified in the URL
+    return ownDataView;
+  }
 
   if (stateVal && !stateValFound) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
@@ -121,21 +130,60 @@ export function resolveDataView(
       },
     });
 
-    if (!Boolean(isTextBasedQuery)) {
+    if (ownDataView) {
+      // the given data view in the URL was not found, but the saved search has its own data view
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-          defaultMessage:
-            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+        text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
+          defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
           values: {
-            loadedDataViewTitle: loadedDataView.getIndexPattern(),
-            loadedDataViewId: loadedDataView.id,
+            ownDataViewTitle: ownDataView.getIndexPattern(),
+            ownDataViewId: ownDataView.id,
           },
         }),
-        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
+      return ownDataView;
     }
+
+    toastNotifications.addWarning({
+      title: warningTitle,
+      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+        defaultMessage:
+          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+        values: {
+          loadedDataViewTitle: loadedDataView.getIndexPattern(),
+          loadedDataViewId: loadedDataView.id,
+        },
+      }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+    });
   }
 
   return loadedDataView;
 }
+
+export const loadAndResolveDataView = async (
+  {
+    id,
+    dataViewSpec,
+    savedSearch,
+  }: { id?: string; dataViewSpec?: DataViewSpec; savedSearch?: SavedSearch },
+  {
+    internalStateContainer,
+    services,
+  }: { internalStateContainer: DiscoverInternalStateContainer; services: DiscoverServices }
+) => {
+  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const adHodDataView = adHocDataViews.find((dataView) => dataView.id === id);
+  if (adHodDataView) return { fallback: false, dataView: adHodDataView };
+
+  const nextDataViewData = await loadDataView({
+    services,
+    id,
+    dataViewSpec,
+    dataViewList: savedDataViews,
+  });
+  const nextDataView = resolveDataView(nextDataViewData, savedSearch, services.toastNotifications);
+  return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
+};

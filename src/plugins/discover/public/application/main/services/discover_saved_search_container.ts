@@ -135,12 +135,7 @@ export function getSavedSearchContainer({
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
     const dataView = nextDataView ?? getState().searchSource.getField('index');
-    const nextSavedSearch = await getSavedSearch('', {
-      search: services.data.search,
-      savedObjectsClient: services.core.savedObjects.client,
-      spaces: services.spaces,
-      savedObjectsTagging: services.savedObjectsTagging,
-    });
+    const nextSavedSearch = await getNewSavedSearch(services.data);
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch(

@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
-import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
+import type { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
@@ -17,6 +18,7 @@ import {
 } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
+import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -26,18 +28,17 @@ import { FetchStatus } from '../../../types';
 export const buildStateSubscribe =
   ({
     appState,
-    savedSearchState,
     dataState,
-    loadAndResolveDataView,
+    internalState,
+    savedSearchState,
+    services,
     setDataView,
   }: {
     appState: DiscoverAppStateContainer;
-    savedSearchState: DiscoverSavedSearchContainer;
     dataState: DiscoverDataStateContainer;
-    loadAndResolveDataView: (
-      id?: string,
-      dataViewSpec?: DataViewSpec
-    ) => Promise<{ fallback: boolean; dataView: DataView }>;
+    internalState: DiscoverInternalStateContainer;
+    savedSearchState: DiscoverSavedSearchContainer;
+    services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
   async (nextState: DiscoverAppState) => {
@@ -59,7 +60,10 @@ export const buildStateSubscribe =
     let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
-      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(nextState.index);
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
+        { id: nextState.index },
+        { internalStateContainer: internalState, services }
+      );
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view

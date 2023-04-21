@@ -402,6 +402,34 @@ describe('actions', () => {
     expect(state.appState.getState().hideChart).toBe(undefined);
   });
 
+  test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
+    const url = '/#?_a=(index:abc)&_g=()';
+    const { state } = await getState(url, savedSearchMock);
+    await state.actions.loadSavedSearch({ useAppState: true });
+    expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
+      'the-data-view-id'
+    );
+    expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      })
+    );
+  });
+
+  test('loadSavedSearch with id ignoring invalid index in URL, adding a warning toast', async () => {
+    const url = '/#?_a=(index:abc)&_g=()';
+    const { state } = await getState(url, savedSearchMock);
+    await state.actions.loadSavedSearch({ useAppState: true, savedSearchId: savedSearchMock.id });
+    expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
+      'the-data-view-id'
+    );
+    expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
+      })
+    );
+  });
+
   test('loadSavedSearch data view handling', async () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
