@@ -13,3 +13,5 @@ export type {
   UserProvidedValues,
   UiSettingsScope,
 } from './src/ui_settings';
+
+export { TIMEZONE_OPTIONS } from './src/timezones';

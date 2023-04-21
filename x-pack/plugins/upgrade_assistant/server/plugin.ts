@@ -29,7 +29,11 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
+import {
+  reindexOperationSavedObjectType,
+  mlSavedObjectType,
+  hiddenTypes,
+} from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
@@ -169,7 +173,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(
-        this.savedObjectsServiceStart.createInternalRepository()
+        this.savedObjectsServiceStart.createInternalRepository(hiddenTypes)
       ),
       security: this.securityPluginStart,
     });
