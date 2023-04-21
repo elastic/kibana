@@ -8,4 +8,4 @@
 export type {
   JobParamsPDFDeprecated,
   TaskPayloadPDF,
-} from '../../../common/types/export_types/printable_pdf';
+} from '@kbn/reporting-plugin/common/types/export_types/printable_pdf';

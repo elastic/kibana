@@ -8,4 +8,4 @@
 export type {
   JobParamsPNGDeprecated,
   TaskPayloadPNG,
-} from '../../../common/types/export_types/png';
+} from '@kbn/reporting-plugin/common/types/export_types/png';

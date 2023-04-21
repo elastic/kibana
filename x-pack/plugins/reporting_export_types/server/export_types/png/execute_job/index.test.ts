@@ -8,14 +8,14 @@
 import * as Rx from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../../..';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
-import { cryptoFactory } from '../../../lib';
+import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
 import {
   createMockConfig,
   createMockConfigSchema,
   createMockReportingCore,
-} from '../../../test_helpers';
+} from '@kbn/reporting-plugin/server/test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from '.';

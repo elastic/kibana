@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { cryptoFactory } from '../../lib';
+import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
 import { decryptJobHeaders } from '.';
 
 const logger = loggingSystemMock.createLogger();

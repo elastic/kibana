@@ -12,8 +12,8 @@ import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE_V2 as jobType,
-} from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+} from '@kbn/reporting-plugin/common/constants';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

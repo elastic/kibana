@@ -9,10 +9,10 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../..';
-import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import type { PngMetrics } from '../../../common/types';
-import type { PngScreenshotOptions } from '../../types';
+import type { ReportingCore } from '@kbn/reporting-plugin/server';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
+import type { PngMetrics } from '@kbn/reporting-plugin/common/types';
+import type { PngScreenshotOptions } from '@kbn/reporting-plugin/server/types';
 
 interface PngResult {
   buffer: Buffer;

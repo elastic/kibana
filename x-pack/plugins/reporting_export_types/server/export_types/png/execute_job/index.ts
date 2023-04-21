@@ -9,8 +9,8 @@ import { TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
+import { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
 import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
 import { TaskPayloadPNG } from '../types';
 

@@ -7,9 +7,9 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../..';
-import { PdfScreenshotOptions } from '../../../types';
-import type { PdfMetrics } from '../../../../common/types';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { PdfScreenshotOptions } from '@kbn/reporting-plugin/server/types';
+import type { PdfMetrics } from '@kbn/reporting-plugin/common/types';
 import { getTracker } from '../../common/pdf_tracker';
 
 interface PdfResult {

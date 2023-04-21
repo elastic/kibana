@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
 import { validateUrls } from '../../common';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from '../types';
 

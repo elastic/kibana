@@ -8,4 +8,4 @@
 export type {
   JobParamsCSV,
   TaskPayloadCSV,
-} from '../../../common/types/export_types/csv_searchsource';
+} from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource';

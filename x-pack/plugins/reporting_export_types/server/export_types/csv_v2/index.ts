@@ -13,9 +13,12 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-} from '../../../common/constants';
-import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+} from '@kbn/reporting-plugin/common/constants';
+import {
+  JobParamsCsvFromSavedObject,
+  TaskPayloadCsvFromSavedObject,
+} from '@kbn/reporting-plugin/common/types';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 

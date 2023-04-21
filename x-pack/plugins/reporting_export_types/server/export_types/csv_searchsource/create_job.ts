@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../types';
+import { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsCSV, TaskPayloadCSV>> =

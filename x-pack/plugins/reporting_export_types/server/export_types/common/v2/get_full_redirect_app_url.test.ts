@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ReportingConfig } from '../../../config/config';
+import { ReportingConfig } from '@kbn/reporting-plugin/server/config/config';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 
 describe('getFullRedirectAppUrl', () => {

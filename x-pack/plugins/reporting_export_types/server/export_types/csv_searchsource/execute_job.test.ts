@@ -19,9 +19,12 @@ jest.mock('@kbn/generate-csv', () => ({
 import nodeCrypto from '@elastic/node-crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../..';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
 import { runTaskFnFactory } from './execute_job';
 
 const logger = loggingSystemMock.createLogger();

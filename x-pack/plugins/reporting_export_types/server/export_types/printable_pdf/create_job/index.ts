@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
 import { validateUrls } from '../../common';
 import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
 
@@ -22,7 +22,7 @@ export const createJobFnFactory: CreateJobFnFactory<
       ...jobParams,
       isDeprecated: true,
       forceNow: new Date().toISOString(),
-      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
+      objects: relativeUrls.map((u: any) => ({ relativeUrl: u })),
     };
   };
 };

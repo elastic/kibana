@@ -7,14 +7,14 @@
 
 import {
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_BASIC,
-  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_TRIAL,
-} from '../../../common/constants';
-import { ExportTypeDefinition } from '../../types';
+  LICENSE_TYPE_ENTERPRISE,
+} from '@kbn/reporting-plugin/common/constants';
+import { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 
