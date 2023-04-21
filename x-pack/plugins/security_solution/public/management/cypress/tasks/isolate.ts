@@ -7,11 +7,12 @@
 
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
+const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
   cb: (responseBody: ActionDetails) => void,
   alias: string
 ) => {
-  cy.intercept('POST', '/api/endpoint/action/*', (req) => {
+  cy.intercept('POST', API_ENDPOINT_ACTION_PATH, (req) => {
     req.continue((res) => {
       const {
         body: { action, data },
