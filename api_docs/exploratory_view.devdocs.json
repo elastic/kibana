@@ -1760,7 +1760,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,

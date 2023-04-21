@@ -207,6 +207,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
         attributes,
         migrationVersion: options.migrationVersion,
         typeMigrationVersion: options.typeMigrationVersion,
+        managed: options.managed,
         references: options.references,
       }),
     });
@@ -217,7 +218,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, references, migrationVersion, typeMigrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion, typeMigrationVersion, managed }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.

@@ -49,6 +49,9 @@ export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingException
 export const EXCEPTIONS_TABLE_DELETE_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemDelete"]';
 
+export const EXCEPTIONS_TABLE_LINK_RULES_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemLinkRules"]';
+
 export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
 
@@ -148,6 +151,13 @@ export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
 
 export const CREATE_SHARED_EXCEPTION_LIST_BTN =
   'button[data-test-subj="exception-lists-form-create-shared"]';
+
+export const exceptionsTableListManagementListContainerByListId = (listId: string) =>
+  `[data-test-subj="exceptionsManagementListCard-${listId}"]`;
+
+export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRulesBadge"]';
+
+export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
 
 // Exception list management
 export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
