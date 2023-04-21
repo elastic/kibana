@@ -193,6 +193,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1500
       );
 
+      const serverLogAction = await testSubjects.find('alertActionAccordion-0');
+      const removeConnectorButton = await serverLogAction.findByCssSelector(
+        '[aria-label="Delete"]'
+      );
+      await removeConnectorButton.click();
+
       await testSubjects.click('.email-alerting-ActionTypeSelectOption');
       await testSubjects.scrollIntoView('addAlertActionButton');
       await commonScreenshots.takeScreenshot(
@@ -201,9 +207,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'rule-flyout-action-variables',
+        screenshotDirectories,
+        1400,
+        1024
+      );
 
       const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
       await cancelEditButton.click();
+      const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');
+      await confirmCancelButton.click();
     });
   });
 }
