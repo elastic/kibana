@@ -49,9 +49,10 @@ describe('Timeline', () => {
         {
           id: 'domInteractive',
           offset: 110000,
-          type: 'agentMark'as const,
+          type: 'agentMark' as const,
           verticalLine: true,
-        },{
+        },
+        {
           id: 'domComplete',
           offset: 190000,
           type: 'agentMark' as const,
