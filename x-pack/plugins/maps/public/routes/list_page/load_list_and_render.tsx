@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
-import { getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
 import { APP_ID } from '../../../common/constants';
 import { mapsClient } from '../../content_management';
@@ -20,49 +19,36 @@ interface Props {
   stateTransfer: EmbeddableStateTransfer;
 }
 
-export class LoadListAndRender extends Component<Props> {
-  _isMounted: boolean = false;
-  state = {
-    mapsLoaded: false,
-    hasSavedMaps: null,
-  };
+export function LoadListAndRender(props: Props) {
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [hasSavedMaps, setHasSavedMaps] = useState(true);
+  
+  useEffect(() => {
+    props.stateTransfer.clearEditorState(APP_ID);
 
-  componentDidMount() {
-    this._isMounted = true;
-    this.props.stateTransfer.clearEditorState(APP_ID);
-    this._loadMapsList();
+    let ignore = false;
+    mapsClient.search({ limit: 1 })
+      .then(results => {
+        if (!ignore) {
+          setHasSavedMaps(results.hits.length > 0);
+          setMapsLoaded(true);
+        }
+      })
+      .catch(err => {
+        if (!ignore) {
+          setMapsLoaded(true);
+          setHasSavedMaps(false);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+  
+  if (!mapsLoaded) {
+    // do not render loading state to avoid UI flash when listing page is displayed
+    return null;
   }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadMapsList() {
-    try {
-      const results = await mapsClient.search({ limit: 1 });
-      if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: !!results.hits.length });
-      }
-    } catch (err) {
-      if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: false });
-        getToasts().addDanger({
-          title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
-            defaultMessage: `Unable to load maps`,
-          }),
-          text: `${err}`,
-        });
-      }
-    }
-  }
-
-  render() {
-    const { mapsLoaded, hasSavedMaps } = this.state;
-
-    if (mapsLoaded) {
-      return hasSavedMaps ? <MapsListView history={this.props.history} /> : <Redirect to="/map" />;
-    } else {
-      return null;
-    }
-  }
+  
+  return hasSavedMaps ? <MapsListView history={props.history} /> : <Redirect to="/map" />;
 }
