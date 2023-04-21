@@ -141,7 +141,9 @@ export const hasPolicyTemplateInputs = (
 export const getVulnMgmtCloudFormation = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
 
-  const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find((p) => p.name === 'vuln_mgmt');
+  const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find(
+    (p) => p.name === VULN_MGMT_POLICY_TEMPLATE
+  );
   if (!vulnMgmtPolicyTemplate) return '';
 
   const vulnMgmtInputs =
