@@ -196,7 +196,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     return (
       <div>
         {isEditPage && <EditScreenStepTitle />}
-
         {/* Defines the enabled policy template */}
         {!integration && (
           <>
@@ -209,11 +208,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <EuiSpacer size="l" />
           </>
         )}
-
         {/* Shows info on the active policy template */}
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
-
         {/* Defines the single enabled input of the active policy template */}
         <PolicyTemplateInputSelector
           input={input}
@@ -221,7 +218,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
-
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}

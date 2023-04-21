@@ -63,8 +63,13 @@ test('it renders index privileges section', () => {
   expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
 });
 
-test('it renders remote index privileges section', () => {
+test('it does not render remote index privileges section by default', () => {
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
+});
+
+test('it renders remote index privileges section when `canUseRemoteIndices` is enabled', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} canUseRemoteIndices />);
   expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
 });
 
