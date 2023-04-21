@@ -16,10 +16,9 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   RulesListNotifyBadgePropsWithApi
 > = (props) => {
-  const { onRuleChanged, rule, isLoading, showTooltipInline, showOnHover } = props;
+  const { onRuleChanged, rule, showTooltipInline, showOnHover } = props;
   const { http } = useKibana().services;
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
-  const [loadingSnoozeAction, setLoadingSnoozeAction] = useState<boolean>(false);
 
   const onSnoozeRule = useCallback(
     (snoozeSchedule: SnoozeSchedule) =>
@@ -41,16 +40,12 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
     setCurrentlyOpenNotify('');
   }, []);
 
-  const onLoading = useCallback((value: boolean) => setLoadingSnoozeAction(value), []);
-
   return (
     <RulesListNotifyBadge
       rule={rule}
       isOpen={currentlyOpenNotify === rule?.id}
-      isLoading={isLoading || loadingSnoozeAction}
       onClick={openSnooze}
       onClose={closeSnooze}
-      onLoading={onLoading}
       onRuleChanged={onRuleChanged}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}

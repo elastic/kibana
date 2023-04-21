@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -30,40 +30,32 @@ import {
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
-export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
-  const {
-    isLoading = false,
-    rule = {
-      muteAll: false,
-      isEditable: false,
-      isSnoozedUntil: null,
-      snoozeSchedule: undefined,
-      activeSnoozes: undefined,
-    },
-    isOpen,
-    onClick,
-    onClose,
-    onLoading,
-    onRuleChanged,
-    snoozeRule,
-    unsnoozeRule,
-    showOnHover = false,
-    showTooltipInline = false,
-  } = props;
-
-  const { isSnoozedUntil, muteAll, isEditable } = rule;
-
+export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
+  rule,
+  isOpen,
+  onClick,
+  onClose,
+  onRuleChanged,
+  snoozeRule,
+  unsnoozeRule,
+  showOnHover = false,
+  showTooltipInline = false,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const isLoading = loading || !rule;
+  const isSnoozedUntil = rule?.isSnoozedUntil;
+  const muteAll = rule?.muteAll ?? false;
+  const isEditable = rule?.isEditable ?? false;
   const isSnoozedIndefinitely = muteAll;
+  const isSnoozed = useMemo(() => (rule ? isRuleSnoozed(rule) : false), [rule]);
+  const nextScheduledSnooze = useMemo(
+    () => (rule ? getNextRuleSnoozeSchedule(rule) : null),
+    [rule]
+  );
 
   const {
     notifications: { toasts },
   } = useKibana().services;
-
-  const isSnoozed = useMemo(() => {
-    return isRuleSnoozed(rule);
-  }, [rule]);
-
-  const nextScheduledSnooze = useMemo(() => getNextRuleSnoozeSchedule(rule), [rule]);
 
   const isScheduled = useMemo(() => {
     return !isSnoozed && Boolean(nextScheduledSnooze);
@@ -235,7 +227,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
       try {
-        onLoading(true);
+        setLoading(true);
         onClosePopover();
         await snoozeRule(schedule);
         onRuleChanged();
@@ -243,16 +235,16 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        onLoading(false);
+        setLoading(false);
       }
     },
-    [onLoading, snoozeRule, onRuleChanged, toasts, onClosePopover]
+    [setLoading, snoozeRule, onRuleChanged, toasts, onClosePopover]
   );
 
   const onApplyUnsnooze = useCallback(
     async (scheduleIds?: string[]) => {
       try {
-        onLoading(true);
+        setLoading(true);
         onClosePopover();
         await unsnoozeRule(scheduleIds);
         onRuleChanged();
@@ -260,10 +252,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        onLoading(false);
+        setLoading(false);
       }
     },
-    [onLoading, unsnoozeRule, onRuleChanged, toasts, onClosePopover]
+    [setLoading, unsnoozeRule, onRuleChanged, toasts, onClosePopover]
   );
 
   const popover = (
@@ -280,8 +272,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         unsnoozeRule={onApplyUnsnooze}
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
-        scheduledSnoozes={rule.snoozeSchedule ?? []}
-        activeSnoozes={rule.activeSnoozes ?? []}
+        scheduledSnoozes={rule?.snoozeSchedule ?? []}
+        activeSnoozes={rule?.activeSnoozes ?? []}
         inPopover
       />
     </EuiPopover>

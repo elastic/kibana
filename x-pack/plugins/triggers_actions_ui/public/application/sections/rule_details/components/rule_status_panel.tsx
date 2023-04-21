@@ -58,7 +58,6 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   statusMessage,
   loadExecutionLogAggregations,
 }) => {
-  const [isSnoozeLoading, setIsSnoozeLoading] = useState(false);
   const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
 
@@ -189,8 +188,6 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
         <RulesListNotifyBadge
           rule={{ ...rule, isEditable }}
           isOpen={isSnoozeOpen}
-          isLoading={isSnoozeLoading}
-          onLoading={setIsSnoozeLoading}
           onClick={openSnooze}
           onClose={closeSnooze}
           onRuleChanged={requestRefresh}

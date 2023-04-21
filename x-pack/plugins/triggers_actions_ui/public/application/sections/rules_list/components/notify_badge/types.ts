@@ -13,11 +13,9 @@ export interface RulesListNotifyBadgeProps {
     'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
   >;
   isOpen: boolean;
-  isLoading: boolean;
   previousSnoozeInterval?: string | null;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   onClose: () => void;
-  onLoading: (isLoading: boolean) => void;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
@@ -27,5 +25,5 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'rule' | 'isLoading' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+  'rule' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
 >;
