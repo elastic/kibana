@@ -21,19 +21,20 @@ interface Props {
 export function LoadListAndRender(props: Props) {
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [hasSavedMaps, setHasSavedMaps] = useState(true);
-  
+
   useEffect(() => {
     props.stateTransfer.clearEditorState(APP_ID);
 
     let ignore = false;
-    mapsClient.search({ limit: 1 })
-      .then(results => {
+    mapsClient
+      .search({ limit: 1 })
+      .then((results) => {
         if (!ignore) {
           setHasSavedMaps(results.hits.length > 0);
           setMapsLoaded(true);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (!ignore) {
           setMapsLoaded(true);
           setHasSavedMaps(false);
@@ -42,14 +43,14 @@ export function LoadListAndRender(props: Props) {
     return () => {
       ignore = true;
     };
-  // only run on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   if (!mapsLoaded) {
     // do not render loading state to avoid UI flash when listing page is displayed
     return null;
   }
-  
+
   return hasSavedMaps ? <MapsListView history={props.history} /> : <Redirect to="/map" />;
 }
