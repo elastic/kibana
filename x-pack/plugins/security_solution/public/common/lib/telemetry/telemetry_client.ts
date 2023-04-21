@@ -14,6 +14,7 @@ import type {
   ReportEntityDetailsClickedParams,
   ReportEntityAlertsClickedParams,
   ReportEntityRiskFilteredParams,
+  ReportMLJobUpdateParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -82,5 +83,9 @@ export class TelemetryClient implements TelemetryClientStart {
       entity,
       selectedSeverity,
     });
+  };
+
+  public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
   };
 }

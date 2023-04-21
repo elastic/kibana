@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { groupBy } from 'lodash';
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 
-import { Loading, Error, ExtensionWrapper } from '../../../../../components';
+import type { EsAssetReference } from '../../../../../../../../common';
+
+import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
+import { ElasticsearchAssetType, InstallStatus } from '../../../../../types';
 
 import {
   useGetPackageInstallStatus,
@@ -25,11 +27,14 @@ import {
   useUIExtension,
 } from '../../../../../hooks';
 
+import { DeferredAssetsSection } from './deferred_assets_accordion';
+
 import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
 const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
+
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
@@ -50,6 +55,8 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
   const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
+  const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
@@ -73,19 +80,33 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         } = packageInfo;
 
         if (
-          !packageAttributes.installed_kibana ||
-          packageAttributes.installed_kibana.length === 0
+          Array.isArray(packageAttributes.installed_es) &&
+          packageAttributes.installed_es?.length > 0
+        ) {
+          const deferredAssets = packageAttributes.installed_es.filter(
+            (asset) => asset.deferred === true
+          );
+          setDeferredInstallations(deferredAssets);
+        }
+
+        const authorizedTransforms = packageAttributes.installed_es.filter(
+          (asset) => asset.type === ElasticsearchAssetType.transform && !asset.deferred
+        );
+
+        if (
+          authorizedTransforms.length === 0 &&
+          (!packageAttributes.installed_kibana || packageAttributes.installed_kibana.length === 0)
         ) {
           setIsLoading(false);
           return;
         }
-
         try {
-          const objectsToGet = packageAttributes.installed_kibana.map(({ id, type }) => ({
-            id,
-            type,
-          }));
-
+          const objectsToGet = [...authorizedTransforms, ...packageAttributes.installed_kibana].map(
+            ({ id, type }) => ({
+              id,
+              type,
+            })
+          );
           // We don't have an API to know which SO types a user has access to, so instead we make a request for each
           // SO type and ignore the 403 errors
           const objectsByType = await Promise.all(
@@ -118,7 +139,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
                 )
             )
           );
-          setAssetsSavedObjects(objectsByType.flat());
+          setAssetsSavedObjects([...objectsByType.flat()]);
         } catch (e) {
           setFetchError(e);
         } finally {
@@ -137,7 +158,10 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 
-  let content: JSX.Element | Array<JSX.Element | null>;
+  const showDeferredInstallations =
+    Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
+
+  let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
     content = <Loading />;
   } else if (fetchError) {
@@ -190,7 +214,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         </ExtensionWrapper>
       );
     } else {
-      content = (
+      content = !showDeferredInstallations ? (
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -199,7 +223,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
             />
           </h2>
         </EuiTitle>
-      );
+      ) : null;
     }
   } else {
     content = [
@@ -211,10 +235,14 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         }
 
         return (
-          <>
-            <AssetsAccordion savedObjects={sectionAssetSavedObjects} type={assetType} />
+          <Fragment key={assetType}>
+            <AssetsAccordion
+              savedObjects={sectionAssetSavedObjects}
+              type={assetType}
+              key={assetType}
+            />
             <EuiSpacer size="l" />
-          </>
+          </Fragment>
         );
       }),
       // Ensure we add any custom assets provided via UI extension to the end of the list of other assets
@@ -225,11 +253,23 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       ) : null,
     ];
   }
+  const deferredInstallationsContent = showDeferredInstallations ? (
+    <>
+      <DeferredAssetsSection
+        deferredInstallations={deferredInstallations}
+        packageInfo={packageInfo}
+      />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>{content}</EuiFlexItem>
+      <EuiFlexItem grow={6}>
+        {deferredInstallationsContent}
+        {content}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
