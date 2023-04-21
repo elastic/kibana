@@ -106,14 +106,12 @@ export function registerTransactionDurationRuleType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {
-      const predefinedGroupby: string[] = [
+      const predefinedGroupby = [
         SERVICE_NAME,
         SERVICE_ENVIRONMENT,
         TRANSACTION_TYPE,
       ];
-
-      const allGroupbyFields: string[] =
-        ruleParams.groupBy ?? predefinedGroupby;
+      const allGroupbyFields = ruleParams.groupBy ?? predefinedGroupby;
 
       const config = await firstValueFrom(config$);
 

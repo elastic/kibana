@@ -98,14 +98,12 @@ export function registerTransactionErrorRateRuleType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, spaceId, params: ruleParams }) => {
-        const predefinedGroupby: string[] = [
+        const predefinedGroupby = [
           SERVICE_NAME,
           SERVICE_ENVIRONMENT,
           TRANSACTION_TYPE,
         ];
-
-        const allGroupbyFields: string[] =
-          ruleParams.groupBy ?? predefinedGroupby;
+        const allGroupbyFields = ruleParams.groupBy ?? predefinedGroupby;
 
         const config = await firstValueFrom(config$);
 
