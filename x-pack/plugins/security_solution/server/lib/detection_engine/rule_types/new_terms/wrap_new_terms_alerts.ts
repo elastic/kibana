@@ -45,7 +45,7 @@ export const wrapNewTermsAlerts = ({
   indicesToQuery: string[];
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl?: string;
+  publicBaseUrl: string | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([

@@ -33,7 +33,7 @@ export const wrapSequencesFactory =
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
-    publicBaseUrl?: string;
+    publicBaseUrl: string | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(

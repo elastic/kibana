@@ -69,7 +69,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl?: string;
+  publicBaseUrl: string | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([

@@ -39,7 +39,7 @@ export const wrapHitsFactory =
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
-    publicBaseUrl?: string;
+    publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
   }) =>
   (
