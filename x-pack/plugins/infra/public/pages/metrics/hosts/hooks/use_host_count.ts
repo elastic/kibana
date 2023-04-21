@@ -8,8 +8,9 @@
 import * as rt from 'io-ts';
 import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { useCallback, useEffect } from 'react';
-import { catchError, map, Observable, of, startWith } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import createContainer from 'constate';
+import { estypes } from '@elastic/elasticsearch';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -24,19 +25,21 @@ export const useHostCount = () => {
       const query = buildQuery();
       const dateRange = getParsedDateRange();
 
-      const filters = {
+      const filters: estypes.QueryDslQueryContainer = {
         bool: {
           ...query.bool,
-          filter: {
+          filter: [
             ...query.bool.filter,
-            range: {
-              [dataView?.timeFieldName ?? '@timestamp']: {
-                gte: dateRange.from,
-                lte: dateRange.to,
-                format: 'strict_date_optional_time',
+            {
+              range: {
+                [dataView?.timeFieldName ?? '@timestamp']: {
+                  gte: dateRange.from,
+                  lte: dateRange.to,
+                  format: 'strict_date_optional_time',
+                },
               },
             },
-          },
+          ],
         },
       };
 
@@ -66,28 +69,18 @@ export const useHostCount = () => {
     parseResponses: normalizeDataSearchResponse,
   });
 
-  const {
-    cancelRequest,
-    isRequestRunning,
-    isResponsePartial,
-    latestResponseData,
-    latestResponseErrors,
-    loaded,
-    total,
-  } = useLatestPartialDataSearchResponse(requests$);
+  const { isRequestRunning, isResponsePartial, latestResponseData, latestResponseErrors } =
+    useLatestPartialDataSearchResponse(requests$);
 
   useEffect(() => {
     fetchHostCount();
   }, [fetchHostCount]);
 
   return {
-    cancelRequest,
     errors: latestResponseErrors,
     isRequestRunning,
     isResponsePartial,
-    loaded,
     data: latestResponseData ?? null,
-    total,
   };
 };
 
@@ -104,14 +97,6 @@ const normalizeDataSearchResponse = (response$: Observable<IKibanaSearchResponse
       loaded: response.loaded,
       total: response.total,
     })),
-    startWith({
-      data: null,
-      errors: [],
-      isPartial: true,
-      isRunning: true,
-      loaded: 0,
-      total: undefined,
-    }),
     catchError((error) =>
       of({
         data: null,

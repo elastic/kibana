@@ -55,13 +55,13 @@ export const Tile = ({
   const getSubtitle = () => {
     const showLimitSubtitle = searchCriteria.limit < (hostCountData?.count.value ?? 0);
     return showLimitSubtitle
-      ? i18n.translate(`xpack.infra.hostsViewPage.metricTrend.${type}.subtitle.limit`, {
+      ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {
             limit: searchCriteria.limit,
           },
         })
-      : i18n.translate(`xpack.infra.hostsViewPage.metricTrend.${type}.subtitle`, {
+      : i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average', {
           defaultMessage: 'Average',
         });
   };
