@@ -28,7 +28,9 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
       });
       if (apiKey && !isValid) {
         await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-        await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
+        await security.authc.apiKeys?.invalidateAsInternalUser({
+          ids: [apiKey?.id || ''],
+        });
       }
       const regenerationRequired = !isEnabled || !isValid;
       if (canEnable && regenerationRequired && server.config.service?.manifestUrl) {
@@ -74,7 +76,7 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
         server,
       });
       await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-      await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
+      await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
       return response.ok({});
     } catch (e) {
       server.logger.error(e);

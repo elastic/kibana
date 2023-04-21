@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     const esSupertest = getService('esSupertest');
 
     const getApiKeys = async () => {
-      const { body } = await esSupertest.get(`/_security/api_key`);
+      const { body } = await esSupertest.get(`/_security/api_key`).query({ with_limited_by: true });
       const apiKeys = body.api_keys || [];
       return apiKeys.filter(
         (apiKey: any) => apiKey.name.includes('synthetics-api-key') && apiKey.invalidated === false
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithAuth.delete(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true');
         }
       });
-      ['manage_security', 'manage_api_key'].forEach((privilege) => {
+      ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
         it(`returns response for an admin with privilege ${privilege}`, async () => {
           const username = 'admin';
           const roleName = `synthetics_admin-${privilege}`;
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      ['manage_security', 'manage_api_key'].forEach((privilege) => {
+      ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
         it(`auto re-enables the api key when created with invalid permissions and invalidates old api key`, async () => {
           const username = 'admin';
           const roleName = `synthetics_admin`;
@@ -335,51 +335,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {},
-          });
-
-          await security.user.create(username, {
-            password,
-            roles: [roleName],
-            full_name: 'a kibana user',
-          });
-
-          const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
-
-          expect(apiResponse.body).eql({
-            areApiKeysEnabled: true,
-            canManageApiKeys: false,
-            canEnable: false,
-            isEnabled: false,
-            isValidApiKey: false,
-          });
-        } finally {
-          await security.role.delete(roleName);
-          await security.user.delete(username);
-        }
-      });
-
-      it('returns response for an uptime all user with only manage_own_api_key privileges', async () => {
-        const username = 'uptime';
-        const roleName = 'uptime_user';
-        const password = `${username}-password`;
-        try {
-          await security.role.create(roleName, {
-            kibana: [
-              {
-                feature: {
-                  uptime: ['all'],
-                },
-                spaces: ['*'],
-              },
-            ],
-            elasticsearch: {
-              cluster: ['manage_own_api_key', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.indices,
-            },
           });
 
           await security.user.create(username, {
