@@ -183,7 +183,8 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
-          rule={{ ...rule, isEditable }}
+          snoozeSettings={rule}
+          disabled={!isEditable}
           onRuleChanged={requestRefresh}
           snoozeRule={onSnoozeRule}
           unsnoozeRule={onUnsnoozeRule}

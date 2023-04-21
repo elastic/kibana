@@ -485,7 +485,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           return (
             <RulesListNotifyBadge
               showOnHover
-              rule={rule}
+              snoozeSettings={rule}
               isLoading={!!isLoadingMap[rule.id]}
               onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
               isOpen={currentlyOpenNotify === rule.id}

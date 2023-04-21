@@ -7,11 +7,17 @@
 
 import { RuleTableItem, SnoozeSchedule } from '../../../../../types';
 
+export type RuleSnoozeSettings = Pick<
+  RuleTableItem,
+  'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+>;
+
 export interface RulesListNotifyBadgeProps {
-  rule?: Pick<
-    RuleTableItem,
-    'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
-  >;
+  /**
+   *  Rule's snooze settings, if `undefined` is passed the component is shown in loading state
+   */
+  snoozeSettings: RuleSnoozeSettings | undefined;
+  disabled?: boolean;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
@@ -21,5 +27,5 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'rule' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+  'snoozeSettings' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
 >;

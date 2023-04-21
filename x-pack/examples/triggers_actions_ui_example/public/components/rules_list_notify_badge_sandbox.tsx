@@ -52,11 +52,7 @@ export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps)
   const RulesListNotifyBadge = triggersActionsUi.getRulesListNotifyBadge;
   return (
     <div style={{ flex: 1 }}>
-      <RulesListNotifyBadge
-        rule={mockRule}
-        isLoading={false}
-        onRuleChanged={() => Promise.resolve()}
-      />
+      <RulesListNotifyBadge snoozeSettings={mockRule} onRuleChanged={() => Promise.resolve()} />
     </div>
   );
 };
