@@ -42,7 +42,7 @@ import {
   deleteSignalsIndex,
   deleteAllRules,
   getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getSignalsByIds,
   createRule,
@@ -386,7 +386,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signals = await getSignalsByIds(supertest, log, [id]);
 

@@ -366,12 +366,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
-    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) =>
-      i18n.translate('core.euiComboBoxOptionsList.delimiterMessage', {
-        defaultMessage: 'Add each item separated by {delimiter}',
-        values: { delimiter },
-        description: 'Screen reader text describing adding delimited options',
-      }),
+    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiComboBoxOptionsList.delimiterMessage"
+        defaultMessage="Add each item separated by {delimiter}"
+        values={{ delimiter }}
+      />
+    ),
     'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
       i18n.translate('core.euiComboBoxPill.removeSelection', {
         defaultMessage: 'Remove {children} from selection in this group',

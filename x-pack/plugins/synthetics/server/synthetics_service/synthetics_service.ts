@@ -15,6 +15,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Subject } from 'rxjs';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -454,13 +455,16 @@ export class SyntheticsService {
       subject.next(
         (monitors ?? []).map((monitor) => {
           const attributes = monitor.attributes as unknown as MonitorFields;
+
+          const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
+
+          const params = paramsBySpace[monitorSpace];
+
           return formatHeartbeatRequest({
+            params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
             monitor: normalizeSecrets(monitor).attributes,
             monitorId: monitor.id,
             heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
-            params: monitor.namespaces
-              ? paramsBySpace[monitor.namespaces[0]]
-              : paramsBySpace.default,
           });
         })
       );
@@ -491,6 +495,20 @@ export class SyntheticsService {
 
     // no need to wait here
     finder.close();
+
+    if (paramsBySpace[ALL_SPACES_ID]) {
+      Object.keys(paramsBySpace).forEach((space) => {
+        if (space !== ALL_SPACES_ID) {
+          paramsBySpace[space] = Object.assign(paramsBySpace[ALL_SPACES_ID], paramsBySpace[space]);
+        }
+      });
+      if (spaceId) {
+        paramsBySpace[spaceId] = {
+          ...(paramsBySpace?.[spaceId] ?? {}),
+          ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}),
+        };
+      }
+    }
 
     return paramsBySpace;
   }

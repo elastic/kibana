@@ -96,7 +96,7 @@ export * from './wait_for';
 export * from './wait_for_alert_to_complete';
 export * from './wait_for_event_log_execute_complete';
 export * from './wait_for_index_to_populate';
-export * from './wait_for_rule_success_or_status';
+export * from './wait_for_rule_status';
 export * from './wait_for_signals_to_be_present';
 export * from './prebuilt_rules/create_prebuilt_rule_saved_objects';
 export * from './prebuilt_rules/delete_all_prebuilt_rule_assets';
