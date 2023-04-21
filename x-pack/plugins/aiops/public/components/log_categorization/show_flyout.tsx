@@ -10,6 +10,7 @@ import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   toMountPoint,
@@ -19,9 +20,13 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import { AIOPS_STORAGE_KEYS } from '../../types/storage';
+
+const localStorage = new Storage(window.localStorage);
 
 export async function showCategorizeFlyout(
   field: DataViewField,
@@ -63,12 +68,14 @@ export async function showCategorizeFlyout(
             >
               <AiopsAppContext.Provider value={appDependencies}>
                 <DatePickerContextProvider {...datePickerDeps}>
-                  <LogCategorizationFlyout
-                    dataView={dataView}
-                    savedSearch={null}
-                    selectedField={field}
-                    onClose={onFlyoutClose}
-                  />
+                  <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                    <LogCategorizationFlyout
+                      dataView={dataView}
+                      savedSearch={null}
+                      selectedField={field}
+                      onClose={onFlyoutClose}
+                    />
+                  </StorageContextProvider>
                 </DatePickerContextProvider>
               </AiopsAppContext.Provider>
             </KibanaContextProvider>,

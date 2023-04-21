@@ -12,8 +12,16 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { estypes } from '@elastic/elasticsearch';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { RandomSampler } from './sampling_menu';
+import {
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+  AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE,
+  AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE,
+} from '../../types/storage';
+import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
@@ -54,11 +62,31 @@ export type EventRate = Array<{
 export type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 export function useCategorizeRequest() {
+  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE>
+  >(AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
+
+  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE>
+  >(AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE, DEFAULT_PROBABILITY);
+
   const { data } = useAiopsAppContext();
 
   const abortController = useRef(new AbortController());
 
-  const randomSampler = useMemo(() => new RandomSampler(), []);
+  const randomSampler = useMemo(
+    () =>
+      new RandomSampler(
+        randomSamplerMode,
+        setRandomSamplerMode,
+        randomSamplerProbability,
+        setRandomSamplerProbability
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const runCategorizeRequest = useCallback(
     (

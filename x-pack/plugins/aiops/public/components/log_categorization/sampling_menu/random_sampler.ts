@@ -15,6 +15,7 @@ export const RANDOM_SAMPLER_PROBABILITIES = [
 
 export const MIN_SAMPLER_PROBABILITY = 0.00001;
 export const RANDOM_SAMPLER_STEP = MIN_SAMPLER_PROBABILITY * 100;
+export const DEFAULT_PROBABILITY = 0.001;
 
 export const RANDOM_SAMPLER_OPTION = {
   ON_AUTOMATIC: 'on_automatic',
@@ -23,6 +24,7 @@ export const RANDOM_SAMPLER_OPTION = {
 } as const;
 
 export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
+export type RandomSamplerProbability = number | null;
 
 export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
   value: RandomSamplerOption;
@@ -52,14 +54,24 @@ export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
   },
 ];
 
-const DEFAULT_PROBABILITY = 0.001;
-
 export class RandomSampler {
   private docCount$ = new BehaviorSubject<number>(0);
   private mode$ = new BehaviorSubject<RandomSamplerOption>(RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
-  private probability$ = new BehaviorSubject<number | null>(DEFAULT_PROBABILITY);
+  private probability$ = new BehaviorSubject<RandomSamplerProbability>(DEFAULT_PROBABILITY);
+  private setRandomSamplerModeInStorage: (mode: RandomSamplerOption) => void;
+  private setRandomSamplerProbabilityInStorage: (prob: RandomSamplerProbability) => void;
 
-  constructor() {}
+  constructor(
+    randomSamplerMode: RandomSamplerOption,
+    setRandomSamplerMode: (mode: RandomSamplerOption) => void,
+    randomSamplerProbability: RandomSamplerProbability,
+    setRandomSamplerProbability: (prob: RandomSamplerProbability) => void
+  ) {
+    this.mode$.next(randomSamplerMode);
+    this.setRandomSamplerModeInStorage = setRandomSamplerMode;
+    this.probability$.next(randomSamplerProbability);
+    this.setRandomSamplerProbabilityInStorage = setRandomSamplerProbability;
+  }
 
   setDocCount(docCount: number) {
     return this.docCount$.next(docCount);
@@ -70,6 +82,7 @@ export class RandomSampler {
   }
 
   public setMode(mode: RandomSamplerOption) {
+    this.setRandomSamplerModeInStorage(mode);
     return this.mode$.next(mode);
   }
 
@@ -81,7 +94,8 @@ export class RandomSampler {
     return this.mode$.getValue();
   }
 
-  public setProbability(probability: number | null) {
+  public setProbability(probability: RandomSamplerProbability) {
+    this.setRandomSamplerProbabilityInStorage(probability);
     return this.probability$.next(probability);
   }
 
