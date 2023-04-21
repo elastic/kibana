@@ -160,7 +160,9 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
                 : {})}
             >
               <EuiFlexItem>
-                <EuiText data-test-subj='description-title' size="s">{i18n.DESCRIPTION}</EuiText>
+                <EuiText data-test-subj="description-title" size="s">
+                  {i18n.DESCRIPTION}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
