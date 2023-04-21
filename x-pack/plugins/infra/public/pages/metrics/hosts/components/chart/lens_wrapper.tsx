@@ -9,7 +9,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
@@ -69,14 +68,13 @@ export const LensWrapper = ({
 
   return (
     <div ref={intersectionRef}>
-      {!isReady ? (
-        <EuiFlexGroup style={style} justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="l" mono />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <ChartLoader loading={loading} loadedOnce={loadedOnce} style={style} hasTitle={hasTitle}>
+      <ChartLoader
+        loading={loading || !isReady}
+        loadedOnce={loadedOnce}
+        style={style}
+        hasTitle={hasTitle}
+      >
+        {isReady && (
           <EmbeddableComponent
             id={id}
             style={style}
@@ -98,8 +96,8 @@ export const LensWrapper = ({
               }
             }}
           />
-        </ChartLoader>
-      )}
+        )}
+      </ChartLoader>
     </div>
   );
 };
