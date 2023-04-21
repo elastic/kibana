@@ -40,9 +40,9 @@ import {
 } from '@kbn/cases-plugin/common/api';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
-import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { ConfigurePersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -307,7 +307,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
 };
 
 interface ConfigureSavedObject {
-  'cases-configure': ESCasesConfigureAttributes;
+  'cases-configure': ConfigurePersistedAttributes;
 }
 
 /**
