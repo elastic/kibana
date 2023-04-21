@@ -66,8 +66,8 @@ export class MaskLegend extends Component<Props, State> {
         defaultMessage: '{aggLabel} is',
         values: {
           aggLabel: this.state.aggLabel,
-        }
-      })
+        },
+      });
     }
 
     const isJoin = this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
@@ -86,7 +86,8 @@ export class MaskLegend extends Component<Props, State> {
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          {`${this._getPrefix()} `}<strong>{getMaskI18nValue(this.props.operator, this.props.value)}</strong>
+          {`${this._getPrefix()} `}
+          <strong>{getMaskI18nValue(this.props.operator, this.props.value)}</strong>
         </small>
       </EuiText>
     );

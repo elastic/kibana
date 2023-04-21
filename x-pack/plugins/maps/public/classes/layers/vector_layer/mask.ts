@@ -38,8 +38,8 @@ const WHEN = i18n.translate('xpack.maps.mask.when', {
 const WHEN_JOIN_METRIC = i18n.translate('xpack.maps.mask.whenJoinMetric', {
   defaultMessage: '{whenLabel} join metric',
   values: {
-    whenLabel: WHEN
-  }
+    whenLabel: WHEN,
+  },
 });
 
 function getOperatorLabel(operator: MASK_OPERATOR): string {
@@ -168,14 +168,13 @@ export class Mask {
     const source = this._esAggField.getSource();
     const isJoin = this._esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
     const maskLabel = getMaskI18nLabel({
-      bucketsName: 'getBucketsName' in (source as IESAggSource)
-        ? (source as IESAggSource).getBucketsName()
-        : undefined,
+      bucketsName:
+        'getBucketsName' in (source as IESAggSource)
+          ? (source as IESAggSource).getBucketsName()
+          : undefined,
       isJoin,
     });
-    const adverb = isJoin
-      ? WHEN_JOIN_METRIC
-      : WHEN;
+    const adverb = isJoin ? WHEN_JOIN_METRIC : WHEN;
 
     return `${maskLabel} ${adverb}`;
   }

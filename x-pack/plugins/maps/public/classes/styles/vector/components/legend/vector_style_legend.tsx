@@ -48,7 +48,9 @@ export function VectorStyleLegend({
   }
 
   function renderMasksByFieldOrigin(fieldOrigin: FIELD_ORIGIN) {
-    const masksByFieldOrigin = masks.filter(mask => mask.getEsAggField().getOrigin() === fieldOrigin);
+    const masksByFieldOrigin = masks.filter(
+      (mask) => mask.getEsAggField().getOrigin() === fieldOrigin
+    );
     if (masksByFieldOrigin.length === 0) {
       return null;
     }
@@ -68,13 +70,14 @@ export function VectorStyleLegend({
     return (
       <>
         <EuiText size="xs" textAlign="left" color="subdued">
-          <small>
-            {masksByFieldOrigin[0].getFieldOriginListLabel()}
-          </small>
+          <small>{masksByFieldOrigin[0].getFieldOriginListLabel()}</small>
         </EuiText>
         <ul>
           {masksByFieldOrigin.map((mask) => (
-            <li key={mask.getEsAggField().getMbFieldName()} style={{ marginLeft: euiThemeVars.euiSizeS }}>
+            <li
+              key={mask.getEsAggField().getMbFieldName()}
+              style={{ marginLeft: euiThemeVars.euiSizeS }}
+            >
               <MaskLegend
                 esAggField={mask.getEsAggField()}
                 onlyShowLabelAndValue={true}
