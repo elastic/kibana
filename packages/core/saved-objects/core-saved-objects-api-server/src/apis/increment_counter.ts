@@ -39,6 +39,16 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * Attributes to use when upserting the document if it doesn't exist.
    */
   upsertAttributes?: Attributes;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false).
+   * Only used when upserting a saved object. If the saved object already
+   * exist this option has no effect.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**
