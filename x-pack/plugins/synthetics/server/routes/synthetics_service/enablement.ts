@@ -7,10 +7,7 @@
 import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  generateAndSaveServiceAPIKey,
-  SyntheticsForbiddenError,
-} from '../../synthetics_service/get_api_key';
+import { generateAndSaveServiceAPIKey } from '../../synthetics_service/get_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'PUT',
@@ -81,57 +78,6 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
     } catch (e) {
       server.logger.error(e);
       throw e;
-    }
-  },
-});
-
-export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
-  method: 'POST',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
-  validate: {},
-  handler: async ({
-    request,
-    response,
-    server,
-    syntheticsMonitorClient,
-    savedObjectsClient,
-  }): Promise<any> => {
-    const { logger } = server;
-    try {
-      const { security } = server;
-      const { syntheticsService } = syntheticsMonitorClient;
-      const { canEnable } = await libs.requests.getSyntheticsEnablement({ server });
-      if (!canEnable) {
-        return response.forbidden();
-      }
-      await syntheticsService.deleteAllConfigs();
-
-      const { apiKey } = await libs.requests.getAPIKeyForSyntheticsService({
-        server,
-      });
-      if (apiKey) {
-        await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-        await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
-      }
-      await generateAndSaveServiceAPIKey({
-        request,
-        authSavedObjectsClient: savedObjectsClient,
-        server,
-      });
-      return response.ok({
-        body: await libs.requests.getSyntheticsEnablement({
-          server,
-        }),
-      });
-    } catch (e) {
-      logger.error(e);
-      if (e instanceof SyntheticsForbiddenError) {
-        return response.forbidden();
-      }
-      return response.customError({
-        statusCode: 500,
-        body: e,
-      });
     }
   },
 });

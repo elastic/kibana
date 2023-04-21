@@ -15,6 +15,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const correctPrivileges = {
+    applications: [],
+    cluster: ['monitor', 'read_ilm', 'read_pipeline'],
+    indices: [
+      {
+        allow_restricted_indices: false,
+        names: ['synthetics-*'],
+        privileges: ['view_index_metadata', 'create_doc', 'auto_configure', 'read'],
+      },
+    ],
+    metadata: {},
+    run_as: [],
+    transient_metadata: {
+      enabled: true,
+    },
+  };
+
   describe('SyntheticsEnablement', () => {
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
@@ -31,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
     };
 
-    describe('[PUT] - /internal/uptime/service/enablement', () => {
+    describe('[PUT] /internal/uptime/service/enablement', () => {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
@@ -39,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
       ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
-        it(`returns response for an admin with privilege ${privilege}`, async () => {
+        it(`returns response when user can manage api keys`, async () => {
           const username = 'admin';
           const roleName = `synthetics_admin-${privilege}`;
           const password = `${username}-password`;
@@ -54,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
               elasticsearch: {
-                cluster: [privilege, ...serviceApiKeyPrivileges.cluster],
+                cluster: [privilege],
                 indices: serviceApiKeyPrivileges.indices,
               },
             });
@@ -74,15 +91,63 @@ export default function ({ getService }: FtrProviderContext) {
             expect(apiResponse.body).eql({
               areApiKeysEnabled: true,
               canManageApiKeys: true,
-              canEnable: true,
-              isEnabled: true,
-              isValidApiKey: true,
+              canEnable: false,
+              isEnabled: false,
+              isValidApiKey: false,
             });
           } finally {
             await security.user.delete(username);
             await security.role.delete(roleName);
           }
         });
+      });
+
+      it(`returns response for an admin with privilege`, async () => {
+        const username = 'admin';
+        const roleName = `synthetics_admin`;
+        const password = `${username}-password`;
+        try {
+          await security.role.create(roleName, {
+            kibana: [
+              {
+                feature: {
+                  uptime: ['all'],
+                },
+                spaces: ['*'],
+              },
+            ],
+            elasticsearch: {
+              cluster: serviceApiKeyPrivileges.cluster,
+              indices: serviceApiKeyPrivileges.indices,
+            },
+          });
+
+          await security.user.create(username, {
+            password,
+            roles: [roleName],
+            full_name: 'a kibana user',
+          });
+
+          const apiResponse = await supertest
+            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(apiResponse.body).eql({
+            areApiKeysEnabled: true,
+            canManageApiKeys: false,
+            canEnable: true,
+            isEnabled: true,
+            isValidApiKey: true,
+          });
+          const validApiKeys = await getApiKeys();
+          expect(validApiKeys.length).eql(1);
+          expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
+        } finally {
+          await security.user.delete(username);
+          await security.role.delete(roleName);
+        }
       });
 
       it(`does not create excess api keys`, async () => {
@@ -100,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
+              cluster: serviceApiKeyPrivileges.cluster,
               indices: serviceApiKeyPrivileges.indices,
             },
           });
@@ -119,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -127,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const validApiKeys = await getApiKeys();
           expect(validApiKeys.length).eql(1);
+          expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
 
           // call api a second time
           const apiResponse2 = await supertest
@@ -137,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse2.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -145,102 +211,94 @@ export default function ({ getService }: FtrProviderContext) {
 
           const validApiKeys2 = await getApiKeys();
           expect(validApiKeys2.length).eql(1);
+          expect(validApiKeys2[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
         } finally {
           await security.user.delete(username);
           await security.role.delete(roleName);
         }
       });
 
-      ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
-        it(`auto re-enables the api key when created with invalid permissions and invalidates old api key`, async () => {
-          const username = 'admin';
-          const roleName = `synthetics_admin`;
-          const password = `${username}-password`;
-          try {
-            // create api key with incorrect permissions
-            const apiKeyResult = await esSupertest
-              .post(`/_security/api_key`)
-              .send({
-                name: 'my-api-key',
-                expiration: '1d',
-                role_descriptors: {
-                  'role-a': {
-                    cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-                    indices: [
-                      {
-                        names: ['synthetics-*'],
-                        privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
-                      },
-                    ],
-                  },
+      it(`auto re-enables the api key when created with invalid permissions and invalidates old api key`, async () => {
+        const username = 'admin';
+        const roleName = `synthetics_admin`;
+        const password = `${username}-password`;
+        try {
+          // create api key with incorrect permissions
+          const apiKeyResult = await esSupertest
+            .post(`/_security/api_key`)
+            .send({
+              name: 'synthetics-api-key',
+              expiration: '1d',
+              role_descriptors: {
+                'role-a': {
+                  cluster: serviceApiKeyPrivileges.cluster,
+                  indices: [
+                    {
+                      names: ['synthetics-*'],
+                      privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
+                    },
+                  ],
                 },
-              })
-              .expect(200);
-            kibanaServer.savedObjects.create({
-              id: syntheticsApiKeyID,
-              type: syntheticsApiKeyObjectType,
-              overwrite: true,
-              attributes: {
-                id: apiKeyResult.body.id,
-                name: 'synthetics-api-key (required for monitor management)',
-                apiKey: apiKeyResult.body.api_key,
               },
-            });
+            })
+            .expect(200);
+          kibanaServer.savedObjects.create({
+            id: syntheticsApiKeyID,
+            type: syntheticsApiKeyObjectType,
+            overwrite: true,
+            attributes: {
+              id: apiKeyResult.body.id,
+              name: 'synthetics-api-key (required for monitor management)',
+              apiKey: apiKeyResult.body.api_key,
+            },
+          });
 
-            const { body: allApiKeys } = await esSupertest.get(`/_security/api_key`);
-            expect(
-              allApiKeys.api_keys.find((apiKey: any) => apiKey.id === apiKeyResult.body.id)
-                .invalidated
-            ).eql(false);
+          const validApiKeys = await getApiKeys();
+          expect(validApiKeys.length).eql(1);
+          expect(validApiKeys[0].role_descriptors.synthetics_writer).not.eql(correctPrivileges);
 
-            await security.role.create(roleName, {
-              kibana: [
-                {
-                  feature: {
-                    uptime: ['all'],
-                  },
-                  spaces: ['*'],
+          await security.role.create(roleName, {
+            kibana: [
+              {
+                feature: {
+                  uptime: ['all'],
                 },
-              ],
-              elasticsearch: {
-                cluster: [privilege, ...serviceApiKeyPrivileges.cluster],
-                indices: serviceApiKeyPrivileges.indices,
+                spaces: ['*'],
               },
-            });
+            ],
+            elasticsearch: {
+              cluster: serviceApiKeyPrivileges.cluster,
+              indices: serviceApiKeyPrivileges.indices,
+            },
+          });
 
-            await security.user.create(username, {
-              password,
-              roles: [roleName],
-              full_name: 'a kibana user',
-            });
+          await security.user.create(username, {
+            password,
+            roles: [roleName],
+            full_name: 'a kibana user',
+          });
 
-            const apiResponse = await supertest
-              .put(API_URLS.SYNTHETICS_ENABLEMENT)
-              .auth(username, password)
-              .set('kbn-xsrf', 'true')
-              .expect(200);
+          const apiResponse = await supertest
+            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .auth(username, password)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
 
-            expect(apiResponse.body).eql({
-              areApiKeysEnabled: true,
-              canManageApiKeys: true,
-              canEnable: true,
-              isEnabled: true,
-              isValidApiKey: true,
-            });
+          expect(apiResponse.body).eql({
+            areApiKeysEnabled: true,
+            canManageApiKeys: false,
+            canEnable: true,
+            isEnabled: true,
+            isValidApiKey: true,
+          });
 
-            const { body: allApiKeys2 } = await esSupertest.get(`/_security/api_key`);
-            expect(
-              allApiKeys2.api_keys.find((apiKey: any) => apiKey.id === apiKeyResult.body.id)
-                .invalidated
-            ).eql(true);
-
-            const validApiKeys = await getApiKeys();
-            expect(validApiKeys.length).eql(1);
-          } finally {
-            await security.user.delete(username);
-            await security.role.delete(roleName);
-          }
-        });
+          const validApiKeys2 = await getApiKeys();
+          expect(validApiKeys2.length).eql(1);
+          expect(validApiKeys2[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
+        } finally {
+          await security.user.delete(username);
+          await security.role.delete(roleName);
+        }
       });
 
       it(`auto re-enables api key when invalidated`, async () => {
@@ -258,7 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
+              cluster: serviceApiKeyPrivileges.cluster,
               indices: serviceApiKeyPrivileges.indices,
             },
           });
@@ -277,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -285,6 +343,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const validApiKeys = await getApiKeys();
           expect(validApiKeys.length).eql(1);
+          expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
 
           // delete api key
           await esSupertest
@@ -306,7 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse2.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -314,6 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const validApiKeys2 = await getApiKeys();
           expect(validApiKeys2.length).eql(1);
+          expect(validApiKeys2[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
         } finally {
           await security.user.delete(username);
           await security.role.delete(roleName);
@@ -363,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('[DELETE] - /internal/uptime/service/enablement', () => {
+    describe('[DELETE] /internal/uptime/service/enablement', () => {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
@@ -385,7 +445,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
+              cluster: serviceApiKeyPrivileges.cluster,
               indices: serviceApiKeyPrivileges.indices,
             },
           });
@@ -397,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           await supertest
-            .post(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -415,7 +475,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -450,7 +510,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           await supertestWithAuth
-            .post(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(API_URLS.SYNTHETICS_ENABLEMENT)
             .set('kbn-xsrf', 'true')
             .expect(200);
           await supertest
@@ -498,7 +558,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
+              cluster: serviceApiKeyPrivileges.cluster,
               indices: serviceApiKeyPrivileges.indices,
             },
           });
@@ -518,14 +578,14 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponseGet.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
           });
 
           await supertest
-            .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
+            .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -542,7 +602,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
@@ -550,7 +610,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // can disable synthetics in non default space when enabled in default space
           await supertest
-            .post(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -567,7 +627,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse2.body).eql({
             areApiKeysEnabled: true,
-            canManageApiKeys: true,
+            canManageApiKeys: false,
             canEnable: true,
             isEnabled: true,
             isValidApiKey: true,
