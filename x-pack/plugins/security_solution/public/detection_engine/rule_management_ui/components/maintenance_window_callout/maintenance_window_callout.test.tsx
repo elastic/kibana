@@ -216,7 +216,7 @@ describe('MaintenanceWindowCallout', () => {
       expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
       expect(appToastsMock.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance window is running',
-        toastMessage: "Notification actions won't run while the maintenance window is running.",
+        toastMessage: "Notification actions won't run while a maintenance window is running.",
       });
     });
   });
