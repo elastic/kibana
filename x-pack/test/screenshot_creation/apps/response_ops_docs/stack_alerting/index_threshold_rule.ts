@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { indexThresholdRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const actions = getService('actions');
   const comboBox = getService('comboBox');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
@@ -17,9 +18,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
+  const emailConnectorName = 'Email connector 1';
   const ruleName = 'kibana sites - high egress';
 
   describe('index threshold rule', function () {
+    let emailConnectorId: string;
+    before(async () => {
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
+      }));
+    });
+
+    after(async () => {
+      await actions.api.deleteConnector(emailConnectorId);
+    });
+
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -152,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('example index threshold rule conditions', async () => {
+    it('example index threshold rule conditions and actions', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('ruleSearchField', indexThresholdRuleName);
@@ -168,6 +192,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1500
       );
+
+      await testSubjects.click('.email-alerting-ActionTypeSelectOption');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'rule-flyout-action-details',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
+      const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
+      await cancelEditButton.click();
     });
   });
 }
