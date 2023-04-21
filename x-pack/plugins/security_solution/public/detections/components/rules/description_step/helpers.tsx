@@ -575,8 +575,8 @@ export const buildAlertSuppressionMissingFieldsDescription = (
 
   const description =
     value === AlertSuppressionMissingFieldsStrategy.Suppress
-      ? 'Suppress on missing field value'
-      : 'Do not suppress';
+      ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
   const title = <TechnicalPreviewBadge label={label} license={license} />;
   return [

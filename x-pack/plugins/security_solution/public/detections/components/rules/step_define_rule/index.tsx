@@ -577,11 +577,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         options={[
           {
             id: AlertSuppressionMissingFieldsStrategy.Suppress,
-            label: 'Suppress on missing field value',
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
           },
           {
             id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
-            label: 'Do not suppress',
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
           },
         ]}
         onChange={(id: string) => {
@@ -939,7 +939,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <RuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}
             data-test-subj="alertSuppressionMissingFields"
-            label={`If “Suppress by” field does not exist`}
+            label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
           >
             <UseMultiFields
               fields={{
