@@ -373,16 +373,9 @@ export const JsonWatchEditSimulate = ({
               data-test-subj="jsonEditor"
               height={200}
               options={{
-                lineNumbers: 'off',
                 fontSize: 12,
                 tabSize: 2,
-                minimap: {
-                  enabled: false,
-                },
                 scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                automaticLayout: true,
               }}
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',

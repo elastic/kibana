@@ -174,14 +174,7 @@ export const JsonWatchEditForm = () => {
             height={500}
             options={{
               lineNumbers: 'off',
-              fontSize: 12,
               tabSize: 2,
-              minimap: {
-                enabled: false,
-              },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
               automaticLayout: true,
             }}
             aria-label={i18n.translate(
