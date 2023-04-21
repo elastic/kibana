@@ -39,4 +39,5 @@ export interface AlertStatus {
   actionGroupId?: string;
   activeStartDate?: string;
   flapping: boolean;
+  maintenanceWindowIds?: string[];
 }

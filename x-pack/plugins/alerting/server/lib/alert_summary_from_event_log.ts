@@ -87,6 +87,10 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       status.flapping = true;
     }
 
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
+      status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
+    }
+
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
