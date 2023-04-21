@@ -1180,8 +1180,6 @@
       "@kbn/shared-ux-link-redirect-app-mocks/*": ["packages/shared-ux/link/redirect_app/mocks/*"],
       "@kbn/shared-ux-link-redirect-app-types": ["packages/shared-ux/link/redirect_app/types"],
       "@kbn/shared-ux-link-redirect-app-types/*": ["packages/shared-ux/link/redirect_app/types/*"],
-      "@kbn/shared-ux-locators": ["packages/shared-ux/locators"],
-      "@kbn/shared-ux-locators/*": ["packages/shared-ux/locators/*"],
       "@kbn/shared-ux-markdown": ["packages/shared-ux/markdown/impl"],
       "@kbn/shared-ux-markdown/*": ["packages/shared-ux/markdown/impl/*"],
       "@kbn/shared-ux-markdown-mocks": ["packages/shared-ux/markdown/mocks"],
