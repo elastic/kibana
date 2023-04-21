@@ -14,7 +14,6 @@ import { SERVICE_VERSION } from '../../../../../../common/es_fields/apm';
 import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 
 function AppVersionTab({
-  agentName,
   environment,
   kuery,
   start,
@@ -39,7 +38,6 @@ function AppVersionTab({
 
   return (
     <StatsList
-      agentName={agentName}
       isLoading={isPending(mainStatisticsStatus)}
       mainStatistics={mainStatistics}
       detailedStatisticsLoading={isPending(detailedStatisticsStatus)}

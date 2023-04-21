@@ -14,7 +14,6 @@ import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 import { DEVICE_MODEL_IDENTIFIER } from '../../../../../../common/es_fields/apm';
 
 function DevicesTab({
-  agentName,
   environment,
   kuery,
   start,
@@ -39,7 +38,6 @@ function DevicesTab({
 
   return (
     <StatsList
-      agentName={agentName}
       isLoading={isPending(mainStatisticsStatus)}
       mainStatistics={mainStatistics}
       detailedStatisticsLoading={isPending(detailedStatisticsStatus)}

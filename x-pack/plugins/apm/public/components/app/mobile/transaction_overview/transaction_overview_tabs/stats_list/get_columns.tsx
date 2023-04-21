@@ -34,14 +34,12 @@ type MobileDetailedStatisticsByField =
 
 export function getColumns({
   agentName,
-  showAppLaunchTimeColumn,
   detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
   offset,
 }: {
   agentName?: string;
-  showAppLaunchTimeColumn: boolean;
   detailedStatisticsLoading: boolean;
   detailedStatistics: MobileDetailedStatisticsByField;
   comparisonEnabled?: boolean;
@@ -128,28 +126,6 @@ export function getColumns({
         );
       },
     },
-    // launch time
-    ...(agentName && showAppLaunchTimeColumn
-      ? [
-          {
-            field: 'appLaunchTime',
-            name: i18n.translate(
-              'xpack.apm.mobile.transactions.overview.table.appLaunchTime',
-              {
-                defaultMessage: 'App launch time',
-              }
-            ),
-            align: RIGHT_ALIGNMENT,
-            render: (_, { appLaunchTime }) => {
-              return (
-                <EuiText size="s" textAlign="right">
-                  {asMillisecondDuration(appLaunchTime)}
-                </EuiText>
-              );
-            },
-          } as ITableColumn<MobileMainStatisticsByFieldItem>,
-        ]
-      : []),
     // crash rate
     {
       field: 'crashRate',

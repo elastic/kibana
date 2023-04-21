@@ -218,21 +218,6 @@ export async function generateMobileData({
         galaxy10.startNewSession();
         galaxy7.startNewSession();
         huaweiP2.startNewSession();
-        galaxy10
-          .appMetrics({
-            'application.launch.time': 1000,
-          })
-          .timestamp(timestamp);
-        galaxy7
-          .appMetrics({
-            'application.launch.time': 1000,
-          })
-          .timestamp(timestamp);
-        huaweiP2
-          .appMetrics({
-            'application.launch.time': 1000,
-          })
-          .timestamp(timestamp);
         pixel7.startNewSession();
         pixel7Pro.startNewSession();
         pixel8.startNewSession();
