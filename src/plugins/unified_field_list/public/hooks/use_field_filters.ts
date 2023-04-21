@@ -7,31 +7,15 @@
  */
 
 import { useMemo, useState } from 'react';
-import { escapeRegExp, memoize } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../types';
 import { getFieldIconType } from '../utils/field_types';
+import { fieldNameMatcher } from '../utils/field_name_matcher';
 
 const htmlId = htmlIdGenerator('fieldList');
-
-export const makeRegEx = memoize(function makeRegEx(glob: string) {
-  const globRegex = glob.split('*').filter(Boolean).map(escapeRegExp).join('.*');
-  return new RegExp(globRegex, 'i');
-});
-
-export const fieldNameMatcher = (field: FieldListItem, fieldSearchHighlight: string): boolean => {
-  if (!fieldSearchHighlight) {
-    return false;
-  }
-
-  return (
-    (!!field.displayName && makeRegEx(fieldSearchHighlight).test(field.displayName)) ||
-    makeRegEx(fieldSearchHighlight).test(field.name)
-  );
-};
 
 /**
  * Input params for useFieldFilters hook
