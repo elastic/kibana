@@ -41,7 +41,7 @@ import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 interface RulesSnoozeSettings {
   /**
-   * Rule SO's id (not ruleId) to snooze settings map,
+   * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
   data: Record<string, RuleSnoozeSettings>;
   /**
