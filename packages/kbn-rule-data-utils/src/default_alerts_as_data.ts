@@ -52,9 +52,6 @@ const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
-// kibana.alert.url - url which will take the user directly to a view of the alert
-const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
-
 // kibana.alert.start - timestamp when the alert is first active
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
 
@@ -97,7 +94,7 @@ const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 // kibana.alert.rule_type_id - rule type id for rule that generated this alert
 const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
 
-// kibana.alert.url - allow our user to go back to the details url in kibana
+// kibana.alert.url - url which will redirect users to the alert page filtered for the given alert
 const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
