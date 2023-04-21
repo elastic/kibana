@@ -6,33 +6,29 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { EnterpriseSearchCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('./base_config'));
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
+  const baseConfig = await readConfigFile(require.resolve('./cypress.config'));
 
   return {
+    ...kibanaCommonTestsConfig.getAll(),
     // default to the xpack functional config
     ...baseConfig.getAll(),
 
-    esTestCluster: {
-      ...baseConfig.get('esTestCluster'),
-      serverArgs: [
-        ...baseConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.enabled=true',
-        'xpack.security.authc.api_key.enabled=true',
-      ],
+    junit: {
+      reportName: 'X-Pack Enterprise Search Functional Tests with Host Configured',
     },
-
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
         '--enterpriseSearch.host=http://localhost:3022',
-        '--usageCollection.uiCounters.enabled=false',
-        `--home.disableWelcomeScreen=true`,
       ],
     },
+    testRunner: EnterpriseSearchCypressCliTestRunner,
   };
 }
