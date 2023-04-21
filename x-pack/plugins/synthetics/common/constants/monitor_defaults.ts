@@ -48,9 +48,11 @@ export const CUSTOM_LABEL = i18n.translate('xpack.synthetics.connectionProfile.c
   defaultMessage: 'Custom',
 });
 
+export const DEFAULT_THROTTLING_VALUE = { download: '5', upload: '3', latency: '20' };
+
 export const PROFILE_VALUES: ThrottlingConfig[] = [
   {
-    value: { download: '5', upload: '3', latency: '20' },
+    value: DEFAULT_THROTTLING_VALUE,
     id: PROFILE_VALUES_ENUM.DEFAULT,
     label: i18n.translate('xpack.synthetics.connectionProfile.default', {
       defaultMessage: 'Default',
