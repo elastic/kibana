@@ -32,6 +32,7 @@ import {
   getControlGroupMock,
 } from '../mocks/control_group';
 import { getMockedControlGroupRenderer } from '../mocks/control_group_renderer';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '../translations';
 
 jest.mock('../../../utils/global_query_string/helpers', () => {
   return {
@@ -507,7 +508,7 @@ describe(' Filter Group Component ', () => {
       render(<TestComponent />);
 
       expect(consoleErrorSpy.mock.calls.length).toBe(1);
-      expect(String(consoleErrorSpy.mock.calls[0][0])).toMatch(/Url Params must be an array/i);
+      expect(String(consoleErrorSpy.mock.calls[0][0])).toMatch(URL_PARAM_ARRAY_EXCEPTION_MSG);
     });
   });
 

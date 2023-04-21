@@ -39,6 +39,7 @@ import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
 import { TEST_IDS } from './constants';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -112,7 +113,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     }
     try {
       if (!Array.isArray(param)) {
-        throw Error('Url Params must be an array');
+        throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
       }
       const storedControlGroupInput = getStoredControlInput();
       if (storedControlGroupInput) {
