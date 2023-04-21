@@ -61,7 +61,18 @@ export const FilterGroup = ({
       label: LOCATION_LABEL,
       field: 'locations',
       values: getSyntheticsFilterDisplayValues(
-        mixUrlValues(data.locations, urlParams.locations),
+        mixUrlValues(
+          data.locations.map((locationData) => {
+            const matchingLocation = locations.find(
+              (location) => location.id === locationData.label
+            );
+            return {
+              label: matchingLocation ? matchingLocation.label : locationData.label,
+              count: locationData.count,
+            };
+          }),
+          urlParams.locations
+        ),
         'locations',
         locations
       ),

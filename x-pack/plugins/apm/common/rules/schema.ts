@@ -16,6 +16,7 @@ export const errorCountParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  errorGroupingKey: schema.maybe(schema.string()),
 });
 
 export const transactionDurationParamsSchema = schema.object({

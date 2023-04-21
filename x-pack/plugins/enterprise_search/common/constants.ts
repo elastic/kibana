@@ -119,8 +119,8 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 };
 
 export const ENGINES_PLUGIN = {
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Applications',
   }),
 };
 
