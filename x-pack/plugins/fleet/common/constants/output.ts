@@ -25,3 +25,5 @@ export const DEFAULT_OUTPUT: NewOutput = {
 };
 
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
+
+export type OutputTypes = typeof outputType.Elasticsearch | typeof outputType.Logstash;

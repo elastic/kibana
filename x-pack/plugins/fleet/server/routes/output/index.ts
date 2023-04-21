@@ -14,6 +14,8 @@ import {
   GetOutputsRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
+  PostESLogstashOutputRequestSchema,
+  PutESLogstashOutputRequestSchema,
 } from '../../types';
 
 import {
@@ -23,6 +25,10 @@ import {
   postOuputHandler,
   putOuputHandler,
   postLogstashApiKeyHandler,
+  postESOutputHandler,
+  postLogstashOutputHandler,
+  putESOutputHandler,
+  putLogstashOutputHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -46,6 +52,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     },
     getOneOuputHandler
   );
+  // to be deprecated
   router.put(
     {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
@@ -66,6 +73,49 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     postOuputHandler
+  );
+  // New endpoints
+  router.put(
+    {
+      path: OUTPUT_API_ROUTES.UPDATE_ES_PATTERN,
+      validate: PutESLogstashOutputRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    putESOutputHandler
+  );
+
+  router.post(
+    {
+      path: OUTPUT_API_ROUTES.CREATE_ES_PATTERN,
+      validate: PostESLogstashOutputRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postESOutputHandler
+  );
+  router.put(
+    {
+      path: OUTPUT_API_ROUTES.UPDATE_LOGSTASH_PATTERN,
+      validate: PutESLogstashOutputRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    putLogstashOutputHandler // create new handler
+  );
+
+  router.post(
+    {
+      path: OUTPUT_API_ROUTES.CREATE_LOGSTASH_PATTERN,
+      validate: PostESLogstashOutputRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postLogstashOutputHandler
   );
 
   router.delete(

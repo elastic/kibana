@@ -85,9 +85,15 @@ export const K8S_API_ROUTES = {
 export const OUTPUT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/outputs`,
   INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
-  UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  // To deprecate:
+  UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
+  // New routes:
+  CREATE_ES_PATTERN: `${API_ROOT}/outputs/elasticsearch`,
+  UPDATE_ES_PATTERN: `${API_ROOT}/outputs/elasticsearch/{outputId}`,
+  CREATE_LOGSTASH_PATTERN: `${API_ROOT}/outputs/logstash`,
+  UPDATE_LOGSTASH_PATTERN: `${API_ROOT}/outputs/logstash/{outputId}`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

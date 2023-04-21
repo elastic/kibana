@@ -13,6 +13,8 @@ import type {
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
+  PostESLogstashOutputRequestSchema,
+  PutESLogstashOutputRequestSchema,
 } from '../../types';
 import type {
   DeleteOutputResponse,
@@ -24,6 +26,7 @@ import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { outputType } from '../../../common/constants';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
@@ -66,6 +69,7 @@ export const getOneOuputHandler: RequestHandler<
   }
 };
 
+// to be removed
 export const putOuputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
   undefined,
@@ -98,7 +102,75 @@ export const putOuputHandler: RequestHandler<
     return defaultFleetErrorHandler({ error, response });
   }
 };
+export const putESOutputHandler: RequestHandler<
+  TypeOf<typeof PutESLogstashOutputRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PutESLogstashOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const data = { ...request.body, type: outputType.Elasticsearch };
+    await outputService.update(soClient, esClient, request.params.outputId, data);
+    const output = await outputService.get(soClient, request.params.outputId);
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+    }
 
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const putLogstashOutputHandler: RequestHandler<
+  TypeOf<typeof PutESLogstashOutputRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PutESLogstashOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const data = { ...request.body, type: outputType.Logstash };
+    await outputService.update(soClient, esClient, request.params.outputId, data);
+    const output = await outputService.get(soClient, request.params.outputId);
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+    }
+
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+// to be removed
 export const postOuputHandler: RequestHandler<
   undefined,
   undefined,
@@ -110,6 +182,59 @@ export const postOuputHandler: RequestHandler<
   try {
     const { id, ...data } = request.body;
     const output = await outputService.create(soClient, esClient, data, { id });
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    }
+
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postESOutputHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostESLogstashOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const { id, ...data } = request.body;
+    const outputData = { ...data, type: outputType.Elasticsearch };
+    const output = await outputService.create(soClient, esClient, outputData, { id });
+    if (output.is_default || output.is_default_monitoring) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    }
+
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postLogstashOutputHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostESLogstashOutputRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const { id, ...data } = request.body;
+    const outputData = { ...data, type: outputType.Logstash };
+    const output = await outputService.create(soClient, esClient, outputData, { id });
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }

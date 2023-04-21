@@ -25,13 +25,9 @@ export function validateLogstashHost(val: string) {
   }
 }
 
-const OutputBaseSchema = {
+const OutputBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
-  type: schema.oneOf([
-    schema.literal(outputType.Elasticsearch),
-    schema.literal(outputType.Logstash),
-  ]),
   hosts: schema.conditional(
     schema.siblingRef('type'),
     schema.literal(outputType.Elasticsearch),
@@ -44,9 +40,6 @@ const OutputBaseSchema = {
   ),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),
-  ca_sha256: schema.maybe(schema.string()),
-  ca_trusted_fingerprint: schema.maybe(schema.string()),
-  config_yaml: schema.maybe(schema.string()),
   ssl: schema.maybe(
     schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
@@ -54,26 +47,42 @@ const OutputBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
+});
+const OutputWithTypeSchema = OutputBaseSchema.extends({
+  type: schema.oneOf([
+    schema.literal(outputType.Elasticsearch),
+    schema.literal(outputType.Logstash),
+  ]),
+});
+
+const shipperSchema = schema.object({
+  disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+  disk_queue_path: schema.nullable(schema.string()),
+  disk_queue_max_size: schema.nullable(schema.number()),
+  disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+  disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+  compression_level: schema.nullable(schema.number()),
+  loadbalance: schema.nullable(schema.boolean()),
+  mem_queue_events: schema.nullable(schema.number()),
+  queue_flush_timeout: schema.nullable(schema.number()),
+  max_batch_bytes: schema.nullable(schema.number()),
+});
+
+const ESOrLogstashSchema = {
+  ca_sha256: schema.maybe(schema.string()),
+  ca_trusted_fingerprint: schema.maybe(schema.string()),
+  config_yaml: schema.maybe(schema.string()),
   proxy_id: schema.nullable(schema.string()),
-  shipper: schema.maybe(
-    schema.object({
-      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.nullable(schema.string()),
-      disk_queue_max_size: schema.nullable(schema.number()),
-      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
-      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
-      compression_level: schema.nullable(schema.number()),
-      loadbalance: schema.nullable(schema.boolean()),
-      mem_queue_events: schema.nullable(schema.number()),
-      queue_flush_timeout: schema.nullable(schema.number()),
-      max_batch_bytes: schema.nullable(schema.number()),
-    })
-  ),
+  shipper: shipperSchema,
 };
 
-export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
+// to be removed once the old endpoints are deprecated:
+export const NewOutputSchema = OutputWithTypeSchema.extends(ESOrLogstashSchema);
 
-export const UpdateOutputSchema = schema.object({
+export const ESLogstashOutputSchema = OutputBaseSchema.extends(ESOrLogstashSchema);
+
+// Update
+export const UpdateOutputBaseSchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(
     schema.oneOf([schema.literal(outputType.Elasticsearch), schema.literal(outputType.Logstash)])
@@ -86,9 +95,6 @@ export const UpdateOutputSchema = schema.object({
   ),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
-  ca_sha256: schema.maybe(schema.string()),
-  ca_trusted_fingerprint: schema.maybe(schema.string()),
-  config_yaml: schema.maybe(schema.string()),
   ssl: schema.maybe(
     schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
@@ -96,24 +102,9 @@ export const UpdateOutputSchema = schema.object({
       key: schema.maybe(schema.string()),
     })
   ),
-  proxy_id: schema.nullable(schema.string()),
-  shipper: schema.maybe(
-    schema.object({
-      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.nullable(schema.string()),
-      disk_queue_max_size: schema.nullable(schema.number()),
-      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
-      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
-      compression_level: schema.nullable(schema.number()),
-      loadbalance: schema.nullable(schema.boolean()),
-      mem_queue_events: schema.nullable(schema.number()),
-      queue_flush_timeout: schema.nullable(schema.number()),
-      max_batch_bytes: schema.nullable(schema.number()),
-    })
-  ),
 });
 
-export const OutputSchema = schema.object({
-  ...OutputBaseSchema,
-  id: schema.string(),
-});
+// to be removed once the old endpoints are deprecated:
+export const UpdateOutputSchema = OutputWithTypeSchema.extends(ESOrLogstashSchema);
+
+export const UpdateESOrLogstashOutputSchema = UpdateOutputBaseSchema.extends(ESOrLogstashSchema);

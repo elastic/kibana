@@ -7,6 +7,8 @@
 
 import type { Output } from '../models';
 
+import type { OutputTypes } from '../../constants';
+
 import type { ListResult } from './common';
 
 export interface GetOneOutputResponse {
@@ -28,7 +30,7 @@ export interface PutOutputRequest {
     outputId: string;
   };
   body: {
-    type?: 'elasticsearch' | 'logstash';
+    type?: OutputTypes;
     name?: string;
     hosts?: string[];
     ca_sha256?: string;
@@ -59,7 +61,7 @@ export interface PutOutputRequest {
 export interface PostOutputRequest {
   body: {
     id?: string;
-    type: 'elasticsearch' | 'logstash';
+    type: OutputTypes;
     name: string;
     hosts?: string[];
     ca_sha256?: string;

@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewOutputSchema, UpdateOutputSchema } from '../models';
+import {
+  NewOutputSchema,
+  UpdateOutputSchema,
+  ESLogstashOutputSchema,
+  UpdateESOrLogstashOutputSchema,
+} from '../models';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
@@ -23,6 +28,7 @@ export const DeleteOutputRequestSchema = {
 
 export const GetOutputsRequestSchema = {};
 
+// old schemas: to be removed once the old endpoints are deprecated
 export const PostOutputRequestSchema = {
   body: NewOutputSchema,
 };
@@ -32,4 +38,16 @@ export const PutOutputRequestSchema = {
     outputId: schema.string(),
   }),
   body: UpdateOutputSchema,
+};
+//
+
+export const PostESLogstashOutputRequestSchema = {
+  body: ESLogstashOutputSchema,
+};
+
+export const PutESLogstashOutputRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+  body: UpdateESOrLogstashOutputSchema,
 };

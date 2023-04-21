@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { outputType } from '../../../common/constants';
+
 /**
  * Check if an esClient has enought permission to create a valid API key for logstash
  *
@@ -46,7 +48,7 @@ export async function generateLogstashApiKey(esClient: ElasticsearchClient) {
     metadata: {
       managed_by: 'fleet',
       managed: true,
-      type: 'logstash',
+      type: outputType.Logstash,
     },
     role_descriptors: {
       'logstash-output': {

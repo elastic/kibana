@@ -11,6 +11,7 @@ import { safeDump } from 'js-yaml';
 
 import type { PreconfiguredOutput, Output, NewOutput } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
+import { outputType } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
@@ -167,10 +168,10 @@ function isPreconfiguredOutputDifferentFromCurrent(
     isDifferent(existingOutput.type, preconfiguredOutput.type) ||
     (preconfiguredOutput.hosts &&
       !isEqual(
-        existingOutput?.type === 'elasticsearch'
+        existingOutput?.type === outputType.Elasticsearch
           ? existingOutput.hosts?.map(normalizeHostsForAgents)
           : existingOutput.hosts,
-        preconfiguredOutput.type === 'elasticsearch'
+        preconfiguredOutput.type === outputType.Elasticsearch
           ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
           : preconfiguredOutput.hosts
       )) ||
