@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { CasesUiConfigType } from '../../../../common/ui/types';
 
-type GlobalServices = Pick<CoreStart, 'http'>;
+type GlobalServices = Pick<CoreStart, 'application' | 'http'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
@@ -16,14 +16,15 @@ export class KibanaServices {
   private static config?: CasesUiConfigType;
 
   public static init({
+    application,
+    config,
     http,
     kibanaVersion,
-    config,
   }: GlobalServices & {
     kibanaVersion: string;
     config: CasesUiConfigType;
   }) {
-    this.services = { http };
+    this.services = { application, http };
     this.kibanaVersion = kibanaVersion;
     this.config = config;
   }

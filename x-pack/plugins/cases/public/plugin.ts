@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+
 import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -47,7 +48,23 @@ export class CasesUiPlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
+  private lazyActions() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "actions" */
+      './components/visualizations/actions'
+    );
+  }
+
+  private async registerActions(plugins: CasesPluginStart) {
+    const { registerActions } = await this.lazyActions();
+    registerActions(plugins);
+  }
+
+  public async setup(core: CoreSetup, plugins: CasesPluginSetup): Promise<CasesUiSetup> {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
@@ -114,6 +131,7 @@ export class CasesUiPlugin
       kibanaVersion: this.kibanaVersion,
       config,
     });
+    this.registerActions(plugins);
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
