@@ -91,6 +91,8 @@ export type {
   BulkInstallPackageInfo,
   PackageAssetReference,
   ExperimentalDataStreamFeature,
+  Secret,
+  SecretElasticDoc,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';
