@@ -61,7 +61,7 @@ describe('None', () => {
       cleanupRule(ruleId);
     });
 
-    it('should still see osquery in alerts', () => {
+    it('should see response actions but cannot see osquery results in alerts', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
@@ -70,10 +70,8 @@ describe('None', () => {
       cy.getBySel('response-actions-notification')
         .should('not.have.text', '0')
         .then(() => {
-          cy.getBySel('responseActionsViewTab').click();
-          cy.getBySel('osquery-results').within(() => {
-            cy.contains('tags');
-          });
+          cy.contains('Permission denied').should('exist');
+          cy.contains('Error while fetching live queries').should('exist');
         });
     });
   });

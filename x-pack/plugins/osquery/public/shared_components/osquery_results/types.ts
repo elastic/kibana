@@ -13,4 +13,5 @@ export interface OsqueryActionResultProps {
   actionId: string;
   queryId: string;
   startDate: string;
+  canReadOsquery: boolean;
 }

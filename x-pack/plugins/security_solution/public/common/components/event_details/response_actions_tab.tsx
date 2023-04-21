@@ -38,7 +38,7 @@ export const useResponseActionsTab = ({
   rawEventData: RawEventData;
 }) => {
   const {
-    services: { osquery },
+    services: { osquery, application },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
   const expandedEventFieldsObject = rawEventData
@@ -67,6 +67,8 @@ export const useResponseActionsTab = ({
     return;
   }
 
+  const canReadOsquery = !!application?.capabilities?.osquery?.read;
+
   const renderItems = () => {
     return map(automatedList?.items, (item) => {
       if (item && 'input_type' in item && item?.input_type === 'osquery') {
@@ -82,6 +84,7 @@ export const useResponseActionsTab = ({
             startDate={startDate}
             ruleName={ruleName}
             ecsData={ecsData}
+            canReadOsquery={canReadOsquery}
           />
         );
       }
