@@ -8,6 +8,11 @@
 import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { range as lodashRange } from 'lodash';
 import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENTS = ['production', 'development'].map((env) =>
+  getSynthtraceEnvironment(__filename, env)
+);
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const { services: numServices = 10, txGroups: numTxGroups = 10 } = scenarioOpts ?? {};
@@ -15,7 +20,6 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   return {
     generate: ({ range }) => {
       const TRANSACTION_TYPES = ['request'];
-      const ENVIRONMENTS = ['production', 'development'];
 
       const MIN_DURATION = 10;
       const MAX_DURATION = 1000;
