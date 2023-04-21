@@ -26,6 +26,15 @@ export interface SecurityMetadata extends Record<string, unknown> {
    * and we need all the filtering actions to perform the opposite (negate) operation.
    */
   negateFilters?: boolean;
+  /**
+   * `metadata.telemetry` is used by the telemetry service to add context to the event.
+   */
+  telemetry?: {
+    /**
+     * It defines which UI component renders the CellActions.
+     */
+    component: string;
+  };
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
