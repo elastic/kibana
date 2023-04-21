@@ -23,7 +23,7 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
 export const CREATE_NEW_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.createNewButton',
   {
-    defaultMessage: 'Create new',
+    defaultMessage: 'Create window',
   }
 );
 
@@ -99,6 +99,13 @@ export const CREATE_FORM_SCHEDULE_INVALID = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scheduleInvalid',
   {
     defaultMessage: 'The end date must be greater than or equal to the start date.',
+  }
+);
+
+export const CREATE_FORM_TIMEZONE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.timezone',
+  {
+    defaultMessage: 'Time zone',
   }
 );
 
@@ -446,3 +453,22 @@ export const SAVE_MAINTENANCE_WINDOW = i18n.translate(
     defaultMessage: 'Save maintenance window',
   }
 );
+
+export const EXPERIMENTAL_LABEL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
+export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
+  defaultMessage: 'Upcoming',
+});

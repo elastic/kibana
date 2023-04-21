@@ -26,6 +26,11 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT,
   EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN,
   EXCEPTIONS_LIST_DETAILS_HEADER,
+  exceptionsTableListManagementListContainerByListId,
+  EXCEPTIONS_TABLE_LINK_RULES_BTN,
+  RULE_ACTION_LINK_RULE_SWITCH,
+  LINKED_RULES_BADGE,
+  MANAGE_RULES_SAVE,
 } from '../screens/exceptions';
 
 export const clearSearchSelection = () => {
@@ -36,10 +41,28 @@ export const expandExceptionActions = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
 };
 
-export const exportExceptionList = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+export const exportExceptionList = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_MODAL_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN).first().click();
+};
+
+export const assertNumberLinkedRules = (listId: string, numberOfRulesAsString: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(LINKED_RULES_BADGE)
+    .contains(numberOfRulesAsString);
+};
+
+export const linkRulesToExceptionList = (listId: string, ruleSwitch: number = 0) => {
+  cy.log(`Open link rules flyout for list_id: '${listId}'`);
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
+  cy.get(EXCEPTIONS_TABLE_LINK_RULES_BTN).first().click();
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
+  cy.get(MANAGE_RULES_SAVE).first().click();
 };
 
 export const deleteExceptionListWithoutRuleReference = () => {
@@ -50,8 +73,10 @@ export const deleteExceptionListWithoutRuleReference = () => {
   cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
 };
 
-export const deleteExceptionListWithRuleReference = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).last().click();
+export const deleteExceptionListWithRuleReferenceByListId = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).last().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
