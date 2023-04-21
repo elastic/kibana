@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
-import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { ChartLabel } from '../../../explore/components/alerts_by_status/chart_label';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../store/inputs';
 import { DonutChartWrapper } from '../charts/donutchart';

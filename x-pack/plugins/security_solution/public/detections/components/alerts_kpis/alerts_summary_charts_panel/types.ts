@@ -6,7 +6,7 @@
  */
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import type { SeverityBuckets as SeverityData } from '../../../../explore/components/alerts_by_status/types';
 import type { AlertsBySeverityAgg } from '../severity_level_panel/types';
 import type {
   AlertsByTypeAgg,

@@ -9,20 +9,20 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { useDispatch } from 'react-redux';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
   STATUS_CRITICAL_LABEL,
   STATUS_HIGH_LABEL,
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
-} from '../translations';
-import { inputsActions } from '../../../../common/store/inputs';
-import type { DeleteQuery, SetQuery } from '../../../../common/containers/use_global_time/types';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+} from '../../../overview/components/detection_response/translations';
+import { inputsActions } from '../../../common/store/inputs';
+import type { DeleteQuery, SetQuery } from '../../../common/containers/use_global_time/types';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export const severityLabels: Record<Severity, string> = {
   critical: STATUS_CRITICAL_LABEL,

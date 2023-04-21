@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { useVisualizationResponse } from '../../../common/components/visualization_actions/use_visualization_response';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
 export const openAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`;

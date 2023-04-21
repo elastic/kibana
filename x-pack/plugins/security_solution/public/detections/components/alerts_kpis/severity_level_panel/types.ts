@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SeverityBucket } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import type { SeverityBucket } from '../../../../explore/components/alerts_by_status/types';
 
 export interface AlertsBySeverityAgg {
   statusBySeverity: {

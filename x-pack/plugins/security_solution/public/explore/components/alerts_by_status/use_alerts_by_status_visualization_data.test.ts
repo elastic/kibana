@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { useVisualizationResponse } from '../../../common/components/visualization_actions/use_visualization_response';
 import {
   acknowledgedAlertsVisualizationId,
   closedAlertsVisualizationId,
@@ -14,7 +14,7 @@ import {
   useAlertsByStatusVisualizationData,
 } from './use_alerts_by_status_visualization_data';
 
-jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
+jest.mock('../../../common/components/visualization_actions/use_visualization_response', () => ({
   useVisualizationResponse: jest.fn(),
 }));
 

@@ -20,16 +20,16 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
-import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import type { FillColor } from '../../../../common/components/charts/donutchart';
-import { DonutChart } from '../../../../common/components/charts/donutchart';
-import { SecurityPageName } from '../../../../../common/constants';
-import { HeaderSection } from '../../../../common/components/header_section';
-import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
-import type { LegendItem } from '../../../../common/components/charts/legend_item';
+import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../common/types';
+import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import type { FillColor } from '../../../common/components/charts/donutchart';
+import { DonutChart } from '../../../common/components/charts/donutchart';
+import { SecurityPageName } from '../../../../common/constants';
+import { HeaderSection } from '../../../common/components/header_section';
+import { HoverVisibilityContainer } from '../../../common/components/hover_visibility_container';
+import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../common/components/inspect';
+import type { LegendItem } from '../../../common/components/charts/legend_item';
 import type { EntityFilter } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
@@ -46,25 +46,25 @@ import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
   STATUS_OPEN,
-} from '../translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { VIEW_ALERTS } from '../../../pages/translations';
-import { SEVERITY_COLOR } from '../utils';
-import { FormattedCount } from '../../../../common/components/formatted_number';
+} from '../../../overview/components/detection_response/translations';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { VIEW_ALERTS } from '../../../overview/pages/translations';
+import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
-import { Legend } from '../../../../common/components/charts/legend';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { Legend } from '../../../common/components/charts/legend';
+import { emptyDonutColor } from '../../../common/components/charts/donutchart_empty';
+import { LastUpdatedAt } from '../../../common/components/last_updated_at';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import { useNavigateToTimeline } from '../../hooks/use_navigate_to_timeline';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
-import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
+import { getAlertsByStatusAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;

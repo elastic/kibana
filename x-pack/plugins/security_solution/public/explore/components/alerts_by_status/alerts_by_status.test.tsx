@@ -8,19 +8,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsByStatus } from './alerts_by_status';
 import { parsedMockAlertsData } from './mock_data';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { CASES_FEATURE_ID } from '../../../../../common/constants';
-import { TestProviders } from '../../../../common/mock/test_providers';
+import { CASES_FEATURE_ID } from '../../../../common/constants';
+import { TestProviders } from '../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../common/lib/kibana/kibana_react');
-jest.mock('../../../../common/hooks/use_experimental_features', () => {
+jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../common/hooks/use_experimental_features', () => {
   return { useIsExperimentalFeatureEnabled: jest.fn() };
 });
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('./chart_label', () => {
   return {
     ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
@@ -33,7 +33,7 @@ jest.mock('./use_alerts_by_status', () => ({
   }),
 }));
 
-jest.mock('../../../../common/containers/use_global_time', () => ({
+jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2022-04-08T12:00:00.000Z',
     to: '2022-04-09T12:00:00.000Z',

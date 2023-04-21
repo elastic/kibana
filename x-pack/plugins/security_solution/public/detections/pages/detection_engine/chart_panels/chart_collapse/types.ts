@@ -8,7 +8,7 @@ import type { BucketItem } from '../../../../../../common/search_strategy/securi
 import type {
   SeverityBucket,
   SeverityBuckets as SeverityData,
-} from '../../../../../overview/components/detection_response/alerts_by_status/types';
+} from '../../../../../explore/components/alerts_by_status/types';
 
 export interface ChartCollapseAgg {
   severities: {
