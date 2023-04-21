@@ -19,6 +19,7 @@ describe('IncludeExpiredExceptionsModal', () => {
       <IncludeExpiredExceptionsModal
         handleCloseModal={handleCloseModal}
         onModalConfirm={onModalConfirm}
+        action={'export'}
       />
     );
     fireEvent.click(wrapper.getByTestId('confirmModalCancelButton'));
@@ -30,6 +31,7 @@ describe('IncludeExpiredExceptionsModal', () => {
       <IncludeExpiredExceptionsModal
         handleCloseModal={handleCloseModal}
         onModalConfirm={onModalConfirm}
+        action={'duplicate'}
       />
     );
     fireEvent.click(wrapper.getByTestId('confirmModalConfirmButton'));
