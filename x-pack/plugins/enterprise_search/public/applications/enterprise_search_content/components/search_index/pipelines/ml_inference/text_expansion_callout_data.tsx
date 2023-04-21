@@ -20,8 +20,6 @@ const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED
 export const useTextExpansionCallOutData = ({
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
-  console.log('useTextExpansionCallOutData');
-
   const { isCreateButtonDisabled } = useValues(TextExpansionCalloutLogic);
 
   const [show, setShow] = useState<boolean>(() => {
