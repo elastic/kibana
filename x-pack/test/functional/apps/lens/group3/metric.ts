@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe('lens metric-woof', () => {
+  describe('lens metric', () => {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
