@@ -49,6 +49,8 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       expect(telemetry).toHaveProperty('reportHostEntryClicked');
+      expect(telemetry).toHaveProperty('reportHostFlyoutRemoveFilter');
+      expect(telemetry).toHaveProperty('reportHostFlyoutAddFilter');
       expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
     });
   });
@@ -115,6 +117,46 @@ describe('TelemetryService', () => {
           filters: [],
           interval: 'interval(now-1h)',
           query: '',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutRemoveFilter', () => {
+    it('should report host flyout remove filter click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutRemoveFilter({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_REMOVE_FILTER,
+        {
+          field_name: 'agent.version',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostFlyoutAddFilter', () => {
+    it('should report host flyout add filter click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostFlyoutAddFilter({
+        field_name: 'agent.version',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_FLYOUT_ADD_FILTER,
+        {
+          field_name: 'agent.version',
         }
       );
     });

@@ -22,6 +22,8 @@ const configSchema = schema.object({
       'Loaded Kibana', // Sent once per page refresh (potentially, once per session)
       'Hosts View Query Submitted', // Worst-case scenario 1 every 2 seconds
       'Host Entry Clicked', // Worst-case scenario once per second - AT RISK,
+      'Host Flyout Remove Filter', // Worst-case scenario once per second - AT RISK,
+      'Host Flyout Add Filter', // Worst-case scenario once per second - AT RISK,
     ],
   }),
 });
