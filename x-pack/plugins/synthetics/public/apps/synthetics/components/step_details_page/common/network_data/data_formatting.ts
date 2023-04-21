@@ -55,7 +55,7 @@ const getFriendlyTooltipValue = ({
     const formattedMimeType: MimeType = MimeTypesMap[mimeType];
     label += ` (${FriendlyMimetypeLabels[formattedMimeType] || mimeType})`;
   }
-  return `${label}: ${formatValueForDisplay(value)}ms`;
+  return `${label}: ${formatValueForDisplay(value, value > 1 ? 0 : 1)}ms`;
 };
 export const isHighlightedItem = (
   item: NetworkEvent,

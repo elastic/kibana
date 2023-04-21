@@ -75,7 +75,9 @@
     "@kbn/files-plugin",
     "@kbn/core-theme-browser",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-ui-settings-browser-mocks"
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/observability-shared-plugin",
+    "@kbn/exploratory-view-plugin"
   ],
   "exclude": ["target/**/*"]
 }
