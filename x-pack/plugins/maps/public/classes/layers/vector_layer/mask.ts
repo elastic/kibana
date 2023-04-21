@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
-import { IESAggField } from '../../fields/agg';
+import type { IESAggSource } from '../../sources/es_agg_source';
+import type { IESAggField } from '../../fields/agg';
 import { FIELD_ORIGIN, MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';
 
 export const BELOW = i18n.translate('xpack.maps.mask.belowLabel', {
@@ -28,6 +29,17 @@ const FEATURES = i18n.translate('xpack.maps.mask.genericFeaturesName', {
 
 const VALUE = i18n.translate('xpack.maps.mask.genericAggLabel', {
   defaultMessage: 'value',
+});
+
+const WHEN = i18n.translate('xpack.maps.mask.when', {
+  defaultMessage: 'when',
+});
+
+const WHEN_JOIN_METRIC = i18n.translate('xpack.maps.mask.whenJoinMetric', {
+  defaultMessage: '{whenLabel} join metric',
+  values: {
+    whenLabel: WHEN
+  }
 });
 
 function getOperatorLabel(operator: MASK_OPERATOR): string {
@@ -72,15 +84,17 @@ export function getMaskI18nDescription({
 }): string {
   return isJoin
     ? i18n.translate('xpack.maps.mask.maskJoinDescription', {
-        defaultMessage: 'when join metric {aggLabel} is ',
+        defaultMessage: '{maskAdverb} {aggLabel} is ',
         values: {
           aggLabel: aggLabel ? aggLabel : VALUE,
+          maskAdverb: WHEN_JOIN_METRIC,
         },
       })
     : i18n.translate('xpack.maps.mask.maskDescription', {
-        defaultMessage: 'when {aggLabel} is ',
+        defaultMessage: '{maskAdverb} {aggLabel} is ',
         values: {
           aggLabel: aggLabel ? aggLabel : VALUE,
+          maskAdverb: WHEN,
         },
       });
 }
@@ -148,6 +162,22 @@ export class Mask {
 
   getEsAggField() {
     return this._esAggField;
+  }
+
+  getFieldOriginListLabel() {
+    const source = this._esAggField.getSource();
+    const isJoin = this._esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
+    const maskLabel = getMaskI18nLabel({
+      bucketsName: 'getBucketsName' in (source as IESAggSource)
+        ? (source as IESAggSource).getBucketsName()
+        : undefined,
+      isJoin,
+    });
+    const adverb = isJoin
+      ? WHEN_JOIN_METRIC
+      : WHEN;
+
+    return `${maskLabel} ${adverb}`;
   }
 
   getOperator() {

@@ -6,6 +6,7 @@
  */
 
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FIELD_ORIGIN, MASK_OPERATOR } from '../../../../../../common/constants';
 import type { IESAggField } from '../../../../fields/agg';
@@ -18,6 +19,7 @@ import {
 
 interface Props {
   esAggField: IESAggField;
+  onlyShowLabelAndValue?: boolean;
   operator: MASK_OPERATOR;
   value: number;
 }
@@ -58,7 +60,16 @@ export class MaskLegend extends Component<Props, State> {
       : undefined;
   }
 
-  render() {
+  _getPrefix() {
+    if (this.props.onlyShowLabelAndValue) {
+      return i18n.translate('xpack.maps.maskLegend.is', {
+        defaultMessage: '{aggLabel} is',
+        values: {
+          aggLabel: this.state.aggLabel,
+        }
+      })
+    }
+
     const isJoin = this.props.esAggField.getOrigin() === FIELD_ORIGIN.JOIN;
     const maskLabel = getMaskI18nLabel({
       bucketsName: this._getBucketsName(),
@@ -68,11 +79,14 @@ export class MaskLegend extends Component<Props, State> {
       aggLabel: this.state.aggLabel,
       isJoin,
     });
-    const maskValue = getMaskI18nValue(this.props.operator, this.props.value);
+    return `${maskLabel} ${maskDescription}`;
+  }
+
+  render() {
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          {`${maskLabel} ${maskDescription} `}<strong>{maskValue}</strong>
+          {`${this._getPrefix()} `}<strong>{getMaskI18nValue(this.props.operator, this.props.value)}</strong>
         </small>
       </EuiText>
     );
