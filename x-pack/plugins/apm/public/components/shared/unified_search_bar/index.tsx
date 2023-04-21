@@ -33,15 +33,15 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 
 function useSearchBarParams(defaultKuery?: string) {
   const { path, query } = useApmParams('/*');
-  const kuery = 'kuery' in query ? query.kuery : undefined;
+  const urlKuery = 'kuery' in query ? query.kuery : undefined;
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
 
   return {
-    urlQuery: kuery
+    kuery: urlKuery
       ? {
-          query: defaultKuery || kuery,
+          query: defaultKuery || urlKuery,
           language: 'kuery',
         }
       : undefined,
@@ -129,7 +129,7 @@ export function UnifiedSearchBar({
     },
   } = services;
 
-  const { urlQuery, serviceName, environment, groupId } =
+  const { kuery, serviceName, environment, groupId } =
     useSearchBarParams(value);
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
@@ -139,16 +139,16 @@ export function UnifiedSearchBar({
 
   const syncSearchBarWithUrl = useCallback(() => {
     // Sync Kuery params with Search Bar
-    if (urlQuery && !deepEqual(queryStringService.getQuery(), urlQuery)) {
-      queryStringService.setQuery(urlQuery);
+    if (kuery && !deepEqual(queryStringService.getQuery(), kuery)) {
+      queryStringService.setQuery(kuery);
     }
     // On page navigation the search bar persists the state where as the url is cleared, hence we need to clear the search bar
-    if (!urlQuery) {
+    if (!kuery) {
       queryStringService.clearQuery();
     }
     // Sync Time Range with Search Bar
     timeFilterService.timefilter.setTime(urlTimeRange as TimeRange);
-  }, [urlQuery, queryStringService, timeFilterService, urlTimeRange]);
+  }, [kuery, queryStringService, timeFilterService, urlTimeRange]);
 
   useEffect(() => {
     syncSearchBarWithUrl();
