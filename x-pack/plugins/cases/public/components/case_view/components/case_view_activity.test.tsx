@@ -504,7 +504,7 @@ describe.skip('Case View Page activity tab', () => {
         });
       });
 
-      it('renders description user action correctly', async () => {
+      it('renders edit description user action correctly', async () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
