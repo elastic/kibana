@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
-import { buildAlertDetailPath } from '../../../../../common/utils/build_alert_detail_path';
+import { buildAlertDetailPath } from '../../../../../common/utils/alert_detail_path';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 
 export const useGetAlertDetailsFlyoutLink = ({

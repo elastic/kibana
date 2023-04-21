@@ -7,7 +7,7 @@
 
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { getAlertDetailsUrl } from '../../../../../common/utils/build_alert_detail_path';
+import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type { ConfigType } from '../../../../config';
 import type { Ancestor, SignalSource, SignalSourceHit } from '../types';

@@ -17,7 +17,7 @@ import {
   ALERT_URL,
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import { getAlertDetailsUrl } from '../../../../../../common/utils/build_alert_detail_path';
+import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import type {
   BaseFieldsLatest,

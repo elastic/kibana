@@ -6,7 +6,7 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ALERTS_PATH, APP_PATH } from '../constants';
+import { ALERT_DETAILS_REDIRECT_PATH, APP_PATH } from '../constants';
 
 export const buildAlertDetailPath = ({
   alertId,
@@ -16,7 +16,7 @@ export const buildAlertDetailPath = ({
   alertId: string;
   index: string;
   timestamp: string;
-}) => `${ALERTS_PATH}/redirect/${alertId}?index=${index}&timestamp=${timestamp}`;
+}) => `${ALERT_DETAILS_REDIRECT_PATH}/${alertId}?index=${index}&timestamp=${timestamp}`;
 
 export const getAlertDetailsUrl = ({
   alertId,
