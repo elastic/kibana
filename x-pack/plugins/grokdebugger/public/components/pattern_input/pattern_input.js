@@ -28,7 +28,7 @@ export function PatternInput({ value, onChange }) {
           tabSize: 2,
           automaticLayout: true,
         }}
-        aria-label={i18n.translate('xpack.grokDebugger.grokPatternLabel', {
+        aria-label={i18n.translate('xpack.grokDebugger.grokPatternAriaLabel', {
           defaultMessage: 'Code editor for inputting the grok pattern',
         })}
         onChange={onChange}
