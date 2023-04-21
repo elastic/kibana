@@ -6,13 +6,13 @@
  */
 
 import {
-  AnalysisConfig,
-  ClassificationAnalysis,
-  OutlierAnalysis,
-  RegressionAnalysis,
-} from '../types/data_frame_analytics';
-import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../types/data_frame_analytics';
+  ANALYSIS_CONFIG_TYPE,
+  type AnalysisConfig,
+  type ClassificationAnalysis,
+  type OutlierAnalysis,
+  type RegressionAnalysis,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics';
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   if (typeof arg !== 'object' || arg === null) return false;

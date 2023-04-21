@@ -6,21 +6,22 @@
  */
 
 import { useMemo } from 'react';
+
+import type {
+  AnalyticsMapReturnType,
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  UpdateDataFrameAnalyticsConfig,
+  DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics';
+
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-
 import { basePath } from '.';
 import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import type { DeepPartial } from '../../../../common/types/common';
 import type { NewJobCapsResponse } from '../../../../common/types/fields';
-import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type {
-  DeleteDataFrameAnalyticsWithIndexStatus,
-  AnalyticsMapReturnType,
-} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;

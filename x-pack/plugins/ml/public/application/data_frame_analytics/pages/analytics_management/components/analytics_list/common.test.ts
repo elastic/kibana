@@ -7,14 +7,14 @@
 
 import StatsMock from './__mocks__/analytics_stats.json';
 
+import { type DataFrameAnalyticsStats, DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics';
+
 import {
   getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
-  DataFrameAnalyticsStats,
-  DATA_FRAME_TASK_STATE,
 } from './common';
 
 const completedJob = StatsMock.data_frame_analytics[0] as DataFrameAnalyticsStats;

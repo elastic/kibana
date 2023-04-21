@@ -9,6 +9,10 @@ import React, { FC, useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics';
 
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
 
@@ -18,12 +22,9 @@ import {
   defaultSearchQuery,
   getScatterplotMatrixLegendType,
   useResultsViewConfig,
-  DataFrameAnalyticsConfig,
   getDestinationIndex,
 } from '../../../../common';
 import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
 import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '../../../../common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
 
 import { getOutlierScoreFieldName } from './common';
 

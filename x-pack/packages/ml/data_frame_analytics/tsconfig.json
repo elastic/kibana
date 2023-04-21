@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/ml-is-populated-object",
+    "@kbn/field-types",
+    "@kbn/ml-error-utils",
   ]
 }

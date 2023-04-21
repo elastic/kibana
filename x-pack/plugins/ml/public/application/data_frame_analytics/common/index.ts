@@ -26,15 +26,9 @@ export {
   ANALYSIS_CONFIG_TYPE,
 } from './analytics';
 
-export type { EsId, EsDoc, EsDocSource, EsFieldName } from './fields';
-export { getDefaultFieldsFromJobCaps, sortExplorationResultsFields, MAX_COLUMNS } from './fields';
-
 export { getIndexData } from './get_index_data';
 export { getIndexFields } from './get_index_fields';
 export { getDestinationIndex } from './get_destination_index';
 export { getScatterplotMatrixLegendType } from './get_scatterplot_matrix_legend_type';
 
 export { useResultsViewConfig } from './use_results_view_config';
-export type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
-export type { DataFrameAnalyticsId } from '../../../../common/types/data_frame_analytics';
-export type { IndexName } from '../../../../common/types/data_frame_analytics';

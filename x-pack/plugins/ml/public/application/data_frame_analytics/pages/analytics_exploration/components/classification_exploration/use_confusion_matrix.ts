@@ -8,23 +8,24 @@
 import { useState, useEffect } from 'react';
 
 import {
+  isKeywordAndTextType,
+  type ClassificationEvaluateResponse,
+  type ConfusionMatrix,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics';
+
+import {
   isClassificationEvaluateResponse,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
   ClassificationMetricItem,
 } from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-import {
-  ClassificationEvaluateResponse,
-  ConfusionMatrix,
-} from '../../../../../../../common/types/data_frame_analytics';
 
 import {
   getDependentVar,
   getPredictionFieldName,
   loadEvalData,
   loadDocsCount,
-  DataFrameAnalyticsConfig,
 } from '../../../../common';
 
 import { isTrainingFilter } from './is_training_filter';

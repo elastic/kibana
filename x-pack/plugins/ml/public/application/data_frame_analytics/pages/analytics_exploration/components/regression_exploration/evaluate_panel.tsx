@@ -8,6 +8,10 @@
 import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -25,9 +29,7 @@ import {
   loadEvalData,
   loadDocsCount,
   Eval,
-  DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,

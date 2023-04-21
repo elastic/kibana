@@ -8,19 +8,18 @@
 import { useState, useEffect } from 'react';
 
 import {
+  isKeywordAndTextType,
+  type DataFrameAnalyticsConfig,
+  type RocCurveItem,
+} from '@kbn/ml-data-frame-analytics';
+
+import {
   isClassificationEvaluateResponse,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
 
-import {
-  getDependentVar,
-  getPredictionFieldName,
-  loadEvalData,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+import { getDependentVar, getPredictionFieldName, loadEvalData } from '../../../../common';
 
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 

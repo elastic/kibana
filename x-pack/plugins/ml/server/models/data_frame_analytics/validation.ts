@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  type AnalysisConfig,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../common/constants/data_frame_analytics';
 import {
   ALL_CATEGORIES,
   FRACTION_EMPTY_LIMIT,
@@ -26,10 +30,6 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
 } from '../../../common/util/analytics_utils';
-import {
-  AnalysisConfig,
-  DataFrameAnalyticsConfig,
-} from '../../../common/types/data_frame_analytics';
 
 interface MissingAgg {
   [key: string]: {

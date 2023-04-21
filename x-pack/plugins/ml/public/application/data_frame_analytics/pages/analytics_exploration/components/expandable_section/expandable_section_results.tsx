@@ -25,6 +25,7 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
 
 import type { DataGridItem } from '../../../../../components/data_grid';
 import {
@@ -44,13 +45,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import {
-  defaultSearchQuery,
-  DataFrameAnalyticsConfig,
-  INDEX_STATUS,
-  SEARCH_SIZE,
-  getAnalysisType,
-} from '../../../../common';
+import { defaultSearchQuery, INDEX_STATUS, SEARCH_SIZE, getAnalysisType } from '../../../../common';
 
 import {
   replaceTokensInDFAUrlValue,

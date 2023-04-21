@@ -34,3 +34,34 @@ export {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from './src/feature_importance';
+
+export {
+  isKeywordAndTextType,
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+} from './src/fields';
+
+export {
+  isDataFrameAnalyticsConfigs,
+  type AnalysisConfig,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
+  type FeatureProcessor,
+  type MapElements,
+  type ConfusionMatrix,
+  type ClassificationEvaluateResponse,
+  type ClassificationAnalysis,
+  type OutlierAnalysis,
+  type RegressionAnalysis,
+  type DataFrameAnalyticsConfig,
+  type DataFrameAnalysisConfigType,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalyticsMeta,
+  type DataFrameAnalyticsStats,
+  type DataFrameTaskStateType,
+  type DeleteDataFrameAnalyticsWithIndexStatus,
+  type UpdateDataFrameAnalyticsConfig,
+  type RocCurveItem,
+} from './src/types';

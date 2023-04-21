@@ -11,14 +11,12 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import {
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
-  JobMapNodeTypes,
-} from '../../../common/constants/data_frame_analytics';
-import {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapReturnType,
-  AnalyticsMapNodeElement,
-  MapElements,
-} from '../../../common/types/data_frame_analytics';
+  type JobMapNodeTypes,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
+  type MapElements,
+} from '@kbn/ml-data-frame-analytics';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,

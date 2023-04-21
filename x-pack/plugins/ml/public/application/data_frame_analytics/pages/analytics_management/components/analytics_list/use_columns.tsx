@@ -20,7 +20,8 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import type { DataFrameAnalyticsId, DataFrameAnalyticsStats } from '@kbn/ml-data-frame-analytics';
+import { getAnalysisType } from '../../../../common';
 import {
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
@@ -28,7 +29,6 @@ import {
   isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
-  DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
