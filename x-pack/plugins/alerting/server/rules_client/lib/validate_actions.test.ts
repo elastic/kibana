@@ -26,6 +26,9 @@ describe('validateActions', () => {
     cancelAlertsOnRuleTimeout: true,
     ruleTaskTimeout: '5m',
     getSummarizedAlerts: jest.fn(),
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
 
   const data = {
