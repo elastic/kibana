@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -27,6 +27,7 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -38,48 +39,6 @@ export interface TextExpansionCallOutState {
 export interface TextExpansionCallOutProps {
   isDismissable?: boolean;
 }
-
-export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
-  'enterprise-search-text-expansion-callout-dismissed';
-
-const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY) === 'true';
-
-export const useTextExpansionCallOutData = ({
-  isDismissable = false,
-}: TextExpansionCallOutProps): TextExpansionCallOutState => {
-  const { isCreateButtonDisabled } = useValues(TextExpansionCalloutLogic);
-
-  const [show, setShow] = useState<boolean>(() => {
-    if (!isDismissable) return true;
-
-    try {
-      return !isDismissed();
-    } catch {
-      return true;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      if (!isDismissed()) {
-        localStorage.setItem(TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY, JSON.stringify(!show));
-      }
-    } catch {
-      return;
-    }
-  }, [show]);
-
-  const dismiss = useCallback(() => {
-    setShow(false);
-  }, []);
-
-  return {
-    dismiss,
-    isCreateButtonDisabled,
-    isDismissable,
-    show,
-  };
-};
 
 const TextExpansionDismissButton = ({ dismiss }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
