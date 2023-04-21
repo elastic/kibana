@@ -91,7 +91,7 @@ describe('UnifiedFieldList useFieldFilters()', () => {
     expect(result.current.onFilterField!({ displayName: 'message.name1' } as DataViewField)).toBe(
       true
     );
-    expect(result.current.onFilterField!({ name: 'messagename10' } as DataViewField)).toBe(true);
+    expect(result.current.onFilterField!({ name: 'messagename10' } as DataViewField)).toBe(false);
     expect(result.current.onFilterField!({ name: 'message.test' } as DataViewField)).toBe(false);
   });
 
