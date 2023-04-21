@@ -17,10 +17,16 @@ import type { LeftPanelTabsType } from './tabs';
 import { tabs } from './tabs';
 import { useLeftPanelContext } from './context';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'history';
+export type LeftPanelPaths =
+  | 'visualize'
+  | 'insights'
+  | 'investigation'
+  | 'history'
+  | 'responseActions';
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
+export const LeftPanelResponseActionsTabPath: LeftPanelProps['path'] = ['responseActions'];
 
 export interface LeftPanelProps extends FlyoutPanel {
   key: 'document-details-left';

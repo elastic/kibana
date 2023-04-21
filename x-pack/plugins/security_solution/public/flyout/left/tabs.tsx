@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
+import { ResponseActionsTab } from './tabs/response_actions_tab';
 import { VisualizeTab } from './tabs/visualize_tab';
 import { InvestigationTab } from './tabs/investigation_tab';
-import { HISTORY_TAB, INSIGHTS_TAB, INVESTIGATIONS_TAB, VISUALIZE_TAB } from './translations';
+import {
+  HISTORY_TAB,
+  INSIGHTS_TAB,
+  INVESTIGATIONS_TAB,
+  RESPONSE_ACTIONS_TAB,
+  VISUALIZE_TAB,
+} from './translations';
 import { InsightsTab } from './tabs/insights_tab';
 import { HistoryTab } from './tabs/history_tab';
 import type { LeftPanelPaths } from '.';
@@ -50,5 +57,11 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': HISTORY_TAB_TEST_ID,
     name: HISTORY_TAB,
     content: <HistoryTab />,
+  },
+  {
+    id: 'responseActions',
+    'data-test-subj': HISTORY_TAB_TEST_ID,
+    name: RESPONSE_ACTIONS_TAB,
+    content: <ResponseActionsTab />,
   },
 ];

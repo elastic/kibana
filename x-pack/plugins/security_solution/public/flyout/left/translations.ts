@@ -34,3 +34,10 @@ export const HISTORY_TAB = i18n.translate(
     defaultMessage: 'History',
   }
 );
+
+export const RESPONSE_ACTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseActionsTab',
+  {
+    defaultMessage: 'Responses',
+  }
+);

@@ -111,6 +111,11 @@ export const INSIGHTS_TITLE = i18n.translate(
   { defaultMessage: 'Insights' }
 );
 
+export const RESPONSE_ACTIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.insightsTitle',
+  { defaultMessage: 'Response Actions' }
+);
+
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
   { defaultMessage: 'Technical Preview' }
@@ -128,6 +133,13 @@ export const ENTITIES_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText',
   {
     defaultMessage: 'entities',
+  }
+);
+
+export const RESPONSE_ACTIONS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.responseActionsText',
+  {
+    defaultMessage: 'responses',
   }
 );
 

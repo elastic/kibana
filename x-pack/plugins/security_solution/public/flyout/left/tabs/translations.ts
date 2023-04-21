@@ -20,6 +20,12 @@ export const SESSION_VIEW_BUTTON = i18n.translate(
     defaultMessage: 'Session View',
   }
 );
+export const RESPONSE_ACTIONS_VIEW_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseActionsViewButton',
+  {
+    defaultMessage: 'Response Actions View',
+  }
+);
 
 export const ANALYZER_GRAPH_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.analyzerGraphButton',
