@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
@@ -102,9 +102,29 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items, refreshData }) => {
     const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
+    const onEdit = useCallback(
+      (id) => navigateToEditMaintenanceWindows(id),
+      [navigateToEditMaintenanceWindows]
+    );
     const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
+    const onCancel = useCallback(
+      (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+      [finishMaintenanceWindow, refreshData]
+    );
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
+    const onArchive = useCallback(
+      (id: string, archive: boolean) =>
+        archiveMaintenanceWindow(
+          { maintenanceWindowId: id, archive },
+          { onSuccess: () => refreshData() }
+        ),
+      [archiveMaintenanceWindow, refreshData]
+    );
     const { mutate: finishAndArchiveMaintenanceWindow } = useFinishAndArchiveMaintenanceWindow();
+    const onCancelAndArchive = useCallback(
+      (id: string) => finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+      [finishAndArchiveMaintenanceWindow, refreshData]
+    );
 
     const tableCss = useMemo(() => {
       return css`
@@ -122,18 +142,12 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         render: ({ status, id }: { status: MaintenanceWindowStatus; id: string }) => {
           return (
             <TableActionsPopover
+              id={id}
               status={status}
-              onEdit={() => navigateToEditMaintenanceWindows(id)}
-              onCancel={() => finishMaintenanceWindow(id, { onSuccess: () => refreshData() })}
-              onArchive={(archive: boolean) =>
-                archiveMaintenanceWindow(
-                  { maintenanceWindowId: id, archive },
-                  { onSuccess: () => refreshData() }
-                )
-              }
-              onCancelAndArchive={() =>
-                finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() })
-              }
+              onEdit={onEdit}
+              onCancel={onCancel}
+              onArchive={onArchive}
+              onCancelAndArchive={onCancelAndArchive}
             />
           );
         },

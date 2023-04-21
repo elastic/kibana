@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   FIELD_TYPES,
@@ -115,31 +115,34 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 
-    const closeModal = () => setIsModalVisible(false);
-    const showModal = () => setIsModalVisible(true);
+    const closeModal = useCallback(() => setIsModalVisible(false), []);
+    const showModal = useCallback(() => setIsModalVisible(true), []);
 
-    let modal;
-    if (isModalVisible) {
-      modal = (
-        <EuiConfirmModal
-          title={i18n.ARCHIVE_TITLE}
-          onCancel={closeModal}
-          onConfirm={() => {
-            closeModal();
-            archiveMaintenanceWindow(
-              { maintenanceWindowId: maintenanceWindowId!, archive: true },
-              { onSuccess }
-            );
-          }}
-          cancelButtonText={i18n.CANCEL}
-          confirmButtonText={i18n.ARCHIVE_TITLE}
-          defaultFocusedButton="confirm"
-          buttonColor="danger"
-        >
-          <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
-        </EuiConfirmModal>
-      );
-    }
+    const modal = useMemo(() => {
+      let m;
+      if (isModalVisible) {
+        m = (
+          <EuiConfirmModal
+            title={i18n.ARCHIVE_TITLE}
+            onCancel={closeModal}
+            onConfirm={() => {
+              closeModal();
+              archiveMaintenanceWindow(
+                { maintenanceWindowId: maintenanceWindowId!, archive: true },
+                { onSuccess }
+              );
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.ARCHIVE_TITLE}
+            defaultFocusedButton="confirm"
+            buttonColor="danger"
+          >
+            <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+          </EuiConfirmModal>
+        );
+      }
+      return m;
+    }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
 
     return (
       <Form form={form}>

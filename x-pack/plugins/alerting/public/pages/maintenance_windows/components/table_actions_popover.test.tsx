@@ -23,6 +23,7 @@ describe('TableActionsPopover', () => {
   test('it renders', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
+        id={'123'}
         status={MaintenanceWindowStatus.Running}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -37,6 +38,7 @@ describe('TableActionsPopover', () => {
   test('it shows the correct actions when a maintenance window is running', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
+        id={'123'}
         status={MaintenanceWindowStatus.Running}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -53,6 +55,7 @@ describe('TableActionsPopover', () => {
   test('it shows the correct actions when a maintenance window is upcoming', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
+        id={'123'}
         status={MaintenanceWindowStatus.Upcoming}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -68,6 +71,7 @@ describe('TableActionsPopover', () => {
   test('it shows the correct actions when a maintenance window is finished', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
+        id={'123'}
         status={MaintenanceWindowStatus.Finished}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -83,6 +87,7 @@ describe('TableActionsPopover', () => {
   test('it shows the correct actions when a maintenance window is archived', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
+        id={'123'}
         status={MaintenanceWindowStatus.Archived}
         onEdit={() => {}}
         onCancel={() => {}}
