@@ -80,10 +80,12 @@ const registerCellActions = (
     services,
   });
 
-  registerCellActionsTrigger({triggerId: SecurityCellActionsTrigger.ALERTS_COUNT, cellActions, actionsOrder: [
-    'addToNewTimeline',
-  ],
-    services,});
+  registerCellActionsTrigger({
+    triggerId: SecurityCellActionsTrigger.ALERTS_COUNT,
+    cellActions,
+    actionsOrder: ['addToNewTimeline'],
+    services,
+  });
 };
 
 const registerCellActionsTrigger = ({
@@ -102,8 +104,10 @@ const registerCellActionsTrigger = ({
 
   actionsOrder.forEach((actionName, order) => {
     const actionFactory = cellActions[actionName];
-    const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+    if (actionFactory) {
+      const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
 
-    uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
+      uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
+    }
   });
 };
