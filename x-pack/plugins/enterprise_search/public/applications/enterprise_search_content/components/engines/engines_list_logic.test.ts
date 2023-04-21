@@ -18,7 +18,6 @@ import { EnginesListLogic } from './engines_list_logic';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
-  createEngineFlyoutOpen: false,
   data: undefined,
   deleteModalEngine: null,
   deleteModalEngineName: '',
@@ -156,24 +155,7 @@ describe('EnginesListLogic', () => {
         });
       });
     });
-    describe('openEngineCreate', () => {
-      it('set createEngineFlyoutOpen to true', () => {
-        EnginesListLogic.actions.openEngineCreate();
-        expect(EnginesListLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          createEngineFlyoutOpen: true,
-        });
-      });
-    });
-    describe('closeEngineCreate', () => {
-      it('set createEngineFlyoutOpen to false', () => {
-        EnginesListLogic.actions.closeEngineCreate();
-        expect(EnginesListLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          createEngineFlyoutOpen: false,
-        });
-      });
-    });
+
     describe('setSearchQuery', () => {
       it('set setSearchQuery to search value', () => {
         EnginesListLogic.actions.setSearchQuery('my-search-query');
