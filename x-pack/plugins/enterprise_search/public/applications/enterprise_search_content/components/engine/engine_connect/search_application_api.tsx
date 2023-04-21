@@ -19,7 +19,6 @@ import {
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
@@ -29,25 +28,18 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { EngineViewTabs } from '../../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
-
-import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
 import { EngineApiIntegrationStage } from './engine_api_integration';
 import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
-export const EngineAPI: React.FC = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { engineData } = useValues(EngineIndicesLogic);
+export const SearchApplicationAPI = () => {
+  const { engineName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
   const enterpriseSearchUrl = getEnterpriseSearchUrl();
   const { navigateToUrl } = useValues(KibanaLogic);
-
-  if (!engineData) return null;
 
   const steps = [
     {
@@ -186,22 +178,11 @@ export const EngineAPI: React.FC = () => {
   ];
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
-      pageViewTelemetry={EngineViewTabs.API}
-      isLoading={isLoadingEngine}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.api.pageTitle', {
-          defaultMessage: 'API',
-        }),
-        rightSideItems: [],
-      }}
-      engineName={engineName}
-    >
+    <>
       {isGenerateModalOpen ? (
         <GenerateEngineApiKeyModal engineName={engineName} onClose={closeGenerateModal} />
       ) : null}
       <EuiSteps headingElement="h2" steps={steps} />
-    </EnterpriseSearchEnginesPageTemplate>
+    </>
   );
 };
