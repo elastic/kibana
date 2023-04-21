@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
       await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('dal');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('dal...');
     });
   });
 }
