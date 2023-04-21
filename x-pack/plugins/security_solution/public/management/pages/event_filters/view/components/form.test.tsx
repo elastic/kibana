@@ -7,7 +7,6 @@
 import React from 'react';
 import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { useFetchIndex } from '../../../../../common/containers/source';
 import { NAME_ERROR } from '../event_filters_list';
 import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../common/hooks/use_license';
@@ -25,8 +24,11 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { useFetchEventFiltersFields } from '../../../../hooks/event_filters';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../hooks/event_filters');
+
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -131,15 +133,15 @@ describe('Event filter form', () => {
         notifications: {},
       },
     });
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
-    mockedContext = createAppRootMockRenderer();
-    latestUpdatedItem = createItem();
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchEventFiltersFields as jest.Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
       },
     ]);
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    mockedContext = createAppRootMockRenderer();
+    latestUpdatedItem = createItem();
 
     formProps = {
       item: latestUpdatedItem,
