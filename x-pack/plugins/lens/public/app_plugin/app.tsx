@@ -457,17 +457,14 @@ export function App({
       }
       if (locator && shortUrls) {
         // This is a stripped down version of what the share URL plugin is doing
-        const relativeUrl = await shortUrls.create({ locator, params });
-        const absoluteShortUrl = application.getUrlForApp('', {
-          path: `/r/s/${relativeUrl.data.slug}`,
-          absolute: true,
-        });
+        const shortUrl = await shortUrls.createWithLocator({ locator, params });
+        const absoluteShortUrl = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
         shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
         return absoluteShortUrl;
       }
       return '';
     },
-    [locator, application, shortUrls]
+    [locator, shortUrls]
   );
 
   const returnToOriginSwitchLabelForContext =
