@@ -12,7 +12,6 @@ export interface RulesListNotifyBadgeProps {
     RuleTableItem,
     'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
   >;
-  previousSnoozeInterval?: string | null;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
