@@ -200,7 +200,7 @@ export const groupAndBulkCreate = async ({
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
-      if (buckets.length === 0) {
+      if (buckets.length === 0 && suppressOnMissingFields === true) {
         return toReturn;
       }
 

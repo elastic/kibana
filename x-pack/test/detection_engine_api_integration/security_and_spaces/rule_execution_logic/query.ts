@@ -24,7 +24,10 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  QueryRuleCreateProps,
+  AlertSuppressionMissingFieldsStrategy,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
@@ -1433,6 +1436,170 @@ export default ({ getService }: FtrProviderContext) => {
             expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).to.eql(1);
           });
         });
+      });
+
+      // when missing_fields_strategy set to "doNotSuppress", each document with missing grouped by field
+      // will generate a separate alert
+      describe('unsuppressed alerts', () => {
+        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
+          es,
+          index: 'ecs_compliant',
+          log,
+        });
+
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          );
+        });
+
+        it('should create unsuppressed alerts for single host.name field when SOME of the documents missing values', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:00:00.000Z';
+          const firstDoc = {
+            id,
+            '@timestamp': timestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const missingFieldDoc = {
+            id,
+            '@timestamp': timestamp,
+          };
+
+          await indexListOfDocuments([
+            firstDoc,
+            firstDoc,
+            missingFieldDoc,
+            missingFieldDoc,
+            missingFieldDoc,
+          ]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+            sort: ['agent.name'],
+          });
+          expect(previewAlerts.length).to.eql(4);
+          // first alert should be suppressed
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: timestamp,
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+
+          // alert is not suppressed and do not have suppress properties
+          expect(previewAlerts[1]._source).to.have.property('id', id);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_END);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+
+          // rest of alerts are not suppressed and do not have suppress properties
+          previewAlerts.slice(2).forEach((previewAlert) => {
+            const source = previewAlert._source;
+            expect(source).to.have.property('id', id);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          });
+        });
+
+        it('should create unsuppressed alerts for single host.name field when ALL the documents missing values', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:00:00.000Z';
+          const missingFieldDoc = {
+            id,
+            '@timestamp': timestamp,
+          };
+
+          await indexListOfDocuments([
+            missingFieldDoc,
+            missingFieldDoc,
+            missingFieldDoc,
+            missingFieldDoc,
+          ]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            },
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+            sort: ['agent.name'],
+          });
+          expect(previewAlerts.length).to.eql(4);
+
+          // alert is not suppressed and do not have suppress properties
+          expect(previewAlerts[1]._source).to.have.property('id', id);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_END);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
+          expect(previewAlerts[1]._source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+
+          // rest of alerts are not suppressed and do not have suppress properties
+          previewAlerts.slice(2).forEach((previewAlert) => {
+            const source = previewAlert._source;
+            expect(source).to.have.property('id', id);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_END);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.to.have.property(ALERT_SUPPRESSION_DOCS_COUNT);
+          });
+        });
+
+        // TODO: write tests
+        it('should create unsuppressed alerts for multiple fields when SOME of the documents missing values', async () => {});
+        it('should create unsuppressed alerts for multiple fields when ALL the documents missing values', async () => {});
+
+        it('should create no more than max_signals unsuppressed alerts', async () => {});
       });
     });
 
