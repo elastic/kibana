@@ -13,9 +13,11 @@ import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../../common';
 
-import type { K8sMode } from './types';
+import type { K8sMode, CSPMode } from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
@@ -51,6 +53,7 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
 
 export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
+  const [isCSP, setIsCSP] = useState<CSPMode>('IS_LOADING');
   useEffect(() => {
     async function checkifK8s() {
       if (!agentPolicy) {
@@ -64,20 +67,67 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
           : 'IS_NOT_KUBERNETES'
       );
     }
+
+    async function checkifCSP() {
+      if (!agentPolicy) {
+        setIsCSP('IS_LOADING');
+        return;
+      }
+
+      const pkgArray = agentPolicy?.package_policies?.map((e) => isCSPPackage(e));
+
+      if (pkgArray?.includes('IS_CSP_KSPM')) {
+        setIsCSP('IS_CSP_KSPM');
+      } else if (pkgArray?.includes('IS_CSP_CSPM')) {
+        setIsCSP('IS_CSP_CSPM');
+      } else if (pkgArray?.includes('IS_CSP_CNVM')) {
+        setIsCSP('IS_CSP_CNVM');
+      } else {
+        setIsCSP('IS_NOT_CSP');
+      }
+    }
+
     checkifK8s();
+    checkifCSP();
   }, [agentPolicy]);
 
-  return { isK8s };
+  return { isK8s, isCSP };
 }
 
 const isK8sPackage = (pkg: PackagePolicy) => {
   const name = pkg.package?.name as string;
-  if (name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE) {
-    return pkg.inputs.some(
-      (input) =>
-        input.enabled && input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
-    );
-  }
 
   return K8S_PACKAGES.has(name);
+};
+
+const isCSPPackage = (pkg: PackagePolicy) => {
+  const name = pkg.package?.name as string;
+  if (name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE) {
+    if (
+      pkg.inputs.some(
+        (input) =>
+          input.enabled &&
+          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
+      )
+    ) {
+      return 'IS_CSP_KSPM';
+    } else if (
+      pkg.inputs.some(
+        (input) =>
+          input.enabled &&
+          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE
+      )
+    ) {
+      return 'IS_CSP_CSPM';
+    } else if (
+      pkg.inputs.some(
+        (input) =>
+          input.enabled &&
+          input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE
+      )
+    ) {
+      return 'IS_CSP_CNVM';
+    }
+  }
+  return 'IS_NOT_CSP';
 };

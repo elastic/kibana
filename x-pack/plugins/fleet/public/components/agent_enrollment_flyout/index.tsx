@@ -99,7 +99,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     }
   }, [selectedPolicy, isFleetServerPolicySelected]);
 
-  const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
+  const { isK8s, isCSP } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
+
+  console.log('isK8S: ', isK8s)
+  console.log('isCSP: ', isCSP)
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
@@ -197,6 +200,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             agentPolicies={agentPolicies}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
+            isCSP={isCSP}
             refreshAgentPolicies={refreshAgentPolicies}
             isLoadingAgentPolicies={isLoadingAgentPolicies}
             mode={mode}

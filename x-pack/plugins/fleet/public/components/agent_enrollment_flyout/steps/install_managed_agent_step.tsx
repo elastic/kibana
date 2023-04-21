@@ -16,13 +16,14 @@ import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/re
 import { InstallSection } from '../../enrollment_instructions/install_section';
 import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 
-import type { K8sMode } from '../types';
+import type { K8sMode, CSPMode } from '../types';
 
 export const InstallManagedAgentStep = ({
   installCommand,
   selectedApiKeyId,
   apiKeyData,
   isK8s,
+  isCSP,
   enrollToken,
   isComplete,
   fullCopyButton,
@@ -31,6 +32,7 @@ export const InstallManagedAgentStep = ({
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   isK8s?: K8sMode;
+  isCSP?: CSPMode;
   enrollToken?: string;
   installCommand: CommandsByPlatform;
   isComplete?: boolean;
@@ -48,6 +50,7 @@ export const InstallManagedAgentStep = ({
       <InstallSection
         installCommand={installCommand}
         isK8s={isK8s}
+        isCSP={isCSP}
         enrollToken={enrollToken}
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}

@@ -14,6 +14,9 @@ export type K8sMode =
   | 'IS_KUBERNETES'
   | 'IS_NOT_KUBERNETES'
   | 'IS_KUBERNETES_MULTIPAGE';
+
+export type CSPMode = 'IS_LOADING' | 'IS_NOT_CSP' | 'IS_CSP_KSPM' | 'IS_CSP_CNVM' | 'IS_CSP_CSPM';
+
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
@@ -26,6 +29,8 @@ export interface BaseProps {
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
+
+  isCSP?: CSPMode;
 
   /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI

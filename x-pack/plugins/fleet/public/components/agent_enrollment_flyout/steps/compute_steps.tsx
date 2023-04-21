@@ -51,6 +51,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   isK8s,
+  isCSP,
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -194,6 +195,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   selectionType,
   onClickViewAgents,
   isK8s,
+  isCSP,
   installedPackagePolicy,
 }) => {
   const kibanaVersion = useKibanaVersion();
@@ -247,6 +249,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         apiKeyData,
         selectedApiKeyId,
         isK8s,
+        isCSP,
         enrollToken,
       })
     );
@@ -283,6 +286,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     refreshAgentPolicies,
     selectionType,
     isK8s,
+    isCSP,
     installManagedCommands,
     apiKeyData,
     enrolledAgentIds,

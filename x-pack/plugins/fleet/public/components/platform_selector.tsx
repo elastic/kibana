@@ -32,6 +32,7 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
+  typeOfCSPIntegration?: string;
   hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
@@ -53,6 +54,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
+  typeOfCSPIntegration,
   hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
@@ -63,8 +65,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const { platform, setPlatform } = usePlatform();
 
   useEffect(() => {
-    setPlatform(hasK8sIntegration ? 'kubernetes' : 'linux');
-  }, [hasK8sIntegration, setPlatform]);
+    setPlatform(
+      hasK8sIntegration || typeOfCSPIntegration === 'IS_CSP_KSPM' ? 'kubernetes' : 'linux'
+    );
+  }, [hasK8sIntegration, typeOfCSPIntegration, setPlatform]);
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
