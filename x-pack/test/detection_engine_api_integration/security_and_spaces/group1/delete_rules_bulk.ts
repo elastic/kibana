@@ -24,12 +24,14 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('delete_rules_bulk', () => {
     describe('deprecations', () => {
@@ -387,6 +389,13 @@ export default ({ getService }: FtrProviderContext): void => {
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createRuleBody.id
+        );
+
         // bulk delete the rule
         await supertest
           .delete(DETECTION_ENGINE_RULES_BULK_DELETE)
@@ -410,6 +419,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Expect that we have exactly 0 legacy rules after the deletion
         expect(bodyAfterDelete.total).to.eql(0);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
     });
   });

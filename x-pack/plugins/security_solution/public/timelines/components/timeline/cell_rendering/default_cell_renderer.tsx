@@ -16,6 +16,8 @@ import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/hel
 
 const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
+  width: 100%;
+  margin: 0 auto;
 `;
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({

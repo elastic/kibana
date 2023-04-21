@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type FC } from 'react';
+import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual, uniq } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiButton,
@@ -25,7 +26,6 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from '@kbn/es-query';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -67,7 +67,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
-  searchQuery: Query['query'];
+  searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
   sampleProbability: number;
 }
@@ -215,6 +215,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
+  const timeRangeMs = { from: earliest, to: latest };
 
   // Disable the grouping switch toggle only if no groups were found,
   // the toggle wasn't enabled already and no fields were selected to be skipped.
@@ -326,14 +327,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           significantTerms={data.significantTerms}
           groupTableItems={groupTableItems}
           loading={isRunning}
-          dataViewId={dataView.id}
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
         />
       ) : null}
       {showSpikeAnalysisTable && !groupResults ? (
         <SpikeAnalysisTable
           significantTerms={data.significantTerms}
           loading={isRunning}
-          dataViewId={dataView.id}
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
         />
       ) : null}
     </div>

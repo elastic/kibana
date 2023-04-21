@@ -14,20 +14,9 @@ import {
 import { updatePrebuiltRules } from './update_prebuilt_rules';
 import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from '../../mocks';
-import { legacyMigrate } from '../../../rule_management';
-import { getQueryRuleParams, getThreatRuleParams } from '../../../rule_schema/mocks';
+import { getThreatRuleParams } from '../../../rule_schema/mocks';
 
 jest.mock('../../../rule_management/logic/crud/patch_rules');
-
-jest.mock('../../../rule_management/logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual(
-    '../../../rule_management/logic/rule_actions/legacy_action_migration'
-  );
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -36,8 +25,6 @@ describe('updatePrebuiltRules', () => {
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
-
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -82,7 +69,6 @@ describe('updatePrebuiltRules', () => {
       ...getFindResultWithSingleHit(),
       data: [getRuleMock(getThreatRuleParams())],
     });
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getThreatRuleParams()));
 
     await updatePrebuiltRules(rulesClient, savedObjectsClient, [
       { ...prepackagedRule, ...updatedThreatParams },
