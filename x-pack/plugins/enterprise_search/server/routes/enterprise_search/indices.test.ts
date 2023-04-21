@@ -56,6 +56,9 @@ jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', ()
 jest.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => ({
   getMlInferencePipelines: jest.fn(),
 }));
+jest.mock('../../lib/ml/get_ml_model_deployment_status', () => ({
+  getMlModelDeploymentStatus: jest.fn(),
+}));
 jest.mock('../../lib/ml/start_ml_model_deployment', () => ({
   startMlModelDeployment: jest.fn(),
 }));
@@ -75,6 +78,7 @@ import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
 import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
@@ -1177,6 +1181,9 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/ml/models/{modelName}', () => {
+    let mockMl: SharedServices;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
@@ -1188,9 +1195,50 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/ml/models/{modelName}',
       });
 
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+      } as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<SharedServices>;
+
       registerIndexRoutes({
         ...mockDependencies,
+        ml: mockMl,
         router: mockRouter.router,
+      });
+    });
+    const modelName = '.elser_model_1_SNAPSHOT';
+
+    it('fails validation without modelName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('deploys or downloads the model', async () => {
+      const request = {
+        params: { modelName },
+      };
+
+      const mockResponse = {
+        deploymentState: MlModelDeploymentState.Starting,
+        modelId: modelName,
+        nodeAllocationCount: 0,
+        startTime: 123456,
+        targetAllocationCount: 3,
+      };
+
+      (getMlModelDeploymentStatus as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
+        headers: { 'content-type': 'application/json' },
       });
     });
   });
