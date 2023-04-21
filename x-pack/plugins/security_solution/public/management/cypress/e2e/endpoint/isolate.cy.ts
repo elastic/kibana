@@ -6,7 +6,7 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
-import { APP_CASES_PATH } from '../../../../../common/constants';
+import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/close_all_toasts';
 import {
   checkEndpointListForIsolatedHosts,
@@ -67,7 +67,7 @@ describe('Isolate command', () => {
     });
 
     it('should allow filtering endpoint by Isolated status', () => {
-      cy.visit('/app/security/administration/endpoints');
+      cy.visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
       checkEndpointListForIsolatedHosts(false);
 
@@ -135,7 +135,7 @@ describe('Isolate command', () => {
     });
 
     it('should have generated endpoint and rule', () => {
-      cy.visit('/app/security/administration/endpoints');
+      cy.visit(APP_ENDPOINTS_PATH);
       cy.contains(endpointHostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
@@ -219,7 +219,7 @@ describe('Isolate command', () => {
     });
 
     it('should have generated endpoint and rule', () => {
-      cy.visit('/app/security/administration/endpoints');
+      cy.visit(APP_ENDPOINTS_PATH);
       cy.contains(endpointHostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
