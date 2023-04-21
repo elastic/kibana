@@ -105,8 +105,8 @@ export async function loadDataView({
 }
 
 /**
- * Function used message the user about the state of the current
- * data view
+ * Check if the given data view is valid, provide a fallback if it doesn't exist
+ * And message the user in this case with toast notifications
  */
 export function resolveDataView(
   ip: DataViewData,
