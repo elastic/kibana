@@ -591,7 +591,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (end.isBefore(start)){ // overnight
+              if (end.isBefore(start) || end.equals(start)){ // overnight
                 def dayEnd = LocalTime.parse("23:59:59");
                 def dayStart = LocalTime.parse("00:00:00");
                 if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {

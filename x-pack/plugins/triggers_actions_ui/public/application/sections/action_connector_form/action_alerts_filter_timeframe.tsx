@@ -53,7 +53,7 @@ const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
     timezone,
     hours: {
       start: '00:00',
-      end: '24:00',
+      end: '23:59',
     },
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
