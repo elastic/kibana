@@ -7,6 +7,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { escapeRegExp, memoize } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -15,6 +16,22 @@ import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../
 import { getFieldIconType } from '../utils/field_types';
 
 const htmlId = htmlIdGenerator('fieldList');
+
+export const makeRegEx = memoize(function makeRegEx(glob: string) {
+  const globRegex = glob.split('*').filter(Boolean).map(escapeRegExp).join('.*');
+  return new RegExp(globRegex, 'i');
+});
+
+export const fieldNameMatcher = (field: FieldListItem, fieldSearchHighlight: string): boolean => {
+  if (!fieldSearchHighlight) {
+    return false;
+  }
+
+  return (
+    (!!field.displayName && makeRegEx(fieldSearchHighlight).test(field.displayName)) ||
+    makeRegEx(fieldSearchHighlight).test(field.name)
+  );
+};
 
 /**
  * Input params for useFieldFilters hook
@@ -74,12 +91,10 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       onFilterField:
         fieldSearchHighlight?.length || selectedFieldTypes.length > 0
           ? (field: T) => {
-              if (
-                fieldSearchHighlight?.length &&
-                !field.name?.toLowerCase().includes(fieldSearchHighlight) &&
-                !field.displayName?.toLowerCase().includes(fieldSearchHighlight)
-              ) {
-                return false;
+              if (fieldSearchHighlight) {
+                if (!fieldNameMatcher(field, fieldSearchHighlight)) {
+                  return false;
+                }
               }
               if (selectedFieldTypes.length > 0) {
                 return selectedFieldTypes.includes(getFieldIconType(field, getCustomFieldType));
