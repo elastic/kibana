@@ -117,7 +117,7 @@ describe('Service overview - header filters', () => {
     });
   });
 
-  describe('Filtering by kuerybar', () => {
+  describe('Filtering by searchbar', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
     });
@@ -129,13 +129,23 @@ describe('Service overview - header filters', () => {
         })
       );
       cy.contains('opbeans-java');
-      cy.getByTestSubj('headerFilterKuerybar').type('transaction.n');
+      cy.getByTestSubj('apmUnifiedSearchBar').type('transaction.n');
       cy.contains('transaction.name');
-      cy.getByTestSubj('suggestionContainer').find('li').first().click();
-      cy.getByTestSubj('headerFilterKuerybar').type(':');
-      cy.getByTestSubj('suggestionContainer').find('li').first().click();
-      cy.getByTestSubj('headerFilterKuerybar').type('{enter}');
-      cy.url().should('include', '&kuery=transaction.name');
+      cy.getByTestSubj(
+        'autocompleteSuggestion-field-transaction.name-'
+      ).click();
+      cy.getByTestSubj('apmUnifiedSearchBar').type(':');
+      cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 1);
+      cy.getByTestSubj(
+        Cypress.$.escapeSelector(
+          'autocompleteSuggestion-value-"GET-/api/product"-'
+        )
+      ).click();
+      cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
+      cy.url().should(
+        'include',
+        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20'
+      );
     });
   });
 });
