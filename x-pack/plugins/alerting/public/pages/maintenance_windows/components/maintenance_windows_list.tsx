@@ -12,12 +12,15 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   useEuiBackgroundColor,
+  EuiFlexGroup,
+  EuiFlexItem,
   SearchFilterConfig,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowFindResponse, SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
+import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { StatusColor, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { MaintenanceWindowStatus } from '../../../../common';
 import { StatusFilter } from './status_filter';
@@ -61,7 +64,18 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventStartTime',
     name: i18n.TABLE_START_TIME,
     dataType: 'date',
-    render: (startDate: string) => formatDate(startDate, 'MM/DD/YY HH:mm A'),
+    render: (startDate: string, item: MaintenanceWindowFindResponse) => {
+      return (
+        <EuiFlexGroup responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
+          {item.events.length > 1 ? (
+            <EuiFlexItem grow={false}>
+              <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      );
+    },
     sortable: true,
   },
   {

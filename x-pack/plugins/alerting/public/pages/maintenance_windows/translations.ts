@@ -102,6 +102,13 @@ export const CREATE_FORM_SCHEDULE_INVALID = i18n.translate(
   }
 );
 
+export const CREATE_FORM_TIMEZONE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.timezone',
+  {
+    defaultMessage: 'Time zone',
+  }
+);
+
 export const CREATE_FORM_REPEAT = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.repeat',
   {
@@ -461,3 +468,7 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
       'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }
 );
+
+export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
+  defaultMessage: 'Upcoming',
+});
