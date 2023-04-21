@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from '../user_actions/translations';
@@ -27,8 +26,7 @@ import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_dr
 import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { Case } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
-import type { Content } from '../user_actions/schema';
-import { schema } from '../user_actions/schema';
+import { schema } from './schema';
 
 const DESCRIPTION_ID = 'description';
 
@@ -73,23 +71,17 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
   ({ caseData, isLoadingDescription, onUpdateField }, ref) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
     const [isEditable, setIsEditable] = useState<boolean>(false);
+    const [fieldValue, setFieldValue] = useState({ content: caseData.description });
+
     const descriptionRef = useRef(null);
     const { euiTheme } = useEuiTheme();
-    const initialState = { content: caseData.description };
-    const { form } = useForm<Content>({
-      defaultValue: initialState,
-      options: { stripEmptyFields: false },
-      schema,
-    });
-
     const { appId } = useCasesContext();
-    const { setFieldValue } = form;
 
     const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
 
     const setComment = useCallback(
       (newComment) => {
-        setFieldValue('content', newComment);
+        setFieldValue({ content: newComment });
       },
       [setFieldValue]
     );
@@ -106,17 +98,17 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
     };
 
     const handleOnChangeEditable = useCallback(() => {
-      setIsEditable(false);
       clearDraftComment();
+      setIsEditable(false);
     }, [setIsEditable, clearDraftComment]);
 
     const handleOnSave = useCallback(
       (content: string) => {
         onUpdateField({ key: DESCRIPTION_ID, value: content });
         setIsEditable(false);
-        clearDraftComment();
+        setFieldValue({ content });
       },
-      [onUpdateField, setIsEditable, clearDraftComment]
+      [onUpdateField, setIsEditable]
     );
 
     const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
@@ -149,8 +141,9 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
         onChangeEditable={handleOnChangeEditable}
         onSaveContent={handleOnSave}
         editorRef={descriptionRef}
-        form={form}
+        fieldValue={fieldValue}
         fieldName="content"
+        formSchema={schema}
       />
     ) : (
       <Panel hasShadow={false} hasBorder={true} data-test-subj="description">
@@ -167,7 +160,7 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
                 : {})}
             >
               <EuiFlexItem>
-                <EuiText size="s">{i18n.DESCRIPTION}</EuiText>
+                <EuiText data-test-subj='description-title' size="s">{i18n.DESCRIPTION}</EuiText>
               </EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>

@@ -189,7 +189,7 @@ describe('CaseViewPage', () => {
     expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
-      within(result.getByTestId('description')).getByTestId('user-action-markdown')
+      within(result.getByTestId('description')).getByTestId('scrollable-markdown')
     ).toHaveTextContent(data.description);
 
     expect(result.getByTestId('case-view-status-action-button')).toHaveTextContent(
@@ -640,7 +640,7 @@ describe('CaseViewPage', () => {
 
         userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
 
-        userEvent.click(screen.getByTestId('user-action-save-markdown'));
+        userEvent.click(screen.getByTestId('editable-save-markdown'));
 
         expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
           newComment

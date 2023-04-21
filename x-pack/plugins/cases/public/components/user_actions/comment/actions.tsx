@@ -54,7 +54,7 @@ export const createActionAttachmentUserActionBuilder = ({
         timelineAvatar: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
-          <ContentWrapper data-test-subj="user-action-markdown">
+          <ContentWrapper data-test-subj="scrollable-markdown">
             <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
           </ContentWrapper>
         ),

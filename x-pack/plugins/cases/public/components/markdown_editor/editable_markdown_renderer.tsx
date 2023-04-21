@@ -7,9 +7,8 @@
 
 import React, { useCallback } from 'react';
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Content } from '../user_actions/schema';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '.';
 import { removeItemFromSessionStorage } from '../utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -25,7 +24,8 @@ interface EditableMarkdownRendererProps {
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
   editorRef: React.MutableRefObject<undefined | null | UserActionMarkdownRefObject>;
-  form: FormHook<Content, Content>;
+  fieldValue: { content: string };
+  formSchema: FormSchema<{ content: string }> | undefined;
 }
 
 const EditableMarkDownRenderer = ({
@@ -36,11 +36,23 @@ const EditableMarkDownRenderer = ({
   onChangeEditable,
   onSaveContent,
   editorRef,
-  form,
+  fieldValue,
+  formSchema,
 }: EditableMarkdownRendererProps) => {
   const { appId } = useCasesContext();
   const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
-  const { submit } = form;
+  const initialState = { content };
+
+  const { form } = useForm({
+    defaultValue: initialState,
+    options: { stripEmptyFields: false },
+    schema: formSchema,
+  });
+  const { submit, setFieldValue } = form;
+
+  if (fieldValue?.content !== content) {
+    setFieldValue(fieldName, fieldValue.content);
+  }
 
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);

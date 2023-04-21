@@ -27,7 +27,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="user-action-cancel-markdown"
+          data-test-subj="editable-cancel-markdown"
           size="s"
           onClick={handleCancelAction}
           iconType="cross"
@@ -37,7 +37,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          data-test-subj="user-action-save-markdown"
+          data-test-subj="editable-save-markdown"
           color="success"
           fill
           iconType="save"

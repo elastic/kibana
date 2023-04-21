@@ -95,7 +95,7 @@ describe('Description ', () => {
     userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
     userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
-    userEvent.click(screen.getByTestId('user-action-save-markdown'));
+    userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).toHaveBeenCalledWith({ key: 'description', value: editedDescription });
@@ -113,7 +113,7 @@ describe('Description ', () => {
     userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
     userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
-    userEvent.click(screen.getByTestId('user-action-cancel-markdown'));
+    userEvent.click(screen.getByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
 
-import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Content } from './schema';
 import { schema } from './schema';
 import { ScrollableMarkdown, EditableMarkdown } from '../markdown_editor';
 
@@ -30,19 +28,13 @@ const UserActionMarkdownComponent = forwardRef<
   UserActionMarkdownProps
 >(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
-  const initialState = { content };
-  const { form } = useForm<Content>({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-
   const fieldName = 'content';
-  const { setFieldValue } = form;
+
+  const [fieldValue, setFieldValue] = useState({ content });
 
   const setComment = useCallback(
     (newComment) => {
-      setFieldValue(fieldName, newComment);
+      setFieldValue({ content: newComment });
     },
     [setFieldValue]
   );
@@ -51,6 +43,7 @@ const UserActionMarkdownComponent = forwardRef<
     setComment,
     editor: editorRef.current,
   }));
+
   return isEditable ? (
     <EditableMarkdown
       id={id}
@@ -59,8 +52,9 @@ const UserActionMarkdownComponent = forwardRef<
       onChangeEditable={onChangeEditable}
       onSaveContent={onSaveContent}
       editorRef={editorRef}
-      form={form}
+      fieldValue={fieldValue}
       fieldName={fieldName}
+      formSchema={schema}
     />
   ) : (
     <ScrollableMarkdown content={content} />

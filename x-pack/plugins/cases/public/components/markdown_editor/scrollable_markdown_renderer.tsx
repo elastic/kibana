@@ -20,7 +20,7 @@ export const ContentWrapper = styled.div`
 
 const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
   return (
-    <ContentWrapper className={'eui-xScroll'} data-test-subj="user-action-markdown">
+    <ContentWrapper className={'eui-xScroll'} data-test-subj="scrollable-markdown">
       <MarkdownRenderer>{content}</MarkdownRenderer>
     </ContentWrapper>
   );
