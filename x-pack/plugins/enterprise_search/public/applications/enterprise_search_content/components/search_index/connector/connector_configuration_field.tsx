@@ -34,8 +34,6 @@ import {
   ensureBooleanType,
 } from './connector_configuration_logic';
 
-import './connector_configuration_field.scss';
-
 interface ConnectorConfigurationFieldProps {
   configEntry: ConfigEntry;
 }

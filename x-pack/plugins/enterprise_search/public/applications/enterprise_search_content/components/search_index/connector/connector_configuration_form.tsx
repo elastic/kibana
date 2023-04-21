@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -56,7 +57,7 @@ export const ConnectorConfigurationForm = () => {
       }}
       component="form"
     >
-      {localConfigView.map((configEntry) => {
+      {localConfigView.map((configEntry, index) => {
         const {
           default_value: defaultValue,
           depends_on: dependencies,
@@ -92,17 +93,65 @@ export const ConnectorConfigurationForm = () => {
             </EuiToolTip>
           );
 
-        return hasDependencies ? (
-          dependenciesSatisfied(dependencies, dependencyLookup) ? (
-            <EuiPanel color="subdued" borderRadius="none">
-              <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
-                <ConnectorConfigurationField configEntry={configEntry} />
-              </EuiFormRow>
-            </EuiPanel>
-          ) : (
-            <></>
-          )
-        ) : (
+        if (hasDependencies) {
+          if (dependenciesSatisfied(dependencies, dependencyLookup)) {
+            // dynamic spacing without CSS
+
+            // finds the previous field that should appear above this field
+            // ignores fields that are ui restricted or hidden due to not having dependencies met
+            const previousField = localConfigView
+              .slice(0, index)
+              .reverse()
+              .find(
+                (x) =>
+                  x.ui_restrictions.length <= 0 &&
+                  (x.depends_on.length <= 0 ||
+                    (x.depends_on.length > 0 &&
+                      dependenciesSatisfied(x.depends_on, dependencyLookup)))
+              );
+            // finds the next field that should appear below this field
+            // ignores fields that are ui restricted or hidden due to not having dependencies met
+            const nextField = localConfigView
+              .slice(index + 1)
+              .find(
+                (x) =>
+                  x.ui_restrictions.length <= 0 &&
+                  (x.depends_on.length <= 0 ||
+                    (x.depends_on.length > 0 &&
+                      dependenciesSatisfied(x.depends_on, dependencyLookup)))
+              );
+
+            // show top spacing if fields before are undefined (i.e. this field is first to render)
+            // or the previous field has no dependencies
+            const topSpacing =
+              !previousField || previousField.depends_on.length <= 0 ? (
+                <EuiSpacer size="m" />
+              ) : (
+                <></>
+              );
+
+            // show bottom spacing if fields after are undefined (i.e. this field is last to render)
+            // or the next field has no dependencies
+            const bottomSpacing =
+              !nextField || nextField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
+
+            return (
+              <>
+                {topSpacing}
+                <EuiPanel color="subdued" borderRadius="none">
+                  <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+                    <ConnectorConfigurationField configEntry={configEntry} />
+                  </EuiFormRow>
+                </EuiPanel>
+                {bottomSpacing}
+              </>
+            );
+          } else {
+            return <></>;
+          }
+        }
+
+        return (
           <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
