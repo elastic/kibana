@@ -21,7 +21,7 @@ export function EventInput({ value, onChange }) {
       data-test-subj="aceEventInput"
     >
       <CodeEditor
-        languageId="json"
+        languageId="plaintext"
         value={value}
         height={200}
         options={{

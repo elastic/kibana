@@ -21,7 +21,7 @@ export function PatternInput({ value, onChange }) {
       data-test-subj="acePatternInput"
     >
       <CodeEditor
-        languageId="json"
+        languageId="plaintext"
         value={value}
         height={200}
         options={{
