@@ -45,7 +45,7 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { ReportingConfigType } from './config';
-import { checkLicense, ExportTypesRegistry } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
