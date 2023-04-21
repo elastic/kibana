@@ -7,8 +7,8 @@
  */
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
+import { isPlainRecord } from './get_raw_record_type';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 
@@ -78,7 +78,7 @@ export function updateSavedSearch(
 
     // add a flag here to identify text based language queries
     // these should be filtered out from the visualize editor
-    const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
+    const isTextBasedQuery = isPlainRecord(state.query);
     if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
       savedSearch.isTextBasedQuery = isTextBasedQuery;
     }

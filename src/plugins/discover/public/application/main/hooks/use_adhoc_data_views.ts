@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isPlainRecord } from '../utils/get_raw_record_type';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
@@ -21,7 +21,7 @@ export const useAdHocDataViews = ({
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
   const query = stateContainer.appState.getState().query;
-  const isTextBasedMode = query && isOfAggregateQueryType(query);
+  const isTextBasedMode = isPlainRecord(query);
   const dataView = stateContainer.internalState.getState().dataView;
 
   useEffect(() => {
