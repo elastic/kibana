@@ -462,6 +462,32 @@ describe('ingest_integration tests ', () => {
       );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
+
+    it('meta fields stay the same where there is no difference', async () => {
+      const mockPolicy = policyFactory();
+      mockPolicy.meta.cloud = true; // cloud mock will return true
+      mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      // values should be updated
+      policyConfig.inputs[0]!.config!.policy.value.meta.cloud = true;
+      policyConfig.inputs[0]!.config!.policy.value.meta.license = 'platinum';
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
   });
 
   describe('package policy delete callback', () => {
