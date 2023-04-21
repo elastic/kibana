@@ -25,10 +25,17 @@ const breadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
       defaultMessage: 'Create',
     }
   ),
+  [AlertingDeepLinkId.maintenanceWindowsEdit]: i18n.translate(
+    'xpack.alerting.breadcrumbs.editMaintenanceWindowsLinkText',
+    {
+      defaultMessage: 'Edit',
+    }
+  ),
 };
 
 const topLevelBreadcrumb: Record<string, IAlertingDeepLinkId> = {
   [AlertingDeepLinkId.maintenanceWindowsCreate]: AlertingDeepLinkId.maintenanceWindows,
+  [AlertingDeepLinkId.maintenanceWindowsEdit]: AlertingDeepLinkId.maintenanceWindows,
 };
 
 function addClickHandlers(
