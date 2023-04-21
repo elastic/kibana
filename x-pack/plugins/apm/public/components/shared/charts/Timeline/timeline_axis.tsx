@@ -12,7 +12,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from './';
 import { Marker } from './Marker';
 import { PlotValues } from './plot_utils';
-import {isFiniteNumber} from "../../../../../common/utils/is_finite_number";
+import { isFiniteNumber } from "../../../../../common/utils/is_finite_number";
 
 // Remove any tick that is too close to topTraceDuration
 const getXAxisTickValues = (

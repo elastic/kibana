@@ -13,7 +13,6 @@ import {
   toJson,
 } from '../../../../utils/testHelpers';
 import { Timeline } from '.';
-import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 describe('Timeline', () => {
   let consoleMock: jest.SpyInstance;
@@ -44,22 +43,21 @@ describe('Timeline', () => {
         {
           id: 'timeToFirstByte',
           offset: 100000,
-          type: 'agentMark',
+          type: 'agentMark' as const,
           verticalLine: true,
         },
         {
           id: 'domInteractive',
           offset: 110000,
-          type: 'agentMark',
+          type: 'agentMark'as const,
           verticalLine: true,
-        },
-        {
+        },{
           id: 'domComplete',
           offset: 190000,
-          type: 'agentMark',
+          type: 'agentMark' as const,
           verticalLine: true,
         },
-      ] as AgentMark[],
+      ],
     };
 
     const wrapper = mountWithTheme(<Timeline {...props} />);
