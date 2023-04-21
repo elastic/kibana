@@ -9,8 +9,10 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumnCellAction,
   EuiProgress,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,6 +39,8 @@ import {
   vulnerabilitiesColumns,
 } from './vulnerabilities_table_columns';
 import { defaultLoadingRenderer, defaultNoDataRenderer } from '../../components/cloud_posture_page';
+import { getFilters } from './utils/get_filters';
+import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from './translations';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -77,6 +81,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     onSort,
     setUrlQuery,
     onResetFilters,
+    urlQuery,
   } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
@@ -118,8 +123,87 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   });
 
   const columns = useMemo(() => {
-    return getVulnerabilitiesColumnsGrid();
-  }, []);
+    const getColumnIdValue = (rowIndex: number, columnId: string) => {
+      const vulnerabilityRow = data?.page[rowIndex] as VulnerabilityRecord;
+      if (columnId === vulnerabilitiesColumns.vulnerability) {
+        return vulnerabilityRow.vulnerability.id;
+      }
+      if (columnId === vulnerabilitiesColumns.cvss) {
+        return vulnerabilityRow.vulnerability.score.base;
+      }
+      if (columnId === vulnerabilitiesColumns.resource) {
+        return vulnerabilityRow.resource?.name;
+      }
+      if (columnId === vulnerabilitiesColumns.severity) {
+        return vulnerabilityRow.vulnerability.severity;
+      }
+      if (columnId === vulnerabilitiesColumns.package_version) {
+        return vulnerabilityRow.vulnerability?.package?.name;
+      }
+      if (columnId === vulnerabilitiesColumns.fix_version) {
+        return vulnerabilityRow.vulnerability.package?.fixed_version;
+      }
+    };
+
+    const cellActions: EuiDataGridColumnCellAction[] = [
+      ({ Component, rowIndex, columnId }) => {
+        const value = getColumnIdValue(rowIndex, columnId);
+
+        if (!value) return null;
+        return (
+          <EuiToolTip position="top" content={FILTER_IN}>
+            <Component
+              iconType="plusInCircle"
+              aria-label={FILTER_IN}
+              onClick={() => {
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: getFilters({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field: columnId,
+                    value,
+                    negate: false,
+                  }),
+                });
+              }}
+            >
+              {FILTER_IN}
+            </Component>
+          </EuiToolTip>
+        );
+      },
+      ({ Component, rowIndex, columnId }) => {
+        const value = getColumnIdValue(rowIndex, columnId);
+
+        if (!value) return null;
+        return (
+          <EuiToolTip position="top" content={FILTER_OUT}>
+            <Component
+              iconType="minusInCircle"
+              aria-label={FILTER_OUT}
+              onClick={() => {
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: getFilters({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field: columnId,
+                    value: getColumnIdValue(rowIndex, columnId),
+                    negate: true,
+                  }),
+                });
+              }}
+            >
+              {FILTER_OUT}
+            </Component>
+          </EuiToolTip>
+        );
+      },
+    ];
+
+    return getVulnerabilitiesColumnsGrid(cellActions);
+  }, [data?.page, dataView, setUrlQuery, urlQuery.filters]);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
@@ -176,10 +260,13 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       }
       if (columnId === vulnerabilitiesColumns.fix_version) {
+        if (!vulnerabilityRow.vulnerability.package?.fixed_version) {
+          return null;
+        }
         return (
           <>
             {vulnerabilityRow.vulnerability.package?.name}{' '}
-            {vulnerabilityRow.vulnerability.package?.fixed_version}
+            {vulnerabilityRow.vulnerability.package.fixed_version}
           </>
         );
       }
@@ -207,6 +294,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
         loading={isLoading}
+        placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <EuiSpacer size="l" />
       {!isLoading && data.page.length === 0 ? (
@@ -236,8 +324,16 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               & .euiDataGridRowCell {
                 font-size: ${euiTheme.size.m};
               }
+              &
+                .euiDataGridRowCell__expandActions
+                > [data-test-subj='euiDataGridCellExpandButton'] {
+                display: none;
+              }
+              & .euiDataGridRowCell__expandFlex {
+                align-items: center;
+              }
             `}
-            aria-label="Data grid styling demo"
+            aria-label={VULNERABILITIES}
             columns={columns}
             columnVisibility={{
               visibleColumns: columns.map(({ id }) => id),
