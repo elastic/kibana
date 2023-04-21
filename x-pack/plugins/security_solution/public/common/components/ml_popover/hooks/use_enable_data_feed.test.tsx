@@ -43,9 +43,9 @@ const JOB = {
   isCompatible: true,
 } as SecurityJob;
 
-const mockSetupMlJob = jest.fn().mockReturnValue(Promise.resolve());
-const mockStartDatafeeds = jest.fn().mockReturnValue(Promise.resolve());
-const mockStopDatafeeds = jest.fn().mockReturnValue(Promise.resolve());
+const mockSetupMlJob = jest.fn();
+const mockStartDatafeeds = jest.fn();
+const mockStopDatafeeds = jest.fn();
 
 jest.mock('../api', () => ({
   setupMlJob: () => mockSetupMlJob(),
@@ -69,10 +69,17 @@ jest.mock('../../../lib/kibana', () => {
 
 describe('useSecurityJobsHelpers', () => {
   afterEach(() => {
-    mockSetupMlJob.mockReset();
     mockStartDatafeeds.mockReset();
     mockStopDatafeeds.mockReset();
     mockSetupMlJob.mockReset();
+
+    mockStartDatafeeds.mockReturnValue(
+      Promise.resolve({ [`datafeed-${jobId}`]: { started: true } })
+    );
+    mockStopDatafeeds.mockReturnValue(
+      Promise.resolve([{ [`datafeed-${jobId}`]: { stopped: true } }])
+    );
+    mockSetupMlJob.mockReturnValue(Promise.resolve());
   });
 
   it('renders isLoading=true when installing job', async () => {
@@ -100,7 +107,6 @@ describe('useSecurityJobsHelpers', () => {
   });
 
   it('does not call setupMlJob if job is already installed', async () => {
-    mockSetupMlJob.mockReturnValue(Promise.resolve());
     const { result } = renderHook(() => useEnableDataFeed(), {
       wrapper,
     });
@@ -113,7 +119,6 @@ describe('useSecurityJobsHelpers', () => {
   });
 
   it('calls setupMlJob if job is uninstalled', async () => {
-    mockSetupMlJob.mockReturnValue(Promise.resolve());
     const { result } = renderHook(() => useEnableDataFeed(), {
       wrapper,
     });
@@ -160,9 +165,78 @@ describe('useSecurityJobsHelpers', () => {
     });
   });
 
+  it('return enabled:true when startDataFeed successfully installed the job', async () => {
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+      expect(response.enabled).toBeTruthy();
+    });
+  });
+
+  it('return enabled:false when startDataFeed promise is rejected while installing a job', async () => {
+    mockStartDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+      expect(response.enabled).toBeFalsy();
+    });
+  });
+
+  it('return enabled:false when startDataFeed failed to install the job', async () => {
+    mockStartDatafeeds.mockReturnValue(
+      Promise.resolve({ [`datafeed-${jobId}`]: { started: false, error: 'test_error' } })
+    );
+
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+      expect(response.enabled).toBeFalsy();
+    });
+  });
+
+  it('return enabled:false when enableDatafeed successfully uninstalled the job', async () => {
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, false);
+      expect(response.enabled).toBeFalsy();
+    });
+  });
+
+  it('return enabled:true when promise is rejected while uninstalling the job', async () => {
+    mockStopDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, false);
+      expect(response.enabled).toBeTruthy();
+    });
+  });
+
+  it('return enabled:true when enableDatafeed fails to uninstall the job', async () => {
+    mockStopDatafeeds.mockReturnValue(
+      Promise.resolve([{ [`datafeed-${jobId}`]: { stopped: false, error: 'test_error' } }])
+    );
+
+    const { result } = renderHook(() => useEnableDataFeed(), {
+      wrapper,
+    });
+    await act(async () => {
+      const response = await result.current.enableDatafeed(JOB, TIMESTAMP, false);
+      expect(response.enabled).toBeTruthy();
+    });
+  });
+
   describe('telemetry', () => {
     it('reports telemetry when installing and enabling a job', async () => {
-      mockSetupMlJob.mockReturnValue(new Promise((resolve) => resolve({})));
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });

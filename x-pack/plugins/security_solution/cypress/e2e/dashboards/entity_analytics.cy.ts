@@ -245,7 +245,7 @@ describe('Entity Analytics Dashboard', () => {
 
     it('renders table', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 6);
+      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
     });
   });
 });

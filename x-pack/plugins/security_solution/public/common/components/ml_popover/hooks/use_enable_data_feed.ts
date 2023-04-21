@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
@@ -16,7 +17,7 @@ import {
 } from '../../../lib/telemetry';
 
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
-import type { SecurityJob } from '../types';
+import type { ErrorResponse, SecurityJob } from '../types';
 import * as i18n from './translations';
 
 // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
@@ -29,9 +30,9 @@ export const useEnableDataFeed = () => {
   const enableDatafeed = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
       submitTelemetry(job, enable);
+      setIsLoading(true);
 
       if (!job.isInstalled) {
-        setIsLoading(true);
         try {
           await setupMlJob({
             configTemplate: job.moduleId,
@@ -56,7 +57,8 @@ export const useEnableDataFeed = () => {
             status: ML_JOB_TELEMETRY_STATUS.installationError,
             errorMessage: `${i18n.CREATE_JOB_FAILURE} - ${error.message}`,
           });
-          return;
+
+          return { enabled: false };
         }
       }
 
@@ -64,17 +66,10 @@ export const useEnableDataFeed = () => {
       const date = new Date();
       const maxStartTime = date.setDate(date.getDate() - 14);
 
-      setIsLoading(true);
+      const datafeedId = `datafeed-${job.id}`;
       if (enable) {
         const startTime = Math.max(latestTimestampMs, maxStartTime);
-        try {
-          await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
-          telemetry.reportMLJobUpdate({
-            jobId: job.id,
-            isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.started,
-          });
-        } catch (error) {
+        const reportEnableJobError = (error: Error) => {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
           addError(error, { title: i18n.START_JOB_FAILURE });
           telemetry.reportMLJobUpdate({
@@ -83,16 +78,32 @@ export const useEnableDataFeed = () => {
             status: ML_JOB_TELEMETRY_STATUS.startError,
             errorMessage: `${i18n.START_JOB_FAILURE} - ${error.message}`,
           });
-        }
-      } else {
+        };
+
         try {
-          await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+          const response = await startDatafeeds({
+            datafeedIds: [datafeedId],
+            start: startTime,
+          });
+
+          if (response[datafeedId]?.error) {
+            throw new Error(response[datafeedId].error);
+          }
+
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.stopped,
+            status: ML_JOB_TELEMETRY_STATUS.started,
           });
+
+          return { enabled: response[datafeedId] ? response[datafeedId].started : false };
         } catch (error) {
+          reportEnableJobError(error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        const reportDisableError = (error: Error) => {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
           addError(error, { title: i18n.STOP_JOB_FAILURE });
           telemetry.reportMLJobUpdate({
@@ -101,15 +112,38 @@ export const useEnableDataFeed = () => {
             status: ML_JOB_TELEMETRY_STATUS.stopError,
             errorMessage: `${i18n.STOP_JOB_FAILURE} - ${error.message}`,
           });
+        };
+
+        try {
+          const [response] = await stopDatafeeds({ datafeedIds: [datafeedId] });
+
+          if (isErrorResponse(response)) {
+            throw new Error(response.error);
+          }
+
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            status: ML_JOB_TELEMETRY_STATUS.stopped,
+          });
+
+          return { enabled: response[datafeedId] ? !response[datafeedId].stopped : true };
+        } catch (error) {
+          reportDisableError(error);
+        } finally {
+          setIsLoading(false);
         }
       }
-      setIsLoading(false);
+      return { enabled: !enable };
     },
     [addError, telemetry]
   );
 
   return { enableDatafeed, isLoading };
 };
+
+const isErrorResponse = (response: ErrorResponse): response is ErrorResponse =>
+  !isEmpty(response.error);
 
 const submitTelemetry = (job: SecurityJob, enabled: boolean) => {
   // Report type of job enabled/disabled
