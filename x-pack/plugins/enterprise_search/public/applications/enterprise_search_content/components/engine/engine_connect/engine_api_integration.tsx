@@ -12,11 +12,11 @@ import { useValues } from 'kea';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { EngineViewLogic } from '../engine_view_logic';
 
 import { EngineApiLogic } from './engine_api_logic';
 
-import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { elasticsearchUrl } from './search_application_api';
 
 const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `6
