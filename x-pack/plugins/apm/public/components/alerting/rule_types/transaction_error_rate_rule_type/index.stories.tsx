@@ -61,7 +61,6 @@ export const CreatingInApmServiceOverview: Story<Args> = ({
 
 CreatingInApmServiceOverview.args = {
   ruleParams: {
-    aggregationType: AggregationType.Avg,
     environment: 'testEnvironment',
     serviceName: 'testServiceName',
     threshold: 1500,
@@ -98,7 +97,6 @@ export const CreatingInStackManagement: Story<Args> = ({
 
 CreatingInStackManagement.args = {
   ruleParams: {
-    aggregationType: AggregationType.Avg,
     environment: 'testEnvironment',
     threshold: 1500,
     windowSize: 5,

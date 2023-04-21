@@ -28,7 +28,7 @@ import {
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 
-interface RuleParams {
+export interface RuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
