@@ -27,7 +27,7 @@ const DEFAULT_QUERY = {
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
-const INITIAL_SELECTED_LIMIT: HostLimitOptions = 20;
+const INITIAL_SELECTED_LIMIT: HostLimitOptions = 100;
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
