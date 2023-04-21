@@ -38,6 +38,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
   it('should install package from Fleet', () => {
     // TODO: Should not request prerelease
-    cy.wait(20000)
+    cy.wait(20000);
   });
 });
