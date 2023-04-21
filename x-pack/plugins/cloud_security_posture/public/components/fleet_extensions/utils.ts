@@ -150,13 +150,14 @@ export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo):
     hasPolicyTemplateInputs(vulnMgmtPolicyTemplate) && vulnMgmtPolicyTemplate.inputs;
 
   if (!vulnMgmtInputs) return '';
-  if (!vulnMgmtInputs[0].vars) return '';
 
-  const cloudFormationTemplate = vulnMgmtInputs[0].vars.find(
-    (v) => v.name === 'cloud_formation_template'
-  );
+  const cloudFormationTemplate = vulnMgmtInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+    return template ? String(template) : acc;
+  }, '');
 
-  return String(cloudFormationTemplate?.default || '');
+  return cloudFormationTemplate;
 };
 
 /**
