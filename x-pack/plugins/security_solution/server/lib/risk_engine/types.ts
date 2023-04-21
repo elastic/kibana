@@ -47,9 +47,10 @@ export interface BaseRiskScore {
   '@timestamp': string;
   identifierField: string;
   identifierValue: string;
-  calculatedLevel: string;
-  calculatedScore: number;
-  calculatedScoreNorm: number;
+  totalScore: number;
+  totalScoreLevel: string;
+  totalScoreNormalized: number;
+  alertsScore: number;
   notes: string[];
 }
 
@@ -63,11 +64,11 @@ export interface FullRiskScore extends BaseRiskScore {
 
 export interface CalculateRiskScoreAggregations {
   user?: {
-    after_key: { [identifierField: string]: string; category: string };
+    after_key: { [identifierField: string]: string };
     buckets: RiskScoreBucket[];
   };
   host?: {
-    after_key: { [identifierField: string]: string; category: string };
+    after_key: { [identifierField: string]: string };
     buckets: RiskScoreBucket[];
   };
 }

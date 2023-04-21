@@ -37,9 +37,10 @@ const bucketToResponse = ({
   '@timestamp': now,
   identifierField,
   identifierValue: bucket.key[identifierField],
-  calculatedLevel: bucket.risk_details.value.level,
-  calculatedScore: bucket.risk_details.value.score,
-  calculatedScoreNorm: bucket.risk_details.value.normalized_score,
+  totalScoreLevel: bucket.risk_details.value.level,
+  totalScore: bucket.risk_details.value.score,
+  totalScoreNormalized: bucket.risk_details.value.normalized_score,
+  alertsScore: 0,
   notes: bucket.risk_details.value.notes,
   riskiestInputs: enrichInputs
     ? bucket.riskiest_inputs.hits.hits
