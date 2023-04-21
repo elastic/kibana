@@ -341,7 +341,10 @@ export const AnalyticsCollectionExploreTableLogic = kea<
 
     return {
       onTableChange: fetchItems,
-      setSearch: fetchItems,
+      setSearch: async (_, breakpoint) => {
+        await breakpoint(200);
+        fetchItems();
+      },
       setSearchSessionId: fetchItems,
       setSelectedTable: fetchItems,
       setTimeRange: fetchItems,
