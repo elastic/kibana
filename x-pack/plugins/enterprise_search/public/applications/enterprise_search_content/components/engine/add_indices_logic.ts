@@ -7,8 +7,6 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
-
 import { UpdateEngineApiLogic } from '../../api/engines/update_engine_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicActions } from './engine_indices_logic';
@@ -17,21 +15,21 @@ export interface AddIndicesLogicActions {
   addIndicesToEngine: EngineIndicesLogicActions['addIndicesToEngine'];
   closeAddIndicesFlyout: EngineIndicesLogicActions['closeAddIndicesFlyout'];
   engineUpdated: EngineIndicesLogicActions['engineUpdated'];
-  setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => {
-    indices: ElasticsearchIndexWithIngestion[];
+  setSelectedIndices: (indices: string[]) => {
+    indices: string[];
   };
   submitSelectedIndices: () => void;
 }
 
 export interface AddIndicesLogicValues {
-  selectedIndices: ElasticsearchIndexWithIngestion[];
+  selectedIndices: string[];
   updateEngineError: typeof UpdateEngineApiLogic.values.error | undefined;
   updateEngineStatus: typeof UpdateEngineApiLogic.values.status;
 }
 
 export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndicesLogicActions>>({
   actions: {
-    setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => ({ indices }),
+    setSelectedIndices: (indices: string[]) => ({ indices }),
     submitSelectedIndices: () => true,
   },
   connect: {
@@ -46,7 +44,7 @@ export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndic
       const { selectedIndices } = values;
       if (selectedIndices.length === 0) return;
 
-      actions.addIndicesToEngine(selectedIndices.map(({ name }) => name));
+      actions.addIndicesToEngine(selectedIndices);
     },
   }),
   path: ['enterprise_search', 'content', 'add_indices_logic'],

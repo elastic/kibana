@@ -88,7 +88,7 @@ export async function create<Params extends RuleTypeParams = never>(
   // Throws an error if alert type isn't registered
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   const username = await context.getUserName();
 
   let createdAPIKey = null;
@@ -113,7 +113,7 @@ export async function create<Params extends RuleTypeParams = never>(
 
   // TODO https://github.com/elastic/kibana/issues/148414
   // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  const firstFrequency = data.actions[0]?.frequency;
+  const firstFrequency = data.actions.find((action) => action?.frequency)?.frequency;
   if (data.consumer === AlertConsumers.SIEM && firstFrequency) {
     data.actions = data.actions.map((action) => omit(action, 'frequency'));
     if (!data.notifyWhen) {

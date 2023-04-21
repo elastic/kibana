@@ -47,7 +47,7 @@ export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
   }, [searchQuery]);
 
   const options: Array<EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>> =
-    data?.indices?.map(indexToOption) ?? [];
+    data?.indices?.map((index) => indexToOption(index.name, index)) ?? [];
 
   const renderOption = (option: EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>) => (
     <EuiFlexGroup>
@@ -84,8 +84,9 @@ export const IndicesSelectComboBox = (props: IndicesSelectComboBoxProps) => {
 };
 
 export const indexToOption = (
-  index: ElasticsearchIndexWithIngestion
+  indexName: string,
+  index?: ElasticsearchIndexWithIngestion
 ): IndicesSelectComboBoxOption => ({
-  label: index.name,
+  label: indexName,
   value: index,
 });

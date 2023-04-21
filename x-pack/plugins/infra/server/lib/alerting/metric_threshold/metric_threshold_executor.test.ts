@@ -34,6 +34,7 @@ import {
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { InfraConfig } from '../../../../common/plugin_config_types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -1818,7 +1819,7 @@ describe('The metric threshold alert type', () => {
   });
 });
 
-const createMockStaticConfiguration = (sources: any) => ({
+const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   alerting: {
     inventory_threshold: {
       group_by_page_size: 100,
@@ -1829,6 +1830,9 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   inventory: {
     compositeSize: 2000,
+  },
+  logs: {
+    app_target: 'logs-ui',
   },
   sources,
 });
