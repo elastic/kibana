@@ -39,6 +39,9 @@ export const DiscoverHistogramLayout = ({
     hideChart,
     isPlainRecord,
   });
+
+  // Initialized when the first search has been requested or
+  // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
     return null;
   }
