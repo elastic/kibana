@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrebuiltRulesAndTimelinesStatusRoute } from './route';
+import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status_route';
 
 import {
   getEmptyFindResult,
