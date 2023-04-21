@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UserProfileSettingsClientContract } from '@kbn/core-user-settings-server-internal';
 import { KibanaRequest } from '@kbn/core-http-server';
 
 /** @public */
