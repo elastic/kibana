@@ -61,7 +61,7 @@ export function APMRuleGroupBy({
         defaultMessage: 'Everything',
       })}
       aria-label={i18n.translate('xpack.apm.ruleFlyout.groupByAriaLabel', {
-        defaultMessage: 'Graph per',
+        defaultMessage: 'Group by',
       })}
       fullWidth
       singleSelection={false}
