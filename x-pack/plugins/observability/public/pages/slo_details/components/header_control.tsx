@@ -55,7 +55,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleNavigateToRules = () => {
     navigateToUrl(
       basePath.prepend(
-        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(%27${slo?.id}%27),status:!(),type:!())`
+        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(slo.id:%27${slo?.id}%27),status:!(),type:!())`
       )
     );
   };
