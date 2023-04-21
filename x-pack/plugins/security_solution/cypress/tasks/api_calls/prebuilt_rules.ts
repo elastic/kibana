@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { ELASTIC_SECURITY_RULE_ID } from '../../../common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
+import { getPrebuiltRuleWithExceptionsMock } from '../../../server/lib/detection_engine/prebuilt_rules/mocks';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 
 export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
@@ -35,25 +38,63 @@ export const waitTillPrebuiltRulesReadyToInstall = () => {
   );
 };
 
-export const createNewRuleAsset = (index: string, initialNumberOfDocuments: number) => {
+export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
+  ...getPrebuiltRuleWithExceptionsMock(),
+  rule_id: ELASTIC_SECURITY_RULE_ID,
+  tags: ['test-tag-1'],
+  enabled: true,
+});
+
+export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) => {
+  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
+    rule['security-rule'].rule_id
+  }`;
+  console.log({ url });
   cy.waitUntil(
     () => {
       return cy
         .request({
           method: 'PUT',
-          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-          headers: { 'kbn-xsrf': 'cypress-creds' },
+          url,
+          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
           failOnStatusCode: false,
-          body: {},
+          body: rule,
         })
         .then((response) => {
+          console.log({ response });
           if (response.status !== 200) {
             return false;
-          } else {
-            return response.body.hits.hits.length > initialNumberOfDocuments;
           }
+          return true;
         });
     },
     { interval: 500, timeout: 12000 }
   );
 };
+// export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) => {
+//   const url = `${Cypress.env('ELASTICSEARCH_URL')}/_bulk`;
+//   console.log({ url });
+//   cy.waitUntil(
+//     () => {
+//       return cy
+//         .request({
+//           method: 'POST',
+//           url,
+//           headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+//           failOnStatusCode: false,
+//           body: JSON.stringify([
+//             { index: { _index: index, _id: `security-rule:${rule['security-rule'].rule_id}` } },
+//             rule,
+//           ]),
+//         })
+//         .then((response) => {
+//           console.log({ response });
+//           if (response.status !== 200) {
+//             return false;
+//           }
+//           return true;
+//         });
+//     },
+//     { interval: 500, timeout: 12000 }
+//   );
+// };
