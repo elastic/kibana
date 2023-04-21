@@ -21,6 +21,10 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         ],
         privileges: ['manage', 'write', 'read', 'view_index_metadata'],
       },
+      {
+        names: ['logs-*'],
+        privileges: ['read'],
+      },
     ],
     run_as: [],
   },
