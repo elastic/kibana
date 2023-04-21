@@ -18,17 +18,17 @@ import { EngineApiLogic } from './engine_api_logic';
 
 import { elasticsearchUrl } from './search_application_api';
 
-const SearchUISnippet = (elasticsearchUrl: string, engineName: string, apiKey: string) => `6
+const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `6
 import EnginesAPIConnector from "@elastic/search-ui-engines-connector";
 
 const connector = new EnginesAPIConnector({
-  host: "${elasticsearchUrl}",
+  host: "${esUrl}",
   engineName: "${engineName}",
   apiKey: "${apiKey || '<YOUR_API_KEY>'}"
 });`;
 
-const cURLSnippet = (elasticsearchUrl: string, engineName: string, apiKey: string) => `
-curl --location --request GET '${elasticsearchUrl}/${engineName}/_search' \\
+const cURLSnippet = (esUrl: string, engineName: string, apiKey: string) => `
+curl --location --request GET '${esUrl}/${engineName}/_search' \\
 --header 'Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}' \\
 --header 'Content-Type: application/json' \\
 --data-raw '{
