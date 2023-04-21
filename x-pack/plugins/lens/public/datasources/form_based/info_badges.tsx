@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiColorPaletteDisplay,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormBasedLayer } from '../..';
+import { InfoBadge } from '../../shared_components/info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
 import { getSamplingValue } from './utils';
 
@@ -29,7 +22,6 @@ export function ReducedSamplingSectionEntries({
   visualizationInfo: VisualizationInfo;
   dataViews: FramePublicAPI['dataViews'];
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {layers.map(([id, layer], layerIndex) => {
@@ -42,62 +34,15 @@ export function ReducedSamplingSectionEntries({
           });
         const layerPalette = layerInfo?.palette;
         return (
-          <li
-            key={`${layerTitle}-${dataView}-${layerIndex}`}
-            data-test-subj={`lns-feature-badges-reducedSampling-${layerIndex}`}
-            css={css`
-              margin: ${euiTheme.size.base} 0 0;
-            `}
+          <InfoBadge
+            title={layerTitle}
+            index={layerIndex}
+            dataView={dataView.id}
+            palette={layerPalette}
+            data-test-subj-prefix="lns-feature-badges-reducedSampling"
           >
-            <EuiFlexGroup justifyContent={layerPalette ? 'center' : 'spaceBetween'} gutterSize="s">
-              {layerPalette ? (
-                <EuiFlexItem grow={false}>
-                  {layerPalette.length === 1 ? (
-                    <EuiIcon
-                      color={layerPalette[0]}
-                      type="stopFilled"
-                      css={css`
-                        margin-top: 2px;
-                      `}
-                    />
-                  ) : (
-                    <EuiIcon
-                      type="color"
-                      css={css`
-                        margin-top: 2px;
-                      `}
-                    />
-                  )}
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem
-                grow={Boolean(layerPalette)}
-                css={css`
-                  width: 150px;
-                `}
-              >
-                <EuiText size="s">{layerTitle}</EuiText>
-                {layerPalette && layerPalette.length > 1 ? (
-                  <EuiColorPaletteDisplay
-                    size="xs"
-                    palette={layerPalette}
-                    css={css`
-                      margin-top: 4px;
-                      width: 150px;
-                    `}
-                  />
-                ) : null}
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding-right: 0;
-                `}
-              >
-                <EuiText size="s">{`${Number(getSamplingValue(layer)) * 100}%`}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </li>
+            <EuiText size="s">{`${Number(getSamplingValue(layer)) * 100}%`}</EuiText>
+          </InfoBadge>
         );
       })}
     </>

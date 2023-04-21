@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiColorPaletteDisplay,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { InfoBadge } from '../../shared_components/info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
 import { XYAnnotationLayerConfig } from './types';
 
@@ -28,7 +20,6 @@ export function IgnoredGlobalFiltersEntries({
   visualizationInfo: VisualizationInfo;
   dataViews: FramePublicAPI['dataViews'];
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {layers.map((layer, layerIndex) => {
@@ -41,54 +32,13 @@ export function IgnoredGlobalFiltersEntries({
           });
         const layerPalette = layerInfo?.palette;
         return (
-          <li
-            key={`${layerTitle}-${dataView}-${layerIndex}`}
-            data-test-subj={`lns-feature-badges-ignoreGlobalFilters-${layerIndex}`}
-            css={css`
-              margin: ${euiTheme.size.base} 0 0;
-            `}
-          >
-            <EuiFlexGroup justifyContent={layerPalette ? 'center' : 'spaceBetween'} gutterSize="s">
-              {layerPalette ? (
-                <EuiFlexItem grow={false}>
-                  {layerPalette.length === 1 ? (
-                    <EuiIcon
-                      color={layerPalette[0]}
-                      type="stopFilled"
-                      css={css`
-                        margin-top: 2px;
-                      `}
-                    />
-                  ) : (
-                    <EuiIcon
-                      type="color"
-                      css={css`
-                        margin-top: 2px;
-                      `}
-                    />
-                  )}
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem
-                grow={Boolean(layerPalette)}
-                css={css`
-                  width: 150px;
-                `}
-              >
-                <EuiText size="s">{layerTitle}</EuiText>
-                {layerPalette && layerPalette.length > 1 ? (
-                  <EuiColorPaletteDisplay
-                    size="xs"
-                    palette={layerPalette}
-                    css={css`
-                      margin-top: 4px;
-                      width: 150px;
-                    `}
-                  />
-                ) : null}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </li>
+          <InfoBadge
+            title={layerTitle}
+            index={layerIndex}
+            dataView={dataView.id}
+            palette={layerPalette}
+            data-test-subj-prefix="lns-feature-badges-ignoreGlobalFilters"
+          />
         );
       })}
     </>
