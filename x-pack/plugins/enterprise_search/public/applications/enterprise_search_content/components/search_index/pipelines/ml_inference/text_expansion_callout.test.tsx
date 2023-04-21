@@ -11,8 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { TextExpansionCallOut } from './text_expansion_callout';
 import { EuiButton } from '@elastic/eui';
+
+import { TextExpansionCallOut } from './text_expansion_callout';
 
 // jest.mock('./text_expansion_callout_data', () => ({
 //   useTextExpansionCallOutData: jest.fn().mockResolvedValue({
@@ -24,18 +25,18 @@ import { EuiButton } from '@elastic/eui';
 // }));
 
 jest.mock('./text_expansion_callout_data', () => {
-  console.log('mock text_expansion_callout_data')
+  console.log('mock text_expansion_callout_data');
   return {
     useTextExpansionCallOutData: jest.fn(() => {
-      console.log('mock useTextExpansionCallOutData()')
+      console.log('mock useTextExpansionCallOutData()');
       return {
         dismiss: jest.fn(),
         isCreateButtonDisabled: false,
         isDismissable: false,
         show: true,
-      }
+      };
     }),
-  }
+  };
 });
 
 const DEFAULT_VALUES = {

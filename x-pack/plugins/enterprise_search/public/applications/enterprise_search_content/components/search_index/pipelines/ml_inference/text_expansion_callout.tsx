@@ -26,8 +26,8 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
