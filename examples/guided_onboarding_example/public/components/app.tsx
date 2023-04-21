@@ -25,6 +25,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { StepTwo } from './step_two';
 import { StepOne } from './step_one';
 import { StepThree } from './step_three';
+import { StepFour } from './step_four';
 import { Main } from './main';
 
 interface GuidedOnboardingExampleAppDeps {
@@ -65,6 +66,13 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                 <Route exact path="/stepThree">
                   <StepThree guidedOnboarding={guidedOnboarding} />
                 </Route>
+                p
+                <Route
+                  path="/stepFour/:indexName?"
+                  render={(routeProps) => (
+                    <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
+                  )}
+                />
               </Switch>
             </Router>
           </EuiPageContent>
