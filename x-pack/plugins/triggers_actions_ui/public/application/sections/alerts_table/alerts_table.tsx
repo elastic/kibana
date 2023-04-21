@@ -36,7 +36,7 @@ import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
-const GridStyles: EuiDataGridStyle = {
+const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
   fontSize: 's',
@@ -63,7 +63,9 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [_, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
+  const [activeRowClasses, setActiveRowClasses] = useState<
+    NonNullable<EuiDataGridStyle['rowClasses']>
+  >({});
   const alertsData = props.useFetchAlertsData();
   const {
     activePage,
@@ -286,7 +288,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   useEffect(() => {
     // Row classes do not deal with visible row indices, so we need to handle page offset
     const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
-    setRowClasses({
+    setActiveRowClasses({
       [rowIndex]: ACTIVE_ROW_CLASS,
     });
   }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
@@ -377,6 +379,68 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return props.columns;
   }, [getCellActions, disabledCellActions, props.columns, visibleCellActions]);
 
+  // Merges the default grid style with the grid style that comes in through props.
+  // In addition, merge rowclasses and styles to allow for active flyout row to be highlighted.
+  // When a rowClassMapper is passed in, generate those classes and merge them with the active ones.
+  const actualGridStyle = useMemo(() => {
+    const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
+    // Merges default row classes, custom ones and adds the active row class style
+    const mergedGridStyle: EuiDataGridStyle = {
+      ...DefaultGridStyle,
+      ...propGridStyle,
+      rowClasses: activeRowClasses,
+    };
+
+    // Generate rowClasses from `rowClassMapper` when one was provided
+    let mappedRowClasses: EuiDataGridStyle['rowClasses'];
+    const rowClassMapper = props.rowClassMapper;
+    if (rowClassMapper) {
+      mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
+        (rowClasses, alert, index) => {
+          const rowClass = rowClassMapper(alert);
+          if (rowClass) {
+            rowClasses[index + pagination.pageIndex * pagination.pageSize] = rowClass;
+          }
+          return rowClasses;
+        },
+        {}
+      );
+    }
+
+    // If ANY additional rowClasses have been provided, we need to merge them
+    if (propGridStyle.rowClasses || mappedRowClasses) {
+      // Get all row indices with a rowClass.
+      const mergedKeys = [
+        ...Object.keys(activeRowClasses),
+        ...Object.keys(propGridStyle.rowClasses || {}),
+        ...Object.keys(mappedRowClasses || {}),
+      ];
+      // Deduplicate keys to avoid extra iterations
+      const dedupedKeys = Array.from(new Set(mergedKeys));
+
+      // For each index, merge row classes
+      const mergedRowClasses = dedupedKeys.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
+        (rowClasses, key) => {
+          const intKey = parseInt(key, 10);
+
+          // Concatenate class names for active row class and passed-in row class
+          // (if either exists)
+          rowClasses[intKey] = [
+            activeRowClasses[intKey],
+            propGridStyle.rowClasses?.[intKey],
+            mappedRowClasses?.[intKey],
+          ]
+            .filter(Boolean)
+            .join(' ');
+          return rowClasses;
+        },
+        {}
+      );
+      mergedGridStyle.rowClasses = mergedRowClasses;
+    }
+    return mergedGridStyle;
+  }, [alerts, activeRowClasses, props.rowClassMapper, pagination, props.gridStyle]);
+
   return (
     <InspectButtonContainer>
       <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -404,7 +468,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             leadingControlColumns={leadingControlColumns}
             rowCount={alertsCount}
             renderCellValue={handleRenderCellValue}
-            gridStyle={{ ...GridStyles, ...(props.gridStyle ?? {}) }}
+            gridStyle={actualGridStyle}
             sorting={{ columns: sortingColumns, onSort }}
             toolbarVisibility={toolbarVisibility}
             pagination={{
