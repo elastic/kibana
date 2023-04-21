@@ -4,6 +4,10 @@
 Alerting rules can use the https://mustache.github.io/[Mustache] template syntax
 (`{{variable name}}`) to pass values when its actions run.
 
+[float]
+[[common-rule-action-variables]]
+=== Common variables
+
 The available variables differ by rule type, however there are some common variables:
 
 * <<general-rule-action-variables>>
@@ -20,7 +24,7 @@ Mustache also supports "triple braces" of the form `{{{variable name}}}`, which 
 
 [float]
 [[general-rule-action-variables]]
-=== General
+==== General
 
 All rule types pass the following variables:
 
@@ -34,7 +38,7 @@ All rule types pass the following variables:
 [float]
 [role="child_attributes"]
 [[alert-summary-action-variables]]
-=== Action frequency: Summary of alerts
+==== Action frequency: Summary of alerts
 
 If the rule's action frequency is a summary of alerts, it passes the following variables:
 
@@ -91,7 +95,7 @@ include::action-variables.asciidoc[tag=alerts-data]
 
 [float]
 [[alert-action-variables]]
-=== Action frequency: For each alert
+==== Action frequency: For each alert
 
 If the rule's action frequency is not a summary of alerts, it passes the following variables:
 
@@ -104,7 +108,7 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 
 [float]
 [[defining-rules-actions-variable-context]]
-==== Context
+===== Context
 
 If the rule's action frequency is not a summary of alerts, the rule defines additional variables as properties of the variable `context`. For example, if a rule type defines a variable `value`, it can be used in an action parameter as `{{context.value}}`.  
 
@@ -126,15 +130,19 @@ triggering data was:
 {{/context.hits}}
 --------------------------------------------------
 
-== Enhancing Mustache variables
+[discrete]
+[[enhance-mustache-variables]]
+=== Enhancing Mustache variables
 
 There are a number of ways that the values contained in Mustache variables can be enhanced, when the Mustache template is rendered:
 
-=== JSON rendering of objects
+[discrete]
+==== JSON rendering of objects
 
 Some alerting connectors expect JSON values to be passed as parameters when the connector is invoked, for example the Webhook connector and the Elasticsearch index connector.  The following capabilities are available:
 
-==== Rendering referenced objects as JSON
+[discrete]
+===== Rendering referenced objects as JSON
 
 When an object is referenced in a Mustache template, compared to a string or numeric value, the object will be rendered as it's JSON representation.  For instance, to see all the `context.*` variables available in a template, you can add the string `{{context}}` to the template, which will render in the final value as the JSON representation of the variables available.
 
@@ -172,6 +180,8 @@ When rendered, this will generate:
       "ruleName": "<the rule name is here>"
     }
 
-=== Formatting dates
+[discrete]
+==== Formatting dates
 
-=== Performing mathematical operations
+[discrete]
+==== Performing mathematical operations
