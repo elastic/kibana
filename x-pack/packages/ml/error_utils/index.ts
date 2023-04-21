@@ -14,6 +14,7 @@ export type {
   EsErrorRootCause,
   MLErrorObject,
   MLHttpFetchError,
+  MLHttpFetchErrorBase,
   MLResponseError,
   QueryErrorMessage,
 } from './src/types';
