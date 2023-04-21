@@ -330,8 +330,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch', {
-          defaultMessage: 'Make recurring',
+        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatSwitch', {
+          defaultMessage: 'Repeat',
         })}
         onChange={() => setIsRecurring(!isRecurring)}
         checked={isRecurring}

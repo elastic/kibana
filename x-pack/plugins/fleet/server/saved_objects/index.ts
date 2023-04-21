@@ -243,6 +243,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             id: { type: 'keyword' },
             type: { type: 'keyword' },
             version: { type: 'keyword' },
+            deferred: { type: 'boolean' },
           },
         },
         installed_kibana: {

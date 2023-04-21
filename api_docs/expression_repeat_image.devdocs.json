@@ -500,7 +500,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"top\" | \"left\" | \"right\" | \"bottom\""
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
