@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VectorScoreBase, Vector } from './types';
+import { VectorScoreBase, Vector } from '../types';
 
 export const getVectorScoreList = (vectorBaseScore: VectorScoreBase) => {
   const result: Vector[] = [];
@@ -24,7 +24,7 @@ export const getVectorScoreList = (vectorBaseScore: VectorScoreBase) => {
 
   if (v3Vector) {
     result.push({
-      version: '2.0',
+      version: '3.0',
       vector: v3Vector,
       score: v3Score,
     });
