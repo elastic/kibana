@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+jest.mock('@kbn/ml-plugin/server/saved_objects', () => ({
+  syncSavedObjectsFactory: jest.fn(),
+}));
+
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SyncSavedObjectResponse } from '@kbn/ml-plugin/common/types/saved_objects';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
@@ -140,8 +144,8 @@ describe('startMlModelDeployment', () => {
         })
       );
 
-    jest.spyOn(mockMLSavedObjectService, 'syncSavedObjectsFactory').mockReturnValue({
-      syncSavedObjects: async (_: boolean = false) => {
+    (mockMLSavedObjectService.syncSavedObjectsFactory as jest.Mock).mockReturnValue({
+      syncSavedObjects: async (_simulate: boolean = false) => {
         const results: SyncSavedObjectResponse = {
           datafeedsAdded: {},
           datafeedsRemoved: {},
