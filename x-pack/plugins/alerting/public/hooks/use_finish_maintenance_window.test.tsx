@@ -9,7 +9,7 @@ import { waitFor } from '@testing-library/dom';
 
 import { MaintenanceWindow } from '../pages/maintenance_windows/types';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
-import { useUpdateMaintenanceWindow } from './use_update_maintenance_window';
+import { useFinishMaintenanceWindow } from './use_finish_maintenance_window';
 
 const mockAddDanger = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -29,14 +29,14 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/maintenance_windows_api/update', () => ({
-  updateMaintenanceWindow: jest.fn(),
+jest.mock('../services/maintenance_windows_api/finish', () => ({
+  finishMaintenanceWindow: jest.fn(),
 }));
 
-const { updateMaintenanceWindow } = jest.requireMock('../services/maintenance_windows_api/update');
+const { finishMaintenanceWindow } = jest.requireMock('../services/maintenance_windows_api/finish');
 
 const maintenanceWindow: MaintenanceWindow = {
-  title: 'updated',
+  title: 'cancel',
   duration: 1,
   rRule: {
     dtstart: '2023-03-23T19:16:21.293Z',
@@ -46,40 +46,40 @@ const maintenanceWindow: MaintenanceWindow = {
 
 let appMockRenderer: AppMockRenderer;
 
-describe('useUpdateMaintenanceWindow', () => {
+describe('useFinishMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
-    updateMaintenanceWindow.mockResolvedValue(maintenanceWindow);
+    finishMaintenanceWindow.mockResolvedValue(maintenanceWindow);
   });
 
   it('should call onSuccess if api succeeds', async () => {
-    const { result } = renderHook(() => useUpdateMaintenanceWindow(), {
+    const { result } = renderHook(() => useFinishMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
     await act(async () => {
-      await result.current.mutate({ maintenanceWindowId: '123', maintenanceWindow });
+      await result.current.mutate('123');
     });
     await waitFor(() =>
-      expect(mockAddSuccess).toBeCalledWith("Updated maintenance window 'updated'")
+      expect(mockAddSuccess).toBeCalledWith("Cancelled running maintenance window 'cancel'")
     );
   });
 
   it('should call onError if api fails', async () => {
-    updateMaintenanceWindow.mockRejectedValue('');
+    finishMaintenanceWindow.mockRejectedValue('');
 
-    const { result } = renderHook(() => useUpdateMaintenanceWindow(), {
+    const { result } = renderHook(() => useFinishMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
     await act(async () => {
-      await result.current.mutate({ maintenanceWindowId: '123', maintenanceWindow });
+      await result.current.mutate('123');
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to update maintenance window.')
+      expect(mockAddDanger).toBeCalledWith('Failed to cancel maintenance window.')
     );
   });
 });
