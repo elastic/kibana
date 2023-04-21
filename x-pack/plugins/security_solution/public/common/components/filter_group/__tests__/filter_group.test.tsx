@@ -7,7 +7,7 @@
 
 import { FilterGroup } from '..';
 import type { ComponentProps, FC } from 'react';
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../../common/constants';
 import {
@@ -18,17 +18,20 @@ import {
   TestProviders,
 } from '../../../mock';
 import type {
-  AwaitingControlGroupAPI,
-  ControlGroupContainer,
   ControlGroupOutput,
   ControlGroupInput,
-  ControlGroupRendererProps,
-  ControlGroupInputBuilder,
+  ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
-import { Subject } from 'rxjs';
 import { initialInputData, sampleOutputData } from './mock.data';
 import { createStore } from '../../../store';
 import { useGetInitialUrlParamValue } from '../../../utils/global_query_string/helpers';
+import { TEST_IDS } from '../constants';
+import {
+  controlGroupFilterInputMock$,
+  controlGroupFilterOutputMock$,
+  getControlGroupMock,
+} from '../mocks/control_group';
+import { getMockedControlGroupRenderer } from '../mocks/control_group_renderer';
 
 jest.mock('../../../utils/global_query_string/helpers', () => {
   return {
@@ -45,74 +48,20 @@ jest.mock('../../../hooks/use_space_id', () => {
 
 const LOCAL_STORAGE_KEY = 'securitySolution.test_space_id.pageFilters';
 
-const TEST_IDS = {
-  FILTER_CONTROLS: 'filter_group__items',
-  FILTER_LOADING: 'filter-group__loading',
-  MOCKED_CONTROL: 'mocked_control_group',
-  ADD_CONTROL: 'filter-group__add-control',
-  SAVE_CONTROL: 'filter-group__save',
-  SAVE_CHANGE_POPOVER: 'filter-group__save-popover',
-  FILTERS_CHANGED_BANNER: 'filter-group--changed-banner',
-  FILTERS_CHANGED_BANNER_SAVE: 'filter-group__save',
-  FILTERS_CHANGED_BANNER_DISCARD: 'filter-group__discard',
-  CONTEXT_MENU: {
-    BTN: 'filter-group__context',
-    MENU: 'filter-group__context-menu',
-    RESET: 'filter-group__context--reset',
-    EDIT: 'filter_group__context--edit',
-    DISCARD: `filter_group__context--discard`,
-  },
-};
-
-const controlGroupFilterOutput$ = new Subject<ControlGroupOutput>();
-
-const controlGroupFilterInput$ = new Subject<ControlGroupInput>();
-
-const getInput$Mock = jest.fn(() => controlGroupFilterInput$);
-
-const getOutput$Mock = jest.fn(() => controlGroupFilterOutput$);
-
-const controlGroupMock = {
-  reload: jest.fn(),
-  getInput: jest.fn().mockReturnValue({
-    viewMode: 'VIEW',
-  }),
-  updateInput: jest.fn(),
-  getOutput$: getOutput$Mock,
-  getInput$: getInput$Mock,
-  openAddDataControlFlyout: jest.fn(),
-  addOptionsListControl: jest.fn(),
-};
+const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newInput: ControlGroupInput) => {
-  controlGroupFilterInput$.next(newInput);
+  controlGroupFilterInputMock$.next(newInput);
   controlGroupMock.getInput.mockReturnValue(newInput);
 };
 
 const updateControlGroupOutputMock = (newOutput: ControlGroupOutput) => {
-  controlGroupFilterOutput$.next(newOutput);
+  controlGroupFilterOutputMock$.next(newOutput);
 };
 
-const MockedControlGroupRenderer: FC<ControlGroupRendererProps> = forwardRef<
-  AwaitingControlGroupAPI,
-  ControlGroupRendererProps
->(({ getCreationOptions }, ref) => {
-  useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupContainer, []);
-  const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
-
-  useEffect(() => {
-    if (creationOptionsCalled) return;
-    setCreationOptionsCalled(true);
-    if (getCreationOptions) {
-      getCreationOptions({}, {
-        addOptionsListControl: controlGroupMock.addOptionsListControl,
-      } as unknown as ControlGroupInputBuilder);
-    }
-  }, [getCreationOptions, creationOptionsCalled]);
-  return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
-});
-
-MockedControlGroupRenderer.displayName = 'MockedControlGroup';
+const MockedControlGroupRenderer = getMockedControlGroupRenderer(
+  controlGroupMock as unknown as ControlGroupContainer
+);
 
 jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_renderer', () => {
   const { forwardRef: fR } = jest.requireActual('react');
@@ -121,6 +70,7 @@ jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_
   // );
   return {
     _esModule: true,
+    // @ts-expect-error
     ControlGroupRenderer: fR((props, ref) => <MockedControlGroupRenderer {...props} ref={ref} />),
   };
 });
@@ -142,7 +92,7 @@ const getStoreWithCustomState = (newState: typeof state = state) => {
 };
 
 const TestComponent: FC<ComponentProps<typeof TestProviders>> = (props) => (
-  <TestProviders {...props}>
+  <TestProviders store={getStoreWithCustomState()} {...props}>
     <FilterGroup
       initialControls={DEFAULT_DETECTION_PAGE_FILTERS}
       dataViewId="security-solution-default"

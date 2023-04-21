@@ -38,6 +38,7 @@ import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
+import { TEST_IDS } from './constants';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -404,7 +405,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       <FilterWrapper className="filter-group__wrapper">
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
           {Array.isArray(initialUrlParam) ? (
-            <EuiFlexItem grow={true} data-test-subj="filter_group__items">
+            <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
                 ref={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}

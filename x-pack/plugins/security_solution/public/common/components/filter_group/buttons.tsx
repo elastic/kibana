@@ -11,6 +11,7 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import { ADD_CONTROLS, ADD_CONTROLS_MAX_LIMIT, PENDING_CHANGES_REMINDER } from './translations';
+import { TEST_IDS } from './constants';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
@@ -24,7 +25,7 @@ export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
         size="s"
         iconSize="m"
         display="base"
-        data-test-subj={'filter-group__add-control'}
+        data-test-subj={TEST_IDS.ADD_CONTROL}
         onClick={onClick}
         {...rest}
         iconType={'plusInCircle'}
@@ -54,7 +55,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
           display="base"
           color={'primary'}
           iconType={'save'}
-          data-test-subj={'filter-group__save'}
+          data-test-subj={TEST_IDS.SAVE_CONTROL}
           onClick={onClick}
           onFocus={openPendingChangesPopover}
           onBlur={closePendingChangesPopover}
@@ -68,7 +69,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
       panelPaddingSize="none"
       closePopover={closePendingChangesPopover}
       panelProps={{
-        'data-test-subj': 'filter-group__save-popover',
+        'data-test-subj': TEST_IDS.SAVE_CHANGE_POPOVER,
       }}
     >
       <div style={{ maxWidth: '200px' }}>
