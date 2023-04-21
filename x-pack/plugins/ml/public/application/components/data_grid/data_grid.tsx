@@ -7,8 +7,7 @@
 
 import { isEqual } from 'lodash';
 import React, { memo, useEffect, useCallback, useRef, FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import {
   EuiButtonEmpty,
@@ -27,8 +26,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
@@ -49,9 +51,21 @@ import {
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
-import './data_grid.scss';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
+
+const cssOverride = css({
+  '.euiDataGridRowCell--boolean': { textTransform: 'none' },
+  // Overrides to align the sorting arrow, actions icon and the column header when no chart is available,
+  // to the bottom of the cell when histogram charts are enabled.
+  // Note that overrides have to be used as currently it is not possible to add a custom class name
+  // for the EuiDataGridHeaderCell - see https://github.com/elastic/eui/issues/5106
+  '.euiDataGridHeaderCell': {
+    '.euiDataGridHeaderCell__sortingArrow,.euiDataGridHeaderCell__icon,.euiPopover': {
+      marginTop: 'auto',
+    },
+  },
+});
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
@@ -337,7 +351,7 @@ export const DataGrid: FC<Props> = memo(
           onMutation={onMutation}
         >
           {(mutationRef) => (
-            <div className="mlDataGrid" ref={mutationRef}>
+            <div css={cssOverride} ref={mutationRef}>
               <EuiDataGrid
                 aria-label={isWithHeader(props) ? props.title : ''}
                 columns={columnsWithCharts.map((c) => {
