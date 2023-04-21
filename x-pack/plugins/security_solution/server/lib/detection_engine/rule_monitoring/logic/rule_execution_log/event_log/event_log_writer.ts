@@ -28,10 +28,10 @@ export interface IEventLogWriter {
 }
 
 export interface BaseArgs {
-  revision: number;
   ruleId: string;
   ruleUuid: string;
   ruleName: string;
+  ruleRevision: number;
   ruleType: string;
   spaceId: string;
   executionId: string;
@@ -84,7 +84,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               execution: {
                 uuid: args.executionId,
               },
-              revision: args.revision,
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -128,7 +128,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 status: args.newStatus,
                 status_order: ruleExecutionStatusToNumber(args.newStatus),
               },
-              revision: args.revision,
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -170,7 +170,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 uuid: args.executionId,
                 metrics: args.metrics,
               },
-              revision: args.revision,
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],

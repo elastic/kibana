@@ -50,7 +50,7 @@ export const createClientForExecutors = (
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
 
-  const { executionId, revision, ruleId, ruleUuid, ruleName, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
   const client: IRuleExecutionLogForExecutors = {
     get context() {
@@ -140,12 +140,12 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
       message,
       logLevel,
-      revision,
     });
   };
 
@@ -203,11 +203,11 @@ export const createClientForExecutors = (
         ruleId,
         ruleUuid,
         ruleName,
+        ruleRevision,
         ruleType,
         spaceId,
         executionId,
         metrics,
-        revision,
       });
     }
 
@@ -215,12 +215,12 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
       newStatus,
       message,
-      revision,
     });
   };
 

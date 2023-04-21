@@ -78,11 +78,6 @@ export interface RuleExecutionContext {
   executionId: string;
 
   /**
-   * Current revision of the rule being execution (rule.revision)
-   */
-  revision: number;
-
-  /**
    * Dynamic, saved object id of the rule being executed (rule.id).
    */
   ruleId: string;
@@ -96,6 +91,11 @@ export interface RuleExecutionContext {
    * Name of the rule being executed.
    */
   ruleName: string;
+
+  /**
+   * Current revision of the rule being execution (rule.revision)
+   */
+  ruleRevision: number;
 
   /**
    * Alerting Framework's rule type id of the rule being executed.

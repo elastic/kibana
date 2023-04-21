@@ -43,7 +43,7 @@ interface CreateAlertEventLogRecordParams {
     recovered: number;
   };
   maintenanceWindowIds?: string[];
-  revision?: number;
+  ruleRevision?: number;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -63,7 +63,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertUuid,
     alertSummary,
     maintenanceWindowIds,
-    revision,
+    ruleRevision,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -99,7 +99,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         ...(maintenanceWindowIds ? { maintenance_window_ids: maintenanceWindowIds } : {}),
         ...(alertUuid ? { uuid: alertUuid } : {}),
         rule: {
-          revision,
+          revision: ruleRevision,
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),
           ...(executionId

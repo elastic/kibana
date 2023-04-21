@@ -32,7 +32,7 @@ describe('createAlertEventLogRecordObject', () => {
         ruleType,
         consumer: 'rule-consumer',
         action: 'execute-start',
-        revision: 0,
+        ruleRevision: 0,
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -105,7 +105,7 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'message text here',
         namespace: 'default',
-        revision: 0,
+        ruleRevision: 0,
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -182,7 +182,7 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'action execution start',
         namespace: 'default',
-        revision: 0,
+        ruleRevision: 0,
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
