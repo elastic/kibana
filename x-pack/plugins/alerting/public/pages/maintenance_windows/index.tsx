@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
@@ -16,6 +25,7 @@ import { AlertingDeepLinkId } from '../../config';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { ExperimentalBadge } from './components/page_header';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
@@ -37,20 +47,31 @@ export const MaintenanceWindowsPage = React.memo(() => {
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18n.MAINTENANCE_WINDOWS}
-        description={i18n.MAINTENANCE_WINDOWS_DESCRIPTION}
-        rightSideItems={
-          !showEmptyPrompt
-            ? [
-                <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
-                  {i18n.CREATE_NEW_BUTTON}
-                </EuiButton>,
-              ]
-            : []
-        }
-      />
+      <EuiPageHeader bottomBorder alignItems="top">
+        <EuiPageHeaderSection>
+          <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="l">
+                <h1>{i18n.MAINTENANCE_WINDOWS}</h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiText size="m">
+            <p>{i18n.MAINTENANCE_WINDOWS_DESCRIPTION}</p>
+          </EuiText>
+        </EuiPageHeaderSection>
+        {!showEmptyPrompt ? (
+          <EuiPageHeaderSection>
+            <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
+              {i18n.CREATE_NEW_BUTTON}
+            </EuiButton>
+          </EuiPageHeaderSection>
+        ) : null}
+      </EuiPageHeader>
       {showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (

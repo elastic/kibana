@@ -14,6 +14,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
+import { CELL_ACTIONS_TELEMETRY } from '../../../../explore/components/risk_score/constants';
 import type {
   HostRiskScore,
   RiskSeverity,
@@ -64,6 +65,9 @@ export const getRiskScoreColumns = (
                 SecurityCellActionType.FILTER,
                 SecurityCellActionType.SHOW_TOP_N,
               ]}
+              metadata={{
+                telemetry: CELL_ACTIONS_TELEMETRY,
+              }}
             />
           </>
         ) : (

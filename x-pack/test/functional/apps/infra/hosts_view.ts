@@ -150,7 +150,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Tests
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/155429
+  describe.skip('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
