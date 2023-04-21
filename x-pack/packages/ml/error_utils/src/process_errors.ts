@@ -16,15 +16,19 @@ import {
   isMLResponseError,
 } from './types';
 
+/**
+ * Extract properties of the error object from within the response error
+ * coming from Kibana, Elasticsearch, and our own ML messages.
+ *
+ * @param {ErrorType} error
+ * @returns {MLErrorObject}
+ */
 export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
-  // extract properties of the error object from within the response error
-  // coming from Kibana, Elasticsearch, and our own ML messages
-
   // some responses contain raw es errors as part of a bulk response
   // e.g. if some jobs fail the action in a bulk request
   if (isEsErrorBody(error)) {
     return {
-      message: error.error.reason,
+      message: error.error.reason ?? '',
       statusCode: error.status,
       fullError: error,
     };
@@ -79,7 +83,7 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
         typeof error.body.attributes.body.error.root_cause[0] === 'object' &&
         isPopulatedObject(error.body.attributes.body.error.root_cause[0], ['script'])
       ) {
-        errObj.causedBy = error.body.attributes.body.error.root_cause[0].script;
+        errObj.causedBy = error.body.attributes.body.error.root_cause[0].script as string;
         errObj.message += `: '${error.body.attributes.body.error.root_cause[0].script}'`;
       }
       return errObj;
@@ -103,8 +107,14 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   };
 };
 
+/**
+ * Extract only the error message within the response error
+ * coming from Kibana, Elasticsearch, and our own ML messages.
+ *
+ * @param {ErrorType} error
+ * @returns {string}
+ */
 export const extractErrorMessage = (error: ErrorType): string => {
-  // extract only the error message within the response error coming from Kibana, Elasticsearch, and our own ML messages
   const errorObj = extractErrorProperties(error);
   return errorObj.message;
 };

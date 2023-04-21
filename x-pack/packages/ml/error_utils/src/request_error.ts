@@ -7,7 +7,22 @@
 
 import { MLErrorObject, ErrorType } from './types';
 
+/**
+ * ML Request Failure
+ *
+ * @export
+ * @class MLRequestFailure
+ * @typedef {MLRequestFailure}
+ * @extends {Error}
+ */
 export class MLRequestFailure extends Error {
+  /**
+   * Creates an instance of MLRequestFailure.
+   *
+   * @constructor
+   * @param {MLErrorObject} error
+   * @param {ErrorType} resp
+   */
   constructor(error: MLErrorObject, resp: ErrorType) {
     super(error.message);
     Object.setPrototypeOf(this, new.target.prototype);
