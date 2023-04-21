@@ -124,7 +124,7 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  strategy: string = 'indexFields',
+  strategy: 'indexFields' | 'dataView' = 'indexFields',
   includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
