@@ -14,7 +14,10 @@ const makeRegEx = memoize(function makeRegEx(glob: string) {
   return new RegExp(globRegex, 'i');
 });
 
-export const fieldNameMatcher = (field: FieldListItem, fieldSearchHighlight: string): boolean => {
+export const fieldNameWildcardMatcher = (
+  field: FieldListItem,
+  fieldSearchHighlight: string
+): boolean => {
   if (!fieldSearchHighlight) {
     return false;
   }
