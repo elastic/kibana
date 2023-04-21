@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiText,
@@ -39,7 +39,7 @@ interface Props {
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
-  cloudFormation?: string | null;
+  cloudFormationTemplateUrl?: string | null;
 }
 
 // Otherwise the copy button is over the text
@@ -61,13 +61,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   hasFleetServer,
   fullCopyButton,
   onCopy,
-  cloudFormation,
+  cloudFormationTemplateUrl,
 }) => {
-  const { platform, setPlatform } = usePlatform();
+  const getInitialPlatform = useCallback(() => {
+    if (cloudFormationTemplateUrl) return 'cloudFormation';
 
-  useEffect(() => {
-    setPlatform(hasK8sIntegration ? 'kubernetes' : 'linux');
-  }, [hasK8sIntegration, setPlatform]);
+    if (hasK8sIntegration) return 'kubernetes';
+
+    return 'linux';
+  }, [cloudFormationTemplateUrl, hasK8sIntegration]);
+
+  const { platform, setPlatform } = usePlatform(getInitialPlatform());
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
@@ -76,12 +80,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const getPlatformOptions = useCallback(() => {
     const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
 
-    if (cloudFormation) {
+    if (cloudFormationTemplateUrl) {
       return platformOptions.concat(CLOUD_FORMATION_PLATFORM_OPTION);
     }
 
     return platformOptions;
-  }, [cloudFormation, isReduced]);
+  }, [cloudFormationTemplateUrl, isReduced]);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -161,16 +165,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'cloudFormation' && cloudFormation && (
+        {platform === 'cloudFormation' && cloudFormationTemplateUrl && (
           <>
             <CloudFormationInstructions
-              cloudFormation={cloudFormation}
+              cloudFormationTemplateUrl={cloudFormationTemplateUrl}
               enrollmentAPIKey={enrollToken}
             />
             <EuiSpacer size="s" />
           </>
         )}
-        {!hasK8sIntegrationMultiPage && !cloudFormation && (
+        {!hasK8sIntegrationMultiPage && platform !== 'cloudFormation' && (
           <>
             {platform === 'kubernetes' && (
               <EuiText>

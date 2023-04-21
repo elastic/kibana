@@ -14,7 +14,7 @@ import { useGetSettings, useKibanaVersion, useStartServices } from '../../hooks'
 
 interface Props {
   enrollmentAPIKey?: string;
-  cloudFormation: string;
+  cloudFormationTemplateUrl: string;
 }
 
 const createCloudFormationUrl = (
@@ -33,43 +33,46 @@ const createCloudFormationUrl = (
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
-  cloudFormation,
+  cloudFormationTemplateUrl,
 }) => {
   const [fleetServer, setFleetServer] = useState<string | ''>();
   const [isError, setIsError] = useState<boolean>(false);
 
   const core = useStartServices();
-  const settings = useGetSettings();
+  const { data, isLoading } = useGetSettings();
   const { notifications } = core;
 
   const kibanaVersion = useKibanaVersion();
 
-  // Fetch the first fleet server host from the settings
+  // Sets Fleet Server Host as the first fleet server host available from the settings
+  // Shows an error if no fleet server host is available
   useEffect(() => {
-    async function fetchAgentManifest() {
-      try {
-        const fleetServerHosts = await settings.data?.item.fleet_server_hosts;
-        if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
-          setFleetServer(fleetServerHosts[0]);
-        }
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.fleet.agentEnrollment.cloudFormation.errorLoadingAgentManifest',
-            {
-              defaultMessage: 'Error while fetching agent manifest',
-            }
-          ),
-        });
-        setIsError(true);
-      }
+    if (isLoading) return;
+
+    const fleetServerHosts = data?.item.fleet_server_hosts;
+    if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
+      setFleetServer(fleetServerHosts[0]);
+    } else {
+      setIsError(true);
+      notifications.toasts.addError(new Error('Fleet server host not found'), {
+        title: i18n.translate(
+          'xpack.fleet.agentEnrollment.cloudFormation.errorLoadingFleetServerHosts',
+          {
+            defaultMessage: 'Error while fetching Fleet Server hosts',
+          }
+        ),
+      });
     }
-    fetchAgentManifest();
-  }, [notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
+  }, [data?.item.fleet_server_hosts, isLoading, notifications.toasts]);
 
   const cloudFormationUrl =
     enrollmentAPIKey && fleetServer
-      ? createCloudFormationUrl(cloudFormation, enrollmentAPIKey, fleetServer, kibanaVersion)
+      ? createCloudFormationUrl(
+          cloudFormationTemplateUrl,
+          enrollmentAPIKey,
+          fleetServer,
+          kibanaVersion
+        )
       : '';
 
   return (
@@ -78,14 +81,14 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
       <EuiCallOut
         title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.callout', {
           defaultMessage:
-            'Sign in to your cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation.',
+            'Sign in to your AWS cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation.',
         })}
         color="warning"
         iconType="warning"
       />
       <EuiSpacer size="m" />
       <EuiButton
-        isLoading={settings.isLoading}
+        isLoading={isLoading}
         isDisabled={isError || cloudFormationUrl === ''}
         color="primary"
         fill
