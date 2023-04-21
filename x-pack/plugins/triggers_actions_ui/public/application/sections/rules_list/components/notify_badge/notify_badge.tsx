@@ -231,7 +231,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setLoading(true);
         closePopover();
         await snoozeRule(schedule);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
@@ -248,7 +248,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         setLoading(true);
         closePopover();
         await unsnoozeRule(scheduleIds);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);

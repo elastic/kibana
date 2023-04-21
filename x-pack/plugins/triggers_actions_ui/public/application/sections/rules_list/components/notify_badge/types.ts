@@ -21,7 +21,7 @@ export interface RulesListNotifyBadgeProps {
    * Whether the component is disabled or not, string give a disabled reason displayed as a tooltip
    */
   disabled?: boolean | string;
-  onRuleChanged: () => void;
+  onRuleChanged: () => void | Promise<void>;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
