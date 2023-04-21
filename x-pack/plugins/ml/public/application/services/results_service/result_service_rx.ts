@@ -17,6 +17,7 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import { MlRecordForInfluencer } from '@kbn/ml-common';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -27,7 +28,6 @@ import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils'
 import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { RecordForInfluencer } from './results_service';
 import { isRuntimeMappings } from '../../../../common';
 
 export interface ResultResponse {
@@ -654,8 +654,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       latestMs: number,
       maxResults: number,
       influencersFilterQuery: InfluencersFilterQuery
-    ): Observable<{ records: RecordForInfluencer[]; success: boolean }> {
-      const obj = { success: true, records: [] as RecordForInfluencer[] };
+    ): Observable<{ records: MlRecordForInfluencer[]; success: boolean }> {
+      const obj = { success: true, records: [] as MlRecordForInfluencer[] };
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, record score, plus any specified job IDs.

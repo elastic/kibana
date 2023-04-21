@@ -19,7 +19,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { MlInfluencer } from '@kbn/ml-common';
+import { MlInfluencer, MlRecordForInfluencer } from '@kbn/ml-common';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -50,7 +50,6 @@ import { MlResultsService } from '../services/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import { RecordForInfluencer } from '../services/results_service/results_service';
 
 export interface ExplorerJob {
   id: string;
@@ -108,7 +107,7 @@ export interface AnomaliesTableData {
   jobIds: string[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 

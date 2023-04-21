@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnomaliesTableRecord } from '../../../common/types/anomalies';
+import { MlAnomaliesTableRecord } from '@kbn/ml-common';
 
 export function buildAnomalyTableItems(
   anomalyRecords: any,
   aggregationInterval: any,
   dateFormatTz: string
-): AnomaliesTableRecord[];
+): MlAnomaliesTableRecord[];
