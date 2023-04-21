@@ -154,8 +154,6 @@ export function ErrorCountRuleType(props: Props) {
     />
   );
 
-  // const fields: string[] = [TRANSACTION_NAME];
-
   const groupAlertsBy = (
     <>
       <EuiFormRow
