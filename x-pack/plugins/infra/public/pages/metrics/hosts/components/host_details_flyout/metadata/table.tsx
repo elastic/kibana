@@ -20,6 +20,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
 import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
+import { AddMetadataFilterButton } from './add_metadata_filter_button';
 
 interface Row {
   name: string;
@@ -117,9 +118,18 @@ export const Table = (props: Props) => {
       {
         field: 'value',
         name: VALUE_LABEL,
-        width: '65%',
+        width: '55%',
         sortable: false,
         render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
+      },
+      {
+        field: 'value',
+        name: 'Actions',
+        sortable: false,
+        showOnHover: true,
+        render: (_name: string, item: Row) => {
+          return <AddMetadataFilterButton item={item} />;
+        },
       },
     ],
     []
@@ -132,6 +142,7 @@ export const Table = (props: Props) => {
       responsive={false}
       columns={columns}
       items={rows}
+      rowProps={{ className: 'euiTableRow-hasActions' }}
       search={search}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
