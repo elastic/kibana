@@ -404,14 +404,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public scrollToPanel = async (panelRef: HTMLDivElement) => {
-    const id = this.getState().componentState.expandedPanelId;
+    const id = this.getState().componentState.scrollToPanelId;
     if (!id) return;
-    // this.untilEmbeddableLoaded(id).then(() => {
-    setTimeout(() => {
+
+    this.untilEmbeddableLoaded(id).then(() => {
+      this.setScrollToPanelId(undefined);
       panelRef.scrollIntoView({ block: 'center' });
-    }, 0);
-    // });
-    this.setScrollToPanelId(undefined);
+    });
   };
 
   public scrollToTop = () => {
@@ -419,18 +418,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public setHighlightPanelId = (id: string | undefined) => {
-    console.log('hightlight?', !this.getState().explicitInput.useMargins);
-    if (!this.getState().explicitInput.useMargins) return;
-
     this.dispatch.setHighlightPanelId(id);
   };
 
   public highlightPanel = (panelRef: HTMLDivElement) => {
     const id = this.getState().componentState.highlightPanelId;
 
-    if (!id || !this.getState().explicitInput.useMargins) return;
-
-    if (panelRef) {
+    if (id && panelRef) {
       this.untilEmbeddableLoaded(id).then(() => {
         panelRef.classList.add('dshDashboardGrid__item--highlighted');
         // Removes the class after the highlight animation finishes

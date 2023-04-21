@@ -11,6 +11,10 @@
     box-shadow: none;
     border-radius: 0;
   }
+
+  .dshDashboardGrid__item--highlighted {
+    border-radius: 0;
+  }
 }
 
 // Remove border color unless in editing mode
@@ -30,7 +34,7 @@
   0% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);
   }
-  20% {
+  25% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, .5);
   }
   100% {
@@ -41,6 +45,8 @@
 .dshDashboardGrid__item--highlighted {
   border-radius: $euiSizeXS;
   animation-name: highlightOutline;
-  animation-duration: 3s;
+  animation-duration: 4s;
   animation-timing-function: ease-out;
+  // keeps outline from getting cut off by other panels without margins
+  z-index: 999 !important;
 }
