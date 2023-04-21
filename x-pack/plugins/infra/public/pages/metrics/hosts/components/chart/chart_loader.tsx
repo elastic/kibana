@@ -5,47 +5,41 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import {} from 'react-use/lib/useEffectOnce';
 
 export const ChartLoader = ({
   children,
   loading,
+  style,
+  loadedOnce = false,
+  hasTitle = false,
 }: {
+  style?: React.CSSProperties;
   children: React.ReactNode;
+  loadedOnce: boolean;
   loading: boolean;
+  hasTitle?: boolean;
 }) => {
-  const loadedOnce = useRef(false);
   const { euiTheme } = useEuiTheme();
-  useEffect(() => {
-    if (!loadedOnce.current && !loading) {
-      loadedOnce.current = true;
-    }
-    return () => {
-      loadedOnce.current = false;
-    };
-  }, [loading]);
-
   return (
-    <div
-      css={css`
-        position: relative;
-        border-radius: ${euiTheme.size.s};
-        overflow: hidden;
-        height: 100%;
-      `}
-    >
+    <LoaderContainer>
       {loading && (
         <EuiProgress
           size="xs"
           color="accent"
           position="absolute"
+          css={css`
+            top: ${loadedOnce && hasTitle ? euiTheme.size.l : 0};
+          `}
           style={{ zIndex: Number(euiTheme.levels.header) - 1 }}
         />
       )}
-      {loading && !loadedOnce.current ? (
-        <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
+      {loading && !loadedOnce ? (
+        <EuiFlexGroup style={style} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingChart mono size="l" />
           </EuiFlexItem>
@@ -53,6 +47,13 @@ export const ChartLoader = ({
       ) : (
         children
       )}
-    </div>
+    </LoaderContainer>
   );
 };
+
+const LoaderContainer = euiStyled.div`
+  position: relative;
+  border-radius: ${({ theme }) => theme.eui.euiSizeS};
+  overflow: hidden;
+  height: 100%;
+`;

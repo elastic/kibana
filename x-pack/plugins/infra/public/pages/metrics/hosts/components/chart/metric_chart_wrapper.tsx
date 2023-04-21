@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Chart, Metric, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
-import styled from 'styled-components';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 import { ChartLoader } from './chart_loader';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
@@ -31,6 +31,17 @@ export const MetricChartWrapper = ({
   toolTip,
   ...props
 }: Props) => {
+  const loadedOnce = useRef(false);
+
+  useEffect(() => {
+    if (!loadedOnce.current && !loading) {
+      loadedOnce.current = true;
+    }
+    return () => {
+      loadedOnce.current = false;
+    };
+  }, [loading]);
+
   const metricsData: MetricWNumber = {
     title,
     subtitle,
@@ -42,7 +53,7 @@ export const MetricChartWrapper = ({
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none" {...props}>
-      <ChartLoader loading={loading}>
+      <ChartLoader loading={loading} loadedOnce={loadedOnce.current} style={{ height: MIN_HEIGHT }}>
         <EuiToolTip
           className="eui-fullWidth"
           delay="regular"

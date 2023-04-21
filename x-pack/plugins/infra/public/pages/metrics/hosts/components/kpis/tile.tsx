@@ -28,7 +28,6 @@ import { LensWrapper } from '../chart/lens_wrapper';
 import { createHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { ChartLoader } from '../chart/chart_loader';
 
 export interface KPIChartProps {
   title: string;
@@ -111,7 +110,7 @@ export const Tile = ({
     });
   };
 
-  const loading = hostsLoading || hostCountLoading;
+  const loading = hostsLoading || !attributes || hostCountLoading;
   const { afterLoadedState } = useAfterLoadedState(loading, {
     attributes,
     lastReloadRequestTime: baseRequest.requestTs,
@@ -148,35 +147,31 @@ export const Tile = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <ChartLoader loading={loading}>
-          <EuiToolTip
-            className="eui-fullWidth"
-            delay="regular"
-            content={toolTip}
-            anchorClassName="eui-fullWidth"
-          >
-            <LensWrapper
-              id={`hostViewKPIChart-${type}`}
-              attributes={afterLoadedState.attributes}
-              style={{ height: MIN_HEIGHT }}
-              extraActions={extraActions}
-              lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
-              dateRange={afterLoadedState.dateRange}
-              filters={afterLoadedState.filters}
-              query={afterLoadedState.query}
-              onBrushEnd={handleBrushEnd}
-            />
-          </EuiToolTip>
-        </ChartLoader>
+        <EuiToolTip
+          className="eui-fullWidth"
+          delay="regular"
+          content={toolTip}
+          anchorClassName="eui-fullWidth"
+        >
+          <LensWrapper
+            id={`hostViewKPIChart-${type}`}
+            attributes={afterLoadedState.attributes}
+            style={{ height: MIN_HEIGHT }}
+            extraActions={extraActions}
+            lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+            dateRange={afterLoadedState.dateRange}
+            filters={afterLoadedState.filters}
+            query={afterLoadedState.query}
+            onBrushEnd={handleBrushEnd}
+            loading={loading}
+          />
+        </EuiToolTip>
       )}
     </EuiPanelStyled>
   );
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
-  position: relative;
-  border-radius: ${({ theme }) => theme.eui.euiSizeS};
-  overflow: hidden;
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;
