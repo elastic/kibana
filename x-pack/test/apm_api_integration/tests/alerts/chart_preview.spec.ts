@@ -155,6 +155,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ).to.equal(true);
     });
 
+    it('error_count with error grouping key', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: 'opbeans-java',
+            errorGroupingKey: 'd16d39e7fa133b8943cea035430a7b4e',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        ...options,
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.errorCountChartPreview).to.eql([
+        { x: 1627974600000, y: 4 },
+        { x: 1627974900000, y: 2 },
+        { x: 1627975200000, y: 0 },
+      ]);
+    });
+
     it('transaction_duration (with data)', async () => {
       const options = getOptions();
       const response = await apmApiClient.readUser({
