@@ -60,7 +60,7 @@ const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
       className="lnsLayerPanel__triggerText"
       color="text"
       size="s"
-      iconType="plusInCircleFilled"
+      iconType="plus"
       contentProps={{
         className: 'lnsLayerPanel__triggerTextContent',
       }}
