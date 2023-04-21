@@ -230,7 +230,7 @@ describe('Querybar Menu component', () => {
     expect(languageSwitcher.length).toBeTruthy();
   });
 
-  it('should render the save query quick buttons', async () => {
+  it('should render the save query quick button', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
@@ -254,10 +254,6 @@ describe('Querybar Menu component', () => {
       '[data-test-subj="saved-query-management-save-changes-button"]'
     );
     expect(saveChangesButton.length).toBeTruthy();
-    const saveChangesAsNewButton = component.find(
-      '[data-test-subj="saved-query-management-save-as-new-button"]'
-    );
-    expect(saveChangesAsNewButton.length).toBeTruthy();
   });
 
   it('should render all filter panel options by default', async () => {
