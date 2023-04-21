@@ -13,7 +13,7 @@ import {
 } from '../../synthetics_service/get_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
-  method: 'GET',
+  method: 'PUT',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
@@ -22,7 +22,16 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
         server,
       });
       const { canEnable, isEnabled } = result;
-      if (canEnable && !isEnabled && server.config.service?.manifestUrl) {
+      const { security } = server;
+      const { apiKey, isValid } = await libs.requests.getAPIKeyForSyntheticsService({
+        server,
+      });
+      if (apiKey && !isValid) {
+        await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+        await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
+      }
+      const regenerationRequired = !isEnabled || !isValid;
+      if (canEnable && regenerationRequired && server.config.service?.manifestUrl) {
         await generateAndSaveServiceAPIKey({
           request,
           authSavedObjectsClient: savedObjectsClient,

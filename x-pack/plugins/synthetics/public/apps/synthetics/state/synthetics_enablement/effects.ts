@@ -14,12 +14,9 @@ import {
   disableSynthetics,
   disableSyntheticsSuccess,
   disableSyntheticsFailure,
-  enableSynthetics,
-  enableSyntheticsSuccess,
-  enableSyntheticsFailure,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchGetSyntheticsEnablement, fetchDisableSynthetics, fetchEnableSynthetics } from './api';
+import { fetchGetSyntheticsEnablement, fetchDisableSynthetics } from './api';
 
 export function* fetchSyntheticsEnablementEffect() {
   yield takeLeading(
@@ -27,22 +24,14 @@ export function* fetchSyntheticsEnablementEffect() {
     fetchEffectFactory(
       fetchGetSyntheticsEnablement,
       getSyntheticsEnablementSuccess,
-      getSyntheticsEnablementFailure
+      getSyntheticsEnablementFailure,
+      successMessage,
+      failureMessage
     )
   );
   yield takeLatest(
     disableSynthetics,
     fetchEffectFactory(fetchDisableSynthetics, disableSyntheticsSuccess, disableSyntheticsFailure)
-  );
-  yield takeLatest(
-    enableSynthetics,
-    fetchEffectFactory(
-      fetchEnableSynthetics,
-      enableSyntheticsSuccess,
-      enableSyntheticsFailure,
-      successMessage,
-      failureMessage
-    )
   );
 }
 

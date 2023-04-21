@@ -14,7 +14,7 @@ import { apiService } from '../../../../utils/api_service';
 
 export const fetchGetSyntheticsEnablement =
   async (): Promise<MonitorManagementEnablementResult> => {
-    return await apiService.get(
+    return await apiService.put(
       API_URLS.SYNTHETICS_ENABLEMENT,
       undefined,
       MonitorManagementEnablementResultCodec
@@ -23,8 +23,4 @@ export const fetchGetSyntheticsEnablement =
 
 export const fetchDisableSynthetics = async (): Promise<{}> => {
   return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
-};
-
-export const fetchEnableSynthetics = async (): Promise<MonitorManagementEnablementResult> => {
-  return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
 };
