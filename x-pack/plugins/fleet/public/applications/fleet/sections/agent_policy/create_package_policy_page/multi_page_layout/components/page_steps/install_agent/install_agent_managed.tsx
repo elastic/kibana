@@ -62,8 +62,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const isK8s =
     props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
-  const cloudFormation = agentPolicy?.cloud_formation_template_url;
-
   const installManagedCommands = ManualInstructions({
     apiKey: enrollmentAPIKey.api_key,
     fleetProxy,
@@ -81,7 +79,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       isComplete: commandCopied || !!enrolledAgentIds.length,
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
-      cloudFormation,
     }),
   ];
 

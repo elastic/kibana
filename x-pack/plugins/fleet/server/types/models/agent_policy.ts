@@ -47,7 +47,6 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
-  cloud_formation_template_url: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const NewAgentPolicySchema = schema.object({
