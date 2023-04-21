@@ -12,6 +12,9 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/bfetch-plugin",
     "@kbn/object-versioning",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/saved-objects-settings",
   ],
   "exclude": [
     "target/**/*",

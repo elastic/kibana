@@ -7,7 +7,12 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { ContentManagementGetTransformsFn, Version } from '@kbn/object-versioning';
+import type {
+  Version,
+  ContentManagementServiceTransforms,
+  ContentManagementServiceDefinitionVersioned,
+} from '@kbn/object-versioning';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
 import type {
   GetResult,
@@ -19,6 +24,11 @@ import type {
   SearchResult,
 } from '../../common';
 
+export type StorageContextGetTransformFn = (
+  definitions: ContentManagementServiceDefinitionVersioned,
+  requestVersion?: Version
+) => ContentManagementServiceTransforms;
+
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
@@ -27,7 +37,7 @@ export interface StorageContext {
     latest: Version;
   };
   utils: {
-    getTransforms: ContentManagementGetTransformsFn;
+    getTransforms: StorageContextGetTransformFn;
   };
 }
 
@@ -54,6 +64,12 @@ export interface ContentStorage<T = unknown, U = T> {
 
   /** Search items */
   search(ctx: StorageContext, query: SearchQuery, options?: object): Promise<SearchResult<T>>;
+
+  /**
+   * Opt-in to multi-type search.
+   * Can only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API.
+   **/
+  mSearch?: MSearchConfig<T>;
 }
 
 export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
@@ -64,4 +80,30 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   version: {
     latest: Version;
   };
+}
+
+/**
+ * A configuration for multi-type search.
+ * By configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.
+ * Underneath content management is using the `savedObjects.find` API to search the saved objects.
+ */
+export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
+  /**
+   * The saved object type that corresponds to this content type.
+   */
+  savedObjectType: string;
+
+  /**
+   * Mapper function that transforms the saved object into the content item result.
+   */
+  toItemResult: (
+    ctx: StorageContext,
+    savedObject: SavedObjectsFindResult<SavedObjectAttributes>
+  ) => T;
+
+  /**
+   * Additional fields to search on. These fields will be added to the search query.
+   * By default, only `title` and `description` are searched.
+   */
+  additionalSearchFields?: string[];
 }

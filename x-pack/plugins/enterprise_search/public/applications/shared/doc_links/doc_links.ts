@@ -72,6 +72,7 @@ class DocLinks {
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
   public elasticsearchSecureCluster: string;
+  public elser: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
@@ -190,6 +191,7 @@ class DocLinks {
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
     this.elasticsearchSecureCluster = '';
+    this.elser = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
@@ -309,6 +311,7 @@ class DocLinks {
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.elasticsearchSecureCluster = docLinks.links.elasticsearch.secureCluster;
+    this.elser = docLinks.links.enterpriseSearch.elser;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
