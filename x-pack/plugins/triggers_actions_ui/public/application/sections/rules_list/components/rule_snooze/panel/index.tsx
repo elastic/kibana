@@ -51,7 +51,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         }
       }
     },
-    [setIsLoading, snoozeRule]
+    [inPopover, setIsLoading, snoozeRule]
   );
 
   const onUnsnoozeRule = useCallback(
@@ -65,7 +65,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         }
       }
     },
-    [setIsLoading, unsnoozeRule]
+    [inPopover, setIsLoading, unsnoozeRule]
   );
 
   const saveSnoozeSchedule = useCallback(
@@ -79,7 +79,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         }
       }
     },
-    [snoozeRule, setIsLoading]
+    [inPopover, snoozeRule, setIsLoading]
   );
 
   const cancelSnoozeSchedules = useCallback(
@@ -93,7 +93,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         }
       }
     },
-    [unsnoozeRule, setIsLoading]
+    [inPopover, unsnoozeRule, setIsLoading]
   );
 
   const onOpenScheduler = useCallback(
