@@ -6,22 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { StepConfig } from '@kbn/guided-onboarding';
 import type { PluginState } from '../../common';
 import { testGuideStep4ActiveState } from '../services/api.mocks';
 import { getStepLocationPath } from './get_step_location';
 
 describe('getStepLocationPath', () => {
   let result: string | undefined;
-  const locationWithParams: StepConfig['location'] = {
-    appID: 'testApp',
-    path: 'testPath/{indexName}',
-    params: ['indexName'],
-  };
-  const locationWithoutParams: StepConfig['location'] = {
-    appID: 'testApp',
-    path: 'testPath',
-  };
+  const pathWithParams = 'testPath/{param1}/{param2}';
+  const pathWithoutParams = 'testPath';
   const pluginStateWithoutParams: PluginState = {
     status: 'in_progress',
     isActivePeriod: true,
@@ -29,18 +21,18 @@ describe('getStepLocationPath', () => {
   };
 
   it('returns initial location path if no params passed', () => {
-    result = getStepLocationPath(locationWithParams, pluginStateWithoutParams);
-    expect(result).toBe(locationWithParams.path);
+    result = getStepLocationPath(pathWithParams, pluginStateWithoutParams);
+    expect(result).toBe(pathWithParams);
   });
 
   it('returns dynamic location path if params passed', () => {
     const pluginStateWithParams: PluginState = {
       status: 'in_progress',
       isActivePeriod: true,
-      activeGuide: { ...testGuideStep4ActiveState, params: { indexName: 'testIndex' } },
+      activeGuide: { ...testGuideStep4ActiveState, params: { param1: 'test1', param2: 'test2' } },
     };
-    result = getStepLocationPath(locationWithParams, pluginStateWithParams);
-    expect(result).toBe(`testPath/testIndex`);
+    result = getStepLocationPath(pathWithParams, pluginStateWithParams);
+    expect(result).toBe(`testPath/test1/test2`);
   });
 
   it('returns initial location path if params passed but no params are used in the location', () => {
@@ -49,7 +41,7 @@ describe('getStepLocationPath', () => {
       isActivePeriod: true,
       activeGuide: { ...testGuideStep4ActiveState, params: { indexName: 'test1234' } },
     };
-    result = getStepLocationPath(locationWithoutParams, pluginStateWithParams);
+    result = getStepLocationPath(pathWithoutParams, pluginStateWithParams);
     expect(result).toBe(`testPath`);
   });
 });

@@ -104,7 +104,7 @@ const step2Config = {
     id: 'step2',
     description: 'Step with dynamic url',
     location: {
-        appID: 'test', path: 'testPath/{indexID}', params: ['indexID']
+        appID: 'test', path: 'testPath/{indexID}'
     }
 };
 ```

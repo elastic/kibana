@@ -82,7 +82,6 @@ export const testGuideConfig: GuideConfig = {
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepFour/{indexName}',
-        params: ['indexName'],
       },
     },
   ],

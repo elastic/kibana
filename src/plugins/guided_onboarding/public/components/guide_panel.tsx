@@ -77,7 +77,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
             if (stepConfig.location) {
               await application.navigateToApp(stepConfig.location.appID, {
-                path: getStepLocationPath(stepConfig.location, pluginState),
+                path: getStepLocationPath(stepConfig.location.path, pluginState),
               });
 
               if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {

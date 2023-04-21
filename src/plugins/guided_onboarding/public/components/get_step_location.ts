@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { StepConfig } from '@kbn/guided-onboarding';
 import { PluginState } from '../../common';
 
-export const getStepLocationPath = (
-  location: StepConfig['location'],
-  pluginState: PluginState
-): string | undefined => {
-  if (location && location.params && pluginState.activeGuide?.params) {
-    const { path, params } = location;
+// regex matches everything between an opening and a closing curly braces
+// without matching the braces themselves
+const paramsBetweenCurlyBraces = /(?<=\{)[^\{\}]+(?=\})/g;
+export const getStepLocationPath = (path: string, pluginState: PluginState): string | undefined => {
+  if (pluginState.activeGuide?.params) {
     let dynamicPath = path;
-    for (const param of params) {
-      dynamicPath = dynamicPath.replace(`{${param}}`, pluginState.activeGuide?.params[param]);
+    const matchedParams = path.match(paramsBetweenCurlyBraces);
+    if (matchedParams) {
+      for (const param of matchedParams) {
+        dynamicPath = dynamicPath.replace(`{${param}}`, pluginState.activeGuide?.params[param]);
+      }
+      return dynamicPath;
     }
-    return dynamicPath;
   }
-  return location?.path;
+  return path;
 };
