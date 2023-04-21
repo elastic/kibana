@@ -250,16 +250,20 @@ export const groupAndBulkCreate = async ({
           alertTimestampOverride: runOpts.alertTimestampOverride,
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-        // TODO: handle this branch
-        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+
+        if (unsuppressedAlerts.length > 0) {
+          const bulkCreateUnsuppressedResult = await runOpts.bulkCreate(unsuppressedAlerts);
+          addToSearchAfterReturn({ current: toReturn, next: bulkCreateUnsuppressedResult });
+        }
       } else {
         const bulkCreateResult = await runOpts.bulkCreate([
           ...wrappedAlerts,
           ...unsuppressedAlerts,
         ]);
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
+
+      runOpts.ruleExecutionLogger.debug(`created ${toReturn.createdSignalsCount} signals`);
 
       const newBucketHistory: BucketHistory[] = buckets.map((bucket) => {
         return {
