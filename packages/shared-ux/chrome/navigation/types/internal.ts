@@ -8,20 +8,6 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
-import type { SerializableRecord } from '@kbn/utility-types';
-
-/**
- * @internal
- */
-export interface Locator<P extends SerializableRecord = {}> {
-  getRedirectUrl(params: P): string;
-  navigateSync: (params: P) => void;
-}
-
-/**
- * @internal
- */
-export type GetLocatorFn = (locatorId: string) => Locator | undefined;
 
 /**
  * @internal
@@ -40,21 +26,6 @@ export interface RecentItem {
   link: string;
   label: string;
   id: string;
-}
-
-/**
- * Locator info used for navigating around Kibana
- * @internal
- */
-export interface ILocatorDefinition<P = SerializableRecord> {
-  /**
-   * ID of a registered LocatorDefinition
-   */
-  id: string;
-  /**
-   * Navigational params in the form understood by the locator's plugin.
-   */
-  params?: P;
 }
 
 export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];

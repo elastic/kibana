@@ -8,13 +8,10 @@
 
 import { SolutionProperties } from '../../types';
 
-const MOCK_LOCATOR_ID = 'MOCK_LOCATOR_ID';
-
-export const mocks: SolutionProperties & { locatorId: string } = {
+export const mocks: SolutionProperties = {
   id: 'example_project',
   icon: 'logoObservability',
   name: 'Example Project',
-  locatorId: MOCK_LOCATOR_ID,
   items: [
     {
       id: 'root',

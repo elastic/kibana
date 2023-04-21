@@ -6,21 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { BasePathService, NavigateToUrlFn, NavItemClickFn } from '../../types/internal';
 import { analyticsItemSet } from './platform_nav/analytics';
 import { devtoolsItemSet } from './platform_nav/devtools';
 import { mlItemSet } from './platform_nav/machine_learning';
 import { managementItemSet } from './platform_nav/management';
-import {
-  BasePathService,
-  GetLocatorFn,
-  NavigateToUrlFn,
-  NavItemClickFn,
-} from '../../types/internal';
 
 export interface NavigationModelDeps {
   basePath: BasePathService;
   navigateToUrl: NavigateToUrlFn;
-  getLocator: GetLocatorFn;
   registerNavItemClick: NavItemClickFn;
 }
 

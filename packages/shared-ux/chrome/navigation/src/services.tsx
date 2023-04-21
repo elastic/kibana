@@ -40,13 +40,11 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const activeNavItemId = useObservable(chrome.getActiveNavItemId$());
   const loadingCount = useObservable(http.getLoadingCount$(), 0);
 
-  const getLocator = (id: string) => dependencies.share.url.locators.get(id);
   const registerNavItemClick = chrome.registerNavItemClick;
 
   const value: NavigationServices = {
     activeNavItemId,
     basePath,
-    getLocator,
     loadingCount,
     navIsOpen,
     navigateToUrl,

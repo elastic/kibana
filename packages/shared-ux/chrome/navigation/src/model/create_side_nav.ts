@@ -9,7 +9,6 @@
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { NavigationModelDeps } from '.';
 import type { NavItemProps, PlatformSectionConfig } from '../../types';
-import type { Locator } from '../../types/internal';
 
 type MyEuiSideNavItem = EuiSideNavItemType<unknown>;
 type OnClickFn = MyEuiSideNavItem['onClick'];
@@ -22,45 +21,25 @@ export const createSideNavDataFactory = (
   deps: NavigationModelDeps,
   activeNavItemId: string | undefined
 ) => {
-  const { basePath, navigateToUrl, getLocator, registerNavItemClick } = deps;
+  const { basePath, navigateToUrl, registerNavItemClick } = deps;
   const createSideNavData = (
     parentIds: string | number = '',
     navItems: NavItemProps[],
     platformSectionConfig?: PlatformSectionConfig
   ): Array<EuiSideNavItemType<unknown>> =>
     navItems.reduce<MyEuiSideNavItem[]>((accum, item) => {
-      const { id, name, items: subNav, locator: locatorDefinition, href } = item;
+      const { id, name, items: subNav, href } = item;
       const config = platformSectionConfig?.properties?.[id];
       if (config?.enabled === false) {
         // return accumulated set without the item that is not enabled
         return accum;
       }
 
-      const { id: locatorId, params: locatorParams } = locatorDefinition ?? {};
-      let locator: Locator | undefined;
-      if (locatorId) {
-        locator = getLocator(locatorId);
-      }
-
       let onClick: OnClickFn | undefined;
-
-      if (locatorId && !locator) {
-        // return `accum` to skip this link
-        return accum;
-      }
 
       const fullId = [parentIds, id].filter(Boolean).join('.');
 
-      let calculatedHref = href; // allow consumer to pass href, but default to an href formed using the locator
-      if (locator) {
-        const storedLocator: Locator = locator; // never undefined
-        calculatedHref = locator.getRedirectUrl(locatorParams ?? {}); // NOTE: calculated href overwrites href from props
-        onClick = (event: React.MouseEvent) => {
-          event.preventDefault();
-          storedLocator.navigateSync(locatorParams ?? {});
-          registerNavItemClick(fullId);
-        };
-      } else if (href) {
+      if (href) {
         onClick = (event: React.MouseEvent) => {
           event.preventDefault();
           navigateToUrl(basePath.prepend(href));
@@ -86,7 +65,7 @@ export const createSideNavDataFactory = (
         name,
         isSelected,
         onClick,
-        href: calculatedHref,
+        href,
         items: filteredSubNav,
         ['data-test-subj']: `nav-item-${fullId}`,
       };

@@ -16,14 +16,12 @@ import {
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
-import { mocks, NavigationStorybookMock } from '../../mocks';
+import { mocks as solutionProperties, NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProps, NavigationServices } from '../../types';
 import { Platform } from '../model';
 import { NavigationProvider } from '../services';
 import { Navigation as Component } from './navigation';
-
-const { locatorId, ...solutionProperties } = mocks;
 
 const storybookMock = new NavigationStorybookMock();
 let colorMode = '';
@@ -82,8 +80,7 @@ const Template = (args: NavigationProps & NavigationServices) => {
 
 export default {
   title: 'Chrome/Navigation',
-  description:
-    'An accordion-like component that renders a nested array of navigation items that use Locator information.',
+  description: 'Navigation container to render items for cross-app linking',
   parameters: {
     docs: {
       page: mdx,

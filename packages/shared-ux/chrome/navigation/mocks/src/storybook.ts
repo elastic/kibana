@@ -7,11 +7,9 @@
  */
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { SerializableRecord } from '@kbn/utility-types';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
 import { NavigationProps, NavigationServices } from '../../types';
-import { GetLocatorFn } from '../../types/internal';
 
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
@@ -39,15 +37,12 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     const { navIsOpen, recentItems } = params;
 
     const navAction = action('Navigate to');
+    const navigateToUrl = (url: string) => {
+      navAction(url);
+      return Promise.resolve();
+    };
+
     const registerNavItemClickAction = action('Register click');
-
-    const getLocator: GetLocatorFn = (locatorId: string) => ({
-      getRedirectUrl: () => `/app/for/${locatorId}`,
-      navigateSync: (locatorParams?: SerializableRecord) => {
-        navAction(`Locator: ${locatorId} / Params: ${JSON.stringify(locatorParams)}`);
-      },
-    });
-
     const activeNavItemId$ = new BehaviorSubject<string | undefined>(undefined);
     const registerNavItemClick = (id: string) => {
       activeNavItemId$.next(id);
@@ -56,9 +51,8 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
 
     return {
       ...params,
-      basePath: { prepend: () => '' },
-      navigateToUrl: () => Promise.resolve(),
-      getLocator,
+      basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
+      navigateToUrl,
       navIsOpen,
       recentItems,
       registerNavItemClick,

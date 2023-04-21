@@ -8,14 +8,7 @@
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import {
-  BasePathService,
-  GetLocatorFn,
-  ILocatorDefinition,
-  NavigateToUrlFn,
-  NavItemClickFn,
-  RecentItem,
-} from './internal';
+import { BasePathService, NavigateToUrlFn, NavItemClickFn, RecentItem } from './internal';
 
 /**
  * A list of services that are consumed by this component.
@@ -24,7 +17,6 @@ import {
 export interface NavigationServices {
   activeNavItemId: string | undefined;
   basePath: BasePathService;
-  getLocator: GetLocatorFn;
   loadingCount: number;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
@@ -38,7 +30,6 @@ export interface NavigationServices {
  * @public
  */
 export interface NavigationKibanaDependencies {
-  share: { url: { locators: { get: GetLocatorFn } } };
   core: {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
@@ -60,15 +51,12 @@ export interface NavigationKibanaDependencies {
  */
 export type NavItemProps<T = unknown> = Pick<EuiSideNavItemType<T>, 'id' | 'name'> & {
   /**
-   * Nav Items that could contain locators
+   * Nav Items
    */
   items?: Array<NavItemProps<T>>;
   /**
-   * ID of a registered LocatorDefinition
-   */
-  locator?: ILocatorDefinition;
-  /**
-   * Href for a link destination (for links within a project)
+   * Href for a link destination
+   * Example: /app/fleet
    */
   href?: string;
 };
