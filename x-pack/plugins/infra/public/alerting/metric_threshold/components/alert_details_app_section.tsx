@@ -26,6 +26,7 @@ import {
   getPaddedAlertTimeRange,
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
+import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
@@ -119,13 +120,15 @@ export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: A
             </EuiText>
             <EuiSpacer size="s" />
             <EuiFlexGroup>
-              <EuiFlexItem style={{ minWidth: 160 }} grow={1}>
+              <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
                 <Threshold
                   chartProps={chartProps}
                   id={`threshold-${generateUniqueKey(criterion)}`}
                   threshold={criterion.threshold[0]}
                   value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
-                  valueFormatter={(d) => `${Number(d.toFixed(2))} %`}
+                  valueFormatter={(d) =>
+                    metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
+                  }
                   title={i18n.translate(
                     'xpack.infra.metrics.alertDetailsAppSection.thresholdTitle',
                     {
