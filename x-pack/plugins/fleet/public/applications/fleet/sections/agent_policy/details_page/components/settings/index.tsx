@@ -53,7 +53,6 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'download_source_id',
     'fleet_server_host_id',
     'agent_features',
-    'cloud_formation_template_url',
   ]);
 
 const FormWrapper = styled.div`
