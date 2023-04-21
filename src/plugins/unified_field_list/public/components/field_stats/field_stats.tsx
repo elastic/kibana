@@ -362,7 +362,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {i18n.translate('unifiedFieldList.fieldStats.fieldSummaryLabel', {
+          {i18n.translate('unifiedFieldList.fieldStats.numberSummary.summaryTableTitle', {
             defaultMessage: 'Summary',
           })}
         </h6>
