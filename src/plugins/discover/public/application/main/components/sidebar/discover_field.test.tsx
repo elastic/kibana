@@ -52,12 +52,10 @@ async function getComponent({
   selected = false,
   field,
   onAddFilterExists = true,
-  showLegacyFieldTopValues = false,
 }: {
   selected?: boolean;
   field?: DataViewField;
   onAddFilterExists?: boolean;
-  showLegacyFieldTopValues?: boolean;
 }) {
   const finalField =
     field ??
@@ -98,9 +96,6 @@ async function getComponent({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        }
-        if (key === 'discover:showLegacyFieldTopValues') {
-          return showLegacyFieldTopValues;
         }
       },
     },

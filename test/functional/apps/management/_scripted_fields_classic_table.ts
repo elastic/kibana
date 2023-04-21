@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const docTable = getService('docTable');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -50,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
-        'discover:showLegacyFieldTopValues': true,
       });
     });
 
@@ -437,12 +437,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(
-          scriptedPainlessFieldName2,
-          '1442531297065'
-        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await docTable.toggleRowExpanded();
+        const firstRow = await docTable.getDetailsRow();
+        await docTable.addInclusiveFilter(firstRow, scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
