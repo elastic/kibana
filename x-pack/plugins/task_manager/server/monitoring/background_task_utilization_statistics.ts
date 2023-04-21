@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
 import stats from 'stats-lite';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
@@ -23,10 +23,13 @@ import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calcultors';
 
-export interface BackgroundTaskUtilizationStat extends JsonObject {
+export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
+  load: number;
+}
+
+export interface BackgroundTaskUtilizationStat extends PublicBackgroundTaskUtilizationStat {
   adhoc: AdhocTaskStat;
   recurring: TaskStat;
-  load: number;
 }
 
 interface TaskStat extends JsonObject {
@@ -79,7 +82,8 @@ export function createBackgroundTaskUtilizationAggregator(
       })
     );
 
-  const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat();
+  const taskManagerUtilizationEventToLoadStat =
+    createTaskRunEventToLoadStat(runningAverageWindowSize);
   const taskManagerWorkerUtilizationEvent$: Observable<
     Pick<BackgroundTaskUtilizationStat, 'load'>
   > = taskPollingLifecycle.events.pipe(
@@ -148,28 +152,37 @@ function hasTiming(taskEvent: TaskLifecycleEvent) {
   return !!taskEvent?.timing;
 }
 
+interface SummarizeUtilizationStatsOpts {
+  lastUpdate: string;
+  monitoredStats: MonitoredStat<BackgroundTaskUtilizationStat> | undefined;
+  isInternal: boolean;
+}
+
+interface SummarizeUtilizationStatsResult {
+  last_update: string;
+  stats:
+    | MonitoredStat<BackgroundTaskUtilizationStat>
+    | MonitoredStat<PublicBackgroundTaskUtilizationStat>
+    | null;
+}
+
 export function summarizeUtilizationStats({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  last_update,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  monitored_stats,
-}: {
-  last_update: string;
-  monitored_stats: MonitoredStat<BackgroundTaskUtilizationStat> | undefined;
-}): {
-  last_update: string;
-  stats: MonitoredStat<BackgroundTaskUtilizationStat> | null;
-} {
-  const utilizationStats = monitored_stats?.value;
+  lastUpdate,
+  monitoredStats,
+  isInternal,
+}: SummarizeUtilizationStatsOpts): SummarizeUtilizationStatsResult {
+  const utilizationStats = monitoredStats?.value;
+
+  if (!monitoredStats || !utilizationStats) {
+    return { last_update: lastUpdate, stats: null };
+  }
+
   return {
-    last_update,
-    stats:
-      monitored_stats && utilizationStats
-        ? {
-            timestamp: monitored_stats.timestamp,
-            value: utilizationStats,
-          }
-        : null,
+    last_update: lastUpdate,
+    stats: {
+      timestamp: monitoredStats.timestamp,
+      value: isInternal ? utilizationStats : pick(utilizationStats, 'load'),
+    },
   };
 }
 
@@ -227,9 +240,8 @@ function createTaskRunEventToRecurringStat(runningAverageWindowSize: number) {
   };
 }
 
-function createTaskRunEventToLoadStat() {
-  // hard-coded to 5; with default poll interval of 3 seconds, this will keep 15 seconds of data
-  const loadQueue = createRunningAveragedStat<number>(5);
+function createTaskRunEventToLoadStat(runningAverageWindowSize: number) {
+  const loadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   return (load: number): Pick<BackgroundTaskUtilizationStat, 'load'> => {
     const historicalLoad = loadQueue(load);
     return {
