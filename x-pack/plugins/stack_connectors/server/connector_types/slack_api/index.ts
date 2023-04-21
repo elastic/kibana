@@ -8,7 +8,6 @@
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
   AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
@@ -33,11 +32,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     id: SLACK_API_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: SLACK_CONNECTOR_NAME,
-    supportedFeatureIds: [
-      AlertingConnectorFeatureId,
-      UptimeConnectorFeatureId,
-      SecurityConnectorFeatureId,
-    ],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       secrets: {
         schema: SlackApiSecretsSchema,
