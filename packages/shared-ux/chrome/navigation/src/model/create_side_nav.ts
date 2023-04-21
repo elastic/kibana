@@ -45,16 +45,8 @@ export const createSideNavDataFactory = (
       let onClick: OnClickFn | undefined;
 
       if (locatorId && !locator) {
-        // FIXME: we need to return `accum` to skip this link
-        // return accum;
-
-        // for DEBUG
-        onClick = () => {
-          window.alert(
-            `Locator not found: ` +
-              JSON.stringify({ locatorId, ...(locatorParams ? { locatorParams } : {}) })
-          );
-        };
+        // return `accum` to skip this link
+        return accum;
       }
 
       const fullId = [parentIds, id].filter(Boolean).join('.');

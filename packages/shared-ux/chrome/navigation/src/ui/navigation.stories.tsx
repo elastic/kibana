@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCollapsibleNav,
+  EuiPopover,
+  EuiThemeProvider,
+} from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -95,6 +101,7 @@ SingleExpanded.argTypes = storybookMock.getArgumentTypes();
 
 export const ReducedPlatformLinks: ComponentStory<typeof Template> = Template.bind({});
 ReducedPlatformLinks.args = {
+  activeNavItemId: 'example_project.root.get_started',
   platformConfig: {
     [Platform.Analytics]: { enabled: false },
     [Platform.MachineLearning]: { enabled: false },
@@ -122,6 +129,7 @@ ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
 
 export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({});
 WithRecentItems.args = {
+  activeNavItemId: 'example_project.root.get_started',
   recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
   solutions: [solutionProperties],
 };
@@ -129,13 +137,44 @@ WithRecentItems.argTypes = storybookMock.getArgumentTypes();
 
 export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bind({});
 WithRequestsLoading.args = {
+  activeNavItemId: 'example_project.root.get_started',
   loadingCount: 1,
   solutions: [solutionProperties],
 };
 WithRequestsLoading.argTypes = storybookMock.getArgumentTypes();
 
+export const CustomElements: ComponentStory<typeof Template> = Template.bind({});
+CustomElements.args = {
+  activeNavItemId: 'example_project.custom',
+  solutions: [
+    {
+      ...solutionProperties,
+      items: [
+        {
+          name: (
+            <EuiPopover
+              button={
+                <EuiButtonEmpty iconType="spaces" iconSide="right">
+                  Custom element
+                </EuiButtonEmpty>
+              }
+              isOpen={true}
+              anchorPosition="rightCenter"
+            >
+              Cool popover content
+            </EuiPopover>
+          ),
+          id: 'custom',
+        },
+      ],
+    },
+  ],
+};
+CustomElements.argTypes = storybookMock.getArgumentTypes();
+
 export const Collapsed: ComponentStory<typeof Template> = Template.bind({});
 Collapsed.args = {
+  activeNavItemId: 'example_project.root.get_started',
   navIsOpen: false,
   solutions: [solutionProperties],
 };

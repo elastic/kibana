@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { LocatorId } from '@kbn/shared-ux-locators';
 import { NavItemProps } from '../../../types';
 
-const mlLocator = (params: { page: string; pageState?: string }) => ({
-  locator: { id: 'ML_APP_LOCATOR', params },
-});
+const { ML } = LocatorId;
 
 export const mlItemSet: NavItemProps[] = [
   {
@@ -20,12 +19,12 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Overview',
         id: 'overview',
-        ...mlLocator({ page: 'overview' }),
+        locator: { id: ML, params: { page: 'overview' } },
       },
       {
         name: 'Notifications',
         id: 'notifications',
-        ...mlLocator({ page: 'notifications' }),
+        locator: { id: ML, params: { page: 'notifications' } },
       },
     ],
   },
@@ -36,22 +35,22 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Jobs',
         id: 'jobs',
-        ...mlLocator({ page: 'jobs' }),
+        locator: { id: ML, params: { page: 'jobs' } },
       },
       {
         name: 'Anomaly explorer',
         id: 'explorer',
-        ...mlLocator({ page: 'explorer' }),
+        locator: { id: ML, params: { page: 'explorer' } },
       },
       {
         name: 'Single metric viewer',
         id: 'single_metric_viewer',
-        ...mlLocator({ page: 'timeseriesexplorer' }),
+        locator: { id: ML, params: { page: 'timeseriesexplorer' } },
       },
       {
         name: 'Settings',
         id: 'settings',
-        ...mlLocator({ page: 'settings' }),
+        locator: { id: ML, params: { page: 'settings' } },
       },
     ],
   },
@@ -62,17 +61,17 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Jobs',
         id: 'jobs',
-        ...mlLocator({ page: 'data_frame_analytics' }),
+        locator: { id: ML, params: { page: 'data_frame_analytics' } },
       },
       {
         name: 'Results explorer',
         id: 'results_explorer',
-        ...mlLocator({ page: 'data_frame_analytics/exploration' }),
+        locator: { id: ML, params: { page: 'data_frame_analytics/exploration' } },
       },
       {
         name: 'Analytics map',
         id: 'analytics_map',
-        ...mlLocator({ page: 'data_frame_analytics/map' }),
+        locator: { id: ML, params: { page: 'data_frame_analytics/map' } },
       },
     ],
   },
@@ -83,12 +82,12 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Trained models',
         id: 'trained_models',
-        ...mlLocator({ page: 'trained_models' }),
+        locator: { id: ML, params: { page: 'trained_models' } },
       },
       {
         name: 'Nodes',
         id: 'nodes',
-        ...mlLocator({ page: 'nodes' }),
+        locator: { id: ML, params: { page: 'nodes' } },
       },
     ],
   },
@@ -99,12 +98,12 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'File',
         id: 'file',
-        ...mlLocator({ page: 'filedatavisualizer' }),
+        locator: { id: ML, params: { page: 'filedatavisualizer' } },
       },
       {
         name: 'Data page',
         id: 'data_view',
-        ...mlLocator({ page: 'datavisualizer_index_select' }),
+        locator: { id: ML, params: { page: 'datavisualizer_index_select' } },
       },
     ],
   },
@@ -115,12 +114,12 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Explain log rate spikes',
         id: 'explain_log_rate_spikes',
-        ...mlLocator({ page: 'explain_log_rate_spikes_index_select' }),
+        locator: { id: ML, params: { page: 'explain_log_rate_spikes_index_select' } },
       },
       {
         name: 'Log pattern analysis',
         id: 'log_pattern_analysis',
-        ...mlLocator({ page: 'log_categorization_index_select' }),
+        locator: { id: ML, params: { page: 'log_categorization_index_select' } },
       },
     ],
   },

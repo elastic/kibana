@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderLogo,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSideNavItemType,
   EuiSpacer,
@@ -99,15 +100,15 @@ export const Navigation = (props: NavigationProps) => {
     switch (props.linkToCloud) {
       case 'projects':
         return (
-          <a href="https://cloud.elastic.co/projects">
+          <EuiLink href="https://cloud.elastic.co/projects" color="text">
             <EuiCollapsibleNavGroup iconType="spaces" title="My projects" />
-          </a>
+          </EuiLink>
         );
       case 'deployments':
         return (
-          <a href="https://cloud.elastic.co/deployments">
+          <EuiLink href="https://cloud.elastic.co/deployments" color="text">
             <EuiCollapsibleNavGroup iconType="spaces" title="My deployments" />
-          </a>
+          </EuiLink>
         );
       default:
         return null;

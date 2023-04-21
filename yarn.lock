@@ -5097,6 +5097,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-locators@link:packages/shared-ux/locators":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-markdown-mocks@link:packages/shared-ux/markdown/mocks":
   version "0.0.0"
   uid ""
