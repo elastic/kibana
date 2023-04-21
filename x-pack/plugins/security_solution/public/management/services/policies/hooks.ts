@@ -6,10 +6,8 @@
  */
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetEndpointSecurityPackage } from './ingest';
