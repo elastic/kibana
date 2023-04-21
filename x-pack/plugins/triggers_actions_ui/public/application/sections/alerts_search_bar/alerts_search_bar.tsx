@@ -72,6 +72,7 @@ export function AlertsSearchBar({
       showDatePicker={showDatePicker}
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
+      onQueryChange={onQuerySubmit}
     />
   );
 }
