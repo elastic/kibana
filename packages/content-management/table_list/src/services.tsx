@@ -80,9 +80,7 @@ export interface TableListViewKibanaDependencies {
   core: {
     application: {
       capabilities: {
-        advancedSettings?: {
-          save: boolean;
-        };
+        [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>;
       };
       getUrlForApp: (app: string, options: { path: string }) => string;
       currentAppId$: Observable<string | undefined>;

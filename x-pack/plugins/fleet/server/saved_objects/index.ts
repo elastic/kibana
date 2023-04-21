@@ -54,10 +54,8 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import {
-  migratePackagePolicyToV870,
-  migratePackagePolicyToV880,
-} from './migrations/security_solution';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 
 /*
  * Saved object types and mappings
