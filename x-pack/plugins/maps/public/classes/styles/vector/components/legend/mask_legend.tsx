@@ -72,7 +72,7 @@ export class MaskLegend extends Component<Props, State> {
     return (
       <EuiText size="xs" textAlign="left" color="subdued">
         <small>
-          <strong>{`${maskLabel} ${maskDescription} ${maskValue}`}</strong>
+          {`${maskLabel} ${maskDescription} `}<strong>{maskValue}</strong>
         </small>
       </EuiText>
     );
