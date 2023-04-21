@@ -308,6 +308,7 @@ function getMockMonitoredUtilization(overrides = {}): MonitoredUtilization {
     stats: {
       timestamp: new Date().toISOString(),
       value: {
+        load: 6,
         adhoc: {
           created: {
             counter: 5,

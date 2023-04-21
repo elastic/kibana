@@ -9,7 +9,7 @@ import { monitorEventLoopDelay } from 'perf_hooks';
 
 import { ConcreteTaskInstance } from './task';
 
-import { Result, Err, asOk } from './lib/result_type';
+import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
@@ -171,10 +171,6 @@ export function asTaskManagerStatEvent(
     type: TaskEventType.TASK_MANAGER_STAT,
     event,
   };
-}
-
-export function asTaskManagerAtCapacityStatEvent(): TaskManagerStat {
-  return asTaskManagerStatEvent('workerUtilization', asOk(100));
 }
 
 export function asEphemeralTaskRejectedDueToCapacityEvent(

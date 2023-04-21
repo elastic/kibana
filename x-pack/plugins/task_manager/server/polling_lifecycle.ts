@@ -27,7 +27,6 @@ import {
   TaskManagerStat,
   asTaskManagerStatEvent,
   EphemeralTaskRejectedDueToCapacity,
-  asTaskManagerAtCapacityStatEvent,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -180,8 +179,10 @@ export class TaskPollingLifecycle {
                 // high load causes the poller to skip work (work isn't called when there is no capacity)
                 this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
 
-                // Emit event indicating task manager is at 100% utilization because it has no capacity
-                this.emitEvent(asTaskManagerAtCapacityStatEvent());
+                // Emit event indicating task manager utilization
+                this.emitEvent(
+                  asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad))
+                );
               }
               return capacity;
             },
