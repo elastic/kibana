@@ -156,6 +156,9 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const mockRunNowResponse = {
@@ -233,7 +236,13 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({
+  action,
+  group,
+  state,
+  id,
+  maintenanceWindowIds = [],
+}: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -255,6 +264,7 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    maintenanceWindowIds,
   };
 };
 
