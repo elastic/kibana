@@ -33,7 +33,7 @@ import {
 import {
   getPosturePolicy,
   getPostureInputHiddenVars,
-  getVulnMgmtCloudFormation,
+  getVulnMgmtCloudFormationDefaultValue,
   POSTURE_NAMESPACE,
   type NewPackagePolicyPostureInput,
   isPostureInput,
@@ -311,7 +311,7 @@ const useCloudFormationTemplate = ({
   updatePolicy: (policy: NewPackagePolicy) => void;
 }) => {
   useEffect(() => {
-    const templateUrl = getVulnMgmtCloudFormation(packageInfo);
+    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
 
     // If the template is not available, do not update the policy
     if (templateUrl === '') return;

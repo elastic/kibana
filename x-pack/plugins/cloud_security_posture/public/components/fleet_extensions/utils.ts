@@ -138,7 +138,7 @@ export const hasPolicyTemplateInputs = (
   return policyTemplate.hasOwnProperty('inputs');
 };
 
-export const getVulnMgmtCloudFormation = (packageInfo: PackageInfo): string => {
+export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
 
   const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find(
