@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const log = getService('log');
 
   const inspectorTrendlineData = [
     ['2015-09-19 06:00', 'null'],
