@@ -12,7 +12,7 @@ require('../../../../../../../src/setup_node_env');
 
 const { Router } = require('../../router');
 const { CoreVersionedRouter } = require('../core_versioned_router');
-const { generateOpenApiDocument } = require('./generate');
+const { generateOpenApiDocument } = require('./generate_oas');
 const z = require('zod');
 
 const logger = {
