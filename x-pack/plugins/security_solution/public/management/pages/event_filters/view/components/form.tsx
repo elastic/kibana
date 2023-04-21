@@ -63,7 +63,7 @@ import { isGlobalPolicyEffected } from '../../../../components/effected_policy_s
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
 import { EventFiltersApiClient } from '../../service/api_client';
-import { useFetchEventFiltersFields } from '../../../../services/policies/hooks';
+import { useFetchEventFiltersFields } from '../../service/hooks';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
