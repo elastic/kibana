@@ -35,7 +35,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const onChange = jest.fn();
-const onChangeAgentPolicy = jest.fn();
 
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
@@ -43,7 +42,6 @@ describe('<CspPolicyTemplateForm />', () => {
       integration: undefined,
     });
     onChange.mockClear();
-    onChangeAgentPolicy.mockClear();
   });
 
   const WrappedComponent = ({
@@ -65,7 +63,6 @@ describe('<CspPolicyTemplateForm />', () => {
           onChange={onChange}
           packageInfo={packageInfo}
           isEditPage={true}
-          onChangeAgentPolicy={onChangeAgentPolicy}
           agentPolicy={agentPolicy}
         />
       )}
@@ -75,7 +72,6 @@ describe('<CspPolicyTemplateForm />', () => {
           onChange={onChange}
           packageInfo={packageInfo}
           isEditPage={false}
-          onChangeAgentPolicy={onChangeAgentPolicy}
           agentPolicy={agentPolicy}
         />
       )}
@@ -158,11 +154,6 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: eksPolicy,
     });
-
-    // make sure CloudFormation template is reset
-    expect(onChangeAgentPolicy).toHaveBeenCalledWith({
-      cloud_formation_template_url: '',
-    });
   });
 
   it('renders CSPM input selector', () => {
@@ -179,11 +170,6 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option2).toBeDisabled();
     expect(option3).toBeDisabled();
     expect(option1).toBeChecked();
-
-    // make sure CloudFormation template is reset
-    expect(onChangeAgentPolicy).toHaveBeenCalledWith({
-      cloud_formation_template_url: '',
-    });
   });
 
   it('renders disabled KSPM input when editing', () => {
@@ -468,13 +454,28 @@ describe('<CspPolicyTemplateForm />', () => {
   }
 
   describe('Vuln Mgmt', () => {
-    it('Update Agent Policy CloudFormation template and stack name from vars', () => {
+    it('Update Agent Policy CloudFormation template from vars', () => {
       const policy = getMockPolicyVulnMgmtAWS();
+
       const packageInfo = getMockPackageInfoVulnMgmtAWS();
       render(<WrappedComponent newPolicy={policy} packageInfo={packageInfo} />);
 
-      expect(onChangeAgentPolicy).toHaveBeenNthCalledWith(1, {
-        cloud_formation_template_url: 's3_url',
+      const expectedUpdatedPolicy = {
+        ...policy,
+        inputs: policy.inputs.map((input) => {
+          if (input.type === 'cloudbeat/vuln_mgmt_aws') {
+            return {
+              ...input,
+              config: { cloud_formation_template_url: { value: 's3_url' } },
+            };
+          }
+          return input;
+        }),
+      };
+
+      expect(onChange).toHaveBeenNthCalledWith(2, {
+        isValid: true,
+        updatedPolicy: expectedUpdatedPolicy,
       });
     });
   });
