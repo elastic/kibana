@@ -18,71 +18,34 @@ import {
 import { TestProviders } from '../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
-import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
+import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 
-jest.mock('../../../common/containers/cti/event_enrichment');
+jest.mock('../hooks/use_fetch_threat_intelligence');
 
 const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
-  dataFormattedForFieldBrowser: [
-    {
-      category: 'kibana',
-      field: 'kibana.alert.rule.uuid',
-      isObjectArray: false,
-      originalValue: ['uuid'],
-      values: ['uuid'],
-    },
-    {
-      category: 'threat',
-      field: 'threat.enrichments',
-      isObjectArray: true,
-      originalValue: ['{"indicator.file.hash.sha256":["sha256"]}'],
-      values: ['{"indicator.file.hash.sha256":["sha256"]}'],
-    },
-    {
-      category: 'threat',
-      field: 'threat.enrichments.indicator.file.hash.sha256',
-      isObjectArray: false,
-      originalValue: ['sha256'],
-      values: ['sha256'],
-    },
-  ],
+  dataFormattedForFieldBrowser: [],
 } as unknown as RightPanelContext;
+
+const renderThreatIntelligenceOverview = (contextValue: RightPanelContext) => (
+  <TestProviders>
+    <RightPanelContext.Provider value={contextValue}>
+      <ThreatIntelligenceOverview />
+    </RightPanelContext.Provider>
+  </TestProviders>
+);
 
 describe('<ThreatIntelligenceOverview />', () => {
   it('should render 1 match detected and 1 field enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.1'],
-            'matched.type': ['indicator_match_rule'],
-          },
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.2'],
-            'matched.type': ['investigation_time'],
-            'event.type': ['indicator'],
-          },
-        ],
-        totalCount: 2,
-      },
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 1,
+      threatEnrichmentsCount: 1,
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID)).toHaveTextContent(
       'Threat Intelligence'
     );
@@ -96,52 +59,14 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render 2 matches detected and 2 fields enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.1'],
-            'matched.type': ['indicator_match_rule'],
-          },
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.2'],
-            'matched.type': ['investigation_time'],
-            'event.type': ['indicator'],
-          },
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.3'],
-            'matched.type': ['indicator_match_rule'],
-          },
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.4'],
-            'matched.type': ['investigation_time'],
-            'event.type': ['indicator'],
-          },
-        ],
-        totalCount: 4,
-      },
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 2,
+      threatEnrichmentsCount: 2,
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID)).toHaveTextContent(
       'Threat Intelligence'
     );
@@ -155,85 +80,45 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render 0 field enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.1'],
-            'matched.type': ['indicator_match_rule'],
-          },
-        ],
-        totalCount: 1,
-      },
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 1,
+      threatEnrichmentsCount: 0,
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
       '0 field enriched with threat intelligence'
     );
   });
 
   it('should render 0 match detected', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.2'],
-            'matched.type': ['investigation_time'],
-            'event.type': ['indicator'],
-          },
-        ],
-        totalCount: 1,
-      },
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 0,
+      threatEnrichmentsCount: 2,
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID)).toHaveTextContent(
       '0 threat match detected'
     );
   });
 
   it('should render loading', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: undefined,
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: true,
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+
     expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should only render null when eventId is null', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [],
-      },
+  it('should render null when eventId is null', () => {
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
     });
     const contextValue = {
@@ -241,87 +126,47 @@ describe('<ThreatIntelligenceOverview />', () => {
       eventId: null,
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { container } = render(renderThreatIntelligenceOverview(contextValue));
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should only render null when dataFormattedForFieldBrowser is null', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [],
-      },
+  it('should render null when dataFormattedForFieldBrowser is null', () => {
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      error: true,
     });
     const contextValue = {
       ...panelContextValue,
       dataFormattedForFieldBrowser: null,
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { container } = render(renderThreatIntelligenceOverview(contextValue));
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should only render null when no enrichment found is null', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [],
-        totalCount: 0,
-      },
+  it('should render null when no enrichment found is null', () => {
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 0,
+      threatEnrichmentsCount: 0,
     });
     const contextValue = {
       ...panelContextValue,
       dataFormattedForFieldBrowser: [],
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+    const { container } = render(renderThreatIntelligenceOverview(contextValue));
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
-      result: {
-        enrichments: [
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.1'],
-            'matched.type': ['indicator_match_rule'],
-          },
-          {
-            'threat.indicator.file.hash.sha256': 'sha256',
-            'matched.atomic': ['sha256'],
-            'matched.field': ['file.hash.sha256'],
-            'matched.id': ['matched.id.2'],
-            'matched.type': ['investigation_time'],
-            'event.type': ['indicator'],
-          },
-        ],
-        totalCount: 2,
-      },
+    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
+      threatMatchesCount: 1,
+      threatEnrichmentsCount: 1,
     });
     const flyoutContextValue = {
       openLeftPanel: jest.fn(),

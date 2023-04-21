@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { groupBy } from 'lodash';
+import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSubSection } from './insights_subsection';
-import { ENRICHMENT_TYPES } from '../../../../common/cti/constants';
-import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
-import {
-  filterDuplicateEnrichments,
-  getEnrichmentFields,
-  parseExistingEnrichments,
-  timelineDataToEnrichment,
-} from '../../../common/components/event_details/cti_details/helpers';
 import type { InsightsSummaryPanelData } from './insights_summary_panel';
 import { InsightsSummaryPanel } from './insights_summary_panel';
 import { useRightPanelContext } from '../context';
@@ -42,7 +33,6 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
 export const ThreatIntelligenceOverview: React.FC = () => {
   const { eventId, indexName, dataFormattedForFieldBrowser } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const goToThreatIntelligenceTab = useCallback(() => {
     openLeftPanel({
@@ -55,45 +45,9 @@ export const ThreatIntelligenceOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName]);
 
-  // retrieve the threat enrichment fields with value for the current document
-  // (see https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/cti/constants.ts#L35)
-  const eventFields = useMemo(
-    () => getEnrichmentFields(dataFormattedForFieldBrowser || []),
-    [dataFormattedForFieldBrowser]
-  );
-
-  // retrieve existing enrichment fields and their value
-  const existingEnrichments = useMemo(
-    () =>
-      isAlert
-        ? parseExistingEnrichments(dataFormattedForFieldBrowser || []).map((enrichmentData) =>
-            timelineDataToEnrichment(enrichmentData)
-          )
-        : [],
-    [dataFormattedForFieldBrowser, isAlert]
-  );
-
-  // api call to retrieve all documents that match the eventFields
-  const { result: enrichmentsResponse, loading: isEnrichmentsLoading } =
-    useInvestigationTimeEnrichment(eventFields);
-
-  // combine existing enrichment and enrichment from the api response
-  // also removes the investigation-time enrichments if the exact indicator already exists
-  const allEnrichments = useMemo(() => {
-    if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
-      return existingEnrichments;
-    }
-    return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [isEnrichmentsLoading, enrichmentsResponse, existingEnrichments]);
-
-  // separate threat matches (from indicator-match rule) from threat enrichments (realtime query)
-  const {
-    [ENRICHMENT_TYPES.IndicatorMatchRule]: threatMatches,
-    [ENRICHMENT_TYPES.InvestigationTime]: threatEnrichments,
-  } = groupBy(allEnrichments, 'matched.type');
-
-  const threatMatchesCount = (threatMatches || []).length;
-  const threatEnrichmentsCount = (threatEnrichments || []).length;
+  const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
+    dataFormattedForFieldBrowser,
+  });
 
   const data: InsightsSummaryPanelData[] = [
     {
@@ -108,11 +62,14 @@ export const ThreatIntelligenceOverview: React.FC = () => {
     },
   ];
 
-  const error: boolean = !eventId || !dataFormattedForFieldBrowser || allEnrichments.length === 0;
+  const error: boolean =
+    !eventId ||
+    !dataFormattedForFieldBrowser ||
+    (threatMatchesCount === 0 && threatEnrichmentsCount === 0);
 
   return (
     <InsightsSubSection
-      loading={isEnrichmentsLoading}
+      loading={loading}
       error={error}
       title={THREAT_INTELLIGENCE_TITLE}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
