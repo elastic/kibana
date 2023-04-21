@@ -76,6 +76,8 @@ export {
   ENDPOINT_PRIVILEGES,
   // Message signing service
   MESSAGE_SIGNING_SERVICE_API_ROUTES,
+  // secrets
+  SECRETS_INDEX,
 } from '../../common/constants';
 
 export {
