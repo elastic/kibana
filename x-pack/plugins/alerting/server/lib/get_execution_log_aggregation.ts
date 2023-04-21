@@ -83,7 +83,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numActiveAlerts: estypes.AggregationsMaxAggregate;
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
-    outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    outcomeMessageAndMaintenanceWindow: estypes.AggregationsTopHitsAggregate;
     maintenanceWindowIds: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
@@ -403,7 +403,7 @@ export function getExecutionLogAggregation({
                     field: DURATION_FIELD,
                   },
                 },
-                outcomeAndMessage: {
+                outcomeMessageAndMaintenanceWindow: {
                   top_hits: {
                     size: 1,
                     _source: {
@@ -416,15 +416,8 @@ export function getExecutionLogAggregation({
                         SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
+                        MAINTENANCE_WINDOW_IDS_FIELD,
                       ],
-                    },
-                  },
-                },
-                maintenanceWindowIds: {
-                  top_hits: {
-                    size: 1,
-                    _source: {
-                      includes: MAINTENANCE_WINDOW_IDS_FIELD,
                     },
                   },
                 },
@@ -495,24 +488,30 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source ?? {};
-  let status = outcomeAndMessage.kibana?.alerting?.outcome ?? '';
+  const outcomeMessageAndMaintenanceWindow =
+    bucket?.ruleExecution?.outcomeMessageAndMaintenanceWindow?.hits?.hits[0]?._source ?? {};
+  let status = outcomeMessageAndMaintenanceWindow.kibana?.alerting?.outcome ?? '';
   if (isEmpty(status)) {
-    status = outcomeAndMessage.event?.outcome ?? '';
+    status = outcomeMessageAndMaintenanceWindow.event?.outcome ?? '';
   }
-  const outcomeMessage = outcomeAndMessage.message ?? '';
-  const outcomeErrorMessage = outcomeAndMessage.error?.message ?? '';
+  const outcomeMessage = outcomeMessageAndMaintenanceWindow.message ?? '';
+  const outcomeErrorMessage = outcomeMessageAndMaintenanceWindow.error?.message ?? '';
   const message =
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
-  const version = outcomeAndMessage.kibana?.version ?? '';
+  const version = outcomeMessageAndMaintenanceWindow.kibana?.version ?? '';
 
-  const maintenanceWindowIds =
-    bucket?.ruleExecution?.maintenanceWindowIds?.hits?.hits[0]?._source?.kibana?.alert
-      ?.maintenance_window_ids || [];
-
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const ruleName = outcomeAndMessage ? outcomeAndMessage.rule?.name ?? '' : '';
+  const ruleId = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.rule?.id ?? ''
+    : '';
+  const spaceIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.kibana?.space_ids ?? []
+    : [];
+  const maintenanceWindowIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? []
+    : [];
+  const ruleName = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
+    : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',

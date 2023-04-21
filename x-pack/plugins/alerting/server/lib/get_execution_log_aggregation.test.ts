@@ -270,15 +270,7 @@ describe('getExecutionLogAggregation', () => {
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
-                  maintenanceWindowIds: {
-                    top_hits: {
-                      _source: {
-                        includes: 'kibana.alert.maintenance_window_ids',
-                      },
-                      size: 1,
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     top_hits: {
                       size: 1,
                       _source: {
@@ -291,6 +283,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
+                          'kibana.alert.maintenance_window_ids',
                         ],
                       },
                     },
@@ -485,15 +478,7 @@ describe('getExecutionLogAggregation', () => {
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
-                  maintenanceWindowIds: {
-                    top_hits: {
-                      _source: {
-                        includes: 'kibana.alert.maintenance_window_ids',
-                      },
-                      size: 1,
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     top_hits: {
                       size: 1,
                       _source: {
@@ -506,6 +491,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
+                          'kibana.alert.maintenance_window_ids',
                         ],
                       },
                     },
@@ -700,15 +686,7 @@ describe('getExecutionLogAggregation', () => {
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
-                  maintenanceWindowIds: {
-                    top_hits: {
-                      _source: {
-                        includes: 'kibana.alert.maintenance_window_ids',
-                      },
-                      size: 1,
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     top_hits: {
                       size: 1,
                       _source: {
@@ -721,6 +699,7 @@ describe('getExecutionLogAggregation', () => {
                           'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
+                          'kibana.alert.maintenance_window_ids',
                         ],
                       },
                     },
@@ -798,7 +777,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 0.0,
                   },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -885,30 +864,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 5.0,
                   },
-                  maintenanceWindowIds: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 4.129077,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.8.0-000001',
-                          _id: 'LgUpoIcBQfpaEqMEdSDv',
-                          _score: 4.129077,
-                          _source: {
-                            kibana: {
-                              alert: {
-                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -927,6 +883,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
                               alerting: {
                                 outcome: 'success',
                               },
@@ -1071,7 +1030,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 0.0,
                   },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1161,30 +1120,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 5.0,
                   },
-                  maintenanceWindowIds: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 4.129077,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.8.0-000001',
-                          _id: 'LgUpoIcBQfpaEqMEdSDv',
-                          _score: 4.129077,
-                          _source: {
-                            kibana: {
-                              alert: {
-                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1203,6 +1139,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
                               alerting: {
                                 outcome: 'success',
                               },
@@ -1347,7 +1286,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 0.0,
                   },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1429,30 +1368,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 5.0,
                   },
-                  maintenanceWindowIds: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 4.129077,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.8.0-000001',
-                          _id: 'LgUpoIcBQfpaEqMEdSDv',
-                          _score: 4.129077,
-                          _source: {
-                            kibana: {
-                              alert: {
-                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1471,6 +1387,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
                               alerting: {
                                 outcome: 'success',
                               },
@@ -1615,7 +1534,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 5.0,
                   },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1702,30 +1621,7 @@ describe('formatExecutionLogResult', () => {
                   numRecoveredAlerts: {
                     value: 5.0,
                   },
-                  maintenanceWindowIds: {
-                    hits: {
-                      total: {
-                        value: 1,
-                        relation: 'eq',
-                      },
-                      max_score: 4.129077,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.8.0-000001',
-                          _id: 'LgUpoIcBQfpaEqMEdSDv',
-                          _score: 4.129077,
-                          _source: {
-                            kibana: {
-                              alert: {
-                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  outcomeAndMessage: {
+                  outcomeMessageAndMaintenanceWindow: {
                     hits: {
                       total: {
                         value: 1,
@@ -1744,6 +1640,9 @@ describe('formatExecutionLogResult', () => {
                             },
                             kibana: {
                               version: '8.2.0',
+                              alert: {
+                                maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                              },
                               alerting: {
                                 outcome: 'success',
                               },
