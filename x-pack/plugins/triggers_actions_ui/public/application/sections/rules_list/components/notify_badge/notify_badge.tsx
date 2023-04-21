@@ -33,7 +33,13 @@ import { RulesListNotifyBadgeProps } from './types';
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
     isLoading = false,
-    rule,
+    rule = {
+      muteAll: false,
+      isEditable: false,
+      isSnoozedUntil: null,
+      snoozeSchedule: undefined,
+      activeSnoozes: undefined,
+    },
     isOpen,
     onClick,
     onClose,

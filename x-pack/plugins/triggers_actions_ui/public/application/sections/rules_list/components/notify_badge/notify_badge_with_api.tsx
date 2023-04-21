@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
-import { loadRule } from '../../../../lib/rule_api/get_rule';
 import { unsnoozeRule as unsnoozeRuleApi } from '../../../../lib/rule_api/unsnooze';
 import { snoozeRule as snoozeRuleApi } from '../../../../lib/rule_api/snooze';
 import { RulesListNotifyBadge } from './notify_badge';
@@ -21,69 +20,38 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   const { http } = useKibana().services;
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [loadingSnoozeAction, setLoadingSnoozeAction] = useState<boolean>(false);
-  const [ruleSnoozeInfo, setRuleSnoozeInfo] =
-    useState<RulesListNotifyBadgePropsWithApi['rule']>(rule);
-
-  // This helps to fix problems related to rule prop updates. As component handles the loading state via isLoading prop
-  // rule prop is obviously not ready atm so when it's ready ruleSnoozeInfo won't be updated without useEffect so
-  // incorrect state will be shown.
-  useEffect(() => {
-    setRuleSnoozeInfo(rule);
-  }, [rule]);
 
   const onSnoozeRule = useCallback(
-    (snoozeSchedule: SnoozeSchedule) => {
-      return snoozeRuleApi({ http, id: ruleSnoozeInfo.id, snoozeSchedule });
-    },
-    [http, ruleSnoozeInfo.id]
+    (snoozeSchedule: SnoozeSchedule) =>
+      rule?.id ? snoozeRuleApi({ http, id: rule.id, snoozeSchedule }) : Promise.resolve(),
+    [http, rule?.id]
   );
 
   const onUnsnoozeRule = useCallback(
-    (scheduleIds?: string[]) => {
-      return unsnoozeRuleApi({ http, id: ruleSnoozeInfo.id, scheduleIds });
-    },
-    [http, ruleSnoozeInfo.id]
+    (scheduleIds?: string[]) =>
+      rule?.id ? unsnoozeRuleApi({ http, id: rule.id, scheduleIds }) : Promise.resolve(),
+    [http, rule?.id]
   );
 
-  const onRuleChangedCallback = useCallback(async () => {
-    const updatedRule = await loadRule({
-      http,
-      ruleId: ruleSnoozeInfo.id,
-    });
-    setLoadingSnoozeAction(false);
-    setRuleSnoozeInfo((prevRule) => ({
-      ...prevRule,
-      activeSnoozes: updatedRule.activeSnoozes,
-      isSnoozedUntil: updatedRule.isSnoozedUntil,
-      muteAll: updatedRule.muteAll,
-      snoozeSchedule: updatedRule.snoozeSchedule,
-    }));
-    onRuleChanged();
-  }, [http, ruleSnoozeInfo.id, onRuleChanged]);
-
   const openSnooze = useCallback(() => {
-    setCurrentlyOpenNotify(props.rule.id);
-  }, [props.rule.id]);
+    setCurrentlyOpenNotify(rule?.id);
+  }, [rule?.id]);
 
   const closeSnooze = useCallback(() => {
     setCurrentlyOpenNotify('');
   }, []);
 
-  const onLoading = useCallback((value: boolean) => {
-    if (value) {
-      setLoadingSnoozeAction(value);
-    }
-  }, []);
+  const onLoading = useCallback((value: boolean) => setLoadingSnoozeAction(value), []);
 
   return (
     <RulesListNotifyBadge
-      rule={ruleSnoozeInfo}
-      isOpen={currentlyOpenNotify === ruleSnoozeInfo.id}
+      rule={rule}
+      isOpen={currentlyOpenNotify === rule?.id}
       isLoading={isLoading || loadingSnoozeAction}
       onClick={openSnooze}
       onClose={closeSnooze}
       onLoading={onLoading}
-      onRuleChanged={onRuleChangedCallback}
+      onRuleChanged={onRuleChanged}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}
       showTooltipInline={showTooltipInline}

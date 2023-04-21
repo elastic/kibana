@@ -8,7 +8,7 @@
 import { RuleTableItem, SnoozeSchedule } from '../../../../../types';
 
 export interface RulesListNotifyBadgeProps {
-  rule: Pick<
+  rule?: Pick<
     RuleTableItem,
     'id' | 'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'isEditable' | 'snoozeSchedule'
   >;
