@@ -43,26 +43,32 @@ export const SearchApplicationAPI = () => {
 
   const steps = [
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.title', {
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step1.title', {
         defaultMessage: 'Generate and save API key',
       }),
       children: (
         <>
           <EuiText>
             <p>
-              {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.apiKeyWarning', {
-                defaultMessage:
-                  "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
-              })}{' '}
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.searchApplication.api.step1.apiKeyWarning',
+                {
+                  defaultMessage:
+                    "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
+                }
+              )}{' '}
               <EuiLink
                 href={docLinks.apiKeys}
-                data-telemetry-id="entSearchContent-engines-api-step1-learnMoreLink"
+                data-telemetry-id="entSearchContent-searchApplications-api-step1-learnMoreLink"
                 external
                 target="_blank"
               >
-                {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.learnMoreLink', {
-                  defaultMessage: 'Learn more about API keys.',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.api.step1.learnMoreLink',
+                  {
+                    defaultMessage: 'Learn more about API keys.',
+                  }
+                )}
               </EuiLink>
             </p>
           </EuiText>
@@ -73,10 +79,10 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id="entSearchContent-engines-api-step1-createApiKeyButton"
+                data-telemetry-id="entSearchContent-searchApplications-api-step1-createApiKeyButton"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.api.step1.createAPIKeyButton',
+                  'xpack.enterpriseSearch.content.searchApplication.api.step1.createAPIKeyButton',
                   {
                     defaultMessage: 'Create API Key',
                   }
@@ -87,16 +93,19 @@ export const SearchApplicationAPI = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id="entSearchContent-engines-api-step1-viewKeysButton"
+                data-telemetry-id="entSearchContent-searchApplications-api-step1-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
                   })
                 }
               >
-                {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
-                  defaultMessage: 'View Keys',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.api.step1.viewKeysButton',
+                  {
+                    defaultMessage: 'View Keys',
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -104,17 +113,17 @@ export const SearchApplicationAPI = () => {
       ),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step2.title', {
-        defaultMessage: "Copy your engine's endpoint",
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step2.title', {
+        defaultMessage: "Copy your search application's endpoint",
       }),
       children: (
         <>
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.api.step2.copyEndpointDescription',
+                'xpack.enterpriseSearch.content.searchApplication.api.step2.copyEndpointDescription',
                 {
-                  defaultMessage: "Use this URL to access your engine's API endpoints.",
+                  defaultMessage: "Use this URL to access your search application's API endpoints.",
                 }
               )}
             </p>
@@ -131,22 +140,22 @@ export const SearchApplicationAPI = () => {
       ),
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.title', {
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step3.title', {
         defaultMessage: 'Learn how to call your endpoints',
       }),
       children: <EngineApiIntegrationStage />,
     },
     {
-      title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step4.title', {
+      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step4.title', {
         defaultMessage: '(Optional) Power up your analytics',
       }),
       children: (
         <>
           <EuiText>
             <p>
-              {i18n.translate('xpack.enterpriseSearch.content.engine.api.step4.copy', {
+              {i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step4.copy', {
                 defaultMessage:
-                  'Your engine provides basic analytics data as part of this installation. To receive more granular and custom metrics, integrate our Behavioral Analytics script on your platform.',
+                  'Your search application provides basic analytics data as part of this installation. To receive more granular and custom metrics, integrate our Behavioral Analytics script on your platform.',
               })}
             </p>
           </EuiText>
@@ -154,7 +163,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-telemetry-id="entSearchContent-engines-api-step4-learnHowLink"
+                data-telemetry-id="entSearchContent-searchApplications-api-step4-learnHowLink"
                 onClick={() =>
                   navigateToUrl(
                     generateEncodedPath(`${ANALYTICS_PLUGIN.URL}${COLLECTION_INTEGRATE_PATH}`, {
@@ -166,9 +175,12 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="popout"
               >
-                {i18n.translate('xpack.enterpriseSearch.content.engine.api.step4.learnHowLink', {
-                  defaultMessage: 'Learn how',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.api.step4.learnHowLink',
+                  {
+                    defaultMessage: 'Learn how',
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
