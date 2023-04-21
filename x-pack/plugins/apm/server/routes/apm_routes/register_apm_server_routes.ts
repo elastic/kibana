@@ -44,6 +44,7 @@ export const inspectableEsQueriesMap = new WeakMap<
 
 export function registerRoutes({
   core,
+  settings,
   repository,
   plugins,
   logger,
@@ -53,6 +54,7 @@ export function registerRoutes({
   kibanaVersion,
 }: {
   core: APMRouteHandlerResources['core'];
+  settings: APMRouteHandlerResources['settings'];
   plugins: APMRouteHandlerResources['plugins'];
   logger: APMRouteHandlerResources['logger'];
   repository: ServerRouteRepository;
@@ -104,6 +106,7 @@ export function registerRoutes({
               request,
               context,
               config,
+              settings,
               logger,
               core,
               plugins,
