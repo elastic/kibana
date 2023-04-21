@@ -106,12 +106,14 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       (id) => navigateToEditMaintenanceWindows(id),
       [navigateToEditMaintenanceWindows]
     );
-    const { mutate: finishMaintenanceWindow } = useFinishMaintenanceWindow();
+    const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
+      useFinishMaintenanceWindow();
     const onCancel = useCallback(
       (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishMaintenanceWindow, refreshData]
     );
-    const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
+    const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =
+      useArchiveMaintenanceWindow();
     const onArchive = useCallback(
       (id: string, archive: boolean) =>
         archiveMaintenanceWindow(
@@ -120,7 +122,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         ),
       [archiveMaintenanceWindow, refreshData]
     );
-    const { mutate: finishAndArchiveMaintenanceWindow } = useFinishAndArchiveMaintenanceWindow();
+    const { mutate: finishAndArchiveMaintenanceWindow, isLoading: isLoadingFinishAndArchive } =
+      useFinishAndArchiveMaintenanceWindow();
     const onCancelAndArchive = useCallback(
       (id: string) => finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishAndArchiveMaintenanceWindow, refreshData]
@@ -158,7 +161,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       <EuiInMemoryTable
         css={tableCss}
         itemId="id"
-        loading={loading}
+        loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
         tableCaption="Maintenance Windows List"
         items={items}
         columns={columns.concat(actions)}
