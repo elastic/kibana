@@ -68,7 +68,8 @@ export const convertToRRule = (
   }
 
   if (frequency === Frequency.YEARLY) {
-    rRule.bymonth = [startDate.month()];
+    // rRule expects 1 based indexing for months
+    rRule.bymonth = [startDate.month() + 1];
     rRule.bymonthday = [startDate.date()];
   }
 
