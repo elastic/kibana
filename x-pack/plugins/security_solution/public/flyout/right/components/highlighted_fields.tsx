@@ -33,7 +33,7 @@ export const HighlightedFields: FC = () => {
   }, [eventId, indexName, openRightPanel, scopeId]);
 
   if (!dataFormattedForFieldBrowser || !browserFields || !eventId) {
-    return <></>;
+    return null;
   }
 
   return (

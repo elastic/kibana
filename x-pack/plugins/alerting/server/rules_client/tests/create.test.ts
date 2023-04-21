@@ -1233,6 +1233,9 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1413,6 +1416,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     const data = getMockData({
@@ -2679,6 +2685,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const createdAttributes = {
       ...data,
@@ -2747,6 +2756,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({ schedule: { interval: '1s' } });
@@ -2780,6 +2792,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -2870,6 +2885,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -2915,6 +2933,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -2974,6 +2995,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -3051,6 +3075,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -3243,6 +3270,9 @@ describe('create()', () => {
         injectReferences: jest.fn(),
       },
       getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -3292,6 +3322,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -3310,7 +3343,7 @@ describe('create()', () => {
             throttle: null,
           },
           alertsFilter: {
-            query: { kql: 'test:1' },
+            query: { kql: 'test:1', filters: [] },
           },
         },
       ],

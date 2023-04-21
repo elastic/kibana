@@ -82,7 +82,6 @@ export class ReplacePanelFlyout extends React.Component<Props> {
         } as DashboardPanelState,
       },
     });
-    container.reload();
 
     (container as DashboardContainer).setHighlightPanelId(id);
     this.showToast(name);

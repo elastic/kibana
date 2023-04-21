@@ -683,6 +683,7 @@ src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
 src/plugins/url_forwarding @elastic/kibana-visualizations
+packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-user-profile-components @elastic/kibana-security
@@ -1058,6 +1059,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/dashboards @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore

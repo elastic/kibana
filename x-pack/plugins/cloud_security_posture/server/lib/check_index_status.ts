@@ -12,22 +12,19 @@ export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType: PostureTypes = 'all'
+  postureType?: PostureTypes
 ): Promise<IndexStatus> => {
-  const query =
-    postureType === 'all'
-      ? {
-          match_all: {},
-        }
-      : {
-          bool: {
-            filter: {
-              term: {
-                'rule.benchmark.posture_type': postureType,
-              },
+  const query = !postureType
+    ? undefined
+    : {
+        bool: {
+          filter: {
+            term: {
+              'rule.benchmark.posture_type': postureType,
             },
           },
-        };
+        },
+      };
 
   try {
     const queryResult = await esClient.search({
