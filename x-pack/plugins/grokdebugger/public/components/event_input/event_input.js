@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EDITOR } from '../../../common/constants';
-import { EuiCodeEditor } from '../../shared_imports';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 export function EventInput({ value, onChange }) {
   return (
@@ -21,18 +20,18 @@ export function EventInput({ value, onChange }) {
       fullWidth
       data-test-subj="aceEventInput"
     >
-      <EuiCodeEditor
-        width="100%"
-        theme="textmate"
-        mode="text"
+      <CodeEditor
+        languageId="json"
         value={value}
-        onChange={onChange}
-        setOptions={{
-          highlightActiveLine: false,
-          highlightGutterLine: false,
-          minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
-          maxLines: EDITOR.SAMPLE_DATA_MAX_LINES,
+        height={200}
+        options={{
+          tabSize: 2,
+          automaticLayout: true,
         }}
+        aria-label={i18n.translate('xpack.grokDebugger.eventInputEditor', {
+          defaultMessage: 'Code editor for event inputs',
+        })}
+        onChange={onChange}
       />
     </EuiFormRow>
   );

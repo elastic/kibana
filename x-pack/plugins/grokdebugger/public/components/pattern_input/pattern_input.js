@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EDITOR } from '../../../common/constants';
-import { EuiCodeEditor } from '../../shared_imports';
-import { GrokMode } from '../../lib/ace';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 export function PatternInput({ value, onChange }) {
   return (
@@ -22,18 +20,18 @@ export function PatternInput({ value, onChange }) {
       fullWidth
       data-test-subj="acePatternInput"
     >
-      <EuiCodeEditor
-        width="100%"
-        theme="textmate"
+      <CodeEditor
+        languageId="json"
         value={value}
-        onChange={onChange}
-        mode={new GrokMode()}
-        setOptions={{
-          highlightActiveLine: false,
-          highlightGutterLine: false,
-          minLines: EDITOR.PATTERN_MIN_LINES,
-          maxLines: EDITOR.PATTERN_MAX_LINES,
+        height={200}
+        options={{
+          tabSize: 2,
+          automaticLayout: true,
         }}
+        aria-label={i18n.translate('xpack.grokDebugger.grokPatternLabel', {
+          defaultMessage: 'Code editor for inputting the grok pattern',
+        })}
+        onChange={onChange}
       />
     </EuiFormRow>
   );
