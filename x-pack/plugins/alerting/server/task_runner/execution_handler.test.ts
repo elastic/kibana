@@ -32,6 +32,7 @@ import { AlertInstanceState, AlertInstanceContext } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
+import { schema } from '@kbn/config-schema';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -70,6 +71,9 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   getSummarizedAlerts: getSummarizedAlertsMock,
+  validate: {
+    params: schema.any(),
+  },
 };
 const rule = {
   id: '1',

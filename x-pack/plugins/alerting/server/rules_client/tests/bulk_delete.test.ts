@@ -27,6 +27,7 @@ import {
   returnedRule2,
   siemRule1,
 } from './test_helpers';
+import { schema } from '@kbn/config-schema';
 import { migrateLegacyActions } from '../lib';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
@@ -174,6 +175,9 @@ describe('bulkDelete', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: schema.any(),
+      },
     });
   });
 
