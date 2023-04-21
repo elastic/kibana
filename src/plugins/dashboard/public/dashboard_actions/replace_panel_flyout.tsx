@@ -21,6 +21,7 @@ import { Toast } from '@kbn/core/public';
 import { DashboardPanelState } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
+import { DashboardContainer } from '../dashboard_container';
 
 interface Props {
   container: IContainer;
@@ -83,6 +84,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     });
     container.reload();
 
+    (container as DashboardContainer).setHighlightPanelId(id);
     this.showToast(name);
     this.props.onClose();
   };

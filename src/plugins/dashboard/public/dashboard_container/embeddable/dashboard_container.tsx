@@ -50,11 +50,7 @@ import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DASHBOARD_LOADED_EVENT,
-  DEFAULT_DASHBOARD_INPUT,
-  DASHBOARD_GRID_HEIGHT,
-} from '../../dashboard_constants';
+import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 
 export interface InheritedChildInput {
@@ -408,9 +404,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public scrollToPanel = async (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.expandedPanelId;
+    if (!id) return;
+    // this.untilEmbeddableLoaded(id).then(() => {
     setTimeout(() => {
       panelRef.scrollIntoView({ block: 'center' });
     }, 0);
+    // });
     this.setScrollToPanelId(undefined);
   };
 
@@ -419,16 +419,25 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public setHighlightPanelId = (id: string | undefined) => {
+    console.log('hightlight?', !this.getState().explicitInput.useMargins);
+    if (!this.getState().explicitInput.useMargins) return;
+
     this.dispatch.setHighlightPanelId(id);
   };
 
   public highlightPanel = (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.highlightPanelId;
+
+    if (!id || !this.getState().explicitInput.useMargins) return;
+
     if (panelRef) {
-      panelRef.classList.add('dshDashboardGrid__item--highlighted');
-      // Removes the class after the highlight animation finishes
-      setTimeout(() => {
-        panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-      }, 5000);
+      this.untilEmbeddableLoaded(id).then(() => {
+        panelRef.classList.add('dshDashboardGrid__item--highlighted');
+        // Removes the class after the highlight animation finishes
+        setTimeout(() => {
+          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        }, 5000);
+      });
     }
     this.setHighlightPanelId(undefined);
   };
