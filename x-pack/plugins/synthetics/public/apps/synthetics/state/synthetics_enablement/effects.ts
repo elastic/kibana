@@ -25,7 +25,7 @@ export function* fetchSyntheticsEnablementEffect() {
       fetchGetSyntheticsEnablement,
       getSyntheticsEnablementSuccess,
       getSyntheticsEnablementFailure,
-      successMessage,
+      null,
       failureMessage
     )
   );
