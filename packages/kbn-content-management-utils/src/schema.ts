@@ -25,19 +25,6 @@ export const referenceSchema = schema.object(
 
 export const referencesSchema = schema.arrayOf(referenceSchema);
 
-/*
-export const mapAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    description: schema.maybe(schema.string()),
-    mapStateJSON: schema.maybe(schema.string()),
-    layerListJSON: schema.maybe(schema.string()),
-    uiStateJSON: schema.maybe(schema.string()),
-  },
-  { unknowns: 'forbid' }
-);
-*/
-
 export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
   schema.object(
     {
