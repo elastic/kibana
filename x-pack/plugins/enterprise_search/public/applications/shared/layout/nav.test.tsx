@@ -300,9 +300,9 @@ describe('useEnterpriseSearchEngineNav', () => {
           name: 'Schema',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/api`,
-          id: 'enterpriseSearchEngineAPI',
-          name: 'API',
+          href: `/app/enterprise_search/content/engines/${engineName}/connect`,
+          id: 'enterpriseSearchApplicationConnect',
+          name: 'Connect',
         },
       ],
       name: engineName,
