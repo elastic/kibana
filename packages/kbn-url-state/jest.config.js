@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { ExpandableFlyout } from './src';
-export {
-  ExpandableFlyoutProvider,
-  useExpandableFlyoutContext,
-  type ExpandableFlyoutContext,
-} from './src/context';
-
-export type { ExpandableFlyoutApi } from './src/context';
-
-export type { ExpandableFlyoutProps } from './src';
-export type { FlyoutPanel } from './src/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-url-state'],
+};
