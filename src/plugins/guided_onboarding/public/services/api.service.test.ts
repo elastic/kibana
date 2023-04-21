@@ -16,7 +16,6 @@ import { API_BASE_PATH } from '../../common';
 import { ApiService } from './api.service';
 import {
   testGuideFirstStep,
-  testGuideLastStep,
   testGuideManualCompletionStep,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
@@ -30,6 +29,7 @@ import {
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
   testGuideStep2ReadyToCompleteState,
+  testGuideParams,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -395,6 +395,21 @@ describe('GuidedOnboarding ApiService', () => {
       });
     });
 
+    it(`saves the params if present`, async () => {
+      httpClient.get.mockResolvedValue({
+        pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      apiService.setup(httpClient, true);
+
+      await apiService.completeGuideStep(testGuideId, testGuideFirstStep, testGuideParams);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // Verify the params were sent to the endpoint
+      expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ guide: { ...testGuideStep2ActiveState, params: testGuideParams } }),
+      });
+    });
+
     it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
       httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
@@ -416,6 +431,7 @@ describe('GuidedOnboarding ApiService', () => {
               testGuideStep2InProgressState.steps[0],
               { ...testGuideStep2InProgressState.steps[1], status: 'ready_to_complete' },
               testGuideStep2InProgressState.steps[2],
+              testGuideStep2InProgressState.steps[3],
             ],
           },
         }),
@@ -436,11 +452,21 @@ describe('GuidedOnboarding ApiService', () => {
         },
       });
       httpClient.get.mockResolvedValueOnce({
-        config: testGuideConfig,
+        config: {
+          ...testGuideConfig,
+          steps: [
+            // remove step4 for this test to make step3 the last in the guide
+            testGuideConfig.steps[0],
+            testGuideConfig.steps[1],
+            testGuideConfig.steps[2],
+          ],
+        },
       });
       apiService.setup(httpClient, true);
 
-      await apiService.completeGuideStep(testGuideId, testGuideLastStep);
+      // for this test step3 is the last step
+      const lastStepId = testGuideConfig.steps[2].id;
+      await apiService.completeGuideStep(testGuideId, lastStepId);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the guide now has a "ready_to_complete" status and the last step is "complete"
@@ -479,6 +505,7 @@ describe('GuidedOnboarding ApiService', () => {
               testGuideStep2ActiveState.steps[0],
               { ...testGuideStep2ActiveState.steps[1], status: 'active' },
               testGuideStep2ActiveState.steps[2],
+              testGuideStep2ActiveState.steps[3],
             ],
           },
         }),
