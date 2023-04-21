@@ -556,6 +556,7 @@ export class JobCreator {
       if (this._datafeed_config.indices_options !== undefined) {
         delete this._datafeed_config.indices_options.ignore_unavailable;
 
+        // if no other properties are set, remove indices_options
         if (Object.keys(this._datafeed_config.indices_options).length === 0) {
           delete this._datafeed_config.indices_options;
         }
